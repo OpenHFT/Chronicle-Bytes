@@ -101,7 +101,7 @@ public class BytesMethodReaderBuilder implements MethodReaderBuilder {
             defaultParselet = Mocker.ignored(BytesParselet.class);
         else
             defaultParselet = (msg, in) -> {
-                Bytes<?> bytes = (Bytes) in;
+                Bytes<?> bytes = (Bytes<?>) in;
                 exceptionHandlerOnUnknownMethod.on(getClass(), "Unknown message type " + msg + " " + bytes.toHexString());
             };
     }

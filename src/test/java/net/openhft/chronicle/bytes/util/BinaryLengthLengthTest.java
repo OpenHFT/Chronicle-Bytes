@@ -63,5 +63,4 @@ public class BinaryLengthLengthTest extends BytesTestCommon {
         assertEquals((byte) binaryWireCode, readCode);
         bytes.releaseLast();
     }
-
 }

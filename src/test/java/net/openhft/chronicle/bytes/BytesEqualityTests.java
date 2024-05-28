@@ -113,7 +113,6 @@ class BytesEqualityTests {
         }
     }
 
-
     /**
      * A suite of tests for exercising contentEquals and a variety of different heap and direct buffer combinations.
      */
@@ -236,6 +235,5 @@ class BytesEqualityTests {
 
             assertEquals(direct, heap);
         }
-
     }
 }

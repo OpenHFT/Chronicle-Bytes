@@ -37,6 +37,7 @@ import static net.openhft.chronicle.bytes.BytesUtil.roundUpTo8ByteAlign;
  * The text representation includes an atomic lock flag along with the value.
  * The format is: {@code !!atomic {  locked: false, value: 00000000000000000000 } }.
  */
+@SuppressWarnings("rawtypes")
 public class TextLongReference extends AbstractReference implements LongReference {
 
     static final int VALUE = 34;
@@ -79,14 +80,14 @@ public class TextLongReference extends AbstractReference implements LongReferenc
             throws IllegalStateException {
         try {
             long valueOffset = offset + LOCKED;
-            int value = bytes.readVolatileInt(valueOffset);
+            int value = bytesStore.readVolatileInt(valueOffset);
             if (value != FALSE && value != TRUE)
                 throw new IllegalStateException("Not a lock value");
 
             while (true) {
-                if (bytes.compareAndSwapInt(valueOffset, FALSE, TRUE)) {
+                if (bytesStore.compareAndSwapInt(valueOffset, FALSE, TRUE)) {
                     long t = call.getAsLong();
-                    bytes.writeOrderedInt(valueOffset, FALSE);
+                    bytesStore.writeOrderedInt(valueOffset, FALSE);
                     return t;
                 }
             }
@@ -138,7 +139,7 @@ public class TextLongReference extends AbstractReference implements LongReferenc
     @Override
     public long getValue()
             throws IllegalStateException {
-        return withLock(() -> bytes.parseLong(offset + VALUE));
+        return withLock(() -> bytesStore.parseLong(offset + VALUE));
     }
 
     /**
@@ -152,7 +153,7 @@ public class TextLongReference extends AbstractReference implements LongReferenc
     public void setValue(long value)
             throws IllegalStateException {
         withLock(() -> {
-            bytes.append(offset + VALUE, value, DIGITS);
+            bytesStore.append(offset + VALUE, value, DIGITS);
             return LONG_TRUE;
         });
     }
@@ -176,8 +177,8 @@ public class TextLongReference extends AbstractReference implements LongReferenc
     public long addValue(long delta)
             throws IllegalStateException {
         return withLock(() -> {
-            long value = bytes.parseLong(offset + VALUE) + delta;
-            bytes.append(offset + VALUE, value, DIGITS);
+            long value = bytesStore.parseLong(offset + VALUE) + delta;
+            bytesStore.append(offset + VALUE, value, DIGITS);
             return value;
         });
     }
@@ -196,8 +197,8 @@ public class TextLongReference extends AbstractReference implements LongReferenc
     public boolean compareAndSwapValue(long expected, long value)
             throws IllegalStateException {
         return withLock(() -> {
-            if (bytes.parseLong(offset + VALUE) == expected) {
-                bytes.append(offset + VALUE, value, DIGITS);
+            if (bytesStore.parseLong(offset + VALUE) == expected) {
+                bytesStore.append(offset + VALUE, value, DIGITS);
                 return LONG_TRUE;
             }
             return LONG_FALSE;

@@ -38,6 +38,8 @@ import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.channels.FileLock;
 
+import static net.openhft.chronicle.core.Jvm.uncheckedCast;
+
 /**
  * Represents a memory-mapped file that can be randomly accessed in chunks. The file is divided
  * into chunks, and each chunk has an overlapping region with the next chunk to avoid wasting bytes
@@ -47,7 +49,7 @@ import java.nio.channels.FileLock;
  * The class is abstract, and specific implementations may differ in how they manage the chunks
  * and underlying file storage.
  */
-@SuppressWarnings({"rawtypes", "unchecked", "restriction"})
+@SuppressWarnings({"rawtypes", "restriction"})
 public abstract class MappedFile extends AbstractCloseableReferenceCounted {
 
     /**
@@ -372,7 +374,7 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
     public MappedBytesStore acquireByteStore(
             ReferenceOwner owner,
             @NonNegative final long position,
-            BytesStore oldByteStore)
+            BytesStore<?, ?> oldByteStore)
             throws IOException, IllegalStateException {
         return acquireByteStore(owner, position, oldByteStore, MappedBytesStore::new);
     }
@@ -395,7 +397,7 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
     public abstract MappedBytesStore acquireByteStore(
             ReferenceOwner owner,
             @NonNegative final long position,
-            BytesStore oldByteStore,
+            BytesStore<?,?> oldByteStore,
             @NotNull final MappedBytesStoreFactory mappedBytesStoreFactory)
             throws IOException, IllegalArgumentException, ClosedIllegalStateException, ThreadingIllegalStateException;
 
@@ -436,12 +438,12 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
-    public void acquireBytesForRead(ReferenceOwner owner, @NonNegative final long position, @NotNull final VanillaBytes bytes)
+    public void acquireBytesForRead(ReferenceOwner owner, @NonNegative final long position, @NotNull final VanillaBytes<?> bytes)
             throws IOException, IllegalStateException, IllegalArgumentException, BufferUnderflowException, BufferOverflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
         throwExceptionIfClosed();
 
         @Nullable final MappedBytesStore mbs = acquireByteStore(owner, position, null);
-        bytes.bytesStore(mbs, position, mbs.capacity() - position);
+        bytes.bytesStore(uncheckedCast(mbs), position, mbs.capacity() - position);
     }
 
     /**
@@ -482,12 +484,12 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
-    public void acquireBytesForWrite(ReferenceOwner owner, @NonNegative final long position, @NotNull final VanillaBytes bytes)
+    public void acquireBytesForWrite(ReferenceOwner owner, @NonNegative final long position, @NotNull final VanillaBytes<?> bytes)
             throws IOException, ClosedIllegalStateException, IllegalArgumentException, BufferUnderflowException, BufferOverflowException, ThreadingIllegalStateException {
         throwExceptionIfClosed();
 
         @Nullable final MappedBytesStore mbs = acquireByteStore(owner, position, null);
-        bytes.bytesStore(mbs, position, mbs.capacity() - position);
+        bytes.bytesStore(uncheckedCast(mbs), position, mbs.capacity() - position);
         bytes.writePosition(position);
     }
 
@@ -569,6 +571,7 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
     /**
      * This finalize() is used to detect when a component is not released deterministically. It is not required to be run, but provides a warning
      */
+    @SuppressWarnings({"deprecation", "removal"})
     @Override
     protected void finalize()
             throws Throwable {

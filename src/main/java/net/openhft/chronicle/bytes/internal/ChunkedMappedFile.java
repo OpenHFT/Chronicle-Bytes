@@ -49,7 +49,7 @@ import static net.openhft.chronicle.core.util.Longs.*;
  * A memory mapped files which can be randomly accessed in chunks. It has overlapping regions to
  * avoid wasting bytes at the end of chunks.
  */
-@SuppressWarnings({"restriction"})
+@SuppressWarnings("restriction")
 public class ChunkedMappedFile extends MappedFile {
     @NotNull
     private final RandomAccessFile raf;
@@ -97,7 +97,7 @@ public class ChunkedMappedFile extends MappedFile {
     private void validateArgs(long chunkSize, long overlapSize, int pageSize, long capacity) {
         requireNonNegative(chunkSize);
         requireNonNegative(overlapSize);
-        require(positive(), pageSize);
+        requirePositive(pageSize);
         requireNonNegative(capacity);
         if (this.overlapSize > this.chunkSize)
             throw new IllegalArgumentException("overlapSize cannot be greater than chunkSize");
@@ -174,7 +174,7 @@ public class ChunkedMappedFile extends MappedFile {
     public MappedBytesStore acquireByteStore(
             ReferenceOwner owner,
             @NonNegative final long position,
-            BytesStore oldByteStore,
+            BytesStore<?,?> oldByteStore,
             @NotNull final MappedBytesStoreFactory mappedBytesStoreFactory)
             throws IOException,
             IllegalArgumentException,
@@ -257,6 +257,7 @@ public class ChunkedMappedFile extends MappedFile {
         this.syncMode = syncMode;
     }
 
+    @SuppressWarnings("try")
     private void resizeRafIfTooSmall(@NonNegative final int chunk)
             throws IOException {
         Jvm.safepoint();

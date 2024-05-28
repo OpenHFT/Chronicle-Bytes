@@ -39,14 +39,14 @@ public class AppendLongCoolerMain {
     }
 
     @NotNull
-    public static Object doWrite(Bytes bytes) {
+    public static Object doWrite(Bytes<?> bytes) {
         bytes.clear();
         bytes.append(longs[i++ % longs.length]);
         return bytes;
     }
 
     @NotNull
-    public static Object doRead(Bytes bytes) {
+    public static Object doRead(Bytes<?> bytes) {
         bytes.readPosition(0);
         double v = bytes.parseDouble();
         if (v < 0) throw new AssertionError();
@@ -54,7 +54,7 @@ public class AppendLongCoolerMain {
     }
 
     @NotNull
-    public static Object doTest(Bytes bytes) {
+    public static Object doTest(Bytes<?> bytes) {
         doWrite(bytes);
         doRead(bytes);
         return bytes;

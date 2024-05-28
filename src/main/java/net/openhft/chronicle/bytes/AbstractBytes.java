@@ -17,10 +17,7 @@
  */
 package net.openhft.chronicle.bytes;
 
-import net.openhft.chronicle.bytes.internal.BytesInternal;
-import net.openhft.chronicle.bytes.internal.HasUncheckedRandomDataInput;
-import net.openhft.chronicle.bytes.internal.ReferenceCountedUtil;
-import net.openhft.chronicle.bytes.internal.UncheckedRandomDataInput;
+import net.openhft.chronicle.bytes.internal.*;
 import net.openhft.chronicle.bytes.internal.migration.HashCodeEqualsUtil;
 import net.openhft.chronicle.bytes.render.DecimalAppender;
 import net.openhft.chronicle.bytes.render.Decimaliser;
@@ -32,6 +29,7 @@ import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.UnsafeMemory;
 import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.annotation.UsedViaReflection;
+import net.openhft.chronicle.bytes.internal.UnsafeText;
 import net.openhft.chronicle.core.io.*;
 import net.openhft.chronicle.core.scoped.ScopedResource;
 import org.jetbrains.annotations.NotNull;
@@ -60,19 +58,15 @@ public abstract class AbstractBytes<U>
         DecimalAppender {
     private static final boolean BYTES_BOUNDS_UNCHECKED = Jvm.getBoolean("bytes.bounds.unchecked", false);
 
-    // if you need to reserve the behaviour of append(double) in x.23
-    @Deprecated(/* to be removed in x.26 */)
-    private static final boolean X_23_APPEND_DOUBLE = Jvm.getBoolean("x.23.append.double", false);
-    @Deprecated(/* to be removed in x.26 */)
-    private static final boolean APPEND_0 = Jvm.getBoolean("bytes.append.0", true);
-
     private static final byte[] MIN_VALUE_TEXT = ("" + Long.MIN_VALUE).getBytes(ISO_8859_1);
+    @Deprecated(/* to remove in x.28 */)
+    private static final boolean APPEND_0 = Jvm.getBoolean("bytes.append.0", true);
     // used for debugging
     @UsedViaReflection
     private final String name;
     private final UncheckedRandomDataInput uncheckedRandomDataInput = new UncheckedRandomDataInputHolder();
     @NotNull
-    protected BytesStore<Bytes<U>, U> bytesStore;
+    protected BytesStore<?, U> bytesStore;
     protected long readPosition;
     protected long writeLimit;
     protected boolean isPresent;
@@ -277,9 +271,6 @@ public abstract class AbstractBytes<U>
     @Override
     public @NotNull AbstractBytes<U> append(double d)
             throws BufferOverflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
-        if (X_23_APPEND_DOUBLE) {
-            return appendX23(d);
-        }
         if (!decimaliser().toDecimal(d, this))
             append8bit(Double.toString(d));
         return this;
@@ -355,11 +346,13 @@ public abstract class AbstractBytes<U>
         return this;
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public boolean fpAppend0() {
         return append0;
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public Bytes<U> fpAppend0(boolean append0) {
         this.append0 = append0;
@@ -844,6 +837,7 @@ public abstract class AbstractBytes<U>
         return this;
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     @NotNull
     public Bytes<U> write(@NotNull final RandomDataInput bytes)
@@ -944,7 +938,7 @@ public abstract class AbstractBytes<U>
         return this;
     }
 
-    public @NotNull Bytes<U> write8bit(@Nullable BytesStore bs)
+    public @NotNull Bytes<U> write8bit(@Nullable BytesStore<?, ?> bs)
             throws BufferOverflowException, ClosedIllegalStateException, BufferUnderflowException, ThreadingIllegalStateException {
         if (bs == null) {
             BytesInternal.writeStopBitNeg1(this);
@@ -959,7 +953,7 @@ public abstract class AbstractBytes<U>
     }
 
     @Override
-    public long write8bit(@NonNegative long position, @NotNull BytesStore bs)
+    public long write8bit(@NonNegative long position, @NotNull BytesStore<?, ?> bs)
             throws ClosedIllegalStateException, ThreadingIllegalStateException {
         if (position < start()) {
             if (position < 0)
@@ -1138,7 +1132,7 @@ public abstract class AbstractBytes<U>
 
     @NotNull
     @Override
-    public Bytes<U> prewrite(@NotNull BytesStore bytes)
+    public Bytes<U> prewrite(@NotNull BytesStore<?, ?> bytes)
             throws BufferOverflowException, ClosedIllegalStateException {
         long offset = prewriteOffsetPositionMoved(bytes.readRemaining());
         bytesStore.write(offset, bytes);
@@ -1438,11 +1432,11 @@ public abstract class AbstractBytes<U>
 
     @NotNull
     @Override
-    public BytesStore bytesStore() {
+    public BytesStore<?, U> bytesStore() {
         return bytesStore;
     }
 
-    protected void bytesStore(BytesStore<Bytes<U>, U> bytesStore) {
+    protected void bytesStore(BytesStore<?, U> bytesStore) {
         this.bytesStore = BytesInternal.failIfBytesOnBytes(bytesStore);
     }
 
@@ -1496,7 +1490,7 @@ public abstract class AbstractBytes<U>
     }
 
     @Override
-    public boolean startsWith(@Nullable final BytesStore bytesStore) throws ClosedIllegalStateException {
+    public boolean startsWith(@Nullable final BytesStore<?, ?> bytesStore) throws ClosedIllegalStateException {
         // This class implements HasUncheckedRandomDataInput, so we could potentially use
         // the unchecked version of startsWith
         return bytesStore != null && BytesInternal.startsWithUnchecked(this, bytesStore);

@@ -167,9 +167,9 @@ public class DistributedUniqueTimeProvider extends SimpleCloseable implements Ti
     /**
      * NOTE: Calls to this method do not produce unique timestamps, rather just calls the underlying provider.
      * <p>
-     *     Use {@link #currentTimeMicros()} or {@link #currentTimeNanos()} to generate unique timestamps,
-     *     or use {@link net.openhft.chronicle.core.time.UniqueMicroTimeProvider#currentTimeMillis()} to generate unique timestamps.
-     * <p>
+     * Use {@link #currentTimeMicros()} or {@link #currentTimeNanos()} to generate unique timestamps,
+     * or use {@link net.openhft.chronicle.core.time.UniqueMicroTimeProvider#currentTimeMillis()} to generate unique timestamps.
+     *
      * @return Ordinary millisecond timestamp
      */
     @Override
@@ -288,14 +288,6 @@ public class DistributedUniqueTimeProvider extends SimpleCloseable implements Ti
         Monitorable.unmonitor(file);
         Monitorable.unmonitor(bytes);
         Monitorable.unmonitor(values);
-    }
-
-    /**
-     * A deduplicator to help recognise duplicate timestamps for a hostId
-     */
-    @Deprecated(/* to be removed in x.26 */)
-    public DistributedUniqueTimeDeduplicator deduplicator() {
-        return deduplicator;
     }
 
     /**

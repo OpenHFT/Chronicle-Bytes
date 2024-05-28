@@ -19,6 +19,7 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.affinity.Affinity;
 import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.core.UnsafeMemory;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.IOTools;
 import org.junit.Test;
@@ -29,6 +30,7 @@ import java.util.Comparator;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
+import static net.openhft.chronicle.core.Jvm.uncheckedCast;
 import static net.openhft.chronicle.core.UnsafeMemory.MEMORY;
 import static org.junit.Assert.assertEquals;
 
@@ -39,7 +41,7 @@ public class StructTest extends BytesTestCommon {
      */
     static abstract class Struct<S extends Struct<S>> {
         protected Bytes<?> self;
-        protected final Bytes<?> bytes;
+        protected final Bytes<Void> bytes;
         private final int size;
         protected long address;
 
@@ -78,7 +80,7 @@ public class StructTest extends BytesTestCommon {
          */
         public S copy() {
             S s = construct(0);
-            s.copy((S) this);
+            s.copy(uncheckedCast(this));
             return s;
         }
 
@@ -98,9 +100,9 @@ public class StructTest extends BytesTestCommon {
         protected S copy(S s) {
             if (self == null || s.address != this.address) {
                 allocateAndInitialise();
-                MEMORY.copyMemory(s.address, this.address, size);
+                UnsafeMemory.copyMemory(s.address, this.address, size);
             }
-            return (S) this;
+            return uncheckedCast(this);
         }
 
         /**
@@ -115,7 +117,7 @@ public class StructTest extends BytesTestCommon {
                 initialise(s.address);
             }
 
-            return (S) this;
+            return uncheckedCast(this);
         }
 
         /**
@@ -127,7 +129,9 @@ public class StructTest extends BytesTestCommon {
         protected void initialise(final long address) {
             assert address != 0;
 
-            ((PointerBytesStore) bytes.bytesStore()).set(address, size);
+            @SuppressWarnings({"unchecked", "rawtypes"})
+            PointerBytesStore store = (PointerBytesStore) (BytesStore) bytes.bytesStore();
+            store.set(address, size);
             bytes.readPosition(0);
             bytes.writePosition(size);
             this.address = bytes.addressForWrite(0);
@@ -459,7 +463,9 @@ public class StructTest extends BytesTestCommon {
                 IOTools.unmonitor(name);
             }
 
-            ((PointerBytesStore) name.bytesStore()).set(address + NAME, NAME_SIZE);
+            @SuppressWarnings({"unchecked", "rawtypes"})
+            PointerBytesStore store = (PointerBytesStore) (BytesStore) name.bytesStore();
+            store.set(address + NAME, NAME_SIZE);
             nameStr = null;
         }
 

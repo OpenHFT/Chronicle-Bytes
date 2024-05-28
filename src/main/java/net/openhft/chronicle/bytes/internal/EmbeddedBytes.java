@@ -23,13 +23,15 @@ import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.io.ClosedIllegalStateException;
 import org.jetbrains.annotations.NotNull;
 
+import static net.openhft.chronicle.core.Jvm.uncheckedCast;
+
 public class EmbeddedBytes<U> extends VanillaBytes<U> {
     private EmbeddedBytes(@NotNull BytesStore<?, ?> bytesStore, long writePosition, long writeLimit) throws IllegalStateException, IllegalArgumentException {
         super(bytesStore, writePosition, writeLimit);
     }
 
     public static <U> EmbeddedBytes<U> wrap(BytesStore<?, U> bytesStore) {
-        return wrap((HeapBytesStore<U>) bytesStore);
+        return wrap(uncheckedCast(bytesStore));
     }
 
     public static <U> EmbeddedBytes<U> wrap(HeapBytesStore<U> bytesStore) {

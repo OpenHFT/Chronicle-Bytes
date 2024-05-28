@@ -56,7 +56,7 @@ import static org.junit.Assert.*;
 import static org.junit.Assume.assumeFalse;
 import static org.junit.Assume.assumeTrue;
 
-@SuppressWarnings({"rawtypes"})
+@SuppressWarnings("rawtypes")
 @RunWith(Parameterized.class)
 public class BytesTest extends BytesTestCommon {
 
@@ -216,12 +216,12 @@ public class BytesTest extends BytesTestCommon {
     public void testCopy() {
         assumeFalse(alloc1 == HEAP_EMBEDDED);
 
-        Bytes<ByteBuffer> bbb = (Bytes) alloc1.fixedBytes(1024);
+        Bytes<?> bbb = alloc1.fixedBytes(1024);
         try {
             for (int i = 'a'; i <= 'z'; i++)
                 bbb.writeUnsignedByte(i);
             bbb.readPositionRemaining(4, 12);
-            BytesStore<Bytes<ByteBuffer>, ByteBuffer> copy = bbb.copy();
+            BytesStore<? extends Bytes<?>, ?> copy = bbb.copy();
             bbb.writeUnsignedByte(10, '0');
             assertEquals("[pos: 0, rlim: 12, wlim: 12, cap: 12 ] efghijklmnop", copy.toDebugString());
             copy.releaseLast();
@@ -294,7 +294,7 @@ public class BytesTest extends BytesTestCommon {
     public void testEqualBytesWithSecondStoreBeingLonger()
             throws IORuntimeException {
 
-        BytesStore store1 = null, store2 = null;
+        BytesStore<?, ?> store1 = null, store2 = null;
         try {
             store1 = alloc1.elasticBytes(64).append("TW-TRSY-20181217-NY572677_3256N1");
             store2 = alloc1.elasticBytes(64).append("TW-TRSY-20181217-NY572677_3256N15");
@@ -468,7 +468,7 @@ public class BytesTest extends BytesTestCommon {
     @Test(expected = IllegalArgumentException.class)
     public void testExpectNegativeOffsetAbsoluteWriteOnFixedBytesThrowsIllegalArgumentException() {
         assumeFalse(alloc1 == HEX_DUMP);
-        Bytes<ByteBuffer> bytes = (Bytes) alloc1.fixedBytes(4);
+        Bytes<?> bytes = alloc1.fixedBytes(4);
         try {
             bytes.writeInt(-1, 1);
         } finally {
@@ -479,7 +479,7 @@ public class BytesTest extends BytesTestCommon {
     @Test(expected = IllegalArgumentException.class)
     public void testExpectNegativeOffsetAbsoluteWriteOnFixedBytesOfInsufficientCapacityThrowsIllegalArgumentException() {
         assumeFalse(alloc1 == HEX_DUMP);
-        Bytes<ByteBuffer> bytes = (Bytes) alloc1.fixedBytes(1);
+        Bytes<?> bytes = alloc1.fixedBytes(1);
         try {
             bytes.writeInt(-1, 1);
         } finally {
@@ -897,7 +897,7 @@ public class BytesTest extends BytesTestCommon {
 
     @Test
     public void testParseDoubleReadLimit() {
-        Bytes<ByteBuffer> bytes = (Bytes) alloc1.fixedBytes(52);
+        Bytes<?> bytes = alloc1.fixedBytes(52);
         try {
             final String spaces = "   ";
             bytes.append(spaces).append(1.23);
@@ -1338,6 +1338,7 @@ public class BytesTest extends BytesTestCommon {
         testAppendDoubleOnce(value, standard, standardFloat, general, expectedDecimal9, false);
     }
 
+    @SuppressWarnings("deprecation")
     private void testAppendDoubleOnce(double value, String standard, String standardFloat, String general, String expectedDecimal9, boolean append0) {
         @NotNull Bytes<?> a = alloc1.elasticBytes(255)
                 .fpAppend0(append0)
@@ -1394,7 +1395,7 @@ public class BytesTest extends BytesTestCommon {
                 buffer.put(c);
             }
 
-            BytesStore heapBytesStore = data.bytesStore();
+            BytesStore<?, ?> heapBytesStore = data.bytesStore();
             heapBytesStore.write(16, buffer, 32, 8);
             for (int i = 0; i < 16; i++)
                 assertEquals(i + ' ', heapBytesStore.readByte(i));

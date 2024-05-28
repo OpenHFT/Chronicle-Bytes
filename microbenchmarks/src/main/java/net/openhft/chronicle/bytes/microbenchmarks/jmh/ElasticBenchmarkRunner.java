@@ -33,5 +33,4 @@ public class ElasticBenchmarkRunner {
 
         new Runner(opt).run();
     }
-
 }

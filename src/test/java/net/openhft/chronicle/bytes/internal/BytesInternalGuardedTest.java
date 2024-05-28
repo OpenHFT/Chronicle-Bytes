@@ -15,8 +15,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package net.openhft.chronicle.bytes;
+package net.openhft.chronicle.bytes.internal;
 
+import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.bytes.internal.BytesInternal;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
@@ -34,7 +35,7 @@ import java.util.Collection;
 
 import static org.junit.Assert.*;
 
-@SuppressWarnings({"rawtypes"})
+@SuppressWarnings("rawtypes")
 @RunWith(Parameterized.class)
 public class BytesInternalGuardedTest extends BytesTestCommon {
 
@@ -72,7 +73,7 @@ public class BytesInternalGuardedTest extends BytesTestCommon {
     @Test
     public void testParse8bitAndStringBuilderWithUtf16Coder()
             throws BufferUnderflowException, IOException {
-        @NotNull BytesStore bs = BytesStore.nativeStore(32);
+        @NotNull BytesStore<?, ?> bs = BytesStore.nativeStore(32);
         bs.write(0, new byte[]{0x76, 0x61, 0x6c, 0x75, 0x65}); // "value" string
 
         StringBuilder sb = new StringBuilder();
@@ -89,7 +90,7 @@ public class BytesInternalGuardedTest extends BytesTestCommon {
     @Test
     public void testCompareUTF()
             throws IORuntimeException {
-        @NotNull BytesStore bs = BytesStore.nativeStore(32);
+        @NotNull BytesStore<?, ?> bs = BytesStore.nativeStore(32);
         bs.writeUtf8(0, "test");
         assertTrue(BytesInternal.compareUtf8(bs, 0, "test"));
         assertFalse(BytesInternal.compareUtf8(bs, 0, null));
@@ -111,11 +112,11 @@ public class BytesInternalGuardedTest extends BytesTestCommon {
     @Test
     public void shouldHandleDifferentSizedStores() {
         Bytes<ByteBuffer> bytes = Bytes.elasticHeapByteBuffer(32);
-        final BytesStore storeOfThirtyTwoBytes = bytes.bytesStore();
+        final BytesStore<?, ?> storeOfThirtyTwoBytes = bytes.bytesStore();
         storeOfThirtyTwoBytes.writeUtf8(0, "thirty_two_bytes_of_utf8_chars_");
 
         Bytes<ByteBuffer> bytes2 = Bytes.elasticHeapByteBuffer(512);
-        final BytesStore longerBuffer = bytes2.bytesStore();
+        final BytesStore<?, ?> longerBuffer = bytes2.bytesStore();
         longerBuffer.writeUtf8(0, "thirty_two_bytes_of_utf8_chars_");
 
         assertTrue(BytesInternal.equalBytesAny(storeOfThirtyTwoBytes, longerBuffer, 32));
@@ -183,5 +184,4 @@ public class BytesInternalGuardedTest extends BytesTestCommon {
 
         bytes.releaseLast();
     }
-
 }

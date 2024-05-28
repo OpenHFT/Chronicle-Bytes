@@ -75,7 +75,7 @@ class DecimaliserFloatTest extends BytesTestCommon {
             assertEquals(48847, mantissa);
             assertEquals(16, exponent);
         };
-        assertTrue(new MaximumPrecision(16).toDecimal((float) HARD_TO_DECIMALISE, check));
+        assertTrue(new MaximumPrecision(16).toDecimal(HARD_TO_DECIMALISE, check));
     }
 
     @Test
@@ -206,3 +206,4 @@ class DecimaliserFloatTest extends BytesTestCommon {
         assertTrue(UsesBigDecimal.USES_BIG_DECIMAL.toDecimal((float) Long.MIN_VALUE, check));
     }
 }
+

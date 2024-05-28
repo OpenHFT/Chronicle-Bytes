@@ -18,33 +18,27 @@
     limitations under the License.
 
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
         <groupId>net.openhft</groupId>
         <artifactId>java-parent-pom</artifactId>
-        <version>1.25.4</version>
-        <relativePath />
+        <version>1.26.0</version>
+        <relativePath/>
     </parent>
 
     <artifactId>chronicle-bytes</artifactId>
-    <version>2.25ea12-SNAPSHOT</version>
+    <version>2.26ea0-SNAPSHOT</version>
     <name>OpenHFT/Chronicle Bytes</name>
     <description>Chronicle-Bytes</description>
     <packaging>bundle</packaging>
 
     <properties>
         <zero.cost.assertions>disabled</zero.cost.assertions>
-        <compiler.argument>-Xlint:deprecation</compiler.argument>
         <sonar.organization>openhft</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
-        <!-- The parent POM defines this plugin and activates it in a profile. Unfortunately this plugin will generate
-        code at @NotNull call-sites that throws IllegalArgumentException rather than NullPointerException. This will
-        break various core tests. Chronicle have raised this issue before with the maintainers of the plugin. See:
-        https://github.com/osundblad/intellij-annotations-instrumenter-maven-plugin/issues/53
-        -->
-        <se.eris.notnull.instrument>false</se.eris.notnull.instrument>
     </properties>
 
     <dependencyManagement>
@@ -52,14 +46,14 @@
             <dependency>
                 <groupId>net.openhft</groupId>
                 <artifactId>third-party-bom</artifactId>
-                <version>3.25.0</version>
+                <version>3.26.0</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
             <dependency>
                 <groupId>net.openhft</groupId>
                 <artifactId>chronicle-bom</artifactId>
-                <version>2.25ea-SNAPSHOT</version>
+                <version>2.26ea-SNAPSHOT</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -182,25 +176,6 @@
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <configuration>
-                    <source>8</source>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>attach-javadocs</id>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                        <configuration>
-                            <additionalOptions>-Xdoclint:none</additionalOptions>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
                     <forkCount>4</forkCount>
@@ -236,19 +211,6 @@
                 </configuration>
             </plugin>
 
-            <!-- used to allow getClass().getPackage().getImplementationVersion() -->
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <compilerArgument>-Xlint:deprecation</compilerArgument>
-                    <source>1.8</source>
-                    <target>1.8</target>
-                    <encoding>UTF-8</encoding>
-                    <!--                    <verbose>true</verbose>-->
-                </configuration>
-            </plugin>
             <!--
                 generate maven dependencies versions file that can be used later
                 to install the right bundle in test phase.
@@ -494,7 +456,9 @@
                                 </goals>
                                 <configuration>
                                     <executable>${java.home}/bin/java</executable>
-                                    <commandlineArgs>${jvm.requiredArgs} -Djvm.resource.tracing=false -classpath %classpath net.openhft.chronicle.bytes.perf.NativeBytesReadWriteJLBH</commandlineArgs>
+                                    <commandlineArgs>${jvm.requiredArgs} -Djvm.resource.tracing=false -classpath
+                                        %classpath net.openhft.chronicle.bytes.perf.NativeBytesReadWriteJLBH
+                                    </commandlineArgs>
                                 </configuration>
                             </execution>
                             <execution>
@@ -505,7 +469,9 @@
                                 </goals>
                                 <configuration>
                                     <executable>${java.home}/bin/java</executable>
-                                    <commandlineArgs>${jvm.requiredArgs} -Djvm.resource.tracing=false -classpath %classpath net.openhft.chronicle.bytes.perf.OnHeapBytesReadWriteJLBH</commandlineArgs>
+                                    <commandlineArgs>${jvm.requiredArgs} -Djvm.resource.tracing=false -classpath
+                                        %classpath net.openhft.chronicle.bytes.perf.OnHeapBytesReadWriteJLBH
+                                    </commandlineArgs>
                                 </configuration>
                             </execution>
                             <execution>
@@ -516,7 +482,9 @@
                                 </goals>
                                 <configuration>
                                     <executable>${java.home}/bin/java</executable>
-                                    <commandlineArgs>${jvm.requiredArgs} -Djvm.resource.tracing=false -classpath %classpath net.openhft.chronicle.bytes.perf.ChunkedMappedBytesReadWriteJLBH</commandlineArgs>
+                                    <commandlineArgs>${jvm.requiredArgs} -Djvm.resource.tracing=false -classpath
+                                        %classpath net.openhft.chronicle.bytes.perf.ChunkedMappedBytesReadWriteJLBH
+                                    </commandlineArgs>
                                 </configuration>
                             </execution>
                             <execution>
@@ -527,7 +495,9 @@
                                 </goals>
                                 <configuration>
                                     <executable>${java.home}/bin/java</executable>
-                                    <commandlineArgs>${jvm.requiredArgs} -Djvm.resource.tracing=false -classpath %classpath net.openhft.chronicle.bytes.perf.SingleMappedBytesReadWriteJLBH</commandlineArgs>
+                                    <commandlineArgs>${jvm.requiredArgs} -Djvm.resource.tracing=false -classpath
+                                        %classpath net.openhft.chronicle.bytes.perf.SingleMappedBytesReadWriteJLBH
+                                    </commandlineArgs>
                                 </configuration>
                             </execution>
                             <execution>
@@ -538,7 +508,9 @@
                                 </goals>
                                 <configuration>
                                     <executable>${java.home}/bin/java</executable>
-                                    <commandlineArgs>${jvm.requiredArgs} -Djvm.resource.tracing=false -classpath %classpath net.openhft.chronicle.bytes.perf.ContentEqual2JLBH</commandlineArgs>
+                                    <commandlineArgs>${jvm.requiredArgs} -Djvm.resource.tracing=false -classpath
+                                        %classpath net.openhft.chronicle.bytes.perf.ContentEqual2JLBH
+                                    </commandlineArgs>
                                 </configuration>
                             </execution>
                             <execution>
@@ -549,7 +521,9 @@
                                 </goals>
                                 <configuration>
                                     <executable>${java.home}/bin/java</executable>
-                                    <commandlineArgs>${jvm.requiredArgs} -Djvm.resource.tracing=false -classpath %classpath net.openhft.chronicle.bytes.perf.ContentEqual20JLBH</commandlineArgs>
+                                    <commandlineArgs>${jvm.requiredArgs} -Djvm.resource.tracing=false -classpath
+                                        %classpath net.openhft.chronicle.bytes.perf.ContentEqual20JLBH
+                                    </commandlineArgs>
                                 </configuration>
                             </execution>
                             <execution>
@@ -560,7 +534,9 @@
                                 </goals>
                                 <configuration>
                                     <executable>${java.home}/bin/java</executable>
-                                    <commandlineArgs>${jvm.requiredArgs} -Djvm.resource.tracing=false -classpath %classpath net.openhft.chronicle.bytes.perf.ContentEqual128JLBH</commandlineArgs>
+                                    <commandlineArgs>${jvm.requiredArgs} -Djvm.resource.tracing=false -classpath
+                                        %classpath net.openhft.chronicle.bytes.perf.ContentEqual128JLBH
+                                    </commandlineArgs>
                                 </configuration>
                             </execution>
                             <execution>
@@ -571,7 +547,9 @@
                                 </goals>
                                 <configuration>
                                     <executable>${java.home}/bin/java</executable>
-                                    <commandlineArgs>${jvm.requiredArgs} -Djvm.resource.tracing=false -classpath %classpath net.openhft.chronicle.bytes.perf.ContentEqual8192JLBH</commandlineArgs>
+                                    <commandlineArgs>${jvm.requiredArgs} -Djvm.resource.tracing=false -classpath
+                                        %classpath net.openhft.chronicle.bytes.perf.ContentEqual8192JLBH
+                                    </commandlineArgs>
                                 </configuration>
                             </execution>
                         </executions>

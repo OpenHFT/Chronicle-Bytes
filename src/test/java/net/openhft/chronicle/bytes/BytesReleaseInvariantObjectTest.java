@@ -102,5 +102,4 @@ final class BytesReleaseInvariantObjectTest extends BytesTestCommon {
         final int hash = bytes.hashCode();
         final int expected = System.identityHashCode(bytes);
     }
-
 }

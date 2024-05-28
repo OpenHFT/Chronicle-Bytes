@@ -53,7 +53,7 @@ public abstract class AbstractBytesStore<B extends BytesStore<B, U>, U>
 
     @Override
     public boolean equals(Object obj) {
-        return obj instanceof BytesStore && BytesInternal.contentEqual(this, (BytesStore) obj);
+        return obj instanceof BytesStore && BytesInternal.contentEqual(this, (BytesStore<?, ?>) obj);
     }
 
     @Override

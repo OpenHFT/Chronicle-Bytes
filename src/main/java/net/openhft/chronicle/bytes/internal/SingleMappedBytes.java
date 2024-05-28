@@ -34,6 +34,7 @@ import java.io.IOException;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 
+import static net.openhft.chronicle.core.Jvm.uncheckedCast;
 import static net.openhft.chronicle.core.util.Longs.requireNonNegative;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
@@ -46,7 +47,6 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
  *
  * @see CommonMappedBytes
  */
-@SuppressWarnings({"unchecked"})
 public class SingleMappedBytes extends CommonMappedBytes {
 
     /**
@@ -69,12 +69,13 @@ public class SingleMappedBytes extends CommonMappedBytes {
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
+    @SuppressWarnings("this-escape")
     protected SingleMappedBytes(@NotNull final MappedFile mappedFile, final String name)
             throws IllegalStateException {
         super(mappedFile, name);
 
         try {
-            bytesStore((BytesStore<Bytes<Void>, Void>) (BytesStore<?, Void>) mappedFile.acquireByteStore(this, 0));
+            bytesStore(uncheckedCast(mappedFile.acquireByteStore(this, 0)));
 
         } catch (@NotNull IOException e) {
             throw new IORuntimeException(e);
@@ -113,9 +114,9 @@ public class SingleMappedBytes extends CommonMappedBytes {
 
             bytesStore.write(wp, byteArray, offset, (int) safeCopySize);
 
-            offset += safeCopySize;
+            offset += (int) safeCopySize;
             wp += safeCopySize;
-            remaining -= safeCopySize;
+            remaining -= (int) safeCopySize;
 
         }
         return this;

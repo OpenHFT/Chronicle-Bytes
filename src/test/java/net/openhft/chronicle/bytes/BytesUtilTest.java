@@ -28,7 +28,6 @@ import java.util.Arrays;
 import static org.junit.Assert.*;
 import static org.junit.Assume.assumeTrue;
 
-@SuppressWarnings("rawtypes")
 public class BytesUtilTest extends BytesTestCommon {
     @Test
     public void fromFileInJar()
@@ -143,6 +142,7 @@ public class BytesUtilTest extends BytesTestCommon {
         assertTrue(BytesUtil.equals(a, aa));
     }
 
+    @SuppressWarnings({"deprecation", "removal"})
     @Test
     public void equals_equivalentObjects() {
         // Intentional boxing to create two equivalent but distinct objects

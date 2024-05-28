@@ -35,17 +35,17 @@ import java.nio.BufferUnderflowException;
  * <p>
  * This class is thread-safe provided that external synchronization is applied. It uses different implementations based on the JVM's debug status:
  * in debug mode, it uses {@link BinaryLongReference} for safety checks; otherwise, it uses {@link UncheckedLongReference} for better performance.
- * </p>
+ *
  * @see LongReference
  * @see ReferenceOwner
  * @see UnsafeCloseable
  * @see BytesStore
  * @see BinaryLongReference
  */
-@SuppressWarnings({"rawtypes", "unchecked"})
+@SuppressWarnings("rawtypes")
 public class UncheckedLongReference extends UnsafeCloseable implements LongReference, ReferenceOwner {
 
-    private BytesStore bytes;
+    private BytesStore<?, ?> bytes;
 
     /**
      * Factory method to create a {@code UncheckedLongReference} or {@code BinaryLongReference} based on the JVM's debug status.
@@ -61,8 +61,9 @@ public class UncheckedLongReference extends UnsafeCloseable implements LongRefer
      * @throws ClosedIllegalStateException    If the {@code BytesStore} has already been closed.
      * @throws ThreadingIllegalStateException If this method is called from multiple threads without proper synchronization.
      */
+    @SuppressWarnings("unchecked")
     @NotNull
-    public static LongReference create(@NotNull BytesStore bytesStore, @NonNegative long offset, @NonNegative int size)
+    public static LongReference create(@NotNull BytesStore<?, ?> bytesStore, @NonNegative long offset, @NonNegative int size)
             throws IllegalArgumentException, BufferOverflowException, BufferUnderflowException, IllegalStateException {
         @NotNull LongReference ref = Jvm.isDebug() ? new BinaryLongReference() : new UncheckedLongReference();
         ref.bytesStore(bytesStore, offset, size);
@@ -97,7 +98,7 @@ public class UncheckedLongReference extends UnsafeCloseable implements LongRefer
 
     @NotNull
     @Override
-    public BytesStore bytesStore() {
+    public BytesStore<?, ?> bytesStore() {
         return bytes;
     }
 

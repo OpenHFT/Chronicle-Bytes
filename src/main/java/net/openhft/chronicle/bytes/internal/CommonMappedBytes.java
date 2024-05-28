@@ -41,7 +41,6 @@ import static net.openhft.chronicle.core.util.StringUtils.*;
  * <p>
  * NOTE These Bytes are single Threaded as are all Bytes.
  */
-@SuppressWarnings({"unchecked"})
 public abstract class CommonMappedBytes extends MappedBytes {
     private final AbstractCloseable closeable = new AbstractCloseable() {
         @Override
@@ -63,6 +62,7 @@ public abstract class CommonMappedBytes extends MappedBytes {
         this(mappedFile, "");
     }
 
+    @SuppressWarnings("this-escape")
     protected CommonMappedBytes(@NotNull final MappedFile mappedFile, final String name)
             throws ClosedIllegalStateException, ThreadingIllegalStateException {
         super(name);
@@ -232,6 +232,7 @@ public abstract class CommonMappedBytes extends MappedBytes {
         mappedFile.release(this);
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     @NotNull
     public Bytes<Void> write(@NotNull final RandomDataInput bytes,
@@ -295,7 +296,9 @@ public abstract class CommonMappedBytes extends MappedBytes {
         requireNonNull(s);
         ensureCapacity(writePosition() + length);
         long address = addressForWritePosition();
-        Memory memory = ((MappedBytesStore) bytesStore()).memory;
+        @SuppressWarnings({"unchecked", "rawtypes"})
+        MappedBytesStore mbs = (MappedBytesStore) (BytesStore) bytesStore();
+        Memory memory = mbs.memory;
         if (Jvm.isJava9Plus()) {
             byte[] bytes = extractBytes(s);
             int i = 0;

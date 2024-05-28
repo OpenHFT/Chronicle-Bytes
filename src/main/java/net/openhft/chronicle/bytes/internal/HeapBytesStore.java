@@ -32,6 +32,7 @@ import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
+import static net.openhft.chronicle.core.Jvm.uncheckedCast;
 import static net.openhft.chronicle.core.util.Ints.requireNonNegative;
 import static net.openhft.chronicle.core.util.Longs.requireNonNegative;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
@@ -54,8 +55,7 @@ public class HeapBytesStore<U>
 
     private HeapBytesStore(@NotNull ByteBuffer byteBuffer) {
         super(false);
-        //noinspection unchecked
-        this.underlyingObject = (U) byteBuffer;
+        this.underlyingObject = uncheckedCast(byteBuffer);
         byteBuffer.order(ByteOrder.nativeOrder());
         this.realUnderlyingObject = byteBuffer.array();
         this.dataOffset = Jvm.arrayByteBaseOffset() + byteBuffer.arrayOffset();
@@ -64,8 +64,7 @@ public class HeapBytesStore<U>
 
     private HeapBytesStore(@Nullable byte[] byteArray) {
         super(false);
-        //noinspection unchecked
-        this.underlyingObject = (U) byteArray;
+        this.underlyingObject = uncheckedCast(byteArray);
         this.realUnderlyingObject = byteArray;
         this.dataOffset = Jvm.arrayByteBaseOffset();
         this.capacity = byteArray == null ? 0 : byteArray.length;
@@ -73,7 +72,7 @@ public class HeapBytesStore<U>
 
     private HeapBytesStore(Object object, long start, long length) {
         super(false);
-        this.underlyingObject = (U) object;
+        this.underlyingObject = uncheckedCast(object);
         this.realUnderlyingObject = object;
         this.dataOffset = Math.toIntExact(start);
         this.capacity = length;
@@ -131,8 +130,9 @@ public class HeapBytesStore<U>
     @NotNull
     @Override
     public BytesStore<HeapBytesStore<U>, U> copy() {
-        if (capacity == 0)
-            return (BytesStore) NoBytesStore.NO_BYTES_STORE;
+        if (capacity == 0) {
+            return uncheckedCast(NoBytesStore.NO_BYTES_STORE);
+        }
         throw new UnsupportedOperationException("todo");
     }
 
@@ -315,8 +315,9 @@ public class HeapBytesStore<U>
         }
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
-    public long write8bit(@NonNegative long position, @NotNull BytesStore bs) {
+    public long write8bit(@NonNegative long position, @NotNull BytesStore<?, ?> bs) {
         requireNonNull(bs);
         int length0 = Math.toIntExact(bs.readRemaining());
         position = BytesUtil.writeStopBit(this, position, length0);
@@ -507,6 +508,7 @@ public class HeapBytesStore<U>
         }
     }
 
+    @SuppressWarnings("deprecation")
     @NotNull
     @Override
     public HeapBytesStore<U> write(@NonNegative final long offsetInRDO,
@@ -518,8 +520,7 @@ public class HeapBytesStore<U>
         requireNonNegative(offset);
         requireNonNegative(length);
         try {
-            memory.copyMemory(
-                    byteArray, offset, realUnderlyingObject, this.dataOffset + offsetInRDO, length);
+            copyMemory0(offsetInRDO, offset, length, byteArray);
             return this;
         } catch (NullPointerException ifReleased) {
             throwExceptionIfReleased();
@@ -527,6 +528,7 @@ public class HeapBytesStore<U>
         }
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public void write(
             @NonNegative long offsetInRDO, @NotNull ByteBuffer bytes, @NonNegative int offset, @NonNegative int length)
@@ -538,12 +540,21 @@ public class HeapBytesStore<U>
                         this.dataOffset + offsetInRDO, length);
 
             } else {
-                memory.copyMemory(bytes.array(), offset, realUnderlyingObject,
-                        this.dataOffset + offsetInRDO, length);
+                byte[] src = bytes.array();
+
+                copyMemory0(offsetInRDO, offset, length, src);
             }
         } catch (NullPointerException ifReleased) {
             throwExceptionIfReleased();
             throw ifReleased;
+        }
+    }
+
+    private void copyMemory0(long offsetInRDO, int offset, int length, byte[] src) {
+        if (realUnderlyingObject instanceof byte[]) {
+            memory.copyMemory(src, offset, (byte[]) realUnderlyingObject, Math.toIntExact(this.dataOffset + offsetInRDO - memory.arrayBaseOffset(byte[].class)), length);
+        } else {
+            memory.copyMemory(src, offset, realUnderlyingObject, this.dataOffset + offsetInRDO, length);
         }
     }
 
@@ -658,9 +669,6 @@ public class HeapBytesStore<U>
     public boolean equals(Object obj) {
         return super.equals(obj);
     }
-
-    @Deprecated(/* to be removed in x.26 */)
-    static final boolean APPEND_0 = Jvm.getBoolean("bytes.append.0", true);
 
     @Override
     public long appendAndReturnLength(final long writePosition, boolean negative, long mantissa, int exponent, boolean append0) {

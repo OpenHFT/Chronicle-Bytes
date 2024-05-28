@@ -40,14 +40,14 @@ public class BytesCoolerMain {
     }
 
     @NotNull
-    public static Object doWrite(Bytes bytes, int digits) {
+    public static Object doWrite(Bytes<?> bytes, int digits) {
         bytes.clear();
         bytes.append(123.456, digits);
         return bytes;
     }
 
     @NotNull
-    public static Object doRead(Bytes bytes) {
+    public static Object doRead(Bytes<?> bytes) {
         bytes.readPosition(0);
         double v = bytes.parseDouble();
         if (v < 0) throw new AssertionError();
@@ -55,7 +55,7 @@ public class BytesCoolerMain {
     }
 
     @NotNull
-    public static Object doTest(Bytes bytes) {
+    public static Object doTest(Bytes<?> bytes) {
         doWrite(bytes, 3);
         doRead(bytes);
         return bytes;

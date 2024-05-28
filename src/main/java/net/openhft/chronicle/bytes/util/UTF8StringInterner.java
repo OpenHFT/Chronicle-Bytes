@@ -67,7 +67,7 @@ public class UTF8StringInterner extends AbstractInterner<String> {
     @SuppressWarnings("rawtypes")
     @Override
     @NotNull
-    protected String getValue(@NotNull BytesStore cs, @NonNegative int length)
+    protected String getValue(@NotNull BytesStore<?, ?> cs, @NonNegative int length)
             throws UTFDataFormatRuntimeException, IllegalStateException, BufferUnderflowException {
         try (final ScopedResource<StringBuilder> sbTl = SBP.get()) {
             // Acquire a StringBuilder from the pool for efficient string construction

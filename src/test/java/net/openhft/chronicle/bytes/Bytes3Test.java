@@ -35,7 +35,7 @@ import java.util.function.Supplier;
 
 import static org.junit.Assert.*;
 
-@SuppressWarnings({"rawtypes"})
+@SuppressWarnings({"rawtypes", "unchecked"})
 @RunWith(Parameterized.class)
 public class Bytes3Test extends BytesTestCommon {
 
@@ -174,7 +174,6 @@ public class Bytes3Test extends BytesTestCommon {
         doAppend((b, s) -> b.append8bit(Bytes.from(s)));
     }
 
-
     @Test
     public void append8bitFromBytesBounded() {
         doAppend((b, s) -> b.append8bit(Bytes.from("[" + s + "]"), 1L, s.length() + 1));
@@ -249,7 +248,6 @@ public class Bytes3Test extends BytesTestCommon {
     public void writeUtf8Substring() {
         doAppend(ByteStringAppender::writeUtf8);
     }
-
 
     @Test
     public void writeUtf8Substring2() {

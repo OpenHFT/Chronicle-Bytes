@@ -35,6 +35,7 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import static net.openhft.chronicle.bytes.BytesStore.wrap;
+import static net.openhft.chronicle.core.Jvm.uncheckedCast;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
@@ -88,7 +89,7 @@ final class BytesFactoryUtil {
     }
 
     static Bytes<Object> bytes(Arguments arguments) {
-        return ((Bytes<Object>) arguments.get()[0]);
+        return uncheckedCast(arguments.get()[0]);
     }
 
     static boolean isReadWrite(Arguments arguments) {
@@ -197,7 +198,6 @@ final class BytesFactoryUtil {
         public String name() {
             return name;
         }
-
     }
 
     private static final class ThrowingConsumerWrapper<O, T extends Throwable> implements Consumer<O> {

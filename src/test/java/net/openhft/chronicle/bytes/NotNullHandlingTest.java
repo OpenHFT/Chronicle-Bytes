@@ -81,5 +81,4 @@ class NotNullHandlingTest extends BytesTestCommon {
     private void fooUnsafe(@NotNull CharSequence text, int value) {
         // Potentially modifying internal state and only then throw an exception.
     }
-
 }

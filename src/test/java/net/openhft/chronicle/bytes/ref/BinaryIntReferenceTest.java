@@ -27,7 +27,7 @@ import static org.junit.Assert.*;
 public class BinaryIntReferenceTest extends BytesTestCommon {
     @Test
     public void test() {
-        @NotNull BytesStore nbs = BytesStore.nativeStoreWithFixedCapacity(32);
+        BytesStore<?, Void> nbs = BytesStore.nativeStoreWithFixedCapacity(32);
         try (@NotNull BinaryIntReference ref = new BinaryIntReference()) {
             ref.bytesStore(nbs, 16, 4);
             assertEquals(0, ref.getValue());

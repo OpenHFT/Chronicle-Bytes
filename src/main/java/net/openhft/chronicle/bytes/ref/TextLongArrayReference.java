@@ -106,7 +106,7 @@ public class TextLongArrayReference extends AbstractReference implements Byteabl
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
-    public static long peakLength(@NotNull BytesStore bytes, @NonNegative long offset)
+    public static long peakLength(@NotNull BytesStore<?, ?> bytes, @NonNegative long offset)
             throws IllegalStateException, BufferUnderflowException {
         //todo check this, I think there could be a bug here
         return (bytes.parseLong(offset + CAPACITY) * VALUE_SIZE) - SEP.length
@@ -124,7 +124,7 @@ public class TextLongArrayReference extends AbstractReference implements Byteabl
     public long getUsed()
             throws IllegalStateException {
         try {
-            return bytes.parseLong(USED + offset);
+            return bytesStore.parseLong(USED + offset);
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
             throw e;
@@ -134,7 +134,7 @@ public class TextLongArrayReference extends AbstractReference implements Byteabl
     public void setUsed(long used)
             throws IllegalStateException {
         try {
-            bytes.append(VALUES + offset, used, DIGITS);
+            bytesStore.append(VALUES + offset, used, DIGITS);
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
             throw e;
@@ -146,7 +146,7 @@ public class TextLongArrayReference extends AbstractReference implements Byteabl
             throws IllegalStateException {
         try {
             while (true) {
-                if (!bytes.compareAndSwapInt(LOCK_OFFSET + offset, FALS, TRU))
+                if (!bytesStore.compareAndSwapInt(LOCK_OFFSET + offset, FALS, TRU))
                     continue;
                 try {
                     if (getUsed() < usedAtLeast) {
@@ -154,7 +154,7 @@ public class TextLongArrayReference extends AbstractReference implements Byteabl
                     }
                     return;
                 } finally {
-                    bytes.writeInt(LOCK_OFFSET + offset, FALS);
+                    bytesStore.writeInt(LOCK_OFFSET + offset, FALS);
                 }
             }
         } catch (NullPointerException e) {
@@ -170,7 +170,7 @@ public class TextLongArrayReference extends AbstractReference implements Byteabl
 
     @Override
     public ByteableLongArrayValues capacity(@NonNegative long arrayLength) {
-        BytesStore bytesStore = bytesStore();
+        BytesStore<?, ?> bytesStore = bytesStore();
         long len = sizeInBytes(arrayLength);
         if (bytesStore == null) {
             this.length = len;
@@ -184,19 +184,18 @@ public class TextLongArrayReference extends AbstractReference implements Byteabl
     public long getValueAt(@NonNegative long index)
             throws IllegalStateException {
         try {
-            return bytes.parseLong(VALUES + offset + index * VALUE_SIZE);
+            return bytesStore.parseLong(VALUES + offset + index * VALUE_SIZE);
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
             throw e;
         }
-
     }
 
     @Override
     public void setValueAt(@NonNegative long index, long value)
             throws IllegalStateException {
         try {
-            bytes.append(VALUES + offset + index * VALUE_SIZE, value, DIGITS);
+            bytesStore.append(VALUES + offset + index * VALUE_SIZE, value, DIGITS);
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
             throw e;
@@ -233,7 +232,7 @@ public class TextLongArrayReference extends AbstractReference implements Byteabl
     public boolean compareAndSet(@NonNegative long index, long expected, long value)
             throws IllegalStateException {
         try {
-            if (!bytes.compareAndSwapInt(LOCK_OFFSET + offset, FALS, TRU))
+            if (!bytesStore.compareAndSwapInt(LOCK_OFFSET + offset, FALS, TRU))
                 return false;
             boolean ret = false;
             try {
@@ -243,13 +242,12 @@ public class TextLongArrayReference extends AbstractReference implements Byteabl
                 }
                 return ret;
             } finally {
-                bytes.writeInt(LOCK_OFFSET + offset, FALS);
+                bytesStore.writeInt(LOCK_OFFSET + offset, FALS);
             }
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
             throw e;
         }
-
     }
 
     @Override
@@ -271,7 +269,7 @@ public class TextLongArrayReference extends AbstractReference implements Byteabl
 
     @Override
     public boolean isNull() {
-        return bytes == null;
+        return bytesStore == null;
     }
 
     @Override
@@ -279,7 +277,7 @@ public class TextLongArrayReference extends AbstractReference implements Byteabl
             throws IllegalStateException {
         throwExceptionIfClosedInSetter();
 
-        bytes = null;
+        bytesStore = null;
         offset = 0;
         length = 0;
     }
@@ -297,7 +295,7 @@ public class TextLongArrayReference extends AbstractReference implements Byteabl
     @NotNull
     @Override
     public String toString() {
-        if (bytes == null) {
+        if (bytesStore == null) {
             return "LongArrayTextReference{" +
                     "bytes=null" +
                     ", offset=" + offset +

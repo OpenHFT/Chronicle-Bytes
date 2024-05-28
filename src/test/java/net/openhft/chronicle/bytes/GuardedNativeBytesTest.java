@@ -28,7 +28,6 @@ import static org.junit.Assert.assertTrue;
  * <p>
  * It aims to test various primitive data types and their conversions
  * using the GuardedNativeBytes class.
- * </p>
  */
 public class GuardedNativeBytesTest {
 
@@ -41,11 +40,10 @@ public class GuardedNativeBytesTest {
      *   <li>Checks the generated hexadecimal string against an expected value.</li>
      *   <li>Reads the binary data back and checks that it matches the original input.</li>
      * </ul>
-     * </p>
-     */
+         */
     @Test
     public void testBinaryPrimitive() {
-        final GuardedNativeBytes<?> bytes = new GuardedNativeBytes(new HexDumpBytes(), 256);
+        final GuardedNativeBytes<?> bytes = new GuardedNativeBytes<>(new HexDumpBytes(), 256);
         try {
             bytes.writeHexDumpDescription("flag").writeBoolean(true);
             bytes.writeHexDumpDescription("s8").writeByte((byte) 1);

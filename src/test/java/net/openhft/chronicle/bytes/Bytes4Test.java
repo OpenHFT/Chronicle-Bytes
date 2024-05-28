@@ -32,12 +32,12 @@ class Bytes4Test extends BytesTestCommon {
     void segFault() {
         {
             byte[] arr = new byte[4];
-            BytesStore bs = BytesStore.wrap(arr);
+            BytesStore<?, byte[]> bs = BytesStore.wrap(arr);
             bs.writeInt(0, 0xaaaaaaaa);
             //System.exit(0);
         }
 
-        BytesStore bs = BytesStore.from("this is a test          ");
+        BytesStore<?, byte[]> bs = BytesStore.from("this is a test          ");
         bs.append(14, 16, 12);
         bs.isClear();
 
@@ -48,7 +48,7 @@ class Bytes4Test extends BytesTestCommon {
     @Disabled("https://github.com/OpenHFT/Chronicle-Bytes/issues/187")
     void bufferOverflow() {
         byte[] arr = new byte[4];
-        final BytesStore bs = BytesStore.wrap(arr);
+        final BytesStore<?, byte[]> bs = BytesStore.wrap(arr);
 
         // Since writeInt can throw AssertionError we need to make it like this
         boolean fail = false;
@@ -77,12 +77,12 @@ class Bytes4Test extends BytesTestCommon {
 
         {
             byte[] arr = new byte[4];
-            BytesStore bs = BytesStore.wrap(arr);
+            BytesStore<?, byte[]> bs = BytesStore.wrap(arr);
             bs.writeInt(0, 0xaaaaaaaa);
             //System.exit(0);
         }
 
-        BytesStore bs = BytesStore.from("this is a test          ");
+        BytesStore<?, byte[]> bs = BytesStore.from("this is a test          ");
         bs.append(14, 16, 12);
         bs.isClear();
         bs.writeUtf8(14, "this is a another text it should over write the other");
@@ -112,7 +112,7 @@ class Bytes4Test extends BytesTestCommon {
 
     }
 
-    private static void print(String name, BytesStore bs) {
+    private static void print(String name, BytesStore<?,?> bs) {
         System.out.println("** " + name + " **");
         System.out.println("readlimit  " + bs.readLimit());
         System.out.println("writelimit " + bs.writeLimit());

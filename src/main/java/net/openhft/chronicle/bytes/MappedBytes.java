@@ -48,7 +48,7 @@ import java.io.FileNotFoundException;
  * @see MappedFile
  * @see AbstractBytes
  */
-@SuppressWarnings({"rawtypes", "unchecked"})
+@SuppressWarnings("rawtypes")
 public abstract class MappedBytes extends AbstractBytes<Void> implements Closeable, ManagedCloseable, Syncable {
 
     protected static final boolean TRACE = Jvm.getBoolean("trace.mapped.bytes");
@@ -282,7 +282,7 @@ public abstract class MappedBytes extends AbstractBytes<Void> implements Closeab
      */
     @Override
     public void sync() {
-        final BytesStore bs = bytesStore;
+        final BytesStore<?, ?> bs = bytesStore;
         if (bs instanceof MappedBytesStore) {
             MappedBytesStore mbs = (MappedBytesStore) bs;
             mbs.syncUpTo(writePosition());
@@ -302,7 +302,7 @@ public abstract class MappedBytes extends AbstractBytes<Void> implements Closeab
 
         // MappedBytes don't have a backing BytesStore so we have to give out bytesForRead|Write backed by this
         return isClear()
-                ? new VanillaBytes(this, writePosition(), bytesStore.writeLimit())
+                ? new VanillaBytes<>(this, writePosition(), bytesStore.writeLimit())
                 : new SubBytes<>(this, readPosition(), readLimit() + start());
     }
 
@@ -318,6 +318,6 @@ public abstract class MappedBytes extends AbstractBytes<Void> implements Closeab
         throwExceptionIfReleased();
 
         // MappedBytes don't have a backing BytesStore so we have to give out bytesForRead|Write backed by this
-        return new VanillaBytes(this, writePosition(), writeLimit());
+        return new VanillaBytes<>(this, writePosition(), writeLimit());
     }
 }

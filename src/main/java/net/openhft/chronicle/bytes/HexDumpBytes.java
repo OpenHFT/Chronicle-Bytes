@@ -56,7 +56,7 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
  * for nested data structures or logically grouped data within the byte array.
  */
 
-@SuppressWarnings({"rawtypes", "unchecked"})
+@SuppressWarnings("rawtypes")
 public class HexDumpBytes
         implements Bytes<Void>, DecimalAppender {
 
@@ -89,7 +89,7 @@ public class HexDumpBytes
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
-    HexDumpBytes(@NotNull Bytes<?> base, @NotNull BytesStore text) {
+    HexDumpBytes(@NotNull Bytes<?> base, @NotNull BytesStore<?, ?> text) {
         final long size = base.readRemaining();
         this.base = NativeBytes.wrapWithNativeBytes(NativeBytesStore.nativeStore(size), size);
         this.base.write(base);
@@ -262,7 +262,7 @@ public class HexDumpBytes
     }
 
     @Override
-    public BytesStore copy() {
+    public BytesStore<Bytes<Void>, Void> copy() throws IllegalStateException {
         throwExceptionIfReleased(this);
         return new HexDumpBytes(base, text);
     }
@@ -279,7 +279,7 @@ public class HexDumpBytes
 
     @Override
     @NotNull
-    public BytesStore bytesStore() {
+    public BytesStore<?, Void> bytesStore() {
         return base.bytesStore();
     }
 
@@ -546,7 +546,7 @@ public class HexDumpBytes
     }
 
     @Override
-    public long write8bit(@NonNegative long position, @NotNull BytesStore bs) {
+    public long write8bit(@NonNegative long position, @NotNull BytesStore<?, ?> bs) {
         requireNonNull(bs);
         throw new UnsupportedOperationException();
     }
@@ -708,7 +708,7 @@ public class HexDumpBytes
     }
 
     @Override
-    public void readWithLength(@NonNegative long length, @NotNull BytesOut<Void> bytesOut) throws BufferUnderflowException, IORuntimeException, IllegalStateException, BufferOverflowException {
+    public void readWithLength(@NonNegative long length, @NotNull BytesOut<?> bytesOut) throws BufferUnderflowException, IORuntimeException, IllegalStateException, BufferOverflowException {
         base.readWithLength(length, bytesOut);
     }
 
@@ -1150,7 +1150,7 @@ public class HexDumpBytes
 
     @Override
     @NotNull
-    public Bytes<Void> prewrite(BytesStore bytes) {
+    public Bytes<Void> prewrite(BytesStore<?, ?> bytes) {
         throw new UnsupportedOperationException();
     }
 
@@ -1374,11 +1374,13 @@ public class HexDumpBytes
         return this;
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public boolean fpAppend0() {
         return base.fpAppend0();
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public Bytes<Void> fpAppend0(boolean append0) {
         base.fpAppend0(append0);
@@ -1423,7 +1425,7 @@ public class HexDumpBytes
     }
 
     @Override
-    public Bytes<Void> append8bit(@NotNull BytesStore bs) throws BufferOverflowException, BufferUnderflowException, IllegalStateException {
+    public Bytes<Void> append8bit(@NotNull BytesStore<?, ?> bs) throws BufferOverflowException, BufferUnderflowException, IllegalStateException {
         long pos = base.writePosition();
         try {
             base.append8bit(bs);
@@ -1456,7 +1458,7 @@ public class HexDumpBytes
     }
 
     @Override
-    public Bytes<Void> append8bit(@NotNull BytesStore bs, long start, long end) throws IllegalArgumentException, BufferOverflowException, BufferUnderflowException, IndexOutOfBoundsException, IllegalStateException {
+    public Bytes<Void> append8bit(@NotNull BytesStore<?, ?> bs, long start, long end) throws IllegalArgumentException, BufferOverflowException, BufferUnderflowException, IndexOutOfBoundsException, IllegalStateException {
         long pos = base.writePosition();
         try {
             base.append8bit(bs, start, end);
@@ -1764,6 +1766,7 @@ public class HexDumpBytes
         }
     }
 
+    @SuppressWarnings("deprecation")
     @NotNull
     @Override
     public Bytes<Void> write(@NotNull RandomDataInput bytes) throws IllegalStateException, BufferOverflowException {
@@ -1789,6 +1792,7 @@ public class HexDumpBytes
         }
     }
 
+    @SuppressWarnings("deprecation")
     @NotNull
     @Override
     public Bytes<Void> write(@NotNull RandomDataInput bytes, @NonNegative long offset, @NonNegative long length) throws BufferOverflowException, BufferUnderflowException, IllegalStateException, IllegalArgumentException {
@@ -1807,7 +1811,7 @@ public class HexDumpBytes
 
     @NotNull
     @Override
-    public Bytes<Void> write(@NotNull BytesStore bytes, @NonNegative long offset, @NonNegative long length) throws BufferOverflowException, BufferUnderflowException, IllegalStateException, IllegalArgumentException {
+    public Bytes<Void> write(@NotNull BytesStore<?, ?> bytes, @NonNegative long offset, @NonNegative long length) throws BufferOverflowException, BufferUnderflowException, IllegalStateException, IllegalArgumentException {
         throwExceptionIfReleased(bytes);
         requireNonNegative(offset);
         requireNonNegative(length);
@@ -1940,5 +1944,4 @@ public class HexDumpBytes
             reader.close();
         }
     }
-
 }

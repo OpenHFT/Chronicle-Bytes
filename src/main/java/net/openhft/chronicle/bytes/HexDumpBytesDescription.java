@@ -20,6 +20,8 @@ package net.openhft.chronicle.bytes;
 import net.openhft.chronicle.core.io.ClosedIllegalStateException;
 import net.openhft.chronicle.core.io.ThreadingIllegalStateException;
 
+import static net.openhft.chronicle.core.Jvm.uncheckedCast;
+
 /**
  * This interface is for additional description to be added to HexDumpBytes
  */
@@ -41,10 +43,9 @@ public interface HexDumpBytesDescription<B extends HexDumpBytesDescription<B>> {
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
-    @SuppressWarnings("unchecked")
     default B writeHexDumpDescription(CharSequence comment)
             throws ClosedIllegalStateException, ThreadingIllegalStateException {
-        return (B) this;
+        return uncheckedCast(this);
     }
 
     /**
@@ -53,9 +54,8 @@ public interface HexDumpBytesDescription<B extends HexDumpBytesDescription<B>> {
      * @param n +1 indent in, -1 reduce indenting
      * @return this.
      */
-    @SuppressWarnings("unchecked")
     default B adjustHexDumpIndentation(int n)
             throws IllegalStateException {
-        return (B) this;
+        return uncheckedCast(this);
     }
 }

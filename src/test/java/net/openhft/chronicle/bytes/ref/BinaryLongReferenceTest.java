@@ -34,7 +34,7 @@ import static org.junit.Assert.*;
 public class BinaryLongReferenceTest extends BytesTestCommon {
     @Test
     public void test() {
-        @NotNull BytesStore nbs = BytesStore.nativeStoreWithFixedCapacity(32);
+        BytesStore<?, Void> nbs = BytesStore.nativeStoreWithFixedCapacity(32);
         try (@NotNull BinaryLongReference ref = new BinaryLongReference()) {
             ref.bytesStore(nbs, 16, 8);
             assertEquals(0, ref.getValue());

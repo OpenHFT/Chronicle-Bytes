@@ -38,6 +38,7 @@ import java.util.stream.Stream;
 import static net.openhft.chronicle.bytes.BytesFactoryUtil.*;
 import static org.junit.jupiter.api.Assertions.*;
 
+@SuppressWarnings("deprecation")
 final class BytesJavaDocComplianceTest extends BytesTestCommon {
 
     private static final Map<String, BytesInitialInfo> INITIAL_INFO_MAP = new LinkedHashMap<>();
@@ -260,5 +261,4 @@ final class BytesJavaDocComplianceTest extends BytesTestCommon {
         final BytesInitialInfo actualInfo = new BytesInitialInfo(bytes);
         assertEquals(expectedInfo, actualInfo, createCommand);
     }
-
 }

@@ -24,7 +24,7 @@ import static org.junit.Assert.assertEquals;
 public class BytesStoreTest extends BytesTestCommon {
     @Test
     public void from() {
-        BytesStore from = BytesStore.from(", ");
+        BytesStore<?, byte[]> from = BytesStore.from(", ");
         assertEquals(2, from.capacity());
         from.releaseLast();
     }

@@ -42,7 +42,7 @@ public interface BytesStoreHash<B extends BytesStore> extends ToLongFunction<B> 
      * @param b the {@link BytesStore} to compute the hash for.
      * @return the 64-bit hash value.
      */
-    static long hash(@NotNull BytesStore b) {
+    static long hash(@NotNull BytesStore<?, ?> b) {
         return b.isDirectMemory()
                 ? OptimisedBytesStoreHash.INSTANCE.applyAsLong(b)
                 : VanillaBytesStoreHash.INSTANCE.applyAsLong(b);
@@ -58,7 +58,7 @@ public interface BytesStoreHash<B extends BytesStore> extends ToLongFunction<B> 
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
-    static long hash(@NotNull BytesStore b, @NonNegative long length) throws IllegalStateException, BufferUnderflowException {
+    static long hash(@NotNull BytesStore<?, ?> b, @NonNegative long length) throws IllegalStateException, BufferUnderflowException {
         return b.isDirectMemory()
                 ? OptimisedBytesStoreHash.INSTANCE.applyAsLong(b, length)
                 : VanillaBytesStoreHash.INSTANCE.applyAsLong(b, length);
@@ -70,7 +70,7 @@ public interface BytesStoreHash<B extends BytesStore> extends ToLongFunction<B> 
      * @param b the {@link BytesStore} to compute the hash for.
      * @return the 32-bit hash value.
      */
-    static int hash32(BytesStore b) {
+    static int hash32(BytesStore<?, ?> b) {
         long hash = hash(b);
         return (int) (hash ^ (hash >>> 32));
     }
@@ -85,7 +85,7 @@ public interface BytesStoreHash<B extends BytesStore> extends ToLongFunction<B> 
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
-    static int hash32(@NotNull BytesStore b, @NonNegative int length) throws IllegalStateException, BufferUnderflowException {
+    static int hash32(@NotNull BytesStore<?, ?> b, @NonNegative int length) throws IllegalStateException, BufferUnderflowException {
         long hash = hash(b, length);
         return (int) (hash ^ (hash >>> 32));
     }
@@ -100,5 +100,5 @@ public interface BytesStoreHash<B extends BytesStore> extends ToLongFunction<B> 
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
-    long applyAsLong(BytesStore bytes, long length) throws IllegalStateException, BufferUnderflowException;
+    long applyAsLong(BytesStore<?, ?> bytes, long length) throws IllegalStateException, BufferUnderflowException;
 }

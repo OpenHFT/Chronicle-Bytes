@@ -63,13 +63,13 @@ public class Issue464BytesStoreEmptyTest extends BytesTestCommon {
 
     @Test
     public void emptyByteArrayShouldHaveDifferentUnderlying() {
-        BytesStore a = BytesStore.wrap(new byte[0]);
-        BytesStore b = BytesStore.wrap(new byte[0]);
+        BytesStore<?, byte[]> a = BytesStore.wrap(new byte[0]);
+        BytesStore<?, byte[]> b = BytesStore.wrap(new byte[0]);
         assertNotSame(a, b);
         assertNotSame(a.underlyingObject(), b.underlyingObject());
     }
 
-    private void doTest(Supplier<BytesStore> supplier) {
+    private void doTest(Supplier<BytesStore<?, ?>> supplier) {
         assertSame(supplier.get(), supplier.get());
     }
 }

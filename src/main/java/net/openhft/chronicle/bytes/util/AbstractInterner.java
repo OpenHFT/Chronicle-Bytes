@@ -31,6 +31,8 @@ import java.nio.BufferUnderflowException;
 import java.util.Objects;
 import java.util.stream.Stream;
 
+import static net.openhft.chronicle.core.Jvm.uncheckedCast;
+
 /**
  * This class provides a caching mechanism that returns a value which matches the decoded bytes. It does not
  * guarantee the return of the same object across different invocations or from different threads, but it
@@ -59,7 +61,7 @@ import java.util.stream.Stream;
  * @param <T> the type of the object being interned
  * @author peter.lawrey
  */
-@SuppressWarnings({"rawtypes", "unchecked"})
+@SuppressWarnings("rawtypes")
 public abstract class AbstractInterner<T> {
     protected final InternerEntry<T>[] entries;
     protected final int mask;
@@ -75,7 +77,7 @@ public abstract class AbstractInterner<T> {
     protected AbstractInterner(@NonNegative int capacity){
         int n = Maths.nextPower2(capacity, 128);
         shift = Maths.intLog2(n);
-        entries = new InternerEntry[n];
+        entries = uncheckedCast(new InternerEntry[n]);
         mask = n - 1;
     }
 
@@ -89,7 +91,7 @@ public abstract class AbstractInterner<T> {
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
-    private static int hash32(@NotNull BytesStore bs, @NonNegative int length) throws IllegalStateException, BufferUnderflowException {
+    private static int hash32(@NotNull BytesStore<?, ?> bs, @NonNegative int length) throws IllegalStateException, BufferUnderflowException {
         return bs.fastHash(bs.readPosition(), length);
     }
 
@@ -124,7 +126,7 @@ public abstract class AbstractInterner<T> {
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
-    public T intern(@NotNull BytesStore cs)
+    public T intern(@NotNull BytesStore<?, ?> cs)
             throws IORuntimeException, BufferUnderflowException, IllegalStateException {
         return intern(cs, (int) cs.readRemaining());
     }
@@ -159,7 +161,7 @@ public abstract class AbstractInterner<T> {
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
-    public T intern(@NotNull BytesStore cs, @NonNegative int length)
+    public T intern(@NotNull BytesStore<?, ?> cs, @NonNegative int length)
             throws IORuntimeException, BufferUnderflowException, IllegalStateException {
         if (length > entries.length)
             return getValue(cs, length);
@@ -175,7 +177,7 @@ public abstract class AbstractInterner<T> {
             return s2.t;
         @NotNull T t = getValue(cs, length);
         final byte[] bytes = new byte[length];
-        @NotNull BytesStore bs = BytesStore.wrap(bytes);
+        @NotNull BytesStore<?, ?> bs = BytesStore.wrap(bytes);
         IOTools.unmonitor(bs);
         cs.read(cs.readPosition(), bytes, 0, length);
         entries[s == null || (s2 != null && toggle()) ? h : h2] = new InternerEntry<>(bs, t);
@@ -196,7 +198,7 @@ public abstract class AbstractInterner<T> {
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     @NotNull
-    protected abstract T getValue(BytesStore bs, @NonNegative int length)
+    protected abstract T getValue(BytesStore<?, ?> bs, @NonNegative int length)
             throws IORuntimeException, IllegalStateException, BufferUnderflowException;
 
     /**
@@ -224,7 +226,7 @@ public abstract class AbstractInterner<T> {
      * @param <T> the type of the object being interned
      */
     private static final class InternerEntry<T> {
-        final BytesStore bytes;
+        final BytesStore<?, ?> bytes;
         final T t;
 
         /**
@@ -233,7 +235,7 @@ public abstract class AbstractInterner<T> {
          * @param bytes the bytes store
          * @param t     the value
          */
-        InternerEntry(BytesStore bytes, T t) {
+        InternerEntry(BytesStore<?, ?> bytes, T t) {
             this.bytes = bytes;
             this.t = t;
         }

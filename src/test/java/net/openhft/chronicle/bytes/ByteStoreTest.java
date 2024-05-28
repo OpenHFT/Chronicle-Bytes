@@ -571,7 +571,7 @@ public class ByteStoreTest extends BytesTestCommon {
     @Test
     public void testToString() {
         assumeFalse(GuardedNativeBytes.areNewGuarded());
-        BytesStore bytes0 = BytesStore.nativeStore(32);
+        BytesStore<?, Void> bytes0 = BytesStore.nativeStore(32);
         final Bytes<?> bytes = bytes0.bytesForWrite();
         bytes0.release(INIT);
         try {

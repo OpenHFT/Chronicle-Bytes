@@ -1008,7 +1008,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
-    long copyTo(@NotNull BytesStore to)
+    long copyTo(@NotNull BytesStore<?, ?> to)
             throws ClosedIllegalStateException;
 
     /**

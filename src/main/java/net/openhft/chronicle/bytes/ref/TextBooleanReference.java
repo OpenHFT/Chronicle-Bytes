@@ -36,6 +36,7 @@ import java.nio.BufferUnderflowException;
  * 32-bit integers in a specific format. The class also provides methods for
  * writing the boolean values into {@link BytesStore} objects.
  */
+@SuppressWarnings("rawtypes")
 public class TextBooleanReference extends AbstractReference implements BooleanValue {
 
     private static final int FALSE = 'f' | ('a' << 8) | ('l' << 16) | ('s' << 24);
@@ -53,7 +54,7 @@ public class TextBooleanReference extends AbstractReference implements BooleanVa
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     @SuppressWarnings("rawtypes")
-    public static void write(final boolean value, final BytesStore bytes, @NonNegative long offset)
+    public static void write(final boolean value, final BytesStore<?, ?> bytes, @NonNegative long offset)
             throws IllegalStateException, BufferOverflowException {
         bytes.writeVolatileInt(offset, value ? TRUE : FALSE);
         bytes.writeByte(offset + 4, (byte) 'e');
@@ -98,7 +99,7 @@ public class TextBooleanReference extends AbstractReference implements BooleanVa
             throws IllegalStateException, BufferUnderflowException {
         throwExceptionIfClosed();
 
-        return bytes.readVolatileInt(offset) == TRUE;
+        return bytesStore.readVolatileInt(offset) == TRUE;
     }
 
     /**
@@ -113,6 +114,6 @@ public class TextBooleanReference extends AbstractReference implements BooleanVa
             throws IllegalStateException {
         throwExceptionIfClosedInSetter();
 
-        write(value, bytes, offset);
+        write(value, bytesStore, offset);
     }
 }

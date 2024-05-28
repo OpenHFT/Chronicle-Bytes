@@ -26,6 +26,7 @@ import java.nio.BufferUnderflowException;
  */
 public final class DecoratedBufferUnderflowException extends BufferUnderflowException {
 
+    private static final long serialVersionUID = 0L;
     /**
      * The custom message describing this exception.
      */

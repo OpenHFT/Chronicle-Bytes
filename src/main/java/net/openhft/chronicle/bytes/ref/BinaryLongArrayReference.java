@@ -81,6 +81,7 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
      *
      * @param defaultCapacity the initial capacity of the long array in number of elements.
      */
+    @SuppressWarnings("this-escape")
     public BinaryLongArrayReference(@NonNegative long defaultCapacity) {
         this.length = (defaultCapacity << SHIFT) + VALUES;
         singleThreadedCheckDisabled(true);
@@ -119,13 +120,13 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
     }
 
     @Override
-    protected void acceptNewBytesStore(@NotNull final BytesStore bytes)
+    protected void acceptNewBytesStore(@NotNull final BytesStore<?, ?> bytes)
             throws IllegalStateException {
-        if (this.bytes != null) {
-            this.bytes.release(this);
+        if (this.bytesStore != null) {
+            this.bytesStore.release(this);
         }
-        this.bytes = bytes;
-        this.bytes.reserve(this);
+        this.bytesStore = bytes;
+        this.bytesStore.reserve(this);
     }
 
     /**
@@ -183,7 +184,7 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
-    public static long peakLength(@NotNull BytesStore bytes, @NonNegative long offset)
+    public static long peakLength(@NotNull BytesStore<?, ?> bytes, @NonNegative long offset)
             throws BufferUnderflowException, IllegalStateException {
         long capacity = bytes.readLong(offset + CAPACITY);
         assert capacity > 0 : "capacity too small " + capacity;
@@ -204,7 +205,7 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
-    public static long peakLength(@NotNull BytesStore bytes, @NonNegative long offset, long capacityHint)
+    public static long peakLength(@NotNull BytesStore<?, ?> bytes, @NonNegative long offset, long capacityHint)
             throws BufferUnderflowException, IllegalStateException {
         long capacity = bytes.readLong(offset + CAPACITY);
         if (capacity == 0) {
@@ -220,9 +221,9 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
             throws IllegalStateException {
         throwExceptionIfClosed();
 
-        if (bytes == null)
+        if (bytesStore == null)
             return (length - VALUES) >>> SHIFT;
-        return bytes.readVolatileLong(offset + CAPACITY);
+        return bytesStore.readVolatileLong(offset + CAPACITY);
     }
 
     @Override
@@ -230,7 +231,7 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
             throws IllegalStateException, BufferUnderflowException {
         throwExceptionIfClosed();
 
-        return bytes.readVolatileLong(offset + USED);
+        return bytesStore.readVolatileLong(offset + USED);
     }
 
     @Override
@@ -238,14 +239,14 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
             throws IllegalStateException, BufferUnderflowException {
         throwExceptionIfClosedInSetter();
 
-        bytes.writeMaxLong(offset + USED, usedAtLeast);
+        bytesStore.writeMaxLong(offset + USED, usedAtLeast);
     }
 
     @Override
     public void setUsed(long used) throws IllegalStateException, BufferUnderflowException {
         throwExceptionIfClosedInSetter();
 
-        bytes.writeVolatileLong(offset + USED, used);
+        bytesStore.writeVolatileLong(offset + USED, used);
     }
 
     @Override
@@ -253,7 +254,7 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
             throws BufferUnderflowException, IllegalStateException {
         throwExceptionIfClosed();
 
-        return bytes.readLong(VALUES + offset + (index << SHIFT));
+        return bytesStore.readLong(VALUES + offset + (index << SHIFT));
     }
 
     @Override
@@ -261,7 +262,7 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
             throws BufferOverflowException, IllegalStateException {
         throwExceptionIfClosedInSetter();
 
-        bytes.writeLong(VALUES + offset + (index << SHIFT), value);
+        bytesStore.writeLong(VALUES + offset + (index << SHIFT), value);
     }
 
     @Override
@@ -269,7 +270,7 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
             throws BufferUnderflowException, IllegalStateException {
         throwExceptionIfClosed();
 
-        return bytes.readVolatileLong(VALUES + offset + (index << SHIFT));
+        return bytesStore.readVolatileLong(VALUES + offset + (index << SHIFT));
     }
 
     @Override
@@ -277,7 +278,7 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
             throws IllegalStateException, BufferOverflowException {
         throwExceptionIfClosed();
 
-        ((BinaryLongReference) value).bytesStore(bytes, VALUES + offset + (index << SHIFT), 8);
+        ((BinaryLongReference) value).bytesStore(bytesStore, VALUES + offset + (index << SHIFT), 8);
     }
 
     @Override
@@ -285,7 +286,7 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
             throws BufferOverflowException, IllegalStateException {
         throwExceptionIfClosedInSetter();
 
-        bytes.writeOrderedLong(VALUES + offset + (index << SHIFT), value);
+        bytesStore.writeOrderedLong(VALUES + offset + (index << SHIFT), value);
     }
 
     @Override
@@ -293,7 +294,7 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
             throws IllegalArgumentException, IllegalStateException, BufferOverflowException {
         throwExceptionIfClosed();
 
-        BytesStore bytesStore = bytes.bytesStore();
+        BytesStore<?, ?> bytesStore = bytes.bytesStore();
         try {
             long peakLength = peakLength(bytesStore, offset, (length - VALUES) >>> 3);
             if (length != peakLength)
@@ -335,7 +336,7 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
         boolean retainsComments = bytes.retainedHexDumpDescription();
         if (retainsComments)
             bytes.writeHexDumpDescription("BinaryLongArrayReference");
-        BytesStore bytesStore = bytesStore();
+        BytesStore<?, ?> bytesStore = bytesStore();
         if (bytesStore == null) {
             long capacity = getCapacity();
             if (retainsComments)
@@ -357,7 +358,7 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
             throws IllegalStateException {
         throwExceptionIfClosed();
 
-        return bytes == null;
+        return bytesStore == null;
     }
 
     @Override
@@ -365,15 +366,15 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
             throws IllegalStateException {
         throwExceptionIfClosedInSetter();
 
-        bytes = null;
+        bytesStore = null;
         offset = 0;
         length = 0;
     }
 
     @Nullable
     @Override
-    public BytesStore bytesStore() {
-        return bytes;
+    public BytesStore<?, ?> bytesStore() {
+        return bytesStore;
     }
 
     @Override
@@ -389,7 +390,7 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
     @NotNull
     @Override
     public String toString() {
-        if (bytes == null)
+        if (bytesStore == null)
             return "not set";
         @NotNull StringBuilder sb = new StringBuilder();
         sb.append("used: ");
@@ -427,7 +428,7 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
             throws IllegalStateException {
         throwExceptionIfClosedInSetter();
 
-        BytesStore bytesStore = bytesStore();
+        BytesStore<?, ?> bytesStore = bytesStore();
         long len = sizeInBytes(arrayLength);
         if (bytesStore == null) {
             this.length = len;
@@ -444,7 +445,6 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
 
         if (value == LONG_NOT_COMPLETE && binaryLongArrayReferences != null)
             binaryLongArrayReferences.add(new WeakReference<>(this));
-        return bytes.compareAndSwapLong(VALUES + offset + (index << SHIFT), expected, value);
+        return bytesStore.compareAndSwapLong(VALUES + offset + (index << SHIFT), expected, value);
     }
 }
-

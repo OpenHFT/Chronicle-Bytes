@@ -48,7 +48,7 @@ public abstract class AbstractReference extends AbstractCloseable implements Byt
      * BytesStore associated with this reference
      */
     @Nullable
-    protected BytesStore<?, ?> bytes;
+    protected BytesStore bytesStore;
 
     /**
      * Offset within the BytesStore for this reference
@@ -58,6 +58,7 @@ public abstract class AbstractReference extends AbstractCloseable implements Byt
     /**
      * Constructor initializes the reference assuming thread safety.
      */
+    @SuppressWarnings("this-escape")
     protected AbstractReference() {
         // assume thread safe.
         singleThreadedCheckDisabled(true);
@@ -91,8 +92,8 @@ public abstract class AbstractReference extends AbstractCloseable implements Byt
      */
     @Nullable
     @Override
-    public BytesStore bytesStore() {
-        return bytes;
+    public BytesStore<?, ?> bytesStore() {
+        return bytesStore;
     }
 
     /**
@@ -110,14 +111,14 @@ public abstract class AbstractReference extends AbstractCloseable implements Byt
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
-    protected void acceptNewBytesStore(@NotNull final BytesStore bytes)
+    protected void acceptNewBytesStore(@NotNull final BytesStore<?, ?> bytes)
             throws IllegalStateException {
-        if (this.bytes != null) {
-            this.bytes.release(this);
+        if (this.bytesStore != null) {
+            this.bytesStore.release(this);
         }
-        this.bytes = bytes.bytesStore();
+        this.bytesStore = bytes.bytesStore();
 
-        this.bytes.reserve(this);
+        this.bytesStore.reserve(this);
     }
 
     /**
@@ -125,11 +126,11 @@ public abstract class AbstractReference extends AbstractCloseable implements Byt
      */
     @Override
     protected void performClose() {
-        if (this.bytes == null)
+        if (this.bytesStore == null)
             return;
 
-        BytesStore<?, ?> bytes0 = this.bytes;
-        this.bytes = null;
+        BytesStore<?, ?> bytes0 = this.bytesStore;
+        this.bytesStore = null;
         try {
             bytes0.release(this);
         } catch (ClosedIllegalStateException ignored) {
@@ -189,6 +190,6 @@ public abstract class AbstractReference extends AbstractCloseable implements Byt
     @Override
     public void unmonitor() {
         super.unmonitor();
-        Monitorable.unmonitor(bytes);
+        Monitorable.unmonitor(bytesStore);
     }
 }

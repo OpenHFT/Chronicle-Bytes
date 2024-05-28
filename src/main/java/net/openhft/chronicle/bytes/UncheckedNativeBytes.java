@@ -36,6 +36,7 @@ import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
+import static net.openhft.chronicle.core.Jvm.uncheckedCast;
 import static net.openhft.chronicle.core.util.Ints.requireNonNegative;
 import static net.openhft.chronicle.core.util.Longs.requireNonNegative;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
@@ -53,12 +54,12 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
  *
  * @param <U> The type of the object this Bytes can point to.
  */
-@SuppressWarnings({"rawtypes", "unchecked"})
+@SuppressWarnings("rawtypes")
 public class UncheckedNativeBytes<U>
         extends AbstractReferenceCounted
         implements Bytes<U>, HasUncheckedRandomDataInput, DecimalAppender {
     private static final byte[] MIN_VALUE_TEXT = ("" + Long.MIN_VALUE).getBytes(ISO_8859_1);
-    @Deprecated(/* to be removed in x.26 */)
+    @Deprecated(/* to remove in x.28 */)
     private static final boolean APPEND_0 = Jvm.getBoolean("bytes.append.0", true);
 
     // The real capacity of the BytesStore this UncheckedNativeBytes operates on
@@ -91,6 +92,7 @@ public class UncheckedNativeBytes<U>
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
+    @SuppressWarnings({"unchecked", "this-escape"})
     public UncheckedNativeBytes(@NotNull Bytes<U> underlyingBytes)
             throws IllegalStateException {
         this.underlyingBytes = underlyingBytes;
@@ -108,7 +110,7 @@ public class UncheckedNativeBytes<U>
             throws IllegalArgumentException, IllegalStateException {
         if (desiredCapacity > realCapacity()) {
             underlyingBytes.ensureCapacity(desiredCapacity);
-            bytesStore = underlyingBytes.bytesStore();
+            bytesStore = uncheckedCast(underlyingBytes.bytesStore());
         }
     }
 
@@ -285,6 +287,7 @@ public class UncheckedNativeBytes<U>
         return readPosition;
     }
 
+    @SuppressWarnings("deprecation")
     @NotNull
     @Override
     public Bytes<U> write(@NotNull RandomDataInput bytes, @NonNegative long offset, @NonNegative long length)
@@ -813,7 +816,7 @@ public class UncheckedNativeBytes<U>
 
     @NotNull
     @Override
-    public Bytes<U> prewrite(@NotNull BytesStore bytes)
+    public Bytes<U> prewrite(@NotNull BytesStore<?, ?> bytes)
             throws IllegalStateException, BufferOverflowException {
         long offsetInRDO = prewriteOffsetPositionMoved(bytes.length());
         bytesStore.write(offsetInRDO, bytes);
@@ -908,7 +911,7 @@ public class UncheckedNativeBytes<U>
 
     @Nullable
     @Override
-    public BytesStore bytesStore() {
+    public BytesStore<?, U> bytesStore() {
         return bytesStore;
     }
 
@@ -952,7 +955,7 @@ public class UncheckedNativeBytes<U>
             throws BufferOverflowException, IllegalArgumentException, IllegalStateException {
         long actualUTF8Length = AppendableUtil.findUtf8Length(chars, offset, length);
         ensureCapacity(writePosition + actualUTF8Length);
-        @NotNull BytesStore nbs = this.bytesStore;
+        @NotNull BytesStore<?, ?> nbs = this.bytesStore;
         long position = ((NativeBytesStore) nbs).appendUtf8(writePosition(), chars, offset, length);
         writePosition(position);
         return this;
@@ -1000,11 +1003,13 @@ public class UncheckedNativeBytes<U>
         return this;
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public boolean fpAppend0() {
         return append0;
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public Bytes<U> fpAppend0(boolean append0) {
         this.append0 = append0;
@@ -1043,6 +1048,7 @@ public class UncheckedNativeBytes<U>
         this.lastNumberHadDigits = lastNumberHadDigits;
     }
 
+    @SuppressWarnings("deprecation")
     @NotNull
     @Override
     public Bytes<U> write(@NotNull RandomDataInput bytes)
@@ -1053,7 +1059,7 @@ public class UncheckedNativeBytes<U>
     }
 
     @Override
-    public long write8bit(@NonNegative long position, @NotNull BytesStore bs) {
+    public long write8bit(@NonNegative long position, @NotNull BytesStore<?, ?> bs) {
         return bytesStore.write8bit(position, bs);
     }
 
@@ -1062,7 +1068,7 @@ public class UncheckedNativeBytes<U>
         return bytesStore.write8bit(position, s, start, length);
     }
 
-    public Bytes<U> write8bit(@Nullable BytesStore bs) throws BufferOverflowException, IllegalStateException, BufferUnderflowException {
+    public Bytes<U> write8bit(@Nullable BytesStore<?, ?> bs) throws BufferOverflowException, IllegalStateException, BufferUnderflowException {
         if (bs == null) {
             BytesInternal.writeStopBitNeg1(this);
 
@@ -1118,5 +1124,4 @@ public class UncheckedNativeBytes<U>
             return bytesStore.readLong(offset);
         }
     }
-
 }

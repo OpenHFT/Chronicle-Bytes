@@ -30,6 +30,7 @@ import net.openhft.chronicle.core.io.IORuntimeException;
  * TODO Move to network where it is used.
  */
 public class ConnectionDroppedException extends IORuntimeException {
+    private static final long serialVersionUID = 0L;
 
     /**
      * Constructs a {@code ConnectionDroppedException} with the specified detail message.

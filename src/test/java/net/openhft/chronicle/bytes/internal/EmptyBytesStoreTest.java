@@ -21,6 +21,7 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.bytes.BytesTestCommon;
 import net.openhft.chronicle.bytes.RandomDataOutput;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IOTools;
 import org.junit.After;
 import org.junit.Test;
@@ -37,15 +38,16 @@ import java.util.Collection;
 import java.util.function.ObjLongConsumer;
 
 import static net.openhft.chronicle.bytes.Bytes.elasticByteBuffer;
+import static net.openhft.chronicle.core.Jvm.uncheckedCast;
 import static org.junit.Assume.assumeFalse;
 import static org.junit.jupiter.api.Assertions.*;
 
 @RunWith(Parameterized.class)
 public class EmptyBytesStoreTest extends BytesTestCommon {
 
-    private final BytesStore instance;
+    private final BytesStore<?, ?> instance;
 
-    public EmptyBytesStoreTest(String type, BytesStore instance) {
+    public EmptyBytesStoreTest(String type, BytesStore<?,?> instance) {
         this.instance = instance;
     }
 
@@ -266,13 +268,14 @@ public class EmptyBytesStoreTest extends BytesTestCommon {
 
     @Test
     public void copy() {
-        final BytesStore<?, Void> copy = instance.copy();
+        final BytesStore<?, Void> copy = uncheckedCast(instance.copy());
         assertEquals(instance, copy);
+        copy.releaseLast();
     }
 
     @Test
     public void bytesForRead() {
-        final Bytes<Void> bytes = instance.bytesForRead();
+        final Bytes<Void> bytes = uncheckedCast(instance.bytesForRead());
         try {
             assertEquals(0, bytes.capacity());
             assertEquals(0, bytes.readPosition());
@@ -438,7 +441,7 @@ public class EmptyBytesStoreTest extends BytesTestCommon {
     @Test
     public void bytesForWrite() {
         try {
-            final Bytes bytes = instance.bytesForWrite();
+            final Bytes<?> bytes = instance.bytesForWrite();
             IOTools.unmonitor(bytes);
             assertThrowsBufferException(() -> bytes.writeSkip(1));
         } catch (UnsupportedOperationException ignored) {
@@ -507,7 +510,7 @@ public class EmptyBytesStoreTest extends BytesTestCommon {
 //        assertThrows(BufferOverflowException.class, () -> INSTANCE.zeroOut(1, 2));
     }
 
-    public void read(final ObjLongConsumer<BytesStore> getter) {
+    public void read(final ObjLongConsumer<BytesStore<?,?>> getter) {
         assumeFalse(instance instanceof NativeBytesStore);
         assertThrowsBufferException(() -> getter.accept(instance, 0));
         assertThrows(IllegalArgumentException.class, () -> getter.accept(instance, -1));
@@ -538,5 +541,5 @@ public class EmptyBytesStoreTest extends BytesTestCommon {
         }
         throw new AssertionFailedError("expected Buffer*Exception");
     }
-
 }
+

@@ -29,6 +29,7 @@ import net.openhft.chronicle.core.io.ThreadingIllegalStateException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.nio.Buffer;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
@@ -43,12 +44,12 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
  * from the operating system which is on heap. It is also capable of handling memory allocation, resizing,
  * and checking boundaries to prevent overflows.
  * <p>
- * The class can be parameterized with a type <U> which represents the underlying type that the byte buffers
+ * The class can be parameterized with a type &lt;U&gt; which represents the underlying type that the byte buffers
  * are intended to represent. This provides a way to use NativeBytes for any type that can be represented as bytes.
  *
  * @param <U> This represents the underlying type that the byte buffers are intended to represent.
  */
-@SuppressWarnings({"rawtypes", "unchecked"})
+@SuppressWarnings("rawtypes")
 public class NativeBytes<U>
         extends VanillaBytes<U> {
     private static final boolean BYTES_GUARDED = Jvm.getBoolean("bytes.guarded");
@@ -63,7 +64,7 @@ public class NativeBytes<U>
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
-    public NativeBytes(@NotNull final BytesStore store, @NonNegative final long capacity)
+    public NativeBytes(@NotNull final BytesStore<?, ?> store, @NonNegative final long capacity)
             throws IllegalArgumentException, ClosedIllegalStateException {
         super(store, 0, capacity);
         this.capacity = capacity;
@@ -76,7 +77,7 @@ public class NativeBytes<U>
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
-    public NativeBytes(@NotNull final BytesStore store)
+    public NativeBytes(@NotNull final BytesStore<?, ?> store)
             throws IllegalArgumentException, ClosedIllegalStateException {
         this(store, store.capacity());
     }
@@ -114,6 +115,7 @@ public class NativeBytes<U>
      * @return A new instance of NativeBytes.
      * @throws AssertionError If there's an error during the wrapping process.
      */
+    @SuppressWarnings("unchecked")
     @NotNull
     public static NativeBytes<Void> nativeBytes() {
         return NativeBytes.wrapWithNativeBytes(BytesStore.empty(), Bytes.MAX_CAPACITY);
@@ -136,21 +138,6 @@ public class NativeBytes<U>
         } finally {
             store.release(INIT);
         }
-    }
-
-    /**
-     * Creates a new copy of the provided Bytes. This method is deprecated and will be removed in version x.26.
-     *
-     * @param bytes The Bytes to copy.
-     * @return A new instance of BytesStore with the copied Bytes.
-     * @throws ClosedIllegalStateException    If the resource has been released or closed.
-     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
-     * @deprecated This method is to be removed in version x.26.
-     */
-    @Deprecated(/* to be removed in x.26 */)
-    public static BytesStore<Bytes<Void>, Void> copyOf(@NotNull final Bytes<?> bytes)
-            throws ClosedIllegalStateException {
-        return BytesUtil.copyOf(bytes);
     }
 
     /**
@@ -179,7 +166,7 @@ public class NativeBytes<U>
             throws ClosedIllegalStateException, IllegalArgumentException {
         requireNonNull(bs);
         return newGuarded
-                ? new GuardedNativeBytes(bs, capacity)
+                ? new GuardedNativeBytes<>(bs, capacity)
                 : new NativeBytes<>(bs, capacity);
     }
 
@@ -309,14 +296,16 @@ public class NativeBytes<U>
 
     private void resizeHelper(@NonNegative final long size,
                               final boolean isByteBufferBacked) throws ClosedIllegalStateException, ThreadingIllegalStateException {
-        final BytesStore store;
+        final BytesStore<Bytes<U>, U> store;
         int position = 0;
         try {
             if (isByteBufferBacked && size <= MAX_HEAP_CAPACITY) {
                 position = ((ByteBuffer) bytesStore.underlyingObject()).position();
                 store = allocate(size);
             } else {
-                store = BytesStore.lazyNativeBytesStoreWithFixedCapacity(size);
+                @SuppressWarnings("unchecked")
+                BytesStore<Bytes<U>, U> store0 = (BytesStore<Bytes<U>, U>) BytesStore.lazyNativeBytesStoreWithFixedCapacity(size);
+                store = store0;
                 if (referenceCounted.unmonitored())
                     AbstractReferenceCounted.unmonitor(store);
             }
@@ -328,9 +317,11 @@ public class NativeBytes<U>
         }
 
         throwExceptionIfReleased();
-        @Nullable final BytesStore<Bytes<U>, U> tempStore = this.bytesStore;
+        @Nullable final BytesStore<?, U> tempStore = this.bytesStore;
         this.bytesStore.copyTo(store);
-        this.bytesStore(store);
+        @SuppressWarnings("unchecked")
+        BytesStore<Bytes<U>, U> bytesStore2 = store;
+        this.bytesStore(bytesStore2);
         try {
             tempStore.release(this);
         } catch (IllegalStateException e) {
@@ -339,28 +330,28 @@ public class NativeBytes<U>
 
         if (this.bytesStore.underlyingObject() instanceof ByteBuffer) {
             @Nullable final ByteBuffer byteBuffer = (ByteBuffer) this.bytesStore.underlyingObject();
-            byteBuffer.position(0);
-            byteBuffer.limit(byteBuffer.capacity());
-            byteBuffer.position(position);
+            //noinspection RedundantCast
+            Buffer buffer = byteBuffer;
+            buffer.position(0);
+            buffer.limit(byteBuffer.capacity());
+            buffer.position(position);
         }
     }
 
     @NotNull
-    private BytesStore allocate(@NonNegative long size) {
-        final BytesStore store;
-        store = allocateNewByteBufferBackedStore(Maths.toInt32(size));
-        return store;
+    private BytesStore<Bytes<U>, U> allocate(@NonNegative long size) {
+        return allocateNewByteBufferBackedStore(Maths.toInt32(size));
     }
 
     @Override
-    protected void bytesStore(@NotNull BytesStore<Bytes<U>, U> bytesStore) {
+    protected void bytesStore(@NotNull BytesStore<?, U> bytesStore) {
         if (capacity < bytesStore.capacity())
             capacity = bytesStore.capacity();
         super.bytesStore(bytesStore);
     }
 
     @Override
-    public void bytesStore(@NotNull BytesStore<Bytes<U>, U> byteStore, @NonNegative long offset, @NonNegative long length)
+    public void bytesStore(@NotNull BytesStore byteStore, @NonNegative long offset, @NonNegative long length)
             throws IllegalArgumentException, BufferUnderflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
         requireNonNull(byteStore);
         if (capacity < offset + length)
@@ -368,12 +359,13 @@ public class NativeBytes<U>
         super.bytesStore(byteStore, offset, length);
     }
 
+    @SuppressWarnings("unchecked")
     @NotNull
-    private BytesStore allocateNewByteBufferBackedStore(@NonNegative final int size) {
+    private BytesStore<Bytes<U>, U> allocateNewByteBufferBackedStore(@NonNegative final int size) {
         if (isDirectMemory()) {
-            return BytesStore.elasticByteBuffer(size, capacity());
+            return (BytesStore<Bytes<U>, U>) BytesStore.elasticByteBuffer(size, capacity());
         } else {
-            return BytesStore.wrap(ByteBuffer.allocate(size));
+            return (BytesStore<Bytes<U>, U>) BytesStore.wrap(ByteBuffer.allocate(size));
         }
     }
 

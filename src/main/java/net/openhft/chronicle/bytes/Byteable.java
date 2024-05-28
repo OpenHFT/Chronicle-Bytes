@@ -31,11 +31,8 @@ import java.nio.channels.FileLock;
 /**
  * An interface for a reference to off-heap memory, acting as a proxy for memory residing outside the heap.
  * This allows the reference to be reassigned, facilitating dynamic memory management.
- *
- * @param <B> the BytesStore type
- * @param <U> the underlying type that the BytesStore manages
  */
-public interface Byteable<B extends BytesStore<B, U>, U> {
+public interface Byteable {
     /**
      * Sets the reference to a data type that points to the underlying ByteStore.
      *
@@ -48,7 +45,8 @@ public interface Byteable<B extends BytesStore<B, U>, U> {
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
-    void bytesStore(@NotNull BytesStore<B, U> bytesStore, @NonNegative long offset, @NonNegative long length)
+    @SuppressWarnings("rawtypes")
+    void bytesStore(@NotNull BytesStore bytesStore, @NonNegative long offset, @NonNegative long length)
             throws ClosedIllegalStateException, IllegalArgumentException, BufferOverflowException, BufferUnderflowException, ThreadingIllegalStateException;
 
     /**
@@ -57,7 +55,7 @@ public interface Byteable<B extends BytesStore<B, U>, U> {
      * @return the ByteStore or null if it's not set
      */
     @Nullable
-    BytesStore<B, U> bytesStore();
+    BytesStore<?, ?> bytesStore();
 
     /**
      * Returns the offset within the ByteStore to which this object currently points.

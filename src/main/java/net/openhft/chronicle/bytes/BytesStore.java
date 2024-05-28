@@ -19,10 +19,7 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.bytes.algo.OptimisedBytesStoreHash;
 import net.openhft.chronicle.bytes.algo.VanillaBytesStoreHash;
-import net.openhft.chronicle.bytes.internal.BytesInternal;
-import net.openhft.chronicle.bytes.internal.HeapBytesStore;
-import net.openhft.chronicle.bytes.internal.NativeBytesStore;
-import net.openhft.chronicle.bytes.internal.NoBytesStore;
+import net.openhft.chronicle.bytes.internal.*;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.io.ClosedIllegalStateException;
@@ -65,7 +62,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
-    static BytesStore from(@NotNull CharSequence cs) throws ClosedIllegalStateException, ThreadingIllegalStateException {
+    static BytesStore<?, ?> from(@NotNull CharSequence cs) throws ClosedIllegalStateException, ThreadingIllegalStateException {
         if (cs.length() == 0)
             return empty();
         if (cs instanceof BytesStore)
@@ -81,7 +78,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
-    static BytesStore from(@NotNull BytesStore cs)
+    static <A extends BytesStore<A, B>,B> BytesStore<A,B> from(@NotNull BytesStore<A, B> cs)
             throws ClosedIllegalStateException {
         return cs.copy();
     }
@@ -92,7 +89,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      * @param cs the String to be converted
      * @return a BytesStore which contains the bytes from the String
      */
-    static BytesStore from(@NotNull String cs) {
+    static BytesStore<?,byte[]> from(@NotNull String cs) {
         return cs.length() == 0 ? empty() : BytesStore.wrap(cs.getBytes(StandardCharsets.ISO_8859_1));
     }
 
@@ -234,8 +231,9 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      *
      * @return an instance of an empty BytesStore
      */
-    static BytesStore empty() {
-        return NoBytesStore.NO_BYTES_STORE;
+    @SuppressWarnings("unchecked")
+    static <B extends BytesStore<B, T>, T> BytesStore<B, T> empty() {
+        return (BytesStore<B, T>) NoBytesStore.NO_BYTES_STORE;
     }
 
     /**
@@ -249,7 +247,6 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      * @throws BufferOverflowException     If the offset is out of bounds
      * @throws ClosedIllegalStateException If the resource has been released or closed.
      */
-    @SuppressWarnings("deprecation")
     @Override
     default boolean compareAndSwapFloat(@NonNegative long offset, float expected, float value)
             throws BufferOverflowException, ClosedIllegalStateException {
@@ -259,7 +256,6 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
     /**
      * Similar to {@link #compareAndSwapFloat(long, float, float)} but operates on a double value.
      */
-    @SuppressWarnings("deprecation")
     @Override
     default boolean compareAndSwapDouble(@NonNegative long offset, double expected, double value)
             throws BufferOverflowException, ClosedIllegalStateException {
@@ -276,7 +272,6 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      * @throws ClosedIllegalStateException If the resource has been released or closed.
      */
     @SuppressWarnings("deprecation")
-    @Override
     default int addAndGetInt(@NonNegative long offset, int adding)
             throws BufferUnderflowException, ClosedIllegalStateException {
         return BytesInternal.addAndGetInt(this, offset, adding);
@@ -286,7 +281,6 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      * Similar to {@link #addAndGetInt(long, int)} but operates on a long value.
      */
     @SuppressWarnings("deprecation")
-    @Override
     default long addAndGetLong(@NonNegative long offset, long adding)
             throws BufferUnderflowException, ClosedIllegalStateException {
         return BytesInternal.addAndGetLong(this, offset, adding);
@@ -296,7 +290,6 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      * Similar to {@link #addAndGetInt(long, int)} but operates on a float value.
      */
     @SuppressWarnings("deprecation")
-    @Override
     default float addAndGetFloat(@NonNegative long offset, float adding)
             throws BufferUnderflowException, ClosedIllegalStateException {
         return BytesInternal.addAndGetFloat(this, offset, adding);
@@ -306,7 +299,6 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      * Similar to {@link #addAndGetInt(long, int)} but operates on a double value.
      */
     @SuppressWarnings("deprecation")
-    @Override
     default double addAndGetDouble(@NonNegative long offset, double adding)
             throws BufferUnderflowException, ClosedIllegalStateException {
         return BytesInternal.addAndGetDouble(this, offset, adding);
@@ -453,7 +445,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
-    default long copyTo(@NotNull BytesStore store)
+    default long copyTo(@NotNull BytesStore<?, ?> store)
             throws ClosedIllegalStateException, ThreadingIllegalStateException {
         requireNonNull(store);
         throwExceptionIfReleased(this);
@@ -597,7 +589,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      * @return the underlying BytesStore
      */
     @Nullable
-    default BytesStore bytesStore() {
+    default BytesStore<?, ?> bytesStore() {
         return this;
     }
 
@@ -611,7 +603,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
-    default boolean equalBytes(@NotNull BytesStore bytesStore, @NonNegative long length)
+    default boolean equalBytes(@NotNull BytesStore<?, ?> bytesStore, @NonNegative long length)
             throws BufferUnderflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
         return length == 8 && bytesStore.length() >= 8
                 ? readLong(readPosition()) == bytesStore.readLong(bytesStore.readPosition())
@@ -696,7 +688,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
-    default boolean contentEquals(@Nullable BytesStore bytesStore)
+    default boolean contentEquals(@Nullable BytesStore<?, ?> bytesStore)
             throws ClosedIllegalStateException, ThreadingIllegalStateException {
         return BytesInternal.contentEqual(this, bytesStore);
     }
@@ -709,7 +701,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
-    default boolean startsWith(@Nullable BytesStore bytesStore)
+    default boolean startsWith(@Nullable BytesStore<?, ?> bytesStore)
             throws ClosedIllegalStateException, ThreadingIllegalStateException {
         return bytesStore != null && BytesInternal.startsWith(this, bytesStore);
     }
@@ -1008,5 +1000,4 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
                 return false;
         return true;
     }
-
 }

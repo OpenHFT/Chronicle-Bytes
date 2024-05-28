@@ -71,7 +71,7 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
  * @see BigInteger
  * @see Histogram
  */
-@SuppressWarnings({"unchecked"})
+@SuppressWarnings("unchecked")
 @DontChain
 public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends StreamingCommon<S> {
     int JAVA9_STRING_CODER_LATIN = 0;
@@ -694,6 +694,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
+    @Deprecated(/* to be removed in x.27, use write(BytesStore) */)
     @NotNull
     default S write(@NotNull RandomDataInput bytes)
             throws BufferOverflowException, ClosedIllegalStateException, ThreadingIllegalStateException {

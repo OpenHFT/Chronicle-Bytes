@@ -74,7 +74,7 @@ public class MappedBytesEdgeTest extends BytesTestCommon {
         });
     }
 
-    static Bytes unmonitored(Bytes bytes) {
+    static Bytes<?> unmonitored(Bytes<?> bytes) {
         IOTools.unmonitor(bytes);
         return bytes;
     }

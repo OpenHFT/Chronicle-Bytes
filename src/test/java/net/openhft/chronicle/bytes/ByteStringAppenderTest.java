@@ -25,6 +25,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -244,7 +245,7 @@ public class ByteStringAppenderTest extends BytesTestCommon {
 
     @Test
     public void testAppend8bit() {
-        BytesStore bs = BytesStore.elasticByteBuffer(4, 16);
+        BytesStore<?, ByteBuffer> bs = BytesStore.elasticByteBuffer(4, 16);
         bs.write(0, " -\n".getBytes());
 
         bytes.append8bit((CharSequence) bs, 1, 2);

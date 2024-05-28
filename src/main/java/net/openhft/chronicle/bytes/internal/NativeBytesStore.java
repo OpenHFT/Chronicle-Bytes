@@ -38,12 +38,13 @@ import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
 
 import static net.openhft.chronicle.bytes.Bytes.MAX_CAPACITY;
+import static net.openhft.chronicle.core.Jvm.uncheckedCast;
 import static net.openhft.chronicle.core.UnsafeMemory.MEMORY;
 import static net.openhft.chronicle.core.util.Ints.requireNonNegative;
 import static net.openhft.chronicle.core.util.Longs.requireNonNegative;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
-@SuppressWarnings({"restriction", "rawtypes", "unchecked"})
+@SuppressWarnings({"restriction", "rawtypes"})
 public class NativeBytesStore<U>
         extends AbstractBytesStore<NativeBytesStore<U>, U> {
     private static final SimpleCleaner NO_DEALLOCATOR = new NoDeallocator();
@@ -54,7 +55,7 @@ public class NativeBytesStore<U>
     private static final ByteBufferCleanerService CLEANER_SERVICE = CleanerServiceLocator.cleanerService();
 
     static {
-        Class directBB = ByteBuffer.allocateDirect(0).getClass();
+        Class<?> directBB = ByteBuffer.allocateDirect(0).getClass();
         BB_ADDRESS = Jvm.getField(directBB, "address");
         BB_CAPACITY = Jvm.getField(directBB, "capacity");
         BB_ATT = Jvm.getField(directBB, "att");
@@ -82,6 +83,7 @@ public class NativeBytesStore<U>
         this(bb, elastic, Bytes.MAX_HEAP_CAPACITY);
     }
 
+    @SuppressWarnings("this-escape")
     public NativeBytesStore(@NotNull ByteBuffer bb, boolean elastic, int maximumLimit) {
         this();
         init(bb, elastic);
@@ -97,6 +99,7 @@ public class NativeBytesStore<U>
         this(address, limit, deallocator, elastic, false);
     }
 
+    @SuppressWarnings("this-escape")
     protected NativeBytesStore(
             long address, @NonNegative long limit, @Nullable Runnable deallocator, boolean elastic, boolean monitored) {
         super(monitored);
@@ -130,7 +133,7 @@ public class NativeBytesStore<U>
      */
     @NotNull
     public static NativeBytesStore<ByteBuffer> follow(@NotNull ByteBuffer bb) {
-        NativeBytesStore store = new NativeBytesStore();
+        NativeBytesStore<ByteBuffer> store = new NativeBytesStore<>();
         store.init(bb, false);
         store.maximumLimit = store.limit;
         store.cleaner = NO_DEALLOCATOR;
@@ -213,28 +216,12 @@ public class NativeBytesStore<U>
         return limit >= length;
     }
 
-    /**
-     * @deprecated use {@link #follow(ByteBuffer)} instead.
-     */
-    @Deprecated(/* To be removed in x.26 */)
-    public void init(@NotNull ByteBuffer bb, boolean elastic) {
+    private void init(@NotNull ByteBuffer bb, boolean elastic) {
         this.elastic = elastic;
-        underlyingObject = (U) bb;
+        underlyingObject = uncheckedCast(bb);
         bb.order(ByteOrder.nativeOrder());
         setAddress(Jvm.address(bb));
         this.limit = bb.capacity();
-    }
-
-    /**
-     * @deprecated use {@link #follow(ByteBuffer)} instead.
-     */
-    @Deprecated(/* To be removed in x.26 */)
-    public void uninit() {
-        underlyingObject = null;
-        address = 0;
-        limit = 0;
-        maximumLimit = 0;
-        cleaner = null;
     }
 
     @Override
@@ -269,13 +256,13 @@ public class NativeBytesStore<U>
         if (underlyingObject == null) {
             @NotNull NativeBytesStore<Void> copy = of(realCapacity(), false, true);
             memoryCopyMemory(address, copy.address, capacity());
-            return (BytesStore) copy;
+            return uncheckedCast(copy);
 
         } else if (underlyingObject instanceof ByteBuffer) {
             ByteBuffer bb = ByteBuffer.allocateDirect(Maths.toInt32(capacity()));
             bb.put((ByteBuffer) underlyingObject);
             bb.clear();
-            return (BytesStore) wrap(bb);
+            return uncheckedCast(wrap(bb));
 
         } else {
             throw new UnsupportedOperationException();
@@ -352,18 +339,6 @@ public class NativeBytesStore<U>
     public boolean compareAndSwapLong(@NonNegative long offset, long expected, long value)
             throws ClosedIllegalStateException, ThreadingIllegalStateException {
         return memory.compareAndSwapLong(address + translate(offset), expected, value);
-    }
-
-    @Override
-    public long addAndGetLong(@NonNegative long offset, long adding)
-            throws BufferUnderflowException {
-        return memory.addLong(address + translate(offset), adding);
-    }
-
-    @Override
-    public int addAndGetInt(@NonNegative long offset, int adding)
-            throws BufferUnderflowException {
-        return memory.addInt(address + translate(offset), adding);
     }
 
     public long translate(@NonNegative long offset) {
@@ -646,7 +621,7 @@ public class NativeBytesStore<U>
     }
 
     @Override
-    public long write8bit(@NonNegative long position, @NotNull BytesStore bs) {
+    public long write8bit(@NonNegative long position, @NotNull BytesStore<?, ?> bs) {
         requireNonNegative(position);
         final long length = bs.readRemaining();
         long addressForWrite = addressForWrite(position);
@@ -768,7 +743,7 @@ public class NativeBytesStore<U>
     }
 
     @Override
-    public long copyTo(@NotNull BytesStore store)
+    public long copyTo(@NotNull BytesStore<?, ?> store)
             throws ClosedIllegalStateException {
         if (store.isDirectMemory())
             return copyToDirect(store);
@@ -776,7 +751,7 @@ public class NativeBytesStore<U>
             return super.copyTo(store);
     }
 
-    public long copyToDirect(@NotNull BytesStore store)
+    public long copyToDirect(@NotNull BytesStore<?, ?> store)
             throws ClosedIllegalStateException {
         long toCopy = Math.min(limit, store.safeLimit());
         if (toCopy > 0) {
@@ -979,6 +954,7 @@ public class NativeBytesStore<U>
     }
 
     private final class Finalizer {
+        @SuppressWarnings({"deprecation", "removal"})
         @Override
         /*
          * This finalize() is used to detect when a component is not released deterministically. It is not required to be run, but provides a warning
@@ -999,6 +975,5 @@ public class NativeBytesStore<U>
         public void clean() {
             // No-op.
         }
-
     }
 }
