@@ -71,6 +71,8 @@ public interface MethodWriterBuilder<T> extends Supplier<T> {
 
     /**
      * Controls whether type information should be included in a verbose manner.
+     * <p>
+     * NOTE: If you are using JSONWire, you also need to set {@code useTypes(true)} to include type information.
      *
      * @param verboseTypes true if type information should be verbose; false otherwise
      * @return this builder, so invocations can be chained
