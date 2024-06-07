@@ -117,6 +117,7 @@ enum BytesInternal {
 
         MethodHandle vectorizedMismatchMethodHandle = null;
         try {
+            Jvm.warn().on(BytesInternal.class, "disable.vectorized.content_equals" + Jvm.getBoolean("disable.vectorized.content_equals"));
             if (Jvm.isJava9Plus() && !Jvm.getBoolean("disable.vectorized.content_equals")) {
                 final Class<?> arraysSupportClass = Class.forName("jdk.internal.util.ArraysSupport");
                 final Method vectorizedMismatch = Jvm.getMethod(arraysSupportClass, "vectorizedMismatch",
@@ -129,6 +130,7 @@ enum BytesInternal {
 
                 vectorizedMismatch.setAccessible(true);
                 vectorizedMismatchMethodHandle = MethodHandles.lookup().unreflect(vectorizedMismatch);
+                Jvm.warn().on(BytesInternal.class, "Enabled vectorizedMismatch");
             }
         } catch (Exception e) {
             if (e.getClass().getName().equals("java.lang.reflect.InaccessibleObjectException"))
