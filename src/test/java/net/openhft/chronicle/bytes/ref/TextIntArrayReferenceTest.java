@@ -36,16 +36,15 @@ public class TextIntArrayReferenceTest extends BytesTestCommon {
         TextIntArrayReference.write(bytes, capacity);
         Assert.assertTrue(bytes.readRemaining() > 0);
 
-        TextIntArrayReference ref = new TextIntArrayReference();
-        ref.bytesStore(bytes, 0, TextIntArrayReference.peakLength(bytes, 0));
-        Assert.assertEquals(capacity, ref.getCapacity());
+        try (TextIntArrayReference ref = new TextIntArrayReference()) {
+            ref.bytesStore(bytes, 0, TextIntArrayReference.peakLength(bytes, 0));
+            Assert.assertEquals(capacity, ref.getCapacity());
 
-        for (long i = 0; i < capacity; i++) {
-            ref.setValueAt(i, (int) i + 1);
-            Assert.assertEquals((int) i + 1, ref.getValueAt(i));
+            for (long i = 0; i < capacity; i++) {
+                ref.setValueAt(i, (int) i + 1);
+                Assert.assertEquals((int) i + 1, ref.getValueAt(i));
+            }
         }
-
-        ref.close();
         bytes.releaseLast();
     }
 
@@ -62,24 +61,24 @@ public class TextIntArrayReferenceTest extends BytesTestCommon {
     @Test
     public void testSetValueAt() {
         Bytes<?> bytes = Bytes.allocateDirect(256);
-        TextIntArrayReference ref = new TextIntArrayReference();
-        ref.bytesStore(bytes, 0, 70); // Example length, adjust based on actual implementation
-        ref.setValueAt(0, 123);
-        Assert.assertEquals(123, ref.getValueAt(0));
-        ref.close();
+        try (TextIntArrayReference ref = new TextIntArrayReference()) {
+            ref.bytesStore(bytes, 0, 70); // Example length, adjust based on actual implementation
+            ref.setValueAt(0, 123);
+            Assert.assertEquals(123, ref.getValueAt(0));
+        }
         bytes.releaseLast();
     }
 
     @Test
     public void testCompareAndSet() {
         Bytes<?> bytes = Bytes.allocateDirect(256);
-        TextIntArrayReference ref = new TextIntArrayReference();
-        ref.bytesStore(bytes, 0, 70); // Example length, adjust based on actual implementation
-        ref.setValueAt(1, 200);
-        boolean result = ref.compareAndSet(1, 200, 250);
-        Assert.assertFalse(result);
-        Assert.assertEquals(200, ref.getValueAt(1));
-        ref.close();
+        try (TextIntArrayReference ref = new TextIntArrayReference()) {
+            ref.bytesStore(bytes, 0, 70); // Example length, adjust based on actual implementation
+            ref.setValueAt(1, 200);
+            boolean result = ref.compareAndSet(1, 200, 250);
+            Assert.assertFalse(result);
+            Assert.assertEquals(200, ref.getValueAt(1));
+        }
         bytes.releaseLast();
     }
 
@@ -95,31 +94,31 @@ public class TextIntArrayReferenceTest extends BytesTestCommon {
     @Test
     public void testIsNotNullAfterBytesStore() {
         Bytes<?> bytes = Bytes.allocateDirect(256);
-        TextIntArrayReference ref = new TextIntArrayReference();
-        ref.bytesStore(bytes, 0, 70); // Example length, adjust based on actual implementation
-        Assert.assertFalse(ref.isNull());
-        ref.close();
+        try (TextIntArrayReference ref = new TextIntArrayReference()) {
+            ref.bytesStore(bytes, 0, 70); // Example length, adjust based on actual implementation
+            Assert.assertFalse(ref.isNull());
+        }
         bytes.releaseLast();
     }
 
     @Test
     public void testReset() {
         Bytes<?> bytes = Bytes.allocateDirect(256);
-        TextIntArrayReference ref = new TextIntArrayReference();
-        ref.bytesStore(bytes, 0, 70); // Example length, adjust based on actual implementation
-        ref.reset();
-        Assert.assertTrue(ref.isNull());
-        ref.close();
+        try (TextIntArrayReference ref = new TextIntArrayReference()) {
+            ref.bytesStore(bytes, 0, 70); // Example length, adjust based on actual implementation
+            ref.reset();
+            Assert.assertTrue(ref.isNull());
+        }
         bytes.releaseLast();
     }
 
     @Test
     public void testMaxSize() {
         Bytes<?> bytes = Bytes.allocateDirect(256);
-        TextIntArrayReference ref = new TextIntArrayReference();
-        ref.bytesStore(bytes, 0, 70); // Example length, adjust based on actual implementation
-        Assert.assertEquals(70, ref.maxSize());
-        ref.close();
+        try (TextIntArrayReference ref = new TextIntArrayReference()) {
+            ref.bytesStore(bytes, 0, 70); // Example length, adjust based on actual implementation
+            Assert.assertEquals(70, ref.maxSize());
+        }
         bytes.releaseLast();
     }
 

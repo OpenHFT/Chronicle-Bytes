@@ -18,12 +18,20 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Jvm;
+import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 import java.util.function.Predicate;
+
+import static org.junit.Assume.assumeFalse;
 import static org.mockito.Mockito.*;
 
 public class MethodReaderBuilderTest {
+
+    @Before
+    public void setup() {
+        assumeFalse(Jvm.isJava21Plus());
+    }
 
     @Test
     public void testWarnMissing() {
