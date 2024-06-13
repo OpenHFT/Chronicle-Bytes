@@ -72,7 +72,7 @@ public class TextIntArrayReferenceTest extends BytesTestCommon {
     }
 
     @Test
-    public void testCompareAndSetIndex1() {
+    public void testCompareAndSetIndex11() {
         assumeFalse(Jvm.isArm());
         Bytes<?> bytes = Bytes.allocateDirect(256);
         try (TextIntArrayReference ref = new TextIntArrayReference()) {
@@ -87,11 +87,11 @@ public class TextIntArrayReferenceTest extends BytesTestCommon {
     }
 
     @Test
-    public void testCompareAndSetIndex8() {
+    public void testCompareAndSetIndex16() {
         Bytes<?> bytes = Bytes.allocateDirect(256);
         try (TextIntArrayReference ref = new TextIntArrayReference()) {
             ref.bytesStore(bytes, 0, 70); // Example length, adjust based on actual implementation
-            int index = 8;
+            int index = 16 - 10; // LOCK_OFFSET = 10
             ref.setValueAt(index, 200);
             boolean result = ref.compareAndSet(index, 200, 250);
             Assert.assertFalse(result);
