@@ -19,6 +19,7 @@ package net.openhft.chronicle.bytes.ref;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesTestCommon;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.values.IntValue;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
@@ -26,6 +27,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
+import static org.junit.Assume.assumeFalse;
 
 public class TextIntArrayReferenceTest extends BytesTestCommon {
 
@@ -70,12 +72,26 @@ public class TextIntArrayReferenceTest extends BytesTestCommon {
     }
 
     @Test
-    public void testCompareAndSet() {
+    public void testCompareAndSetIndex1() {
+        assumeFalse(Jvm.isArm());
         Bytes<?> bytes = Bytes.allocateDirect(256);
         try (TextIntArrayReference ref = new TextIntArrayReference()) {
             ref.bytesStore(bytes, 0, 70); // Example length, adjust based on actual implementation
             ref.setValueAt(1, 200);
             boolean result = ref.compareAndSet(1, 200, 250);
+            Assert.assertFalse(result);
+            Assert.assertEquals(200, ref.getValueAt(1));
+        }
+        bytes.releaseLast();
+    }
+
+    @Test
+    public void testCompareAndSetIndex8() {
+        Bytes<?> bytes = Bytes.allocateDirect(256);
+        try (TextIntArrayReference ref = new TextIntArrayReference()) {
+            ref.bytesStore(bytes, 0, 70); // Example length, adjust based on actual implementation
+            ref.setValueAt(8, 200);
+            boolean result = ref.compareAndSet(8, 200, 250);
             Assert.assertFalse(result);
             Assert.assertEquals(200, ref.getValueAt(1));
         }
