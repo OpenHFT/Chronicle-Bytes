@@ -26,7 +26,7 @@ public class MethodReaderBuilderTest {
     public void testPredicate() {
         MethodReaderBuilder builder = mock(MethodReaderBuilder.class, Mockito.CALLS_REAL_METHODS);
 
-        Predicate<Object> predicate = o -> true;
+        Predicate<MethodReader> predicate = o -> true;
 
         builder.predicate(predicate);
     }

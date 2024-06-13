@@ -73,7 +73,7 @@ public class AppendableUtilTest extends BytesTestCommon {
 
     @Test
     public void testParseUtf8() throws BufferUnderflowException {
-        BytesStore<Bytes<byte[]>, byte[]> bs = BytesStore.from("Hello World");
+        BytesStore<?, byte[]> bs = BytesStore.from("Hello World");
         StringBuilder sb = new StringBuilder();
         AppendableUtil.parseUtf8(bs, sb, true, 11);
         Assertions.assertEquals("Hello World", sb.toString());

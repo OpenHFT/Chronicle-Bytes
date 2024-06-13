@@ -16,7 +16,7 @@ class BytesPoolTest {
 
     @Test
     void testAcquireBytes() {
-        Bytes<?> bytes = bytesPool.acquireBytes();
+        Bytes<?> bytes = bytesPool.createThreadLocal().get().get();
         assertNotNull(bytes, "Acquired bytes should not be null.");
 
         assertEquals(0, bytes.readRemaining(), "Acquired bytes should be ready for use.");

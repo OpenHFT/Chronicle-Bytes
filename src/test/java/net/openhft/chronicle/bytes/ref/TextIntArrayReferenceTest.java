@@ -25,6 +25,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 public class TextIntArrayReferenceTest extends BytesTestCommon {
 
@@ -44,6 +45,7 @@ public class TextIntArrayReferenceTest extends BytesTestCommon {
             Assert.assertEquals((int) i + 1, ref.getValueAt(i));
         }
 
+        ref.close();
         bytes.releaseLast();
     }
 
@@ -64,6 +66,7 @@ public class TextIntArrayReferenceTest extends BytesTestCommon {
         ref.bytesStore(bytes, 0, 70); // Example length, adjust based on actual implementation
         ref.setValueAt(0, 123);
         Assert.assertEquals(123, ref.getValueAt(0));
+        ref.close();
         bytes.releaseLast();
     }
 
@@ -76,15 +79,17 @@ public class TextIntArrayReferenceTest extends BytesTestCommon {
         boolean result = ref.compareAndSet(1, 200, 250);
         Assert.assertFalse(result);
         Assert.assertEquals(200, ref.getValueAt(1));
+        ref.close();
         bytes.releaseLast();
     }
 
     @Test(expected = UnsupportedOperationException.class)
     public void testBindValueAt() {
-        TextIntArrayReference ref = new TextIntArrayReference();
-        IntValue value = null; // Placeholder for actual IntValue implementation
-        ref.bindValueAt(0, value);
-        // Expected to throw UnsupportedOperationException
+        try (TextIntArrayReference ref = new TextIntArrayReference()) {
+            IntValue value = null; // Placeholder for actual IntValue implementation
+            ref.bindValueAt(0, value);
+            fail("Expected to throw UnsupportedOperationException");
+        }
     }
 
     @Test
@@ -93,6 +98,7 @@ public class TextIntArrayReferenceTest extends BytesTestCommon {
         TextIntArrayReference ref = new TextIntArrayReference();
         ref.bytesStore(bytes, 0, 70); // Example length, adjust based on actual implementation
         Assert.assertFalse(ref.isNull());
+        ref.close();
         bytes.releaseLast();
     }
 
@@ -103,6 +109,7 @@ public class TextIntArrayReferenceTest extends BytesTestCommon {
         ref.bytesStore(bytes, 0, 70); // Example length, adjust based on actual implementation
         ref.reset();
         Assert.assertTrue(ref.isNull());
+        ref.close();
         bytes.releaseLast();
     }
 
@@ -112,6 +119,7 @@ public class TextIntArrayReferenceTest extends BytesTestCommon {
         TextIntArrayReference ref = new TextIntArrayReference();
         ref.bytesStore(bytes, 0, 70); // Example length, adjust based on actual implementation
         Assert.assertEquals(70, ref.maxSize());
+        ref.close();
         bytes.releaseLast();
     }
 
