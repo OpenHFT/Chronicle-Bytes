@@ -19,7 +19,6 @@ package net.openhft.chronicle.bytes;
 
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
-import org.junit.Ignore;
 
 import java.nio.ByteBuffer;
 
@@ -40,7 +39,6 @@ public class AllocationRatesTest extends BytesTestCommon {
     static final int BUFFER_SIZE = 128 * 1024;
     static final int ALLOCATIONS = 10000;
 
-    @Ignore
     @Test
     public void compareAllocationRates() {
         for (int i = 4; i >= 0; i--) {

@@ -67,13 +67,6 @@
             <scope>provided</scope>
         </dependency>
 
-	<dependency>
-    	    <groupId>org.mockito</groupId>
-    	    <artifactId>mockito-core</artifactId>
-    	    <version>4.0.0</version>
-    	    <scope>test</scope>
-	</dependency>
-
         <dependency>
             <groupId>net.openhft</groupId>
             <artifactId>posix</artifactId>
@@ -133,12 +126,6 @@
         <dependency>
             <groupId>net.openhft</groupId>
             <artifactId>chronicle-test-framework</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>net.openhft</groupId>
-            <artifactId>chronicle-bytes</artifactId>
-            <version>2.24ea20</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

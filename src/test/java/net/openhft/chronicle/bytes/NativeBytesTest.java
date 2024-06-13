@@ -23,7 +23,6 @@ import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.Assume;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -141,7 +140,6 @@ public class NativeBytesTest extends BytesTestCommon {
         nativeBytes.releaseLast();
     }
 
-    @Ignore
     @Test
     public void tryGrowBeyondByteBufferCapacity() {
         Assume.assumeFalse(alloc == HEAP);
