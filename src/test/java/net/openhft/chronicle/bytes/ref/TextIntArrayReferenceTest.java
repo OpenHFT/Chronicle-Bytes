@@ -77,10 +77,11 @@ public class TextIntArrayReferenceTest extends BytesTestCommon {
         Bytes<?> bytes = Bytes.allocateDirect(256);
         try (TextIntArrayReference ref = new TextIntArrayReference()) {
             ref.bytesStore(bytes, 0, 70); // Example length, adjust based on actual implementation
-            ref.setValueAt(1, 200);
-            boolean result = ref.compareAndSet(1, 200, 250);
+            int index = 1;
+            ref.setValueAt(index, 200);
+            boolean result = ref.compareAndSet(index, 200, 250);
             Assert.assertFalse(result);
-            Assert.assertEquals(200, ref.getValueAt(1));
+            Assert.assertEquals(200, ref.getValueAt(index));
         }
         bytes.releaseLast();
     }
@@ -90,10 +91,11 @@ public class TextIntArrayReferenceTest extends BytesTestCommon {
         Bytes<?> bytes = Bytes.allocateDirect(256);
         try (TextIntArrayReference ref = new TextIntArrayReference()) {
             ref.bytesStore(bytes, 0, 70); // Example length, adjust based on actual implementation
-            ref.setValueAt(8, 200);
-            boolean result = ref.compareAndSet(8, 200, 250);
+            int index = 8;
+            ref.setValueAt(index, 200);
+            boolean result = ref.compareAndSet(index, 200, 250);
             Assert.assertFalse(result);
-            Assert.assertEquals(200, ref.getValueAt(1));
+            Assert.assertEquals(200, ref.getValueAt(index));
         }
         bytes.releaseLast();
     }
