@@ -18,6 +18,7 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.io.InvalidMarshallableException;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -26,6 +27,9 @@ import static junit.framework.TestCase.assertEquals;
 import static org.junit.Assume.assumeFalse;
 
 public class BytesTextMethodTesterTest extends BytesTestCommon {
+
+    private BytesTextMethodTester<?> tester;
+
     @Test
     public void run()
             throws IOException {

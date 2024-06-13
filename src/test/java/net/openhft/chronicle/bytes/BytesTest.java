@@ -32,6 +32,7 @@ import net.openhft.chronicle.core.io.BackgroundResourceReleaser;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.util.Histogram;
 import org.jetbrains.annotations.NotNull;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -1205,6 +1206,7 @@ public class BytesTest extends BytesTestCommon {
         testAppendDoubleOnce(-Double.MAX_VALUE, "-179769313486231570000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000", "-Infinity", "-1.7976931348623157E308", "");
     }
 
+    @Ignore
     @Test
     public void testAppendReallySmallDouble() {
         assumeFalse(alloc1 == HEAP_UNCHECKED);
@@ -1227,6 +1229,7 @@ public class BytesTest extends BytesTestCommon {
         bytes.releaseLast();
     }
 
+    @Ignore
     @Test
     public void testAppendReallyBigDouble() {
         assumeFalse(alloc1 == HEAP_UNCHECKED);

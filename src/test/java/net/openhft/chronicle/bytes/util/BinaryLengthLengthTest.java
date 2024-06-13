@@ -19,10 +19,12 @@ package net.openhft.chronicle.bytes.util;
 
 import net.openhft.chronicle.bytes.BinaryWireCode;
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.BytesOut;
 import net.openhft.chronicle.bytes.BytesTestCommon;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.Assertions;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
@@ -48,6 +50,24 @@ public class BinaryLengthLengthTest extends BytesTestCommon {
                 {BinaryLengthLength.LENGTH_16BIT, BinaryWireCode.BYTES_LENGTH16},
                 {BinaryLengthLength.LENGTH_32BIT, BinaryWireCode.BYTES_LENGTH32}
         });
+    }
+
+    @Test
+    public void testInvalidLengthFor8Bit() {
+        BytesOut<?> bytes = Bytes.allocateDirect(512);
+        long pos = BinaryLengthLength.LENGTH_8BIT.initialise(bytes);
+        bytes.writeSkip(256);
+        Assertions.assertThrows(IllegalStateException.class, () -> BinaryLengthLength.LENGTH_8BIT.writeLength((Bytes<?>) bytes, pos, bytes.writePosition()));
+        bytes.releaseLast();
+    }
+
+    @Test
+    public void testInvalidLengthFor16Bit() {
+        BytesOut<?> bytes = Bytes.allocateDirect(65539);
+        long pos = BinaryLengthLength.LENGTH_16BIT.initialise(bytes);
+        bytes.writeSkip(65536);
+        Assertions.assertThrows(IllegalStateException.class, () -> BinaryLengthLength.LENGTH_16BIT.writeLength((Bytes<?>) bytes, pos, bytes.writePosition()));
+        bytes.releaseLast();
     }
 
     @Test

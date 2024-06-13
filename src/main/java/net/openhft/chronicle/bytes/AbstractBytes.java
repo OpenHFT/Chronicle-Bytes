@@ -70,7 +70,7 @@ public abstract class AbstractBytes<U>
     protected long readPosition;
     protected long writeLimit;
     protected boolean isPresent;
-    private long writePosition;
+    long writePosition;
     private int lastDecimalPlaces = 0;
     private boolean lenient = false;
     private boolean lastNumberHadDigits = false;

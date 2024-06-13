@@ -18,12 +18,125 @@
 package net.openhft.chronicle.bytes;
 
 import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+
+import java.nio.BufferOverflowException;
+import java.nio.BufferUnderflowException;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class AppendableUtilTest extends BytesTestCommon {
 
+    @Test
+    public void setCharAtWithStringBuilder() {
+        StringBuilder sb = new StringBuilder("hello");
+        AppendableUtil.setCharAt(sb, 1, 'a');
+        assertEquals("hallo", sb.toString());
+    }
+
+    @Test
+    public void testSetCharAtStringBuilder() throws BufferOverflowException {
+        StringBuilder sb = new StringBuilder("Hello");
+        AppendableUtil.setCharAt(sb, 1, 'a');
+        assertEquals("Hallo", sb.toString());
+    }
+
+    @Test
+    public void testSetLengthStringBuilder() {
+        StringBuilder sb = new StringBuilder("Hello");
+        AppendableUtil.setLength(sb, 3);
+        assertEquals("Hel", sb.toString());
+    }
+
+    @Test
+    public void testAppendDouble() {
+        StringBuilder sb = new StringBuilder();
+        AppendableUtil.append(sb, 3.14);
+        assertEquals("3.14", sb.toString());
+    }
+
+    @Test
+    public void testAppendLong() {
+        StringBuilder sb = new StringBuilder();
+        AppendableUtil.append(sb, 42L);
+        assertEquals("42", sb.toString());
+    }
+
+    @Test
+    public void testSetCharAtWithStringBuilder() throws BufferOverflowException {
+        StringBuilder sb = new StringBuilder("Hello World");
+        AppendableUtil.setCharAt(sb, 6, 'J');
+        Assertions.assertEquals("Hello Jorld", sb.toString());
+    }
+
+    @Test
+    public void testParseUtf8() throws BufferUnderflowException {
+        BytesStore<Bytes<byte[]>, byte[]> bs = BytesStore.from("Hello World");
+        StringBuilder sb = new StringBuilder();
+        AppendableUtil.parseUtf8(bs, sb, true, 11);
+        Assertions.assertEquals("Hello World", sb.toString());
+    }
+
+    @Test
+    public void testSetLengthWithStringBuilder() {
+        StringBuilder sb = new StringBuilder("Hello World");
+        AppendableUtil.setLength(sb, 5);
+        Assertions.assertEquals("Hello", sb.toString());
+    }
+
+    @Test
+    public void testAppendDoubleWithStringBuilder() {
+        StringBuilder sb = new StringBuilder();
+        AppendableUtil.append(sb, 3.14);
+        Assertions.assertEquals("3.14", sb.toString());
+    }
+
+    @Test
+    public void testFindUtf8LengthByteArray() {
+        byte[] bytes = "Hello World".getBytes();
+        long length = AppendableUtil.findUtf8Length(bytes);
+        Assertions.assertEquals(22, length);
+    }
+
+    @Test
+    public void testFindUtf8LengthCharArray() {
+        char[] chars = "Hello World".toCharArray();
+        long length = AppendableUtil.findUtf8Length(chars);
+        Assertions.assertEquals(11, length);
+    }
+
+    @Test
+    public void setCharAtWithUnsupportedAppendable() {
+        Appendable appendable = new Appendable() {
+            @Override
+            public Appendable append(CharSequence csq) { return this; }
+            @Override
+            public Appendable append(CharSequence csq, int start, int end) { return this; }
+            @Override
+            public Appendable append(char c) { return this; }
+        };
+
+        assertThrows(IllegalArgumentException.class, () -> AppendableUtil.setCharAt(appendable, 1, 'a'));
+    }
+
+    @Test
+    public void appendDoubleToStringBuilder() {
+        StringBuilder sb = new StringBuilder();
+        AppendableUtil.append(sb, 3.14);
+        assertEquals("3.14", sb.toString());
+    }
+
+    @Test
+    public void appendStringToAppendableAndCharSequence() {
+        StringBuilder sb = new StringBuilder();
+        AppendableUtil.append(sb, "test");
+        assertEquals("test", sb.toString());
+    }
+
+
+    @SuppressWarnings("rawtypes")
     @Test
     public void setLength() {
         StringBuilder sb = new StringBuilder("hello world");
