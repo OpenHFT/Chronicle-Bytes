@@ -19,12 +19,114 @@ package net.openhft.chronicle.bytes.ref;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesTestCommon;
+import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.core.values.IntValue;
 import org.jetbrains.annotations.NotNull;
+import org.junit.Assert;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+import static org.junit.Assume.assumeFalse;
 
 public class TextIntArrayReferenceTest extends BytesTestCommon {
+
+    @Test
+    public void testWriteAndReadArray() {
+        Bytes<?> bytes = Bytes.allocateDirect(256);
+        long capacity = 5;
+        TextIntArrayReference.write(bytes, capacity);
+        Assert.assertTrue(bytes.readRemaining() > 0);
+
+        try (TextIntArrayReference ref = new TextIntArrayReference()) {
+            ref.bytesStore(bytes, 0, TextIntArrayReference.peakLength(bytes, 0));
+            Assert.assertEquals(capacity, ref.getCapacity());
+
+            for (long i = 0; i < capacity; i++) {
+                ref.setValueAt(i, (int) i + 1);
+                Assert.assertEquals((int) i + 1, ref.getValueAt(i));
+            }
+        }
+        bytes.releaseLast();
+    }
+
+    @Test
+    public void testPeakLength() {
+        Bytes<?> bytes = Bytes.allocateDirect(256);
+        long capacity = 10;
+        TextIntArrayReference.write(bytes, capacity);
+        long length = TextIntArrayReference.peakLength(bytes, 0);
+        Assert.assertTrue(length > 0);
+        bytes.releaseLast();
+    }
+
+    @Test
+    public void testSetValueAt() {
+        Bytes<?> bytes = Bytes.allocateDirect(256);
+        try (TextIntArrayReference ref = new TextIntArrayReference()) {
+            ref.bytesStore(bytes, 0, 70); // Example length, adjust based on actual implementation
+            ref.setValueAt(0, 123);
+            Assert.assertEquals(123, ref.getValueAt(0));
+        }
+        bytes.releaseLast();
+    }
+
+    @Test
+    public void testCompareAndSetIndex1() {
+        assumeFalse(Jvm.isArm());
+        Bytes<?> bytes = Bytes.allocateDirect(256);
+        try (TextIntArrayReference ref = new TextIntArrayReference()) {
+            ref.bytesStore(bytes, 0, 70); // Example length, adjust based on actual implementation
+            int index = 1;
+            ref.setValueAt(index, 200);
+            boolean result = ref.compareAndSet(index, 200, 250);
+            Assert.assertFalse(result);
+            Assert.assertEquals(200, ref.getValueAt(index));
+        }
+        bytes.releaseLast();
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void testBindValueAt() {
+        try (TextIntArrayReference ref = new TextIntArrayReference()) {
+            IntValue value = null; // Placeholder for actual IntValue implementation
+            ref.bindValueAt(0, value);
+            fail("Expected to throw UnsupportedOperationException");
+        }
+    }
+
+    @Test
+    public void testIsNotNullAfterBytesStore() {
+        Bytes<?> bytes = Bytes.allocateDirect(256);
+        try (TextIntArrayReference ref = new TextIntArrayReference()) {
+            ref.bytesStore(bytes, 0, 70); // Example length, adjust based on actual implementation
+            Assert.assertFalse(ref.isNull());
+        }
+        bytes.releaseLast();
+    }
+
+    @Test
+    public void testReset() {
+        Bytes<?> bytes = Bytes.allocateDirect(256);
+        try (TextIntArrayReference ref = new TextIntArrayReference()) {
+            ref.bytesStore(bytes, 0, 70); // Example length, adjust based on actual implementation
+            ref.reset();
+            Assert.assertTrue(ref.isNull());
+        }
+        bytes.releaseLast();
+    }
+
+    @Test
+    public void testMaxSize() {
+        Bytes<?> bytes = Bytes.allocateDirect(256);
+        try (TextIntArrayReference ref = new TextIntArrayReference()) {
+            ref.bytesStore(bytes, 0, 70); // Example length, adjust based on actual implementation
+            Assert.assertEquals(70, ref.maxSize());
+        }
+        bytes.releaseLast();
+    }
+
+    @SuppressWarnings("rawtypes")
     @Test
     public void getSetValues() {
         int length = 5 * 12 + 70;

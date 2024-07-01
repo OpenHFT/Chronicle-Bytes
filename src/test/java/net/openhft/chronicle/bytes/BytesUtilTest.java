@@ -19,16 +19,64 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Jvm;
 import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.api.AfterEach;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Arrays;
 
 import static org.junit.Assert.*;
 import static org.junit.Assume.assumeTrue;
 
 public class BytesUtilTest extends BytesTestCommon {
+
+    @TempDir
+    Path tempDir;
+
+    File testFile;
+
+    @BeforeEach
+    void setUp() {
+        testFile = new File(tempDir.toFile(), "testFile.bin");
+    }
+
+    @AfterEach
+    void tearDown() {
+        if (testFile.exists()) {
+            testFile.delete();
+        }
+    }
+
+    @Test
+    public void testStopBitLength() {
+        int length = BytesUtil.stopBitLength(128);
+        Assertions.assertEquals(2, length);
+    }
+
+    @Test
+    public void testAsString() {
+        Exception exception = new Exception("Test exception");
+        String result = BytesUtil.asString("Error occurred", exception);
+        Assertions.assertTrue(result.startsWith("Error occurred\njava.lang.Exception: Test exception"));
+    }
+
+    @Test
+    public void testRoundUpTo64ByteAlign() {
+        long result = BytesUtil.roundUpTo64ByteAlign(65);
+        Assertions.assertEquals(128, result);
+    }
+
+    @Test
+    public void testIsControlSpace() {
+        Assertions.assertTrue(BytesUtil.isControlSpace(' '));
+        Assertions.assertFalse(BytesUtil.isControlSpace('A'));
+    }
+
     @Test
     public void fromFileInJar()
             throws IOException {

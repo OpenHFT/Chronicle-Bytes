@@ -26,6 +26,7 @@ import static junit.framework.TestCase.assertEquals;
 import static org.junit.Assume.assumeFalse;
 
 public class BytesTextMethodTesterTest extends BytesTestCommon {
+
     @Test
     public void run()
             throws IOException {

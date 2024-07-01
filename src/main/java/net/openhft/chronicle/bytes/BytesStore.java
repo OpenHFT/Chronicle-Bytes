@@ -559,7 +559,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
     }
 
     /**
-     * By default the maximum length of data shown is 256 characters. Use {@link #toDebugString(long)} if you want more.
+     * By default, the maximum length of data shown is 256 characters. Use {@link #toDebugString(long)} if you want more.
      * <p>
      * This is assumed to be used to print the contents on a best effort basis. If an Error occurs it will be returned in the String.
      *
