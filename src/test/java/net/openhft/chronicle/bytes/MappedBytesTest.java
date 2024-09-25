@@ -72,6 +72,7 @@ public class MappedBytesTest extends BytesTestCommon {
         text = largeTextBuilder.toString();
     }
 
+    @SuppressWarnings("EmptyMethod")
     @Before
     @BeforeEach
     public void threadDump() {

@@ -35,6 +35,7 @@ import static org.junit.Assert.assertTrue;
 
 public class MappedUniqueTimeProviderTest extends BytesTestCommon {
 
+    @SuppressWarnings("EmptyMethod")
     @Before
     @BeforeEach
     public void threadDump() {

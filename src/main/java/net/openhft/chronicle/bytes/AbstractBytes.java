@@ -1543,6 +1543,7 @@ public abstract class AbstractBytes<U>
         private ReportUnoptimised() {
         }
 
+        @SuppressWarnings("EmptyMethod")
         static void reportOnce() {
             // Do nothing
         }

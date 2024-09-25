@@ -627,6 +627,7 @@ public class UncheckedNativeBytes<U>
         return this;
     }
 
+    @SuppressWarnings("EmptyMethod")
     void writeCheckOffset(@NonNegative long offset, long adding)
             throws BufferOverflowException {
         // Do nothing

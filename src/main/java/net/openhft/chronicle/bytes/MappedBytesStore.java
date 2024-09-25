@@ -106,6 +106,7 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
         throw new IllegalStateException("Read Only");
     }
 
+    @SuppressWarnings("EmptyMethod")
     static void readWriteOk() {
         // nothing to do
     }

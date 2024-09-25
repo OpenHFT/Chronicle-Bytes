@@ -745,6 +745,7 @@ public interface Bytes<U> extends
      * If this Bytes {@link #isElastic()} the {@link #realCapacity()} can be
      * lower than the virtual {@link #capacity()}.
      */
+    @SuppressWarnings("EmptyMethod")
     @Override
     default @NonNegative long realCapacity() {
         return BytesStore.super.realCapacity();

@@ -58,6 +58,7 @@ class ReentrantFileLockTest extends BytesTestCommon {
         fileToLock = IOTools.createTempFile("fileToLock");
     }
 
+    @SuppressWarnings("EmptyMethod")
     @Before
     @BeforeEach
     public void threadDump() {

@@ -76,9 +76,4 @@ class NotNullHandlingTest extends BytesTestCommon {
         assert SKIP_ASSERTIONS || requireNonNull(text) != null;
         assert SKIP_ASSERTIONS || requireNonNegative(value) > 0;
     }
-
-    // This is where we are today
-    private void fooUnsafe(@NotNull CharSequence text, int value) {
-        // Potentially modifying internal state and only then throw an exception.
-    }
 }
