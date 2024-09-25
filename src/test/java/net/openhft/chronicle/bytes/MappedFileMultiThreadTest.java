@@ -43,6 +43,7 @@ public class MappedFileMultiThreadTest extends BytesTestCommon {
     private static final int RUNTIME_MS = Integer.getInteger("runtimems", 2_000);
     private static final String TMP_FILE = System.getProperty("file", IOTools.createTempFile("testMultiThreadLock").getAbsolutePath());
 
+    @SuppressWarnings("EmptyMethod")
     @Before
     @BeforeEach
     public void threadDump() {

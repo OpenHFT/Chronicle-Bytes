@@ -36,6 +36,7 @@ public class UnsafeTextTest extends BytesTestCommon {
 
     static long blackhole;
 
+    @SuppressWarnings("EmptyMethod")
     @Override
     @Before
     public void threadDump() {

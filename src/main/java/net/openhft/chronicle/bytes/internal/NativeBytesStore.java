@@ -871,6 +871,7 @@ public class NativeBytesStore<U>
 
     // Explicitly overrides because this class adds properties which triggers static analyzing warnings unless
     // this method is overridden
+    @SuppressWarnings("EmptyMethod")
     @Override
     public int hashCode() {
         return super.hashCode();

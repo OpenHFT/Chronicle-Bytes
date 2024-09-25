@@ -32,6 +32,7 @@ import static org.junit.Assert.assertEquals;
 
 public class Issue523Test extends BytesTestCommon {
 
+    @SuppressWarnings("EmptyMethod")
     @Before
     @BeforeEach
     public void threadDump() {

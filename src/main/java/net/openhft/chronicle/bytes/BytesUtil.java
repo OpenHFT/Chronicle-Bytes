@@ -785,6 +785,7 @@ public enum BytesUtil {
         private WarnUncheckedElasticBytes() {
         }
 
+        @SuppressWarnings("EmptyMethod")
         static void warn() {
             // static block does the work.
         }
