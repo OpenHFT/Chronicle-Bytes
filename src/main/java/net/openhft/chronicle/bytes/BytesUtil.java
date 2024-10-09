@@ -514,27 +514,6 @@ public enum BytesUtil {
     }
 
     /**
-     * Appends bytes from a specified start position of a Bytes object to a StringBuilder.
-     *
-     * @param bytes         The Bytes object.
-     * @param startPosition The start position in the Bytes object.
-     * @param sb            The StringBuilder to append to.
-     * @throws ClosedIllegalStateException    If the resource has been released or closed.
-     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
-     */
-    @Deprecated(/* to be removed in x.27 */)
-    public static void appendBytesFromStart(@NotNull Bytes<?> bytes, @NonNegative long startPosition, @NotNull StringBuilder sb)
-            throws IllegalStateException {
-        try {
-            BytesInternal.parse8bit(startPosition, bytes, sb, (int) (bytes.readPosition() - startPosition));
-            sb.append('\u2016');
-            sb.append(bytes);
-        } catch (IOException | BufferUnderflowException e) {
-            throw new IORuntimeException(e);
-        }
-    }
-
-    /**
      * Reads a Marshallable object from a BytesIn object.
      *
      * @param marshallable The Marshallable object to read.

@@ -853,22 +853,6 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
             @NonNegative final int length) throws BufferOverflowException, ClosedIllegalStateException, IllegalArgumentException, ArrayIndexOutOfBoundsException, ThreadingIllegalStateException;
 
     /**
-     * Writes the memory content of an object to this output stream.
-     *
-     * @param o      The object whose memory content is to be written.
-     * @param length The length (in bytes) of the object's content to write.
-     * @return The current StreamingDataOutput instance.
-     * @throws BufferOverflowException        If there is not enough space left in the output stream.
-     * @throws ClosedIllegalStateException    If the resource has been released or closed.
-     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
-     */
-    @Deprecated(/* for removal in x.27 */)
-    default S unsafeWriteObject(Object o, @NonNegative int length)
-            throws BufferOverflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
-        return unsafeWriteObject(o, BytesUtil.triviallyCopyableStart(o.getClass()), length);
-    }
-
-    /**
      * Writes the memory content of an object to this output stream from a specific offset.
      *
      * @param o      The object whose memory content is to be written.
