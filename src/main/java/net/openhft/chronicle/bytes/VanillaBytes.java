@@ -309,21 +309,6 @@ public class VanillaBytes<U>
     }
 
     @SuppressWarnings("deprecation")
-    @NotNull
-    @Override
-    public Bytes<U> write(@NotNull RandomDataInput bytes, @NonNegative long offset, @NonNegative long length)
-            throws BufferOverflowException, BufferUnderflowException, ClosedIllegalStateException, IllegalArgumentException, ThreadingIllegalStateException {
-        requireNonNull(bytes);
-        if ((offset | length) < 0) {
-            requireNonNegative(offset);
-            requireNonNegative(length);
-        }
-        ensureCapacity(writePosition() + length);
-        optimisedWrite(bytes, offset, length);
-        return this;
-    }
-
-    @SuppressWarnings("deprecation")
     protected void optimisedWrite(@NotNull RandomDataInput bytes, @NonNegative long offset, @NonNegative long length)
             throws BufferOverflowException, BufferUnderflowException, ClosedIllegalStateException, IllegalArgumentException, ThreadingIllegalStateException {
         requireNonNull(bytes);

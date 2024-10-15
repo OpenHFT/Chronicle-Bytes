@@ -218,25 +218,6 @@ public abstract class CommonMappedBytes extends MappedBytes {
         mappedFile.release(this);
     }
 
-    @SuppressWarnings("deprecation")
-    @Override
-    @NotNull
-    public Bytes<Void> write(@NotNull final RandomDataInput bytes,
-                             @NonNegative final long offset,
-                             @NonNegative final long length)
-            throws BufferUnderflowException, BufferOverflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
-        requireNonNull(bytes);
-        requireNonNegative(offset);
-        requireNonNegative(length);
-        throwExceptionIfClosed();
-
-        if (length == 8)
-            writeLong(bytes.readLong(offset));
-        else if (length > 0)
-            BytesInternal.writeFully(bytes, offset, length, this);
-        return this;
-    }
-
     @NotNull
     @Override
     public Bytes<Void> append8bit(@NotNull CharSequence text, @NonNegative int start, @NonNegative int end)
