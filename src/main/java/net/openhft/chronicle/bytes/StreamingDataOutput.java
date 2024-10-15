@@ -703,7 +703,10 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
 
         if (bytes.readRemaining() > writeRemaining())
             throw new BufferOverflowException();
-        return write(bytes, bytes.readPosition(), bytes.readRemaining());
+        @NonNegative long readOffset = bytes.readPosition();
+        @NonNegative long length = bytes.readRemaining();
+        BytesInternal.writeFully(bytes, readOffset, length, this);
+        return (S) this;
     }
 
     /**

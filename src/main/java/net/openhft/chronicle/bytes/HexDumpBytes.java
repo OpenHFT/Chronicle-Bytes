@@ -1801,7 +1801,8 @@ public class HexDumpBytes
         requireNonNegative(length);
         long pos = base.writePosition();
         try {
-            base.write(bytes, offset, length);
+            base.ensureCapacity(base.writePosition() + length);
+            base.optimisedWrite(bytes, offset, length);
             return this;
 
         } finally {

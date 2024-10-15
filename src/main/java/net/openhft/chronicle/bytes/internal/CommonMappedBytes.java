@@ -98,20 +98,6 @@ public abstract class CommonMappedBytes extends MappedBytes {
     }
 
     @NotNull
-    @Override
-    public CommonMappedBytes write(@NotNull final RandomDataInput bytes)
-            throws ClosedIllegalStateException, BufferOverflowException {
-        requireNonNull(bytes);
-        throwExceptionIfClosed();
-
-        assert bytes != this : "you should not write to yourself !";
-        final long remaining = bytes.readRemaining();
-        write(writePosition(), bytes);
-        uncheckedWritePosition(writePosition() + remaining);
-        return this;
-    }
-
-    @NotNull
     public CommonMappedBytes write(@NonNegative final long offsetInRDO, @NotNull final RandomDataInput bytes)
             throws BufferOverflowException, ClosedIllegalStateException {
         requireNonNegative(offsetInRDO);

@@ -339,7 +339,7 @@ public class VanillaBytes<U>
                 writeSkip(len);
             }
         } else {
-            super.write(bytes, offset, length);
+            BytesInternal.writeFully(bytes, offset, length, this);
         }
     }
 
@@ -439,8 +439,6 @@ public class VanillaBytes<U>
     public Bytes<U> append8bit(@NotNull CharSequence cs)
             throws BufferOverflowException, BufferUnderflowException, IndexOutOfBoundsException, ClosedIllegalStateException, ThreadingIllegalStateException {
         requireNonNull(cs);
-        if (cs instanceof RandomDataInput)
-            return write((RandomDataInput) cs);
 
         if (isDirectMemory() && cs instanceof String && this.bytesStore instanceof NativeBytesStore)
             return append8bitNBSS((String) cs);

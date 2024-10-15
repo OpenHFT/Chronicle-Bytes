@@ -1049,16 +1049,6 @@ public class UncheckedNativeBytes<U>
         this.lastNumberHadDigits = lastNumberHadDigits;
     }
 
-    @SuppressWarnings("deprecation")
-    @NotNull
-    @Override
-    public Bytes<U> write(@NotNull RandomDataInput bytes)
-            throws IllegalStateException {
-        assert bytes != this : "you should not write to yourself !";
-
-        return write(bytes, bytes.readPosition(), Math.min(writeRemaining(), bytes.readRemaining()));
-    }
-
     @Override
     public long write8bit(@NonNegative long position, @NotNull BytesStore<?, ?> bs) {
         return bytesStore.write8bit(position, bs);
