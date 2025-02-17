@@ -27,10 +27,10 @@ public class CopyToTest {
 
     @Test
     public void testCopyFromBytesIntoByteBuffer() {
-        Bytes<?> bytesToTest = Bytes.fromDirect("Hello, world");
+        Bytes<?> bytesToTest = Bytes.fromDirect("THIS IS A TEST STRING");
         ByteBuffer copyToDestination = ByteBuffer.allocateDirect(128);
         copyToDestination.limit((int) bytesToTest.readLimit());
         bytesToTest.copyTo(copyToDestination);
-        assertEquals("Hello, world", Bytes.wrapForRead(copyToDestination).toUtf8String());
+        assertEquals("THIS IS A TEST STRING", Bytes.wrapForRead(copyToDestination).toUtf8String());
     }
 }
