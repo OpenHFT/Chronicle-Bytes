@@ -401,8 +401,10 @@ public interface RandomDataInput extends RandomCommon {
         int len = (int) Math.min(bb.remaining(), readRemaining());
         long readPosition = readPosition();
         int i;
-        for (i = 0; i < len - 7; i += 8)
-            bb.putLong(pos + i, readLong(readPosition + i));
+        for (i = 0; i < len - 7; i += 8) {
+            long value = readLong(readPosition + i);
+            bb.putLong(pos + i, bb.order() == ByteOrder.BIG_ENDIAN ? Long.reverseBytes(value) : value);
+        }
         for (; i < len; i++)
             bb.put(pos + i, readByte(readPosition + i));
         return len;
