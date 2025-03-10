@@ -126,7 +126,7 @@ public class ChunkedMappedFile extends MappedFile {
                 warmupChunks(errorsDuringWarmup, file, mapAlignment, chunks);
             }
             Thread.yield();
-            Files.delete(file.toPath());
+            IOTools.deleteDirWithFiles(path.toFile());
         } catch (IOException e) {
             Jvm.setExceptionHandlers(error, warn, debug);
             Jvm.warn().on(ChunkedMappedFile.class, "Error during warmup", e);
