@@ -111,9 +111,10 @@ public class ChunkedMappedFile extends MappedFile {
         ExceptionHandler error = Jvm.error().defaultHandler();
         ExceptionHandler warn = Jvm.warn().defaultHandler();
         ExceptionHandler debug = Jvm.debug().defaultHandler();
+        ExceptionHandler perf = Jvm.perf().defaultHandler();
 
         try {
-            Jvm.setExceptionHandlers(error, null, null);
+            Jvm.setExceptionHandlers(error, null, null, null);
 
             final Path path = Files.createTempDirectory("warmup");
 
@@ -128,10 +129,10 @@ public class ChunkedMappedFile extends MappedFile {
             Thread.yield();
             IOTools.deleteDirWithFiles(path.toFile());
         } catch (IOException e) {
-            Jvm.setExceptionHandlers(error, warn, debug);
+            Jvm.setExceptionHandlers(error, warn, debug, perf);
             Jvm.warn().on(ChunkedMappedFile.class, "Error during warmup", e);
         } finally {
-            Jvm.setExceptionHandlers(error, warn, debug);
+            Jvm.setExceptionHandlers(error, warn, debug, perf);
             if (!errorsDuringWarmup.isEmpty())
                 Jvm.warn().on(ChunkedMappedFile.class, errorsDuringWarmup.size() + " errors during warmup: " + errorsDuringWarmup);
         }
