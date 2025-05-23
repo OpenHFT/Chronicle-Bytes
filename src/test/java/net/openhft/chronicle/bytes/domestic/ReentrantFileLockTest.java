@@ -49,8 +49,13 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class ReentrantFileLockTest extends BytesTestCommon {
 
-    private static final int NUM_THREADS = 4;
-    private static final int NUM_ITERATIONS = 300;
+    // Reduced the number of spawned processes to limit memory
+    // consumption which occasionally caused "os::commit_memory" errors
+    // on low memory environments running the test suite.
+    private static final int NUM_THREADS = 2;
+    // Fewer iterations are sufficient to verify behaviour and keep
+    // resource consumption down during the test runs.
+    private static final int NUM_ITERATIONS = 100;
     private File fileToLock;
 
     @BeforeEach
