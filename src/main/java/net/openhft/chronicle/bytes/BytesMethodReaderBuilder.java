@@ -25,10 +25,10 @@ import net.openhft.chronicle.core.util.Mocker;
 import static net.openhft.chronicle.bytes.internal.ReferenceCountedUtil.throwExceptionIfReleased;
 
 /**
- * Concrete implementation of MethodReaderBuilder for constructing BytesMethodReader instances.
- * This builder offers several methods for customizing the creation of a BytesMethodReader,
- * including setting the methodEncoderLookup function, the default BytesParselet,
- * and the level of logging for unknown methods.
+ * Builder for {@link BytesMethodReader} instances. It allows configuration of
+ * the lookup mechanism for method decoders ({@link MethodEncoderLookup}), the
+ * handler for unknown method calls ({@link BytesParselet}) and logging
+ * behaviour for unrecognised methods. Implements {@link MethodReaderBuilder}.
  */
 public class BytesMethodReaderBuilder implements MethodReaderBuilder {
     private final BytesIn<?> in;
@@ -37,11 +37,12 @@ public class BytesMethodReaderBuilder implements MethodReaderBuilder {
     private ExceptionHandler exceptionHandlerOnUnknownMethod = Jvm.debug();
 
     /**
-     * Constructor for BytesMethodReaderBuilder.
-     *
-     * @param in the BytesIn object from which serialized method calls are read.
-     * @throws ClosedIllegalStateException    If the resource has been released or closed.
-     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
+     * @param in the {@link BytesIn} stream from which serialised method calls
+     *           will be read. Must not be {@code null}.
+     * @throws NullPointerException        if {@code in} is {@code null}
+     * @throws ClosedIllegalStateException if {@code in} has been released
+     * @throws ThreadingIllegalStateException if {@code in} is accessed by
+     *                                        multiple threads unsafely
      */
     public BytesMethodReaderBuilder(BytesIn<?> in) {
         throwExceptionIfReleased(in);
@@ -53,7 +54,7 @@ public class BytesMethodReaderBuilder implements MethodReaderBuilder {
      * This instance controls how the builder handles unknown methods.
      *
      * @param exceptionHandler the ExceptionHandler instance
-     * @return the builder instance for method chaining
+     * @return this builder for chained invocation
      */
     @Override
     public MethodReaderBuilder exceptionHandlerOnUnknownMethod(ExceptionHandler exceptionHandler) {
@@ -62,9 +63,8 @@ public class BytesMethodReaderBuilder implements MethodReaderBuilder {
     }
 
     /**
-     * Returns the current MethodEncoderLookup function.
-     *
-     * @return the current MethodEncoderLookup function
+     * Returns the currently configured {@link MethodEncoderLookup} strategy used
+     * to find decoders for method calls.
      */
     public MethodEncoderLookup methodEncoderLookup() {
         return methodEncoderLookup;
@@ -74,7 +74,7 @@ public class BytesMethodReaderBuilder implements MethodReaderBuilder {
      * Sets the MethodEncoderLookup function for this builder.
      *
      * @param methodEncoderLookup the MethodEncoderLookup function
-     * @return the builder instance for method chaining
+     * @return this builder for chained invocation
      */
     public BytesMethodReaderBuilder methodEncoderLookup(MethodEncoderLookup methodEncoderLookup) {
         this.methodEncoderLookup = methodEncoderLookup;
@@ -82,10 +82,10 @@ public class BytesMethodReaderBuilder implements MethodReaderBuilder {
     }
 
     /**
-     * Returns the default BytesParselet for this builder.
-     * If not set, a default BytesParselet is initialized.
-     *
-     * @return the default BytesParselet
+     * Returns the {@link BytesParselet} to use when a message ID is encountered
+     * for which no specific handler is registered. If not explicitly set,
+     * it is initialised based on the
+     * {@link #exceptionHandlerOnUnknownMethod(ExceptionHandler)} configuration.
      */
     public BytesParselet defaultParselet() {
         if (defaultParselet == null)
@@ -94,6 +94,10 @@ public class BytesMethodReaderBuilder implements MethodReaderBuilder {
         return defaultParselet;
     }
 
+    /**
+     * Initialises {@link #defaultParselet} depending on whether unknown methods
+     * should be ignored or logged.
+     */
     private void initDefaultParselet() {
         if (exceptionHandlerOnUnknownMethod instanceof IgnoresEverything)
             defaultParselet = Mocker.ignored(BytesParselet.class);
@@ -108,7 +112,7 @@ public class BytesMethodReaderBuilder implements MethodReaderBuilder {
      * Sets the default BytesParselet for this builder.
      *
      * @param defaultParselet the default BytesParselet
-     * @return the builder instance for method chaining
+     * @return this builder for chained invocation
      */
     public BytesMethodReaderBuilder defaultParselet(BytesParselet defaultParselet) {
         this.defaultParselet = defaultParselet;
@@ -116,11 +120,8 @@ public class BytesMethodReaderBuilder implements MethodReaderBuilder {
     }
 
     /**
-     * Throws an UnsupportedOperationException when called.
-     * This method is required to fulfill the MethodReaderBuilder interface, but it is not supported
-     * in the BytesMethodReaderBuilder class.
+     * This builder does not support interceptors for method reader returns.
      *
-     * @return nothing
      * @throws UnsupportedOperationException always
      */
     @Override
@@ -129,11 +130,8 @@ public class BytesMethodReaderBuilder implements MethodReaderBuilder {
     }
 
     /**
-     * Throws an UnsupportedOperationException when called.
-     * This method is required to fulfill the MethodReaderBuilder interface, but it is not supported
-     * in the BytesMethodReaderBuilder class.
+     * This builder does not support metadata handlers.
      *
-     * @return nothing
      * @throws UnsupportedOperationException always
      */
     @Override
@@ -142,10 +140,11 @@ public class BytesMethodReaderBuilder implements MethodReaderBuilder {
     }
 
     /**
-     * Constructs the BytesMethodReader instance with the specified components.
+     * Constructs and returns a new {@link BytesMethodReader} configured with the
+     * settings from this builder and the provided handler {@code objects}.
      *
-     * @param objects the components for the BytesMethodReader
-     * @return the built BytesMethodReader instance
+     * @param objects the target objects whose methods will be invoked
+     * @return a new configured {@link BytesMethodReader}
      */
     public BytesMethodReader build(Object... objects) {
         return new BytesMethodReader(in, defaultParselet(), methodEncoderLookup, objects);
