@@ -1,0 +1,429 @@
+= Chronicle Wire Integration Guide
+:doctype: book
+:toc:
+:toclevels: 3
+:lang: en-GB
+
+Explains how Chronicle Wire builds on Chronicle Bytes to provide ultra-low-latency serialisation.
+This guide shows practical patterns for choosing wire formats, serializing objects and method calls, tuning performance, and evolving schemas.
+
+== 1  What Is Chronicle Wire?
+
+*Chronicle Wire* is a high-performance serialization framework meticulously layered directly on
+`Chronicle Bytes` instances <<CB-FN-008>>.
+`Bytes` provides the versatile, low-level memory abstraction (on-heap, off-heap, or memory-mapped files), acting as the "transport medium" for the data.
+Chronicle Wire then intelligently formats Java objects, data types, or method calls into a stream of bytes onto this `Bytes` buffer, and reconstructs them upon reading.
+
+The core design philosophy emphasizes:
+* **Zero Garbage Creation:** On critical paths, Wire aims to avoid generating Java heap garbage during serialization and deserialization.
+* **High Speed:** Achieved by minimizing reflection, generating optimized code for `Marshallable` types, and performing direct operations on the underlying `Bytes`.
+* **Flexibility:** Supporting multiple data formats (wire types) to suit different needs, from human-readable YAML to compact binary representations.
+
+All write and read operations ultimately use the same cursor API provided by `Bytes`, meaning the cost of serialization is primarily the encoding logic itself, rather than I/O overhead.
+
+=== 1.1 Core Concepts and Components
+
+* `Wire`: The central interface (e.g., `YamlWire`, `BinaryWire`) providing methods to read and write data.
+It's obtained from a `WireType` applied to a `Bytes` instance.
+* `WireIn` / `WireOut`: Implemented by `Wire`, these define the capabilities for input and output operations.
+* `ValueIn` / `ValueOut`: Used for reading and writing individual fields or values.
+You interact with these when processing fields of an object or items in a sequence.
+* `DocumentContext`: Represents a single message or document boundary within a `Bytes` stream.
+This is crucial when dealing with sequences of messages, like in Chronicle Queue.
+You obtain one via `wire.readingDocument()` or `wire.writingDocument()`.
+All operations within a document are atomic from the perspective of that document being fully written or not (if the underlying `Bytes` supports it, e.g. with MMFs).
+* `Marshallable` Objects: Java objects that can be serialized and deserialized by Wire.
+* `SelfDescribingMarshallable`: The most common interface for user POJOs.
+Requires implementing `readMarshallable` and `writeMarshallable`.
+* `BytesMarshallable`: For objects that need to read/write directly to/from `Bytes` for ultimate control, bypassing most Wire formatting for their payload.
+* `WireMarshallable`: For objects that need custom control over how they are represented in a specific `Wire` format.
+
+=== 1.2  Supported Wire Types
+
+Chronicle Wire provides multiple *wire types*, each with different characteristics:
+
+[cols="15,15,15,30,35",options="header"]
+|===
+| WireType
+| Human Readable
+| Size Overhead
+| Typical Use-Case
+| Underlying `Bytes` Content Example (Conceptual for `MyData { id: 10, name: "A" }`)
+
+| `YAML_ONLY`
+| Yes
+| High
+| Config files, logs, debugging, human review
+| `id: 10\nname: A\n...\n`
+
+| `JSON`
+| Yes
+| Medium
+| REST APIs, web services, JavaScript interop
+| `{"id":10,"name":"A"}`
+
+| `TEXT`
+| Yes
+| Medium
+| Simple text-based formats, easier than YAML
+| `id: 10\nname: A\n` (more compact than YAML)
+
+| `BINARY` / `BINARY_LIGHT`
+| No
+| Low
+| IPC, low-latency messaging, durable storage
+| Field codes + data (e.g., `\x02id\x0A\x04name\x01A`)
+
+| `RAW`
+| No
+| Very Low
+| Extreme speed, fixed schemas, internal state
+| Just data values (e.g., `\x0A\x01A`) - field presence is implicit by order.
+
+| `FIELDLESS_BINARY`
+| No
+| Very Low
+| Similar to `RAW` but can embed type info
+| Similar to RAW, often used for `BytesMarshallable`.
+|===
+
+All types largely share the same `Wire` API for reading and writing common Java types and `Marshallable` objects; you can often switch formats with a single line change.
+
+== 2  Choosing a Wire Type
+
+Consider these factors when selecting a `WireType`:
+
+[cols="2,6"]
+|===
+|Criterion |Recommendation
+|Development & Debugging |Start with `YAML_ONLY` or `TEXT`. You can inspect queue files or `Bytes` dumps in a text editor.
+|Production Hot Path (Performance Critical) |`BINARY_LIGHT` offers a good balance of speed, size, and some schema flexibility. `RAW` or `FIELDLESS_BINARY` for absolute minimal overhead if schema is fixed and well-controlled.
+|Interoperability with Web / JavaScript |`JSON`. Be mindful of potential GC pressure from string-heavy representations; keep off critical low-latency paths if possible.
+|Configuration Files |`YAML_ONLY` is excellent due to its readability and support for comments.
+|Minimizing Data Size |`RAW`, `FIELDLESS_BINARY`, or `BINARY_LIGHT`.
+|Schema Flexibility Needed |`BINARY_LIGHT`, `YAML_ONLY`, `JSON`, `TEXT` are more tolerant of additive changes than `RAW`.
+|===
+
+Performance example for serializing/deserializing a simple 6-field object (<<CB-NF-P-001>> baseline, 3.2 GHz x86-64):
+
+* YAML: ~0.25 - 0.45 µs mean (depending on complexity)
+* JSON: ~0.20 - 0.35 µs mean
+* TEXT: ~0.18 - 0.30 µs mean
+* BINARY_LIGHT: ~0.15 - 0.25 µs mean
+* RAW: ~0.10 - 0.20 µs mean
+
+*Actual performance depends heavily on data structure, field types, and access patterns.*
+
+== 3  Serializing `Marshallable` Objects
+
+The primary way to serialize custom Java objects is by implementing `SelfDescribingMarshallable`.
+
+.Defining a `SelfDescribingMarshallable` Object
+[source,java]
+----
+import net.openhft.chronicle.wire.SelfDescribingMarshallable;
+import net.openhft.chronicle.wire.WireIn;
+import net.openhft.chronicle.wire.WireOut;
+
+public class MyData extends SelfDescribingMarshallable {
+    private int id;
+    private String name;
+    private double value;
+
+    // Constructors, getters, setters omitted for brevity
+
+    public MyData(int id, String name, double value) {
+        this.id = id;
+        this.name = name;
+        this.value = value;
+    }
+
+    @Override
+    public void readMarshallable(WireIn wire) throws IllegalStateException {
+        id = wire.read("id").int32();
+        name = wire.read("name").text();
+        value = wire.read("value").float64();
+    }
+
+    @Override
+    public void writeMarshallable(WireOut wire) {
+        wire.write("id").int32(id);
+        wire.write("name").text(name);
+        wire.write("value").float64(value);
+    }
+
+    @Override
+    public String toString() { // For easy verification
+        return "MyData{" + "id=" + id + ", name='" + name + '\'' + ", value=" + value + '}';
+    }
+}
+----
+
+.Writing and Reading `MyData`
+[source,java]
+----
+import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.wire.*;
+
+public class WireExample {
+    public static void main(String[] args) {
+        try (Bytes<Void> bytes = Bytes.allocateElasticDirect(256)) {
+            Wire wire = WireType.BINARY_LIGHT.apply(bytes); // Or YAML_ONLY, JSON, etc.
+
+            MyData originalData = new MyData(101, "TestData", 99.9);
+
+            // Writing the object
+            System.out.println("Writing: " + originalData);
+            try (DocumentContext dc = wire.writingDocument()) {
+                dc.wire().getValueOut().object(originalData);
+            }
+
+            // Prepare Bytes for reading
+            bytes.flip(); // Sets readLimit to writePosition, readPosition to start
+
+            // Reading the object
+            MyData readData = null;
+            try (DocumentContext dc = wire.readingDocument()) {
+                if (dc.isPresent()) {
+                    readData = dc.wire().getValueIn().object(MyData.class);
+                }
+            }
+            System.out.println("Read: " + readData);
+
+            assert originalData.toString().equals(readData.toString());
+        }
+    }
+}
+----
+
+=== 3.1 Using `BytesMarshallable`
+
+For performance-critical sections where you need to write raw bytes directly, bypassing Wire's field formatting for a portion of the object.
+
+[source,java]
+----
+import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.BytesMarshallable;
+// ... other imports
+
+public class RawPayloadData implements BytesMarshallable {
+    private long header;
+    private byte[] rawPayload; // Max 1KB for this example
+
+    // Assume header gets written/read via standard Wire, payload via BytesMarshallable
+    public void set(long header, byte[] payload) { /* ... */ }
+
+    @Override
+    public void readMarshallable(BytesIn<?> bytes) throws IllegalStateException {
+        header = bytes.readLong();
+        int length = bytes.readInt(); // Read payload length
+        if (length > 0 && length <= 1024) {
+            rawPayload = new byte[length];
+            bytes.read(rawPayload);
+        } else if (length < 0) {
+            throw new IllegalStateException("Invalid payload length: " + length);
+        } else {
+            rawPayload = null; // or empty array
+        }
+    }
+
+    @Override
+    public void writeMarshallable(BytesOut<?> bytes) {
+        bytes.writeLong(header);
+        if (rawPayload != null) {
+            bytes.writeInt(rawPayload.length); // Write payload length
+            bytes.write(rawPayload);
+        } else {
+            bytes.writeInt(0);
+        }
+    }
+}
+----
+
+*Note*: When using `BytesMarshallable`, you are responsible for all byte ordering and formatting within its methods.
+`FIELDLESS_BINARY` wire type is often used with `BytesMarshallable` objects.
+
+== 4  MethodWriter / MethodReader Pattern
+
+This powerful idiom turns a Java interface into an RPC-style channel over `Bytes` with minimal overhead and no generated garbage on the hot path.
+
+[source,java]
+----
+// 1. Define the contract (interface)
+public interface TickEvents {
+    void onPrice(String symbol, long timestampNanos, double price);
+    void onTrade(String symbol, long timestampNanos, double price, long quantity);
+}
+
+// In your application:
+// 2. Acquire a Bytes buffer (e.g., off-heap elastic buffer)
+try (Bytes<Void> bytes = Bytes.allocateElasticDirect(512)) {
+
+    // 3. Create a Wire view onto the Bytes buffer
+    Wire wire = WireType.BINARY_LIGHT.apply(bytes); // Choose your wire type
+
+    // 4. Writer Side: Obtain a MethodWriter for the interface
+    TickEvents eventWriter = wire.methodWriter(TickEvents.class);
+
+    // Call methods on the writer; these calls are serialized to 'bytes'
+    eventWriter.onPrice("EUR/USD", System.nanoTime(), 1.0730);
+    eventWriter.onTrade("GBP/USD", System.nanoTime(), 1.2560, 10000);
+
+    // 5. Reader Side: Implement the interface and create a MethodReader
+    StringBuilder receivedEvents = new StringBuilder();
+    TickEvents eventListener = new TickEvents() {
+        @Override
+        public void onPrice(String symbol, long ts, double px) {
+            receivedEvents.append(String.format("Price: %s %.4f @ %d%n", symbol, px, ts));
+        }
+        @Override
+        public void onTrade(String symbol, long ts, double px, long qty) {
+            receivedEvents.append(String.format("Trade: %s %d @ %.4f, ts %d%n", symbol, qty, px, ts));
+        }
+    };
+
+    MethodReader methodReader = wire.methodReader(eventListener);
+
+    // Prepare Bytes for reading
+    bytes.flip();
+
+    // Read and dispatch messages one by one
+    while (methodReader.readOne()) {
+        // Loop continues as long as messages are successfully read and dispatched
+    }
+
+    System.out.println("Received via MethodReader:\n" + receivedEvents);
+    assert receivedEvents.toString().contains("Price: EUR/USD");
+    assert receivedEvents.toString().contains("Trade: GBP/USD");
+
+} // bytes.releaseLast() called automatically
+----
+
+Key aspects of MethodWriter/Reader:
+
+* **No Reflection at Runtime:** The interface is analyzed once (typically on first use), and optimized proxies are generated.
+* **Message Boundaries:** Each method call typically forms a distinct "document" or message within the `Bytes` stream, managed by `DocumentContext`.
+* **Replayability:** Consumers can replay messages from the `Bytes` stream or skip messages.
+* **Schema Evolution:** Adding new methods to the *end* of the interface generally maintains binary compatibility with older readers (they will ignore unknown method calls).
+
+== 5  Schema Evolution Strategies
+
+Managing changes to your data structures over time is crucial.
+
+* **Additive Changes (Fields/Methods):**
+* **Fields (`SelfDescribingMarshallable`):** Append new fields in `writeMarshallable`.
+Older readers will ignore these new fields if using `BINARY_LIGHT`, `YAML_ONLY`, `JSON`, or `TEXT`.
+Newer readers can handle missing optional fields from older data (e.g., by checking `valueIn.isNull()` or providing defaults).
+* **Methods (`MethodWriter`):** Add new methods to the *end* of the interface.
+Older readers/listeners will ignore these new method calls.
+* **Renaming Fields/Methods:**
+* **Fields:** A common strategy is to add the new field and keep the old field for a transition period.
+Write both, or write the new and have `readMarshallable` check for either the old or new field name.
+Use `@Deprecated` on the old field's accessor/mutator.
+Consider providing a utility to upgrade older data.
+* **Methods:** Similar to fields, you might introduce a new method and deprecate the old one, forwarding calls if necessary.
+* **Removing Fields/Methods:** This is a breaking change.
+Only do this after all producers and consumers have been upgraded to no longer use or expect the removed element.
+Otherwise, readers might throw exceptions or fail to deserialize.
+* **Changing Field Types:** Generally a breaking change unless the new type is "wider" and compatible (e.g., `int` to `long`).
+Handle with care, often requiring a new field name.
+* **Versioning with `RAW` or `FIELDLESS_BINARY`:** Since these formats lack field names, schema evolution is more rigid.
+* Embed a version number (e.g., as a stop-bit encoded `int` or a `short`) at the beginning of your `RAW` message or `BytesMarshallable` payload.
+* Your `readMarshallable` logic would then switch based on this version to correctly interpret the subsequent bytes.
+* Example for `BytesMarshallable`:
+
+[source,java]
+----
+@Override
+public void readMarshallable(BytesIn<?> bytes) {
+int version = bytes.readStopBit();
+if (version == 1) { /* read version 1 fields */ }
+else if (version == 2) { /* read version 2 fields */ }
+else { throw new IllegalStateException("Unsupported version: " + version); }
+}
+
+        @Override
+        public void writeMarshallable(BytesOut<?> bytes) {
+            bytes.writeStopBit(CURRENT_VERSION); // Write current version
+            /* write current version fields */
+        }
+----
+
+== 6  Inter-Process Communication (IPC) & Chronicle Queue
+
+Chronicle Wire is fundamental to Chronicle Queue.
+Messages written to a queue are typically Wire frames serialized onto `MappedBytes` (memory-mapped files).
+
+* **Appenders** use a `Wire` instance (often `BINARY_LIGHT`) to serialize messages (either `Marshallable` objects or `MethodWriter` calls) into the queue's underlying `Bytes`.
+Each message is written within a `DocumentContext`.
+* **Tailers** use a `Wire` instance to read these frames from `Bytes` and deserialize them.
+* **MethodWriter/Reader**: You can use `MethodWriter` to write messages to the queue and `MethodReader` to read them back, allowing for RPC-style interactions over the queue.
+* **IPC**: Chronicle Wire's design allows for efficient IPC between processes on the same host or across hosts.
+When using `BINARY_LIGHT` or `RAW`, the serialized data is compact and can be directly written to and read from `Bytes` buffers, minimizing overhead.
+* **Same-Host IPC**: When processes share the same host, they can use `Bytes.allocateElasticDirect()` to create a shared memory buffer.
+This allows one process to write messages that another process can read without copying data between JVMs.
+
+This architecture allows for extremely fast IPC, with typical same-host latencies around 1 microsecond (p99) including Wire deserialization, because data often only moves between CPU caches.
+
+Cross-host replication (e.g., Chronicle Queue Enterprise) also benefits, as the compact Wire frames (already in `Bytes`) are efficiently sent over TCP.
+
+== 7  Debugging Techniques
+
+* **Switch to `YAML_ONLY` or `TEXT`:** Temporarily change the `WireType` for a specific component (e.g., a writer or a reader) to make its `Bytes` output human-readable.
+This can be invaluable for inspecting message content.
+* **Chronicle Queue `DumpQueueMain`:** If using Chronicle Queue, this utility can pretty-print messages from a queue file, especially useful if they are in YAML or TEXT format.
+* **`HexDumpBytes`:** As shown in `api-guide.adoc`, you can use `HexDumpBytes` to get a detailed hexadecimal view of any `Bytes` slice, helping to diagnose low-level serialization issues.
+* **Logging in `readMarshallable`/`writeMarshallable`:** Add temporary logging within your `Marshallable` methods to trace field values during serialization/deserialization.
+* **`WireDumper`:** Utility to dump the structure of a wire stream, showing field names and types.
+* **`WireType` Debugging:** Use `WireType.dump()` to print the structure of a `WireType`, which can help understand how fields are encoded and what types are expected.
+
+== 8  Common Pitfalls and Avoidance
+
+[cols="1,3",options="header"]
+|===
+| Pitfall
+| Avoidance Strategy
+
+| Forgetting `DocumentContext` for messages
+| Always wrap message writes with `try (DocumentContext dc = wire.writingDocument()) {...}` and reads with `try (DocumentContext dc = wire.readingDocument()) {...}`.
+This ensures message atomicity and correct framing.
+
+| Mismatch between `WireType` on writer and reader
+| Ensure both ends use compatible `WireType`s. `BINARY_LIGHT` is generally robust. `RAW` requires exact schema and order matching.
+
+| Schema evolution errors with `RAW`
+| Implement explicit versioning within your `RAW` data streams (see Section 5).
+Test schema changes thoroughly.
+
+| `StringBuilder` churn during YAML/JSON parsing
+| For very high-performance parsing of text-based formats (if unavoidable), consider custom `WireParser` logic or ensure internal `StringBuilder` reuse where the library supports it.
+Typically, binary formats are preferred for performance.
+
+| Forgetting to `releaseLast()` the underlying `Bytes`
+| `Bytes` instances (especially off-heap) hold resources.
+Always use try-with-resources for `Bytes` and ensure `Wire` instances (which hold a reference to `Bytes`) are also managed within such scopes or their lifecycle is otherwise controlled (see `CB-NF-O-001` in `project-requirements.adoc`).
+
+| Endianness issues with `RAW` or `BytesMarshallable` across different machine architectures
+| While `Bytes` itself uses native order, if you manually construct `RAW` messages for cross-platform use, be aware of endianness.
+Consider a magic number or header to detect mismatches (see `CB-RISK-001` in `project-requirements.adoc`).
+Standard Wire formats like `BINARY_LIGHT` handle this.
+
+| ClassNotFoundException for `Marshallable` types
+| Ensure the class definition for deserialized objects is available on the classpath of the reading application.
+|===
+
+== 9  Performance Tuning Checklist
+
+* **Reuse `Wire` Instances:** Avoid re-creating `Wire` objects (e.g., `WireType.BINARY_LIGHT.apply(bytes)`) repeatedly on the hot path.
+If the underlying `Bytes` instance is long-lived and thread-local, the `Wire` instance can often be too.
+* **Reuse `MethodWriter` / `MethodReader` Proxies:** The proxies generated by `wire.methodWriter()` and `wire.methodReader()` are lightweight but have a small creation cost.
+Cache and reuse them where appropriate (e.g., per thread, per `Wire` instance).
+* **Implement `BytesMarshallable` for Ultra-Performance:** For DTOs on the most critical paths where `RAW` or `FIELDLESS_BINARY` is used, implementing `BytesMarshallable` gives you direct control over byte layout, potentially outperforming `SelfDescribingMarshallable` if carefully crafted.
+* **Pre-size `Bytes` Buffers:** If you know the approximate maximum size of your messages, pre-allocate the `Bytes` buffer accordingly (e.g., `bytes.ensureWritable(maxMessageSize)` or initial capacity for `Bytes.allocateElasticDirect()`).
+This reduces the chance of reallocations during writes.
+* **Choose `BINARY_LIGHT` or `RAW`:** For speed, these are generally the best choices. `VanillaWire` is the highly optimized implementation behind `BINARY_LIGHT`.
+* **Efficient `readMarshallable`/`writeMarshallable`:** Ensure your implementations are lean.
+Avoid allocations, complex logic, or I/O within these methods.
+* **JMH Benchmarking:** Use JMH (Java Microbenchmark Harness) to measure the performance of your serialization/deserialization logic.
+Use `Blackhole.consume()` to prevent dead code elimination of listener output or deserialized objects.
+* **Minimize Fields in Hot DTOs:** Fewer fields generally mean faster serialization.
