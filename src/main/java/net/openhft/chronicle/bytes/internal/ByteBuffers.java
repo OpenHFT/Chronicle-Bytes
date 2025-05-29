@@ -21,15 +21,17 @@ import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
 
 /**
- * Utility class for working with {@link ByteBuffer} instances.
- * <p>
- * Provides functionality to directly set the address and capacity of a ByteBuffer.
+ * Internal utility for low level manipulation of {@link ByteBuffer} objects,
+ * primarily direct buffers. It relies on reflection to modify the private
+ * address and capacity fields, so must be used with great care.
  */
 public final class ByteBuffers {
     private ByteBuffers() {
     }
 
+    /** reflected field for ByteBuffer.address */
     private static final Field ADDRESS;
+    /** reflected field for ByteBuffer.capacity */
     private static final Field CAPACITY;
 
     static {
@@ -39,16 +41,17 @@ public final class ByteBuffers {
     }
 
     /**
-     * Sets the memory address and capacity of a {@link ByteBuffer} instance directly.
+     * Directly sets the internal {@code address} and {@code capacity} fields of
+     * the given direct {@link ByteBuffer}.
      * <p>
-     * This method uses reflection to access and modify the address and capacity fields of the ByteBuffer.
-     * It should be used with caution as it bypasses the usual safety checks and can lead to undefined behavior
-     * if used improperly.
+     * <strong>Warning:</strong> this bypasses all normal safety mechanisms. The
+     * caller must ensure the provided address and capacity describe a valid
+     * memory region or the JVM may crash.
      *
-     * @param buffer   the ByteBuffer whose address and capacity are to be set
-     * @param address  the memory address to be set
-     * @param capacity the capacity to be set
-     * @throws AssertionError if the operation fails due to IllegalAccessException or IllegalArgumentException
+     * @param buffer   the direct buffer to modify
+     * @param address  native address for the buffer
+     * @param capacity new capacity value (truncated to {@code int})
+     * @throws AssertionError if reflective access fails
      */
     public static void setAddressCapacity(ByteBuffer buffer, long address, long capacity) {
         int cap = Math.toIntExact(capacity);

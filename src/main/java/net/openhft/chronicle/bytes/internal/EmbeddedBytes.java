@@ -23,15 +23,31 @@ import org.jetbrains.annotations.NotNull;
 
 import static net.openhft.chronicle.core.Jvm.uncheckedCast;
 
+/**
+ * Non elastic {@link VanillaBytes} view over a field group inside an object.
+ * The length is stored in a byte immediately before the group.
+ */
 public class EmbeddedBytes<U> extends VanillaBytes<U> {
+    /**
+     * Creates a view over {@code bytesStore} with the given bounds. The byte
+     * at {@code start()-1} holds the length.
+     */
     private EmbeddedBytes(@NotNull BytesStore<?, ?> bytesStore, long writePosition, long writeLimit) throws IllegalStateException, IllegalArgumentException {
         super(bytesStore, writePosition, writeLimit);
     }
 
+    /**
+     * Wraps {@code bytesStore}, which must be a HeapBytesStore for a field
+     * group, returning an EmbeddedBytes view.
+     */
     public static <U> EmbeddedBytes<U> wrap(BytesStore<?, U> bytesStore) {
         return wrap(uncheckedCast(bytesStore));
     }
 
+    /**
+     * Creates an EmbeddedBytes over the data in {@code bytesStore}. The length
+     * is read from the byte before {@code bytesStore.start()}.
+     */
     public static <U> EmbeddedBytes<U> wrap(HeapBytesStore<U> bytesStore) {
         long wp = bytesStore.start();
         int length = bytesStore.readUnsignedByte(wp - 1);
@@ -39,12 +55,19 @@ public class EmbeddedBytes<U> extends VanillaBytes<U> {
     }
 
     @Override
+    /**
+     * Sets the write position and updates the length byte stored before this
+     * field group.
+     */
     protected void uncheckedWritePosition(@NonNegative long writePosition) {
         super.uncheckedWritePosition(writePosition);
         bytesStore.writeUnsignedByte(lengthOffset(), (int) writePosition);
     }
 
     @Override
+    /**
+     * Reads the current length prefix and returns it as the write position.
+     */
     public @NonNegative long writePosition() {
         try {
             return bytesStore.readUnsignedByte(lengthOffset());
@@ -53,6 +76,9 @@ public class EmbeddedBytes<U> extends VanillaBytes<U> {
         }
     }
 
+    /**
+     * @return the absolute offset of the length byte
+     */
     private long lengthOffset() {
         return bytesStore.start() - 1;
     }
