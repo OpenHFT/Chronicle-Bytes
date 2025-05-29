@@ -28,7 +28,7 @@
  * exist primarily for debugging. See {@link net.openhft.chronicle.bytes.ref} and the
  * <a href="../adoc/wire-integration.adoc">wire integration guide</a> for usage advice.</p>
  *
- * @apiNote Prefer binary classes on the hot path; use text classes for observability.
+ * <p> Prefer binary classes on the hot path; use text classes for observability.
  * @see net.openhft.chronicle.bytes.BytesStore
  * @see net.openhft.chronicle.bytes.Byteable
  */

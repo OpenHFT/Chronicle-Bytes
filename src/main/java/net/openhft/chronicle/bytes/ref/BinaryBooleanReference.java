@@ -33,7 +33,7 @@ import static net.openhft.chronicle.bytes.HexDumpBytes.MASK;
  * <p>The encoding uses {@code 0xB0} for {@code false} and {@code 0xB1} for
  * {@code true} to avoid confusion with ASCII digits.</p>
  *
- * @implNote Any other byte value yields undefined behaviour in
+ * <p> Any other byte value yields undefined behaviour in
  * {@link #getValue()}.
  * @see BytesStore
  * @see BooleanValue
@@ -81,12 +81,12 @@ public class BinaryBooleanReference extends AbstractReference implements Boolean
 
     /**
      * Reads a boolean value from the bytes store.
+     * <p> Behaviour is undefined if the stored byte is neither
      *
      * @return The read boolean value
      * @throws BufferUnderflowException If the bytes store contains insufficient data
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
-     * @implNote Behaviour is undefined if the stored byte is neither
      * {@code 0xB0} nor {@code 0xB1}.
      */
     @Override

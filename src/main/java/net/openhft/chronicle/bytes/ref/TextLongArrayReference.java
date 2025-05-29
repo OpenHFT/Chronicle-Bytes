@@ -34,8 +34,8 @@ import static java.nio.charset.StandardCharsets.ISO_8859_1;
  * Fixed-width text array of 64-bit integers for diagnostics.
  * <p>Each entry is zero padded to twenty digits and guarded by a spin-lock flag.</p>
  *
- * @implNote Constants such as {@code TRU} and {@code FALS} encode the lock state.
- * @apiNote For debugging only, not tuned for throughput.
+ * <p> Constants such as {@code TRU} and {@code FALS} encode the lock state.
+ * <p> For debugging only, not tuned for throughput.
  */
 @SuppressWarnings("rawtypes")
 public class TextLongArrayReference extends AbstractReference implements ByteableLongArrayValues {

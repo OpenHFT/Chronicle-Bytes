@@ -34,7 +34,7 @@ import java.nio.channels.FileLock;
  * {@link #performClose()} releases it. Subclasses must call
  * {@code throwExceptionIfClosed...()} before mutating state.</p>
  *
- * @implSpec {@link #unmonitor()} propagates to the wrapped store.
+ * <p> {@link #unmonitor()} propagates to the wrapped store.
  * @see BytesStore
  * @see Byteable
  * @see Closeable

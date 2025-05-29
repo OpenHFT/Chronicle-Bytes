@@ -34,8 +34,8 @@ import static net.openhft.chronicle.bytes.BytesUtil.roundUpTo8ByteAlign;
  * Reference to a 10-digit, zero-padded integer in text form.
  * <p>The 34-byte layout embeds a CAS-based lock.</p>
  *
- * @implNote {@code FALSE} and {@code TRUE} store the lock field.
- * @apiNote Debug-only; avoid on performance critical paths.
+ * <p> {@code FALSE} and {@code TRUE} store the lock field.
+ * <p> Debug-only; avoid on performance critical paths.
  */
 @SuppressWarnings("rawtypes")
 public class TextIntReference extends AbstractReference implements IntValue {

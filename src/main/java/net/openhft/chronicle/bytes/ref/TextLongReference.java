@@ -35,9 +35,9 @@ import static net.openhft.chronicle.bytes.BytesUtil.roundUpTo8ByteAlign;
  * <p>The layout is exactly {@code 34} bytes and includes a spin-lock
  * flag.  The lock is obtained via CAS in {@link #withLock(ThrowingLongSupplier)}.</p>
  *
- * @implNote {@code FALSE} and {@code TRUE} encode the lock state as four ASCII
+ * <p> {@code FALSE} and {@code TRUE} encode the lock state as four ASCII
  * characters.
- * @apiNote These text classes are intended for debugging rather than production
+ * <p> These text classes are intended for debugging rather than production
  * use.
  */
 @SuppressWarnings("rawtypes")

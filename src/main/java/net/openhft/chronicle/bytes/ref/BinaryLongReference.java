@@ -31,9 +31,9 @@ import static net.openhft.chronicle.bytes.HexDumpBytes.MASK;
  * <p>The value may temporarily be {@link #LONG_NOT_COMPLETE} when used as part
  * of a state machine.</p>
  *
- * @implSpec Volatile and ordered methods follow the same guarantees as
+ * <p> Volatile and ordered methods follow the same guarantees as
  * {@link java.util.concurrent.atomic.AtomicLong}.
- * @apiNote Dereferencing a {@code null} store in {@link #toString()} is solely
+ * <p> Dereferencing a {@code null} store in {@link #toString()} is solely
  * for debugging.
  *
  * @see BytesStore

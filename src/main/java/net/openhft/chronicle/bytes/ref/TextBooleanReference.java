@@ -30,8 +30,8 @@ import java.nio.BufferUnderflowException;
  * <p>The format is four ASCII bytes containing either {@code " tru"}
  * or {@code "fals"} and includes a simple spin-lock.</p>
  *
- * @implNote {@code FALSE} and {@code TRUE} hold the encoded text.
- * @apiNote These classes target debugging, not production performance.
+ * <p> {@code FALSE} and {@code TRUE} hold the encoded text.
+ * <p> These classes target debugging, not production performance.
  */
 @SuppressWarnings("rawtypes")
 public class TextBooleanReference extends AbstractReference implements BooleanValue {

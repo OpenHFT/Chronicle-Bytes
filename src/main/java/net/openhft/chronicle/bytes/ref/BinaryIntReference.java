@@ -38,10 +38,10 @@ import java.nio.BufferUnderflowException;
  * }
  * }</pre>
  *
- * @implSpec All volatile methods provide a full happens-before edge. Ordered
+ * <p> All volatile methods provide a full happens-before edge. Ordered
  * methods use lazy set semantics. {@link #maxSize()} always returns {@code
  * Integer.BYTES}.
- * @apiNote Negative values are valid; {@link #INT_NOT_COMPLETE} is only a
+ * <p> Negative values are valid; {@link #INT_NOT_COMPLETE} is only a
  * replay sentinel.
  *
  * @see BytesStore
@@ -178,7 +178,7 @@ public class BinaryIntReference extends AbstractReference implements IntValue {
      * @throws BufferUnderflowException If the offset is too large
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
-     * @implSpec This atomic fetch-and-add forms a happens-before edge with
+     * <p> This atomic fetch-and-add forms a happens-before edge with
      *           subsequent reads of the value.
      */
     @Override
@@ -216,7 +216,7 @@ public class BinaryIntReference extends AbstractReference implements IntValue {
      * @throws BufferOverflowException If the offset is too large
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
-     * @implSpec A successful swap establishes a happens-before relation with
+     * <p> A successful swap establishes a happens-before relation with
      *           subsequent reads of the value.
      */
     @Override
