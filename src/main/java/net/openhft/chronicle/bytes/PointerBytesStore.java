@@ -24,30 +24,20 @@ import net.openhft.chronicle.core.io.ThreadingIllegalStateException;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * A BytesStore that points to arbitrary memory.
- * <p>
- * This class represents a view of Bytes over an arbitrary area of memory. It provides methods to set and
- * interact with this area of memory.
- *
- * <p><b>WARNING:</b> It is not recommended to use this in conjunction with ElasticBytes. ElasticBytes, by design,
- * can change its underlying data structure's location, which might invalidate or corrupt the memory view
- * held by this PointerBytesStore.
+ * {@link NativeBytesStore} providing a view over externally managed memory.
+ * Not suitable for elastic bytes.
  */
 public class PointerBytesStore extends NativeBytesStore<Void> {
 
     /**
-     * Default constructor that initializes a PointerBytesStore with no data.
+     * Constructs a store with no associated memory.
      */
     public PointerBytesStore() {
         super(NoBytesStore.NO_PAGE, 0, null, false, false);
     }
 
     /**
-     * Sets the memory address and capacity of this PointerBytesStore.
-     *
-     * @param address  the memory address
-     * @param capacity the size of the memory to which this PointerBytesStore should point
-     * @throws IllegalArgumentException if the capacity is negative
+     * Points this store at a new memory region.
      */
     public void set(long address, @NonNegative long capacity) throws IllegalArgumentException {
         setAddress(address);
