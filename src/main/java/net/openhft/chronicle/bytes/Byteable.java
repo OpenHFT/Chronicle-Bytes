@@ -27,55 +27,47 @@ import java.nio.BufferUnderflowException;
 import java.nio.channels.FileLock;
 
 /**
- * An interface for a reference to off-heap memory, acting as a proxy for memory residing outside the heap.
- * This allows the reference to be reassigned, facilitating dynamic memory management.
+ * Allows a Java object to view a slice of a {@link BytesStore}. Implementations
+ * may be remapped to different offsets to avoid copying.
  */
 public interface Byteable {
     /**
-     * Sets the reference to a data type that points to the underlying ByteStore.
+     * Map this object onto a region of {@code bytesStore}.
      *
-     * @param bytesStore the fixed-point ByteStore
-     * @param offset     the offset within the ByteStore, indicating the starting point of the memory section
-     * @param length     the length of the memory section within the ByteStore
-     * @throws IllegalArgumentException       If the provided arguments are invalid
-     * @throws BufferOverflowException        If the new memory section extends beyond the end of the ByteStore
-     * @throws BufferUnderflowException       If the new memory section starts before the start of the ByteStore
-     * @throws ClosedIllegalStateException    If the resource has been released or closed.
-     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
+     * @param bytesStore backing store
+     * @param offset     non-negative offset
+     * @param length     non-negative length which should match {@link #maxSize()}
+     * @throws IllegalArgumentException       if parameters are out of range
+     * @throws BufferOverflowException        if the region would extend past the end of the store
+     * @throws BufferUnderflowException       if the region would start before {@code 0}
+     * @throws ClosedIllegalStateException    if the store is closed
+     * @throws ThreadingIllegalStateException if accessed from the wrong thread
      */
     @SuppressWarnings("rawtypes")
     void bytesStore(@NotNull BytesStore bytesStore, @NonNegative long offset, @NonNegative long length)
             throws ClosedIllegalStateException, IllegalArgumentException, BufferOverflowException, BufferUnderflowException, ThreadingIllegalStateException;
 
     /**
-     * Returns the ByteStore to which this object currently points.
-     *
-     * @return the ByteStore or null if it's not set
+     * @return current backing {@link BytesStore} or {@code null} if unmapped
      */
     @Nullable
     BytesStore<?, ?> bytesStore();
 
     /**
-     * Returns the offset within the ByteStore to which this object currently points.
-     *
-     * @return the offset within the ByteStore (not the physical memory address)
+     * @return offset within the current {@link BytesStore}
      */
     long offset();
 
     /**
-     * Returns the absolute address in the memory to which this object currently points.
-     *
-     * @return the absolute address in the memory
-     * @throws UnsupportedOperationException If the address is not set or the underlying ByteStore isn't native
+     * @return absolute address of the mapped data if supported
+     * @throws UnsupportedOperationException if not backed by native memory
      */
     default long address() throws UnsupportedOperationException {
         return bytesStore().addressForRead(offset());
     }
 
     /**
-     * Returns the maximum size in bytes that this reference can point to.
-     *
-     * @return the maximum size in bytes for this reference
+     * @return fixed byte size represented by this object
      */
     long maxSize();
 
