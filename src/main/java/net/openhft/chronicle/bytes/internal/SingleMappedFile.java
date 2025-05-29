@@ -36,8 +36,8 @@ import java.nio.channels.FileLock;
 import static net.openhft.chronicle.core.io.Closeable.closeQuietly;
 
 /**
- * A memory mapped files which can be randomly accessed in a single chunk. It has no overlapping region to
- * avoid wasting bytes at the end of file.
+ * {@link MappedFile} implementation that maps the entire file as one contiguous
+ * region. Suitable when the full capacity fits into the process address space.
  */
 @SuppressWarnings({"rawtypes", "restriction"})
 public class SingleMappedFile extends MappedFile {

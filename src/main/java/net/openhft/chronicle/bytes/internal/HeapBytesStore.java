@@ -36,19 +36,26 @@ import static net.openhft.chronicle.core.util.Longs.requireNonNegative;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
 /**
- * Wrapper for Heap ByteBuffers and arrays.
+ * {@link net.openhft.chronicle.bytes.BytesStore} implementation backed by an
+ * on-heap byte array or heap {@link ByteBuffer}. Accesses are performed using
+ * {@code Unsafe} for speed. Instances are reference counted.
  *
- * @param <U> Underlying type
+ * @param <U> underlying type
  */
 @SuppressWarnings("restriction")
 public class HeapBytesStore<U>
         extends AbstractBytesStore<HeapBytesStore<U>, U> {
+    /** Actual byte array backing this store when wrapping heap memory. */
     @Nullable
     private final Object realUnderlyingObject;
+    /** Unsafe offset of the first data byte. */
     private final int dataOffset;
+    /** Usable capacity of this store. */
     private final long capacity;
+    /** Original object passed to the constructor, array or ByteBuffer. */
     @Nullable
     private final U underlyingObject;
+    /** Memory accessor used for heap operations. */
     private UnsafeMemory memory = UnsafeMemory.MEMORY;
 
     private HeapBytesStore(@NotNull ByteBuffer byteBuffer) {
@@ -96,6 +103,10 @@ public class HeapBytesStore<U>
         return new HeapBytesStore<>(bb);
     }
 
+    /**
+     * Returns the base unsafe offset for accessing data within
+     * {@link #realUnderlyingObject}.
+     */
     long dataOffset() {
         return dataOffset;
     }

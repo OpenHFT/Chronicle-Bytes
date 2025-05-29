@@ -66,8 +66,9 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 import static net.openhft.chronicle.core.util.StringUtils.*;
 
 /**
- * Utility methods to support common functionality in this package. This is not intended to be
- * accessed directly.
+ * Provides internal static helper methods used by {@link net.openhft.chronicle.bytes.Bytes},
+ * {@link net.openhft.chronicle.bytes.BytesStore} and related types. The API of this enum is
+ * purely for the Chronicle implementation and may change without notice.
  */
 @SuppressWarnings("rawtypes")
 public
@@ -141,6 +142,16 @@ enum BytesInternal {
         }
     }
 
+    /**
+     * Compares the readable bytes of {@code a} and {@code b} for equality. The
+     * comparison starts at each store's current {@code readPosition()} and runs
+     * to {@code readLimit()}.
+     *
+     * @param a first store, may be null
+     * @param b second store, may be null
+     * @return true if both stores have the same readable content
+     * @throws ClosedIllegalStateException if either store has been released
+     */
     public static boolean contentEqual(@Nullable final BytesStore<?, ?> a,
                                        @Nullable final BytesStore<?, ?> b) throws ClosedIllegalStateException {
         if (a == null) return b == null;
@@ -511,6 +522,21 @@ enum BytesInternal {
         return true;
     }
 
+    /**
+     * Reads {@code length} bytes from {@code bytes} and appends the characters to
+     * {@code appendable}. The {@code utf} flag indicates whether the length
+     * parameter represents a count of UTF-8 bytes or a character count for 8-bit
+     * data.
+     *
+     * @param bytes      the input to read from
+     * @param appendable the destination for the decoded characters
+     * @param utf        true if {@code length} is a UTF-8 byte count, false if it is
+     *                   the number of characters in 8-bit encoding
+     * @param length     the number of bytes or characters to read
+     * @throws UTFDataFormatRuntimeException if an invalid UTF-8 sequence is encountered
+     * @throws BufferUnderflowException      if fewer than {@code length} bytes are available
+     * @throws ClosedIllegalStateException   if either argument has been released
+     */
     public static void parseUtf8(
             @NotNull StreamingDataInput bytes, Appendable appendable, boolean utf, @NonNegative int length)
             throws UTFDataFormatRuntimeException, BufferUnderflowException, ClosedIllegalStateException {
@@ -528,6 +554,21 @@ enum BytesInternal {
         }
     }
 
+    /**
+     * Reads {@code length} bytes starting at {@code offset} from {@code input}
+     * and appends the decoded characters to {@code appendable}. This method is
+     * optimised for {@link NativeBytesStore} backed input when {@code appendable}
+     * is a {@link StringBuilder}.
+     *
+     * @param input      the source of bytes
+     * @param offset     position within the input to start reading
+     * @param appendable destination for the characters
+     * @param utf        length represents a UTF-8 byte count
+     * @param length     number of UTF-8 bytes to parse
+     * @throws UTFDataFormatRuntimeException if invalid UTF-8 is found
+     * @throws BufferUnderflowException      if the length exceeds the readable bytes
+     * @throws ClosedIllegalStateException   if either argument has been released
+     */
     public static void parseUtf8(
             @NotNull RandomDataInput input, @NonNegative long offset, Appendable appendable, boolean utf, @NonNegative int length)
             throws UTFDataFormatRuntimeException, BufferUnderflowException, ClosedIllegalStateException {
@@ -877,6 +918,17 @@ enum BytesInternal {
         }
     }
 
+    /**
+     * Optimised 8-bit parsing for a {@link NativeBytesStore} into a
+     * {@link StringBuilder}. Characters are appended directly without UTF-8
+     * decoding.
+     *
+     * @param offset start offset within the bytes store
+     * @param nbs    native store to read from
+     * @param sb     target builder
+     * @param length number of bytes to parse
+     * @return number of characters appended
+     */
     public static int parse8bit_SB1(@NonNegative long offset, @NotNull NativeBytesStore nbs, @NotNull StringBuilder sb, @NonNegative int length) {
         throwExceptionIfReleased(nbs);
         requireNonNull(sb);
@@ -1145,6 +1197,15 @@ enum BytesInternal {
         return sbytes;
     }
 
+    /**
+     * Writes the UTF-8 encoded form of a portion of {@code str} to
+     * {@code bytes} without writing a length prefix.
+     *
+     * @param bytes  destination for the encoded characters
+     * @param str    characters to encode
+     * @param offset starting index within {@code str}
+     * @param length number of characters to encode
+     */
     public static void appendUtf8(@NotNull StreamingDataOutput bytes,
                                   @NotNull CharSequence str, @NonNegative int offset, @NonNegative int length)
             throws IndexOutOfBoundsException, ClosedIllegalStateException, ThreadingIllegalStateException {
@@ -1175,6 +1236,17 @@ enum BytesInternal {
         }
     }
 
+    /**
+     * Encodes a section of {@code str} as UTF-8 bytes directly into the given
+     * {@code RandomDataOutput} starting at {@code outOffset}.
+     *
+     * @param out       destination for the bytes
+     * @param outOffset position within the destination to start writing
+     * @param str       characters to encode
+     * @param strOffset first character index
+     * @param length    number of characters to encode
+     * @return the offset after the last written byte
+     */
     public static long appendUtf8(@NotNull RandomDataOutput out, @NonNegative long outOffset,
                                   @NotNull CharSequence str, @NonNegative int strOffset, @NonNegative int length)
             throws IndexOutOfBoundsException, BufferOverflowException, ClosedIllegalStateException {
@@ -1274,6 +1346,16 @@ enum BytesInternal {
         out.writeUnsignedShort(NEG_ONE);
     }
 
+    /**
+     * Writes the given value using stop-bit encoding to {@code out}. Values close
+     * to zero are encoded in a single byte while larger values expand to multiple
+     * bytes.
+     *
+     * @param out target for the encoded value
+     * @param n   value to encode
+     * @throws BufferOverflowException    if there is insufficient space in {@code out}
+     * @throws ClosedIllegalStateException if the output has been released
+     */
     public static void writeStopBit(@NotNull StreamingDataOutput out, char n)
             throws BufferOverflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
         if ((n & ~0x7F) == 0) {
@@ -1310,6 +1392,14 @@ enum BytesInternal {
         return writeStopBit0(addr, n);
     }
 
+    /**
+     * Writes {@code n} using stop-bit encoding to {@code out}.
+     *
+     * @param out target to write to
+     * @param n   value to encode
+     * @throws BufferOverflowException    if {@code out} has insufficient capacity
+     * @throws ClosedIllegalStateException if the output has been released
+     */
     public static void writeStopBit(@NotNull StreamingDataOutput out, long n)
             throws BufferOverflowException, ClosedIllegalStateException {
         if ((n & ~0x7F) == 0) {
@@ -1575,6 +1665,14 @@ enum BytesInternal {
         return new String(bytes, StandardCharsets.UTF_8);
     }
 
+    /**
+     * Returns a string using ISO-8859-1 encoding of the readable portion of
+     * {@code bytes}. If the data exceeds an internal limit it is truncated with
+     * an ellipsis.
+     *
+     * @param bytes the bytes to convert
+     * @return readable content as a string
+     */
     @NotNull
     public static String toString(@NotNull RandomDataInput bytes) {
         try {
@@ -1684,6 +1782,14 @@ enum BytesInternal {
         return (char) readStopBit0(in, b);
     }
 
+    /**
+     * Reads a stop-bit encoded long value from {@code in}.
+     *
+     * @param in the input to read from
+     * @return the decoded value
+     * @throws IORuntimeException        if the underlying read fails
+     * @throws ClosedIllegalStateException if the input has been released
+     */
     public static long readStopBit(@NotNull StreamingDataInput in)
             throws IORuntimeException, ClosedIllegalStateException {
         byte b;
@@ -3047,12 +3153,14 @@ enum BytesInternal {
      * b6 03 56 4d 48                                  # VMH
      * </pre>
      *
-     * @param bytes     The buffer whose content is to be converted to a hexadecimal string.
-     *                  Must not be null.
-     * @param offset    The starting offset within the buffer to begin the hexadecimal conversion.
-     * @param maxLength The number of bytes to convert from the buffer.
-     * @return A hexadecimal representation of the buffer content with comments describing the bytes.
-     * Each line of the string contains the hexadecimal representation of 16 bytes.
+     * Converts up to {@code maxLength} bytes from {@code bytes} starting at
+     * {@code offset} into a multi-line hex dump. Each line represents sixteen
+     * bytes followed by an ASCII rendering of those bytes.
+     *
+     * @param bytes     buffer to convert
+     * @param offset    starting offset within the buffer
+     * @param maxLength number of bytes to convert
+     * @return formatted hex dump of the readable data
      * @throws BufferUnderflowException    If there is not enough data in the buffer.
      * @throws ClosedIllegalStateException If the resource has been released or closed.
      * @throws IllegalArgumentException    If the provided offset or maxLength are negative.
@@ -3267,6 +3375,15 @@ enum BytesInternal {
         return bytes;
     }
 
+    /**
+     * Copies all readable bytes from {@code input} to {@code output}. Neither
+     * the input nor the output is closed by this method.
+     *
+     * @param input  source of bytes
+     * @param output destination stream
+     * @throws IOException                if the stream write fails
+     * @throws ClosedIllegalStateException if the input has been released
+     */
     public static void copy(@NotNull final RandomDataInput input, @NotNull final OutputStream output)
             throws IOException, ClosedIllegalStateException {
         requireNonNull(input);
@@ -3280,6 +3397,13 @@ enum BytesInternal {
         }
     }
 
+    /**
+     * Reads from {@code input} until EOF and writes the bytes to {@code output}.
+     * Neither stream is closed.
+     *
+     * @param input  source stream
+     * @param output destination bytes
+     */
     public static void copy(@NotNull InputStream input, @NotNull StreamingDataOutput output)
             throws IOException, BufferOverflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
         @NotNull byte[] bytes = new byte[512];
