@@ -288,6 +288,19 @@ try (Bytes<Void> bytes = Bytes.allocateElasticDirect(256)) {
 }
 ----
 
+=== 4.4  Error Handling
+
+Chronicle Bytes throws specific exceptions when cursor invariants are violated or
+when attempts are made to operate on a closed buffer.
+
+* `BufferOverflowException` or `BufferUnderflowException` occur if you write or
+  read past the current limits.
+* `ClosedIllegalStateException` indicates a method was called after the buffer
+  was released.
+
+Always check capacities and use try-with-resources for off-heap buffers to ensure
+they are closed properly.
+
 == 5  Common Patterns and Use Cases
 
 === 5.1  Zero-Copy Slicing (CB-FN-006)

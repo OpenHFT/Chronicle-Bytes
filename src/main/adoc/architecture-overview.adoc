@@ -30,6 +30,58 @@ Where a statement maps directly to a formal requirement from
 <<CB-FN-004>>.
 ====
 
+=== 1.1  Component Relationships
+
+Chronicle Bytes maintains a clear separation between the region of memory and the
+view used to access it. `BytesStore` represents the memory itself while `Bytes`
+is an accessor with movable cursors. Several concrete implementations exist for
+different storage modes:
+
+....
+            Bytes
+              |
+   +----------+----------+
+   |          |          |
+NativeBytes MappedBytes OnHeapBytes
+   |          |          |
+   |          |          |
+NativeBytesStore MappedBytesStore HeapBytesStore
+....
+
+Each `Bytes` variant wraps a specific `BytesStore`. A `BytesStore` may be shared
+between many `Bytes` views, but each `Bytes` instance has its own read and write
+cursors.
+
+=== 1.2  Memory Types
+
+* **On-heap**: Backed by a `byte[]`. GC manages the memory but introduces
+  unpredictable pauses.
+* **Native (off-heap)**: Backed by direct memory outside the Java heap. It avoids
+  GC pauses and is suitable for low-latency paths.
+* **Memory-mapped**: Regions of files mapped into memory via `MappedBytesStore`.
+  Useful for IPC and persistence with minimal copying.
+
+=== 1.3  Threading Model (<<CB-NF-O-005>>)
+
+`Bytes` instances are not thread-safe for concurrent mutation. Each thread should
+use its own `Bytes` view. Atomic operations on a `BytesStore` (`compareAndSwapLong`
+and similar) are safe to call from multiple threads.
+
+=== 1.4  Elastic Buffers
+
+Elastic `Bytes` instances, such as those created with
+`Bytes.allocateElasticDirect()`, grow on demand up to the capacity of their
+underlying `BytesStore`. Growth involves allocating a larger store and copying
+existing data, so pre-sizing buffers can avoid a stall on the first resize.
+
+=== 1.5  Reference Counting
+
+Off-heap `BytesStore` implementations use reference counting to manage native
+memory. Calls to `reserve()` increment the count, while `release()` and
+`releaseLast()` decrement it. When the count reaches zero the memory is freed or
+the mapping is unmapped. Forgetting to release results in leaks; releasing too
+many times throws `IllegalStateException`.
+
 == 2  Guiding Architectural Principles
 
 The design and implementation of Chronicle Bytes adhere to several core principles to meet the demands of high-performance systems:
