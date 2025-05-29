@@ -23,16 +23,16 @@ import net.openhft.chronicle.core.io.ThreadingIllegalStateException;
 import net.openhft.chronicle.core.values.LongArrayValues;
 
 /**
- * Represents an array of long integer values, where each long integer in the array is byteable and dynamically sized.
+ * Off-heap, contiguous array of signed 64-bit values.
  * <p>
- * Implementations of this interface should provide means to manage the array of long integers, with
- * support for resizing the array dynamically. It is meant to be used where direct, low-level access
- * to the bytes representing the long integer values is needed.
- * 
+ * Implementations must store each value contiguously according to
+ * {@link BinaryLongArrayReference#SHIFT} and are expected to use
+ * little-endian aligned storage.
  *
  * @see LongArrayValues
  * @see Byteable
  * @see DynamicallySized
+ * @see BinaryLongArrayReference
  */
 @SuppressWarnings("rawtypes")
 public interface ByteableLongArrayValues extends LongArrayValues, Byteable, DynamicallySized {

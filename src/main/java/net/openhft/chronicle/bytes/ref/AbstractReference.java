@@ -29,12 +29,12 @@ import java.nio.BufferUnderflowException;
 import java.nio.channels.FileLock;
 
 /**
- * Represents an abstract reference to a {@link BytesStore}.
+ * Base class for references backed by a {@link BytesStore}.
+ * <p>{@link #acceptNewBytesStore(BytesStore)} reserves the store and
+ * {@link #performClose()} releases it. Subclasses must call
+ * {@code throwExceptionIfClosed...()} before mutating state.</p>
  *
- * <p>This class provides an abstraction for managing a reference to a BytesStore. It provides
- * functionality to read and write data from/to the BytesStore, manage a reference count, and lock
- * resources.
- *
+ * @implSpec {@link #unmonitor()} propagates to the wrapped store.
  * @see BytesStore
  * @see Byteable
  * @see Closeable

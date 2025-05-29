@@ -23,15 +23,15 @@ import net.openhft.chronicle.core.io.ThreadingIllegalStateException;
 import net.openhft.chronicle.core.values.IntArrayValues;
 
 /**
- * Represents an array of integer values, where each integer in the array is byteable and dynamically sized.
+ * Off-heap, contiguous array of signed 32-bit values.
  * <p>
- * Implementations of this interface should provide means to manage the array of integers, with
- * support for resizing the array dynamically. It is meant to be used where direct, low-level access
- * to the bytes representing the integer values is needed.
+ * Values must be stored contiguously following
+ * {@link BinaryIntArrayReference#SHIFT} in little-endian order.
  *
  * @see IntArrayValues
  * @see Byteable
  * @see DynamicallySized
+ * @see BinaryIntArrayReference
  */
 @SuppressWarnings("rawtypes")
 public interface ByteableIntArrayValues extends IntArrayValues, Byteable, DynamicallySized {

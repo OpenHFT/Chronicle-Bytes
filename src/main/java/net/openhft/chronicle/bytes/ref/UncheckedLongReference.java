@@ -28,11 +28,12 @@ import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 
 /**
- * A class for managing references to long values stored in a {@link BytesStore} without performing bounds checking.
- * This class is optimized for high performance in scenarios involving off-heap memory or memory-mapped files where bounds checks could impair performance.
- * <p>
- * This class is thread-safe provided that external synchronization is applied. It uses different implementations based on the JVM's debug status:
- * in debug mode, it uses {@link BinaryLongReference} for safety checks; otherwise, it uses {@link UncheckedLongReference} for better performance.
+ * Unsafe view of a long value with no bounds checking.
+ * <p>The {@link #create(BytesStore, long, int)} factory chooses
+ * {@link BinaryLongReference} when {@link Jvm#isDebug()} is true and otherwise
+ * returns an {@code UncheckedLongReference}.</p>
+ *
+ * All methods are unsafe: callers must ensure bounds and thread discipline.
  *
  * @see LongReference
  * @see ReferenceOwner

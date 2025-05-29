@@ -27,27 +27,14 @@ import java.nio.BufferOverflowException;
 import static net.openhft.chronicle.bytes.HexDumpBytes.MASK;
 
 /**
- * Represents a 64-bit long integer in binary form, backed by a {@link BytesStore}.
- * <p>
- * This class provides various operations to access and manipulate a single long integer in binary form.
- * The long integer is stored in a BytesStore, and this class provides methods for atomic operations,
- * reading/writing the value, and managing its state.
- * <p>
- * The class also supports volatile reads, ordered writes, and compare-and-swap operations.
- * The maximum size of the backing storage is 8 bytes, corresponding to a 64-bit long integer.
- * <p>
- * Example usage:
- * <pre>
- * BytesStore bytesStore = BytesStore.nativeStoreWithFixedCapacity(32);
- * try (BinaryLongReference ref = new BinaryLongReference()) {
- *     ref.bytesStore(bytesStore, 16, 8);
- *     ref.setValue(1234567890L);
- *     long value = ref.getVolatileValue();
- * }
- * </pre>
- * <p>
- * Note: This class is not thread-safe. External synchronization may be necessary if instances
- * are shared between threads.
+ * Holds a 64-bit long in little-endian binary form.
+ * <p>The value may temporarily be {@link #LONG_NOT_COMPLETE} when used as part
+ * of a state machine.</p>
+ *
+ * @implSpec Volatile and ordered methods follow the same guarantees as
+ * {@link java.util.concurrent.atomic.AtomicLong}.
+ * @apiNote Dereferencing a {@code null} store in {@link #toString()} is solely
+ * for debugging.
  *
  * @see BytesStore
  * @see LongReference
@@ -65,6 +52,8 @@ public class BinaryLongReference extends AbstractReference implements LongRefere
      * @param bytes  The BytesStore from which bytes will be stored.
      * @param offset The starting point in bytes from where the value will be stored.
      * @param length The number of bytes that should be stored.
+     *               If {@code bytes} is a {@link HexDumpBytes}, the offset is
+     *               masked with {@link HexDumpBytes#MASK}.
      * @throws IllegalArgumentException If the length provided is not equal to 8.
      * @throws BufferOverflowException  If the bytes cannot be written.
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
@@ -79,9 +68,8 @@ public class BinaryLongReference extends AbstractReference implements LongRefere
         if (length != maxSize())
             throw new IllegalArgumentException();
 
-        if (bytes instanceof HexDumpBytes) {
-            offset &= MASK;
-        }
+        if (bytes instanceof HexDumpBytes)
+            offset &= MASK; // align with HexDump masking
 
         super.bytesStore(bytes, offset, length);
     }

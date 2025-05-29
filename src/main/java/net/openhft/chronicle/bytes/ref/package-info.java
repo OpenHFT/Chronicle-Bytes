@@ -7,7 +7,7 @@
  * <ul>
  *     <li>{@link net.openhft.chronicle.bytes.ref.AbstractReference} - A base class representing a reference to a byte store.</li>
  *     <li>{@link net.openhft.chronicle.bytes.ref.BinaryBooleanReference} - A concrete implementation for reading and writing boolean values in binary format.</li>
- *     <li>{@link net.openhft.chronicle.bytes.ref.BinaryIntArrayReference} - Represents a binary array of 64-bit integers with support for reading, writing, and reference counts.</li>
+ *     <li>{@link net.openhft.chronicle.bytes.ref.BinaryIntArrayReference} - Represents a binary array of 32-bit integers.</li>
  *     <li>{@link net.openhft.chronicle.bytes.ref.BinaryIntReference} - Represents a 32-bit integer value in binary form.</li>
  *     <li>{@link net.openhft.chronicle.bytes.ref.BinaryLongArrayReference} - Represents an array of 64-bit values in binary format.</li>
  *     <li>{@link net.openhft.chronicle.bytes.ref.BinaryLongReference} - Represents a 64-bit long reference in binary format.</li>
@@ -24,11 +24,11 @@
  *     <li>{@link net.openhft.chronicle.bytes.ref.UncheckedLongReference} - Provides an unchecked reference to a 64-bit long value.</li>
  * </ul>
  *
- * <p>This package is mainly used when there is a need for efficient low-level manipulation
- * of arrays and values at the byte level, for instance, when working with memory-mapped files
- * or high-performance I/O.
+ * <p>Binary references are suited to latency-sensitive code whereas the text variants
+ * exist primarily for debugging. See {@link net.openhft.chronicle.bytes.ref} and the
+ * <a href="../adoc/wire-integration.adoc">wire integration guide</a> for usage advice.</p>
  *
- * @author OpenHFT
+ * @apiNote Prefer binary classes on the hot path; use text classes for observability.
  * @see net.openhft.chronicle.bytes.BytesStore
  * @see net.openhft.chronicle.bytes.Byteable
  */
