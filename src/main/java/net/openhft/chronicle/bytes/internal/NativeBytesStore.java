@@ -43,6 +43,12 @@ import static net.openhft.chronicle.core.util.Longs.requireNonNegative;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
 @SuppressWarnings({"restriction", "rawtypes"})
+/**
+ * A {@link net.openhft.chronicle.bytes.BytesStore} backed by off-heap native
+ * memory. Instances are reference counted and must be released to free the
+ * underlying memory. The store may be elastic or fixed in size depending on
+ * how it was created.
+ */
 public class NativeBytesStore<U>
         extends AbstractBytesStore<NativeBytesStore<U>, U> {
     private static final SimpleCleaner NO_DEALLOCATOR = new NoDeallocator();
@@ -59,17 +65,22 @@ public class NativeBytesStore<U>
         BB_ATT = Jvm.getField(directBB, "att");
     }
 
-    // Even though not referenced, this field needs to stay
-    // TODO: Rework using a non-finalizer solution
+    /** Finalizer used to warn about unreleased native memory when resource tracing is enabled. */
     private final Finalizer finalizer;
+    /** Base address of the allocated native memory. */
     public long address;
-    // on release, set this to null.
+    /** Memory accessor for low level operations. Cleared on release. */
     public Memory memory = OS.memory();
+    /** Maximum capacity that this store can represent. */
     public long maximumLimit;
+    /** Actual allocated capacity of the current memory block. */
     protected long limit;
+    /** Cleaner used to free the native memory when the reference count drops to zero. */
     @Nullable
     private SimpleCleaner cleaner;
+    /** Whether this store can grow when wrapped by an elastic bytes. */
     private boolean elastic;
+    /** Optional underlying object, typically a ByteBuffer if wrapping one. */
     @Nullable
     private U underlyingObject;
 
@@ -339,6 +350,13 @@ public class NativeBytesStore<U>
         return memory.compareAndSwapLong(address + translate(offset), expected, value);
     }
 
+    /**
+     * Translates a logical offset to an address offset. For
+     * {@code NativeBytesStore} this is an identity mapping.
+     *
+     * @param offset logical offset within the store
+     * @return same value as {@code offset}
+     */
     public long translate(@NonNegative long offset) {
         return offset;
     }
