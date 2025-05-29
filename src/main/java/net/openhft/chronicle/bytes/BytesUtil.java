@@ -46,24 +46,9 @@ import static net.openhft.chronicle.core.UnsafeMemory.MEMORY;
 import static net.openhft.chronicle.core.io.IOTools.*;
 
 /**
- * Utility class for performing operations on Bytes and related data types.
- *
- * <p>This class provides a collection of static methods to manipulate and
- * interact with Bytes objects. These methods include transformations, checks,
- * and complex calculations not provided in the Bytes class itself.
- *
- * <p>Some of the operations provided in this class include:
- * <ul>
- * <li>Converting Bytes objects to different representations, such as char arrays.</li>
- * <li>Reading and writing specific data formats from/to Bytes objects, such as stop bits.</li>
- * <li>Manipulating the content of Bytes objects, such as combining double newlines or reversing contents.</li>
- * <li>Performing complex mathematical calculations, like rounding up values based on byte alignment.</li>
- * <li>Providing utility methods for exceptions, booleans and byte manipulations.</li>
- * </ul>
- *
- * <p>All methods in this class throw {@link java.lang.NullPointerException} if the objects provided to them are {@code null}.
- *
- * @see Bytes
+ * Collection of helper methods dealing with {@link Bytes}, {@link BytesStore} and low level byte
+ * manipulation.  Includes file I/O helpers, string conversions and checks for "trivially copyable"
+ * objects.
  */
 @SuppressWarnings("rawtypes")
 public enum BytesUtil {
@@ -95,10 +80,8 @@ public enum BytesUtil {
     static final String TIME_STAMP_PATH = Jvm.getProperty("timestamp.path", new File(TIME_STAMP_DIR, ".time-stamp." + USER_NAME + ".dat").getAbsolutePath());
 
     /**
-     * Checks if the given class is trivially copyable.
-     *
-     * @param clazz Class to check.
-     * @return true if the class is trivially copyable, false otherwise.
+     * Returns {@code true} if all primitive fields of {@code clazz} occupy a contiguous range allowing
+     * direct memory copies.
      */
     public static boolean isTriviallyCopyable(@NotNull Class<?> clazz) {
         final int[] ints = TRIVIALLY_COPYABLE.get(clazz);
@@ -106,11 +89,8 @@ public enum BytesUtil {
     }
 
     /**
-     * Helper method to determine if the given class is trivially copyable.
-     *
-     * @param clazz Class to check.
-     * @return An array of integers representing certain properties of the class related to its copyability.
-     * @throws UnsupportedOperationException If running on Azul Zing JVM.
+     * Internal helper returning {@code [start, end]} offsets of the contiguous primitive field block or
+     * an empty array if none exists.
      */
     static int[] isTriviallyCopyable0(@NotNull Class<?> clazz) {
         if (clazz.isArray()) {
@@ -167,31 +147,21 @@ public enum BytesUtil {
     }
 
     /**
-     * Returns the range within which a class is trivially copyable.
-     *
-     * @param clazz Class to get the range for.
-     * @return An array of integers representing the range in which the class is trivially copyable.
+     * Returns {@code [start, end]} offsets for the contiguous primitive block of {@code clazz}.
      */
     public static int[] triviallyCopyableRange(Class<?>clazz) {
         return TRIVIALLY_COPYABLE.get(clazz);
     }
 
     /**
-     * Returns the offset of the first byte of the trivially copyable fields of a given class.
-     *
-     * @param clazz The class to examine.
-     * @return The offset of the first byte that is trivially copyable.
+     * Offset of the first trivially copyable byte within {@code clazz}.
      */
     public static int triviallyCopyableStart(Class<?>clazz) {
         return triviallyCopyableRange(clazz)[0];
     }
 
     /**
-     * Returns the length of the trivially copyable fields in a given class.
-     * Note that references are ignored as they are not considered trivially copyable.
-     *
-     * @param clazz The class to examine.
-     * @return The length of the trivially copyable data.
+     * Length in bytes of the trivially copyable region of {@code clazz}.
      */
     public static int triviallyCopyableLength(Class<?>clazz) {
         final int[] startEnd = triviallyCopyableRange(clazz);
@@ -209,12 +179,9 @@ public enum BytesUtil {
     }
 
     /**
-     * Finds the absolute path of a file specified by name.
-     * Throws an exception if the file does not exist.
-     *
-     * @param name The name of the file to find.
-     * @return The absolute path of the file.
-     * @throws FileNotFoundException If the file does not exist.
+     * Resolves {@code name} to an absolute file path.  If the file is not present the current
+     * working directory, the classpath is searched.  The returned path always points to a regular
+     * file and an exception is thrown if it cannot be located.
      */
     public static String findFile(@NotNull String name)
             throws FileNotFoundException {
@@ -232,12 +199,8 @@ public enum BytesUtil {
     }
 
     /**
-     * Reads the content of a file specified by name into a Bytes object.
-     * If the name starts with "=", the rest of the name string will be converted to Bytes directly.
-     *
-     * @param name The name of the file to read.
-     * @return The content of the file as a Bytes object.
-     * @throws IOException If an I/O error occurs.
+     * Reads the named file into a {@link Bytes} instance.  If {@code name} starts with {@code '='}
+     * the remainder is treated as the literal text content.
      */
     public static Bytes<?> readFile(@NotNull String name)
             throws IOException {
@@ -255,11 +218,7 @@ public enum BytesUtil {
     }
 
     /**
-     * Writes the content of a Bytes object to a file specified by name.
-     *
-     * @param file  The name of the file to write to.
-     * @param bytes The Bytes object containing the data to write.
-     * @throws IOException If an I/O error occurs.
+     * Writes the readable bytes to {@code file}, overwriting any existing content.
      */
     public static void writeFile(String file, Bytes<byte[]> bytes)
             throws IOException {
@@ -726,13 +685,8 @@ public enum BytesUtil {
     }
 
     /**
-     * Returns a copy of the given Bytes object. The Bytes object must not have been released.
-     * If the Bytes object is empty, an empty BytesStore is returned.
-     *
-     * @param bytes The Bytes object to copy.
-     * @return A copy of the given Bytes object.
-     * @throws ClosedIllegalStateException    If the resource has been released or closed.
-     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
+     * Creates a new direct {@link Bytes} containing a copy of the readable region of {@code bytes}.
+     * The source must not have been released.
      */
     public static Bytes<Void> copyOf(@NotNull final Bytes<?> bytes)
             throws ClosedIllegalStateException, ThreadingIllegalStateException {

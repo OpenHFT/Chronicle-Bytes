@@ -30,23 +30,11 @@ import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 
 /**
- * An interface that provides support for parsing bytes as text. This interface is designed to facilitate
- * the reading and parsing of textual data that is encoded within a byte stream. It supports parsing
- * various data types including booleans, integers, floats, doubles, and decimal numbers,
- * and provides utility methods for dealing with character encoding such as UTF-8 and ISO-8859-1.
+ * Extends {@link StreamingDataInput} with helpers for parsing textual data directly from a
+ * {@link Bytes} stream.  Implementations consume data from the current read position and advance it
+ * as characters or numbers are parsed.
  *
- * <p>The {@code ByteStringParser} extends {@link StreamingDataInput}, inheriting the capabilities
- * of reading and manipulating streams of binary data.
- *
- * <p>This interface is especially useful for reading and converting bytes into human-readable text
- * or numerical representations. It includes methods for parsing numbers with flexible formatting,
- * reading text with specified character encoding, and utilities for dealing with character
- * termination conditions.
- *
- * <p>Example use cases include reading and parsing data from binary communication protocols,
- * files, or any other source where bytes need to be interpreted as text or numbers.
- *
- * @param <B> the type of {@code ByteStringParser} which extends itself, allowing for method chaining.
+ * @param <B> self type for fluent chaining
  */
 public interface ByteStringParser<B extends ByteStringParser<B>> extends StreamingDataInput<B> {
     /**
@@ -61,18 +49,11 @@ public interface ByteStringParser<B extends ByteStringParser<B>> extends Streami
     }
 
     /**
-     * Attempts to parse the next series of characters in the byte string as a boolean value.
-     * It uses the provided {@code tester} to detect the end of the text. The parsing is case-insensitive.
-     * <p>
-     * False can be: "f", "false", "n", "no", "0".
-     * True can be: "t", "true", "y", "yes", "1".
+     * Parses a boolean token, stopping when {@code tester} returns {@code true}. The recognised
+     * tokens are case-insensitive variants of {@code true/t/yes/y/1} and {@code false/f/no/n/0}.
      *
-     * @param tester a {@code StopCharTester} used to detect the end of the boolean text.
-     * @return a {@code Boolean} value if the text could be parsed as boolean; null otherwise.
-     * @throws BufferUnderflowException       If there is insufficient data.
-     * @throws ArithmeticException            If a numeric overflow occurs.
-     * @throws ClosedIllegalStateException    If the resource has been released or closed.
-     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
+     * @param tester stop condition for the parse
+     * @return parsed value or {@code null} if no recognised token was found
      */
     @Nullable
     default Boolean parseBoolean(@NotNull StopCharTester tester)
@@ -81,17 +62,8 @@ public interface ByteStringParser<B extends ByteStringParser<B>> extends Streami
     }
 
     /**
-     * Attempts to parse the next series of characters in the byte string as a boolean value.
-     * It uses a default {@code StopCharTester} to detect non-alpha-numeric characters.
-     * <p>
-     * False can be: "f", "false", "n", "no", "0".
-     * True can be: "t", "true", "y", "yes", "1".
-     *
-     * @return a {@code Boolean} value if the text could be parsed as boolean; null otherwise.
-     * @throws BufferUnderflowException       If there is insufficient data.
-     * @throws ArithmeticException            If a numeric overflow occurs.
-     * @throws ClosedIllegalStateException    If the resource has been released or closed.
-     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
+     * Convenience wrapper for {@link #parseBoolean(StopCharTester)} using
+     * {@link StopCharTesters#NON_ALPHA_DIGIT}.
      */
     @Nullable
     default Boolean parseBoolean()
@@ -349,12 +321,8 @@ public interface ByteStringParser<B extends ByteStringParser<B>> extends Streami
     void lastNumberHadDigits(boolean lastNumberHadDigits);
 
     /**
-     * Skips over characters in the byte string until a terminating character is encountered.
-     *
-     * @param tester the StopCharTester instance to use for determining the terminating character.
-     * @return true if a terminating character was found, false if the end of the buffer was reached.
-     * @throws ClosedIllegalStateException    If the resource has been released or closed.
-     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
+     * Advances the read position until {@code tester.isStopChar()} returns {@code true} or end of input
+     * is reached.  The terminating character itself remains unread.
      */
     default boolean skipTo(@NotNull StopCharTester tester)
             throws ClosedIllegalStateException, ThreadingIllegalStateException {

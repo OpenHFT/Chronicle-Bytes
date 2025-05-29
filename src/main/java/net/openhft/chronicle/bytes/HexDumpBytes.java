@@ -45,13 +45,8 @@ import static net.openhft.chronicle.core.util.Longs.requireNonNegative;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
 /**
- * A class that implements the {@link Bytes} interface for generating a hex dump of byte data. The hex dump is a
- * human-readable display of data in hexadecimal and ASCII formats. It's commonly used for debugging, forensics,
- * and analyzing low-level data.
- * <p>
- * It supports setting specific number wrap for byte data and custom offset formatting to provide more flexibility
- * and control over the output of the hex dump. The class also enables indentation adjustment, which can be useful
- * for nested data structures or logically grouped data within the byte array.
+ * {@link Bytes} implementation that records all writes and produces a formatted hexadecimal dump of the data.
+ * Primarily intended for diagnostics and testing.
  */
 
 @SuppressWarnings("rawtypes")
@@ -70,7 +65,7 @@ public class HexDumpBytes
     private int numberWrap = 16;
 
     /**
-     * Constructs a HexDumpBytes instance with default settings.
+     * Creates an empty instance with default buffer sizes.
      */
     public HexDumpBytes() {
         base = Bytes.allocateElasticDirect(256);
@@ -80,12 +75,7 @@ public class HexDumpBytes
     }
 
     /**
-     * Constructs a HexDumpBytes instance with provided base and text bytes.
-     *
-     * @param base NativeBytes instance representing base data.
-     * @param text BytesStore instance representing text data.
-     * @throws ClosedIllegalStateException    If the resource has been released or closed.
-     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
+     * Internal constructor used when copying an existing dump.
      */
     HexDumpBytes(@NotNull Bytes<?> base, @NotNull BytesStore<?, ?> text) {
         final long size = base.readRemaining();
@@ -96,11 +86,7 @@ public class HexDumpBytes
     }
 
     /**
-     * Creates a HexDumpBytes instance from provided text reader.
-     *
-     * @param reader Reader instance to read the text data.
-     * @return HexDumpBytes instance initialized with the read text data.
-     * @throws NumberFormatException if parsing a number fails.
+     * Parses a textual hex dump and returns a populated instance.
      */
     public static HexDumpBytes fromText(@NotNull Reader reader) throws NumberFormatException {
         HexDumpBytes tb = new HexDumpBytes();
@@ -115,11 +101,7 @@ public class HexDumpBytes
     }
 
     /**
-     * Creates a HexDumpBytes instance from provided char sequence.
-     *
-     * @param text CharSequence to read the text data from.
-     * @return HexDumpBytes instance initialized with the read text data.
-     * @throws NumberFormatException if parsing a number fails.
+     * Convenience overload of {@link #fromText(Reader)}.
      */
     public static HexDumpBytes fromText(@NotNull CharSequence text) throws NumberFormatException {
         return fromText(new StringReader(text.toString()));
