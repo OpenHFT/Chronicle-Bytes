@@ -27,9 +27,15 @@ import org.jetbrains.annotations.NotNull;
 import java.nio.BufferUnderflowException;
 
 /**
- * This class provides a mechanism for interning Strings with 8-bit characters.
- * Interning is a method of storing only one copy of each distinct String value,
- * which must be immutable.
+ * Implementation of {@link AbstractInterner} for interning {@link String}
+ * objects whose bytes are assumed to represent 8-bit characters such as
+ * ISO-8859-1.
+ *
+ * <p>Example usage:</p>
+ * <pre>{@code
+ * Bit8StringInterner interner = new Bit8StringInterner(128);
+ * String s = interner.intern(bytes, length);
+ * }</pre>
  *
  * @see AbstractInterner
  */
@@ -50,11 +56,13 @@ public class Bit8StringInterner extends AbstractInterner<String> {
     }
 
     /**
-     * Returns a String value from the provided {@link BytesStore} object.
+     * Decodes an 8-bit character sequence from the provided {@link BytesStore}.
+     * Exactly {@code length} bytes are read starting from {@code cs.readPosition()}.
+     * The read position is not modified.
      *
-     * @param cs     the BytesStore object from which to get the String value
-     * @param length the length of the string to be interned
-     * @return the interned String value
+     * @param cs     the bytes store containing the characters
+     * @param length the number of bytes to read
+     * @return the resulting string
      * @throws BufferUnderflowException       If the BytesStore doesn't have enough remaining capacity
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way

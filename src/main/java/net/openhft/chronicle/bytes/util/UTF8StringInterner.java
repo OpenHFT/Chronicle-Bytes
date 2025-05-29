@@ -29,10 +29,14 @@ import org.jetbrains.annotations.NotNull;
 import java.nio.BufferUnderflowException;
 
 /**
- * A specialized interner for interning strings encoded in UTF-8.
- * <p>
- * This class extends {@link AbstractInterner} and overrides its getValue method to intern
- * strings encoded in UTF-8 format represented in {@link BytesStore}.
+ * {@link AbstractInterner} implementation for interning {@link String} objects
+ * decoded from UTF-8 byte sequences within a {@link BytesStore}.
+ *
+ * <p>Example usage:</p>
+ * <pre>{@code
+ * UTF8StringInterner interner = new UTF8StringInterner(256);
+ * String s = interner.intern(store, length);
+ * }</pre>
  */
 public class UTF8StringInterner extends AbstractInterner<String> {
 
@@ -51,12 +55,13 @@ public class UTF8StringInterner extends AbstractInterner<String> {
     }
 
     /**
-     * Converts the bytes from a {@link BytesStore} into a UTF-8 encoded string.
-     * The bytes are assumed to be in UTF-8 format and are decoded accordingly.
+     * Decodes a UTF-8 string from the supplied {@link BytesStore}. Exactly
+     * {@code length} bytes are read starting from {@code cs.readPosition()} and
+     * the read position is left unchanged.
      *
-     * @param cs     the {@link BytesStore} containing the bytes to be converted
-     * @param length the number of bytes to read from the {@link BytesStore}
-     * @return the resulting UTF-8 encoded string
+     * @param cs     the bytes store containing UTF-8 data
+     * @param length the number of bytes to read
+     * @return the decoded string
      * @throws UTFDataFormatRuntimeException  If the bytes are not valid UTF-8 encoded characters
      * @throws BufferUnderflowException       If the buffer's limits are exceeded
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
