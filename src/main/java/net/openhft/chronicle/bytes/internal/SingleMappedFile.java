@@ -39,6 +39,8 @@ import static net.openhft.chronicle.core.io.Closeable.closeQuietly;
  * Maps an entire file into a single contiguous region. No chunking or overlap is
  * used, making it suitable for relatively small files that fit comfortably in
  * process address space.
+ * {@link MappedFile} implementation that maps the entire file as one contiguous
+ * region. Suitable when the full capacity fits into the process address space.
  */
 @SuppressWarnings({"rawtypes", "restriction"})
 public class SingleMappedFile extends MappedFile {

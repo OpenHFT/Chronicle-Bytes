@@ -38,34 +38,37 @@ import static net.openhft.chronicle.core.util.Longs.requireNonNegative;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
 /**
- * A BytesStore implementation that wraps memory-mapped data.
- *
+ * {@link NativeBytesStore} backed by a region of a memory-mapped file.
  * <p>
- * This class is intended for working with large files that can be read from and written to as if they were a part of the program's memory.
- * <p>
- * <b>WARNING:</b> This class assumes that the caller will correctly handle bounds checking. Incorrect handling can lead to {@link IndexOutOfBoundsException}.
- * Misuse of this class can cause hard-to-diagnose memory access errors and data corruption.
+ * Direct access methods assume the caller performs bounds checking; misuse can
+ * corrupt memory.
  */
 public class MappedBytesStore extends NativeBytesStore<Void> {
+    /** run before each write, throws if read only */
     protected final Runnable writeCheck;
+    /** owning mapped file */
     private final MappedFile mappedFile;
+    /** logical start offset within the file */
     private final long start;
+    /** region end up to which accesses are always safe */
     private final long safeLimit;
+    /** filesystem page size */
     private final int pageSize;
+    /** mode used when syncing to disk */
     private SyncMode syncMode = MappedFile.DEFAULT_SYNC_MODE;
+    /** length already synced */
     private long syncLength = 0;
 
     /**
-     * Creates a new MappedBytesStore with the given parameters.
+     * Constructs a {@code MappedBytesStore} for a mapped region.
      *
-     * @param owner        The owner of this MappedBytesStore.
-     * @param mappedFile   The MappedFile to be wrapped by this BytesStore.
-     * @param start        The start position within the MappedFile.
-     * @param address      The memory address of the mapped data.
-     * @param capacity     The capacity of the mapped data.
-     * @param safeCapacity The safe capacity of the mapped data. Accessing data beyond the safe capacity might lead to a crash.
-     * @param pageSize     Page size to use to check alignment
-     * @throws ClosedIllegalStateException If the resource has been released or closed.
+     * @param owner        reference owner
+     * @param mappedFile   parent mapped file
+     * @param start        logical start offset
+     * @param address      native address of the mapping
+     * @param capacity     mapped capacity
+     * @param safeCapacity portion guaranteed not to cross a chunk
+     * @param pageSize     page size for alignment
      */
     @SuppressWarnings("this-escape")
     protected MappedBytesStore(ReferenceOwner owner, MappedFile mappedFile, @NonNegative long start, long address, @NonNegative long capacity, @NonNegative long safeCapacity, @Positive int pageSize)
@@ -83,17 +86,7 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
     }
 
     /**
-     * Creates a new MappedBytesStore with the given parameters.
-     *
-     * @param owner        The owner of this MappedBytesStore.
-     * @param mappedFile   The MappedFile to be wrapped by this BytesStore.
-     * @param start        The start position within the MappedFile.
-     * @param address      The memory address of the mapped data.
-     * @param capacity     The capacity of the mapped data.
-     * @param safeCapacity The safe capacity of the mapped data. Accessing data beyond the safe capacity might lead to a crash.
-     * @param pageSize     Page size to use to check alignment
-     * @return the MappedBytesStore
-     * @throws ClosedIllegalStateException If the resource has been released or closed.
+     * Factory method mirroring the protected constructor.
      */
     public static MappedBytesStore create(ReferenceOwner owner, MappedFile mappedFile, @NonNegative long start, long address, @NonNegative long capacity, @NonNegative long safeCapacity, @Positive int pageSize)
             throws ClosedIllegalStateException {
@@ -110,10 +103,8 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
     }
 
     /**
-     * Fetch the capacity of the underlying file
-     * This can differ from the exposed capacity() of this bytes store (which has been page aligned)
-     *
-     * @return - capacity of the underlying file
+     * @return capacity of the underlying file, which may differ from
+     * {@link #capacity()} if alignment is applied
      */
     public long underlyingCapacity() {
         return mappedFile.capacity();
@@ -140,13 +131,18 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
     }
 
     @Override
+    /**
+     * Returns {@code true} if the given offset lies within this mapping's safe range.
+     */
     public boolean inside(@NonNegative long offset) {
         return start <= offset && offset < safeLimit;
     }
 
     @Override
+    /**
+     * Same as {@link #inside(long)} but also checks the end of the supplied range.
+     */
     public boolean inside(@NonNegative long offset, @NonNegative long bufferSize) {
-        // yes this is different to the method above (we take into account the overlap because we know the length)
         return start <= offset && offset + bufferSize <= limit;
     }
 
@@ -171,6 +167,9 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
     }
 
     @Override
+    /**
+     * Converts a logical offset in the file into an offset relative to this mapped region.
+     */
     public long translate(@NonNegative long offset) {
         assert SKIP_ASSERTIONS || offset >= start;
         assert SKIP_ASSERTIONS || offset < limit;
@@ -398,7 +397,7 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
     }
 
     /**
-     * Sync the ByteStore if required.
+     * Syncs the mapped region to disk prior to release if required.
      */
     @Override
     protected void performRelease() {
@@ -415,6 +414,9 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
      * @param offset   the offset within the ByteStore from the start to sync, offset must be a multiple of 4K
      * @param length   the length to sync, length must be a multiple of 4K
      * @param syncMode the mode to sync
+     */
+    /**
+     * Helper performing the actual msync call.
      */
     private void performMsync(@NonNegative long offset, long length, SyncMode syncMode) {
         if (syncMode == SyncMode.NONE)

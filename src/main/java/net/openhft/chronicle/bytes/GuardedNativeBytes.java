@@ -26,24 +26,24 @@ import java.nio.BufferUnderflowException;
 import static net.openhft.chronicle.bytes.BinaryWireCode.*;
 
 /**
- * <p>
- * This class extends the {@link NativeBytes} class and provides an additional layer of safety by tracking the raw primitives written to the byte buffer.
- * <p>
- * The purpose of this class is to facilitate the detection of inconsistencies during testing. When inconsistencies are detected, they can be corrected before the code is moved into production.
- * <p>
- * GuardedNativeBytes records the type of each primitive written into the bytes buffer (byte, short, int, long, float, double). This tracking enables validation of the consistency of data written and read, which is critical for data integrity.
- * <p>
- * Please note that while this class is very useful for ensuring data consistency during testing, it may introduce a performance overhead and thus not recommended to be used in a production environment.
- *
- * @param <U> The type of the object that this byte buffer is bound to.
+ * Debugging wrapper that prefixes each primitive written with a type code and checks it on reads.
+ * Useful for catching mismatched read/write pairs but adds considerable overhead and should not be
+ * used in production.
  */
 public class GuardedNativeBytes<U> extends NativeBytes<U> {
+    /** type marker for a single byte */
     static final byte BYTE_T = (byte) INT8;
+    /** type marker for a short */
     static final byte SHORT_T = (byte) INT16;
+    /** type marker for an int */
     static final byte INT_T = (byte) INT32;
+    /** type marker for a long */
     static final byte LONG_T = (byte) INT64;
+    /** type marker for stop-bit encoded value */
     static final byte STOP_T = (byte) STOP_BIT;
+    /** type marker for a float */
     static final byte FLOAT_T = (byte) FLOAT32;
+    /** type marker for a double */
     static final byte DOUBLE_T = (byte) FLOAT64;
 
     private static final String[] STRING_FOR_CODE = _stringForCode(GuardedNativeBytes.class);
@@ -223,6 +223,9 @@ public class GuardedNativeBytes<U> extends NativeBytes<U> {
         return super.readDouble();
     }
 
+    /**
+     * Verifies the next type marker matches {@code expected}.
+     */
     private void expectByte(byte expected) throws IllegalStateException {
         byte type = super.readByte();
         if (type != expected)
@@ -230,6 +233,9 @@ public class GuardedNativeBytes<U> extends NativeBytes<U> {
                     + " but was " + STRING_FOR_CODE[type & 0xFF]);
     }
 
+    /**
+     * Verifies the next marker matches either {@code expected} or {@code expected2}.
+     */
     private void expectByte(byte expected, byte expected2) throws IllegalStateException {
         byte type = super.readByte();
         if (type != expected && type != expected2)

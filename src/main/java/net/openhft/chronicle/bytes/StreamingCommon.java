@@ -20,24 +20,23 @@ import net.openhft.chronicle.core.io.ThreadingIllegalStateException;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * Represents a streaming interface for handling streaming data with support for random access.
- * The interface is used for managing reading and writing positions within the streaming data.
+ * A common base interface for streaming data access. It manages fundamental
+ * buffer properties such as positions and limits and supports random access
+ * semantics. Implementations are mainly used by higher level streaming
+ * interfaces like {@link StreamingDataInput} and {@link StreamingDataOutput}.
  *
- * @param <S> Type of the implementing class, extending StreamingCommon
+ * @param <S> type of the implementing class
  */
 public interface StreamingCommon<S extends StreamingCommon<S>> extends RandomCommon {
 
     /**
-     * Resets the read and write positions to the start of the streaming buffer,
-     * and sets the write limit to the capacity of the buffer. This effectively
-     * clears any existing data in the buffer and prepares it for new data to be written.
+     * Resets the read and write positions to {@link #start()} and sets the
+     * effective limits to {@link #capacity()}. The underlying data is left
+     * unchanged but the buffer behaves as if newly allocated.
      *
-     * <p>This operation is similar to rewinding the tape to the beginning,
-     * and having it ready to record new data over anything that was there before.
-     *
-     * @return A reference to this object, allowing for method chaining.
-     * @throws ClosedIllegalStateException    If the resource has been released or closed.
-     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
+     * @return this instance for chaining
+     * @throws ClosedIllegalStateException    if the resource has been released or closed
+     * @throws ThreadingIllegalStateException if accessed by multiple threads in an unsafe way
      */
     @NotNull
     S clear() throws ClosedIllegalStateException, ThreadingIllegalStateException;

@@ -21,25 +21,19 @@ import net.openhft.chronicle.core.io.ThreadingIllegalStateException;
 import static net.openhft.chronicle.core.Jvm.uncheckedCast;
 
 /**
- * This interface is for additional description to be added to HexDumpBytes
+ * Provides hooks for adding comments and controlling indentation when generating hex dumps.
  */
 public interface HexDumpBytesDescription<B extends HexDumpBytesDescription<B>> {
     /**
-     * Do these Bytes support saving comments as descriptions for fields.
-     *
-     * @return true if comments are for field descriptions
+     * @return {@code true} if comments are retained for later inclusion in the hex dump
      */
     default boolean retainedHexDumpDescription() {
         return false;
     }
 
     /**
-     * Add comment as appropriate for the toHexString format
-     *
-     * @param comment to add (or ignore)
-     * @return this
-     * @throws ClosedIllegalStateException    If the resource has been released or closed.
-     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
+     * Adds {@code comment} to the output, either as a full line (if starting with {@code '#'}) or
+     * appended to the current line.
      */
     default B writeHexDumpDescription(CharSequence comment)
             throws ClosedIllegalStateException, ThreadingIllegalStateException {
@@ -47,10 +41,7 @@ public interface HexDumpBytesDescription<B extends HexDumpBytesDescription<B>> {
     }
 
     /**
-     * Adjust the indent for nested data
-     *
-     * @param n +1 indent in, -1 reduce indenting
-     * @return this.
+     * Adjusts the indentation level for subsequent dump lines.
      */
     default B adjustHexDumpIndentation(int n)
             throws IllegalStateException {
