@@ -35,11 +35,13 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 import static net.openhft.chronicle.core.util.StringUtils.*;
 
 /**
- * Bytes to wrap memory mapped data.
- * <p>
- * NOTE These Bytes are single Threaded as are all Bytes.
+ * Base class for {@link net.openhft.chronicle.bytes.MappedBytes}
+ * implementations. It provides common behaviour for bytes backed by a
+ * {@link net.openhft.chronicle.bytes.MappedFile}. Instances are intended for use
+ * by a single thread.
  */
 public abstract class CommonMappedBytes extends MappedBytes {
+    /** manages closed state and delegates to {@link #performClose()} */
     private final AbstractCloseable closeable = new AbstractCloseable() {
         @Override
         protected void performClose() throws ClosedIllegalStateException {
@@ -47,19 +49,29 @@ public abstract class CommonMappedBytes extends MappedBytes {
         }
     };
 
+    /** underlying file that owns the mapping */
     protected final MappedFile mappedFile;
+    /** whether the file is read only */
     private final boolean backingFileIsReadOnly;
+    /** capacity of the mapped region */
     private final long capacity;
 
     protected long lastActualSize = 0;
     private boolean initReleased;
 
     // assume the mapped file is reserved already.
+    /**
+     * @param mappedFile the already reserved mapped file backing this instance
+     */
     protected CommonMappedBytes(@NotNull final MappedFile mappedFile)
             throws ClosedIllegalStateException {
         this(mappedFile, "");
     }
 
+    /**
+     * @param mappedFile the mapped file backing this bytes
+     * @param name       optional name used for debugging
+     */
     @SuppressWarnings("this-escape")
     protected CommonMappedBytes(@NotNull final MappedFile mappedFile, final String name)
             throws ClosedIllegalStateException, ThreadingIllegalStateException {
@@ -397,6 +409,9 @@ public abstract class CommonMappedBytes extends MappedBytes {
         closeable.close();
     }
 
+    /**
+     * Releases this instance's reservation on the mapped file.
+     */
     void performClose() throws ClosedIllegalStateException {
         if (!initReleased)
             release(INIT);
@@ -535,6 +550,9 @@ public abstract class CommonMappedBytes extends MappedBytes {
     }
 
     @Override
+    /**
+     * @return whether the underlying mapped file was opened read only
+     */
     public boolean isBackingFileReadOnly() {
         return backingFileIsReadOnly;
     }

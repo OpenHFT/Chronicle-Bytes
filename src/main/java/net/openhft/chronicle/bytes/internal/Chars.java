@@ -17,14 +17,18 @@ package net.openhft.chronicle.bytes.internal;
 
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * Lookup utilities for rendering bytes as characters, used in hex dumps and
+ * similar operations.
+ */
 public final class Chars {
     private Chars() { }
+    /** lookup table for byte value to String */
     public static final String[] charToString = createCharToString();
 
     /**
-     * Creates a lookup table mapping byte values to their corresponding String representations.
-     *
-     * @return a lookup table for byte-to-String conversions.
+     * Populates {@link #charToString} with printable representations for all
+     * byte values. Control characters are encoded as escape sequences.
      */
     @NotNull
     public static String[] createCharToString() {
