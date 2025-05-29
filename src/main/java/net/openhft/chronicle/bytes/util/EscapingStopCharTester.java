@@ -18,9 +18,14 @@ package net.openhft.chronicle.bytes.util;
 import net.openhft.chronicle.bytes.StopCharTester;
 
 /**
- * This class implements a stop character tester that supports escape characters.
- * It decorates another {@link StopCharTester} by allowing characters to be escaped
- * using the backslash character ('\\').
+ * Implementation of {@link StopCharTester} where a backslash ('\\') escapes the
+ * following character. The tester delegates to another {@code StopCharTester}
+ * for actual stop character detection of non escaped characters.
+ * <p>
+ * The escape state persists for a single subsequent call to
+ * {@link #isStopChar(int)} on the same instance. Instances are therefore not
+ * thread safe. See also {@link EscapingStopCharsTester} for the two-argument
+ * variant.
  */
 public class EscapingStopCharTester implements StopCharTester {
 
@@ -30,9 +35,8 @@ public class EscapingStopCharTester implements StopCharTester {
     private boolean escaped = false;
 
     /**
-     * Constructs an EscapingStopCharTester with the given {@link StopCharTester}.
-     *
-     * @param sct the StopCharTester to be decorated with escape character functionality.
+     * @param sct the underlying {@link StopCharTester} used when the character
+     *            is not escaped
      */
     public EscapingStopCharTester(StopCharTester sct) {
         this.sct = sct;

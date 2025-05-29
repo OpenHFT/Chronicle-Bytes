@@ -35,11 +35,13 @@ import java.nio.BufferOverflowException;
 public interface Compression {
 
     /**
-     * Compresses the input uncompressed data into the output compressed data using the specified algorithm.
+     * Compresses {@code uncompressed} into {@code compressed} using the named algorithm.
+     * Unrecognised names cause a fall back to {@link Compressions#Binary} which performs no compression.
+     * Supported aliases are {@code "lzw"} and {@code "gzip"}.
      *
-     * @param cs           The compression algorithm to be used (e.g. "lzw", "gzip").
-     * @param uncompressed The input data to be compressed.
-     * @param compressed   The output to write the compressed data.
+     * @param cs           the algorithm name, must not be {@code null}
+     * @param uncompressed the input data to compress
+     * @param compressed   the destination buffer for compressed data
      * @throws BufferOverflowException        If there is not enough space in the output buffer.
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
@@ -66,11 +68,13 @@ public interface Compression {
     }
 
     /**
-     * Uncompresses the input compressed data into the output uncompressed data using the specified algorithm.
+     * Decompresses data using the named algorithm. Alias {@code "!binary"} behaves
+     * the same as {@code "binary"}. Any other unrecognised name results in an
+     * {@link IllegalArgumentException}.
      *
-     * @param cs   The compression algorithm to be used (e.g. "lzw", "gzip").
-     * @param from The input compressed data.
-     * @param to   The output to write the uncompressed data.
+     * @param cs   the algorithm name, must not be {@code null}
+     * @param from the input compressed data
+     * @param to   the destination for decompressed bytes
      * @throws IORuntimeException             If an I/O error occurs.
      * @throws IllegalArgumentException       If the algorithm is unsupported.
      * @throws BufferOverflowException        If there is not enough space in the output buffer.
@@ -133,10 +137,12 @@ public interface Compression {
     }
 
     /**
-     * Compresses a byte array.
+     * Compresses a byte array using the streams returned by
+     * {@link #compressingStream(OutputStream)}.
      *
-     * @param bytes The input byte array to compress.
-     * @return The compressed data as byte array.
+     * @param bytes the input bytes to compress
+     * @return the compressed data
+     * @throws AssertionError if an unexpected {@link IOException} occurs
      */
     default byte[] compress(byte[] bytes) {
         @NotNull ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -150,7 +156,10 @@ public interface Compression {
     }
 
     /**
-     * Compresses data from the input to the output using the implementing compression algorithm.
+     * Compresses data from {@code from} to {@code to} using this implementation's
+     * algorithm. The stream wrappers originate from
+     * {@link #compressingStream(OutputStream)}. Unexpected I/O issues are
+     * wrapped in an {@link AssertionError} as the streams are memory based.
      *
      * @param from The input data to be compressed.
      * @param to   The output to write the compressed data.
@@ -168,11 +177,12 @@ public interface Compression {
     }
 
     /**
-     * Uncompresses a byte array.
+     * Uncompresses a byte array using the stream returned by
+     * {@link #decompressingStream(InputStream)}.
      *
-     * @param bytes The input compressed data as byte array.
-     * @return The uncompressed data as byte array.
-     * @throws IORuntimeException If an I/O error occurs.
+     * @param bytes the compressed data
+     * @return the resulting uncompressed bytes
+     * @throws IORuntimeException if an I/O error occurs while reading the data
      */
     default byte[] uncompress(byte[] bytes)
             throws IORuntimeException {
@@ -209,20 +219,28 @@ public interface Compression {
     }
 
     /**
-     * Returns an InputStream that will decompress data read from it.
+     * Returns a new {@link InputStream} that wraps {@code input} and will
+     * decompress bytes as they are read. The caller is responsible for closing
+     * the returned stream. Closing the wrapper does not close the underlying
+     * {@code input} stream. Future implementations may buffer the input and
+     * callers should not depend on the concrete type of the returned stream.
      *
-     * @param input the underlying InputStream to read compressed data from.
-     * @return a decompressing InputStream.
-     * @throws IORuntimeException If an I/O error occurs.
+     * @param input the underlying stream supplying compressed data
+     * @return a stream producing uncompressed bytes
+     * @throws IORuntimeException if an I/O error occurs
      */
     InputStream decompressingStream(InputStream input)
             throws IORuntimeException;
 
     /**
-     * Returns an OutputStream that will compress data written to it.
+     * Returns a new {@link OutputStream} that compresses any bytes written to it
+     * using this algorithm's strategy. The caller must close the returned stream
+     * to flush all data. Closing it does not close {@code output}. The returned
+     * stream may be wrapped in additional buffering and its exact class is not
+     * guaranteed.
      *
-     * @param output the underlying OutputStream to write compressed data to.
-     * @return a compressing OutputStream.
+     * @param output the underlying stream to receive compressed data
+     * @return a stream accepting uncompressed bytes
      */
     OutputStream compressingStream(OutputStream output);
 

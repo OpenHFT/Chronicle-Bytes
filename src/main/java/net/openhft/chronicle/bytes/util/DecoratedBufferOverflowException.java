@@ -40,6 +40,17 @@ public final class DecoratedBufferOverflowException extends BufferOverflowExcept
     }
 
     /**
+     * Constructs a new exception with the specified detail message and cause.
+     *
+     * @param message the detail message
+     * @param cause   the cause
+     */
+    public DecoratedBufferOverflowException(final String message, final Throwable cause) {
+        this.message = message;
+        initCause(cause);
+    }
+
+    /**
      * Returns the detail message of this exception.
      *
      * @return the detail message string of this exception

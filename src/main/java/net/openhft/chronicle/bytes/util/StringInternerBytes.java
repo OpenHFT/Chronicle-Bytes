@@ -30,8 +30,15 @@ import java.nio.BufferUnderflowException;
 import static net.openhft.chronicle.bytes.BytesUtil.toCharArray;
 
 /**
- * String interner optimized for Bytes. This class extends {@link StringInterner} and is specifically
- * designed to handle interning of strings represented in {@link Bytes} objects.
+ * {@link net.openhft.chronicle.core.pool.StringInterner} specialised for
+ * {@link Bytes} instances. Byte sequences are interpreted as 8-bit characters
+ * (for example ISO-8859-1) when forming {@link String} objects.
+ *
+ * <p>Example usage:</p>
+ * <pre>{@code
+ * StringInternerBytes interner = new StringInternerBytes(64);
+ * String s = interner.intern(bytes, length);
+ * }</pre>
  */
 public class StringInternerBytes extends StringInterner {
 
@@ -63,15 +70,14 @@ public class StringInternerBytes extends StringInterner {
     }
 
     /**
-     * Converts the given bytes to an ISO-8859-1 encoded string, and interns it. The string ends
-     * either at the byte limit or the specified length, whichever comes first. If the string is
-     * already in the pool, the pooled instance is returned. Otherwise, the string is added to the
-     * pool.
+     * Reads {@code length} bytes from {@code bytes.readPosition()}, converts them
+     * using an 8-bit character encoding and interns the resulting {@link String}.
+     * The read position of {@code bytes} is advanced after the conversion.
      *
-     * @param bytes  the bytes to convert to a string.
-     * @param length specifies the maximum number of bytes to be converted, must be non-negative.
-     * @return the interned string representation of the bytes.
-     * @throws IllegalArgumentException If length is negative.
+     * @param bytes  the bytes to convert
+     * @param length the number of bytes to read from {@code bytes}
+     * @return the interned string
+     * @throws IllegalArgumentException if {@code length} is negative
      * @throws BufferUnderflowException If there are not enough bytes remaining to read.
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way

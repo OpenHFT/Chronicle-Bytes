@@ -29,15 +29,18 @@ import java.io.OutputStream;
 import java.nio.BufferOverflowException;
 import java.util.zip.*;
 /**
- * Enum representing different compression algorithms and providing corresponding
- * compressing and decompressing streams.
+ * Compression algorithms supported by Chronicle Bytes. Each enum constant
+ * provides {@link Compression} implementations for stream-based compression and
+ * decompression.
  */
 @SuppressWarnings("rawtypes")
 public enum Compressions implements Compression {
 
     /**
-     * Binary compression is a placeholder compression which does not perform any actual
-     * compression. It simply returns the input bytes.
+     * Represents a no-operation compression strategy. The data is passed through
+     * unchanged and no CPU time is spent compressing or expanding it.
+     *
+     * @see Compression
      */
     Binary {
         /**
@@ -129,7 +132,11 @@ public enum Compressions implements Compression {
     },
 
     /**
-     * LZW (Lempel-Ziv-Welch) is a lossless data compression algorithm.
+     * Uses {@link java.util.zip.InflaterInputStream} and
+     * {@link java.util.zip.DeflaterOutputStream} in a DEFLATE variant of LZW.
+     * Provides modest compression ratios at a low CPU cost.
+     *
+     * @see Compression
      */
     LZW {
         /**
@@ -158,7 +165,11 @@ public enum Compressions implements Compression {
     },
 
     /**
-     * GZIP is a file format and a software application used for file compression and decompression.
+     * Uses {@link java.util.zip.GZIPInputStream} and
+     * {@link java.util.zip.GZIPOutputStream}. GZIP typically yields higher
+     * compression at increased CPU usage and is defined in RFC 1952.
+     *
+     * @see Compression
      */
     GZIP {
         /**
@@ -166,7 +177,7 @@ public enum Compressions implements Compression {
          *
          * @param input the GZIP-compressed input stream
          * @return the decompressing input stream
-         * @throws IORuntimeException If an I/O error occurs
+         * @throws IORuntimeException if creating the stream fails
          */
         @NotNull
         @Override

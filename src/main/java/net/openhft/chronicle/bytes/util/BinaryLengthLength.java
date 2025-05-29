@@ -23,20 +23,32 @@ import net.openhft.chronicle.core.annotation.NonNegative;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * Enum representing different byte lengths for binary values.
- * It provides methods to get the code associated with each byte length,
- * to initialize a {@link BytesOut} object with the length code, and
- * to write the length of the data into the {@link Bytes} object.
+ * Defines strategies for encoding and writing the length prefix of binary data
+ * segments. Supported prefixes are 8, 16 and 32-bit fields. After writing the
+ * payload the caller must invoke {@link #writeLength(Bytes, long, long)} exactly
+ * once to store the final length.
+ *
+ * <p>Maximum storable lengths:</p>
+ * <ul>
+ *   <li>8-bit: 255 bytes</li>
+ *   <li>16-bit: 65 535 bytes</li>
+ *   <li>32-bit: 2 147 483 647 bytes</li>
+ * </ul>
+ *
+ * @implNote Each {@code writeLength} call performs a store fence as required by
+ * JSR-133 to ensure the length is visible to other threads.
  */
 public enum BinaryLengthLength {
     /**
-     * Represents an 8-bit length encoding for binary data.
+     * Represents an 8-bit length prefix capable of encoding data lengths from 0
+     * to 255 bytes. The prefix consists of one byte identifying the type and one
+     * byte holding the length value.
      */
     LENGTH_8BIT {
         /**
-         * Returns the code representing 8-bit length.
+         * Returns the identifying code for an 8-bit length prefix.
          *
-         * @return The code for the 8-bit length.
+         * @return the code used in the binary stream
          */
         @Override
         public int code() {
@@ -44,10 +56,10 @@ public enum BinaryLengthLength {
         }
 
         /**
-         * Initializes a {@link BytesOut} object with the length code.
+         * Writes the identifying code and reserves one byte for the length.
          *
-         * @param bytes The {@link BytesOut} object to initialize.
-         * @return The position within the {@link BytesOut} where the length will be written.
+         * @param bytes the output to initialise
+         * @return the offset where the length should later be written
          */
         @Override
         public long initialise(@NotNull final BytesOut<?> bytes) {
@@ -58,11 +70,13 @@ public enum BinaryLengthLength {
         }
 
         /**
-         * Writes the length of the data into the {@link Bytes} object.
+         * Calculates the data length and writes it at the supplied position.
+         * A store fence is performed to ensure visibility between threads.
          *
-         * @param bytes                           The {@link Bytes} object to write to.
-         * @param positionReturnedFromInitialise  The position within the {@link Bytes} to write the length.
-         * @param end                             The end position of the data within the {@link Bytes}.
+         * @param bytes                          the bytes to update
+         * @param positionReturnedFromInitialise the offset returned by {@link #initialise(BytesOut)}
+         * @param end                            the absolute end of the data
+         * @throws IllegalStateException if the length exceeds 255
          */
         @Override
         public void writeLength(@NotNull Bytes<?> bytes, @NonNegative long positionReturnedFromInitialise, @NonNegative long end) {
@@ -70,17 +84,18 @@ public enum BinaryLengthLength {
             if (length >= 1 << 8)
                 throw invalidLength(length);
             bytes.writeByte(positionReturnedFromInitialise, (byte) length);
-            UnsafeMemory.MEMORY.storeFence(); // Ensures that the write is flushed to memory
+            UnsafeMemory.MEMORY.storeFence(); // ensures visibility between threads
         }
     },
     /**
-     * Represents a 16-bit length encoding for binary data.
+     * Represents a 16-bit length prefix. The prefix comprises one code byte and
+     * two bytes storing the length, allowing data up to 65535 bytes.
      */
     LENGTH_16BIT {
         /**
-         * Returns the code representing 16-bit length.
+         * Returns the identifying code for a 16-bit length prefix.
          *
-         * @return The code for the 16-bit length.
+         * @return the code used in the binary stream
          */
         @Override
         public int code() {
@@ -88,10 +103,10 @@ public enum BinaryLengthLength {
         }
 
         /**
-         * Initializes a {@link BytesOut} object with the length code.
+         * Writes the identifying code and reserves two bytes for the length.
          *
-         * @param bytes The {@link BytesOut} object to initialize.
-         * @return The position within the {@link BytesOut} where the length will be written.
+         * @param bytes the output to initialise
+         * @return the offset where the length should later be written
          */
         @Override
         public long initialise(@NotNull final BytesOut<?> bytes) {
@@ -102,11 +117,12 @@ public enum BinaryLengthLength {
         }
 
         /**
-         * Writes the length of the data into the {@link Bytes} object.
+         * Calculates the data length and writes it at the supplied position.
          *
-         * @param bytes                           The {@link Bytes} object to write to.
-         * @param positionReturnedFromInitialise  The position within the {@link Bytes} to write the length.
-         * @param end                             The end position of the data within the {@link Bytes}.
+         * @param bytes                          the bytes to update
+         * @param positionReturnedFromInitialise the offset returned by {@link #initialise(BytesOut)}
+         * @param end                            the absolute end of the data
+         * @throws IllegalStateException if the length exceeds 65535
          */
         @Override
         public void writeLength(@NotNull Bytes<?> bytes, @NonNegative long positionReturnedFromInitialise, @NonNegative long end) {
@@ -114,17 +130,18 @@ public enum BinaryLengthLength {
             if (length >= 1 << 16)
                 throw invalidLength(length);
             bytes.writeShort(positionReturnedFromInitialise, (short) length);
-            UnsafeMemory.MEMORY.storeFence(); // Ensures that the write is flushed to memory
+            UnsafeMemory.MEMORY.storeFence(); // ensures visibility between threads
         }
     },
     /**
-     * Represents a 32-bit length encoding for binary data.
+     * Represents a 32-bit length prefix allowing data up to 2,147,483,647 bytes.
+     * The prefix comprises one code byte followed by four bytes of length.
      */
     LENGTH_32BIT {
         /**
-         * Returns the code representing 32-bit length.
+         * Returns the identifying code for a 32-bit length prefix.
          *
-         * @return The code for the 32-bit length.
+         * @return the code used in the binary stream
          */
         @Override
         public int code() {
@@ -132,10 +149,10 @@ public enum BinaryLengthLength {
         }
 
         /**
-         * Initializes a {@link BytesOut} object with the length code.
+         * Writes the identifying code and reserves four bytes for the length.
          *
-         * @param bytes The {@link BytesOut} object to initialize.
-         * @return The position within the {@link BytesOut} where the length will be written.
+         * @param bytes the output to initialise
+         * @return the offset where the length should later be written
          */
         @Override
         public long initialise(@NotNull BytesOut<?> bytes) {
@@ -146,11 +163,12 @@ public enum BinaryLengthLength {
         }
 
         /**
-         * Writes the length of the data into the {@link Bytes} object.
+         * Calculates the data length and writes it at the supplied position.
          *
-         * @param bytes                           The {@link Bytes} object to write to.
-         * @param positionReturnedFromInitialise  The position within the {@link Bytes} to write the length.
-         * @param end                             The end position of the data within the {@link Bytes}.
+         * @param bytes                          the bytes to update
+         * @param positionReturnedFromInitialise the offset returned by {@link #initialise(BytesOut)}
+         * @param end                            the absolute end of the data
+         * @throws IllegalStateException if the length exceeds the 32-bit range
          */
         @Override
         public void writeLength(@NotNull Bytes<?> bytes, @NonNegative long positionReturnedFromInitialise, @NonNegative long end) {
@@ -158,6 +176,7 @@ public enum BinaryLengthLength {
             if (length >= 1L << 31)
                 throw invalidLength(length);
             bytes.writeOrderedInt(positionReturnedFromInitialise, (int) length);
+            UnsafeMemory.MEMORY.storeFence(); // ensures visibility between threads
         }
     };
 
@@ -174,26 +193,30 @@ public enum BinaryLengthLength {
     }
 
     /**
-     * Returns the code representing the length encoding.
+     * Returns the {@link net.openhft.chronicle.bytes.BinaryWireCode} identifying
+     * this length field in the binary stream.
      *
-     * @return the length encoding code
+     * @return the code used in the wire format
      */
     public abstract int code();
 
     /**
-     * Initialises the binary data with the appropriate length encoding.
+     * Writes the identifying code and reserves space for the length field.
      *
      * @param bytes the output bytes to write to
-     * @return the position where the length encoding starts
+     * @return the absolute offset at which the length should be written later
      */
     public abstract long initialise(@NotNull BytesOut<?> bytes);
 
     /**
-     * Writes the length of the data into the {@link Bytes} object.
+     * Writes the actual length at the supplied offset after the data segment has
+     * been written.
      *
-     * @param bytes                          The {@link Bytes} object to write to.
-     * @param positionReturnedFromInitialise The position within the {@link Bytes} to write the length.
-     * @param end                            The end position of the data within the {@link Bytes}.
+     * @param bytes                          the bytes to update
+     * @param positionReturnedFromInitialise the offset from {@link #initialise(BytesOut)}
+     * @param end                            the absolute end of the data
      */
-    public abstract void writeLength(@NotNull Bytes<?> bytes, @NonNegative long positionReturnedFromInitialise, @NonNegative long end);
+    public abstract void writeLength(@NotNull Bytes<?> bytes,
+                                     @NonNegative long positionReturnedFromInitialise,
+                                     @NonNegative long end);
 }
