@@ -35,29 +35,11 @@ import static net.openhft.chronicle.core.util.Longs.requireNonNegative;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
 /**
- * The {@code RandomDataInput} class provides a series of methods for reading data
- * from various types of inputs. It allows to read data from an input source
- * in a non-sequential manner, i.e., the data can be accessed at any offset.
- *
- * <p>This class supports reading of primitive data types like {@code int},
- * {@code long}, {@code double} etc., as well as more complex data structures
- * like {@code byte[]}, {@code String} and {@code ByteBuffer}. It also provides
- * methods for direct reading from memory and for reading with a load barrier.
- *
- * <p>Furthermore, the {@code RandomDataInput} class provides additional methods for
- * advanced operations like copying data to native memory, finding a specific byte,
- * calculating the hash code of a sequence of bytes, and more.
- *
- * <p>Methods in this class may throw {@code BufferUnderflowException} if the offset
- * specified is outside the limits of the byte sequence or {@code ClosedIllegalStateException}
- * if the byte sequence has been released.
- *
- * <p>Note: Implementations of this class are typically not thread-safe. If multiple
- * threads interact with a {@code RandomDataInput} instance concurrently, it must be synchronized
- * externally.
+ * Provides methods for reading data from a byte sequence or buffer at arbitrary offsets.
+ * Implementations extend {@link RandomCommon}.
+ * Offset-based reads can be thread-safe if the data is immutable or synchronised.
  */
 public interface RandomDataInput extends RandomCommon {
-    /**
      * Reads a volatile int value from the current reading position.
      *
      * @return the read int value.

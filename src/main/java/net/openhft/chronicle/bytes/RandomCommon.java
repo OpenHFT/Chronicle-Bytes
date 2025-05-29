@@ -26,7 +26,9 @@ import java.nio.BufferUnderflowException;
 import java.nio.ByteOrder;
 
 /**
- * Interface defining methods for managing random access to a buffer. It extends ReferenceCounted to allow for reference counting features.
+ * A foundational interface for random access to a byte sequence or buffer.
+ * It defines start position, capacity and cursor operations.
+ * Extends {@link net.openhft.chronicle.core.io.ReferenceCounted} for lifecycle management and underpins {@link RandomDataInput} and {@link RandomDataOutput}.
  */
 interface RandomCommon extends ReferenceCounted {
     /**
@@ -38,15 +40,16 @@ interface RandomCommon extends ReferenceCounted {
     }
 
     /**
-     * @return the highest limit allowed for this buffer.
+     * @return the maximum addressable capacity.
+     * May be as large as {@link Bytes#MAX_CAPACITY} for virtual mappings.
      */
     @NonNegative
     default long capacity() {
         return Bytes.MAX_CAPACITY;
     }
-
     /**
-     * @return the limit for this buffer without resizing
+     * @return the current allocated capacity of the underlying storage.
+     * For elastic buffers this may be less than {@link #capacity()} and can grow on demand.
      */
     @NonNegative
     default long realCapacity() {
@@ -54,31 +57,24 @@ interface RandomCommon extends ReferenceCounted {
     }
 
     /**
-     * Returns the read position.
-     * <p>
-     * The read position is {@code start() <= readPosition() && readPosition() <= readLimit() && readPosition < safeLimit()}
-     * <p>
-     * If the resource is closed, the returned value is unspecified.
-     *
-     * @return position to read from.
+    /**
+     * @return the current read position.
+     * Typically {@code start() <= readPosition() <= writePosition()} and {@code readPosition() <= readLimit()}.
      */
     @NonNegative
     default long readPosition() {
         return start();
     }
+    }
 
     /**
-     * Returns the write position.
-     * <p>
-     * The write position is {@code readPosition() <= writePosition() && writePosition() <= writeLimit()}
-     * <p>
-     * If the resource is closed, the returned value is unspecified.
-     *
-     * @return position to write to.
+     * @return the current write position.
+     * Typically {@code readPosition() <= writePosition() <= writeLimit()}.
      */
     @NonNegative
     default long writePosition() {
         return start();
+    }
     }
 
     /**
@@ -168,41 +164,37 @@ interface RandomCommon extends ReferenceCounted {
      *
      * @param offset within this buffer. addressForRead(start()) is the actual addressForRead of the first byte.
      * @return the underlying addressForRead of the buffer
-     * @throws UnsupportedOperationException If the underlying buffer is on the heap
-     * @throws BufferUnderflowException      If the offset is before the start() or the after the capacity()
-     * @throws ClosedIllegalStateException    If the resource has been released or closed.
-     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
-     */
-    long addressForRead(@NonNegative long offset)
-            throws UnsupportedOperationException, BufferUnderflowException, ClosedIllegalStateException, ThreadingIllegalStateException;
-
     /**
      * Retrieves the underlying memory address for reading. This is for expert users only.
      *
-     * @param offset The offset within this buffer.
-     * @param buffer The buffer index.
-     * @return The underlying memory address for reading at the specified offset.
-     * @throws UnsupportedOperationException If the underlying buffer is on the heap.
+     * @param offset the logical offset within this buffer relative to {@link #start()}.
+     * @return the native address for the specified offset.
+     * @throws UnsupportedOperationException if the buffer uses heap memory.
+     * @throws BufferUnderflowException      if the offset is outside the allowed range.
+     * @throws ClosedIllegalStateException   if the resource has been released or closed.
+     * @throws ThreadingIllegalStateException if accessed concurrently in an unsafe way.
+     */
+    long addressForRead(@NonNegative long offset)
+            throws UnsupportedOperationException, BufferUnderflowException, ClosedIllegalStateException, ThreadingIllegalStateException;
      * @throws BufferUnderflowException      If the offset is before the start or after the capacity.
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
+     */
+    /**
+     * Retrieves the underlying memory address for reading. This is for expert users only.
+     *
+     * @param offset the logical offset within this buffer relative to {@link #start()}.
+     * @param buffer the buffer index if this store is backed by multiple buffers.
+     * @return the native address for the specified offset.
+     * @throws UnsupportedOperationException if the buffer uses heap memory.
+     * @throws BufferUnderflowException      if the offset is outside the allowed range.
+     * @throws ClosedIllegalStateException   if the resource has been released or closed.
+     * @throws ThreadingIllegalStateException if accessed concurrently in an unsafe way.
      */
     default long addressForRead(@NonNegative long offset, @NonNegative int buffer)
             throws UnsupportedOperationException, BufferUnderflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
         return addressForRead(offset);
     }
-
-    /**
-     * Retrieves the underlying memory address for writing.  This is for expert users only.
-     *
-     * @param offset within this buffer. addressForRead(start()) is the actual addressForRead of the first byte.
-     * @return the underlying addressForRead of the buffer
-     * @throws UnsupportedOperationException If the underlying buffer is on the heap
-     * @throws BufferOverflowException       If the offset is before the start() or the after the capacity()
-     * @throws ClosedIllegalStateException    If the resource has been released or closed.
-     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
-     */
-    long addressForWrite(@NonNegative long offset)
             throws UnsupportedOperationException, BufferOverflowException, ClosedIllegalStateException, ThreadingIllegalStateException;
 
     /**
@@ -231,16 +223,21 @@ interface RandomCommon extends ReferenceCounted {
      *
      * @return A Bytes object for reading.
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
-     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
+    /**
+     * @return a {@link Bytes} view for reading from this buffer.
+     * The returned view reflects the current positions and limits.
      */
     @NotNull
     Bytes<?> bytesForRead()
             throws ClosedIllegalStateException, ThreadingIllegalStateException;
 
     /**
-     * Retrieves a Bytes object for writing.
-     *
-     * @return A Bytes object for writing.
+     * @return a {@link Bytes} view for writing to this buffer.
+     * The returned view uses the current write position and limits.
+     */
+    @NotNull
+    Bytes<?> bytesForWrite()
+            throws ClosedIllegalStateException;
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
