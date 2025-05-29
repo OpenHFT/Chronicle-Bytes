@@ -24,8 +24,19 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 import static org.junit.Assume.assumeFalse;
 
+/**
+ * Examples showing how to read and write {@code String} values with Chronicle Bytes.
+ *
+ * <p>This test uses both 8-bit and UTF-8 encoding to illustrate the behaviour
+ * of the string pooling when the same text is written and read in different
+ * ways.</p>
+ */
 public class StringsTest extends BytesTestCommon {
 
+    /**
+     * Demonstrates writing the same text in two encodings and
+     * validating that the pooled instances are reused when read back.
+     */
     @Test
     public void testString() {
         assumeFalse(NativeBytes.areNewGuarded());
@@ -62,6 +73,10 @@ public class StringsTest extends BytesTestCommon {
         }
     }
 
+    /**
+     * Shows that {@code null} strings can be written and read without raising
+     * an exception. Both encodings are handled in the same manner.
+     */
     @Test
     public void testNull() {
         final HexDumpBytes bytes = new HexDumpBytes();
