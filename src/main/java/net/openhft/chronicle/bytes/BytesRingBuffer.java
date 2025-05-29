@@ -25,26 +25,20 @@ import java.lang.reflect.Method;
 import java.nio.BufferOverflowException;
 
 /**
- * This interface represents a ring buffer data structure capable of reading and writing
- * Bytes (binary data). The BytesRingBuffer interface extends {@link BytesRingBufferStats},
- * {@link BytesConsumer}, and {@link Closeable} to provide statistics about the ring buffer,
- * consume bytes from the buffer and close the buffer when it's no longer needed.
- *
- * <p>This interface also includes methods for creating instances of ring buffer, determining the size,
- * checking for emptiness, and offering or reading bytes to/from the buffer.
- *
- * <p>Note that some methods in this interface are expected to be implemented in commercial versions
- * and would need unlocking for use.
- *
- * <p>This interface is not meant to be implemented by user code.
+ * Represents a ring buffer for {@link Bytes} data, intended for
+ * high-throughput, low-latency messaging between threads or services. It
+ * combines statistics ({@link BytesRingBufferStats}), byte consumption
+ * ({@link BytesConsumer}) and resource management ({@link Closeable}). Direct
+ * user implementation is discouraged and some functionality may require
+ * commercial libraries.
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
 public interface BytesRingBuffer extends BytesRingBufferStats, BytesConsumer, Closeable {
     /**
-     * Constructs a new  instance with the provided {@link BytesStore}.
+     * Factory method to create a new ring buffer.
      *
-     * @param bytesStore the {@link BytesStore} to be used for the ring buffer.
-     * @return a new instance of .
+     * @param bytesStore backing store
+     * @return new ring buffer instance
      */
     @NotNull
     static BytesRingBuffer newInstance(@NotNull BytesStore<?, Void> bytesStore) {
@@ -52,11 +46,11 @@ public interface BytesRingBuffer extends BytesRingBufferStats, BytesConsumer, Cl
     }
 
     /**
-     * Constructs a new {@link MultiReaderBytesRingBuffer} instance with the provided {@link BytesStore} and a given number of readers.
+     * Factory method to create a ring buffer with multiple readers.
      *
-     * @param bytesStore the {@link BytesStore} to be used for the ring buffer.
-     * @param numReaders the number of readers for the ring buffer.
-     * @return a new instance of {@link MultiReaderBytesRingBuffer}.
+     * @param bytesStore backing store
+     * @param numReaders number of readers
+     * @return new {@link MultiReaderBytesRingBuffer}
      */
     @NotNull
     static MultiReaderBytesRingBuffer newInstance(
@@ -78,10 +72,9 @@ public interface BytesRingBuffer extends BytesRingBufferStats, BytesConsumer, Cl
     }
 
     /**
-     * Returns the {@link Class} object for {@link MultiReaderBytesRingBuffer}.
-     *
-     * @return the {@link Class} object for {@link MultiReaderBytesRingBuffer}.
-     * @throws ClassNotFoundException if the class "software.chronicle.enterprise.ring.EnterpriseRingBuffer" is not found.
+     * @return the {@link Class} for the commercial implementation of
+     *         {@link MultiReaderBytesRingBuffer}
+     * @throws ClassNotFoundException if the implementation class is not present
      */
     @NotNull
     static Class<MultiReaderBytesRingBuffer> clazz()
@@ -91,21 +84,16 @@ public interface BytesRingBuffer extends BytesRingBufferStats, BytesConsumer, Cl
     }
 
     /**
-     * Calculates the required size for the ring buffer with a given capacity.
-     *
-     * @param capacity the capacity of the ring buffer.
-     * @return the required size for the ring buffer.
+     * Calculates the total byte size required for a ring buffer of the given
+     * capacity.
      */
     static long sizeFor(@NonNegative long capacity) {
         return sizeFor(capacity, 1);
     }
 
     /**
-     * Calculates the required size for the ring buffer with a given capacity and a specific number of readers.
-     *
-     * @param capacity   the capacity of the ring buffer.
-     * @param numReaders the number of readers for the ring buffer.
-     * @return the required size for the ring buffer.
+     * Calculates the total byte size required for a ring buffer with the given
+     * {@code capacity} and number of readers.
      */
     static long sizeFor(@NonNegative long capacity, @NonNegative int numReaders) {
         try {
@@ -123,41 +111,39 @@ public interface BytesRingBuffer extends BytesRingBufferStats, BytesConsumer, Cl
     }
 
     /**
-     * clears the ring buffer but moving the read position to the write position
+     * Clears the buffer, typically by advancing reader positions to the current
+     * write position.
      */
     void clear();
 
     /**
-     * Inserts the specified element at the tail of this queue if it is possible to do so
-     * immediately without exceeding the queue's capacity,
+     * Attempts to write the content of {@code bytes0} as a single message.
      *
-     * @param bytes0 the {@code bytes0} that you wish to add to the ring buffer
-     * @return returning {@code true} upon success and {@code false} if this queue is full.
+     * @param bytes0 bytes to write
+     * @return {@code true} if the message was written, {@code false} if the
+     *         buffer lacks space
      */
     boolean offer(@NotNull BytesStore<?, ?> bytes0);
 
     /**
-     * Retrieves and removes the head of this queue, or returns {@code null} if this queue is
-     * empty.
+     * Reads the next available message into {@code using}.
      *
-     * @param using Bytes to read into.
-     * @return false if this queue is empty, or a populated buffer if the element was retried
-     * @throws BufferOverflowException is the {@code using} buffer is not large enough
+     * @param using destination buffer
+     * @return {@code true} if a message was read, {@code false} if none were available
+     * @throws BufferOverflowException if {@code using} is too small
      */
     @Override
     boolean read(@NotNull BytesOut<?> using);
 
     /**
-     * Retrieves the number of bytes that can be read from this buffer.
-     *
-     * @return the number of bytes that can be read
+     * Number of bytes currently available for reading from the default reader
+     * perspective.
      */
     long readRemaining();
 
     /**
-     * Checks if the buffer is empty. A buffer is considered empty if there are no readable bytes.
-     *
-     * @return {@code true} if the buffer is empty, {@code false} otherwise
+     * @return {@code true} if no readable messages are present for the default
+     *         reader
      */
     boolean isEmpty();
 
