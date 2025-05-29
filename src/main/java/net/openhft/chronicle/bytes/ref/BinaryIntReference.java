@@ -54,6 +54,9 @@ import java.nio.BufferUnderflowException;
  */
 @SuppressWarnings("rawtypes")
 public class BinaryIntReference extends AbstractReference implements IntValue {
+    /**
+     * Sentinel value used when an integer operation fails to complete normally.
+     */
     public static final int INT_NOT_COMPLETE = Integer.MIN_VALUE;
 
     /**
@@ -109,12 +112,12 @@ public class BinaryIntReference extends AbstractReference implements IntValue {
     }
 
     /**
-     * Retrieves the 32-bit integer value from the BytesStore.
+     * Performs a plain read of the value from the backing store.
      *
-     * @return the 32-bit integer value
-     * @throws BufferUnderflowException If the offset is too large
-     * @throws ClosedIllegalStateException    If the resource has been released or closed.
-     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
+     * @return the current value
+     * @throws BufferUnderflowException if the offset is invalid
+     * @throws ClosedIllegalStateException    if the resource has been released or closed.
+     * @throws ThreadingIllegalStateException if accessed by multiple threads unsafely
      */
     @Override
     public int getValue()
@@ -125,12 +128,12 @@ public class BinaryIntReference extends AbstractReference implements IntValue {
     }
 
     /**
-     * Sets the 32-bit integer value in the BytesStore.
+     * Writes the value to the backing store using plain semantics.
      *
-     * @param value the 32-bit integer value to set
-     * @throws BufferOverflowException If the offset is too large
-     * @throws ClosedIllegalStateException    If the resource has been released or closed.
-     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
+     * @param value the value to store
+     * @throws BufferOverflowException if the offset is invalid
+     * @throws ClosedIllegalStateException    if the resource has been released or closed.
+     * @throws ThreadingIllegalStateException if accessed by multiple threads unsafely
      */
     @Override
     public void setValue(int value)

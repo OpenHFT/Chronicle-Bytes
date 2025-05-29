@@ -1,8 +1,7 @@
 /**
- * Provides classes and interfaces for handling references to arrays of
- * various primitive types with byte representation. This package is a part of
- * the Chronicle Bytes library, which offers high-performance byte manipulation
- * and I/O capabilities.
+ * Provides references to primitive values and arrays stored directly in a {@link net.openhft.chronicle.bytes.BytesStore}.
+ * These references permit low-level manipulation of off-heap or memory-mapped data.
+ * The reference objects themselves are not thread-safe.
  *
  * <p>Key classes and interfaces included in this package:
  * <ul>
