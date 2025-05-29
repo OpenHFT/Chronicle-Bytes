@@ -1,0 +1,23 @@
+= README examples for Chronicle Bytes
+:lang: en-GB
+
+This package contains small JUnit tests that double as usage examples.
+They are referenced from the main documentation and can be executed
+like any other unit test.
+
+== Files
+* `CASTest.java`
+* `PrimitiveTest.java`
+* `StopBitTest.java`
+* `StringsTest.java`
+
+== Running the Examples
+Run the tests from your IDE or via Maven:
+
+[source,bash]
+----
+mvn -q test -Dtest=net.openhft.chronicle.bytes.readme.*
+----
+
+The tests show basic read and write operations. They are designed to be
+short so the code snippets are easy to copy.
