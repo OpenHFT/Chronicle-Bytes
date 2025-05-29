@@ -63,7 +63,7 @@ public enum OptimisedBytesStoreHash implements BytesStoreHash<BytesStore<?,?>> {
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      *
-     * @implNote This method is on the hot path for small direct {@link BytesStore} instances and allocates no objects.
+     * <p> This method is on the hot path for small direct {@link BytesStore} instances and allocates no objects.
      */
     static long applyAsLong1to7(@NotNull BytesStore<?, ?> store, @NonNegative int remaining) throws IllegalStateException, BufferUnderflowException {
         final long address = store.addressForRead(store.readPosition());
@@ -80,7 +80,7 @@ public enum OptimisedBytesStoreHash implements BytesStoreHash<BytesStore<?,?>> {
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      *
-     * @implNote Suitable for hot paths and performs no allocation.
+     * <p> Suitable for hot paths and performs no allocation.
      */
     static long applyAsLong8(@NotNull BytesStore<?, ?> store) throws IllegalStateException, BufferUnderflowException {
         final long address = store.addressForRead(store.readPosition());
@@ -117,7 +117,7 @@ public enum OptimisedBytesStoreHash implements BytesStoreHash<BytesStore<?,?>> {
      * @return A 64-bit hash value.
      * @throws BufferUnderflowException If there is not enough data.
      *
-     * @implNote Handles medium sized payloads without allocation.
+     * <p> Handles medium sized payloads without allocation.
      */
     static long applyAsLong9to16(@NotNull BytesStore<?, ?> store, @NonNegative int remaining) throws BufferUnderflowException {
         @NotNull final BytesStore<?, ?> bytesStore = store.bytesStore();
@@ -153,7 +153,7 @@ public enum OptimisedBytesStoreHash implements BytesStoreHash<BytesStore<?,?>> {
      * @return A 64-bit hash value.
      * @throws BufferUnderflowException If there is not enough data.
      *
-     * @implNote Designed for medium payloads, free from allocation.
+     * <p> Designed for medium payloads, free from allocation.
      */
     static long applyAsLong17to32(@NotNull BytesStore<?, ?> store, @NonNegative int remaining) throws BufferUnderflowException {
         @NotNull final BytesStore<?, ?> bytesStore = store.bytesStore();
@@ -189,7 +189,7 @@ public enum OptimisedBytesStoreHash implements BytesStoreHash<BytesStore<?,?>> {
      * @return A 64-bit hash value.
      * @throws BufferUnderflowException If there is not enough data.
      *
-     * @implNote Intended for large direct {@link BytesStore} blocks.
+     * <p> Intended for large direct {@link BytesStore} blocks.
      */
     public static long applyAsLong32bytesMultiple(@NotNull BytesStore<?, ?> store, @NonNegative int remaining) throws BufferUnderflowException {
         @NotNull final BytesStore<?, ?> bytesStore = store.bytesStore();
@@ -235,7 +235,7 @@ public enum OptimisedBytesStoreHash implements BytesStoreHash<BytesStore<?,?>> {
      * @return A 64-bit hash value.
      * @throws BufferUnderflowException If there is not enough data.
      *
-     * @implNote Fallback for arbitrary lengths; still avoids allocation.
+     * <p> Fallback for arbitrary lengths; still avoids allocation.
      */
     public static long applyAsLongAny(@NotNull BytesStore<?, ?> store, @NonNegative long remaining) throws BufferUnderflowException {
         @NotNull final BytesStore<?, ?> bytesStore = store.bytesStore();

@@ -31,7 +31,7 @@ import java.util.function.ToLongFunction;
  * This interface also exposes static helpers for computing 32-bit and 64-bit
  * hashes using the bundled implementations.
  *
- * @implSpec Implementations should avoid allocating memory and may assume that
+ * <p> Implementations should avoid allocating memory and may assume that
  * {@code length} bytes can be read without extra bounds checks.
  *
  * See {@code algo-overview.adoc} for usage examples.
@@ -109,7 +109,7 @@ public interface BytesStoreHash<B extends BytesStore> extends ToLongFunction<B> 
      * @throws ClosedIllegalStateException    if the resource has been released or closed
      * @throws ThreadingIllegalStateException if this resource was accessed by multiple threads in an unsafe way
      *
-     * @implNote Implementations are typically branch-free and perform no allocations.
+     * <p> Implementations are typically branch-free and perform no allocations.
      */
     long applyAsLong(BytesStore<?, ?> bytes, long length) throws IllegalStateException, BufferUnderflowException;
 }
