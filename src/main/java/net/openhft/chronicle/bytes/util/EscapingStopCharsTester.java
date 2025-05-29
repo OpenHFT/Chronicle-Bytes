@@ -24,7 +24,6 @@ import net.openhft.chronicle.bytes.StopCharsTester;
  */
 public class EscapingStopCharsTester implements StopCharsTester {
 
-    // The decorated StopCharsTester
     private final StopCharsTester sct;
     // A flag to track whether the last character was an escape character
     private boolean escaped = false;
