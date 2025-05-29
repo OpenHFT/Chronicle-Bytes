@@ -31,7 +31,7 @@ import java.util.function.Consumer;
 
 /**
  * The BytesMethodReader class provides a concrete implementation of the MethodReader interface.
- * It extends SimpleCloseable and it's capable of reading serialized method calls from a BytesIn object.
+ * It extends SimpleCloseable, and it's capable of reading serialized method calls from a BytesIn object.
  * The class uses an instance of BytesParselet to define a default behavior when reading method calls,
  * and a map of method encoders to decode serialized method calls into their original form.
  * <p>
