@@ -253,7 +253,7 @@ public class TextLongArrayReference extends AbstractReference implements Byteabl
             throws IllegalStateException, BufferOverflowException, IllegalArgumentException {
         throwExceptionIfClosedInSetter();
 
-        long peakLength = 0;
+        long peakLength;
         try {
             peakLength = peakLength(bytes, offset);
         } catch (BufferUnderflowException e) {
