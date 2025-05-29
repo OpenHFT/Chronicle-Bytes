@@ -49,5 +49,4 @@ public interface Decimaliser {
      * @return {@code true} if the conversion and appending were successful, {@code false} otherwise.
      */
     boolean toDecimal(float value, DecimalAppender decimalAppender);
-
 }
