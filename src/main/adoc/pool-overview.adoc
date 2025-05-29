@@ -1,0 +1,17 @@
+= Chronicle Bytes Pooling
+:doctype: book
+:toc:
+:toclevels: 2
+:lang: en-GB
+
+Pooling reuses `Bytes` objects to minimise allocation churn in very
+low-latency scenarios. Each thread keeps a small cache of instances.
+
+.Acquiring and releasing
+```
+try (Bytes<?> b = pool.acquire()) {
+    // use b
+}
+```
+
+See `memory-management.adoc` for advice on native memory budget.

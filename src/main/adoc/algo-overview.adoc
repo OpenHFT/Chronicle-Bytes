@@ -1,0 +1,17 @@
+= Chronicle Bytes Hash Algorithms
+:doctype: book
+:toc:
+:toclevels: 2
+:lang: en-GB
+
+This module provides non-cryptographic hash functions for `BytesStore` data.
+It is typically used for in-memory indexes and integrity checks where speed is
+more important than collision resistance.
+
+.Common call flow
+```
+BytesStoreHash hash = OptimisedBytesStoreHash.INSTANCE;
+long value = hash.applyAsLong(bytesStore, bytesStore.readRemaining());
+```
+
+See `memory-management.adoc` for details about memory ownership and lifetimes.
