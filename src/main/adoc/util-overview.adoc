@@ -1,0 +1,146 @@
+= Chronicle Bytes Utility Helpers (`net.openhft.chronicle.bytes.util`)
+:doctype: book
+:toc:
+:toclevels: 2
+:lang: en-GB
+
+This overview describes the collection of helper types that reside in the
+`net.openhft.chronicle.bytes.util` package.
+These utilities provide ancillary functionalities such as compression, string interning, and parsing aids.
+While some components are designed for internal use by higher layers like _Wire_ and _Queue_ and may evolve, others offer stable utility for general use.
+Every class is designed with Chronicle’s core goals in mind – aiming for **low-allocation, low-latency, and direct-memory-friendly** operations where appropriate.
+
+== At a glance
+
+|===
+|Domain | Main types | Typical use case
+
+|_Compression_ | `Compression` (Interface), `Compressions` (Enum) | On-the-fly LZW / GZIP stream processing or pass-through *Binary* (no-op) mode.
+|_String interning_ | `AbstractInterner` (Base class), `StringInternerBytes`, `UTF8StringInterner`, `Bit8StringInterner` | Reduce GC churn and memory footprint by reusing `String` instances for frequently encountered byte sequences (e.g., field names, symbols).
+|_Length prefixes_ | `BinaryLengthLength` (Enum) | Encode variable-width byte-length headers for binary data segments, supporting 8-bit, 16-bit, or 32-bit length fields.
+|_Parsing helpers_ | `EscapingStopCharTester`, `EscapingStopCharsTester` | Decorators for `StopCharTester` and `StopCharsTester` to enable tokenisation of text while honouring backslash (`\`) as an escape character, so that escaped stop characters are not treated as terminators.
+|_Property expansion_ | `PropertyReplacer` (Enum) | Expand `${property}` placeholders within a template string, sourcing values from `System.getProperty` or a supplied `java.util.Properties` object.
+|_Customised exceptions_ | `DecoratedBufferOverflowException`, `DecoratedBufferUnderflowException` | Provide more informative buffer boundary error messages by allowing a pre-formatted string, potentially avoiding the cost of `String.format` at throw time.
+|===
+
+[#compression]
+== Compression utilities
+
+The `Compression` interface defines a strategy for compressing and decompressing byte data, offering methods for:
+
+* Byte array operations: `compress(byte[])`, `uncompress(byte[])`
+* Zero-copy `BytesIn`/`BytesOut` operations: `compress(BytesIn, BytesOut)` and its `uncompress` mirror
+* Stream-based operations via factories: `compressingStream(OutputStream)` and `decompressingStream(InputStream)`
+
+The companion enum `Compressions` provides three ready-made strategies:
+
+* `Binary`: A pass-through (no-op) strategy.
+It is allocation-free and always available.
+* `LZW`: Implements LZW-like compression using `java.util.zip.DeflaterOutputStream` and `java.util.zip.InflaterInputStream`.
+Offers a good general-purpose balance between compression ratio and speed.
+* `GZIP`: Implements GZIP (RFC 1952) compression using `java.util.zip.GZIPOutputStream` and `java.util.zip.GZIPInputStream`.
+Typically yields a higher compression ratio but may involve more overhead and state allocation.
+
+[TIP]
+====
+All `Compressions` enum constants are thread-safe singletons.
+When using the stream wrappers, they are designed to close the _decorator_ stream but leave the underlying stream open.
+It is good practice to manage the underlying stream's lifecycle separately, often using a `try-with-resources` block for it.
+====
+
+[#interning]
+== String interning utilities
+
+Interners are designed to reduce memory usage and garbage collection overhead by canonicalising `String` instances created from byte sequences.
+If a byte sequence has been seen before, a cached `String` instance is returned.
+
+* **`AbstractInterner<T>`**: An abstract base class for interners.
+It implements a lock-free cache with a power-of-two capacity using open-addressing and a simple toggle heuristic for collision resolution.
+Subclasses define how to convert bytes to an object of type `T`.
+* **`StringInternerBytes`**: A subclass of `net.openhft.chronicle.core.pool.StringInterner` specifically for `Bytes` instances.
+It assumes an 8-bit (e.g., ISO-8859-1) encoding when converting bytes to `String`.
+It uses `BytesStoreHash` for potentially faster hashing of `BytesStore` content.
+* **`Bit8StringInterner`**: Extends `AbstractInterner` and treats each byte as an unsigned 8-bit character to form a `String`.
+* **`UTF8StringInterner`**: Extends `AbstractInterner` and decodes byte sequences as UTF-8 to produce `String` objects.
+It uses `AppendableUtil.parseUtf8` for validation and conversion.
+
+[NOTE]
+====
+The caches in these interners are capacity-bounded.
+The simple collision resolution (toggle heuristic) means they are not strict LRU (Least Recently Used) caches, so objects may be evicted.
+The interning methods aim to be allocation-free on a cache hit.
+A new value (and potentially an entry object) is allocated only on a cache miss.
+====
+
+[#length-prefix]
+== `BinaryLengthLength`
+
+This enum provides a standardised way to encode the length of a subsequent binary field using a compact prefix.
+It supports 8-bit, 16-bit, or 32-bit length fields, each identified by a unique code from `BinaryWireCode`.
+
+* `initialise(BytesOut)`: Writes a one-byte type code (e.g., `BinaryWireCode.BYTES_LENGTH8`) to the output stream, followed by zero-filled bytes for the length itself.
+It returns the offset where the actual length should be written.
+* `writeLength(Bytes, long pos, long end)`: After the payload has been written, this method is called.
+It calculates the actual length of the payload, validates it against the capacity of the chosen length type (8, 16, or 32-bit), and then writes this length back at the previously returned offset (`pos`).
+For `LENGTH_32BIT`, it uses an ordered write (`writeOrderedInt`) and issues a store-fence for visibility.
+
+[#parsing]
+== Escaping stop-character testers
+
+These utility classes enhance the functionality of `StopCharTester` and `StopCharsTester` by adding support for escape characters.
+
+* `EscapingStopCharTester` (for single-character `StopCharTester`): Wraps a `StopCharTester`.
+If a backslash (`\`) is encountered, it is consumed, and the _next_ character is treated as an escaped literal, not a stop character.
+* `EscapingStopCharsTester` (for `StopCharsTester` that also peeks at the next character): Similarly wraps a `StopCharsTester`, providing backslash-escaping logic.
+
+[NOTE]
+====
+Both these testers are stateful due to the internal `escaped` flag.
+Therefore, a single instance should **not** be shared across threads or re-used concurrently for different parsing operations without external synchronisation or re-initialisation.
+====
+
+[#property-replacer]
+== `PropertyReplacer`
+
+This enum (utility class style) provides static methods to replace placeholders of the form `${property}` within a template string.
+
+* `replaceTokensWithProperties(String)`: Uses JVM system properties (`System.getProperty`) as the source for property values.
+* `replaceTokensWithProperties(String, Properties)`: Uses a supplied `java.util.Properties` object as the source.
+
+Whitespace around the property key within the `${...}` is tolerated.
+If a property is not found in the specified source, an `IllegalArgumentException` is thrown with a detailed message to aid debugging.
+
+[#decorated-exceptions]
+== Decorated buffer exceptions
+
+* `DecoratedBufferOverflowException`: Extends `java.nio.BufferOverflowException`.
+* `DecoratedBufferUnderflowException`: Extends `java.nio.BufferUnderflowException`.
+
+Both allow a custom, pre-formatted message to be passed at construction.
+This can be useful for providing more context-rich error messages (e.g., including hex dumps or problematic offsets) without incurring the performance cost of string formatting at the point the exception is thrown, especially in low-latency code paths.
+Both include a `serialVersionUID`.
+
+== Thread-safety & Memory Model Notes
+
+* **Stateless Utilities**: Classes like `PropertyReplacer` and the static helper methods in `Compression` are intrinsically thread-safe as they operate only on their inputs.
+The `Compressions` enum constants are also thread-safe singletons.
+* **Interners**: `AbstractInterner` and its subclasses use a lock-free approach for reads and a racy-update for writes to the cache.
+This design relies on benign data races where eventual consistency is acceptable, and individual operations on cache entries are typically atomic or idempotent.
+They aim for correct behaviour under concurrency but may not guarantee that all threads always see the exact same `String` instance immediately after a new string is interned by one thread.
+* **Compression Streams**: The `InputStream` and `OutputStream` wrappers returned by `Compression` strategies (like `LZW` or `GZIP`) are typically stateful and **not** thread-safe.
+Each thread should use its own stream instance or access a shared stream via external synchronisation.
+* **`EscapingStopCharTester` / `EscapingStopCharsTester`**: These are stateful and **not** thread-safe.
+
+== Quick Reference
+
+|===
+|Task | Recommended helper(s) | Typical cost (approx.) | Throws on error?
+
+|Expand `${...}` tokens in a string | `PropertyReplacer` | O(length of string + number of properties) | `IllegalArgumentException` (missing property)
+|Intern 8-bit (ISO-8859-1) strings from `Bytes` | `StringInternerBytes` | Cache hit: O(length) for hash & compare. Cache miss: O(length) for decode & copy + cache update. | `BufferUnderflowException`
+|Intern UTF-8 strings from `BytesStore` | `UTF8StringInterner` | Similar to 8-bit, but UTF-8 decoding is more complex. | `UTFDataFormatRuntimeException`, `BufferUnderflowException`
+|Encode binary data length (e.g., for messages) | `BinaryLengthLength` enum | Constant time for prefix write and length update. | `IllegalStateException` (length too large for prefix type)
+|Compress/decompress data (e.g., LZW, GZIP) | `Compressions` enum, `Compression` interface | Depends on algorithm, data, and stream/array overhead. GZIP usually higher overhead than LZW. Binary is no-op. | `IORuntimeException` possible for stream operations.
+|Tokenise text with escape character support | `EscapingStopCharTester` / `EscapingStopCharsTester` | Per-character check, minimal overhead over base tester. | Depends on wrapped tester.
+|Custom, informative buffer exceptions | `DecoratedBufferOverflowException`, `DecoratedBufferUnderflowException` | Construction cost similar to standard exceptions if message is pre-formatted. | N/A (they _are_ the error)
+|===
