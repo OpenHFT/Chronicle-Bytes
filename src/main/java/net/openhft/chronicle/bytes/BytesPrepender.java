@@ -24,33 +24,17 @@ import org.jetbrains.annotations.NotNull;
 import java.nio.BufferOverflowException;
 
 /**
- * An interface defining a prependable buffer of bytes. A BytesPrepender can prepend bytes, byte arrays,
- * and numeric values to a buffer, making them accessible for reading operations from the front.
- * <p>
- * This interface is generic and can be parameterized with any type that extends BytesPrepender.
- * <p>
- * Note: For all prepend and prewrite operations, the read position (but not the write position or read limit)
- * is moved backward.
- * <p>
- * BufferOverflowException can occur if the capacity of the underlying
- * buffer is exceeded during operation execution.
+ * Supports writing data before the current {@link Bytes#readPosition()}.
+ * After each operation the read position moves backwards.
  *
- * @param <B> the type of BytesPrepender. This is a self-referential generic type parameter.
- * @see BufferOverflowException
- * @see IllegalStateException
+ * @param <B> self type
  */
 @SuppressWarnings("unchecked")
 public interface BytesPrepender<B extends BytesPrepender<B>> {
 
     /**
-     * Clears the buffer and pads it with a specified length to allow prepending later.
-     * clearAndPad(0) is equivalent to clear().
-     *
-     * @param length the padding length
-     * @return this instance, after clearing and padding
-     * @throws BufferOverflowException If the length is greater than the difference of capacity() and start()
-     * @throws ClosedIllegalStateException    If the resource has been released or closed.
-     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
+     * Clears the buffer then advances both cursors by {@code length} bytes so
+     * data can be prepended later.
      */
     @NotNull
     B clearAndPad(@NonNegative long length)

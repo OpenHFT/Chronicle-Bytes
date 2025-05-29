@@ -18,31 +18,24 @@ package net.openhft.chronicle.bytes;
 import net.openhft.chronicle.core.io.Closeable;
 
 /**
- * Defines a context for operating with bytes. This interface provides methods to retrieve bytes
- * and keys. It also provides utility methods to check if the context is closed and to perform
- * a rollback on close.
+ * Holds a {@link Bytes} buffer and optional key for a unit of work. Implementations
+ * may support rollback of writes when the context is closed.
  */
 public interface BytesContext extends Closeable {
 
     /**
-     * Retrieves the bytes to be written.
-     *
-     * @return the {@link Bytes} object to be written to.
+     * Returns the buffer associated with this context.
      */
     Bytes<?> bytes();
 
     /**
-     * Retrieves the key to be written.
-     *
-     * @return the key to be written.
+     * Provides a context-dependent key, such as a message type.
      */
     int key();
 
     /**
-     * Checks whether the context is closed.
-     *
-     * @return {@code true} if the context is closed, {@code false} otherwise.
-     * @throws UnsupportedOperationException if the method is not overridden.
+     * Indicates whether this context has been closed. The default implementation
+     * throws {@link UnsupportedOperationException} and should be overridden.
      */
     @Override
     default boolean isClosed() {
@@ -50,8 +43,7 @@ public interface BytesContext extends Closeable {
     }
 
     /**
-     * Performs a rollback operation when the context is closed. The exact behavior of this
-     * method is left to the implementing class.
+     * Marks this context to roll back any writes when {@link #close()} is called.
      */
     default void rollbackOnClose() {
     }

@@ -33,19 +33,11 @@ import java.util.function.Supplier;
 import static net.openhft.chronicle.core.Jvm.uncheckedCast;
 
 /**
- * This class is used to marshal objects into bytes and unmarshal them from bytes.
- * The object's fields are read and written in a streaming manner, with the ability
- * to handle different types of fields. It uses a map to track the fields of the class
- * and their corresponding values. This class makes use of the {@link FieldAccess} for
- * actual field value extraction and setting.
+ * Reflection‑based marshaller for simple objects. It inspects the fields of a
+ * class and serialises/deserialises them sequentially using {@link FieldAccess}
+ * helpers. This approach is generic but slower than hand‑written marshalling.
  *
- * <p>This class also provides a method for extracting all fields from a class and its
- * superclasses (except transient and static fields). All the fields are made accessible
- * even if they are private, and are then stored in a map for future access.
- *
- * <p>Note: This class suppresses rawtypes and unchecked warnings.
- *
- * @param <T> the type of the object to be marshaled.
+ * @param <T> type being marshalled
  */
 @SuppressWarnings("rawtypes")
 public class BytesMarshaller<T> {
@@ -89,11 +81,7 @@ public class BytesMarshaller<T> {
     }
 
     /**
-     * Reads the state of the given ReadBytesMarshallable object from the specified BytesIn.
-     *
-     * @param t  the object to read into.
-     * @param in the BytesIn from which to read.
-     * @throws InvalidMarshallableException If the object cannot be read due to invalid data.
+     * Populates {@code t} by reading each field from {@code in} using reflection.
      */
     public void readMarshallable(ReadBytesMarshallable t, BytesIn<?> in) throws InvalidMarshallableException {
         for (@NotNull FieldAccess field : fields) {
@@ -102,17 +90,7 @@ public class BytesMarshaller<T> {
     }
 
     /**
-     * Writes the state of the given WriteBytesMarshallable object to the specified BytesOut.
-     *
-     * @param t   the object to write.
-     * @param out the BytesOut to which to write.
-     * @throws IllegalArgumentException       If a method is invoked with an illegal or inappropriate argument.
-     * @throws ClosedIllegalStateException    If the resource has been released or closed.
-     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
-     * @throws BufferOverflowException        If there is not enough space in the buffer.
-     * @throws BufferUnderflowException       If there is not enough data available in the buffer.
-     * @throws ArithmeticException            If there is an arithmetic error.
-     * @throws InvalidMarshallableException   If the object cannot be written due to invalid data.
+     * Writes all fields of {@code t} to {@code out} using reflection.
      */
     public void writeMarshallable(WriteBytesMarshallable t, BytesOut<?> out)
             throws IllegalArgumentException, ClosedIllegalStateException, BufferOverflowException, BufferUnderflowException, ArithmeticException, InvalidMarshallableException, ThreadingIllegalStateException {
