@@ -15,11 +15,9 @@
 // -------------------------------------------------------------------
 
 == 1  Scope
-Chronicle Bytes is the low-level memory-access layer for the wider OpenHFT
-stack.
-These requirements define the contracts, performance envelopes and
-operational obligations that the library **must** meet to be accepted into the
-Chronicle Software code-base.
+
+Chronicle Bytes is the low-level memory-access layer for the wider OpenHFT stack.
+These requirements define the contracts, performance envelopes and operational obligations that the library **must** meet to be accepted into the Chronicle Software code-base.
 
 == 2  Functional Requirements
 
@@ -176,6 +174,7 @@ reference build container `Dockerfile.build`. |CI.
 |===
 
 == 11  Glossary
+
 ASCII-7 ::  American Standard Code for Information Interchange, 7-bit.
 atomic operations ::  Operations that complete in a single, indivisible step, often used for thread-safe updates to shared memory.
 direct memory ::  Off-heap memory managed by the JVM, not part of the Java heap, accessed via `java.nio.ByteBuffer.allocateDirect` or `Unsafe`.

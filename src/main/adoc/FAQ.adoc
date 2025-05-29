@@ -68,7 +68,8 @@ This avoids conditional logic or byte-swapping operations on the hot path, maxim
 If you need to interoperate with a system of different endianness, you must handle the byte swapping explicitly (e.g., using `Integer.reverseBytes()`), which would then incur a performance cost.
 
 . **How large can a direct (off-heap) or memory-mapped buffer grow?** * **Direct off-heap (`allocateDirect`, `allocateElasticDirect`):** Limited by the available native process memory and the `-XX:MaxDirectMemorySize` JVM parameter.
-* **Memory-mapped files (`MappedBytes`):** Can address up to 256 TB on modern operating systems, and up to 2^63 bytes theoretically (Java `long` for size/offset). Practically limited by available disk space, OS virtual address space limits (very large on 64-bit OSes), and file system limits.
+* **Memory-mapped files (`MappedBytes`):** Can address up to 256 TB on modern operating systems, and up to 2^63 bytes theoretically (Java `long` for size/offset).
+Practically limited by available disk space, OS virtual address space limits (very large on 64-bit OSes), and file system limits.
 
 . **Is stop-bit encoding (`readStopBitLong`, `writeStopBitLong`) slower than fixed 8-byte longs?** * For small integer values (e.g., fitting in 1-3 bytes with stop-bit encoding), it's often faster due to fewer bytes being written/read, leading to better cache utilization and reduced I/O.
 * For large integer values that would require 5 or more bytes with stop-bit encoding (especially those needing all 8 or 9 bytes), a fixed-width `writeLong`/`readLong` is generally faster.
@@ -117,7 +118,8 @@ Proper synchronization (e.g., using atomics provided by `BytesStore`, or higher-
 This counts against the JVM's direct memory limit.
 Memory-mapped file regions do not typically count against this specific limit but rather against available process virtual address space.
 
-. **How do I pin a memory-mapped file in RAM to prevent page faults?** Chronicle Software offers an Enterprise feature, `MappedBytes.lockMemory()`, which uses system calls like `mlock()` (on Linux) to attempt to lock the mapped memory region into physical RAM. Standard Chronicle Bytes does not expose this directly, but you can pre-touch pages by iterating through them (`bytes.warmUp()` or manual reads).
+. **How do I pin a memory-mapped file in RAM to prevent page faults?** Chronicle Software offers an Enterprise feature, `MappedBytes.lockMemory()`, which uses system calls like `mlock()` (on Linux) to attempt to lock the mapped memory region into physical RAM.
+Standard Chronicle Bytes does not expose this directly, but you can pre-touch pages by iterating through them (`bytes.warmUp()` or manual reads).
 
 . **Is there any data copying when a file is memory-mapped by `MappedBytesStore`?** No, not in the traditional sense of a buffer copy.
 The operating system maps the file's pages directly into the application's virtual address space.
@@ -130,7 +132,8 @@ Retention and space reclamation are managed by deleting older queue cycle files 
 . **Why does my process's Resident Set Size (RSS) exceed `BytesUtil.nativeMemoryUsed()`?** RSS includes all memory used by the process: Java heap, metaspace, thread stacks, JIT compiled code, loaded native libraries, other native allocations by your application or third-party libraries, *and* direct memory/memory-mapped files used by Chronicle Bytes.
 `BytesUtil.nativeMemoryUsed()` (or `BytesMetrics`) specifically tracks native memory allocated *by the Chronicle Bytes library itself* for its off-heap stores.
 
-. **Can I allocate more off-heap memory (direct or mapped) than physical RAM?** * **Memory-mapped files:** Yes, you can map files much larger than physical RAM. The OS will page data in and out as needed.
+. **Can I allocate more off-heap memory (direct or mapped) than physical RAM?** * **Memory-mapped files:** Yes, you can map files much larger than physical RAM.
+The OS will page data in and out as needed.
 However, if the working set exceeds RAM, performance will degrade significantly due to page faults (swapping).
 * **Direct memory (`allocateDirect`):** Generally, you should not allocate more direct memory than available physical RAM (minus OS/heap needs), as this can lead to swapping or `OutOfMemoryError` for native allocations.
 On Linux, set `vm.swappiness=0` (or a very low value) on production servers to discourage swapping of process memory.
@@ -155,8 +158,10 @@ When `YAML_ONLY` is used, the messages in the Chronicle Queue segment files are 
 
 . **How do I evolve a data schema safely when using Chronicle Wire?** The best approach depends on the Wire type.
 For `BINARY_LIGHT`, `YAML_ONLY`, or `TEXT`:
-* **Additive changes are safest:** Add new fields to your `Marshallable` objects or new methods to the end of your `MethodWriter` interfaces. Older readers will typically ignore these new fields/methods.
-* **Field removal/type change:** These are generally breaking changes. Plan carefully and version your data or interfaces.
+* **Additive changes are safest:** Add new fields to your `Marshallable` objects or new methods to the end of your `MethodWriter` interfaces.
+Older readers will typically ignore these new fields/methods.
+* **Field removal/type change:** These are generally breaking changes.
+Plan carefully and version your data or interfaces.
 (See `wire-integration.adoc` for detailed schema evolution strategies).
 
 . **Is using `JSON` Wire format significantly heavy on GC (Garbage Collection)?** Yes, parsing and generating JSON typically involves more String object allocations (for field names and string values) compared to binary formats.
@@ -174,11 +179,13 @@ If compression is needed, it's typically applied at a different layer – for ex
 Why?** This usually means `reader.readOne()` is consistently returning `false`, indicating no complete message was found.
 Possible reasons:
 * The writer has not written any (or any complete) messages to the `Bytes` buffer.
-* The `Bytes` buffer's `readPosition` is at or past the `readLimit`, or the `readLimit` doesn't encompass a full message. Ensure `bytes.flip()` or similar cursor adjustment was done after writing and before reading.
+* The `Bytes` buffer's `readPosition` is at or past the `readLimit`, or the `readLimit` doesn't encompass a full message.
+Ensure `bytes.flip()` or similar cursor adjustment was done after writing and before reading.
 * The writer and reader are not looking at the same `Bytes` buffer or file region.
 
 . **Can a single message (Wire frame) written to `Bytes` cross the 2 GiB boundary?** While `Bytes` itself supports 63-bit sizes (~ 256 TiB in practice), a single Wire message (document) is typically length-prefixed with a 32-bit integer.
-This implicitly limits a single, self-contained Wire message to less than 2 GiB. For larger data, you would need to chunk it into multiple messages or use `BytesMarshallable` with custom length prefixing if `Bytes` is being used directly for very large payloads.
+This implicitly limits a single, self-contained Wire message to less than 2 GiB.
+For larger data, you would need to chunk it into multiple messages or use `BytesMarshallable` with custom length prefixing if `Bytes` is being used directly for very large payloads.
 Chronicle Queue files can be much larger than 2GiB, containing many such messages.
 
 . **Are field names stored in `BINARY_LIGHT` Wire format?** No, not the full string names.
@@ -228,7 +235,9 @@ Then, you can read messages sequentially as they were originally written.
 
 . **Does running Chronicle Bytes applications inside Docker containers impose extra latency?** Generally minimal if Docker is configured correctly.
 * **Network:** `host` networking mode typically offers the lowest network latency.
-* **Storage:** Avoid `overlayfs` for memory-mapped files used by Chronicle Queue if extremely low disk latency is critical. Instead, mount queue directories using Docker volumes mapped to fast host paths, or use `--tmpfs` for ephemeral, in-memory queues. CPU pinning and resource limits should also be managed carefully.
+* **Storage:** Avoid `overlayfs` for memory-mapped files used by Chronicle Queue if extremely low disk latency is critical.
+Instead, mount queue directories using Docker volumes mapped to fast host paths, or use `--tmpfs` for ephemeral, in-memory queues.
+CPU pinning and resource limits should also be managed carefully.
 
 == 6  Troubleshooting
 
@@ -256,7 +265,8 @@ This is expected.
 For accurate native memory profiling of your application *without* profiler overhead, measure using OS tools or `BytesMetrics` when the profiler is not attached.
 
 . **My Chronicle Queue `ExcerptTailer` shows the queue as empty, but the queue file on disk is growing in size.** Possible reasons:
-* **Different Roll Cycle:** The tailer might be configured to look at an older, completed roll cycle file, while the appender is writing to a new current cycle file. Verify your `RollCycles` configuration.
+* **Different Roll Cycle:** The tailer might be configured to look at an older, completed roll cycle file, while the appender is writing to a new current cycle file.
+Verify your `RollCycles` configuration.
 * **Indexing Delay:** There might be a slight delay before an appended entry is fully indexed and visible to a tailer, though this is usually very short.
 * **Incorrect Tailer Initialization:** The tailer might not be initialized to the correct starting point or might have been inadvertently moved to the end.
 
@@ -274,8 +284,11 @@ Consider:
 * Grouping smaller allocations into larger, fewer `BytesStore` instances if feasible.
 
 . **I've configured SLF4J logging levels to WARN/ERROR, but I still see performance impact or allocations on the hot path.** Double-check your code:
-* Ensure no `logger.debug(...)` or `logger.info(...)` calls (even with guards like `if (logger.isDebugEnabled())`) are accidentally placed within extremely performance-sensitive, tight loops. The check itself can have a tiny cost.
-* Verify that string concatenation or argument formatting for log messages is not happening *before* the level check (e.g., `logger.debug("Value is " + value);` will always perform the concatenation). Use parameterized logging: `logger.debug("Value is {}", value);`. (See `CB-NF-O-004`).
+* Ensure no `logger.debug(...)` or `logger.info(...)` calls (even with guards like `if (logger.isDebugEnabled())`) are accidentally placed within extremely performance-sensitive, tight loops.
+The check itself can have a tiny cost.
+* Verify that string concatenation or argument formatting for log messages is not happening *before* the level check (e.g., `logger.debug("Value is " + value);` will always perform the concatenation).
+Use parameterized logging: `logger.debug("Value is {}", value);`.
+(See `CB-NF-O-004`).
 
 . **The Java `Cleaner` thread shows high CPU usage in my application.** This is a strong indication that you are frequently allocating and then dereferencing (leaking from your code's perspective) Java wrapper objects for native resources (like off-heap `Bytes` instances) without calling `releaseLast()` or `close()` properly.
 The `Cleaner` thread is working hard to reclaim the associated native memory when the Java objects become phantom reachable.
@@ -284,7 +297,8 @@ Enable `-Dchronicle.bytes.disableCleaners=false` (if it was disabled) and loggin
 
 == 7  Licensing and Governance
 
-. **Is there a Contributor License Agreement (CLA) for Chronicle Bytes?** Yes, contributions to OpenHFT projects, including Chronicle Bytes, typically require signing a CLA. This is usually managed automatically via GitHub when you make your first Pull Request.
+. **Is there a Contributor License Agreement (CLA) for Chronicle Bytes?** Yes, contributions to OpenHFT projects, including Chronicle Bytes, typically require signing a CLA.
+This is usually managed automatically via GitHub when you make your first Pull Request.
 
 . **What coding standards or style guides should Pull Requests (PRs) adhere to?** OpenHFT projects generally follow the Google Java Style Guide, with some Chronicle-specific modifications or conventions.
 Look for a `CONTRIBUTING.md` file or style guide (like `AGENT.md` mentioned in the requirements) in the specific GitHub repository.
