@@ -42,7 +42,7 @@ import net.openhft.chronicle.core.values.TwoLongValue;
  * apply to the first {@code long} value, providing a consistent interface for operations on both values.
  * <p>
  * Implementations of this interface should ensure thread safety and proper synchronization to maintain consistency
- * across threads, especially in multi-threaded environments. Additional optimizations and behaviors may be
+ * across threads, especially in multi-threaded environments. Additional optimisations and behaviours may be
  * implemented but are not mandated by this interface.
  * <p>
  * This documentation should be paired with specific class-level details in concrete implementations to guide

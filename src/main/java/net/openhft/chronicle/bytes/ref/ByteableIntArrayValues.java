@@ -37,22 +37,22 @@ import net.openhft.chronicle.core.values.IntArrayValues;
 public interface ByteableIntArrayValues extends IntArrayValues, Byteable, DynamicallySized {
 
     /**
-     * Calculates the size in bytes needed to store the given number of integers.
+     * Calculates the byte size required to hold the provided element capacity.
      *
-     * @param sizeInBytes the number of integers to be stored.
-     * @return the size in bytes needed to store the specified number of integers.
+     * @param capacity the number of elements
+     * @return total bytes needed for this capacity
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     @Override
-    long sizeInBytes(@NonNegative long sizeInBytes)
+    long sizeInBytes(@NonNegative long capacity)
             throws IllegalStateException;
 
     /**
-     * Sets the capacity of the array, in terms of the number of integers it can hold.
+     * Sets the capacity of the array as a count of elements, not bytes.
      *
-     * @param arrayLength the desired array capacity, in number of integers.
-     * @return this {@code ByteableIntArrayValues} instance.
+     * @param arrayLength the desired element count
+     * @return this instance for chaining
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */

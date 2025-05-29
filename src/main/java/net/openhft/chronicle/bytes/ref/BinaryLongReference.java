@@ -54,6 +54,9 @@ import static net.openhft.chronicle.bytes.HexDumpBytes.MASK;
  */
 @SuppressWarnings("rawtypes")
 public class BinaryLongReference extends AbstractReference implements LongReference {
+    /**
+     * Sentinel value indicating that a long operation did not complete as expected.
+     */
     public static final long LONG_NOT_COMPLETE = -1;
 
     /**
@@ -110,11 +113,11 @@ public class BinaryLongReference extends AbstractReference implements LongRefere
     }
 
     /**
-     * Retrieves the 64-bit long value from the BytesStore.
+     * Performs a plain read of the value from the backing store.
      *
-     * @return the 64-bit long value
-     * @throws ClosedIllegalStateException    If the resource has been released or closed.
-     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
+     * @return the current value
+     * @throws ClosedIllegalStateException    if the resource has been released or closed.
+     * @throws ThreadingIllegalStateException if accessed by multiple threads unsafely
      */
     @Override
     public long getValue()
@@ -123,11 +126,11 @@ public class BinaryLongReference extends AbstractReference implements LongRefere
     }
 
     /**
-     * Sets the 64-bit long value in the BytesStore.
+     * Writes the value to the backing store using plain semantics.
      *
-     * @param value the 64-bit long value to set
-     * @throws ClosedIllegalStateException    If the resource has been released or closed.
-     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
+     * @param value the value to store
+     * @throws ClosedIllegalStateException    if the resource has been released or closed.
+     * @throws ThreadingIllegalStateException if accessed by multiple threads unsafely
      */
     @Override
     public void setValue(long value)
