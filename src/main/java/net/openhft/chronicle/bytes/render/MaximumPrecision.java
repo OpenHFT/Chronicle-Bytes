@@ -18,7 +18,7 @@ package net.openhft.chronicle.bytes.render;
 /**
  * Decimaliser that rounds values to a fixed number of decimal places.
  *
- * @implNote For example a precision of two converts {@code 1.238} to {@code 1.24}.
+ * <p> For example a precision of two converts {@code 1.238} to {@code 1.24}.
  * Trailing zeros introduced by rounding are trimmed.
  */
 public class MaximumPrecision implements Decimaliser {
