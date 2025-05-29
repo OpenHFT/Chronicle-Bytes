@@ -65,7 +65,6 @@ interface RandomCommon extends ReferenceCounted {
     default long readPosition() {
         return start();
     }
-    }
 
     /**
      * @return the current write position.
@@ -74,7 +73,6 @@ interface RandomCommon extends ReferenceCounted {
     @NonNegative
     default long writePosition() {
         return start();
-    }
     }
 
     /**
@@ -164,22 +162,10 @@ interface RandomCommon extends ReferenceCounted {
      *
      * @param offset within this buffer. addressForRead(start()) is the actual addressForRead of the first byte.
      * @return the underlying addressForRead of the buffer
-    /**
-     * Retrieves the underlying memory address for reading. This is for expert users only.
-     *
-     * @param offset the logical offset within this buffer relative to {@link #start()}.
-     * @return the native address for the specified offset.
-     * @throws UnsupportedOperationException if the buffer uses heap memory.
-     * @throws BufferUnderflowException      if the offset is outside the allowed range.
-     * @throws ClosedIllegalStateException   if the resource has been released or closed.
-     * @throws ThreadingIllegalStateException if accessed concurrently in an unsafe way.
      */
     long addressForRead(@NonNegative long offset)
             throws UnsupportedOperationException, BufferUnderflowException, ClosedIllegalStateException, ThreadingIllegalStateException;
-     * @throws BufferUnderflowException      If the offset is before the start or after the capacity.
-     * @throws ClosedIllegalStateException    If the resource has been released or closed.
-     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
-     */
+
     /**
      * Retrieves the underlying memory address for reading. This is for expert users only.
      *
@@ -195,6 +181,18 @@ interface RandomCommon extends ReferenceCounted {
             throws UnsupportedOperationException, BufferUnderflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
         return addressForRead(offset);
     }
+
+    /**
+     * Retrieves the underlying memory address for writing.  This is for expert users only.
+     *
+     * @param offset within this buffer. addressForRead(start()) is the actual addressForRead of the first byte.
+     * @return the underlying addressForRead of the buffer
+     * @throws UnsupportedOperationException If the underlying buffer is on the heap
+     * @throws BufferOverflowException       If the offset is before the start() or the after the capacity()
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
+     */
+    long addressForWrite(@NonNegative long offset)
             throws UnsupportedOperationException, BufferOverflowException, ClosedIllegalStateException, ThreadingIllegalStateException;
 
     /**
@@ -219,11 +217,6 @@ interface RandomCommon extends ReferenceCounted {
     }
 
     /**
-     * Retrieves a Bytes object for reading.
-     *
-     * @return A Bytes object for reading.
-     * @throws ClosedIllegalStateException    If the resource has been released or closed.
-    /**
      * @return a {@link Bytes} view for reading from this buffer.
      * The returned view reflects the current positions and limits.
      */
@@ -232,12 +225,9 @@ interface RandomCommon extends ReferenceCounted {
             throws ClosedIllegalStateException, ThreadingIllegalStateException;
 
     /**
-     * @return a {@link Bytes} view for writing to this buffer.
-     * The returned view uses the current write position and limits.
-     */
-    @NotNull
-    Bytes<?> bytesForWrite()
-            throws ClosedIllegalStateException;
+     * Retrieves a Bytes object for writing.
+     *
+     * @return A Bytes object for writing.
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */

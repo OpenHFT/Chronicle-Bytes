@@ -33,7 +33,6 @@ import java.util.function.UnaryOperator;
  * It is a convenient way to perform data driven tests of writer/reader style APIs.
  *
  * @param <T> interface type whose methods are recorded and verified
- * @see net.openhft.chronicle.bytes.readme.StringsTest
  */
 @SuppressWarnings("rawtypes")
 public class BytesTextMethodTester<T> {
