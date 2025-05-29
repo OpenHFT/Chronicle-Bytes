@@ -9,7 +9,5 @@
  * <p>
  * This package is a part of the open-source library Chronicle Bytes.
  * Please visit <a href="https://chronicle.software">chronicle.software</a> for more information.
- *
- * @see net.openhft.chronicle.bytes.domestic.ReentrantFileLock
  */
 package net.openhft.chronicle.bytes.domestic;
