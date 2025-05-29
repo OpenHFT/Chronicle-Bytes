@@ -1,0 +1,20 @@
+= Chronicle Bytes Domestic Utilities
+:doctype: book
+:toc:
+:toclevels: 2
+:lang: en-GB
+
+The domestic package contains helpers used by the rest of Chronicle Bytes but
+not intended as stable public API. Behaviour may change between releases.
+
+Typical usage is to acquire a reentrant file lock:
+```
+FileLock lock = ReentrantFileLock.lock(file, channel);
+try {
+    // work with the file
+} finally {
+    lock.release();
+}
+```
+
+For memory management information refer to `memory-management.adoc`.
