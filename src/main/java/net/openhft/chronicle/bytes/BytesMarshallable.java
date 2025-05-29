@@ -22,29 +22,16 @@ import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 
 /**
- * An interface for objects that can be read from and written to bytes in a streaming manner.
- * The object's internal state can be directly serialized and deserialized from a BytesIn
- * or BytesOut object. This interface extends the ReadBytesMarshallable and
- * WriteBytesMarshallable interfaces, which provide methods for reading and writing
- * Marshallable objects, respectively.
- * <p>
- * Classes implementing this interface should override the methods to provide their own
- * custom serialization and deserialization logic. If not overridden, the default methods
- * use the BytesUtil's methods for reading and writing Marshallable objects.
- * <p>
- * The $toString method provides a default implementation for creating a string
- * representation of the object in a hexadecimal format.
- *
- * <p>Implementations of this interface must not be chained as suggested by the {@code DontChain} annotation.
+ * Serialisable object that reads and writes its state directly to a
+ * {@link Bytes} stream. Default implementations delegate to
+ * {@link BytesUtil} utilities. The interface is marked with
+ * {@link DontChain} to discourage chaining of implementations.
  */
 @DontChain
 public interface BytesMarshallable extends ReadBytesMarshallable, WriteBytesMarshallable {
 
     /**
-     * Indicates whether the object uses self-describing messages for serialization.
-     * By default, this method returns false.
-     *
-     * @return false by default.
+     * {@inheritDoc}
      */
     @Override
     default boolean usesSelfDescribingMessage() {
@@ -52,14 +39,7 @@ public interface BytesMarshallable extends ReadBytesMarshallable, WriteBytesMars
     }
 
     /**
-     * Reads the state of this object from the bytes.
-     *
-     * @param bytes the BytesIn object to read from.
-     * @throws IORuntimeException             If an I/O error occurs.
-     * @throws BufferUnderflowException       If there is not enough data available in the buffer.
-     * @throws InvalidMarshallableException   If the object cannot be read due to invalid data.
-     * @throws ClosedIllegalStateException    If the resource has been released or closed.
-     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
+     * {@inheritDoc}
      */
     @Override
     default void readMarshallable(BytesIn<?> bytes)
@@ -69,15 +49,7 @@ public interface BytesMarshallable extends ReadBytesMarshallable, WriteBytesMars
     }
 
     /**
-     * Writes the state of this object to the bytes.
-     *
-     * @param bytes the BytesOut object to write to.
-     * @throws BufferOverflowException        If there is not enough space in the buffer.
-     * @throws BufferUnderflowException       If there is not enough data available in the buffer.
-     * @throws ArithmeticException            If there is an arithmetic error.
-     * @throws InvalidMarshallableException   If the object cannot be written due to invalid data.
-     * @throws ClosedIllegalStateException    If the resource has been released or closed.
-     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
+     * {@inheritDoc}
      */
     @Override
     default void writeMarshallable(BytesOut<?> bytes)
@@ -87,9 +59,7 @@ public interface BytesMarshallable extends ReadBytesMarshallable, WriteBytesMars
     }
 
     /**
-     * Provides a string representation of this object in a hexadecimal format.
-     *
-     * @return the hexadecimal string representation of this object.
+     * Dumps the binary form of this object as a hex string for debugging.
      */
     default String $toString() {
         ValidatableUtil.startValidateDisabled();
