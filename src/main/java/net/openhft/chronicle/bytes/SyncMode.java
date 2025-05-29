@@ -18,25 +18,22 @@ package net.openhft.chronicle.bytes;
 import net.openhft.posix.MSyncFlag;
 
 /**
- * An enumeration of sync modes for disk operations.
- * This enum controls whether the write operations are synchronized with the disk, and if so, whether
- * to wait for the synchronization to complete before continuing with the program execution.
+ * Synchronisation options for memory mapped file updates, mirroring the
+ * behaviour of {@code msync(2)}.
  */
 public enum SyncMode {
     /**
-     * No synchronization is performed. The write operations are not explicitly synced with the disk.
+     * No synchronisation is requested.
      */
     NONE(null),
     /**
-     * Synchronization is performed, and the program waits for the sync operation to complete before proceeding.
-     * This mode guarantees that the write operation is completed before the next operation is carried out.
-     * However, this mode may not be supported on all platforms.
+     * Synchronous update using {@link MSyncFlag#MS_SYNC}. The call blocks until
+     * all modified pages are written to disk.
      */
     SYNC(MSyncFlag.MS_SYNC),
     /**
-     * Synchronization is scheduled but the program does not wait for it to complete before proceeding.
-     * This mode allows the write operation to be carried out asynchronously. The actual write to the disk
-     * happens later and does not block the program execution. However, this mode may not be supported on all platforms.
+     * Asynchronous update using {@link MSyncFlag#MS_ASYNC}. Dirty pages are
+     * scheduled for write out but the call returns immediately.
      */
     ASYNC(MSyncFlag.MS_ASYNC);
 

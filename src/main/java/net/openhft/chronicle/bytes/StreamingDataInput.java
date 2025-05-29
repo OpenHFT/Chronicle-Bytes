@@ -42,28 +42,13 @@ import static net.openhft.chronicle.core.UnsafeMemory.MEMORY;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
 /**
- * The StreamingDataInput interface represents a data stream for reading in binary data.
- * It provides a range of read methods to retrieve different types of data from the stream,
- * such as integers, longs, floating-point numbers, strings, byte arrays, etc.
- * <p>
- * Reading methods in this interface are usually expected to advance the read position by the
- * number of bytes read. This allows consecutive calls to the read methods to sequentially
- * read chunks of data from the stream.
- * <p>
- * Additionally, StreamingDataInput provides support for leniency and conversion of data into
- * BigInteger or BigDecimal objects. When lenient mode is enabled, methods will return default
- * values when there's no more data to read, instead of throwing exceptions.
- * <p>
- * The interface includes methods for handling exceptions and managing the state of the stream,
- * such as checking the remaining bytes or throwing an exception if the stream has been previously released.
- * <p>
- * Defines a data input interface that supports setting and getting positions and limits.
- * Implementing classes can be used to read data from a data source, typically a byte stream or byte buffer.
- * <p>
- * Note: Implementations of this interface may choose to handle the actual reading of data
- * in various ways, such as through direct memory access or other optimized mechanisms.
+ * Provides sequential, cursor based reading of binary and textual data from a
+ * stream or buffer. Methods typically advance the {@link #readPosition()} by
+ * the number of bytes consumed. Implementations may also offer lenient mode in
+ * which reads beyond a limit return default values rather than throwing.
+ * This interface extends {@link StreamingCommon} and {@link ByteStringParser}.
  *
- * @param <S> the type of StreamingDataInput
+ * @param <S> the concrete type
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
 public interface StreamingDataInput<S extends StreamingDataInput<S>> extends StreamingCommon<S> {
@@ -82,13 +67,15 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
             throws BufferUnderflowException, IllegalStateException, ClosedIllegalStateException, ThreadingIllegalStateException;
 
     /**
-     * Sets the read position of this StreamingDataInput without limiting it to the current read limit.
+     * Sets the read position after first widening the read limit to
+     * {@link #capacity()}. Useful when random access is required regardless of
+     * the current limit.
      *
-     * @param position the new read position, must be non-negative
-     * @return this StreamingDataInput instance, for chaining
-     * @throws BufferUnderflowException       If the new position is greater than the capacity
-     * @throws ClosedIllegalStateException    If the resource has been released or closed.
-     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
+     * @param position the new read position
+     * @return this instance for chaining
+     * @throws BufferUnderflowException       if the position is beyond the capacity
+     * @throws ClosedIllegalStateException    if the resource has been released or closed
+     * @throws ThreadingIllegalStateException if accessed by multiple threads in an unsafe way
      */
     @NotNull
     default S readPositionUnlimited(@NonNegative long position)
@@ -140,14 +127,15 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
     }
 
     /**
-     * Skips the specified number of bytes by advancing the read position.
-     * The number of bytes to skip must be less than or equal to the read limit.
+     * Advances the read position by {@code bytesToSkip}. If
+     * {@linkplain #lenient() lenient mode} is active, attempts to move beyond
+     * the read limit are capped at the limit without throwing.
      *
      * @param bytesToSkip the number of bytes to skip
-     * @return this StreamingDataInput instance, for chaining
-     * @throws BufferUnderflowException       If the new read position is outside the limits of the data source
-     * @throws ClosedIllegalStateException    If the resource has been released or closed.
-     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
+     * @return this instance for chaining
+     * @throws BufferUnderflowException       if the new position exceeds the limit and lenient mode is off
+     * @throws ClosedIllegalStateException    if the resource has been released or closed
+     * @throws ThreadingIllegalStateException if accessed by multiple threads in an unsafe way
      */
     @NotNull
     S readSkip(long bytesToSkip)
@@ -182,17 +170,19 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
     void uncheckedReadSkipBackOne();
 
     /**
-     * Perform a set of actions within a temporary bounds mode. The bounds are defined by the specified length.
-     * After the consumer has been executed, the original read limit is restored and the read position is moved forward by the specified length.
+     * Temporarily restricts the {@link #readLimit()} to {@code readPosition() + length},
+     * invokes {@code bytesConsumer}, then restores the original limit and
+     * advances the read position by {@code length}. Intended for processing
+     * length prefixed sections.
      *
-     * @param length        the length to set the temporary bounds to
-     * @param bytesConsumer the consumer to execute within the temporary bounds
-     * @param sb            the StringBuilder to use
-     * @param toBytes       the BytesOut to use
-     * @throws BufferUnderflowException       If the specified length is greater than the number of bytes remaining to read
-     * @throws IORuntimeException             If the bytesConsumer encounters an IO error
-     * @throws ClosedIllegalStateException    If the resource has been released or closed.
-     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
+     * @param length        the temporary length
+     * @param bytesConsumer action to perform within the bounds
+     * @param sb            optional string builder used by some consumers
+     * @param toBytes       optional buffer used by some consumers
+     * @throws BufferUnderflowException       if the length exceeds the remaining bytes
+     * @throws IORuntimeException             if the consumer throws an I/O error
+     * @throws ClosedIllegalStateException    if the resource has been released or closed
+     * @throws ThreadingIllegalStateException if accessed by multiple threads in an unsafe way
      */
     default void readWithLength0(@NonNegative long length, @NotNull ThrowingConsumerNonCapturing<S, IORuntimeException, BytesOut> bytesConsumer, StringBuilder sb, BytesOut<?> toBytes)
             throws BufferUnderflowException, IORuntimeException, ClosedIllegalStateException, ThreadingIllegalStateException {
@@ -211,15 +201,16 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
     }
 
     /**
-     * Perform a set of actions within a temporary bounds mode. The bounds are defined by the specified length.
-     * After the consumer has been executed, the original read limit is restored and the read position is moved forward by the specified length.
+     * Same as {@link #readWithLength0(long, ThrowingConsumerNonCapturing, StringBuilder, BytesOut)}
+     * but without the extra {@code StringBuilder} and {@code BytesOut}
+     * parameters.
      *
-     * @param length        the length to set the temporary bounds to
-     * @param bytesConsumer the consumer to execute within the temporary bounds
-     * @throws BufferUnderflowException       If the specified length is greater than the number of bytes remaining to read
-     * @throws IORuntimeException             If the bytesConsumer encounters an IO error
-     * @throws ClosedIllegalStateException    If the resource has been released or closed.
-     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
+     * @param length        the temporary length
+     * @param bytesConsumer action to perform within the bounds
+     * @throws BufferUnderflowException       if the length exceeds the remaining bytes
+     * @throws IORuntimeException             if the consumer throws an I/O error
+     * @throws ClosedIllegalStateException    if the resource has been released or closed
+     * @throws ThreadingIllegalStateException if accessed by multiple threads in an unsafe way
      */
     default void readWithLength(@NonNegative long length, @NotNull ThrowingConsumer<S, IORuntimeException> bytesConsumer)
             throws BufferUnderflowException, IORuntimeException, ClosedIllegalStateException, ThreadingIllegalStateException {
