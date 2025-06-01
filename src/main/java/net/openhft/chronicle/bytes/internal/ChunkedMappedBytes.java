@@ -90,14 +90,18 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
                 return this;
             }
 
-            bytesStore.write(wp, byteArray, offset, (int) safeCopySize);
+            int bytesToWrite = (int) Math.min(safeCopySize, (long) Integer.MAX_VALUE);
+            bytesToWrite = Math.min(bytesToWrite, remaining);
 
-            offset += (int) safeCopySize;
-            wp += safeCopySize;
-            remaining -= (int) safeCopySize;
+            bytesStore.write(wp, byteArray, offset, bytesToWrite);
 
-            // move to the next chunk
-            bytesStore = acquireNextByteStore0(wp, false);
+            offset += bytesToWrite;
+            wp += bytesToWrite;
+            remaining -= bytesToWrite;
+
+            if (bytesToWrite == safeCopySize)
+                // move to the next chunk
+                bytesStore = acquireNextByteStore0(wp, false);
         }
         return this;
 
