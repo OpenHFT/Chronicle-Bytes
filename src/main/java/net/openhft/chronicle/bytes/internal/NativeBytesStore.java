@@ -83,6 +83,11 @@ public class NativeBytesStore<U>
         this(bb, elastic, Bytes.MAX_HEAP_CAPACITY);
     }
 
+    @Deprecated(/* remove in x.29 */)
+    public NativeBytesStore(@NotNull ByteBuffer bb, boolean elastic, int maximumLimit) {
+        this(bb, elastic, (long) maximumLimit);
+    }
+
     @SuppressWarnings("this-escape")
     public NativeBytesStore(@NotNull ByteBuffer bb, boolean elastic, long maximumLimit) {
         this();
