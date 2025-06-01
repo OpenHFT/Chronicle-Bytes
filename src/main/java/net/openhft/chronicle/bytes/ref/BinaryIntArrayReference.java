@@ -131,11 +131,15 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
             throws BufferOverflowException, IllegalArgumentException, IllegalStateException {
         assert (bytes.writePosition() & 0x7) == 0;
 
+        if (capacity > (Long.MAX_VALUE >> SHIFT))
+            throw new IllegalArgumentException("Capacity " + capacity + " is too large and would overflow when shifted by " + SHIFT);
+
         bytes.writeLong(capacity);
         bytes.writeLong(0L); // used
         long start = bytes.writePosition();
-        bytes.zeroOut(start, start + (capacity << SHIFT));
-        bytes.writeSkip(capacity << SHIFT);
+        long sizeToSkip = capacity << SHIFT;
+        bytes.zeroOut(start, start + sizeToSkip);
+        bytes.writeSkip(sizeToSkip);
     }
 
     /**
@@ -151,9 +155,13 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
             throws BufferOverflowException, IllegalStateException {
         assert (bytes.writePosition() & 0x7) == 0;
 
+        if (capacity > (Long.MAX_VALUE >> SHIFT))
+            throw new IllegalArgumentException("Capacity " + capacity + " is too large and would overflow when shifted by " + SHIFT);
+
         bytes.writeLong(capacity);
         bytes.writeLong(0L); // used
-        bytes.writeSkip(capacity << SHIFT);
+        long sizeToSkip = capacity << SHIFT;
+        bytes.writeSkip(sizeToSkip);
     }
 
     /**
@@ -170,6 +178,8 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
             throws BufferUnderflowException, IllegalStateException {
         final long capacity = bytes.readLong(offset + CAPACITY);
         assert capacity > 0 : "capacity too small " + capacity;
+        if (capacity > (Long.MAX_VALUE - VALUES) >> SHIFT)
+            throw new ArithmeticException("Capacity " + capacity + " is too large, would overflow peakLength calculation.");
         return (capacity << SHIFT) + VALUES;
     }
 
@@ -373,7 +383,11 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
         if (used < 0 || used > capacity)
             throw new IORuntimeException("Corrupt used value");
 
-        bytes.readSkip(capacity << SHIFT);
+        if (capacity > (Long.MAX_VALUE >> SHIFT))
+            throw new IllegalArgumentException("Capacity " + capacity + " is too large and would overflow when shifted by " + SHIFT);
+
+        long sizeToSkip = capacity << SHIFT;
+        bytes.readSkip(sizeToSkip);
         long len = bytes.readPosition() - position;
         bytesStore((Bytes) bytes, position, len);
     }
@@ -532,6 +546,8 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
             throws IllegalStateException {
         throwExceptionIfClosed();
 
+        if (capacity > (Long.MAX_VALUE - VALUES) >> SHIFT)
+            throw new ArithmeticException("Capacity " + capacity + " is too large, would overflow sizeInBytes calculation.");
         return (capacity << SHIFT) + VALUES;
     }
 
