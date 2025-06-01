@@ -90,8 +90,8 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
                 return this;
             }
 
-            int bytesToWrite = (int) Math.min(safeCopySize, (long) Integer.MAX_VALUE);
-            bytesToWrite = Math.min(bytesToWrite, remaining);
+            // as remaining is an int, the min is an int
+            int bytesToWrite = (int) Math.min(safeCopySize, remaining);
 
             bytesStore.write(wp, byteArray, offset, bytesToWrite);
 
