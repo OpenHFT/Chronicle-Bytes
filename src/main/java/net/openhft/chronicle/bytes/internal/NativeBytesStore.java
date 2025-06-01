@@ -84,7 +84,7 @@ public class NativeBytesStore<U>
     }
 
     @SuppressWarnings("this-escape")
-    public NativeBytesStore(@NotNull ByteBuffer bb, boolean elastic, int maximumLimit) {
+    public NativeBytesStore(@NotNull ByteBuffer bb, boolean elastic, long maximumLimit) {
         this();
         init(bb, elastic);
         this.maximumLimit = elastic ? maximumLimit : Math.min(limit, maximumLimit);
@@ -191,7 +191,11 @@ public class NativeBytesStore<U>
 
     @NotNull
     public static NativeBytesStore<ByteBuffer> elasticByteBuffer(@NonNegative int size, @NonNegative long maxSize) {
-        return new NativeBytesStore<>(ByteBuffer.allocateDirect(size), true, Math.toIntExact(maxSize));
+        if (maxSize > Bytes.MAX_HEAP_CAPACITY) {
+            Jvm.warn().on(NativeBytesStore.class, "maxSize " + maxSize + " exceeds " + Bytes.MAX_HEAP_CAPACITY + ", capping to " + Bytes.MAX_HEAP_CAPACITY);
+            maxSize = Bytes.MAX_HEAP_CAPACITY;
+        }
+        return new NativeBytesStore<>(ByteBuffer.allocateDirect(size), true, maxSize);
     }
 
     @NotNull
