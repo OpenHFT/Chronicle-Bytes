@@ -498,18 +498,21 @@ public class BytesMarshaller<T> {
         protected void setValue(Object o, BytesIn<?> read)
                 throws ClosedIllegalStateException, IllegalArgumentException, BufferUnderflowException, BufferOverflowException, ArithmeticException, IllegalAccessException {
             Map m = (Map) field.get(o);
-            long length = read.readStopBit();
-            if (length < 0) {
+            long numEntriesLong = read.readStopBit();
+            if (numEntriesLong < 0) {
                 if (m != null)
                     field.set(o, null);
                 return;
             }
+            if (numEntriesLong > Integer.MAX_VALUE)
+                throw new IORuntimeException("Map too large to deserialize, contains " + numEntriesLong + " entries.");
+            int numEntries = (int) numEntriesLong;
             if (m == null) {
                 field.set(o, m = collectionSupplier.get());
             } else {
                 m.clear();
             }
-            for (int i = 0; i < length; i++) {
+            for (int i = 0; i < numEntries; i++) {
                 m.put(read.readObject(keyType), read.readObject(valueType));
             }
         }
