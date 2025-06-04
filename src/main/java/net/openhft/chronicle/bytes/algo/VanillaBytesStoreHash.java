@@ -39,22 +39,30 @@ public enum VanillaBytesStoreHash implements BytesStoreHash<BytesStore<?,?>> {
      */
     INSTANCE;
 
+    /** Mixing constant used in the hashing algorithm. */
     static final int K0 = 0x6d0f27bd;
+    /** Mixing constant used in the hashing algorithm. */
     static final int K1 = 0xc1f3bfc9;
+    /** Mixing constant used in the hashing algorithm. */
     static final int K2 = 0x6b192397;
+    /** Mixing constant used in the hashing algorithm. */
     static final int K3 = 0x6b915657;
+    /** Multiplicative constant used in the hashing algorithm. */
     static final int M0 = 0x5bc80bad;
+    /** Multiplicative constant used in the hashing algorithm. */
     static final int M1 = 0xea7585d7;
+    /** Multiplicative constant used in the hashing algorithm. */
     static final int M2 = 0x7a646e19;
+    /** Multiplicative constant used in the hashing algorithm. */
     static final int M3 = 0x855dd4db;
 
     /**
-     * Constant indicating the byte order for reading multi-byte values.
+     * Offset to select the higher four bytes of a long during hashing, dependent on system endianness.
      */
     private static final int HI_BYTES = ByteOrder.nativeOrder() == ByteOrder.LITTLE_ENDIAN ? 4 : 0;
 
     /**
-     * Agitates the given long value to generate a hash value.
+     * Applies a series of bitwise operations (XORs and rotations) to the given long value to improve its hash distribution.
      *
      * @param l The input value.
      * @return The agitated hash value.

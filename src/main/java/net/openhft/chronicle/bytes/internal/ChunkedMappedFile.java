@@ -44,8 +44,9 @@ import static net.openhft.chronicle.core.io.Closeable.closeQuietly;
 import static net.openhft.chronicle.core.util.Longs.*;
 
 /**
- * A memory mapped files which can be randomly accessed in chunks. It has overlapping regions to
- * avoid wasting bytes at the end of chunks.
+ * Implementation of {@link MappedFile} that divides a file into multiple
+ * potentially overlapping memory mapped chunks. Only a subset of chunks may be
+ * mapped at once allowing access to files larger than a single mapping.
  */
 @SuppressWarnings("restriction")
 public class ChunkedMappedFile extends MappedFile {

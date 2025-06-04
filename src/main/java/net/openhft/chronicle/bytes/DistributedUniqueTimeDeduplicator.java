@@ -15,21 +15,21 @@
  */
 package net.openhft.chronicle.bytes;
 
+/**
+ * Detects and optionally retains the newest timestamp for each host id so duplicates can be filtered.
+ */
 public interface DistributedUniqueTimeDeduplicator {
 
     /**
-     * Compare this new timestamp to the previously retained timstamp for the hostId
+     * Compares {@code timestampHostId} with the last timestamp held for its host id.
      *
-     * @param timestampHostId to compare
-     * @return -1 if the timestamp is older, 0 if the same, +1 if newer
+     * @param timestampHostId value embedding time and host id
+     * @return -1 if older, 0 if equal or no previous value, +1 if newer
      */
     int compareByHostId(long timestampHostId);
 
     /**
-     * Compare this new timestamp to the previously retained timestamp for the hostId and retaining the timestamp
-     *
-     * @param timestampHostId to compare
-     * @return -1 if the timestamp is older, 0 if the same, +1 if newer
+     * As {@link #compareByHostId(long)} but also retains {@code timestampHostId} if it is newer.
      */
     int compareAndRetainNewer(long timestampHostId);
 }

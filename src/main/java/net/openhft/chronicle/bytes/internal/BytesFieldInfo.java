@@ -28,20 +28,16 @@ import java.util.stream.Collectors;
 import static net.openhft.chronicle.core.UnsafeMemory.MEMORY;
 
 /**
- * This class holds the metadata information for fields within an object that are annotated with
- * {@link FieldGroup}. It provides utilities for analyzing and grouping the fields based on
- * their annotations, calculating the memory offset positions, and determining the size occupied
- * by each group of fields.
- * <p>
- * The class is particularly useful for understanding and manipulating the layout of fields within
- * an object in memory.
- * <p>
- * Example usage might include serialization, memory analysis, or direct memory access.
- *
- * @see FieldGroup
+ * Inspects a class to determine the layout of its primitive fields, especially
+ * those annotated with {@link net.openhft.chronicle.bytes.FieldGroup}. It
+ * computes contiguous memory ranges for each group and summarises the primitive
+ * counts in a single integer. Results are cached per class to avoid repeated
+ * reflection.
  */
 public class BytesFieldInfo {
+    /** cache to avoid repeated reflection for the same class */
     private static final ClassLocal<BytesFieldInfo> CACHE = ClassLocal.withInitial(BytesFieldInfo::init);
+    /** sentinel field used when scanning for group boundaries */
     static final Field $END$;
 
     static {
@@ -57,9 +53,8 @@ public class BytesFieldInfo {
     private final int description;
 
     /**
-     * Constructs an instance of BytesFieldInfo for the given class.
-     *
-     * @param aClass the class to analyze
+     * Scans {@code aClass} and its super classes for fields, grouping them by
+     * {@link FieldGroup} annotations and calculating their offsets.
      */
     BytesFieldInfo(Class<?> aClass) {
         this.aClass = aClass;
@@ -141,17 +136,14 @@ public class BytesFieldInfo {
     }
 
     /**
-     * Returns the description metadata.
-     *
-     * @return an integer representing the description metadata
+     * @return an integer encoding counts of primitive field types with an odd
+     *         parity bit as a basic validity check
      */
     public int description() {
         return description;
     }
 
-    /**
-     * Entry representing the start and end memory positions for a group of fields.
-     */
+    /** holds start and end offsets for a field group */
     static class BFIEntry {
         long start;
         long end;
@@ -168,10 +160,8 @@ public class BytesFieldInfo {
     }
 
     /**
-     * Retrieves the BytesFieldInfo instance for the given class from the cache.
-     *
-     * @param aClass the class to look up
-     * @return the cached BytesFieldInfo instance for the given class
+     * Retrieves a cached {@code BytesFieldInfo} for {@code aClass} or creates
+     * one if absent.
      */
     public static BytesFieldInfo lookup(Class<?> aClass) {
         return CACHE.get(aClass);
@@ -187,11 +177,7 @@ public class BytesFieldInfo {
     }
 
     /**
-     * Returns the starting memory offset for the group with the given name.
-     *
-     * @param groupName the name of the group
-     * @return the starting memory offset
-     * @throws IllegalArgumentException if no group with the given name is found
+     * @return start offset (relative to the object header) for the named group
      */
     public long startOf(String groupName) {
         final BFIEntry bfiEntry = groups.get(groupName);
@@ -201,11 +187,7 @@ public class BytesFieldInfo {
     }
 
     /**
-     * Returns the total memory size in bytes occupied by the group with the given name.
-     *
-     * @param groupName the name of the group
-     * @return the size of the group in bytes
-     * @throws IllegalArgumentException if no group with the given name is found
+     * @return length in bytes of the named group
      */
     public long lengthOf(String groupName) {
         final BFIEntry bfiEntry = groups.get(groupName);
@@ -215,9 +197,7 @@ public class BytesFieldInfo {
     }
 
     /**
-     * Generates a string representation of the field groups within the object.
-     *
-     * @return a string representation of the field groups
+     * @return a human readable dump of the discovered groups and their offsets
      */
     public String dump() {
         final StringBuilder sb = new StringBuilder().append("type: ").append(getClass().getSimpleName()).append(", groups: { ");
@@ -228,11 +208,8 @@ public class BytesFieldInfo {
     }
 
     /**
-     * Retrieves all non-static fields from the given class and its superclasses, sorted by their
-     * memory offsets.
-     *
-     * @param clazz the class from which to retrieve the fields
-     * @return a sorted list of fields
+     * Utility used during construction: returns all non-static, non-transient
+     * fields from {@code clazz} and its super classes ordered by memory offset.
      */
     public static List<Field> fields(Class<?> clazz) {
         List<Field> fields = new ArrayList<>();

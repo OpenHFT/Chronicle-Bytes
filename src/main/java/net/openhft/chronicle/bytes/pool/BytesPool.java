@@ -23,18 +23,17 @@ import net.openhft.chronicle.core.scoped.ScopedThreadLocal;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * A thread-local pool of reusable {@link Bytes} instances.
+ * Provides factory methods for creating thread-local pools of reusable {@link Bytes} instances.
  * <p>
- * This class uses a {@link ThreadLocal} to store a single {@link Bytes} instance per thread,
- * which can be reused to avoid the overhead of creating a new instance every time bytes are
- * needed for operations.
- * <p>
- * This class is primarily meant to be used in high-performance environments where reducing
- * object creation is crucial.
+ * The {@link ScopedResourcePool} returned by {@link #createThreadLocal()} manages the lifecycle of
+ * {@link Bytes} objects per thread to minimise allocation overhead.
+ * See {@code pool-overview.adoc} for tuning guidelines.
  */
 public final class BytesPool {
 
-    private static final int DEFAULT_BYTES_POOL_SIZE_PER_THREAD = Jvm.getInteger("chronicle.bytesPool.instancesPerThread", 4);
+    /** Default number of {@link Bytes} instances cached per thread. */
+    private static final int DEFAULT_BYTES_POOL_SIZE_PER_THREAD =
+            Jvm.getInteger("chronicle.bytesPool.instancesPerThread", 4);
 
     /**
      * Create a scoped-thread-local pool of bytes resources
@@ -60,14 +59,13 @@ public final class BytesPool {
 
     /**
      * Thread-local variable that holds the {@link Bytes} instance for each thread.
+     * Used by legacy code paths that do not employ {@link ScopedResourcePool}.
      */
     final ThreadLocal<Bytes<?>> bytesTL = new ThreadLocal<>();
 
     /**
-     * Creates a new {@link Bytes} instance.
-     * <p>
-     * This method is called internally when there is no {@link Bytes} instance available
-     * in the thread-local pool for the current thread.
+     * Creates a new {@link Bytes} instance for use by the pool.
+     * Invoked when no cached instance is available for the current thread.
      *
      * @return A newly created {@link Bytes} instance.
      */

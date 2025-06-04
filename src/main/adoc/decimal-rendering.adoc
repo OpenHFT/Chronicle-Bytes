@@ -1,0 +1,40 @@
+= Decimal Rendering Strategies
+:doctype: book
+:toc:
+:toclevels: 2
+:lang: en-GB
+
+This page summarises the options in the `net.openhft.chronicle.bytes.render` package.
+It accompanies the Javadoc and shows how to render floating point values into
+textual form suitable for Chronicle's wire formats.
+
+== Choosing a Decimaliser
+
+* `SimpleDecimaliser` is extremely fast but gives up for values that need more
+  than `18` decimal places or exceed `1e15` while scaling.
+* `MaximumPrecision` allows a fixed number of decimal places, rounding with
+  `Math.round` as required.
+* `UsesBigDecimal` handles the widest range of values using
+  `BigDecimal` and therefore allocates objects and may be slower.
+* `GeneralDecimaliser` tries the simple approach first and falls back to
+  `UsesBigDecimal` when necessary.
+* `StandardDecimaliser` is the default for most use cases. It attempts a
+  precision of `18` decimal places and then falls back to `UsesBigDecimal`.
+
+== Example Usage
+
+The following snippet converts a value to text using a `Bytes` buffer:
+
+[source,java]
+----
+Bytes<?> bytes = Bytes.allocateElasticOnHeap();
+Decimaliser d = StandardDecimaliser.STANDARD;
+boolean ok = d.toDecimal(1.2345, (neg, m, e) -> bytes.append(neg ? '-' : '')
+        .append(m)
+        .append('e')
+        .append(-e));
+System.out.println(bytes.toString());
+----
+
+See the <<wire-integration.adoc,Wire Integration>> guide for details on using
+these renderers within wire formats.

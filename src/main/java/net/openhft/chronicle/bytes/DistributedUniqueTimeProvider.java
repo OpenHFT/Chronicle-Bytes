@@ -27,22 +27,20 @@ import net.openhft.chronicle.core.values.LongArrayValues;
 import java.io.File;
 
 /**
- * Provides unique timestamps across multiple systems by incorporating a host identifier into the timestamp, for microsecond and nanosecond resolution timestamps.
- * This class is particularly useful in distributed systems where clock synchronization and uniqueness
- * across hosts are critical. It implements {@link TimeProvider}.
- * <p>
- * NOTE: {@link #currentTimeMillis()} is not unique, it is just a call to the underlying provider as there isn't enough resolution to include the hostId.
- * <p>
+ * {@link TimeProvider} implementation producing timestamps that remain unique across JVMs by embedding
+ * a host identifier in the lower bits.  A memory mapped file coordinates monotonicity between processes.
  *
- * Each timestamp generated is guaranteed to be unique across all hosts participating in the system.
- * The class uses a file-based mechanism to ensure that timestamps are not only unique across restarts
- * but also across different JVM instances.
+ * {@link #currentTimeMillis()} simply delegates to the underlying provider and is therefore not unique.
  */
 public class DistributedUniqueTimeProvider extends SimpleCloseable implements TimeProvider, Monitorable {
 
+    /** maximum supported host identifiers */
     static final int HOST_IDS = 100;
+    /** offset in the file for the last issued timestamp */
     private static final int LAST_TIME = 128;
+    /** offset in the file for the deduplicator array */
     private static final int DEDUPLICATOR = 192;
+    /** conversion constant between nanoseconds and microseconds */
     private static final int NANOS_PER_MICRO = 1000;
 
     private final Bytes<?> bytes;
@@ -127,12 +125,7 @@ public class DistributedUniqueTimeProvider extends SimpleCloseable implements Ti
     }
 
     /**
-     * Sets the hostId of the DistributedUniqueTimeProvider. The hostId is used to
-     * create unique timestamps across different hosts.
-     *
-     * @param hostId The host identifier, must be non-negative.
-     * @return A reference to the current DistributedUniqueTimeProvider instance with the updated hostId.
-     * @throws IllegalArgumentException if the provided hostId is negative.
+     * Configures the host identifier used in generated timestamps.
      */
     public DistributedUniqueTimeProvider hostId(@NonNegative int hostId) {
         // Check if the provided hostId is negative and throw an exception if it is
@@ -148,11 +141,7 @@ public class DistributedUniqueTimeProvider extends SimpleCloseable implements Ti
     }
 
     /**
-     * Sets the TimeProvider of the DistributedUniqueTimeProvider. The TimeProvider
-     * is responsible for providing the current time in nanoseconds.
-     *
-     * @param provider The TimeProvider instance to be used for fetching the current time.
-     * @return A reference to the current DistributedUniqueTimeProvider instance with the updated TimeProvider.
+     * Replaces the underlying time source used for wall-clock time.
      */
     public DistributedUniqueTimeProvider provider(TimeProvider provider) {
         // Assign the provided TimeProvider to the instance variable
@@ -176,10 +165,7 @@ public class DistributedUniqueTimeProvider extends SimpleCloseable implements Ti
     }
 
     /**
-     * This method returns a unique, monotonically increasing microsecond timestamp where
-     * the lowest two digits of the microseconds is the hostId, ensuring uniqueness across different hosts.
-     *
-     * @return the timestamps with hostId as a long
+     * Generates a unique microsecond-resolution timestamp embedding the configured host id.
      */
     @Override
     public long currentTimeMicros() throws IllegalStateException {
@@ -219,10 +205,7 @@ public class DistributedUniqueTimeProvider extends SimpleCloseable implements Ti
     }
 
     /**
-     * This method returns a unique, monotonically increasing nanosecond timestamp.
-     * The lowest two digits of the nanoseconds is the hostId, providing uniqueness across different hosts.
-     *
-     * @return the timestamps with hostId as a long
+     * Generates a unique nanosecond-resolution timestamp embedding the host id.
      */
     @Override
     public long currentTimeNanos() throws IllegalStateException {

@@ -21,8 +21,9 @@ import static net.openhft.chronicle.core.UnsafeMemory.MEMORY;
 import static net.openhft.chronicle.core.UnsafeMemory.UNSAFE;
 
 /**
- * These are fast, unsafe ways to render text.
- * NOTE: The caller has to ensure there is always plenty of memory to perform this operation.
+ * Utility with highly optimised methods for writing textual representations
+ * of numbers directly to native memory. The caller must guarantee sufficient
+ * space and valid addresses.
  */
 public final class UnsafeText {
 
@@ -36,6 +37,12 @@ public final class UnsafeText {
     private static final String MIN_VALUE_STR = "" + Long.MIN_VALUE;
     private static final long ARRAY_BYTE_BASE_OFFSET = Jvm.arrayByteBaseOffset();
 
+    /**
+     * Writes the decimal representation of {@code num} to {@code address}.
+     * The caller must ensure enough writable bytes are available.
+     *
+     * @return the address just past the last byte written
+     */
     public static long appendFixed(long address, long num) {
         if (num >= 0) {
             // nothing
@@ -81,6 +88,10 @@ public final class UnsafeText {
         }
     }
 
+    /**
+     * Appends {@code num} with the decimal point placed {@code decimal} digits
+     * from the end.
+     */
     public static long appendBase10d(long address, long num, int decimal) {
         if (num >= 0) {
             // nothing
@@ -113,6 +124,12 @@ public final class UnsafeText {
      * @return endOfAddress
      */
     //      throws BufferOverflowException, IllegalArgumentException
+    /**
+     * Writes the decimal form of {@code d} to {@code address}. Numbers outside
+     * a safe range fall back to {@link Double#toString(double)}.
+     *
+     * @return the address just past the last byte written
+     */
     public static long appendDouble(long address, double d) {
         double abs = Math.abs(d);
         // outside range so that !Double.isFinite(d) implicitly added.
@@ -286,6 +303,7 @@ public final class UnsafeText {
         return address;
     }
 
+    /** writes a byte array at {@code address} */
     public static long append8bit(long address, byte[] bytes) {
         final int len = bytes.length;
         int i;
@@ -296,6 +314,7 @@ public final class UnsafeText {
         return address + len;
     }
 
+    /** writes the lower 8 bits of each char into memory */
     public static long append8bit(long address, char[] chars) {
         final int len = chars.length;
         int i;

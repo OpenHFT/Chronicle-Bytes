@@ -33,11 +33,11 @@ import java.util.regex.Pattern;
 import static java.text.MessageFormat.format;
 
 /**
- * Provides file systems' page size auto-resolving.
- * Linux and hugetlbfs specific only for now.
+ * Utility to determine page size for memory mapping, aware of hugetlbfs mounts.
  */
 public final class PageUtil {
 
+    /** assumed page size when no explicit value is found */
     public static final int DEFAULT_HUGE_PAGE_SIZE = 2 * 1024 * 1024;
 
     private static final Pattern PAGE_SIZE_PATTERN = Pattern.compile("pagesize=([0-9]+)([KkMmGg])");

@@ -1,0 +1,42 @@
+= Chronicle Bytes Pooling
+:doctype: book
+:toc:
+:toclevels: 2
+:lang: en-GB
+
+Chronicle Bytes provides a pooling mechanism to reuse `Bytes` objects, primarily to minimise allocation overhead and reduce Garbage Collector (GC) pressure in very low-latency scenarios.
+This is particularly beneficial when temporary `Bytes` instances are frequently needed.
+
+The `BytesPool` class offers static factory methods (e.g., `BytesPool.createThreadLocal()`) to create a thread-local pool of reusable `Bytes` instances, typically `Bytes.allocateElasticDirect()` instances.
+Each thread maintains its own small cache of these `Bytes` objects.
+When a `Bytes` instance is acquired from the pool, an available one from the cache is provided.
+Upon release, the instance is `clear()`-ed and returned to the thread's cache for future reuse.
+
+The number of `Bytes` instances retained per thread can be configured using the system property `chronicle.bytesPool.instancesPerThread` (defaulting to 4).
+
+== Acquiring and Releasing Pooled Bytes
+
+The recommended way to use the pool is with a try-with-resources statement on a `ScopedResource`, which ensures the `Bytes` instance is automatically returned to the pool.
+
+[source,java]
+----
+import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.pool.BytesPool;
+import net.openhft.chronicle.core.scoped.ScopedResource;
+import net.openhft.chronicle.core.scoped.ScopedResourcePool;
+
+// Create a pool (can be a static field or managed elsewhere)
+ScopedResourcePool<Bytes<?>> bytesPool = BytesPool.createThreadLocal();
+
+// Acquire a Bytes instance from the pool
+try (ScopedResource<Bytes<?>> sb = bytesPool.get()) {
+    Bytes<?> b = sb.get();
+    // Use b for operations
+    b.writeUtf8("Hello, pooled Bytes!");
+    // b is automatically cleared and returned to the pool at the end of this block
+}
+----
+
+This approach helps in managing the lifecycle of pooled `Bytes` objects efficiently and safely.
+
+For further details on native memory management and considerations, refer to `memory-management.adoc` and `project-requirements.adoc` (specifically requirement `CB-FN-014`).

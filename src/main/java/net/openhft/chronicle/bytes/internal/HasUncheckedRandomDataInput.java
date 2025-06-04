@@ -17,14 +17,15 @@ package net.openhft.chronicle.bytes.internal;
 
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * Provides a means to obtain an {@link UncheckedRandomDataInput} view for fast
+ * reads where bounds checks have already been performed by the caller.
+ */
 @FunctionalInterface
 public interface HasUncheckedRandomDataInput {
 
     /**
-     * Returns a view of a memory segment providing memory read operations with potentially unchecked
-     * memory boundaries.
-     *
-     * @return an unchecked view
+     * @return a view for random reads with minimal bounds checking
      */
     @NotNull
     UncheckedRandomDataInput acquireUncheckedInput();

@@ -30,16 +30,11 @@ import java.util.*;
 import java.util.function.Consumer;
 
 /**
- * The BytesMethodReader class provides a concrete implementation of the MethodReader interface.
- * It extends SimpleCloseable and it's capable of reading serialized method calls from a BytesIn object.
- * The class uses an instance of BytesParselet to define a default behavior when reading method calls,
- * and a map of method encoders to decode serialized method calls into their original form.
- * <p>
- * The class also maintains an internal list of method encoders, which are stored in the order that
- * they were added. This allows the BytesMethodReader to efficiently look up the appropriate method
- * encoder based on a messageId.
- * <p>
- * The BytesMethodReader is not thread-safe.
+ * Concrete {@link MethodReader} that reads method calls serialised in a binary
+ * format from a {@link BytesIn} stream and dispatches them to target objects.
+ * {@link MethodEncoder} instances, typically obtained via
+ * {@link MethodEncoderLookup}, are used to decode arguments. This reader is not
+ * thread-safe and extends {@link SimpleCloseable}.
  */
 @SuppressWarnings("rawtypes")
 public class BytesMethodReader extends SimpleCloseable implements MethodReader {
@@ -49,16 +44,12 @@ public class BytesMethodReader extends SimpleCloseable implements MethodReader {
     private final Map<Long, Consumer<BytesIn>> methodEncoderMap = new LinkedHashMap<>();
 
     /**
-     * Constructor for the BytesMethodReader class.
-     * <p>
-     * Initializes a new instance of the BytesMethodReader with a BytesIn object, a default BytesParselet,
-     * and a methodEncoderLookup function. The constructor also accepts an array of objects which represent
-     * the possible targets for the method calls that this reader will dispatch.
-     *
-     * @param in                  the BytesIn object from which serialized method calls are read.
-     * @param defaultParselet     the default BytesParselet used when reading method calls.
-     * @param methodEncoderLookup the lookup function used to find a method's encoder.
-     * @param objects             the array of objects that can be targets of method calls.
+     * @param in              the {@link BytesIn} stream from which messages are
+     *                        read
+     * @param defaultParselet handler for messages with unrecognised IDs
+     * @param methodEncoderLookup strategy for obtaining {@link MethodEncoder}
+     *                            instances
+     * @param objects         target objects whose methods may be invoked
      */
     public BytesMethodReader(BytesIn<?> in,
                              BytesParselet defaultParselet,
@@ -79,14 +70,9 @@ public class BytesMethodReader extends SimpleCloseable implements MethodReader {
     }
 
     /**
-     * Adds a method encoder to this reader for a specific method on a specific object.
-     * <p>
-     * This method creates a reader for the encoded method and then adds it to the appropriate
-     * place in the list or map of method encoders.
-     *
-     * @param object  the target object of the method call.
-     * @param method  the Method object representing the method being called.
-     * @param encoder the MethodEncoder used to decode the method call.
+     * Prepares and stores a consumer for the supplied {@code method}. When
+     * invoked it decodes arguments using {@code encoder} and calls the method on
+     * {@code object}.
      */
     private void addEncoder(Object object, Method method, MethodEncoder encoder) {
         Jvm.setAccessible(method);
@@ -117,12 +103,9 @@ public class BytesMethodReader extends SimpleCloseable implements MethodReader {
     }
 
     /**
-     * Throws an UnsupportedOperationException when called.
-     * <p>
-     * This method is required to fulfill the MethodReader interface, but it is not supported
-     * in the BytesMethodReader class.
+     * Interceptors for method reader returns are not supported by this
+     * implementation.
      *
-     * @return nothing
      * @throws UnsupportedOperationException always
      */
     @Override
@@ -131,18 +114,19 @@ public class BytesMethodReader extends SimpleCloseable implements MethodReader {
     }
 
     /**
-     * Attempts to read a single message from the BytesIn object.
-     * <p>
-     * If a suitable method encoder is found, it is used to decode the message and the corresponding
-     * method is invoked. Otherwise, the default parselet is used.
-     * <p>
-     * If the reader is closed or if there are no more messages to read, the method returns {@code false}.
+     * Reads the next method call from the input stream. The message ID is read
+     * using stop bit encoding and used to look up a handler. If none is found the
+     * {@code defaultParselet} is invoked.
      *
-     * @return {@code true} if a message was successfully read, {@code false} if no more messages are available
-     * @throws InvocationTargetRuntimeException If an exception is thrown by the target method
-     * @throws BufferUnderflowException         If there is not enough data available in the buffer to read the next message
-     * @throws ClosedIllegalStateException    If the resource has been released or closed.
-     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
+     * @return {@code true} if a message was processed, {@code false} if no data
+     *         was available
+     * @throws InvocationTargetRuntimeException if the target method throws an
+     *                                          exception
+     * @throws BufferUnderflowException         if the stream ends prematurely
+     * @throws ClosedIllegalStateException      if the {@link BytesIn} has been
+     *                                          released
+     * @throws ThreadingIllegalStateException   if accessed by multiple threads
+     *                                          unsafely
      */
     public boolean readOne()
             throws InvocationTargetRuntimeException, IllegalStateException, BufferUnderflowException {
@@ -166,13 +150,11 @@ public class BytesMethodReader extends SimpleCloseable implements MethodReader {
     }
 
     /**
-     * Sets whether the underlying input should be closed when the MethodReader is closed.
-     * <p>
-     * Note: This method currently does not alter the close behavior of the BytesMethodReader.
-     * It returns the MethodReader itself for method chaining.
+     * This implementation does not currently close the underlying
+     * {@link BytesIn} when invoked. The parameter is ignored.
      *
-     * @param closeIn {@code true} to close the input when this reader is closed, {@code false} otherwise
-     * @return the MethodReader itself, for method chaining
+     * @param closeIn ignored
+     * @return this reader
      */
     @Override
     public MethodReader closeIn(boolean closeIn) {

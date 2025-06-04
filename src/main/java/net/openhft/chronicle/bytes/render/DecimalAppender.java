@@ -19,9 +19,10 @@ import net.openhft.chronicle.core.io.ClosedIllegalStateException;
 import net.openhft.chronicle.core.io.ThreadingIllegalStateException;
 
 /**
- * This interface represents a handler for decimal numbers, and defines how they should be appended in various forms.
- * Implementations of this interface should provide strategies for handling the individual components of a decimal number,
- * including its sign, mantissa, and exponent.
+ * Handler for decimal numbers extracted by a {@link Decimaliser}.
+ * Implementations must document their threading guarantees. In Chronicle Bytes
+ * a typical implementation appends directly to a byte buffer without
+ * allocation.
  * <p>
  * A decimal number is represented as: {@code decimal = sign * mantissa * 10 ^ (-exponent)},
  * where:
@@ -36,13 +37,13 @@ import net.openhft.chronicle.core.io.ThreadingIllegalStateException;
 public interface DecimalAppender {
 
     /**
-     * Appends a decimal number, represented by its sign, mantissa, and exponent, to a target.
-     * The target can be any object that consumes these components, such as a StringBuilder or a file stream.
+     * Append a decimal number, represented by its sign, mantissa and exponent, to a target.
+     * The target is often a {@link net.openhft.chronicle.bytes.BytesOut} buffer.
      *
      * @param isNegative Whether the number is negative. {@code true} indicates a negative number,
      *                   {@code false} indicates a positive number.
      * @param mantissa   The significant digits of the decimal number, represented as a long integer.
-     * @param exponent   The power of 10 by which the mantissa is scaled to obtain the actual decimal number.
+     * @param exponent   The power of ten by which the mantissa is scaled, typically in the range 0-18.
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */

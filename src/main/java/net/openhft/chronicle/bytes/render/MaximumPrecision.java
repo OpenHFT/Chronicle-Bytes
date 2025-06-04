@@ -16,21 +16,20 @@
 package net.openhft.chronicle.bytes.render;
 
 /**
- * Implementation of {@link Decimaliser} that converts floating-point numbers to decimal representation with a specified
- * maximum number of decimal places. During conversion, the number of decimal places will be limited to this maximum precision.
- * <p>
- * For example, if a maximum precision of 2 is specified, the number 1.238 will be converted to 1.24.
+ * Decimaliser that rounds values to a fixed number of decimal places.
+ *
+ * <p> For example a precision of two converts {@code 1.238} to {@code 1.24}.
+ * Trailing zeros introduced by rounding are trimmed.
  */
 public class MaximumPrecision implements Decimaliser {
 
     private final int precision;
 
     /**
-     * Creates a new MaximumPrecision object with the specified maximum precision.
+     * Create an instance with the given precision.
      *
-     * @param precision the maximum number of decimal places to be used in the conversion.
-     *                  Must be between 0 and 18, inclusive.
-     * @throws IllegalArgumentException if the precision is not between 0 and 18.
+     * @param precision number of decimal places, 0-18 inclusive
+     * @throws IllegalArgumentException if {@code precision} is outside that range
      */
     public MaximumPrecision(int precision) {
         if (precision < 0 || precision > 18) {
@@ -40,13 +39,11 @@ public class MaximumPrecision implements Decimaliser {
     }
 
     /**
-     * Converts a double value to its decimal representation using the specified maximum precision, and appends it
-     * to the provided {@link DecimalAppender}.
+     * Convert {@code value} rounding to at most {@code precision} decimal places.
      *
-     * @param value           the double value to be converted.
-     * @param decimalAppender the {@link DecimalAppender} used to store and append the converted decimal value.
-     * @return true if the conversion and appending were successful, false if the absolute value is greater than 1e18.
-     * @throws AssertionError if the conversion fails unexpectedly.
+     * @param value           the double to convert; must be finite
+     * @param decimalAppender the appender receiving the components
+     * @return {@code true} if the value was in range
      */
     @Override
     public boolean toDecimal(double value, DecimalAppender decimalAppender) {
@@ -90,13 +87,11 @@ public class MaximumPrecision implements Decimaliser {
     }
 
     /**
-     * Converts a float value to its decimal representation using the specified maximum precision, and appends it
-     * to the provided {@link DecimalAppender}.
+     * Convert {@code value} rounding to at most {@code precision} decimal places.
      *
-     * @param value           the float value to be converted.
-     * @param decimalAppender the {@link DecimalAppender} used to store and append the converted decimal value.
-     * @return true if the conversion and appending were successful, false if the absolute value is greater or equal to 1e18.
-     * @throws AssertionError if the conversion fails unexpectedly.
+     * @param value           the float to convert; must be finite
+     * @param decimalAppender the appender receiving the components
+     * @return {@code true} if the value was in range
      */
     @Override
     public boolean toDecimal(float value, DecimalAppender decimalAppender) {

@@ -41,12 +41,11 @@ import static net.openhft.chronicle.bytes.internal.ReferenceCountedUtil.throwExc
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
 /**
- * This interface represents an immutable reference to a segment of bytes with a fixed range.
- * It can be safely shared across threads given that the data it references is accessed in a thread-safe manner.
- * Direct access is only possible within the allocated capacity of the BytesStore.
+ * Reference to a fixed-capacity region of memory. The bounds are immutable but
+ * the content may be mutable. The instance itself is {@link ReferenceCounted}.
  *
- * @param <B> The BytesStore type
- * @param <U> The underlying data type the BytesStore manages
+ * @param <B> concrete subtype
+ * @param <U> backing buffer type
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
 public interface BytesStore<B extends BytesStore<B, U>, U>
@@ -114,12 +113,8 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
     }
 
     /**
-     * Wraps a ByteBuffer into a BytesStore. The ByteBuffer can be either on heap or off heap.
-     * When the resulting BytesStore is closed, the direct ByteBuffer will be deallocated and should not be used anymore.
-     *
-     * @param bb the ByteBuffer to be wrapped
-     * @return a BytesStore that contains the bytes from the ByteBuffer
-     * @see #follow(ByteBuffer)
+     * Takes ownership of {@code bb} and returns a store backed by it. Closing
+     * the store will deallocate the buffer if it is direct.
      */
     @NotNull
     static BytesStore<?, ByteBuffer> wrap(@NotNull ByteBuffer bb) {
@@ -129,14 +124,8 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
     }
 
     /**
-     * Wraps a ByteBuffer which can be either on heap or off heap without taking ownership of that buffer.
-     * <p>
-     * When resulting BytesStore instance is closed, direct {@code byteBuffer} will not be deallocated so its
-     * life cycle should be tracked elsewhere.
-     *
-     * @param bb the ByteBuffer to follow
-     * @return a BytesStore that directly interfaces with the given ByteBuffer
-     * @see #wrap(ByteBuffer)
+     * Returns a store that references {@code bb} without assuming ownership.
+     * Closing the store does not deallocate a direct buffer.
      */
     @NotNull
     static BytesStore<?, ByteBuffer> follow(@NotNull ByteBuffer bb) {
@@ -408,19 +397,16 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      * Use this test to determine if an offset is considered safe for reading from. Note that it checks we are
      * inside the BytesStore limits *without* including the overlap
      *
-     * @param offset the specified offset to check
-     * @return {@code true} if offset is safe
-     */
+    * @param offset byte index to check
+    * @return {@code true} if the offset is within {@link #start()} and {@link #safeLimit()}
+    */
     default boolean inside(@NonNegative long offset) {
         return start() <= offset && offset < safeLimit();
     }
 
     /**
-     * Returns if a number of bytes starting from an offset are inside this ByteStore limits.
-     *
-     * @param offset     the starting index to check
-     * @param bufferSize the number of bytes to be read/written
-     * @return {@code true} if the bytes between the offset and offset+buffer are inside the BytesStore
+     * Returns {@code true} if {@code bufferSize} bytes from {@code offset} fall
+     * entirely within the valid range.
      */
     default boolean inside(@NonNegative long offset, @NonNegative long bufferSize) {
         return start() <= offset && offset + bufferSize <= safeLimit();

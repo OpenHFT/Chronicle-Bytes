@@ -20,289 +20,166 @@ import org.jetbrains.annotations.NotNull;
 import java.lang.reflect.Field;
 
 /**
- * The BinaryWireCode interface contains constants for various types of data expected
- * in a binary wire protocol. These constants correspond to specific codes or ranges
- * used in the decoding process.
- * <p>
- * The constants are categorized into different types:
- * BYTES_LENGTH8, BYTES_LENGTH16, and BYTES_LENGTH32 correspond to sequences of length
- * 0 - 255, 0 - 2^16-1, and 0 - 2^32-1 respectively,
- * FIELD_ANCHOR, ANCHOR, and UPDATED_ALIAS are used for field anchoring purposes,
- * U8_ARRAY represents an array of unsigned bytes,
- * I64_ARRAY represents an array of 64-bit integer values,
- * PADDING32 and PADDING are used for padding purposes,
- * FLOAT32, FLOAT64, FLOAT_STOP_2, FLOAT_STOP_4, FLOAT_STOP_6, FLOAT_SET_LOW_0,
- * FLOAT_SET_LOW_2, FLOAT_SET_LOW_4 are used for various floating point number operations,
- * UUID, UINT8, UINT16, UINT32, INT8, INT16, INT32, INT64, SET_LOW_INT8, SET_LOW_INT16,
- * STOP_BIT, INT64_0x are used for various integer operations and UUID representation,
- * FALSE, TRUE, TIME, DATE, DATE_TIME, ZONED_DATE_TIME, TYPE_PREFIX, FIELD_NAME_ANY,
- * STRING_ANY, EVENT_NAME, FIELD_NUMBER, NULL, TYPE_LITERAL, EVENT_OBJECT, COMMENT, HINT
- * are used for various data type representations and operations,
- * FIELD_NAME0 to FIELD_NAME31 are used to represent field names,
- * STRING_0 to STRING_31 are used to represent strings.
+ * Defines byte codes used by Chronicle's binary wire protocol. Each constant
+ * indicates the type or structure of the data that follows in the stream.
  */
 public interface BinaryWireCode {
 
-    /**
-     * Represents a sequence of length 0 - 255 bytes.
-     */
+    /** Code for a byte sequence with a length in the following one byte. */
     int BYTES_LENGTH8 = 0x80;
 
-    /**
-     * Represents a sequence of length 0 - 2^16-1 bytes.
-     */
+    /** Code for a byte sequence with a 2 byte length prefix. */
     int BYTES_LENGTH16 = 0x81;
 
-    /**
-     * Represents a sequence of length 0 - 2^32-1.
-     */
+    /** Code for a byte sequence with a 4 byte length prefix. */
     int BYTES_LENGTH32 = 0x82;
 
-    /**
-     * Denotes a field anchor.
-     */
+    /** Code referencing a previously written field. */
     int FIELD_ANCHOR = 0x87;
 
-    /**
-     * Represents an anchor.
-     */
+    /** Anchor for cyclic references. */
     int ANCHOR = 0x88;
 
-    /**
-     * Represents an updated alias.
-     */
+    /** Indicates an alias update. */
     int UPDATED_ALIAS = 0x89;
 
-    /**
-     * Represents an array of unsigned bytes.
-     */
+    /** Code for an array of unsigned bytes. */
     int U8_ARRAY = 0x8A;
-    /**
-     * Represents an array of signed long.
-     */
+    /** Code for an array of signed 64-bit integers. */
     int I64_ARRAY = 0x8D;
 
-    /**
-     * Represents 32-bit padding.
-     */
+    /** 32-bit padding marker. */
     int PADDING32 = 0x8E;
 
-    /**
-     * Represents padding.
-     */
+    /** Generic padding marker. */
     int PADDING = 0x8F;
 
-    /**
-     * Represents a 32-bit floating-point number.
-     */
+    /** 32-bit float value. */
     int FLOAT32 = 0x90;
 
-    /**
-     * Represents a 64-bit floating-point number.
-     */
+    /** 64-bit float value. */
     int FLOAT64 = 0x91;
-    /**
-     * Represents floating-point stop bit encoded * 10^2.
-     */
+    /** Float encoded with 2 decimal places using stop bits. */
     int FLOAT_STOP_2 = 0x92;
 
-    /**
-     * Represents floating-point stop 4.
-     */
+    /** Float encoded with 4 decimal places. */
     int FLOAT_STOP_4 = 0x94;
 
-    /**
-     * Represents floating-point stop 6.
-     */
+    /** Float encoded with 6 decimal places. */
     int FLOAT_STOP_6 = 0x96;
 
-    /**
-     * Represents floating-point set low 0.
-     */
+    /** Float value scaled by 1. */
     int FLOAT_SET_LOW_0 = 0x9A;
 
-    /**
-     * Represents floating-point set low 2.
-     */
+    /** Float value scaled by 10^2. */
     int FLOAT_SET_LOW_2 = 0x9B;
 
-    /**
-     * Represents floating-point set low 4.
-     */
+    /** Float value scaled by 10^4. */
     int FLOAT_SET_LOW_4 = 0x9C;
     // 0x98 - 0x9F
 
-    /**
-     * Represents a UUID.
-     */
+    /** Universally unique identifier. */
     int UUID = 0xA0;
 
-    /**
-     * Represents an 8-bit unsigned integer.
-     */
+    /** Unsigned 8-bit integer value. */
     int UINT8 = 0xA1;
 
-    /**
-     * Represents a 16-bit unsigned integer.
-     */
+    /** Unsigned 16-bit integer value. */
     int UINT16 = 0xA2;
 
-    /**
-     * Represents a 32-bit unsigned integer.
-     */
+    /** Unsigned 32-bit integer value. */
     int UINT32 = 0xA3;
 
-    /**
-     * Represents an 8-bit integer.
-     */
+    /** Signed 8-bit integer value. */
     int INT8 = 0xA4;
 
-    /**
-     * Represents a 16-bit integer.
-     */
+    /** Signed 16-bit integer value. */
     int INT16 = 0xA5;
 
-    /**
-     * Represents a 32-bit integer.
-     */
+    /** Signed 32-bit integer value. */
     int INT32 = 0xA6;
 
-    /**
-     * Represents a 64-bit integer.
-     */
+    /** Signed 64-bit integer value. */
     int INT64 = 0xA7;
 
-    /**
-     * Represents a set low 8-bit integer.
-     */
+    /** Set low 8-bit integer value. */
     int SET_LOW_INT8 = 0xA8;
 
-    /**
-     * Represents a set low 16-bit integer.
-     */
+    /** Set low 16-bit integer value. */
     int SET_LOW_INT16 = 0xA9;
 
-    /**
-     * Represents a stop bit.
-     */
+    /** Stop bit encoded integer. */
     int STOP_BIT = 0xAE;
 
-    /**
-     * Represents a 64-bit integer with a hexadecimal prefix.
-     */
+    /** 64-bit integer formatted as hexadecimal. */
     int INT64_0x = 0xAF;
 
-    /**
-     * Represents a boolean false value.
-     */
+    /** Boolean false value. */
     int FALSE = 0xB0;
 
-    /**
-     * Represents a boolean true value.
-     */
+    /** Boolean true value. */
     int TRUE = 0xB1;
 
-    /**
-     * Represents a time.
-     */
+    /** Millisecond time of day. */
     int TIME = 0xB2;
 
-    /**
-     * Represents a date.
-     */
+    /** Date (days since epoch). */
     int DATE = 0xB3;
 
-    /**
-     * Represents a date and time.
-     */
+    /** Date and time without zone. */
     int DATE_TIME = 0xB4;
 
-    /**
-     * Represents a zoned date and time.
-     */
+    /** Zoned date and time. */
     int ZONED_DATE_TIME = 0xB5;
 
-    /**
-     * Represents a type prefix.
-     */
+    /** Type prefix marker. */
     int TYPE_PREFIX = 0xB6;
 
-    /**
-     * Represents a field name that can be any string.
-     */
+    /** Field name encoded as text. */
     int FIELD_NAME_ANY = 0xB7;
 
-    /**
-     * Represents a string that can be any string.
-     */
+    /** Arbitrary string value. */
     int STRING_ANY = 0xB8;
 
-    /**
-     * Represents an event name.
-     */
+    /** Event name string. */
     int EVENT_NAME = 0xB9;
 
-    /**
-     * Represents a field number.
-     */
+    /** Field number encoded as stop bit. */
     int FIELD_NUMBER = 0xBA;
 
-    /**
-     * Represents a null value.
-     */
+    /** Null marker. */
     int NULL = 0xBB;
 
-    /**
-     * Represents a type literal.
-     */
+    /** Type literal string. */
     int TYPE_LITERAL = 0xBC;
 
-    /**
-     * Represents an event object.
-     */
+    /** Event object encoded in binary. */
     int EVENT_OBJECT = 0xBD;
 
-    /**
-     * Represents a comment.
-     */
+    /** Comment text. */
     int COMMENT = 0xBE;
 
-    /**
-     * Represents a hint.
-     */
+    /** Hint for optimisation. */
     int HINT = 0xBF;
 
-    /**
-     * Represents the field name of length 0.
-     */
+    /** Field name with zero length. */
     int FIELD_NAME0 = 0xC0;
     // ...
 
-    /**
-     * Represents the field name of length 31 bytes.
-     */
+    /** Field name exactly 31 bytes long. */
     int FIELD_NAME31 = 0xDF;
 
-    /**
-     * Represents the string of length 0.
-     */
+    /** String of length zero. */
     int STRING_0 = 0xE0;
     // ...
-    /**
-     * Represents the string of length 31 bytes.
-     */
+    /** String exactly 31 bytes long. */
     int STRING_31 = 0xFF;
 
-    /**
-     * Maps each code in the interface to its corresponding string representation.
-     */
+    /** Lookup table mapping codes to their textual name, useful for debugging. */
     String[] STRING_FOR_CODE = _stringForCode(BinaryWireCode.class);
 
     /**
-     * Helper method for generating a text representation all the codes
-     *
-     * @param clazz to search for constants to extract
-     * @return an array of Strings for each code
+     * Builds {@link #STRING_FOR_CODE} by reflecting over constant fields.
      */
     static String[] _stringForCode(Class<?> clazz) {
         String[] stringForCode = new String[256];
