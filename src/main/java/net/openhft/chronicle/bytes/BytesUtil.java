@@ -117,7 +117,9 @@ public enum BytesUtil {
      */
     public static void checkArrayLength(int len, long remaining) throws IORuntimeException {
         if (len < 0 || len > MAX_ARRAY_LEN || len > remaining)
-            throw new IORuntimeException("Invalid array length: " + len);
+            throw new IORuntimeException("Invalid array length: " + len +
+                    ", max: " + MAX_ARRAY_LEN +
+                    ", remaining: " + remaining);
     }
 
     /**
