@@ -498,13 +498,12 @@ public interface RandomDataInput extends RandomCommon {
         AppendableUtil.setLength(sb, 0);
 
         requireNonNegative(offset);
-        long pos = offset;
-        long remaining = requireNonNegative(readLimit() - pos);
+        long remaining = requireNonNegative(readLimit() - offset);
         if (remaining < 1)
             throw new BufferUnderflowException();
 
         long utfLen;
-        if ((utfLen = readByte(pos++)) < 0) {
+        if ((utfLen = readByte(offset++)) < 0) {
             utfLen &= 0x7FL;
             long b;
             int count = 7;
@@ -527,10 +526,10 @@ public interface RandomDataInput extends RandomCommon {
         if (utfLen == -1)
             return ~offset;
         int len = Maths.toUInt31(utfLen);
-        if (requireNonNegative(readLimit() - pos) < len)
+        if (requireNonNegative(readLimit() - offset) < len)
             throw new BufferUnderflowException();
-        BytesInternal.parseUtf8(this, pos, sb, true, len);
-        return pos + utfLen;
+        BytesInternal.parseUtf8(this, offset, sb, true, len);
+        return offset + utfLen;
     }
 
     /**
@@ -562,13 +561,12 @@ public interface RandomDataInput extends RandomCommon {
 
         requireNonNegative(offset);
         requireNonNegative(maxUtf8Len);
-        long pos = offset;
-        long remaining = requireNonNegative(readLimit() - pos);
+        long remaining = requireNonNegative(readLimit() - offset);
         if (remaining < 1)
             throw new BufferUnderflowException();
 
         long utfLen;
-        if ((utfLen = readByte(pos++)) < 0) {
+        if ((utfLen = readByte(offset++)) < 0) {
             utfLen &= 0x7FL;
             long b;
             int count = 7;
@@ -593,10 +591,10 @@ public interface RandomDataInput extends RandomCommon {
         if (utfLen > maxUtf8Len)
             throw new ClosedIllegalStateException("Attempted to read a char sequence of " +
                     "utf8 size " + utfLen + ", when only " + maxUtf8Len + " allowed");
-        if (requireNonNegative(readLimit() - pos) < utfLen)
+        if (requireNonNegative(readLimit() - offset) < utfLen)
             throw new BufferUnderflowException();
-        BytesInternal.parseUtf8(this, pos, sb, true, (int) utfLen);
-        return pos + utfLen;
+        BytesInternal.parseUtf8(this, offset, sb, true, (int) utfLen);
+        return offset + utfLen;
     }
 
     /**
