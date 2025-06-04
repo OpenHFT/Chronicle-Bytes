@@ -83,7 +83,7 @@ enum BytesInternal {
                 IOTools.unmonitor(bbb);
                 return bbb;
             },
-            Bytes::clear,
+            BytesInternal::clearAndZero,
             THREAD_LOCAL_BYTES_POOL_SIZE);
     public static final StringInternerBytes SI;
     static final char[] HEXADECIMAL = "0123456789abcdef".toCharArray();
@@ -3471,6 +3471,15 @@ enum BytesInternal {
         }
 
         return bytesStore;
+    }
+
+    private static void clearAndZero(Bytes<?> bytes) {
+        try {
+            bytes.zeroOut(bytes.start(), bytes.writePosition());
+        } catch (IllegalStateException e) {
+            Jvm.warn().on(BytesInternal.class, "Failed to zero pooled Bytes", e);
+        }
+        bytes.clear();
     }
 
     @SuppressWarnings("unchecked")

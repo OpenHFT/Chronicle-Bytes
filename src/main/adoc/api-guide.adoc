@@ -527,7 +527,7 @@ Do not release the `Bytes` instance in a way that expects to free the underlying
 == 8  Performance Tips
 
 * **Thread Affinity**: Pin critical threads to specific CPU cores (e.g., using `AffinityLock`) to improve cache utilization (L1/L2) and reduce context switching.
-* **Buffer Reuse**: For frequently needed, fixed-size buffers, consider pooling `Bytes` instances or, more commonly, allocating them once per thread (using `ThreadLocal`) and reusing them by calling `clear()` or resetting cursors.
+* **Buffer Reuse**: For frequently needed, fixed-size buffers, consider pooling `Bytes` instances or, more commonly, allocating them once per thread (using `ThreadLocal`) and reusing them by calling `clear()` or resetting cursors. Pooled buffers should zero the bytes written so far before reuse to prevent data leakage. The built-in `BytesPool` performs this via `zeroOut()` on the used region.
 * **Bulk Operations**: Use bulk methods like `Bytes.write(BytesStore anotherBytes, long offset, long length)` or `Bytes.unsafeWriteObject(Object obj, long offset, int length)` (with extreme care) for copying large chunks of data, as they often have lower per-byte overhead than repeated individual primitive writes.
 * **JVM Options**: Experiment with relevant JVM options (e.g., `-XX:+UnlockDiagnosticVMOptions -XX:PrintAssembly` to inspect generated code, `-XX:+UseLargePages` for off-heap memory).
 * **Disable Debug Fields (Production)**: If Chronicle Bytes has compile-time or runtime flags to strip debug assertions or fields (e.g., `-Dbytes.compact=true` if such a flag exists), enable them in production for minimal overhead.

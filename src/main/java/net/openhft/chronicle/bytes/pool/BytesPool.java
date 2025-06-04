@@ -54,7 +54,7 @@ public final class BytesPool {
     public static ScopedResourcePool<Bytes<?>> createThreadLocal(int instancesPerThread) {
         return new ScopedThreadLocal<>(
                 BytesPool::createBytes,
-                Bytes::clear,
+                BytesPool::clearAndZero,
                 instancesPerThread);
     }
 
@@ -76,5 +76,14 @@ public final class BytesPool {
         Bytes<?> bbb = Bytes.allocateElasticDirect(256);
         IOTools.unmonitor(bbb);
         return bbb;
+    }
+
+    private static void clearAndZero(Bytes<?> bytes) {
+        try {
+            bytes.zeroOut(bytes.start(), bytes.writePosition());
+        } catch (IllegalStateException e) {
+            Jvm.warn().on(BytesPool.class, "Failed to zero pooled Bytes", e);
+        }
+        bytes.clear();
     }
 }
