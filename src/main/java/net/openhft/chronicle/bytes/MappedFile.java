@@ -199,7 +199,9 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
      * Creates and returns a MappedFile instance for the specified file with the given chunk size.
      * The overlap size is set to the default page size of the operating system.
      *
-     * @param filename  The name of the file to be memory-mapped.
+     * @param filename  The name of the file to be memory-mapped. The path is
+     *                  resolved to its canonical form to help guard against
+     *                  path traversal.
      * @param chunkSize The size of each chunk in bytes.
      * @return A new MappedFile instance.
      * @throws FileNotFoundException If the specified file does not exist.
@@ -213,7 +215,9 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
     /**
      * Creates and returns a MappedFile instance for the specified file with the given chunk size and overlap size.
      *
-     * @param filename    The name of the file to be memory-mapped.
+     * @param filename    The name of the file to be memory-mapped. The path is
+     *                    resolved to its canonical form to help guard against
+     *                    path traversal.
      * @param chunkSize   The size of each chunk in bytes.
      * @param overlapSize The size of the overlapping regions between chunks in bytes.
      * @return A new MappedFile instance.
@@ -224,7 +228,10 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
                                         @NonNegative final long chunkSize,
                                         @NonNegative final long overlapSize)
             throws FileNotFoundException {
-        return mappedFile(new File(filename), chunkSize, overlapSize);
+        final File rawFile = new File(filename);
+        final String canonical = CanonicalPathUtil.of(rawFile);
+        final File canonicalFile = new File(canonical);
+        return mappedFile(canonicalFile, chunkSize, overlapSize);
     }
 
     /**
