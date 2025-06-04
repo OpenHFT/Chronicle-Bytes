@@ -16,11 +16,13 @@
 package net.openhft.chronicle.bytes.render;
 
 /**
- * A light-weight implementation of {@link Decimaliser}, which employs a simple rounding technique for converting floating-point
- * numbers to decimal representation. The range for conversion is between 1e-18 and {@link Long#MAX_VALUE}.
- * <p>
- * This implementation is designed for performance and simplicity, at the cost of potentially reduced accuracy.
- * It is useful in scenarios where performance is a higher priority than precision.
+ * A lightweight {@link Decimaliser} using simple rounding.
+ * It attempts to represent numbers with up to {@link #LARGEST_EXPONENT_IN_LONG}
+ * decimal places. If the scaled mantissa exceeds {@link #MANTISSA_LIMIT} the
+ * method gives up and returns {@code false}.
+ *
+ * <p>This approach is optimised for speed and is thread-safe.
+ * See {@link MaximumPrecision} for a more accurate alternative.
  */
 public class SimpleDecimaliser implements Decimaliser {
 
@@ -30,21 +32,26 @@ public class SimpleDecimaliser implements Decimaliser {
     public static final int LARGEST_EXPONENT_IN_LONG = 18;
 
     /**
+     * Largest mantissa handled by the simple algorithm before precision is lost.
+     */
+    static final long MANTISSA_LIMIT = 1_000_000_000_000_000L; // 1e15
+
+    /**
      * A singleton instance of {@link SimpleDecimaliser} for convenient reuse.
      * This instance is thread-safe and can be used across multiple threads without synchronization.
      */
     public static final Decimaliser SIMPLE = new SimpleDecimaliser();
 
     /**
-     * Converts a double value to its decimal representation using a simple rounding approach, and appends it to the provided
-     * {@link DecimalAppender}.
+     * Convert {@code value} using a simple rounding approach and append the result.
      * <p>
      * This method iteratively scales the input value by powers of 10, and performs rounding to attempt finding a precise
      * representation. If such representation is found, it is appended using the provided {@link DecimalAppender}.
      *
-     * @param value           The double value to be converted.
-     * @param decimalAppender The {@link DecimalAppender} used to store and append the converted decimal value.
-     * @return {@code true} if the conversion and appending were successful, {@code false} otherwise.
+     * @param value           the double value to convert; must be finite
+     * @param decimalAppender the appender that receives sign, mantissa and exponent
+     * @return {@code true} if the value was represented within {@link #MANTISSA_LIMIT}
+     *         and {@link #LARGEST_EXPONENT_IN_LONG}
      */
     public boolean toDecimal(double value, DecimalAppender decimalAppender) {
         // Determine if the input value is negative.
@@ -65,7 +72,7 @@ public class SimpleDecimaliser implements Decimaliser {
                 return true;
             }
             // this is over the edge of precision
-            if (mantissa >= 1e15)
+            if (mantissa >= MANTISSA_LIMIT)
                 return false;
             // Increase the factor for the next iteration.
             factor *= 10;
@@ -74,15 +81,11 @@ public class SimpleDecimaliser implements Decimaliser {
     }
 
     /**
-     * Converts a float value to its decimal representation using a simple rounding approach, and appends it to the provided
-     * {@link DecimalAppender}.
-     * <p>
-     * This method iteratively scales the input value by powers of 10, and performs rounding to attempt finding a precise
-     * representation. If such representation is found, it is appended using the provided {@link DecimalAppender}.
+     * Convert {@code value} using a simple rounding approach and append the result.
      *
-     * @param value           The float value to be converted.
-     * @param decimalAppender The {@link DecimalAppender} used to store and append the converted decimal value.
-     * @return {@code true} if the conversion and appending were successful, {@code false} otherwise.
+     * @param value           the float value to convert; must be finite
+     * @param decimalAppender the appender that receives sign, mantissa and exponent
+     * @return {@code true} if the value was represented within {@link #LARGEST_EXPONENT_IN_LONG}
      */
     public boolean toDecimal(float value, DecimalAppender decimalAppender) {
         // Determine if the input value is negative.
@@ -102,6 +105,8 @@ public class SimpleDecimaliser implements Decimaliser {
                 decimalAppender.append(sign, mantissa, exponent);
                 return true;
             }
+            if (mantissa >= MANTISSA_LIMIT)
+                return false;
             // Increase the factor for the next iteration.
             factor *= 10;
         }

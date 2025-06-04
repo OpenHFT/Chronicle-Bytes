@@ -16,38 +16,32 @@
 package net.openhft.chronicle.bytes.render;
 
 /**
- * Provides functionality for converting floating-point values (double and float) into a
- * decimal representation that can be appended to a target.
- * <p>
- * This interface offers multiple strategies for converting floating-point numbers, including
- * a light-weight approach and a more precise, BigDecimal-based implementation.
+ * Strategy interface that decomposes a floating point number into sign,
+ * mantissa and exponent suitable for textual serialisation.
+ * Implementations may trade performance against precision.
+ *
+ * <p>NaN, infinity and negative zero values are not converted and should cause
+ * the method to return {@code false}.
  *
  * @see DecimalAppender
  */
 public interface Decimaliser {
 
     /**
-     * Converts a double value to its decimal representation and appends it using the provided DecimalAppender.
-     * <p>
-     * The DecimalAppender should have been implemented to accept the sign, mantissa, and exponent of the decimal representation,
-     * and append them accordingly.
+     * Convert {@code value} to a decimal representation and append it.
      *
-     * @param value           The double value to be converted.
-     * @param decimalAppender The DecimalAppender used to store and append the converted decimal value.
-     * @return {@code true} if the conversion and appending were successful, {@code false} otherwise.
+     * @param value           the double value to serialise; must be finite and not negative zero
+     * @param decimalAppender the target receiving sign, mantissa and exponent
+     * @return {@code true} if the value could be represented and appended
      */
     boolean toDecimal(double value, DecimalAppender decimalAppender);
 
     /**
-     * Converts a float value to its decimal representation and appends it using the provided DecimalAppender.
-     * <p>
-     * The DecimalAppender should have been implemented to accept the sign, mantissa, and exponent of the decimal representation,
-     * and append them accordingly.
+     * Convert {@code value} to a decimal representation and append it.
      *
-     * @param value           The float value to be converted.
-     * @param decimalAppender The DecimalAppender used to store and append the converted decimal value.
-     * @return {@code true} if the conversion and appending were successful, {@code false} otherwise.
+     * @param value           the float value to serialise; must be finite and not negative zero
+     * @param decimalAppender the target receiving sign, mantissa and exponent
+     * @return {@code true} if the value could be represented and appended
      */
     boolean toDecimal(float value, DecimalAppender decimalAppender);
-
 }
