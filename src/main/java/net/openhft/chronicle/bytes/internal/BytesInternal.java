@@ -1491,8 +1491,8 @@ enum BytesInternal {
                     if (bytes.readLong(end - 8) != 0)
                         break;
                 }
-            } catch (@NotNull UnsupportedOperationException | BufferUnderflowException ignored) {
-                // ignore
+            } catch (@NotNull UnsupportedOperationException | BufferUnderflowException e) {
+                Jvm.debug().on(BytesInternal.class, "vectorized toString check failed", e);
             }
             toString(bytes, sb, start, readPosition, readLimit, end);
             if (end < bytes.readLimit())

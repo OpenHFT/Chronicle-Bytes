@@ -19,6 +19,7 @@ import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.bytes.VanillaBytes;
 import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.io.ClosedIllegalStateException;
+import net.openhft.chronicle.core.Jvm;
 import org.jetbrains.annotations.NotNull;
 
 import static net.openhft.chronicle.core.Jvm.uncheckedCast;
@@ -48,7 +49,8 @@ public class EmbeddedBytes<U> extends VanillaBytes<U> {
     public @NonNegative long writePosition() {
         try {
             return bytesStore.readUnsignedByte(lengthOffset());
-        } catch (ClosedIllegalStateException ignored) {
+        } catch (ClosedIllegalStateException e) {
+            Jvm.debug().on(EmbeddedBytes.class, "bytesStore is closed", e);
             return 0;
         }
     }

@@ -376,8 +376,8 @@ public abstract class CommonMappedBytes extends MappedBytes {
             throws ClosedIllegalStateException {
         try {
             super.release(id);
-        } catch (ClosedIllegalStateException ignored) {
-            // ignored
+        } catch (ClosedIllegalStateException e) {
+            Jvm.debug().on(CommonMappedBytes.class, "release called on closed resource", e);
         }
         initReleased |= id == INIT;
         if (refCount() <= 0)
