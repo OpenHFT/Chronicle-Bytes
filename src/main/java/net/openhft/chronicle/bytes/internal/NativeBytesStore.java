@@ -54,9 +54,19 @@ public class NativeBytesStore<U>
 
     static {
         Class<?> directBB = ByteBuffer.allocateDirect(0).getClass();
-        BB_ADDRESS = Jvm.getField(directBB, "address");
-        BB_CAPACITY = Jvm.getField(directBB, "capacity");
-        BB_ATT = Jvm.getField(directBB, "att");
+        Field address = null;
+        Field capacity = null;
+        Field att = null;
+        try {
+            address = Jvm.getField(directBB, "address");
+            capacity = Jvm.getField(directBB, "capacity");
+            att = Jvm.getField(directBB, "att");
+        } catch (Throwable t) {
+            Jvm.warn().on(NativeBytesStore.class, "Unable to access ByteBuffer fields", t);
+        }
+        BB_ADDRESS = address;
+        BB_CAPACITY = capacity;
+        BB_ATT = att;
     }
 
     // Even though not referenced, this field needs to stay

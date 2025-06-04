@@ -34,8 +34,16 @@ public final class ByteBuffers {
 
     static {
         ByteBuffer direct = ByteBuffer.allocateDirect(0);
-        ADDRESS = Jvm.getField(direct.getClass(), "address");
-        CAPACITY = Jvm.getField(direct.getClass(), "capacity");
+        Field address = null;
+        Field capacity = null;
+        try {
+            address = Jvm.getField(direct.getClass(), "address");
+            capacity = Jvm.getField(direct.getClass(), "capacity");
+        } catch (Throwable t) {
+            Jvm.warn().on(ByteBuffers.class, "Unable to access direct ByteBuffer fields", t);
+        }
+        ADDRESS = address;
+        CAPACITY = capacity;
     }
 
     /**
@@ -51,6 +59,8 @@ public final class ByteBuffers {
      * @throws AssertionError if the operation fails due to IllegalAccessException or IllegalArgumentException
      */
     public static void setAddressCapacity(ByteBuffer buffer, long address, long capacity) {
+        if (ADDRESS == null || CAPACITY == null)
+            throw new UnsupportedOperationException("Direct ByteBuffer fields not accessible");
         int cap = Math.toIntExact(capacity);
         try {
             ADDRESS.setLong(buffer, address);
