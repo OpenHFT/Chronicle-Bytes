@@ -29,12 +29,12 @@ import java.nio.BufferUnderflowException;
 import java.nio.channels.FileLock;
 
 /**
- * Represents an abstract reference to a {@link BytesStore}.
+ * Base class for references backed by a {@link BytesStore}.
+ * <p>{@link #acceptNewBytesStore(BytesStore)} reserves the store and
+ * {@link #performClose()} releases it. Subclasses must call
+ * {@code throwExceptionIfClosed...()} before mutating state.</p>
  *
- * <p>This class provides an abstraction for managing a reference to a BytesStore. It provides
- * functionality to read and write data from/to the BytesStore, manage a reference count, and lock
- * resources.
- *
+ * <p> {@link #unmonitor()} propagates to the wrapped store.
  * @see BytesStore
  * @see Byteable
  * @see Closeable
@@ -63,13 +63,13 @@ public abstract class AbstractReference extends AbstractCloseable implements Byt
     }
 
     /**
-     * Sets the underlying BytesStore to work with, along with the offset and length.
+     * Sets the underlying {@link BytesStore} together with the offset and length.
      *
-     * @param bytes  the BytesStore to set
-     * @param offset the offset to set
-     * @param length the length to set
-     * @throws IllegalArgumentException If the arguments are invalid
-     * @throws BufferOverflowException  If the provided buffer is too small
+     * @param bytes  the {@code BytesStore} providing the backing memory
+     * @param offset the non-negative offset within the store
+     * @param length the number of bytes this reference spans
+     * @throws IllegalArgumentException if {@code length} does not match {@link #maxSize()}
+     * @throws BufferOverflowException  if the region exceeds the store capacity
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
@@ -86,7 +86,7 @@ public abstract class AbstractReference extends AbstractCloseable implements Byt
     }
 
     /**
-     * @return the BytesStore associated with this reference
+     * Returns the {@link BytesStore} that backs this reference, or {@code null} if none is set.
      */
     @Nullable
     @Override
@@ -95,7 +95,7 @@ public abstract class AbstractReference extends AbstractCloseable implements Byt
     }
 
     /**
-     * @return the offset within the BytesStore for this reference
+     * Returns the byte offset relative to the start of the associated store.
      */
     @Override
     public long offset() {

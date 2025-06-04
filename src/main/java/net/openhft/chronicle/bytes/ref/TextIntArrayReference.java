@@ -29,14 +29,13 @@ import java.nio.BufferOverflowException;
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 
 /**
- * TextIntArrayReference is an implementation of a reference to an array of integers, represented
- * in a text format. It extends AbstractReference and implements ByteableIntArrayValues. This class
- * facilitates the serialization and deserialization of an array of integers in a custom textual
- * representation. The text representation is structured as JSON-like content.
- * <p>
- * The format of the text representation of an integer array is:
- * {@code { capacity: 00000001234, used: 0000000128, values: [ 1234567890, ... ] }}
- * 
+ * Fixed-width text array of 32-bit integers for diagnostics.
+ * <p>The bytes encode {@code capacity}, {@code used} and zero-padded values.
+ * Locking relies on the {@code locked} flag in each entry.</p>
+ *
+ * <p> Magic constants such as {@code FALSE} and {@code TRUE} hold the
+ * lock state.
+ * <p> Debugging aid; not for high performance operations.
  */
 @SuppressWarnings("rawtypes")
 public class TextIntArrayReference extends AbstractReference implements ByteableIntArrayValues {

@@ -31,9 +31,14 @@ import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static net.openhft.chronicle.bytes.BytesUtil.roundUpTo8ByteAlign;
 
 /**
- * Implementation of a reference to an array of 64-bit long values in Text wire format.
- * The text representation includes an atomic lock flag along with the value.
- * The format is: {@code !!atomic {  locked: false, value: 00000000000000000000 } }.
+ * Reference to a 20-digit, zero-padded long held in text format.
+ * <p>The layout is exactly {@code 34} bytes and includes a spin-lock
+ * flag.  The lock is obtained via CAS in {@link #withLock(ThrowingLongSupplier)}.</p>
+ *
+ * <p> {@code FALSE} and {@code TRUE} encode the lock state as four ASCII
+ * characters.
+ * <p> These text classes are intended for debugging rather than production
+ * use.
  */
 @SuppressWarnings("rawtypes")
 public class TextLongReference extends AbstractReference implements LongReference {
