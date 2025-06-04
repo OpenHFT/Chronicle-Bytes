@@ -81,7 +81,7 @@ public class BinaryBooleanReference extends AbstractReference implements Boolean
 
     /**
      * Reads a boolean value from the bytes store.
-     * <p> Behaviour is undefined if the stored byte is neither
+     * Behaviour is undefined if the stored byte is neither
      *
      * @return The read boolean value
      * @throws BufferUnderflowException If the bytes store contains insufficient data
