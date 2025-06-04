@@ -1,21 +1,24 @@
 /**
- * Provides classes for hash computations on ByteStore objects.
+ * Provides classes for non-cryptographic hash computations on {@link net.openhft.chronicle.bytes.BytesStore} objects.
  * <p>
- * This package includes two hash implementations, {@link net.openhft.chronicle.bytes.algo.VanillaBytesStoreHash}
- * and {@link net.openhft.chronicle.bytes.algo.XxHash}. Both implement the {@link net.openhft.chronicle.bytes.algo.BytesStoreHash}
- * interface for the {@link net.openhft.chronicle.bytes.BytesStore} objects. These hashing algorithms are designed for
- * speed and effectiveness. VanillaBytesStoreHash provides a single instance of the hashing algorithm with constants
- * for faster computation, while XxHash is a more customizable hash implementation with seed support.
+ * The package offers three implementations:
+ * {@link net.openhft.chronicle.bytes.algo.VanillaBytesStoreHash},
+ * {@link net.openhft.chronicle.bytes.algo.XxHash} and
+ * {@link net.openhft.chronicle.bytes.algo.OptimisedBytesStoreHash}. They all
+ * implement {@link net.openhft.chronicle.bytes.algo.BytesStoreHash}.
+ * VanillaBytesStoreHash uses a fixed set of mixing constants for quick hashing
+ * while XxHash supports a seed. OptimisedBytesStoreHash chooses the most
+ * efficient strategy based on size and direct memory access.
  * <p>
- * Both classes feature the fetch and applyAsLong methods for fetching values from a byte store and computing their
- * hash respectively. Errors during execution are thrown as IllegalStateException and BufferUnderflowException.
+ * {@code XxHash} was migrated from the Zero-Allocation-Hashing project and is
+ * renowned for speed. These algorithms are deterministic across platforms but
+ * should not be used for security or privacy-sensitive computations.
  * <p>
- * {@code XxHash} is migrated from the Zero-Allocation-Hashing project, renowned for its speed.
- * <p>
- * Note: As these algorithms are non-cryptographic, they should not be used for any security or privacy sensitive
- * computations.
+ * See the AsciiDoc module overview {@code algo-overview.adoc} for examples and
+ * performance notes.
  *
  * @see net.openhft.chronicle.bytes.BytesStore
  * @see net.openhft.chronicle.bytes.algo.BytesStoreHash
+ * @see <a href="../../../../src/main/adoc/algo-overview.adoc">algo-overview.adoc</a>
  */
 package net.openhft.chronicle.bytes.algo;

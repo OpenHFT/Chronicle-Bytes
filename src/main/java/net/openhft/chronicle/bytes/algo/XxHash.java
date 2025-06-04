@@ -35,10 +35,15 @@ import java.nio.BufferUnderflowException;
 @SuppressWarnings("rawtypes")
 public class XxHash implements BytesStoreHash<BytesStore<?, ?>> {
     // Primes if treated as unsigned
+    /** Prime constant used in xxHash. */
     private static final long P1 = -7046029288634856825L;
+    /** Prime constant used in xxHash. */
     private static final long P2 = -4417276706812531889L;
+    /** Prime constant used in xxHash. */
     private static final long P3 = 1609587929392839161L;
+    /** Prime constant used in xxHash. */
     private static final long P4 = -8796714831421723037L;
+    /** Prime constant used in xxHash. */
     private static final long P5 = 2870177450012600261L;
 
     /**
@@ -58,10 +63,10 @@ public class XxHash implements BytesStoreHash<BytesStore<?, ?>> {
     }
 
     /**
-     * Finalizes the hash calculation.
+     * Performs the final mixing steps of the xxHash algorithm on the accumulated hash value.
      *
-     * @param hash the hash to finalize.
-     * @return the finalized hash.
+     * @param hash the hash to finalise
+     * @return the finalised hash value
      */
     private static long finishUp(long hash) {
         hash ^= hash >>> 33;
