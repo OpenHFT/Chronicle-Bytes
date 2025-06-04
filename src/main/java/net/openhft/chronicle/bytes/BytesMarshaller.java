@@ -360,6 +360,7 @@ public class BytesMarshaller<T> {
                     field.set(o, null);
                 return;
             }
+            BytesUtil.checkArrayLength(length, read.readRemaining());
             if (c == null) {
                 c = (Object[]) Array.newInstance(field.getType().getComponentType(), length);
                 field.set(o, c);
@@ -435,6 +436,7 @@ public class BytesMarshaller<T> {
                     field.set(o, null);
                 return;
             }
+            BytesUtil.checkArrayLength(length, read.readRemaining());
 
             if (c == null)
                 field.set(o, c = collectionSupplier.get());
@@ -502,6 +504,7 @@ public class BytesMarshaller<T> {
                     field.set(o, null);
                 return;
             }
+            BytesUtil.checkArrayLength(Maths.toInt32(length), read.readRemaining());
             if (m == null) {
                 field.set(o, m = collectionSupplier.get());
             } else {
@@ -573,14 +576,15 @@ public class BytesMarshaller<T> {
             int len = read.readInt();
             if (len == ~0) {
                 field.set(o, null);
-            } else if (len >= 0) {
-                byte[] array = (byte[]) field.get(o);
-                if (array == null || array.length != len) {
-                    array = new byte[len];
-                    field.set(o, array);
-                }
-                read.read(array);
+                return;
             }
+            BytesUtil.checkArrayLength(len, read.readRemaining());
+            byte[] array = (byte[]) field.get(o);
+            if (array == null || array.length != len) {
+                array = new byte[len];
+                field.set(o, array);
+            }
+            read.read(array);
         }
     }
 
@@ -667,15 +671,16 @@ public class BytesMarshaller<T> {
             int len = read.readInt();
             if (len == ~0) {
                 field.set(o, null);
-            } else if (len >= 0) {
-                int[] array = (int[]) field.get(o);
-                if (array == null || array.length != len) {
-                    array = new int[len];
-                    field.set(o, array);
-                }
-                for (int i = 0; i < len; i++)
-                    array[i] = read.readInt();
+                return;
             }
+            BytesUtil.checkArrayLength(len, read.readRemaining() / 4);
+            int[] array = (int[]) field.get(o);
+            if (array == null || array.length != len) {
+                array = new int[len];
+                field.set(o, array);
+            }
+            for (int i = 0; i < len; i++)
+                array[i] = read.readInt();
         }
     }
 
@@ -722,15 +727,16 @@ public class BytesMarshaller<T> {
             int len = read.readInt();
             if (len == ~0) {
                 field.set(o, null);
-            } else if (len >= 0) {
-                float[] array = (float[]) field.get(o);
-                if (array == null || array.length != len) {
-                    array = new float[len];
-                    field.set(o, array);
-                }
-                for (int i = 0; i < len; i++)
-                    array[i] = read.readFloat();
+                return;
             }
+            BytesUtil.checkArrayLength(len, read.readRemaining() / 4);
+            float[] array = (float[]) field.get(o);
+            if (array == null || array.length != len) {
+                array = new float[len];
+                field.set(o, array);
+            }
+            for (int i = 0; i < len; i++)
+                array[i] = read.readFloat();
         }
     }
 
@@ -777,15 +783,16 @@ public class BytesMarshaller<T> {
             int len = read.readInt();
             if (len == ~0) {
                 field.set(o, null);
-            } else if (len >= 0) {
-                long[] array = (long[]) field.get(o);
-                if (array == null || array.length != len) {
-                    array = new long[len];
-                    field.set(o, array);
-                }
-                for (int i = 0; i < len; i++)
-                    array[i] = read.readLong();
+                return;
             }
+            BytesUtil.checkArrayLength(len, read.readRemaining() / 8);
+            long[] array = (long[]) field.get(o);
+            if (array == null || array.length != len) {
+                array = new long[len];
+                field.set(o, array);
+            }
+            for (int i = 0; i < len; i++)
+                array[i] = read.readLong();
         }
     }
 
@@ -832,15 +839,16 @@ public class BytesMarshaller<T> {
             int len = read.readInt();
             if (len == ~0) {
                 field.set(o, null);
-            } else if (len >= 0) {
-                double[] array = (double[]) field.get(o);
-                if (array == null || array.length != len) {
-                    array = new double[len];
-                    field.set(o, array);
-                }
-                for (int i = 0; i < len; i++)
-                    array[i] = read.readDouble();
+                return;
             }
+            BytesUtil.checkArrayLength(len, read.readRemaining() / 8);
+            double[] array = (double[]) field.get(o);
+            if (array == null || array.length != len) {
+                array = new double[len];
+                field.set(o, array);
+            }
+            for (int i = 0; i < len; i++)
+                array[i] = read.readDouble();
         }
     }
 }
