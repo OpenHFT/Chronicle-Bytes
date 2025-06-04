@@ -95,6 +95,34 @@ public enum BytesUtil {
     static final String TIME_STAMP_PATH = Jvm.getProperty("timestamp.path", new File(TIME_STAMP_DIR, ".time-stamp." + USER_NAME + ".dat").getAbsolutePath());
 
     /**
+     * The maximum array length that will be accepted when reading data.
+     * Oversized requests trigger an {@link IORuntimeException}.
+     */
+    // Default to 16 MiB to avoid inadvertent OOMs when deserialising data.
+    private static final int MAX_ARRAY_LEN = Jvm.getInteger("bytes.max-array-len", 16 << 20);
+
+    /**
+     * Returns the configured maximum array length.
+     */
+    public static int maxArrayLength() {
+        return MAX_ARRAY_LEN;
+    }
+
+    /**
+     * Validates the requested length against {@link #MAX_ARRAY_LEN} and the bytes remaining.
+     *
+     * @param len       the length requested
+     * @param remaining bytes remaining in the source
+     * @throws IORuntimeException if the length is negative or exceeds the limits
+     */
+    public static void checkArrayLength(int len, long remaining) throws IORuntimeException {
+        if (len < 0 || len > MAX_ARRAY_LEN || len > remaining)
+            throw new IORuntimeException("Invalid array length: " + len +
+                    ", max: " + MAX_ARRAY_LEN +
+                    ", remaining: " + remaining);
+    }
+
+    /**
      * Checks if the given class is trivially copyable.
      *
      * @param clazz Class to check.
