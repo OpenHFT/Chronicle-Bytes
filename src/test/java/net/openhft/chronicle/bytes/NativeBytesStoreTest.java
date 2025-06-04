@@ -64,15 +64,13 @@ public class NativeBytesStoreTest extends BytesTestCommon {
 
             bytesStore.write8bit(0, bytes);
 
-            // System.out.printf("0x%04x : 0x%02x, 0x%02x%n", i, bytesStore.readByte(0), bytesStore.readByte(1));
-
             final StringBuilder sb = new StringBuilder();
             bytesStore.readUtf8(0, sb);
 
             Assert.assertEquals("failed at " + i, expected, sb.toString());
 
             bytes.releaseLast();
-            expected = expected + "a";
+            expected = expected + "aaaaaaaaaaaaaaaaaaaaaaa"; // 23 characters
         }
     }
 
