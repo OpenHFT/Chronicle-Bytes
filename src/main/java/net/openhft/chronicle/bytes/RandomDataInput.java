@@ -487,7 +487,7 @@ public interface RandomDataInput extends RandomCommon {
      * {@code null}
      * @throws IORuntimeException       If the reading operation encounters an unexpected error.
      * @throws IllegalArgumentException If the buffer is not a {@code StringBuilder} or {@code Bytes}.
-     * @throws BufferUnderflowException If the reading operation encounters the end of the byte source.
+     * @throws BufferUnderflowException If the offset or encoded length exceed {@code readLimit()}.
      * @throws ArithmeticException      If the calculated length of the UTF-8 encoded string is invalid.
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
@@ -496,10 +496,15 @@ public interface RandomDataInput extends RandomCommon {
     default <T extends Appendable & CharSequence> long readUtf8(@NonNegative long offset, @NotNull T sb)
             throws IORuntimeException, IllegalArgumentException, BufferUnderflowException, ArithmeticException, ClosedIllegalStateException {
         AppendableUtil.setLength(sb, 0);
-        // TODO insert some bounds check here
+
+        requireNonNegative(offset);
+        long pos = offset;
+        long remaining = requireNonNegative(readLimit() - pos);
+        if (remaining < 1)
+            throw new BufferUnderflowException();
 
         long utfLen;
-        if ((utfLen = readByte(offset++)) < 0) {
+        if ((utfLen = readByte(pos++)) < 0) {
             utfLen &= 0x7FL;
             long b;
             int count = 7;
@@ -522,8 +527,10 @@ public interface RandomDataInput extends RandomCommon {
         if (utfLen == -1)
             return ~offset;
         int len = Maths.toUInt31(utfLen);
-        BytesInternal.parseUtf8(this, offset, sb, true, len);
-        return offset + utfLen;
+        if (requireNonNegative(readLimit() - pos) < len)
+            throw new BufferUnderflowException();
+        BytesInternal.parseUtf8(this, pos, sb, true, len);
+        return pos + utfLen;
     }
 
     /**
@@ -543,6 +550,7 @@ public interface RandomDataInput extends RandomCommon {
      * {@code null}
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
+     * @throws BufferUnderflowException       If the offset or encoded length exceed {@code readLimit()}.
      * @see RandomDataOutput#writeUtf8Limited(long, CharSequence, int)
      */
     default <T extends Appendable & CharSequence> long readUtf8Limited(@NonNegative long offset,
@@ -551,10 +559,16 @@ public interface RandomDataInput extends RandomCommon {
             throws IORuntimeException, IllegalArgumentException, BufferUnderflowException,
             ClosedIllegalStateException {
         AppendableUtil.setLength(sb, 0);
-        // TODO insert some bounds check here
+
+        requireNonNegative(offset);
+        requireNonNegative(maxUtf8Len);
+        long pos = offset;
+        long remaining = requireNonNegative(readLimit() - pos);
+        if (remaining < 1)
+            throw new BufferUnderflowException();
 
         long utfLen;
-        if ((utfLen = readByte(offset++)) < 0) {
+        if ((utfLen = readByte(pos++)) < 0) {
             utfLen &= 0x7FL;
             long b;
             int count = 7;
@@ -579,8 +593,10 @@ public interface RandomDataInput extends RandomCommon {
         if (utfLen > maxUtf8Len)
             throw new ClosedIllegalStateException("Attempted to read a char sequence of " +
                     "utf8 size " + utfLen + ", when only " + maxUtf8Len + " allowed");
-        BytesInternal.parseUtf8(this, offset, sb, true, (int) utfLen);
-        return offset + utfLen;
+        if (requireNonNegative(readLimit() - pos) < utfLen)
+            throw new BufferUnderflowException();
+        BytesInternal.parseUtf8(this, pos, sb, true, (int) utfLen);
+        return pos + utfLen;
     }
 
     /**

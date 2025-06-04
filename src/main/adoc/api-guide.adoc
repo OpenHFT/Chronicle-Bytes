@@ -245,6 +245,8 @@ Chronicle Bytes supports various string encodings and formats <<CB-FN-009>>.
 UTF-8 is common.
 `readUtf8()`/`writeUtf8()` use a stop-bit encoded length prefix.
 `read8bit()`/`write8bit()` handle ISO-8859-1 / US-ASCII like strings.
+When consuming untrusted data, prefer `readUtf8Limited()` to cap string size.
+Inputs that exceed the remaining readable bytes trigger `BufferUnderflowException` <<CB-NF-S-001>>.
 
 .String I/O
 [source,java]
