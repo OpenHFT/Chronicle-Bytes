@@ -43,31 +43,10 @@ import static net.openhft.chronicle.core.util.Longs.requireNonNegative;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
 /**
- * StreamingDataOutput is an interface for classes that support writing data to a stream.
- * Position based access.  Once data has been read, the writePosition() moves.
- *
- * <p>The various write methods in this interface support writing bytes, arrays of bytes, and sequences
- * of bytes from other sources like {@link ByteBuffer} and {@link RandomDataInput}. It also provides
- * methods for writing primitive data types and their boxed counterparts. Additionally, it supports
- * writing complex data structures such as {@link BigDecimal}, {@link BigInteger}, {@link Histogram}
- * and objects in unsafe way.
- *
- * <p>Not all the methods are expected to be implemented by classes. Default methods are provided for
- * common use cases. Classes that extend this interface can override these methods to provide more
- * efficient or custom implementations.
- *
- * <p>Implementations of this interface are expected to handle cases where the buffer may not have
- * enough capacity to handle the write operation. In such cases, methods should throw a {@link BufferOverflowException}.
- *
- * <p>Instances of classes implementing StreamingDataOutput are not guaranteed to be thread safe. If multiple
- * threads interact with the same instance, external synchronization should be used.
- *
- * @see RandomDataOutput
- * @see ByteBuffer
- * @see BufferOverflowException
- * @see BigDecimal
- * @see BigInteger
- * @see Histogram
+ * Provides sequential, cursor based writing of binary and textual data to a
+ * stream or buffer. Methods typically advance the {@link #writePosition()} by
+ * the number of bytes written. Implementations may throw
+ * {@link BufferOverflowException} if insufficient space is available.
  */
 @SuppressWarnings("unchecked")
 @DontChain
@@ -76,9 +55,8 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     int JAVA9_STRING_CODER_UTF16 = 1;
 
     /**
-     * Sets the current write position in the data stream. The write position indicates the point
-     * where the next write operation will begin. Calling this method does not modify the data in
-     * the stream; it only changes the position where future write operations will take place.
+     * Sets the current write position. No data is written or removed; this merely
+     * changes the index at which the next write will occur.
      *
      * @param position The new write position. It must be a non-negative number.
      * @return The current StreamingDataOutput instance.
@@ -91,8 +69,8 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
             throws BufferOverflowException, ClosedIllegalStateException, ThreadingIllegalStateException;
 
     /**
-     * Sets the limit for writing to the data stream. No data can be written beyond this limit.
-     * If an attempt is made to write data beyond this limit, a BufferOverflowException will be thrown.
+     * Sets the maximum writeable offset. Attempts to write beyond this limit
+     * result in {@link BufferOverflowException}.
      *
      * @param limit The new write limit. It must be a non-negative number.
      * @return The current StreamingDataOutput instance.
@@ -103,9 +81,8 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
             throws BufferOverflowException;
 
     /**
-     * Skips a specified number of bytes from the current write position in the data stream.
-     * This method adjusts the write position either forward or backward based on the value of
-     * bytesToSkip. The new position should not exceed the write limit.
+     * Advances or rewinds the write position by {@code bytesToSkip}. The result
+     * must remain within {@link #writeLimit()}.
      *
      * @param bytesToSkip The number of bytes to skip. This can be a negative number to move the
      *                    position backward.

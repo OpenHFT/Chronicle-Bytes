@@ -23,27 +23,24 @@ import net.openhft.chronicle.core.io.ThreadingIllegalStateException;
 import java.nio.BufferOverflowException;
 
 /**
- * An interface defining a contract for serializing data directly to a Bytes instance.
- * Objects implementing this interface can be marshalled into a sequence of bytes.
- *
- * @see net.openhft.chronicle.core.io.Validatable
+ * Functional interface for objects that can serialise their state directly to a
+ * {@link BytesOut} stream. Implementations typically call
+ * {@link net.openhft.chronicle.core.io.Validatable#validate()} before writing.
  */
 @FunctionalInterface
 @DontChain
 public interface WriteBytesMarshallable extends CommonMarshallable {
 
     /**
-     * Serializes this object to the provided Bytes instance.
+     * Writes this object's state to {@code bytes} using a custom binary format.
+     * Implementations may validate their state prior to writing and throw
+     * {@link InvalidMarshallableException} if invalid.
      *
-     * <p>This method is responsible for calling
-     * {@link net.openhft.chronicle.core.io.Validatable#validate()} as needed to ensure
-     * the validity of the state of the object before serialization.
-     *
-     * @param bytes the {@link BytesOut} instance to write the object's state to.
-     * @throws BufferOverflowException        If there is no more space left to write in the buffer.
-     * @throws InvalidMarshallableException   If the object cannot be successfully serialized.
-     * @throws ClosedIllegalStateException    If the resource has been released or closed.
-     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
+     * @param bytes the target stream
+     * @throws BufferOverflowException        if there is insufficient space in the buffer
+     * @throws InvalidMarshallableException   if the object is not in a valid state for serialisation
+     * @throws ClosedIllegalStateException    if the resource has been released or closed
+     * @throws ThreadingIllegalStateException if accessed by multiple threads in an unsafe way
      */
     void writeMarshallable(BytesOut<?> bytes)
             throws IllegalStateException, BufferOverflowException, InvalidMarshallableException;

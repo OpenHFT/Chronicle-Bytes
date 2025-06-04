@@ -21,11 +21,8 @@ import net.openhft.chronicle.core.io.ReferenceCounted;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
 /**
- * A utility class for handling operations related to {@link ReferenceCounted} instances.
- * Provides methods to verify whether a {@link ReferenceCounted} instance or any object
- * that implements {@link ReferenceCounted} has been previously released.
- *
- * <p> This class is not intended to be instantiated.
+ * Helpers for checking the state of {@link ReferenceCounted} objects. The class
+ * is not instantiable.
  */
 public final class ReferenceCountedUtil {
 
@@ -34,11 +31,13 @@ public final class ReferenceCountedUtil {
     }
 
     /**
-     * Checks the provided {@code referenceCounted} throwing a ClosedIllegalStateException If it has been previously released.
+     * Verifies that {@code referenceCounted} still has a positive reference
+     * count. If not, {@link ReferenceCounted#releaseLast()} is invoked which
+     * will throw a {@link ClosedIllegalStateException} with additional context.
      *
-     * @param referenceCounted the non-null {@link ReferenceCounted} resource to check
-     * @throws ClosedIllegalStateException If the resource has been released or closed.
-     * @throws NullPointerException        If the provided {@code referenceCounted} is {@code null}
+     * @param referenceCounted the resource to test
+     * @throws ClosedIllegalStateException if already released
+     * @throws NullPointerException if {@code referenceCounted} is null
      */
     public static void throwExceptionIfReleased(final ReferenceCounted referenceCounted) throws ClosedIllegalStateException {
         if (referenceCounted.refCount() <= 0) {
@@ -50,12 +49,9 @@ public final class ReferenceCountedUtil {
     }
 
     /**
-     * Checks the provided {@code object} throwing a ClosedIllegalStateException If it implements
-     * ReferenceCounted AND has been previously released.
-     *
-     * @param object the non-null object to check
-     * @throws ClosedIllegalStateException If the resource has been released or closed.
-     * @throws NullPointerException        If the provided {@code object} is {@code null}
+     * As {@link #throwExceptionIfReleased(ReferenceCounted)} but only if
+     * {@code object} implements {@link ReferenceCounted}. Otherwise a simple
+     * null check is performed.
      */
     public static void throwExceptionIfReleased(final Object object) throws ClosedIllegalStateException {
         if (object instanceof ReferenceCounted) {

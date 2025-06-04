@@ -61,7 +61,7 @@ public interface RandomDataInput extends RandomCommon {
      * Reads a volatile int value from the current reading position.
      *
      * @return the read int value.
-     * @throws BufferUnderflowException If the reading position is outside the bounds of the byte source.
+     * @throws BufferUnderflowException       If the reading position is outside the bounds of the byte source.
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
@@ -75,7 +75,7 @@ public interface RandomDataInput extends RandomCommon {
      *
      * @param offset the location from where the boolean value is read.
      * @return the read boolean value.
-     * @throws BufferUnderflowException If the offset is outside the bounds of the byte source.
+     * @throws BufferUnderflowException       If the offset is outside the bounds of the byte source.
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
@@ -89,7 +89,7 @@ public interface RandomDataInput extends RandomCommon {
      *
      * @param offset the location from where the byte value is read.
      * @return the read byte value.
-     * @throws BufferUnderflowException If the offset is outside the bounds of the byte source.
+     * @throws BufferUnderflowException       If the offset is outside the bounds of the byte source.
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
@@ -102,7 +102,7 @@ public interface RandomDataInput extends RandomCommon {
      *
      * @param offset the location from where the unsigned byte value is read.
      * @return the unsigned byte value interpreted as a positive int.
-     * @throws BufferUnderflowException If the offset is outside the bounds of the byte source.
+     * @throws BufferUnderflowException       If the offset is outside the bounds of the byte source.
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
@@ -129,7 +129,7 @@ public interface RandomDataInput extends RandomCommon {
      *
      * @param offset the location from where the short value is read.
      * @return the read short value.
-     * @throws BufferUnderflowException If the offset is outside the bounds of the byte source.
+     * @throws BufferUnderflowException       If the offset is outside the bounds of the byte source.
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
@@ -142,7 +142,7 @@ public interface RandomDataInput extends RandomCommon {
      *
      * @param offset the location from where the unsigned short value is read.
      * @return the unsigned short value interpreted as a positive int.
-     * @throws BufferUnderflowException If the offset is outside the bounds of the byte source.
+     * @throws BufferUnderflowException       If the offset is outside the bounds of the byte source.
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
@@ -157,7 +157,7 @@ public interface RandomDataInput extends RandomCommon {
      *
      * @param offset the location from where the unsigned 24-bit integer value is read.
      * @return the unsigned 24-bit integer value interpreted as a positive int.
-     * @throws BufferUnderflowException If the offset is outside the bounds of the byte source.
+     * @throws BufferUnderflowException       If the offset is outside the bounds of the byte source.
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
@@ -171,7 +171,7 @@ public interface RandomDataInput extends RandomCommon {
      *
      * @param offset the location from where the 32-bit integer value is read.
      * @return the read int value.
-     * @throws BufferUnderflowException If the offset is outside the bounds of the byte source.
+     * @throws BufferUnderflowException       If the offset is outside the bounds of the byte source.
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
@@ -184,7 +184,7 @@ public interface RandomDataInput extends RandomCommon {
      *
      * @param offset the location from where the unsigned 32-bit integer value is read.
      * @return the unsigned 32-bit integer value interpreted as a positive long.
-     * @throws BufferUnderflowException If the offset is outside the bounds of the byte source.
+     * @throws BufferUnderflowException       If the offset is outside the bounds of the byte source.
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
@@ -198,7 +198,7 @@ public interface RandomDataInput extends RandomCommon {
      *
      * @param offset the location from where the long value is read.
      * @return the read long value.
-     * @throws BufferUnderflowException If the offset is outside the bounds of the byte source.
+     * @throws BufferUnderflowException       If the offset is outside the bounds of the byte source.
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
@@ -210,7 +210,7 @@ public interface RandomDataInput extends RandomCommon {
      *
      * @param offset the location from where the float value is read.
      * @return the read float value.
-     * @throws BufferUnderflowException If the offset is beyond the limits of the byte source.
+     * @throws BufferUnderflowException       If the offset is beyond the limits of the byte source.
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
@@ -222,7 +222,7 @@ public interface RandomDataInput extends RandomCommon {
      *
      * @param offset the location from where the double value is read.
      * @return the read double value.
-     * @throws BufferUnderflowException If the offset is beyond the limits of the byte source.
+     * @throws BufferUnderflowException       If the offset is beyond the limits of the byte source.
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
@@ -234,7 +234,7 @@ public interface RandomDataInput extends RandomCommon {
      *
      * @param offset the location from where the byte value is read.
      * @return the byte value in a printable string form.
-     * @throws BufferUnderflowException If the offset is beyond the limits of the byte source.
+     * @throws BufferUnderflowException       If the offset is beyond the limits of the byte source.
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
@@ -249,7 +249,7 @@ public interface RandomDataInput extends RandomCommon {
      *
      * @param offset the location from where the byte value is read.
      * @return the volatile byte value.
-     * @throws BufferUnderflowException If the offset is beyond the limits of the byte source.
+     * @throws BufferUnderflowException       If the offset is beyond the limits of the byte source.
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
@@ -262,7 +262,7 @@ public interface RandomDataInput extends RandomCommon {
      *
      * @param offset the location from where the short value is read.
      * @return the volatile short value.
-     * @throws BufferUnderflowException If the offset is beyond the limits of the byte source.
+     * @throws BufferUnderflowException       If the offset is beyond the limits of the byte source.
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
@@ -275,7 +275,7 @@ public interface RandomDataInput extends RandomCommon {
      *
      * @param offset the location from where the int value is read.
      * @return the volatile int value.
-     * @throws BufferUnderflowException If the offset is beyond the limits of the byte source.
+     * @throws BufferUnderflowException       If the offset is beyond the limits of the byte source.
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
@@ -288,7 +288,7 @@ public interface RandomDataInput extends RandomCommon {
      *
      * @param offset the location from where the float value is read.
      * @return the volatile float value.
-     * @throws BufferUnderflowException If the offset is beyond the limits of the byte source.
+     * @throws BufferUnderflowException       If the offset is beyond the limits of the byte source.
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
@@ -303,7 +303,7 @@ public interface RandomDataInput extends RandomCommon {
      *
      * @param offset the location from where the long value is read.
      * @return the volatile long value.
-     * @throws BufferUnderflowException If the offset is beyond the limits of the byte source.
+     * @throws BufferUnderflowException       If the offset is beyond the limits of the byte source.
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
@@ -316,7 +316,7 @@ public interface RandomDataInput extends RandomCommon {
      *
      * @param offset the location from where the double value is read.
      * @return the volatile double value.
-     * @throws BufferUnderflowException If the offset is beyond the limits of the byte source.
+     * @throws BufferUnderflowException       If the offset is beyond the limits of the byte source.
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
@@ -330,7 +330,7 @@ public interface RandomDataInput extends RandomCommon {
      *
      * @param offset the location from where the long value is read.
      * @return the parsed long value.
-     * @throws BufferUnderflowException If the offset is beyond the limits of the byte source.
+     * @throws BufferUnderflowException       If the offset is beyond the limits of the byte source.
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
@@ -345,7 +345,7 @@ public interface RandomDataInput extends RandomCommon {
      * @param position the starting point within the byte source from which data is copied.
      * @param address  the destination address in native memory.
      * @param size     the number of bytes to transfer.
-     * @throws BufferUnderflowException If the specified position or size exceeds the byte source limits.
+     * @throws BufferUnderflowException       If the specified position or size exceeds the byte source limits.
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
@@ -358,7 +358,7 @@ public interface RandomDataInput extends RandomCommon {
      *
      * @param bytes the target byte array to which the data is copied.
      * @return the number of bytes actually copied.
-     * @throws BufferUnderflowException If the source's read position or limit is beyond the byte source limits.
+     * @throws BufferUnderflowException       If the source's read position or limit is beyond the byte source limits.
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
@@ -387,7 +387,7 @@ public interface RandomDataInput extends RandomCommon {
      *
      * @param bb the target ByteBuffer to which the data is copied.
      * @return the number of bytes copied.
-     * @throws BufferUnderflowException If the read operation encounters end of the byte source.
+     * @throws BufferUnderflowException       If the read operation encounters end of the byte source.
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
@@ -449,7 +449,7 @@ public interface RandomDataInput extends RandomCommon {
      * @param start  the start index, inclusive.
      * @param length the length of the subsequence.
      * @return a new BytesStore instance containing the specified subsequence.
-     * @throws BufferUnderflowException If the start index or length are outside the limits of this byte sequence.
+     * @throws BufferUnderflowException       If the start index or length are outside the limits of this byte sequence.
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
@@ -485,10 +485,10 @@ public interface RandomDataInput extends RandomCommon {
      * @param sb     the buffer to read char sequence into (truncated first)
      * @return offset after the normal read char sequence, or -1 - offset, if char sequence is
      * {@code null}
-     * @throws IORuntimeException       If the reading operation encounters an unexpected error.
-     * @throws IllegalArgumentException If the buffer is not a {@code StringBuilder} or {@code Bytes}.
-     * @throws BufferUnderflowException If the reading operation encounters the end of the byte source.
-     * @throws ArithmeticException      If the calculated length of the UTF-8 encoded string is invalid.
+     * @throws IORuntimeException             If the reading operation encounters an unexpected error.
+     * @throws IllegalArgumentException       If the buffer is not a {@code StringBuilder} or {@code Bytes}.
+     * @throws BufferUnderflowException       If the reading operation encounters the end of the byte source.
+     * @throws ArithmeticException            If the calculated length of the UTF-8 encoded string is invalid.
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      * @see RandomDataOutput#writeUtf8(long, CharSequence)
@@ -613,7 +613,7 @@ public interface RandomDataInput extends RandomCommon {
      * @return {@code true} if two char sequences are equal
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
-     * @throws IORuntimeException    If the contents are not a valid string.
+     * @throws IORuntimeException             If the contents are not a valid string.
      */
     default boolean compareUtf8(@NonNegative long offset, @Nullable CharSequence other)
             throws IORuntimeException, BufferUnderflowException, ClosedIllegalStateException {
@@ -650,8 +650,8 @@ public interface RandomDataInput extends RandomCommon {
      * Converts the byte sequence into a direct byte buffer.
      *
      * @return a direct ByteBuffer containing the data of this byte sequence.
-     * @throws IllegalArgumentException If the byte sequence cannot be converted into a ByteBuffer.
-     * @throws ArithmeticException      If the calculated size of the ByteBuffer is invalid.
+     * @throws IllegalArgumentException       If the byte sequence cannot be converted into a ByteBuffer.
+     * @throws ArithmeticException            If the calculated size of the ByteBuffer is invalid.
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
@@ -673,7 +673,7 @@ public interface RandomDataInput extends RandomCommon {
      * @param offset the start offset of the sequence of bytes.
      * @param length the length of the sequence of bytes.
      * @return a hash code value for the specified sequence of bytes.
-     * @throws BufferUnderflowException If the specified sequence of bytes extends beyond the limits of this byte sequence.
+     * @throws BufferUnderflowException       If the specified sequence of bytes extends beyond the limits of this byte sequence.
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */

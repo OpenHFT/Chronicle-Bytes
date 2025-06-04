@@ -30,27 +30,11 @@ import java.nio.ByteBuffer;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
 /**
- * The {@code RandomDataOutput} interface provides a set of methods for writing data to a buffer
- * or similar data structure at arbitrary positions (offsets). It includes methods for writing
- * all primitive types, as well as arrays, {@link CharSequence}s and other types of data.
- *
- * <p>Writing methods in this interface often include parameters for specifying the offset at
- * which to start writing, as well as the data to be written. These methods can be used for
- * low-level operations such as directly writing to memory regions or disk blocks.
- *
- * <p>In addition to methods for writing individual items, this interface also includes methods
- * for copying data from one buffer to another or from arrays.
- *
- * <p>This interface also provides atomic and volatile write operations to ensure thread safety
- * and visibility when accessing and manipulating data in a concurrent environment.
- *
- * <p>Methods in this interface may throw {@link BufferOverflowException} if the requested
- * operation would exceed the buffer's current capacity or {@link ClosedIllegalStateException} if the
- * buffer has been previously released.
+ * Provides methods for writing data to a byte sequence or buffer at arbitrary offsets.
+ * Implementations extend {@link RandomCommon}. Use atomic or ordered methods for thread safety.
  *
  * @see RandomDataInput
  */
-
 @SuppressWarnings({"rawtypes", "unchecked"})
 public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomCommon {
     /**

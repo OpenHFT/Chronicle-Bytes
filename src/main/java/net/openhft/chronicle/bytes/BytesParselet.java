@@ -16,19 +16,14 @@
 package net.openhft.chronicle.bytes;
 
 /**
- * Functional interface representing a parselet for processing byte data.
- * The implementing class should provide the logic to accept and handle
- * a certain type of message represented in bytes.
+ * Parses messages read from a {@link BytesIn} when no specific method handler
+ * is available.
  */
 @FunctionalInterface
 public interface BytesParselet {
     /**
-     * This method is invoked with a message type and an input stream of bytes.
-     * The implementing class is expected to parse and process the bytes according
-     * to the provided message type.
-     *
-     * @param messageType a long value representing the type of the message to be processed.
-     * @param in          a {@link BytesIn} instance containing the message data in bytes.
+     * Handles a message of the supplied {@code messageType} using bytes from
+     * {@code in}.
      */
     void accept(long messageType, BytesIn<?> in);
 }

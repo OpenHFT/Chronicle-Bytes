@@ -32,10 +32,11 @@ import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 
 /**
- * This interface provides methods for appending different types of data to an underlying buffer. The data is appended in the form of bytes.
- * The interface also extends the StreamingDataOutput and Appendable interfaces, thus inheriting their methods.
+ * Extension of {@link StreamingDataOutput} and {@link Appendable} that exposes
+ * convenience methods for writing text and numbers to a {@link Bytes} stream.
+ * Each method returns {@code this} to allow fluent call chains.
  *
- * @param <B> the type that extends ByteStringAppender
+ * @param <B> concrete type for fluent chaining
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
 public interface ByteStringAppender<B extends ByteStringAppender<B>> extends StreamingDataOutput<B>, Appendable {
@@ -51,13 +52,13 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
     }
 
     /**
-     * Appends a UTF-8 encoded character to the buffer.
+     * Appends the given character, typically encoded as UTF-8.
      *
-     * @param ch the character to append
-     * @return the ByteStringAppender instance with the appended character
-     * @throws BufferOverflowException        If the append operation exceeds the buffer's capacity
-     * @throws ClosedIllegalStateException    If the resource has been released or closed.
-     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
+     * @param ch character to append
+     * @return this appender
+     * @throws BufferOverflowException        if no space is available
+     * @throws ClosedIllegalStateException    if the appender has been closed
+     * @throws ThreadingIllegalStateException if accessed from multiple threads unsafely
      */
     @Override
     @NotNull
@@ -68,13 +69,13 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
     }
 
     /**
-     * Append a characters in UTF-8
+     * Appends the supplied character sequence, encoded as UTF-8.
      *
-     * @param cs the CharSequence to append
-     * @return this
-     * @throws BufferUnderflowException       If the capacity of the underlying buffer was exceeded
-     * @throws ClosedIllegalStateException    If the resource has been released or closed.
-     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
+     * @param cs text to append
+     * @return this appender
+     * @throws BufferUnderflowException       if the buffer cannot resize
+     * @throws ClosedIllegalStateException    if closed
+     * @throws ThreadingIllegalStateException if accessed concurrently
      */
     @Override
     @NotNull
@@ -195,11 +196,12 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
     }
 
     /**
-     * Appends a long in decimal with a given number of decimal places. Prints value * 10^-decimalPlaces
+     * Appends {@code value} as a decimal number with {@code decimalPlaces} digits after the decimal point.
+     * For example {@code appendDecimal(12345, 2)} appends {@code "123.45"}.
      *
-     * @param value         to append
-     * @param decimalPlaces to shift the decimal place
-     * @return this
+     * @param value         number scaled by {@code 10^decimalPlaces}
+     * @param decimalPlaces number of decimal digits to output
+     * @return this appender
      * @throws BufferOverflowException        If the relative append operation exceeds the underlying buffer's capacity
      * @throws IORuntimeException             If an error occurred while attempting to resize the underlying buffer
      * @throws IllegalArgumentException       If the decimalPlaces is negative or too large
@@ -214,13 +216,8 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
     }
 
     /**
-     * Appends a float in decimal notation
-     *
-     * @param f the float number to append
-     * @return this
-     * @throws BufferOverflowException        If the relative append operation exceeds the underlying buffer's capacity
-     * @throws ClosedIllegalStateException    If the resource has been released or closed.
-     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
+     * Appends {@code f} using the configured {@link Decimaliser}.  Very small or
+     * large values may fall back to {@link Float#toString()}.
      */
     @NotNull
     default B append(float f)
@@ -235,14 +232,7 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
     }
 
     /**
-     * Appends a double in decimal notation
-     *
-     * @param d to append
-     * @return this
-     * @throws BufferOverflowException        If the capacity of the underlying buffer was exceeded
-     * @throws IORuntimeException             If an error occurred while attempting to resize the underlying buffer
-     * @throws ClosedIllegalStateException    If the resource has been released or closed.
-     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
+     * Appends {@code d} using the current {@link Decimaliser} strategy.
      */
     @NotNull
     default B append(double d)
@@ -256,32 +246,30 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
     }
 
     /**
-     * Gets the Decimaliser currently associated with this ByteStringAppender.
-     *
-     * @return The Decimaliser currently associated with this ByteStringAppender.
+     * Returns the strategy used to convert floating point values to text.
      */
     Decimaliser decimaliser();
 
     /**
-     * Associates a Decimaliser with this ByteStringAppender.
+     * Sets the {@link Decimaliser} controlling how floating point numbers are rendered.
      *
-     * <p>The Decimaliser is an interface which can be implemented to provide custom logic
-     * for rendering decimal numbers in this ByteStringAppender.
-     *
-     * @param decimaliser The Decimaliser to be associated with this ByteStringAppender.
-     * @return The ByteStringAppender instance with the Decimaliser set.
+     * @param decimaliser implementation to use
+     * @return this appender
      */
     B decimaliser(Decimaliser decimaliser);
 
     /**
-     * @return whether floating point add .0 to indicate it is a floating point even if redundant.
+     * Whether a trailing {@code .0} is appended to whole floating point values.
+     *
+     * @deprecated to be removed in x.28.  Use {@link #decimaliser(Decimaliser)} to control formatting.
      */
     @Deprecated(/* to remove in x.28 */)
     boolean fpAppend0();
 
     /**
-     * @param append0 Does floating point add .0 to indicate it is a floating point even if redundant.
-     * @return this
+     * Controls whether a trailing {@code .0} is appended to whole floating point values.
+     *
+     * @deprecated to be removed in x.28.  Use {@link #decimaliser(Decimaliser)} instead.
      */
     @Deprecated(/* to remove in x.28 */)
     B fpAppend0(boolean append0);
@@ -344,10 +332,11 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
     }
 
     /**
-     * Appends the ISO-8859-1 representation of the specified BytesStore.
+     * Appends the content of {@code bs} assuming one byte per character (ISO-8859-1).
+     * Characters outside the 8-bit range are replaced with '?'.
      *
      * @param bs the BytesStore to append
-     * @return this
+     * @return this appender
      * @throws BufferOverflowException        If the BytesStore is too large to write in the capacity available
      * @throws BufferUnderflowException       If the capacity of the underlying buffer was exceeded
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
@@ -359,10 +348,10 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
     }
 
     /**
-     * Appends the ISO-8859-1 representation of the specified String.
+     * Appends {@code cs} in 8-bit encoding (ISO-8859-1). Characters above 255 become '?'.
      *
      * @param cs the String to append
-     * @return this
+     * @return this appender
      * @throws BufferOverflowException        If the string is too large to write in the capacity available
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.

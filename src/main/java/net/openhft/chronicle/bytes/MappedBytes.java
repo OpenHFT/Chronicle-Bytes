@@ -27,36 +27,39 @@ import java.io.File;
 import java.io.FileNotFoundException;
 
 /**
- * A specialized implementation of {@link AbstractBytes} that wraps memory-mapped data for efficient random file access.
- *
- * <p>Memory is grouped in chunks of 64 MB by default. The chunk size can be significantly increased if the
- * OS supports sparse files via the {@link OS#isSparseFileSupported()} method, e.g. {@code blockSize(512 << 30)}.
- *
- * <p>Only the most recently accessed memory chunk is reserved, and the previous chunk is released. For random access,
- * a chunk can be manually reserved by obtaining the bytesStore() and using reserve(owner) on it.
- * However, it is crucial to call release(owner) on the same BytesStore before closing the file to avoid memory leaks.
- *
- * <p>Several factory methods are provided to create different types of MappedBytes, including single mapped bytes
- * and chunked mapped bytes, with optional settings for read-only mode and chunk overlap size.
- *
- * <p>Note: MappedBytes, like all Bytes, are single-threaded. Also, it is recommended to ensure the mapped file
- * is reserved before using MappedBytes.
- *
- * @see BytesStore
- * @see MappedFile
- * @see AbstractBytes
+ * A specialised {@link Bytes} implementation backed by a memory-mapped file.
+ * <p>
+ * The underlying file is accessed in chunks (64&nbsp;MiB by default) so very
+ * large files can be treated as if they were in memory. Only the most recently
+ * accessed chunk is retained; previous chunks are released. Call
+ * {@link #releaseLast()} when finished with a {@code MappedBytes} instance to
+ * free system resources.
+ * <p>
+ * Instances are single threaded and should be reserved before use.
  */
 @SuppressWarnings("rawtypes")
 public abstract class MappedBytes extends AbstractBytes<Void> implements Closeable, ManagedCloseable, Syncable {
 
+    /**
+     * System property flag {@code trace.mapped.bytes} for enabling trace
+     * logging of {@code MappedBytes} operations.
+     */
     protected static final boolean TRACE = Jvm.getBoolean("trace.mapped.bytes");
 
     // assume the mapped file is reserved already.
+    /**
+     * Constructs an instance for use by subclasses. The resulting object is
+     * backed by an empty {@link BytesStore} until a real mapping is assigned.
+     */
     protected MappedBytes()
             throws ClosedIllegalStateException, ThreadingIllegalStateException {
         this("");
     }
 
+    /**
+     * Constructs an instance for use by subclasses with a descriptive name.
+     * The instance initially references an empty store.
+     */
     protected MappedBytes(final String name)
             throws ClosedIllegalStateException, ThreadingIllegalStateException {
         super(BytesStore.empty(),
@@ -66,14 +69,14 @@ public abstract class MappedBytes extends AbstractBytes<Void> implements Closeab
     }
 
     /**
-     * Creates a MappedBytes instance that wraps a single memory-mapped file.
+     * Creates a {@code MappedBytes} covering the entire file as a single mapping.
      *
-     * @param filename The name of the file to be memory-mapped.
-     * @param capacity The maximum number of bytes that can be read from or written to the mapped file.
-     * @return A new MappedBytes instance.
-     * @throws FileNotFoundException If the file does not exist.
-     * @throws ClosedIllegalStateException    If the resource has been released or closed.
-     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
+     * @param filename path of the file to map
+     * @param capacity total capacity to map
+     * @return a new {@code MappedBytes}
+     * @throws FileNotFoundException       if the file cannot be found
+     * @throws ClosedIllegalStateException if the mapped file is already closed
+     * @throws ThreadingIllegalStateException if accessed from multiple threads
      */
     @NotNull
     public static MappedBytes singleMappedBytes(@NotNull final String filename, @NonNegative final long capacity)
@@ -82,12 +85,7 @@ public abstract class MappedBytes extends AbstractBytes<Void> implements Closeab
     }
 
     /**
-     * Creates a MappedBytes instance that wraps a single memory-mapped file.
-     *
-     * @param file     The name of the file to be memory-mapped.
-     * @param capacity The maximum number of bytes that can be read from or written to the mapped file.
-     * @return A new MappedBytes instance.
-     * @throws FileNotFoundException If the file does not exist.
+     * As {@link #singleMappedBytes(String, long)} but accepting a {@link File} instance.
      */
     @NotNull
     public static MappedBytes singleMappedBytes(@NotNull final File file, @NonNegative final long capacity)
@@ -96,13 +94,13 @@ public abstract class MappedBytes extends AbstractBytes<Void> implements Closeab
     }
 
     /**
-     * Creates a MappedBytes instance that wraps a single memory-mapped file.
+     * Creates a single mapping for the whole file with explicit read-only option.
      *
-     * @param file     The name of the file to be memory-mapped.
-     * @param capacity The maximum number of bytes that can be read from or written to the mapped file.
-     * @param readOnly read only is true, read-write if false
-     * @return A new MappedBytes instance.
-     * @throws FileNotFoundException If the file does not exist.
+     * @param file     file to map
+     * @param capacity total capacity
+     * @param readOnly {@code true} for read only
+     * @return a new {@code MappedBytes}
+     * @throws FileNotFoundException if the file does not exist
      */
 
     @NotNull
@@ -117,14 +115,14 @@ public abstract class MappedBytes extends AbstractBytes<Void> implements Closeab
     }
 
     /**
-     * Creates a MappedBytes instance that wraps a memory-mapped file divided into chunks of a specified size.
+     * Creates a chunked mapping for the given file.
      *
-     * @param filename  The name of the file to be memory-mapped.
-     * @param chunkSize The size of each chunk in bytes.
-     * @return A new MappedBytes instance.
-     * @throws FileNotFoundException          If the file does not exist.
-     * @throws ClosedIllegalStateException    If the resource has been released or closed.
-     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
+     * @param filename  path of the file to map
+     * @param chunkSize size of each chunk in bytes
+     * @return a new {@code MappedBytes}
+     * @throws FileNotFoundException          if the file does not exist
+     * @throws ClosedIllegalStateException    if the mapped file is closed
+     * @throws ThreadingIllegalStateException if accessed from multiple threads
      */
     @NotNull
     public static MappedBytes mappedBytes(@NotNull final String filename, @NonNegative final long chunkSize)
@@ -149,15 +147,15 @@ public abstract class MappedBytes extends AbstractBytes<Void> implements Closeab
     }
 
     /**
-     * Creates a MappedBytes instance that wraps a memory-mapped file divided into chunks of a specified size.
+     * Creates a chunked mapping with a specified overlap between chunks.
      *
-     * @param file        The name of the file to be memory-mapped.
-     * @param chunkSize   The size of each chunk in bytes.
-     * @param overlapSize The size of overlap of chunks in bytes.
-     * @return A new MappedBytes instance.
-     * @throws FileNotFoundException          If the file does not exist.
-     * @throws ClosedIllegalStateException    If the resource has been released or closed.
-     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
+     * @param file        file to map
+     * @param chunkSize   size of each chunk
+     * @param overlapSize overlap between adjacent chunks
+     * @return a new {@code MappedBytes}
+     * @throws FileNotFoundException          if the file does not exist
+     * @throws ClosedIllegalStateException    if the mapped file is closed
+     * @throws ThreadingIllegalStateException if accessed from multiple threads
      */
     @NotNull
     public static MappedBytes mappedBytes(@NotNull final File file, @NonNegative final long chunkSize, @NonNegative final long overlapSize)
@@ -171,17 +169,17 @@ public abstract class MappedBytes extends AbstractBytes<Void> implements Closeab
     }
 
     /**
-     * Creates a MappedBytes instance that wraps a memory-mapped file divided into chunks of a specified size.
+     * Creates a chunked mapping with explicit overlap, page size and read-only option.
      *
-     * @param file        The name of the file to be memory-mapped.
-     * @param chunkSize   The size of each chunk in bytes.
-     * @param overlapSize The size of overlap of chunks in bytes.
-     * @param pageSize    The custom page size in bytes.
-     * @param readOnly    read only is true, read-write if false
-     * @return A new MappedBytes instance.
-     * @throws FileNotFoundException          If the file does not exist.
-     * @throws ClosedIllegalStateException    If the resource has been released or closed.
-     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
+     * @param file        file to map
+     * @param chunkSize   size of each chunk
+     * @param overlapSize overlap between adjacent chunks
+     * @param pageSize    page size to align mappings
+     * @param readOnly    {@code true} for read only
+     * @return a new {@code MappedBytes}
+     * @throws FileNotFoundException          if the file does not exist
+     * @throws ClosedIllegalStateException    if the mapped file is closed
+     * @throws ThreadingIllegalStateException if accessed from multiple threads
      */
     @NotNull
     public static MappedBytes mappedBytes(@NotNull final File file,
@@ -199,7 +197,9 @@ public abstract class MappedBytes extends AbstractBytes<Void> implements Closeab
     }
 
     /**
-     * @see  #mappedBytes(File, long, long, int, boolean)
+     * Convenience overload using the default page size.
+     *
+     * @see #mappedBytes(File, long, long, int, boolean)
      */
     @NotNull
     public static MappedBytes mappedBytes(@NotNull final File file,
@@ -211,12 +211,12 @@ public abstract class MappedBytes extends AbstractBytes<Void> implements Closeab
     }
 
     /**
-     * Create a MappedBytes for a MappedFile
+     * Creates a {@code MappedBytes} view for a pre-existing {@link MappedFile}.
      *
-     * @param rw MappedFile to use
-     * @return the MappedBytes
-     * @throws ClosedIllegalStateException    If the resource has been released or closed.
-     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
+     * @param rw the mapped file to use
+     * @return the created {@code MappedBytes}
+     * @throws ClosedIllegalStateException    if the mapped file has been closed
+     * @throws ThreadingIllegalStateException if accessed from multiple threads
      */
     @NotNull
     public static MappedBytes mappedBytes(@NotNull final MappedFile rw)
@@ -225,13 +225,13 @@ public abstract class MappedBytes extends AbstractBytes<Void> implements Closeab
     }
 
     /**
-     * Creates a MappedBytes instance that wraps a read-only memory-mapped file.
+     * Maps the given file in read-only mode.
      *
-     * @param file The file to be memory-mapped in read-only mode.
-     * @return A new MappedBytes instance.
-     * @throws FileNotFoundException          If the file does not exist.
-     * @throws ClosedIllegalStateException    If the resource has been released or closed.
-     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
+     * @param file file to map
+     * @return a new read only {@code MappedBytes}
+     * @throws FileNotFoundException          if the file does not exist
+     * @throws ClosedIllegalStateException    if the mapped file is closed
+     * @throws ThreadingIllegalStateException if accessed from multiple threads
      */
     @NotNull
     public static MappedBytes readOnly(@NotNull final File file)
@@ -245,16 +245,12 @@ public abstract class MappedBytes extends AbstractBytes<Void> implements Closeab
     }
 
     /**
-     * Checks if the backing file is read-only.
-     *
-     * @return true if the backing file is read-only, false otherwise.
+     * @return {@code true} if the underlying file was mapped read only
      */
     public abstract boolean isBackingFileReadOnly();
 
     /**
-     * Checks if the bytes are stored in shared memory.
-     *
-     * @return true if the bytes are stored in shared memory, false otherwise.
+     * Memory-mapped files are a form of shared memory, hence this returns {@code true}.
      */
     @Override
     public boolean sharedMemory() {
@@ -262,21 +258,17 @@ public abstract class MappedBytes extends AbstractBytes<Void> implements Closeab
     }
 
     /**
-     * Updates the number of chunks in the mapped file.
-     *
-     * @param chunkCount The new number of chunks.
+     * Populates the supplied array with the number of chunks held by the underlying {@link MappedFile}.
      */
     public abstract void chunkCount(long[] chunkCount);
 
     /**
-     * Retrieves the mapped file.
-     *
-     * @return the MappedFile instance.
+     * @return the underlying {@link MappedFile}
      */
     public abstract MappedFile mappedFile();
 
     /**
-     * Ensures that any modifications to this MappedBytes instance are written to the storage device containing the mapped file.
+     * Forces any changes made to this mapping to be written to the storage device.
      */
     @Override
     public void sync() {
@@ -288,11 +280,7 @@ public abstract class MappedBytes extends AbstractBytes<Void> implements Closeab
     }
 
     /**
-     * Provides a bytes object for read operations. This object is backed by the current MappedBytes instance.
-     *
-     * @return a Bytes instance for read operations.
-     * @throws ClosedIllegalStateException    If the resource has been released or closed.
-     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
+     * Returns a view for reading from the current mapping.
      */
     @Override
     public @NotNull Bytes<Void> bytesForRead() throws ClosedIllegalStateException {
@@ -305,11 +293,7 @@ public abstract class MappedBytes extends AbstractBytes<Void> implements Closeab
     }
 
     /**
-     * Provides a bytes object for write operations. This object is backed by the current MappedBytes instance.
-     *
-     * @return a Bytes instance for write operations.
-     * @throws ClosedIllegalStateException    If the resource has been released or closed.
-     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
+     * Returns a view for writing to the current mapping.
      */
     @Override
     public @NotNull Bytes<Void> bytesForWrite() throws ClosedIllegalStateException {

@@ -44,9 +44,11 @@ import static net.openhft.chronicle.core.util.Longs.requireNonNegative;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
 /**
- * Abstract representation of Bytes.
+ * Provides a base implementation of {@link Bytes} with cursor management,
+ * optional bounds checking and default text formatting support. Subclasses
+ * override memory access methods to suit different backing stores.
  *
- * @param <U> Underlying type
+ * @param <U> underlying memory type
  */
 @SuppressWarnings("rawtypes")
 public abstract class AbstractBytes<U>
@@ -54,33 +56,77 @@ public abstract class AbstractBytes<U>
         implements Bytes<U>,
         HasUncheckedRandomDataInput,
         DecimalAppender {
-    private static final boolean BYTES_BOUNDS_UNCHECKED = Jvm.getBoolean("bytes.bounds.unchecked", false);
+    /**
+     * System flag (<em>bytes.bounds.unchecked</em>) that disables bounds
+     * checking for reads and writes when set to {@code true}. Use only in
+     * trusted environments as incorrect offsets can corrupt memory.
+     */
+    private static final boolean BYTES_BOUNDS_UNCHECKED =
+            Jvm.getBoolean("bytes.bounds.unchecked", false);
 
-    private static final byte[] MIN_VALUE_TEXT = ("" + Long.MIN_VALUE).getBytes(ISO_8859_1);
+    /**
+     * Cached ISO-8859-1 representation of {@link Long#MIN_VALUE} used when
+     * appending long values.
+     */
+    private static final byte[] MIN_VALUE_TEXT =
+            ("" + Long.MIN_VALUE).getBytes(ISO_8859_1);
+
+    /**
+     * Deprecated flag (<em>bytes.append.0</em>) controlling whether whole
+     * floating point numbers were suffixed with ".0". Removal planned in x.28.
+     */
     @Deprecated(/* to remove in x.28 */)
     private static final boolean APPEND_0 = Jvm.getBoolean("bytes.append.0", true);
-    // used for debugging
+
+    /** Optional name for debugging only. */
     @UsedViaReflection
     private final String name;
+
     private final UncheckedRandomDataInput uncheckedRandomDataInput = new UncheckedRandomDataInputHolder();
     @NotNull
     protected BytesStore<?, U> bytesStore;
+    /** Offset, from {@link #start()}, of the next byte to read. */
     protected long readPosition;
+    /** Highest byte index that may be written. */
     protected long writeLimit;
+    /** Whether the underlying store is open. */
     protected boolean isPresent;
+    /** Offset for the next byte to write. */
     private long writePosition;
+    /** Number of decimal places of the last appended floating point value. */
     private int lastDecimalPlaces = 0;
+    /** Lenient mode suppresses {@link BufferUnderflowException} on some reads. */
     private boolean lenient = false;
+    /** Tracks whether the last parsed number contained digits. */
     private boolean lastNumberHadDigits = false;
+    /** Strategy used when appending decimal numbers. */
     private Decimaliser decimaliser = StandardDecimaliser.STANDARD;
+    /** Whether to append the ".0" suffix for whole numbers. */
     private boolean append0 = APPEND_0;
 
-    AbstractBytes(@NotNull BytesStore<Bytes<U>, U> bytesStore, @NonNegative long writePosition, @NonNegative long writeLimit)
+    /**
+     * Creates a bytes view over the provided store.
+     *
+     * @param bytesStore   the underlying store
+     * @param writePosition initial {@link #writePosition()} relative to {@link #start()}
+     * @param writeLimit    initial {@link #writeLimit()}
+     * @throws ClosedIllegalStateException    if the store is closed
+     * @throws ThreadingIllegalStateException if accessed from a thread that does not own the store
+     */
+    AbstractBytes(@NotNull BytesStore<Bytes<U>, U> bytesStore,
+                  @NonNegative long writePosition,
+                  @NonNegative long writeLimit)
             throws ClosedIllegalStateException, ThreadingIllegalStateException {
         this(bytesStore, writePosition, writeLimit, "");
     }
 
-    AbstractBytes(@NotNull BytesStore<Bytes<U>, U> bytesStore, @NonNegative long writePosition, @NonNegative long writeLimit, String name)
+    /**
+     * Implementation detail constructor allowing a debug name.
+     */
+    AbstractBytes(@NotNull BytesStore<Bytes<U>, U> bytesStore,
+                  @NonNegative long writePosition,
+                  @NonNegative long writeLimit,
+                  String name)
             throws ClosedIllegalStateException, ThreadingIllegalStateException {
         super(bytesStore.isDirectMemory());
         this.bytesStore(bytesStore);
@@ -94,6 +140,7 @@ public abstract class AbstractBytes<U>
 
     @Override
     public boolean isDirectMemory() {
+        // delegate to the underlying store
         return bytesStore.isDirectMemory();
     }
 
@@ -114,6 +161,10 @@ public abstract class AbstractBytes<U>
         bytesStore.move(from - start, to - start, length);
     }
 
+    /**
+     * Moves unread data to the start of the buffer so that new writes can reuse
+     * space before {@link #readPosition()}.
+     */
     @NotNull
     @Override
     public Bytes<U> compact()
@@ -148,6 +199,10 @@ public abstract class AbstractBytes<U>
         return this;
     }
 
+    /**
+     * Resets read and write positions to {@link #start()} and sets the
+     * {@link #writeLimit()} to {@link #capacity()}.
+     */
     @Override
     @NotNull
     public Bytes<U> clear()
@@ -163,6 +218,12 @@ public abstract class AbstractBytes<U>
         return this;
     }
 
+    /**
+     * Clears the buffer then advances both cursors by {@code length} bytes
+     * leaving space at the start.
+     *
+     * @throws BufferOverflowException if {@code start() + length > capacity()}
+     */
     @NotNull
     @Override
     public Bytes<U> clearAndPad(@NonNegative long length)
@@ -1453,11 +1514,19 @@ public abstract class AbstractBytes<U>
         return false;
     }
 
+    /**
+     * Enables or disables lenient parsing. When enabled, reaching the end of
+     * the buffer returns default values instead of throwing
+     * {@link BufferUnderflowException}.
+     */
     @Override
     public void lenient(boolean lenient) {
         this.lenient = lenient;
     }
 
+    /**
+     * Returns {@code true} if lenient parsing is active.
+     */
     @Override
     public boolean lenient() {
         return lenient;

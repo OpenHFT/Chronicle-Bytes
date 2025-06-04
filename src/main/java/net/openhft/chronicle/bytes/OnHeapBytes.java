@@ -26,28 +26,16 @@ import java.nio.BufferOverflowException;
 
 import static net.openhft.chronicle.core.Jvm.uncheckedCast;
 
+/**
+ * {@link VanillaBytes} backed by an on heap {@code byte[]}.
+ */
 public class OnHeapBytes extends VanillaBytes<byte[]> {
     public static final int MAX_CAPACITY = Bytes.MAX_HEAP_CAPACITY;
     private final boolean elastic;
     private final long capacity;
 
     /**
-     * Constructs an instance of OnHeapBytes using the provided BytesStore. The elasticity of the created OnHeapBytes instance
-     * is specified by the elastic parameter.
-     * <p>
-     * OnHeapBytes allows for the manipulation of byte sequences in an on-heap manner, meaning it relies on JVM's garbage
-     * collector for memory management. It can either have a fixed size (not elastic) or allow for dynamic resizing (elastic).
-     * If the OnHeapBytes is set to be elastic, its maximum capacity is specified by {@code MAX_CAPACITY}, else it matches
-     * the capacity of the provided BytesStore. In both elastic and non-elastic states, this instance can be read/written using cursors.
-     *
-     * @param bytesStore the BytesStore instance containing the bytes to be managed.
-     * @param elastic    a boolean value specifying whether this instance of OnHeapBytes is elastic.
-     *                   If {@code true}, the instance is elastic and its capacity can grow up to {@code MAX_CAPACITY}.
-     *                   If {@code false}, the instance has a fixed size that matches the capacity of the provided BytesStore.
-     * @throws IllegalArgumentException       If the arguments provided are not valid, for instance if the BytesStore's
-     *                                        capacity exceeds the {@code MAX_CAPACITY} when the elastic parameter is false.
-     * @throws ClosedIllegalStateException    If the resource has been released or closed.
-     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
+     * Constructs an instance backed by {@code bytesStore}.
      */
     @SuppressWarnings("this-escape")
     public OnHeapBytes(@NotNull BytesStore<?, ?> bytesStore, boolean elastic)

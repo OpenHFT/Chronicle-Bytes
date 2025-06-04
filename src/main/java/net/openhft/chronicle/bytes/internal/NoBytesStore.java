@@ -30,13 +30,17 @@ import static net.openhft.chronicle.core.util.Longs.requireNonNegative;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
 /**
- * This is a ByteStore which uses no space but could be resized to be larger (by replacing it with a ByteStore with space)
+ * Immutable {@link BytesStore} with zero capacity used as a placeholder for
+ * elastic {@link net.openhft.chronicle.bytes.Bytes} before any data is written.
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
 public final class NoBytesStore implements BytesStore<NoBytesStore, Void> {
+    /** singleton instance */
     public static final BytesStore<?, ?> NO_BYTES_STORE = new NoBytesStore();
+    /** shared zeroed page */
     public static final long NO_PAGE;
     @NotNull
+    /** empty Bytes backed by {@link #NO_BYTES_STORE} */
     public static final Bytes<?> NO_BYTES;
     private static final ByteBuffer BYTE_BUFFER = ByteBuffer.allocate(4 << 10);
 
@@ -279,11 +283,13 @@ public final class NoBytesStore implements BytesStore<NoBytesStore, Void> {
     }
 
     @Override
+    /** @return always {@code 0} */
     public @NonNegative long capacity() {
         return 0;
     }
 
     @Override
+    /** @return always {@code null} */
     public Void underlyingObject() {
         return null;
     }

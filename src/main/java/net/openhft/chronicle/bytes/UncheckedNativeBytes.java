@@ -40,17 +40,12 @@ import static net.openhft.chronicle.core.util.Longs.requireNonNegative;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
 /**
- * An optimized extension of AbstractBytes that performs unchecked read and write operations
- * on a Bytes instance that is backed by native memory.
- * The class bypasses bounds checking to provide high-performance access to the underlying data.
+ * Provides unchecked access to a native {@link BytesStore}. No bounds checks are
+ * performed on reads or writes. Intended for expert, performance critical use.
+ * <p>
+ * <strong>Warning:</strong> invalid usage may corrupt memory or crash the JVM.
  *
- * <p>This class is intended for use in performance-critical scenarios where the client can
- * ensure that all operations stay within valid bounds, thus avoiding the overhead of bounds checking.
- *
- * <p>Warning: Using this class improperly can result in IndexOutOfBoundsException being thrown,
- * corruption of data, JVM crashes, or other undefined behavior.
- *
- * @param <U> The type of the object this Bytes can point to.
+ * @param <U> the type this bytes can reference
  */
 @SuppressWarnings("rawtypes")
 public class UncheckedNativeBytes<U>
@@ -84,11 +79,13 @@ public class UncheckedNativeBytes<U>
     private boolean append0 = APPEND_0;
 
     /**
-     * Constructs an UncheckedNativeBytes instance by wrapping around the provided Bytes object.
+     * Creates an unchecked wrapper over the native store of {@code underlyingBytes}.
+     * The wrapper retains a reference to the given bytes and adopts its current
+     * read and write positions and limits.
      *
-     * @param underlyingBytes the Bytes object to wrap around
-     * @throws ClosedIllegalStateException    If the resource has been released or closed.
-     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
+     * @param underlyingBytes the bytes to operate on
+     * @throws ClosedIllegalStateException    if the resource has been released or closed
+     * @throws ThreadingIllegalStateException if accessed by multiple threads in an unsafe way
      */
     @SuppressWarnings({"unchecked", "this-escape"})
     public UncheckedNativeBytes(@NotNull Bytes<U> underlyingBytes)
@@ -104,6 +101,10 @@ public class UncheckedNativeBytes<U>
     }
 
     @Override
+    /**
+     * Delegates capacity expansion to the wrapped bytes and updates this view
+     * if the underlying store changes.
+     */
     public void ensureCapacity(@NonNegative long desiredCapacity)
             throws IllegalArgumentException, IllegalStateException {
         if (desiredCapacity > realCapacity()) {
@@ -113,11 +114,17 @@ public class UncheckedNativeBytes<U>
     }
 
     @Override
+    /**
+     * Indicates that this bytes instance performs no bounds checks.
+     */
     public boolean unchecked() {
         return true;
     }
 
     @Override
+    /**
+     * Returns {@code true} as this bytes instance operates on native memory.
+     */
     public boolean isDirectMemory() {
         return true;
     }
