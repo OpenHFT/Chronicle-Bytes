@@ -20,6 +20,7 @@ import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.bytes.MappedBytesStore;
 import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.io.*;
+import net.openhft.chronicle.core.Jvm;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -131,8 +132,8 @@ public abstract class AbstractReference extends AbstractCloseable implements Byt
         this.bytesStore = null;
         try {
             bytes0.release(this);
-        } catch (ClosedIllegalStateException ignored) {
-            // ignored
+        } catch (ClosedIllegalStateException e) {
+            Jvm.debug().on(AbstractReference.class, "release after close", e);
         }
     }
 
