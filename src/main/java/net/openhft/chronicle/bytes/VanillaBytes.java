@@ -364,7 +364,7 @@ public class VanillaBytes<U>
                     write((BytesStore) str, start, (long) end - start);
                     return this;
                 }
-                if (str instanceof String) {
+                if (str instanceof String && Jvm.maxDirectMemory() > 0) {
                     if (Jvm.isJava9Plus()) {
                         byte coder = StringUtils.getStringCoder((String) str);
                         appendUtf8(StringUtils.extractBytes((String) str), start, end - start, coder);
