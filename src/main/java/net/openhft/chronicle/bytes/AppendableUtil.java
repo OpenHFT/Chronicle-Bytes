@@ -19,6 +19,7 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.bytes.internal.BytesInternal;
 import net.openhft.chronicle.bytes.internal.NativeBytesStore;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.annotation.Java9;
 import net.openhft.chronicle.core.annotation.NonNegative;
@@ -329,7 +330,7 @@ public enum AppendableUtil {
      */
     public static void parse8bit(@NotNull StreamingDataInput bytes, Appendable appendable, @NonNegative int utflen)
             throws BufferUnderflowException, IOException, ClosedIllegalStateException {
-        if (appendable instanceof StringBuilder) {
+        if (appendable instanceof StringBuilder && Jvm.maxDirectMemory() > 0) {
             @NotNull final StringBuilder sb = (StringBuilder) appendable;
             if (bytes instanceof Bytes && ((Bytes) bytes).bytesStore() instanceof NativeBytesStore) {
                 parse8bit_SB1((Bytes) bytes, sb, utflen);

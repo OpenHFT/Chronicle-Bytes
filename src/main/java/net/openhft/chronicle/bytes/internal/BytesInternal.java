@@ -743,7 +743,7 @@ enum BytesInternal {
             throw new IllegalArgumentException();
         sb.ensureCapacity(utflen);
 
-        if (Jvm.isJava9Plus()) {
+        if (Jvm.isJava9Plus() && Jvm.maxDirectMemory() > 0) {
             byte[] sbBytes = extractBytes(sb);
             for (int count = 0; count < utflen; count++) {
                 int c = bytes.readUnsignedByte();
@@ -888,7 +888,7 @@ enum BytesInternal {
         int count = 0;
 
         if (Jvm.isJava9Plus()) {
-            byte coder = getStringCoder(sb);
+            byte coder = Jvm.maxDirectMemory() > 0 ? getStringCoder(sb) : JAVA9_STRING_CODER_UTF16;
 
             if (coder == JAVA9_STRING_CODER_LATIN) {
                 byte[] bytes = extractBytes(sb);
@@ -2323,7 +2323,7 @@ enum BytesInternal {
         final long address = nb.address + nb.translate(bytes.readPosition());
         @Nullable final Memory memory = nb.memory;
 
-        if (Jvm.isJava9Plus()) {
+        if (Jvm.isJava9Plus() && Jvm.maxDirectMemory() > 0) {
             final int appendableLength = appendable.capacity();
             for (; i < len && i < appendableLength; i++) {
                 int c = memory.readByte(address + i);
