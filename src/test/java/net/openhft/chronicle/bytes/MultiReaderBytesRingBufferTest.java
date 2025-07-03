@@ -44,8 +44,8 @@ public class MultiReaderBytesRingBufferTest {
         RingBufferReader reader1 = ringBuffer.createReader();
         RingBufferReader reader2 = ringBuffer.createReader();
 
-        Bytes<?> bytes1 = Bytes.elasticByteBuffer();
-        Bytes<?> bytes2 = Bytes.elasticByteBuffer();
+        Bytes<?> bytes1 = Bytes.allocateElastic();
+        Bytes<?> bytes2 = Bytes.allocateElastic();
 
         // Assume the ring buffer has data. Read using both readers.
         boolean reader1HasData = reader1.read(bytes1);
@@ -69,7 +69,7 @@ public class MultiReaderBytesRingBufferTest {
         reader.toEnd();
 
         // Attempt to read after moving to end
-        Bytes<?> bytes = Bytes.elasticByteBuffer();
+        Bytes<?> bytes = Bytes.allocateElastic();
         boolean hasData = reader.read(bytes);
 
         // Assuming no new data was written after calling toEnd, there should be nothing to read

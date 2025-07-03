@@ -18,6 +18,7 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.bytes.util.UTF8StringInterner;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.pool.StringInterner;
 import net.openhft.chronicle.core.util.StringUtils;
@@ -30,7 +31,9 @@ import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static org.junit.Assert.*;
@@ -43,23 +46,26 @@ public class MoreBytesTest extends BytesTestCommon {
         Assert.assertEquals(sourceStr.indexOf(subStr), source.indexOf(subBytes));
     }
 
+    @SuppressWarnings("rawtypes")
     @Test
     public void testOneRelease() {
         int count = 0;
-        Bytes<?>[] bytesArray = {
+        List<Bytes> bytesArray = new ArrayList<>(Arrays.asList(
                 Bytes.allocateDirect(10),
                 Bytes.allocateDirect(new byte[5]),
                 Bytes.allocateElasticDirect(100),
-                Bytes.elasticByteBuffer(),
                 Bytes.wrapForRead(new byte[1]),
-                Bytes.wrapForRead(ByteBuffer.allocateDirect(128)),
                 Bytes.wrapForWrite(new byte[1]),
-                Bytes.wrapForWrite(ByteBuffer.allocateDirect(128)),
                 Bytes.elasticHeapByteBuffer(),
                 Bytes.elasticHeapByteBuffer(1),
                 Bytes.allocateElasticOnHeap(),
                 Bytes.allocateElasticOnHeap(1)
-        };
+        ));
+        if (Jvm.maxDirectMemory() > 0) {
+            bytesArray.add(Bytes.elasticByteBuffer());
+            bytesArray.add(Bytes.wrapForRead(ByteBuffer.allocateDirect(128)));
+            bytesArray.add(Bytes.wrapForWrite(ByteBuffer.allocateDirect(128)));
+        }
         for (Bytes<?> b : bytesArray) {
             try {
                 assertEquals(count + ": " + b.getClass().getSimpleName(), 1, b.refCount());
@@ -297,7 +303,7 @@ public class MoreBytesTest extends BytesTestCommon {
     public void testReadWithLength()
             throws BufferUnderflowException, IllegalStateException {
         final Bytes<?> b = Bytes.from("Hello World");
-        final Bytes<ByteBuffer> bytesOut = Bytes.elasticByteBuffer();
+        final Bytes<ByteBuffer> bytesOut = Bytes.elasticHeapByteBuffer();
         try {
             b.readWithLength(2, bytesOut);
             assertEquals("He", bytesOut.toString());

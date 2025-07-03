@@ -245,6 +245,8 @@ public class ByteStringAppenderTest extends BytesTestCommon {
 
     @Test
     public void testAppend8bit() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         BytesStore<?, ByteBuffer> bs = BytesStore.elasticByteBuffer(4, 16);
         bs.write(0, " -\n".getBytes());
 

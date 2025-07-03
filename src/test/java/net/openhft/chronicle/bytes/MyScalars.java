@@ -27,7 +27,7 @@ import java.time.LocalTime;
 import java.time.ZonedDateTime;
 import java.util.UUID;
 
-class MyScalars implements BytesMarshallable {
+public class MyScalars implements BytesMarshallable {
     String s;
     BigInteger bi;
     BigDecimal bd;

@@ -17,6 +17,7 @@
  */
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.Jvm;
 import org.junit.Test;
 
 import java.nio.ByteBuffer;
@@ -24,6 +25,7 @@ import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
 
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeFalse;
 
 public class Issue281Test extends BytesTestCommon {
     public static void bufferToBytes(Bytes<?> bytes, ByteBuffer dataBuffer, int index) {
@@ -34,6 +36,8 @@ public class Issue281Test extends BytesTestCommon {
 
     @Test
     public void testByteBufferToBytes() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         final Bytes<?> data = Bytes.allocateElasticDirect().append("1234567890ABCD");
         final Bytes<?> retVal = Bytes.allocateElasticDirect();
         ByteBuffer buffer = ByteBuffer.allocateDirect(16);

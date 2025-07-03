@@ -692,8 +692,8 @@ public class BytesMarshallableTest extends BytesTestCommon {
         }
     }
 
-    private static final class BM3 implements BytesMarshallable {
-        long value;
+    public static final class BM3 implements BytesMarshallable {
+        public long value;
 
         @Override
         public boolean equals(Object o) {
@@ -709,7 +709,7 @@ public class BytesMarshallableTest extends BytesTestCommon {
         }
     }
 
-    private static final class BMA implements BytesMarshallable {
+    public static final class BMA implements BytesMarshallable {
         byte[] bytes;
         int[] ints;
         float[] floats;

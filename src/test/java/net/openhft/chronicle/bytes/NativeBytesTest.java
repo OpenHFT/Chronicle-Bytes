@@ -18,11 +18,13 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.bytes.util.DecoratedBufferOverflowException;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.Assume;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -37,6 +39,7 @@ import java.util.Collection;
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static net.openhft.chronicle.bytes.Allocator.*;
 import static org.junit.Assert.*;
+import static org.junit.Assume.assumeFalse;
 
 @RunWith(Parameterized.class)
 public class NativeBytesTest extends BytesTestCommon {
@@ -52,6 +55,11 @@ public class NativeBytesTest extends BytesTestCommon {
         return Arrays.asList(new Object[][]{
                 {NATIVE}, {NATIVE_ADDRESS}, {HEAP}, {BYTE_BUFFER}
         });
+    }
+
+    @Before
+    public void hasDirectMemory() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
     }
 
     @Test
@@ -128,7 +136,7 @@ public class NativeBytesTest extends BytesTestCommon {
 
     @Test
     public void testResizeTwoPagesToThreePages() {
-        Assume.assumeFalse(alloc == HEAP);
+        assumeFalse(alloc == HEAP);
 
         long pageSize = OS.pageSize();
         @NotNull NativeBytes<Void> nativeBytes = NativeBytes.nativeBytes(2 * pageSize);
@@ -142,7 +150,7 @@ public class NativeBytesTest extends BytesTestCommon {
 
     @Test
     public void tryGrowBeyondByteBufferCapacity() {
-        Assume.assumeFalse(alloc == HEAP);
+        assumeFalse(alloc == HEAP);
         long maxMemory = Runtime.getRuntime().maxMemory();
         Assume.assumeTrue(maxMemory >= Bytes.MAX_HEAP_CAPACITY * 3L / 2);
 

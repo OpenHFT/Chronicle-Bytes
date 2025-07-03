@@ -21,6 +21,7 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesMarshallable;
 import net.openhft.chronicle.bytes.BytesTestCommon;
 import net.openhft.chronicle.bytes.NativeBytes;
+import net.openhft.chronicle.core.Jvm;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -51,6 +52,7 @@ public class BinaryIntArrayReferenceTest extends BytesTestCommon {
 
     @Test
     public void marshallable() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
         assumeFalse(NativeBytes.areNewGuarded());
         final Bytes<?> bytes = Bytes.allocateElasticDirect(256);
         try {

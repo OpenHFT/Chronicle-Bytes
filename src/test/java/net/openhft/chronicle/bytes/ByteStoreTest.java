@@ -682,6 +682,7 @@ public class ByteStoreTest extends BytesTestCommon {
 
     @Test
     public void testFollow() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
         ByteBuffer direct = ByteBuffer.allocateDirect(128);
         for (int i = 0; i < 128; i++) {
             BytesStore<?, ByteBuffer> store = BytesStore.follow(direct);

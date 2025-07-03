@@ -25,6 +25,7 @@ import net.openhft.chronicle.core.util.Histogram;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 import javax.crypto.Cipher;
@@ -44,6 +45,11 @@ import static org.junit.Assume.assumeFalse;
 public class NativeBytesStoreTest extends BytesTestCommon {
 
     volatile int bcs;
+
+    @Before
+    public void hasDirectMemory() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+    }
 
     private static void generate(final @NotNull Bytes<?> bytes, final int t) {
         bytes.clear();

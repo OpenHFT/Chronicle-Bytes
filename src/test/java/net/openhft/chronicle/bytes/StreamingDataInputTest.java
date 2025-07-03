@@ -17,6 +17,8 @@
  */
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.Jvm;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -26,6 +28,7 @@ import java.util.Arrays;
 import java.util.Objects;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assume.assumeFalse;
 
 @RunWith(Parameterized.class)
 public class StreamingDataInputTest extends BytesTestCommon {
@@ -39,6 +42,11 @@ public class StreamingDataInputTest extends BytesTestCommon {
     @Parameterized.Parameters(name = "allocator={0}")
     public static Object[] params() {
         return Arrays.stream(Allocator.values()).toArray();
+    }
+
+    @Before
+    public void hasNativeMemory() {
+        assumeFalse(allocator.name().startsWith("NATIVE") && Jvm.maxDirectMemory() == 0);
     }
 
     @Test

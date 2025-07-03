@@ -33,6 +33,7 @@ import java.util.Collection;
 import java.util.function.Consumer;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assume.assumeFalse;
 
 @RunWith(Parameterized.class)
 public class MappedBytesEdgeTest extends BytesTestCommon {
@@ -81,6 +82,8 @@ public class MappedBytesEdgeTest extends BytesTestCommon {
 
     @Test
     public void testCorrectChunkResolved() throws IOException {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         final File tempMBFile = Files.createTempFile("mapped", "bytes").toFile();
         final long overlap = OS.mapAlign(overlap(CHUNK_SIZE));
         if (overlap != overlap(CHUNK_SIZE)) {

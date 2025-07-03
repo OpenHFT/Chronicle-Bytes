@@ -34,7 +34,7 @@ import static org.junit.Assume.assumeFalse;
 
 public class ByteStringParserTest extends BytesTestCommon {
     @NotNull
-    Bytes<?> bytes = Bytes.elasticByteBuffer();
+    Bytes<?> bytes = Bytes.allocateElastic();
 
     @Override
     public void afterChecks() {

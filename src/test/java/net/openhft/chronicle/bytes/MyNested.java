@@ -21,7 +21,7 @@ import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import net.openhft.chronicle.core.io.Validatable;
 import org.jetbrains.annotations.NotNull;
 
-class MyNested implements BytesMarshallable, Validatable {
+public class MyNested implements BytesMarshallable, Validatable {
     MyByteable byteable;
     MyScalars scalars;
 

@@ -37,7 +37,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.function.ObjLongConsumer;
 
-import static net.openhft.chronicle.bytes.Bytes.elasticByteBuffer;
+import static net.openhft.chronicle.bytes.Bytes.elasticHeapByteBuffer;
 import static net.openhft.chronicle.core.Jvm.uncheckedCast;
 import static org.junit.Assume.assumeFalse;
 import static org.junit.jupiter.api.Assertions.*;
@@ -165,7 +165,7 @@ public class EmptyBytesStoreTest extends BytesTestCommon {
 
     @Test
     public void write2() {
-        final Bytes<ByteBuffer> bytes = elasticByteBuffer();
+        final Bytes<ByteBuffer> bytes = elasticHeapByteBuffer();
         bytes.append("Hello");
         try {
             assertDoesNotThrow(() -> instance.write(0, bytes, 0, 0));
@@ -184,7 +184,7 @@ public class EmptyBytesStoreTest extends BytesTestCommon {
 
     @Test
     public void write4() {
-        final Bytes<ByteBuffer> bytes = elasticByteBuffer();
+        final Bytes<ByteBuffer> bytes = elasticHeapByteBuffer();
         try {
             assertDoesNotThrow(() -> instance.write(0, bytes));
             bytes.append("Hello");
@@ -308,7 +308,7 @@ public class EmptyBytesStoreTest extends BytesTestCommon {
 
     @Test
     public void copyTo() {
-        final Bytes<ByteBuffer> bytes = elasticByteBuffer();
+        final Bytes<ByteBuffer> bytes = elasticHeapByteBuffer();
         try {
             assertDoesNotThrow(() -> instance.copyTo(bytes));
         } finally {

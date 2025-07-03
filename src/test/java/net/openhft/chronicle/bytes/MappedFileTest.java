@@ -22,10 +22,7 @@ import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.IOTools;
 import net.openhft.chronicle.core.io.ReferenceOwner;
 import org.jetbrains.annotations.NotNull;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
@@ -43,10 +40,19 @@ public class MappedFileTest extends BytesTestCommon {
     @Rule
     public final TemporaryFolder tmpDir = new TemporaryFolder();
 
+    @Before
+    public void ignoreCouldntDisable() {
+        if (Jvm.maxDirectMemory() == 0) {
+            ignoreException("Couldn't disable close on interrupt");
+            ignoreException("class is not public");
+        }
+    }
+
     @org.junit.jupiter.api.Test
     void testWarmup() {
         try {
-            MappedFile.warmup();
+            if (Jvm.maxDirectMemory() > 0)
+                MappedFile.warmup();
         } catch (Throwable t) {
             fail(t.getMessage());
         }
@@ -55,6 +61,7 @@ public class MappedFileTest extends BytesTestCommon {
     @Test
     public void shouldReleaseReferenceWhenNewStoreIsAcquired()
             throws IOException {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
         final File file = tmpDir.newFile();
         // this is what it will end up as
         final long chunkSize = OS.mapAlign(64);
@@ -85,7 +92,7 @@ public class MappedFileTest extends BytesTestCommon {
     @Test
     public void testReferenceCounts()
             throws IOException {
-        /*        assumeFalse(Jvm.isMacArm());*/
+        assumeFalse(Jvm.maxDirectMemory() == 0);
 
         final File tmp = IOTools.createTempFile("testReferenceCounts");
         int chunkSize;
@@ -149,9 +156,9 @@ public class MappedFileTest extends BytesTestCommon {
     }
 
     @Test
-    public void largeReadOnlyFile()
-            throws IOException {
+    public void largeReadOnlyFile() throws IOException {
         assumeFalse(Runtime.getRuntime().maxMemory() < Integer.MAX_VALUE || OS.isWindows());
+        assumeFalse(Jvm.maxDirectMemory() == 0);
 
         final File file = Files.createTempFile("largeReadOnlyFile", "deleteme").toFile();
         file.deleteOnExit();
@@ -165,10 +172,10 @@ public class MappedFileTest extends BytesTestCommon {
     }
 
     @Test
-    public void largeReadOnlyFileSingle()
-            throws IOException {
+    public void largeReadOnlyFileSingle() throws IOException {
         assumeFalse(OS.isWindows());
         assumeFalse(Runtime.getRuntime().maxMemory() < Integer.MAX_VALUE);
+        assumeFalse(Jvm.maxDirectMemory() == 0);
 
         final File file = Files.createTempFile("largeReadOnlyFile", "deleteme").toFile();
         file.deleteOnExit();
@@ -211,6 +218,7 @@ public class MappedFileTest extends BytesTestCommon {
     public void testReadOnlyOpen()
             throws IOException {
         assumeFalse(OS.isWindows());
+        assumeFalse(Jvm.maxDirectMemory() == 0);
 
         String text = "Some text to put in this file. yay!\n";
 

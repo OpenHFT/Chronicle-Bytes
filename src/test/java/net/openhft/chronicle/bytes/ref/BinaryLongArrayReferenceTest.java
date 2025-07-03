@@ -18,6 +18,7 @@
 package net.openhft.chronicle.bytes.ref;
 
 import net.openhft.chronicle.bytes.*;
+import net.openhft.chronicle.core.Jvm;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -49,6 +50,8 @@ public class BinaryLongArrayReferenceTest extends BytesTestCommon {
     @Test
     public void marshallable() {
         assumeFalse(NativeBytes.areNewGuarded());
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         final Bytes<?> bytes = new HexDumpBytes();
         try {
             final LongArrays la = new LongArrays(4, 8);

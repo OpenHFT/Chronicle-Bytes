@@ -17,6 +17,7 @@
  */
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
 import org.junit.Before;
 import org.junit.Test;
@@ -48,6 +49,7 @@ public class CheckOverSizedMessagesTest extends BytesTestCommon {
     @Before
     public void checkPageSize() {
         assumeTrue(OS.isLinux());
+        assumeFalse(Jvm.maxDirectMemory() == 0);
     }
 
     @Test

@@ -37,6 +37,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assume.assumeFalse;
 
 public class MappedFileMultiThreadTest extends BytesTestCommon {
     private static final int CORES = Integer.getInteger("cores", Runtime.getRuntime().availableProcessors());
@@ -51,8 +52,9 @@ public class MappedFileMultiThreadTest extends BytesTestCommon {
     }
 
     @Test
-    public void testMultiThreadLock()
-            throws Exception {
+    public void testMultiThreadLock() throws Exception {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         final List<String> garbage = Collections.synchronizedList(new ArrayList<>());
         final long chunkSize = OS.isWindows() ? 64 << 10 : 4 << 10;
         try (MappedFile mf = MappedFile.mappedFile(TMP_FILE, chunkSize, 0)) {

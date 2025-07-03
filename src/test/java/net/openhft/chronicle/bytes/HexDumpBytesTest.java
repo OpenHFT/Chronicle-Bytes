@@ -17,11 +17,13 @@
  */
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.Jvm;
 import org.junit.Test;
 
 import java.io.FileNotFoundException;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assume.assumeFalse;
 
 public class HexDumpBytesTest extends BytesTestCommon {
 
@@ -48,6 +50,8 @@ public class HexDumpBytesTest extends BytesTestCommon {
 
     @Test
     public void memoryMapped() throws FileNotFoundException {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         try (MappedBytes mappedBytes = MappedBytes.mappedBytes("test.dat", 64 * 1024)) {
             doTest(new HexDumpBytes(mappedBytes));
         }

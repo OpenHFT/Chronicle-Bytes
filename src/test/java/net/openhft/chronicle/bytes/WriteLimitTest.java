@@ -17,6 +17,7 @@
  */
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.Jvm;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -32,7 +33,7 @@ import static org.junit.Assert.fail;
 
 @RunWith(Parameterized.class)
 public class WriteLimitTest extends BytesTestCommon {
-    static final Allocator[] ALLOCATORS = {Allocator.NATIVE, Allocator.NATIVE_ADDRESS, Allocator.HEAP, Allocator.BYTE_BUFFER};
+    static final Allocator[] ALLOCATORS = {Allocator.HEAP, Allocator.HEAP_EMBEDDED, Allocator.HEAP_UNCHECKED};
     static List<Object[]> tests;
     static Random random = new Random();
     final String name;
@@ -67,10 +68,12 @@ public class WriteLimitTest extends BytesTestCommon {
     }
 
     static void addTest(String name, Consumer<Bytes<?>> action, int length) {
-        for (Allocator a : ALLOCATORS)
+        Allocator[] allocators = Jvm.maxDirectMemory() == 0 ? ALLOCATORS : Allocator.values();
+        for (Allocator a : allocators)
             tests.add(new Object[]{a + " " + name, a, action, length});
     }
 
+    @SuppressWarnings("RedundantCast")
     @Test
     public void writeLimit() {
         Bytes<?> bytes = allocator.elasticBytes(64);
@@ -78,6 +81,8 @@ public class WriteLimitTest extends BytesTestCommon {
             int position = (int) (bytes.realCapacity() - length - i);
             bytes.clear().writePosition(position).writeLimit(position + length);
             action.accept(bytes);
+            if (bytes.unchecked())
+                continue;
 
             bytes.clear().writePosition(position).writeLimit(position + length - 1);
             try {

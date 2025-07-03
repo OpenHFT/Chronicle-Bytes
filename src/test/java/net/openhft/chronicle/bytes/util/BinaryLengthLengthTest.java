@@ -21,6 +21,8 @@ import net.openhft.chronicle.bytes.BinaryWireCode;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesOut;
 import net.openhft.chronicle.bytes.BytesTestCommon;
+import net.openhft.chronicle.core.Jvm;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -30,6 +32,7 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Collection;
 
+import static org.junit.Assume.assumeFalse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @RunWith(Parameterized.class)
@@ -50,6 +53,11 @@ public class BinaryLengthLengthTest extends BytesTestCommon {
                 {BinaryLengthLength.LENGTH_16BIT, BinaryWireCode.BYTES_LENGTH16},
                 {BinaryLengthLength.LENGTH_32BIT, BinaryWireCode.BYTES_LENGTH32}
         });
+    }
+
+    @Before
+    public void hasDirect() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
     }
 
     @Test

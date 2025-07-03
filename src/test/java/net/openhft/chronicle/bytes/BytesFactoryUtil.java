@@ -29,6 +29,9 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -63,23 +66,27 @@ final class BytesFactoryUtil {
             final File singleFileRo = create(File.createTempFile("single-mapped-file-ro" + CNT.getAndIncrement(), "bin"), CHUNK_SIZE * 2);
             singleFileRo.deleteOnExit();
             final MassiveFieldHolder holder = new MassiveFieldHolder();
-            return Stream.of(
+            List<Arguments> arguments = new ArrayList<>(Arrays.asList(
                     Arguments.of(Bytes.allocateDirect(SIZE), true, "Bytes.allocateDirect(SIZE)"),
                     Arguments.of(Bytes.allocateElasticOnHeap(SIZE), true, "Bytes.allocateElasticOnHeap(SIZE)"),
                     Arguments.of(wipe(Bytes.allocateElasticDirect()), true, "Bytes.allocateElasticDirect()"),
-                    Arguments.of(Bytes.wrapForWrite(heapByteBuffer), true, "Bytes.wrapForWrite(heapByteBuffer)"),
-                    Arguments.of(Bytes.wrapForWrite(directByteBuffer), true, "Bytes.wrapForWrite(directByteBuffer)"),
-                    Arguments.of(MappedBytes.mappedBytes(file, CHUNK_SIZE), true, "MappedBytes.mappedBytes(file, CHUNK_SIZE)"),
-                    Arguments.of(MappedBytes.mappedBytes(fileRo, CHUNK_SIZE, 0, true), false, "MappedBytes.mappedBytes(fileRo, CHUNK_SIZE, 0, true)"),
-                    Arguments.of(MappedBytes.singleMappedBytes(singleFile, CHUNK_SIZE), true, "MappedBytes.singleMappedBytes(singleFile, CHUNK_SIZE)"),
-                    Arguments.of(MappedBytes.singleMappedBytes(singleFileRo, CHUNK_SIZE, true), false, "MappedBytes.singleMappedBytes(singleFileRo, CHUNK_SIZE, true)"),
 
                     Arguments.of(Bytes.forFieldGroup(holder, "a"), true, "Bytes.forFieldGroup(holder, \"a\")"),
 
-                    Arguments.of(new HexDumpBytes(), true, "new HexDumpBytes()"),
-                    Arguments.of(new GuardedNativeBytes<>(wrap(ByteBuffer.allocate(SIZE)), SIZE), true, "new GuardedNativeBytes<>(wrap(ByteBuffer.allocate(SIZE))")
-
-            );
+                    Arguments.of(new HexDumpBytes(), true, "new HexDumpBytes()")
+            ));
+            if (Jvm.maxDirectMemory()>0) {
+                arguments.addAll(Arrays.asList(
+                        Arguments.of(Bytes.wrapForWrite(heapByteBuffer), true, "Bytes.wrapForWrite(heapByteBuffer)"),
+                        Arguments.of(Bytes.wrapForWrite(directByteBuffer), true, "Bytes.wrapForWrite(directByteBuffer)"),
+                        Arguments.of(MappedBytes.mappedBytes(file, CHUNK_SIZE), true, "MappedBytes.mappedBytes(file, CHUNK_SIZE)"),
+                        Arguments.of(MappedBytes.mappedBytes(fileRo, CHUNK_SIZE, 0, true), false, "MappedBytes.mappedBytes(fileRo, CHUNK_SIZE, 0, true)"),
+                        Arguments.of(MappedBytes.singleMappedBytes(singleFile, CHUNK_SIZE), true, "MappedBytes.singleMappedBytes(singleFile, CHUNK_SIZE)"),
+                        Arguments.of(MappedBytes.singleMappedBytes(singleFileRo, CHUNK_SIZE, true), false, "MappedBytes.singleMappedBytes(singleFileRo, CHUNK_SIZE, true)"),
+                        Arguments.of(new GuardedNativeBytes<>(wrap(ByteBuffer.allocate(SIZE)), SIZE), true, "new GuardedNativeBytes<>(wrap(ByteBuffer.allocate(SIZE))")
+                ));
+            }
+            return arguments.stream();
         } catch (IOException ioException) {
             System.out.flush();
             System.err.flush();
@@ -223,7 +230,6 @@ final class BytesFactoryUtil {
         private final long writePosition;
         private final long writeLimit;
         private final long capacity;
-        private final long realCapacity;
         private final boolean directMemory;
         private final boolean elastic;
 
@@ -232,7 +238,6 @@ final class BytesFactoryUtil {
             this.writePosition = bytes.writePosition();
             this.writeLimit = bytes.writeLimit();
             this.capacity = bytes.capacity();
-            this.realCapacity = bytes.realCapacity();
             this.directMemory = bytes.isDirectMemory();
             this.elastic = bytes.isElastic();
         }
@@ -248,18 +253,16 @@ final class BytesFactoryUtil {
             if (writePosition != that.writePosition) return false;
             if (writeLimit != that.writeLimit) return false;
             if (capacity != that.capacity) return false;
-            if (realCapacity != that.realCapacity) return false;
             if (directMemory != that.directMemory) return false;
             return elastic == that.elastic;
         }
 
         @Override
         public int hashCode() {
-            int result = (int) (readPosition ^ (readPosition >>> 32));
-            result = 31 * result + (int) (writePosition ^ (writePosition >>> 32));
-            result = 31 * result + (int) (writeLimit ^ (writeLimit >>> 32));
-            result = 31 * result + (int) (capacity ^ (capacity >>> 32));
-            result = 31 * result + (int) (realCapacity ^ (realCapacity >>> 32));
+            int result = Long.hashCode(readPosition);
+            result = 31 * result + Long.hashCode(writePosition);
+            result = 31 * result + Long.hashCode(writeLimit);
+            result = 31 * result + Long.hashCode(capacity);
             result = 31 * result + (directMemory ? 1 : 0);
             result = 31 * result + (elastic ? 1 : 0);
             return result;
@@ -272,7 +275,6 @@ final class BytesFactoryUtil {
                     ", writePosition=" + writePosition +
                     ", writeLimit=" + writeLimit +
                     ", capacity=" + capacity +
-                    ", realCapacity=" + realCapacity +
                     ", directMemory=" + directMemory +
                     ", elastic=" + elastic +
                     '}';

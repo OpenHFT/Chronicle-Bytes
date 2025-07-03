@@ -19,14 +19,16 @@ package net.openhft.chronicle.bytes.internal;
 
 import net.openhft.chronicle.bytes.BytesTestCommon;
 import net.openhft.chronicle.bytes.render.*;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.math.BigDecimal;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 
 import static org.junit.Assert.*;
+import static org.junit.Assume.assumeFalse;
 
 @SuppressWarnings({"squid:S2699", "squid:S5786"})
 class DecimaliserDoubleTest extends BytesTestCommon {
@@ -64,6 +66,11 @@ class DecimaliserDoubleTest extends BytesTestCommon {
             assertEquals(1, exponent);
     };
     public static final double HARD_TO_DECIMALISE = 4.8846945805332034E-12;
+
+    @BeforeEach
+    public void hasDirect() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+    }
 
     @Test
     public void toDoubleTestTest() {

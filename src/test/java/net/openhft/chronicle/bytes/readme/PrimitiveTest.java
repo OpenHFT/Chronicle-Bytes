@@ -280,11 +280,11 @@ public class PrimitiveTest extends BytesTestCommon {
         }
     }
 
-    private static final class Outer implements BytesMarshallable {
+    public static final class Outer implements BytesMarshallable {
 
-        private final String name;
-        private final Inner innerA;
-        private final Inner innerB;
+        public String name;
+        public Inner innerA;
+        public Inner innerB;
 
         public Outer(final String name,
                      final Inner innerA,
@@ -299,10 +299,10 @@ public class PrimitiveTest extends BytesTestCommon {
         }
     }
 
-    private static final class Inner implements BytesMarshallable {
+    public static final class Inner implements BytesMarshallable {
 
-        private String key;
-        private double value;
+        public String key;
+        public double value;
 
         public Inner(String key, double value) {
             this.key = key;
@@ -313,15 +313,15 @@ public class PrimitiveTest extends BytesTestCommon {
         }
     }
 
-    private static final class PrimitiveDTO implements BytesMarshallable {
-        boolean flag;
-        byte s8;
-        short s16;
-        char ch;
-        int s32;
-        long s64;
-        float f32;
-        double f64;
+    public static class PrimitiveDTO implements BytesMarshallable {
+        public boolean flag;
+        public byte s8;
+        public short s16;
+        public char ch;
+        public int s32;
+        public long s64;
+        public float f32;
+        public double f64;
 
         public PrimitiveDTO(final boolean flag,
                             final byte s8,
