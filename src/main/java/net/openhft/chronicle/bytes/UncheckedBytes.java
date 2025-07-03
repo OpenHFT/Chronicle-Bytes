@@ -274,7 +274,7 @@ public class UncheckedBytes<U>
             return this;
         }
 
-        if (Jvm.isJava9Plus()) {
+        if (Jvm.isJava9Plus() && Jvm.maxDirectMemory() > 0) {
             byte[] strBytes = extractBytes(text);
             byte coder = StringUtils.getStringCoder(text);
             long utfLength = AppendableUtil.findUtf8Length(strBytes, coder);
