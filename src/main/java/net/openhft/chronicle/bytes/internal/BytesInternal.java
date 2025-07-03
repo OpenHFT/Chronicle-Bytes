@@ -1046,7 +1046,7 @@ enum BytesInternal {
             return;
         }
 
-        if (Jvm.isJava9Plus()) {
+        if (Jvm.isJava9Plus() && Jvm.maxDirectMemory() > 0) {
             byte[] strBytes = extractBytes(str);
             byte coder = StringUtils.getStringCoder(str);
             long utfLength = AppendableUtil.findUtf8Length(strBytes, coder);
