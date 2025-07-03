@@ -321,6 +321,11 @@ public class HexDumpBytes
     }
 
     @Override
+    public long realCapacity() {
+        return base.realCapacity();
+    }
+
+    @Override
     public long addressForRead(@NonNegative long offset) throws UnsupportedOperationException, IllegalStateException, BufferUnderflowException {
         requireNonNegative(offset);
         return base.addressForRead(offset);
