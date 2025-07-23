@@ -170,6 +170,12 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
         return readPosition(position);
     }
 
+    /**
+     * Sets the read position to the specified offset. It has the side effect of ensuring the position is within the current byteStore chunk between the start and hard limit.
+     * It uses the hard limit instead of the safe limit to avoid changing or resizing the underlying file unnecessarily.
+     * @param position the new read position, must be non-negative
+     * @return this Bytes instance for method chaining
+     */
     @NotNull
     @Override
     public Bytes<Void> readPosition(@NonNegative final long position)
@@ -184,6 +190,12 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
         }
     }
 
+    /**
+     * Sets the write limit to the specified offset. It has the side effect of ensuring the limit is within the current byteStore chunk between the start and hard limit.
+     * It uses the hard limit instead of the safe limit to avoid changing or resizing the underlying file unnecessarily.
+     * @param limit the new write limit, must be non-negative
+     * @return this Bytes instance for method chaining
+     */
     @Override
     public @NotNull Bytes<Void> writeLimit(long limit) throws BufferOverflowException {
         // use the real limit of the byteStore rather than the safe limit to minimise resizing
@@ -193,6 +205,12 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
         return super.writeLimit(limit);
     }
 
+    /**
+     * Sets the write position to the specified offset. It has the side effect of ensuring the position is within the current byteStore chunk between the start and soft limit.
+     * It uses the safe limit instead of the hard limit to allow large writes in a single blob without having to check the hard limit unnecessarily.
+     * @param position the new write position, must be non-negative
+     * @return this Bytes instance for method chaining
+     */
     @Override
     public @NotNull Bytes<Void> writePosition(long position) throws BufferOverflowException {
         // use the safe limit of the byteStore to ensure we can write something after it
