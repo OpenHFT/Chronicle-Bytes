@@ -47,7 +47,7 @@ public class MappedBytesEdgeTest extends BytesTestCommon {
         this.doit = doit;
     }
 
-    @Parameterized.Parameters(name = "size {0} rw {1} op {2}")
+    @Parameterized.Parameters(name = "{2} size={0} rw={1}")
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][]{
                 {1, ReadWrite.PEEK, "peekUnsignedByte", (Consumer<Bytes<?>>) (StreamingDataInput::peekUnsignedByte)},
