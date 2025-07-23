@@ -29,10 +29,13 @@ import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.ThreadingIllegalStateException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
+import java.util.Objects;
 
 import static net.openhft.chronicle.core.Jvm.uncheckedCast;
 import static net.openhft.chronicle.core.util.Ints.requireNonNegative;
@@ -46,6 +49,8 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
  */
 @SuppressWarnings("rawtypes")
 public class ChunkedMappedBytes extends CommonMappedBytes {
+
+    static final Logger LOG = LoggerFactory.getLogger(ChunkedMappedBytes.class);
 
     // assume the mapped file is reserved already.
     public ChunkedMappedBytes(@NotNull final MappedFile mappedFile)
@@ -171,10 +176,12 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
     }
 
     /**
-     * Sets the read position to the specified offset. It has the side effect of ensuring the position is within the current byteStore chunk between the start and hard limit.
-     * It uses the hard limit instead of the safe limit to avoid changing or resizing the underlying file unnecessarily.
-     * @param position the new read position, must be non-negative
-     * @return this Bytes instance for method chaining
+     * Move the read position to {@code position}, loading the correct chunk if needed.
+     * <p>
+     * Uses the chunk’s hard upper bound so we only grow the file when absolutely required.
+     *
+     * @param position new read position (>= 0)
+     * @return this instance
      */
     @NotNull
     @Override
@@ -191,13 +198,16 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
     }
 
     /**
-     * Sets the write limit to the specified offset. It has the side effect of ensuring the limit is within the current byteStore chunk between the start and hard limit.
-     * It uses the hard limit instead of the safe limit to avoid changing or resizing the underlying file unnecessarily.
-     * @param limit the new write limit, must be non-negative
-     * @return this Bytes instance for method chaining
+     * Move the write limit to {@code limit}, loading the correct chunk if needed.
+     * <p>
+     * Uses the chunk’s hard upper bound so we only grow the file when absolutely required.
+     *
+     * @param limit new write limit (>= 0)
+     * @return this instance
      */
+    @NotNull
     @Override
-    public @NotNull Bytes<Void> writeLimit(long limit) throws BufferOverflowException {
+    public Bytes<Void> writeLimit(long limit) throws BufferOverflowException {
         // use the real limit of the byteStore rather than the safe limit to minimise resizing
         if (limit != capacity() && !bytesStore.inside(limit, 0)) {
             acquireNextByteStore0(limit, false);
@@ -206,13 +216,16 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
     }
 
     /**
-     * Sets the write position to the specified offset. It has the side effect of ensuring the position is within the current byteStore chunk between the start and soft limit.
-     * It uses the safe limit instead of the hard limit to allow large writes in a single blob without having to check the hard limit unnecessarily.
-     * @param position the new write position, must be non-negative
-     * @return this Bytes instance for method chaining
+     * Move the write position to {@code position}, loading the correct chunk if needed.
+     * <p>
+     * Uses the chunk’s safe upper bound so we can safely write a significant block of data after this without checking the size regularly.
+     *
+     * @param position new write position (>= 0)
+     * @return this instance
      */
+    @NotNull
     @Override
-    public @NotNull Bytes<Void> writePosition(long position) throws BufferOverflowException {
+    public Bytes<Void> writePosition(long position) throws BufferOverflowException {
         // use the safe limit of the byteStore to ensure we can write something after it
         if (!bytesStore.inside(position)) {
             acquireNextByteStore0(position, false);
@@ -365,6 +378,8 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
     private synchronized @NotNull MappedBytesStore acquireNextByteStore0(@NonNegative final long offset, final boolean set)
             throws ClosedIllegalStateException, ThreadingIllegalStateException {
         throwExceptionIfClosed();
+        if (LOG.isDebugEnabled())
+            Jvm.debug().on(LOG, Integer.toHexString(System.identityHashCode(this)) + ", file: " + mappedFile.file().getName() + ", offset: 0x" + Long.toHexString(offset) + ", read: " + set);
 
         @Nullable final BytesStore<?, ?> oldBS = this.bytesStore;
         @NotNull final MappedBytesStore newBS;
