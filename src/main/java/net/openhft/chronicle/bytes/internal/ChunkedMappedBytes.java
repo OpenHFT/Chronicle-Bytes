@@ -175,12 +175,31 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
     public Bytes<Void> readPosition(@NonNegative final long position)
             throws BufferUnderflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
 
-        if (bytesStore.inside(position)) {
+        // use the real limit of the byteStore rather than the safe limit to minimise resizing
+        if (bytesStore.inside(position, 0)) {
             return super.readPosition(position);
         } else {
             acquireNextByteStore0(position, true);
             return this;
         }
+    }
+
+    @Override
+    public @NotNull Bytes<Void> writeLimit(long limit) throws BufferOverflowException {
+        // use the real limit of the byteStore rather than the safe limit to minimise resizing
+        if (limit != capacity() && !bytesStore.inside(limit, 0)) {
+            acquireNextByteStore0(limit, false);
+        }
+        return super.writeLimit(limit);
+    }
+
+    @Override
+    public @NotNull Bytes<Void> writePosition(long position) throws BufferOverflowException {
+        // use the safe limit of the byteStore to ensure we can write something after it
+        if (!bytesStore.inside(position)) {
+            acquireNextByteStore0(position, false);
+        }
+        return super.writePosition(position);
     }
 
     /**

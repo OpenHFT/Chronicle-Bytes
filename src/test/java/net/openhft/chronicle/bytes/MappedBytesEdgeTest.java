@@ -42,36 +42,35 @@ public class MappedBytesEdgeTest extends BytesTestCommon {
     private final ReadWrite rw;
     private final Consumer<Bytes<?>> doit;
 
-    public MappedBytesEdgeTest(int size, ReadWrite rw, Consumer<Bytes<?>> doit) {
+    public MappedBytesEdgeTest(int size, ReadWrite rw, String name, Consumer<Bytes<?>> doit) {
         this.size = size;
         this.rw = rw;
         this.doit = doit;
     }
 
-    @Parameterized.Parameters(name = "size {0} rw {1} lambda {2}")
+    @Parameterized.Parameters(name = "size {0} rw {1} op {2}")
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][]{
-                {1, ReadWrite.READ, (Consumer<Bytes<?>>) (StreamingDataInput::peekUnsignedByte)},
-                {4, ReadWrite.READ, (Consumer<Bytes<?>>) (StreamingDataInput::readInt)},
-                {4, ReadWrite.READ, (Consumer<Bytes<?>>) (StreamingDataInput::readVolatileInt)},
-                {4, ReadWrite.READ, (Consumer<Bytes<?>>) (RandomDataInput::peekVolatileInt)},
-                {8, ReadWrite.READ, (Consumer<Bytes<?>>) (StreamingDataInput::readLong)},
-                {8, ReadWrite.READ, (Consumer<Bytes<?>>) (StreamingDataInput::readDouble)},
-                {256, ReadWrite.READ, (Consumer<Bytes<?>>) (b -> b.read(unmonitored(Bytes.allocateDirect(256))))},
-                {512, ReadWrite.READ, (Consumer<Bytes<?>>) (b -> b.read(ByteBuffer.allocate(512)))},
-                {1024, ReadWrite.READ, (Consumer<Bytes<?>>) (b -> b.read(new byte[1024]))},
+                {1, ReadWrite.PEEK, "peekUnsignedByte", (Consumer<Bytes<?>>) (StreamingDataInput::peekUnsignedByte)},
+                {4, ReadWrite.READ, "readInt", (Consumer<Bytes<?>>) (StreamingDataInput::readInt)},
+                {4, ReadWrite.READ, "readVolatileInt", (Consumer<Bytes<?>>) (StreamingDataInput::readVolatileInt)},
+                {4, ReadWrite.PEEK, "peekVolatileInt", (Consumer<Bytes<?>>) (RandomDataInput::peekVolatileInt)},
+                {8, ReadWrite.READ, "readLong", (Consumer<Bytes<?>>) (StreamingDataInput::readLong)},
+                {8, ReadWrite.READ, "readDouble", (Consumer<Bytes<?>>) (StreamingDataInput::readDouble)},
+                {256, ReadWrite.READ, "read(unmonitored(Bytes.allocateDirect(256)))", (Consumer<Bytes<?>>) (b -> b.read(unmonitored(Bytes.allocateDirect(256))))},
+                {512, ReadWrite.READ, "read(ByteBuffer.allocate(512))", (Consumer<Bytes<?>>) (b -> b.read(ByteBuffer.allocate(512)))},
+                {1024, ReadWrite.READ, "read(new byte[1024])", (Consumer<Bytes<?>>) (b -> b.read(new byte[1024]))},
 
-                {1, ReadWrite.WRITE, (Consumer<Bytes<?>>) (b -> b.writeByte((byte) 99))},
-                {2, ReadWrite.WRITE, (Consumer<Bytes<?>>) (b -> b.writeShort((short) 123))},
-                {4, ReadWrite.WRITE, (Consumer<Bytes<?>>) (b -> b.writeInt(1234))},
-                {4, ReadWrite.WRITE, (Consumer<Bytes<?>>) (b -> b.writeOrderedInt(1234))},
-                {8, ReadWrite.WRITE, (Consumer<Bytes<?>>) (b -> b.writeLong(1234))},
-                {8, ReadWrite.WRITE, (Consumer<Bytes<?>>) (b -> b.writeDouble(1234))},
-                {6, ReadWrite.WRITE, (Consumer<Bytes<?>>) (b -> b.write8bit("hello"))},
-                {7, ReadWrite.WRITE, (Consumer<Bytes<?>>) (b -> b.appendUtf8("doggie"))},
-                {10, ReadWrite.WRITE, (Consumer<Bytes<?>>) (b -> b.write(Bytes.from("armadillo")))},
+                {1, ReadWrite.WRITE, "writeByte", (Consumer<Bytes<?>>) (b -> b.writeByte((byte) 99))},
+                {2, ReadWrite.WRITE, "writeShort", (Consumer<Bytes<?>>) (b -> b.writeShort((short) 123))},
+                {4, ReadWrite.WRITE, "writeInt", (Consumer<Bytes<?>>) (b -> b.writeInt(1234))},
+                {4, ReadWrite.WRITE, "writeOrderedInt", (Consumer<Bytes<?>>) (b -> b.writeOrderedInt(1234))},
+                {8, ReadWrite.WRITE, "writeLong", (Consumer<Bytes<?>>) (b -> b.writeLong(1234))},
+                {8, ReadWrite.WRITE, "writeDouble", (Consumer<Bytes<?>>) (b -> b.writeDouble(1234))},
+                {6, ReadWrite.WRITE, "write8bit", (Consumer<Bytes<?>>) (b -> b.write8bit("hello"))},
+                {7, ReadWrite.WRITE, "appendUtf8", (Consumer<Bytes<?>>) (b -> b.appendUtf8("doggie"))},
+                {10, ReadWrite.WRITE, "write", (Consumer<Bytes<?>>) (b -> b.write(Bytes.from("armadillo")))},
                 // {1024, ReadWrite.WRITE, (Consumer<Bytes<?>>) (b -> b.write(new byte[1024]))}, // <-- this behaves differently, it won't start a write in the offset
-
         });
     }
 
@@ -91,11 +90,12 @@ public class MappedBytesEdgeTest extends BytesTestCommon {
         }
         try (final MappedBytes bytes = MappedBytes.mappedBytes(tempMBFile, CHUNK_SIZE, overlap)) {
             // map in the real file
+            bytes.writeInt((3 * CHUNK_SIZE) - 4, 1);
             bytes.writePosition(0).writeByte((byte) 0);
             assertEquals(0, bytes.bytesStore().start());
 
             if (rw == ReadWrite.WRITE) {
-                checkWritePosition(bytes, CHUNK_SIZE + overlap - size, 0);
+                checkWritePosition(bytes, CHUNK_SIZE + overlap - size, CHUNK_SIZE);
                 checkWritePosition(bytes, CHUNK_SIZE + overlap, CHUNK_SIZE);
                 checkWritePosition(bytes, CHUNK_SIZE + overlap + size, CHUNK_SIZE);
                 // go back to just before the overlap - will still be in second chunk
@@ -104,7 +104,7 @@ public class MappedBytesEdgeTest extends BytesTestCommon {
                 // now try and write over the end of the chunk
                 checkWritePosition(bytes, CHUNK_SIZE - 1, 0);
                 // and end of chunk plus offset
-                checkWritePosition(bytes, CHUNK_SIZE + overlap - 1, size > 1 ? CHUNK_SIZE : 0);
+                checkWritePosition(bytes, CHUNK_SIZE + overlap - 1,  CHUNK_SIZE);
 
                 if (size > 1) {
                     // load the first chunk
@@ -121,8 +121,8 @@ public class MappedBytesEdgeTest extends BytesTestCommon {
                 bytes.writePosition(CHUNK_SIZE * 5);
 
                 checkReadPosition(bytes, CHUNK_SIZE - size, 0);
-                checkReadPosition(bytes, CHUNK_SIZE, CHUNK_SIZE);
-                checkReadPosition(bytes, CHUNK_SIZE + size, CHUNK_SIZE);
+                checkReadPosition(bytes, CHUNK_SIZE, 0);
+                checkReadPosition(bytes, CHUNK_SIZE + size, 0);
                 checkReadPosition(bytes, CHUNK_SIZE - size, 0);
 
                 if (size > 1) {
@@ -160,6 +160,7 @@ public class MappedBytesEdgeTest extends BytesTestCommon {
     }
 
     protected enum ReadWrite {
+        PEEK,
         READ,
         WRITE
     }
