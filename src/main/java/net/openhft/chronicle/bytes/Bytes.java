@@ -646,7 +646,7 @@ public interface Bytes<U> extends
             try {
                 @NotNull final StringBuilder builder = new StringBuilder();
                 while (buffer.readRemaining() > 0) {
-                    builder.append((char) buffer.readByte());
+                    builder.append((char) buffer.readUnsignedByte());
                 }
 
                 // remove the last comma

@@ -265,4 +265,19 @@ public class Bytes3Test extends BytesTestCommon {
     public void writeUtf8FromBytes() {
         doAppend((b, s) -> b.writeUtf8(Bytes.from(s)));
     }
+
+    @SuppressWarnings("rawtypes")
+    @Test
+    public void toString8bit() {
+        if (forRead) return;
+        bytes = supplier.get();
+        for (char ch = 0; ch < 256; ch++) {
+            bytes.writeUnsignedByte(ch);
+        }
+        String s = bytes.toString();
+        for (char ch = 0; ch < 256; ch++) {
+            assertEquals("Character mismatch at index " + ch + " in: " + s, ch, s.charAt(ch));
+        }
+        assertEquals("Expected 256 characters, but got: " + s.length(), 256, s.length());
+    }
 }
