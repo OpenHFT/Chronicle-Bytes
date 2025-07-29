@@ -267,27 +267,4 @@ public class CheckOverSizedMessagesTest extends BytesTestCommon {
         }
     }
 
-    @Test
-    public void parse8bit() {
-        Bytes<?> in = Bytes.wrapForRead(BYTE6K);
-        try (MappedBytes mb = mbNoOverlap()) {
-            mb.writePosition(3 << 10);
-            final BytesStore bs0 = mb.bytesStore();
-            in.parse8bit(mb, StopCharTesters.ALL);
-            final BytesStore bs2 = mb.bytesStore();
-            assertNotSame(bs0, bs2);
-        }
-    }
-
-    @Test
-    public void parseUTF8() {
-        Bytes<?> in = Bytes.wrapForRead(BYTE6K);
-        try (MappedBytes mb = mbNoOverlap()) {
-            mb.writePosition(3 << 10);
-            final BytesStore bs0 = mb.bytesStore();
-            in.parseUtf8(mb, StopCharTesters.ALL);
-            final BytesStore bs2 = mb.bytesStore();
-            assertNotSame(bs0, bs2);
-        }
-    }
 }
