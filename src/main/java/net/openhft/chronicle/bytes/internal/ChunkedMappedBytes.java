@@ -51,6 +51,7 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 public class ChunkedMappedBytes extends CommonMappedBytes {
 
     static final Logger LOG = LoggerFactory.getLogger(ChunkedMappedBytes.class);
+    static final boolean DEBUG_CHUNKED_MAPPED_BYTES = Jvm.getBoolean("debug.chunked.mapped.bytes", false);
 
     // assume the mapped file is reserved already.
     public ChunkedMappedBytes(@NotNull final MappedFile mappedFile)
@@ -378,7 +379,7 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
     private synchronized @NotNull MappedBytesStore acquireNextByteStore0(@NonNegative final long offset, final boolean set)
             throws ClosedIllegalStateException, ThreadingIllegalStateException {
         throwExceptionIfClosed();
-        if (LOG.isDebugEnabled())
+        if (DEBUG_CHUNKED_MAPPED_BYTES && LOG.isDebugEnabled())
             Jvm.debug().on(LOG, Integer.toHexString(System.identityHashCode(this)) + ", file: " + mappedFile.file().getName() + ", offset: 0x" + Long.toHexString(offset) + ", read: " + set);
 
         @Nullable final BytesStore<?, ?> oldBS = this.bytesStore;
