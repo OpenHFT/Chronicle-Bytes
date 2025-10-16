@@ -292,20 +292,15 @@
                 <configuration>
                     <header>license_header.txt</header>
                     <properties>
-                        <currentYear>2022</currentYear>
+                        <currentYear>2025</currentYear>
                     </properties>
                     <headerDefinitions>
                         <headerDefinition>license_header_def.xml</headerDefinition>
                     </headerDefinitions>
                     <excludes>
-                        <exclude>**/README</exclude>
-                        <exclude>**/README.md</exclude>
                         <exclude>**/package-info.java</exclude>
                         <exclude>**/*.versionsBackup</exclude>
-                        <exclude>CONTRIBUTOR_LICENSE_AGREEMENT</exclude>
                         <exclude>LICENSE</exclude>
-                        <exclude>DISCLAIMER</exclude>
-                        <exclude>THIRD_PARTY_LICENSES</exclude>
                         <exclude>src/test/resources/**</exclude>
                         <exclude>src/main/resources/**</exclude>
                     </excludes>
