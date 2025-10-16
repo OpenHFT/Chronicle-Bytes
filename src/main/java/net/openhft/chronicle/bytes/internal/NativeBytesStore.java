@@ -1,7 +1,5 @@
 /*
- * Copyright (c) 2016-2022 chronicle.software
- *
- *     https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -955,11 +953,11 @@ public class NativeBytesStore<U>
     }
 
     private final class Finalizer {
-        @SuppressWarnings({"deprecation", "removal"})
-        @Override
         /*
          * This finalize() is used to detect when a component is not released deterministically. It is not required to be run, but provides a warning
          */
+        @Override
+        @SuppressWarnings({"deprecation", "removal"})
         protected void finalize()
                 throws Throwable {
             super.finalize();
