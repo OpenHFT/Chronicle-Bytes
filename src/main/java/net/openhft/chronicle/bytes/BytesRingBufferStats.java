@@ -1,7 +1,5 @@
 /*
- * Copyright (c) 2016-2022 chronicle.software
- *
- *     https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,13 +24,9 @@ import java.util.List;
  */
 public interface BytesRingBufferStats {
     /**
-     * Each time the ring is read, the number of bytes remaining in the write buffer are recorded, and that
-     * number is returned by this method.
-     * Calling this method resets the number. If no read calls were made since the last
-     * call to this method, it returns Long.MAX_VALUE.
-     *
-     * @return the number of bytes remaining in the write buffer as at the last read
-     * or Long.MAX_VALUE if no reads were performed.
+     * Minimum free space observed for the writer since the last call. Reset on
+     * each invocation. Returns {@link Long#MAX_VALUE} if no reads occurred in
+     * that period.
      */
     @NonNegative
     long minNumberOfWriteBytesRemaining();

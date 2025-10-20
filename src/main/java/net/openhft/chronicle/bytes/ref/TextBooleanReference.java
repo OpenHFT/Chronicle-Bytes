@@ -1,7 +1,5 @@
 /*
- * Copyright (c) 2016-2022 chronicle.software
- *
- *     https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,13 +26,12 @@ import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 
 /**
- * TextBooleanReference is an implementation of a reference to a boolean value,
- * represented in text wire format. The class enables the efficient serialization
- * and deserialization of boolean values using a text-based representation.
- * <p>
- * The boolean values ' true' and 'false' are represented internally as
- * 32-bit integers in a specific format. The class also provides methods for
- * writing the boolean values into {@link BytesStore} objects.
+ * Reference to a fixed-width text boolean.
+ * <p>The format is four ASCII bytes containing either {@code " tru"}
+ * or {@code "fals"} and includes a simple spin-lock.</p>
+ *
+ * <p> {@code FALSE} and {@code TRUE} hold the encoded text.
+ * <p> These classes target debugging, not production performance.
  */
 @SuppressWarnings("rawtypes")
 public class TextBooleanReference extends AbstractReference implements BooleanValue {

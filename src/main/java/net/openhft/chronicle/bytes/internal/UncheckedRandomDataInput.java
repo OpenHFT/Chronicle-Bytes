@@ -1,7 +1,5 @@
 /*
- * Copyright (c) 2016-2022 chronicle.software
- *
- *     https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,11 +23,8 @@ import java.nio.BufferUnderflowException;
 
 /**
  * This interface defines methods for reading data of different types (byte, short, int, long) from
- * a certain offset position. The methods do not necessarily perform boundary checks, so it's
- * crucial to ensure memory bounds are validated before invoking these methods.
- * <p>
- * Note: Calling these methods without proper boundary checks can lead to undefined results
- * and even JVM crashes.
+ * An ultra high performance interface for random data access. Implementations do
+ * not perform bounds checks; callers must validate offsets themselves.
  */
 public interface UncheckedRandomDataInput {
 

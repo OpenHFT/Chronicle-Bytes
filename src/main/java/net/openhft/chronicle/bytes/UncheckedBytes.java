@@ -1,7 +1,5 @@
 /*
- * Copyright (c) 2016-2022 chronicle.software
- *
- *     https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,13 +36,11 @@ import static net.openhft.chronicle.core.util.StringUtils.extractBytes;
 import static net.openhft.chronicle.core.util.StringUtils.extractChars;
 
 /**
- * An optimized extension of AbstractBytes that doesn't perform any bounds checking
- * for read and write operations. This class is designed for scenarios where speed is crucial,
- * and the client is certain that all operations are within valid bounds, therefore, skipping
- * the overhead of bounds checking.
- *
- * <p>Warning: Using this class improperly can result in IndexOutOfBoundsException being thrown
- * or worse, it can corrupt your data, cause JVM crashes, or produce other undefined behavior.
+ * A wrapper around another {@link Bytes} instance that bypasses most bounds
+ * checks on read and write operations. Intended for performance critical code
+ * where the caller guarantees that all offsets are valid.
+ * <p>
+ * <strong>Warning:</strong> misuse can corrupt data or crash the JVM.
  */
 @SuppressWarnings("rawtypes")
 public class UncheckedBytes<U>
@@ -53,11 +49,12 @@ public class UncheckedBytes<U>
     private Bytes<?> underlyingBytes;
 
     /**
-     * Constructs an UncheckedBytes instance by wrapping around the provided Bytes object.
+     * Constructs an unchecked view over {@code underlyingBytes}. The positions
+     * and limits of the wrapped bytes are inherited.
      *
-     * @param underlyingBytes the Bytes object to wrap around
-     * @throws ClosedIllegalStateException    If the resource has been released or closed.
-     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
+     * @param underlyingBytes the Bytes instance to wrap
+     * @throws ClosedIllegalStateException    if the resource has been released or closed
+     * @throws ThreadingIllegalStateException if accessed by multiple threads in an unsafe way
      */
     @SuppressWarnings("this-escape")
     public UncheckedBytes(@NotNull Bytes<?> underlyingBytes)
@@ -72,13 +69,12 @@ public class UncheckedBytes<U>
     }
 
     /**
-     * Sets the underlying Bytes instance for this UncheckedBytes.
-     * Releases any resources associated with the current underlying BytesStore, and
-     * reserves the BytesStore of the new underlying Bytes.
+     * Replaces the wrapped {@link Bytes} instance. The current store is
+     * released and the new one reserved.
      *
-     * @param bytes the new underlying Bytes instance
-     * @throws ClosedIllegalStateException    If the resource has been released or closed.
-     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
+     * @param bytes the new underlying bytes
+     * @throws ClosedIllegalStateException    if the resource has been released or closed
+     * @throws ThreadingIllegalStateException if accessed by multiple threads in an unsafe way
      */
     public void setBytes(@NotNull Bytes<?> bytes)
             throws IllegalStateException {
@@ -97,6 +93,10 @@ public class UncheckedBytes<U>
     }
 
     @Override
+    /**
+     * Delegates capacity checks to the wrapped instance and updates this view
+     * if the underlying store changes.
+     */
     public void ensureCapacity(@NonNegative long desiredCapacity)
             throws IllegalArgumentException, IllegalStateException {
         if (desiredCapacity > realCapacity()) {
@@ -106,6 +106,9 @@ public class UncheckedBytes<U>
     }
 
     @Override
+    /**
+     * Always returns this instance as it is already unchecked.
+     */
     @NotNull
     public Bytes<U> unchecked(boolean unchecked) {
         throwExceptionIfReleased();
@@ -176,6 +179,9 @@ public class UncheckedBytes<U>
 
     @NotNull
     @Override
+    /**
+     * Unsupported for unchecked views as copying would reintroduce checks.
+     */
     public BytesStore<Bytes<U>, U> copy() {
         throwExceptionIfReleased();
         throw new UnsupportedOperationException("todo");
@@ -274,7 +280,7 @@ public class UncheckedBytes<U>
             return this;
         }
 
-        if (Jvm.isJava9Plus()) {
+        if (Jvm.isJava9Plus() && Jvm.maxDirectMemory() > 0) {
             byte[] strBytes = extractBytes(text);
             byte coder = StringUtils.getStringCoder(text);
             long utfLength = AppendableUtil.findUtf8Length(strBytes, coder);

@@ -1,8 +1,22 @@
-= Chronicle Bytes micro-benchmarks
-Peter Lawrey
+= Chronicle Bytes Microbenchmarks
+:lang: en-GB
 
-Micro-benchmark involving Chronicle Bytes
+This module contains JMH benchmarks that measure the throughput of common
+operations such as primitive writes, string parsing and CAS updates.
 
-== Cooler micro-benchmarks
+== Purpose
+The benchmarks help detect performance regressions and guide optimisation work.
 
-Code runs slower in a CPU after it has cooled. These tests look at how they perform so they can be optimised.
+== How to Run
+From this directory execute:
+
+[source,bash]
+----
+mvn -q clean verify
+----
+
+Results are printed on the console after the JMH harness completes.
+
+== Adding Benchmarks
+Create a new class under `src/main/java` and follow the existing patterns.
+Each benchmark should document what it measures and keep setup code minimal.

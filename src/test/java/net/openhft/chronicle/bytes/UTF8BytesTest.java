@@ -1,7 +1,5 @@
 /*
- * Copyright (c) 2016-2022 chronicle.software
- *
- *     https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +15,7 @@
  */
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.Jvm;
 import org.junit.Test;
 
 import java.io.File;
@@ -24,14 +23,16 @@ import java.io.IOException;
 import java.nio.file.Files;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assume.assumeFalse;
 
 public class UTF8BytesTest extends BytesTestCommon {
 
     private static final String MESSAGE = "awésome-message-1";
 
     @Test
-    public void testUtfEncoding()
-            throws IOException {
+    public void testUtfEncoding() throws IOException {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         File f = Files.createTempFile("testUtfEncoding", "data").toFile();
         f.deleteOnExit();
         final MappedBytes bytes = MappedBytes.mappedBytes(f, 256, 0);

@@ -1,7 +1,5 @@
 /*
- * Copyright (c) 2016-2022 chronicle.software
- *
- *     https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,8 +44,9 @@ import static net.openhft.chronicle.core.io.Closeable.closeQuietly;
 import static net.openhft.chronicle.core.util.Longs.*;
 
 /**
- * A memory mapped files which can be randomly accessed in chunks. It has overlapping regions to
- * avoid wasting bytes at the end of chunks.
+ * Implementation of {@link MappedFile} that divides a file into multiple
+ * potentially overlapping memory mapped chunks. Only a subset of chunks may be
+ * mapped at once allowing access to files larger than a single mapping.
  */
 @SuppressWarnings("restriction")
 public class ChunkedMappedFile extends MappedFile {
@@ -111,9 +110,10 @@ public class ChunkedMappedFile extends MappedFile {
         ExceptionHandler error = Jvm.error().defaultHandler();
         ExceptionHandler warn = Jvm.warn().defaultHandler();
         ExceptionHandler debug = Jvm.debug().defaultHandler();
+        ExceptionHandler perf = Jvm.perf().defaultHandler();
 
         try {
-            Jvm.setExceptionHandlers(error, null, null);
+            Jvm.setExceptionHandlers(error, null, null, null);
 
             final Path path = Files.createTempDirectory("warmup");
 
@@ -128,10 +128,10 @@ public class ChunkedMappedFile extends MappedFile {
             Thread.yield();
             IOTools.deleteDirWithFiles(path.toFile());
         } catch (IOException e) {
-            Jvm.setExceptionHandlers(error, warn, debug);
+            Jvm.setExceptionHandlers(error, warn, debug, perf);
             Jvm.warn().on(ChunkedMappedFile.class, "Error during warmup", e);
         } finally {
-            Jvm.setExceptionHandlers(error, warn, debug);
+            Jvm.setExceptionHandlers(error, warn, debug, perf);
             if (!errorsDuringWarmup.isEmpty())
                 Jvm.warn().on(ChunkedMappedFile.class, errorsDuringWarmup.size() + " errors during warmup: " + errorsDuringWarmup);
         }

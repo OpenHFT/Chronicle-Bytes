@@ -1,7 +1,5 @@
 /*
- * Copyright (c) 2016-2022 chronicle.software
- *
- *     https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,22 +36,19 @@ import static net.openhft.chronicle.bytes.BytesStore.nativeStoreWithFixedCapacit
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
 /**
- * NativeBytes is a subclass of VanillaBytes which can wrap either a ByteBuffer or malloc'ed memory.
- * It provides flexibility in handling byte arrays which can be of arbitrary sizes and can grow dynamically.
- * The class is called NativeBytes because it deals with 'native' ByteBuffers or memory directly allocated
- * from the operating system which is on heap. It is also capable of handling memory allocation, resizing,
- * and checking boundaries to prevent overflows.
- * <p>
- * The class can be parameterized with a type &lt;U&gt; which represents the underlying type that the byte buffers
- * are intended to represent. This provides a way to use NativeBytes for any type that can be represented as bytes.
+ * {@link VanillaBytes} backed by native (off&nbsp;heap) memory or a direct
+ * {@link ByteBuffer}. The store grows on demand when elastic.
  *
- * @param <U> This represents the underlying type that the byte buffers are intended to represent.
+ * @param <U> underlying type
  */
 @SuppressWarnings("rawtypes")
 public class NativeBytes<U>
         extends VanillaBytes<U> {
+    /** system property {@code bytes.guarded} */
     private static final boolean BYTES_GUARDED = Jvm.getBoolean("bytes.guarded");
+    /** whether new instances are wrapped by {@link GuardedNativeBytes} */
     private static boolean newGuarded = BYTES_GUARDED;
+    /** virtual capacity */
     protected long capacity;
 
     /**

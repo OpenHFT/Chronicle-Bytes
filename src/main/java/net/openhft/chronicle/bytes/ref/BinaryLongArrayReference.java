@@ -1,7 +1,5 @@
 /*
- * Copyright (c) 2016-2022 chronicle.software
- *
- *     https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,12 +36,11 @@ import static net.openhft.chronicle.bytes.HexDumpBytes.MASK;
 import static net.openhft.chronicle.bytes.ref.BinaryLongReference.LONG_NOT_COMPLETE;
 
 /**
- * Represents a binary array of 64-bit long values backed by a {@link BytesStore}.
- * <p>
- * This class provides various operations to access and manipulate an array of 64-bit long integers in binary form.
- * The long integers are stored in a BytesStore, and this class provides methods for reading and writing values at specific indices.
- * <p>
- * Example usage:
+ * Array of 64-bit values stored as
+ * {@code [capacity][used][values...]} in little-endian order.
+ * The value region starts at offset {@code VALUES} and each entry is shifted by
+ * {@code SHIFT} bytes.
+ * <p>Example usage:</p>
  * <pre>
  * BytesStore bytesStore = BytesStore.nativeStoreWithFixedCapacity(32);
  * BinaryLongArrayReference ref = new BinaryLongArrayReference(4); // Creates an array with 4 longs
@@ -52,7 +49,7 @@ import static net.openhft.chronicle.bytes.ref.BinaryLongReference.LONG_NOT_COMPL
  * long value = ref.getValueAt(0);
  * </pre>
  * <p>
- * Note: This class is not thread-safe. External synchronization may be necessary if instances
+ * Note: This class is not thread-safe. External synchronisation may be necessary if instances
  * are shared between threads.
  *
  * @see BytesStore

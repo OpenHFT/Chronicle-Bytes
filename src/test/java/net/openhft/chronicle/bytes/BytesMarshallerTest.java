@@ -1,7 +1,5 @@
 /*
- * Copyright (c) 2016-2022 chronicle.software
- *
- *     https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -120,6 +118,7 @@ class BytesMarshallerTest {
     void setValueWithNonEmptyArray() throws IllegalAccessException {
         // Simulate reading 2 for array size, then read strings
         when(bytesIn.readStopBit()).thenReturn(2L);
+        when(bytesIn.readRemaining()).thenReturn(12L);
         when(bytesIn.readObject(String.class)).thenReturn("hello", "world");
         fieldAccess.setValue(testObject, bytesIn);
         assert Arrays.equals(testObject.stringArray, new String[]{"hello", "world"});

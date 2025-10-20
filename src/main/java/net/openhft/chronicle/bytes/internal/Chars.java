@@ -1,7 +1,5 @@
 /*
- * Copyright (c) 2016-2022 chronicle.software
- *
- *     https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,14 +17,18 @@ package net.openhft.chronicle.bytes.internal;
 
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * Lookup utilities for rendering bytes as characters, used in hex dumps and
+ * similar operations.
+ */
 public final class Chars {
     private Chars() { }
+    /** lookup table for byte value to String */
     public static final String[] charToString = createCharToString();
 
     /**
-     * Creates a lookup table mapping byte values to their corresponding String representations.
-     *
-     * @return a lookup table for byte-to-String conversions.
+     * Populates {@link #charToString} with printable representations for all
+     * byte values. Control characters are encoded as escape sequences.
      */
     @NotNull
     public static String[] createCharToString() {

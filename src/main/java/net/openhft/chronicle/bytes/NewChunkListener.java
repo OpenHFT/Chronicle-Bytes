@@ -1,7 +1,5 @@
 /*
- * Copyright (c) 2016-2022 chronicle.software
- *
- *     https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,21 +18,13 @@ package net.openhft.chronicle.bytes;
 import net.openhft.chronicle.core.annotation.NonNegative;
 
 /**
- * Functional interface defining a listener that gets invoked when a new chunk is added to a {@link MappedFile} in {@link MappedBytes}.
- * <p>
- * This listener provides a mechanism to perform actions or react to events whenever a new chunk is added to a {@link MappedFile}.
- * <p>
- * Implementations should define the {@link #onNewChunk(String, int, long)} method to handle the event.
+ * Listener notified when a new chunk is allocated by a {@link MappedFile}.
  */
 @FunctionalInterface
 public interface NewChunkListener {
 
     /**
-     * This method is invoked when a new chunk is added to a {@link MappedFile} in {@link MappedBytes}.
-     *
-     * @param filename    the name of the file to which a new chunk has been added
-     * @param chunk       the number (or identifier) of the new chunk
-     * @param delayMicros the delay in microseconds from when the chunk was scheduled to be added, to when it was actually added
+     * Invoked after mapping a new chunk.
      */
     void onNewChunk(String filename, @NonNegative int chunk, @NonNegative long delayMicros);
 }

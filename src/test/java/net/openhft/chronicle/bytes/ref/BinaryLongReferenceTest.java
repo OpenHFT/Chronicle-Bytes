@@ -1,7 +1,5 @@
 /*
- * Copyright (c) 2016-2022 chronicle.software
- *
- *     https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +19,7 @@ import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.bytes.BytesTestCommon;
 import net.openhft.chronicle.bytes.MappedBytesStore;
 import net.openhft.chronicle.bytes.MappedFile;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IOTools;
 import net.openhft.chronicle.core.io.ReferenceOwner;
 import org.jetbrains.annotations.NotNull;
@@ -30,6 +29,7 @@ import java.io.File;
 import java.io.IOException;
 
 import static org.junit.Assert.*;
+import static org.junit.Assume.assumeFalse;
 
 public class BinaryLongReferenceTest extends BytesTestCommon {
     @Test
@@ -63,6 +63,8 @@ public class BinaryLongReferenceTest extends BytesTestCommon {
 
     @Test
     public void testCanAssignByteStoreWithExistingOffsetNotInRange() throws IOException {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         final File tempFile = IOTools.createTempFile("testCanAssignByteStoreWithExistingOffsetNotInRange");
         final ReferenceOwner referenceOwner = ReferenceOwner.temporary("test");
         try (final MappedFile mappedFile = MappedFile.mappedFile(tempFile, 4096)) {

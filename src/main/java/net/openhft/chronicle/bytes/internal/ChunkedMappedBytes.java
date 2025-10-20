@@ -1,7 +1,5 @@
 /*
- * Copyright (c) 2016-2022 chronicle.software
- *
- *     https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,10 +27,13 @@ import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.ThreadingIllegalStateException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
+import java.util.Objects;
 
 import static net.openhft.chronicle.core.Jvm.uncheckedCast;
 import static net.openhft.chronicle.core.util.Ints.requireNonNegative;
@@ -46,6 +47,9 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
  */
 @SuppressWarnings("rawtypes")
 public class ChunkedMappedBytes extends CommonMappedBytes {
+
+    static final Logger LOG = LoggerFactory.getLogger(ChunkedMappedBytes.class);
+    static final boolean DEBUG_CHUNKED_MAPPED_BYTES = Jvm.getBoolean("debug.chunked.mapped.bytes", false);
 
     // assume the mapped file is reserved already.
     public ChunkedMappedBytes(@NotNull final MappedFile mappedFile)
@@ -174,17 +178,62 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
         return readPosition(position);
     }
 
+    /**
+     * Move the read position to {@code position}, loading the correct chunk if needed.
+     * <p>
+     * Uses the chunk’s hard upper bound so we only grow the file when absolutely required.
+     *
+     * @param position new read position (>= 0)
+     * @return this instance
+     */
     @NotNull
     @Override
     public Bytes<Void> readPosition(@NonNegative final long position)
             throws BufferUnderflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
 
-        if (bytesStore.inside(position)) {
+        // use the real limit of the byteStore rather than the safe limit to minimise resizing
+        if (bytesStore.inside(position, 0)) {
             return super.readPosition(position);
         } else {
             acquireNextByteStore0(position, true);
             return this;
         }
+    }
+
+    /**
+     * Move the write limit to {@code limit}, loading the correct chunk if needed.
+     * <p>
+     * Uses the chunk’s hard upper bound so we only grow the file when absolutely required.
+     *
+     * @param limit new write limit (>= 0)
+     * @return this instance
+     */
+    @NotNull
+    @Override
+    public Bytes<Void> writeLimit(long limit) throws BufferOverflowException {
+        // use the real limit of the byteStore rather than the safe limit to minimise resizing
+        if (limit != capacity() && !bytesStore.inside(limit, 0)) {
+            acquireNextByteStore0(limit, false);
+        }
+        return super.writeLimit(limit);
+    }
+
+    /**
+     * Move the write position to {@code position}, loading the correct chunk if needed.
+     * <p>
+     * Uses the chunk’s safe upper bound so we can safely write a significant block of data after this without checking the size regularly.
+     *
+     * @param position new write position (>= 0)
+     * @return this instance
+     */
+    @NotNull
+    @Override
+    public Bytes<Void> writePosition(long position) throws BufferOverflowException {
+        // use the safe limit of the byteStore to ensure we can write something after it
+        if (!bytesStore.inside(position)) {
+            acquireNextByteStore0(position, false);
+        }
+        return super.writePosition(position);
     }
 
     /**
@@ -332,6 +381,8 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
     private synchronized @NotNull MappedBytesStore acquireNextByteStore0(@NonNegative final long offset, final boolean set)
             throws ClosedIllegalStateException, ThreadingIllegalStateException {
         throwExceptionIfClosed();
+        if (DEBUG_CHUNKED_MAPPED_BYTES && LOG.isDebugEnabled())
+            Jvm.debug().on(LOG, Integer.toHexString(System.identityHashCode(this)) + ", file: " + mappedFile.file().getName() + ", offset: 0x" + Long.toHexString(offset) + ", read: " + set);
 
         @Nullable final BytesStore<?, ?> oldBS = this.bytesStore;
         @NotNull final MappedBytesStore newBS;

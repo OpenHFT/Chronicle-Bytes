@@ -1,7 +1,5 @@
 /*
- * Copyright (c) 2016-2022 chronicle.software
- *
- *     https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,59 +39,37 @@ import java.nio.channels.FileLock;
 import static net.openhft.chronicle.core.Jvm.uncheckedCast;
 
 /**
- * Represents a memory-mapped file that can be randomly accessed in chunks. The file is divided
- * into chunks, and each chunk has an overlapping region with the next chunk to avoid wasting bytes
- * at the end of each chunk. This class provides methods for locking regions of the file, acquiring
- * bytes for read or write operations, and managing the reference counts of the underlying mapped byte stores.
- * <p>
- * The class is abstract, and specific implementations may differ in how they manage the chunks
- * and underlying file storage.
+ * Manages a memory-mapped file and creates {@link MappedBytesStore} views over it.
+ * Chunks may overlap to avoid wasted space. Used heavily by Chronicle Queue and
+ * Chronicle Map for off-heap persistence.
  */
 @SuppressWarnings({"rawtypes", "restriction"})
 public abstract class MappedFile extends AbstractCloseableReferenceCounted {
 
-    /**
-     * The default disk synchronization mode for this mapped file.
-     */
+    /** default {@link SyncMode} for new mappings */
     public static final SyncMode DEFAULT_SYNC_MODE = SyncMode.valueOf(System.getProperty("mappedFile.defaultSyncMode", "ASYNC"));
 
-    /**
-     * Flag to indicate if the mapped file should be retained.
-     */
+    /** system flag {@code mappedFile.retain} controlling reference retention */
     protected static final boolean RETAIN = Jvm.getBoolean("mappedFile.retain");
 
-    /**
-     * The default capacity of the mapped file.
-     */
+    /** default capacity used for chunked files */
     private static final long DEFAULT_CAPACITY = 128L << 40;
 
-    /**
-     * A token that represents the internalized file path.
-     */
+    /** token derived from the canonical path for synchronisation */
     private final String internalizedToken;
 
-    /**
-     * The actual file that is memory-mapped.
-     */
+    /** the file being mapped */
     @NotNull
     private final File file;
 
-    /**
-     * Flag indicating if the file is read-only.
-     */
+    /** read only mapping flag */
     private final boolean readOnly;
 
-    /**
-     * Listener for the event when a new chunk is created.
-     */
+    /** invoked when a new chunk is allocated */
     protected NewChunkListener newChunkListener = MappedFile::logNewChunk;
 
     /**
-     * Constructs a new MappedFile with the specified file and read-only flag.
-     *
-     * @param file     The file to be memory-mapped.
-     * @param readOnly True if the file should be read-only, false otherwise.
-     * @throws IORuntimeException if an I/O error occurs.
+     * Creates a mapped file wrapper.
      */
     protected MappedFile(@NotNull final File file,
                          final boolean readOnly)
@@ -183,13 +159,7 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
     }
 
     /**
-     * Creates and returns a MappedFile instance for the specified file with the given chunk size.
-     * The overlap size is set to the default page size of the operating system.
-     *
-     * @param file      The file to be memory-mapped.
-     * @param chunkSize The size of each chunk in bytes.
-     * @return A new MappedFile instance.
-     * @throws FileNotFoundException If the specified file does not exist.
+     * Opens a chunked mapping using the default overlap size.
      */
     @NotNull
     public static MappedFile mappedFile(@NotNull final File file, @NonNegative final long chunkSize)
@@ -201,7 +171,9 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
      * Creates and returns a MappedFile instance for the specified file with the given chunk size.
      * The overlap size is set to the default page size of the operating system.
      *
-     * @param filename  The name of the file to be memory-mapped.
+     * @param filename  The name of the file to be memory-mapped. The path is
+     *                  resolved to its canonical form to help guard against
+     *                  path traversal.
      * @param chunkSize The size of each chunk in bytes.
      * @return A new MappedFile instance.
      * @throws FileNotFoundException If the specified file does not exist.
@@ -215,7 +187,9 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
     /**
      * Creates and returns a MappedFile instance for the specified file with the given chunk size and overlap size.
      *
-     * @param filename    The name of the file to be memory-mapped.
+     * @param filename    The name of the file to be memory-mapped. The path is
+     *                    resolved to its canonical form to help guard against
+     *                    path traversal.
      * @param chunkSize   The size of each chunk in bytes.
      * @param overlapSize The size of the overlapping regions between chunks in bytes.
      * @return A new MappedFile instance.
@@ -226,7 +200,10 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
                                         @NonNegative final long chunkSize,
                                         @NonNegative final long overlapSize)
             throws FileNotFoundException {
-        return mappedFile(new File(filename), chunkSize, overlapSize);
+        final File rawFile = new File(filename);
+        final String canonical = CanonicalPathUtil.of(rawFile);
+        final File canonicalFile = new File(canonical);
+        return mappedFile(canonicalFile, chunkSize, overlapSize);
     }
 
     /**

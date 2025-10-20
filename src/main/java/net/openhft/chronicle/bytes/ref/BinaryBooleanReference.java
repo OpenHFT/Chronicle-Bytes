@@ -1,7 +1,5 @@
 /*
- * Copyright (c) 2016-2022 chronicle.software
- *
- *     https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,11 +29,12 @@ import java.nio.BufferUnderflowException;
 import static net.openhft.chronicle.bytes.HexDumpBytes.MASK;
 
 /**
- * Represents a binary reference to a boolean value.
+ * Stores a boolean as a single byte.
+ * <p>The encoding uses {@code 0xB0} for {@code false} and {@code 0xB1} for
+ * {@code true} to avoid confusion with ASCII digits.</p>
  *
- * <p>This class encapsulates a reference to a boolean value stored in binary form. It provides
- * functionality to read and write a boolean value to/from a {@link BytesStore}.
- *
+ * <p> Any other byte value yields undefined behaviour in
+ * {@link #getValue()}.
  * @see BytesStore
  * @see BooleanValue
  */
@@ -82,11 +81,13 @@ public class BinaryBooleanReference extends AbstractReference implements Boolean
 
     /**
      * Reads a boolean value from the bytes store.
+     * Behaviour is undefined if the stored byte is neither
      *
      * @return The read boolean value
      * @throws BufferUnderflowException If the bytes store contains insufficient data
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
+     * {@code 0xB0} nor {@code 0xB1}.
      */
     @Override
     public boolean getValue()

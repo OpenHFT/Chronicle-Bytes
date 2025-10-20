@@ -1,7 +1,5 @@
 /*
- * Copyright (c) 2016-2022 chronicle.software
- *
- *     https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,10 +43,7 @@ import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Locale;
-import java.util.Scanner;
+import java.util.*;
 import java.util.concurrent.Callable;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
@@ -70,16 +65,20 @@ public class BytesTest extends BytesTestCommon {
 
     @Parameterized.Parameters(name = "{0}")
     public static Collection<Object[]> data() {
-        return Arrays.asList(new Object[][]{
-                {"Native Unchecked", NATIVE_UNCHECKED},
-                {"Native Wrapped", NATIVE},
-                {"Native Address", NATIVE_ADDRESS},
+        List<Object[]> tests = new ArrayList<>(Arrays.asList(new Object[][]{
                 {"Heap", HEAP},
                 {"Heap ByteBuffer", BYTE_BUFFER},
                 {"Heap Unchecked", HEAP_UNCHECKED},
                 {"Heap Embedded", HEAP_EMBEDDED},
                 {"Hex Dump", HEX_DUMP}
-        });
+        }));
+        if (Jvm.maxDirectMemory() > 0)
+            tests.addAll(Arrays.asList(new Object[][]{
+                    {"Native Unchecked", NATIVE_UNCHECKED},
+                    {"Native Wrapped", NATIVE},
+                    {"Native Address", NATIVE_ADDRESS},
+            }));
+        return tests;
     }
 
     @Test
@@ -1383,6 +1382,8 @@ public class BytesTest extends BytesTestCommon {
 
     @Test
     public void testWriteDirect() throws Exception {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         doTestWrite(() -> ByteBuffer.allocateDirect(128));
     }
 

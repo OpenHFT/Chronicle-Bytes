@@ -1,7 +1,5 @@
 /*
- * Copyright (c) 2016-2022 chronicle.software
- *
- *     https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +21,10 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 
+/**
+ * Runnable that unmaps a memory region when executed, typically via a cleaner
+ * service.
+ */
 public final class Unmapper implements Runnable {
     private final long size;
 
@@ -30,6 +32,11 @@ public final class Unmapper implements Runnable {
 
     private volatile long address;
 
+    /**
+     * @param address start of the region
+     * @param size    size of the region
+     * @param pageSize operating system page size
+     */
     public Unmapper(long address, long size, int pageSize) throws IllegalStateException {
 
         assert (address != 0);
@@ -39,6 +46,9 @@ public final class Unmapper implements Runnable {
     }
 
     @Override
+    /**
+     * Performs the unmap. If already unmapped the call is ignored.
+     */
     public void run() {
         if (address == 0)
             return;

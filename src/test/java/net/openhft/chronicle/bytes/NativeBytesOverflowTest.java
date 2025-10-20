@@ -1,7 +1,5 @@
 /*
- * Copyright (c) 2016-2022 chronicle.software
- *
- *     https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +15,7 @@
  */
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.Jvm;
 import org.junit.Test;
 
 import java.nio.BufferOverflowException;
@@ -24,6 +23,7 @@ import java.nio.ByteBuffer;
 
 import static net.openhft.chronicle.bytes.BytesStore.wrap;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeFalse;
 
 public class NativeBytesOverflowTest extends BytesTestCommon {
 
@@ -52,6 +52,8 @@ public class NativeBytesOverflowTest extends BytesTestCommon {
 
     @Test(expected = BufferOverflowException.class)
     public void testElastic() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         Bytes<?> bytes = Bytes.elasticByteBuffer();
         try {
             bytes.writeLimit(2).writePosition(0);

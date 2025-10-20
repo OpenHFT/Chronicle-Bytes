@@ -1,7 +1,5 @@
 /*
- * Copyright (c) 2016-2022 chronicle.software
- *
- *     https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +17,15 @@ package net.openhft.chronicle.bytes.internal;
 
 import net.openhft.chronicle.bytes.BytesTestCommon;
 import net.openhft.chronicle.bytes.render.*;
+import net.openhft.chronicle.core.Jvm;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 
 import static org.junit.Assert.*;
+import static org.junit.Assume.assumeFalse;
 
 @SuppressWarnings({"squid:S2699", "squid:S5786"})
 class DecimaliserFloatTest extends BytesTestCommon {
@@ -62,6 +63,11 @@ class DecimaliserFloatTest extends BytesTestCommon {
             assertEquals(1, exponent);
     };
     public static final float HARD_TO_DECIMALISE = 4.8846945805332034E-12f;
+
+    @BeforeEach
+    public void hasDirect() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+    }
 
     @Test
     public void toFloatTestTest() {

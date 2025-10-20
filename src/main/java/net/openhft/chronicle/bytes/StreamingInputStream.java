@@ -1,7 +1,5 @@
 /*
- * Copyright (c) 2016-2022 chronicle.software
- *
- *     https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,13 +24,9 @@ import java.io.InputStream;
 import java.nio.BufferUnderflowException;
 
 /**
- * A special kind of InputStream implementation which reads data from a StreamingDataInput instance.
- *
- * <p>This class provides a way to connect APIs expecting an InputStream with data sources
- * encapsulated in StreamingDataInput instances.
- *
- * @see StreamingDataInput
- * @see InputStream
+ * An {@link InputStream} adapter that sources its data from a
+ * {@link StreamingDataInput}. Useful when an API requires an
+ * {@code InputStream} but the data resides in a Chronicle Bytes stream.
  */
 @SuppressWarnings("rawtypes")
 public class StreamingInputStream extends InputStream {

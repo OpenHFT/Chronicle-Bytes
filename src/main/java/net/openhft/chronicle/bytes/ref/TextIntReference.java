@@ -1,7 +1,5 @@
 /*
- * Copyright (c) 2016-2022 chronicle.software
- *
- *     https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,13 +31,11 @@ import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static net.openhft.chronicle.bytes.BytesUtil.roundUpTo8ByteAlign;
 
 /**
- * TextIntReference is an implementation of a reference to a 32-bit integer, represented
- * in text wire format. It extends AbstractReference and implements IntValue. The text representation
- * is formatted to resemble a JSON-like content for an atomic 32-bit integer with a lock indicator.
- * <p>
- * The format of the text representation is:
- * {@code !!atomic { locked: false, value: 0000000000 }}
- * 
+ * Reference to a 10-digit, zero-padded integer in text form.
+ * <p>The 34-byte layout embeds a CAS-based lock.</p>
+ *
+ * <p> {@code FALSE} and {@code TRUE} store the lock field.
+ * <p> Debug-only; avoid on performance critical paths.
  */
 @SuppressWarnings("rawtypes")
 public class TextIntReference extends AbstractReference implements IntValue {

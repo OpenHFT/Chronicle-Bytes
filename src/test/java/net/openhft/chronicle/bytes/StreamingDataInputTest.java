@@ -1,7 +1,5 @@
 /*
- * Copyright (c) 2016-2022 chronicle.software
- *
- *     https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +15,8 @@
  */
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.Jvm;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -26,6 +26,7 @@ import java.util.Arrays;
 import java.util.Objects;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assume.assumeFalse;
 
 @RunWith(Parameterized.class)
 public class StreamingDataInputTest extends BytesTestCommon {
@@ -39,6 +40,11 @@ public class StreamingDataInputTest extends BytesTestCommon {
     @Parameterized.Parameters(name = "allocator={0}")
     public static Object[] params() {
         return Arrays.stream(Allocator.values()).toArray();
+    }
+
+    @Before
+    public void hasNativeMemory() {
+        assumeFalse(allocator.name().startsWith("NATIVE") && Jvm.maxDirectMemory() == 0);
     }
 
     @Test

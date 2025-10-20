@@ -1,0 +1,197 @@
+= Chronicle Bytes Project Requirements
+:doctype: book
+:toc:
+:lang: en-GB
+
+// -------------------------------------------------------------------
+// Legend
+// -------------------------------------------------------------------
+// Requirement identifiers follow the company nine-box taxonomy:
+// \<Scope\>-\<Tag\>-NNN where
+// Scope  = CB (Chronicle Bytes)
+// Tag    = FN | NF-P | NF-S | NF-O | NF-MP | TEST | DOC | OPS | RISK
+// NNN    = sequential number with three digits
+// All text is British English and ASCII-7 only, per AGENT.md section 2.
+// -------------------------------------------------------------------
+
+== 1  Scope
+
+Chronicle Bytes is the low-level memory-access layer for the wider OpenHFT stack.
+These requirements define the contracts, performance envelopes and operational obligations that the library **must** meet to be accepted into the Chronicle Software code-base.
+
+== 2  Functional Requirements
+
+[cols="1,5,4",options="header"]
+|===
+|ID |Description |Verification
+|CB-FN-001 |Provide the `Bytes<T>` API that exposes separate read and write
+cursors, limits and capacity, allowing zero-copy access to arbitrary memory
+regions. |Unit tests exercise cursor moves, bounds checks and data integrity.
+|CB-FN-002 |Implement `BytesStore<B,U>` as the immutable backing store for
+`Bytes`; support on-heap, direct (off-heap) and memory-mapped file variants. |Integration tests open each variant, write then re-read data.
+|CB-FN-003 |Support elastic buffers that grow transparently up to the maximum
+real capacity advertised by the chosen `BytesStore`. |JMH benchmark writes
+variable-length records until capacity grows, asserting no exceptions.
+|CB-FN-004 |Expose atomic operations (compare-and-swap, get-and-add) for 32- and
+64-bit integers and other relevant primitives located in off-heap memory. |Concurrency stress test using multiple
+threads contending on the same address, asserting correctness under load.
+|CB-FN-005 |Provide stop-bit encoding and decoding utilities for signed and
+unsigned integer types (long, int). |Round-trip property-based test over random values.
+|CB-FN-006 |Allow creation of lightweight slice views (`bytesForRead`,
+`bytesForWrite`, `slice`) without data copying. |Memory accounting test proves the same
+underlying address is shared; operations on slice reflect in parent and vice-versa.
+|CB-FN-007 |Offer hex-dump debugging support via `HexDumpBytes` or similar utility. |Unit test
+emits dump and matches expected ASCII layout for various data types.
+|CB-FN-008 |Integrate with Chronicle Wire to permit `MethodWriter` and
+`MethodReader` serialisation on any supported `Bytes` implementation. |End-to-end test serialises a six-field POJO then deserialises, asserting data
+integrity and listener invocation.
+|CB-FN-009 |Support efficient parsing and formatting of common string encodings (e.g., UTF-8, ISO-8859-1, US-ASCII) with options to control encoding/decoding behaviour, including length prefixes. |Unit tests for various encodings, including edge cases, malformed sequences, and different length prefixing strategies. Property-based tests for round-trip fidelity.
+|CB-FN-010 |Provide mechanisms to wrap existing `byte[]` arrays (including sub-regions) and `java.nio.ByteBuffer` instances (read-only and writable) without copying data. |Unit tests wrap various array/buffer types and sub-regions, perform operations, and verify data integrity and no-copy behaviour.
+|CB-FN-011 |Offer methods for efficient bulk data transfer between `Bytes` instances or from/to `BytesStore` and other data sources like `InputStream`/`OutputStream` or `java.nio.channels.ReadableByteChannel`/`WritableByteChannel`. |JMH benchmarks comparing bulk transfer speeds with manual loops and `java.nio` alternatives for various sizes.
+|CB-FN-012 |Ensure all `Bytes` implementations correctly handle memory alignment for primitive types where platform performance is sensitive to it, particularly for off-heap and memory-mapped stores. This includes providing aligned write/read methods. |Micro-benchmarks measuring access times for aligned vs. unaligned data; code review for alignment strategies. Unit tests for aligned access methods.
+|CB-FN-013 |Provide utility methods for common byte-level manipulations, such as finding a specific byte or byte sequence, or comparing regions of `Bytes` instances. |Unit tests verify correctness for various search patterns and comparison scenarios.
+|CB-FN-014 |Support for acquiring and releasing `Bytes` instances from a configurable pool to reduce allocation overhead and GC pressure. |JMH benchmark showing performance benefits of pooling under high churn. Unit tests for pool lifecycle and instance re-use.
+|===
+
+== 3  Non-Functional Requirements – Performance
+
+[cols="1,5,4",options="header"]
+|===
+|ID |Requirement |Benchmark Target
+|CB-NF-P-001 |Serialise and deserialise a six-field object (string plus enum)
+using YAML Wire in ≤ 0.25 µs mean and ≤ 0.5 µs 99.9 %tile on 3.2 GHz x86-64. |JMH `SampleTime` benchmark, ≥ 10 M ops.
+|CB-NF-P-002 |`Bytes.equalsBytes()` or equivalent region comparison method must be **≥ 3 ×** faster than
+`java.nio.ByteBuffer.equals` for 32 KiB payloads (on-heap and off-heap). |Custom micro-benchmark
+throughput comparison leveraging JVM intrinsics where possible.
+|CB-NF-P-003 |Allocate **and** release an elastic off-heap buffer of 1 MiB in
+≤ 20 µs 99.99 %tile. |JMH `SingleShot` benchmark, ≥ 1 000 repeats.
+|CB-NF-P-004 |Read an eight-byte aligned long from hot-cache `MappedBytes` in
+≤ 80 ns mean and ≤ 150 ns 99.9 %tile. |Low-level harness pinned with thread affinity.
+|CB-NF-P-005 |`compareAndSwapLong` on a contended cache line (off-heap) sustains ≥ 25 M
+successful swaps / sec on dual-socket Intel Xeon Gold 6338N (or equivalent modern server CPU). |5 s busy-loop
+calibration with multiple contending threads.
+|CB-NF-P-006 |UTF-8 string encoding (128 ASCII characters) throughput ≥ 500 MB/s; decoding throughput ≥ 400 MB/s on 3.2 GHz x86-64. |JMH benchmark with typical string lengths (e.g. 16-256 chars).
+|CB-NF-P-007 |Random read/write access for primitive types (long, int, double) directly on off-heap `Bytes` instances sustains ≥ 200 M ops/sec per core. |JMH benchmark targeting various primitive access patterns (sequential and random).
+|CB-NF-P-008 |Resizing an elastic off-heap buffer (e.g., doubling capacity from 1MB to 2MB) should complete in ≤ 5 µs 99%tile, assuming underlying memory allocation is fast. |JMH benchmark measuring resize operation latency.
+|CB-NF-P-009 |Acquiring a pooled off-heap `Bytes` instance (1KB) and releasing it must be ≤ 100 ns mean time. |JMH benchmark focusing on pool `acquire`/`release` cycle.
+|===
+
+== 4  Non-Functional Requirements – Security
+
+[cols="1,5,4",options="header"]
+|===
+|ID |Requirement |Verification
+|CB-NF-S-001 |All memory access operations **must** perform rigorous bounds checking to prevent buffer overflows or underflows, leading to deterministic exceptions (e.g., `BufferOverflowException`, `IndexOutOfBoundsException`) rather than undefined behaviour or JVM crashes. |Property-based tests attempting out-of-bounds access across all `Bytes` types and operations. Static analysis tool checks (e.g., SpotBugs).
+|CB-NF-S-002 |For memory-mapped files, ensure appropriate file permissions and locking mechanisms are utilized by default to prevent unintended data corruption when files might be shared between processes, if such sharing is a supported feature. Documentation must highlight safe sharing patterns. |Integration tests simulating multi-process access with varied permission settings. Code review of file handling.
+|CB-NF-S-003 |The library **must not** introduce vulnerabilities through its own direct JNI/native code (if any beyond standard JDK calls like Unsafe). Any use of `sun.misc.Unsafe` must be encapsulated, its risks understood, documented, and limited to essential use cases. |Code review of any native code or `Unsafe` usage. Dependency vulnerability scan (e.g., OWASP Dependency-Check) as part of CI.
+|CB-NF-S-004 |Operations that can potentially lead to excessive memory allocation (e.g., elastic buffer growth with very large inputs) should have documented safeguards or configurable limits where appropriate, or clear warnings about potential `OutOfMemoryError`. |Documentation review; specific tests attempting to trigger excessive allocation.
+|===
+
+== 5  Non-Functional Requirements – Operability
+
+[cols="1,5,4",options="header"]
+|===
+|ID |Requirement |Evidence
+|CB-NF-O-001 |All off-heap resources (`BytesStore` and `Bytes` instances holding them) **must** implement `java.io.Closeable` and explicit `releaseLast()`/`close()` methods for deterministic reclamation. Reference counting must be robust. |Unit tests track allocated vs released native bytes; stress tests for reference counting correctness under concurrent access if applicable.
+|CB-NF-O-002 |Expose `BytesMetrics` (e.g., count of active instances, total native memory allocated/used by type – direct, mapped) via JMX MBeans. |Integration test registers MBean and observes counter changes under various load patterns.
+|CB-NF-O-003 |Log a single WARN with stack trace if a `Bytes`/`BytesStore` instance holding native resources is GC-finalised while still retained (ref-count \> 0). |Fault-injection test leaks a buffer and verifies log output and frequency.
+|CB-NF-O-004 |All default log messages use SLF4J and allocate zero temporary objects on the hot path when logging is disabled at the configured level (e.g. INFO and above). |JMH probe with logging disabled at various levels. Code review of logging statements.
+|CB-NF-O-005 |Define and document the thread-safety guarantees for all `Bytes` and `BytesStore` operations. Specifically, `Bytes` instances are not thread-safe for concurrent mutation of cursors or content by default. `BytesStore` atomic operations are thread-safe. Concurrent reads on a single `Bytes` instance by multiple threads are permissible if no writes occur to that `Bytes` instance's view or the underlying store section it views. |Documentation review; targeted concurrency tests for documented safe/unsafe patterns.
+|CB-NF-O-006 |The library should provide clear diagnostic information (e.g., detailed exception messages, relevant state) when common errors occur (e.g., out-of-bounds access, resource leaks, mapping failures). |Review of exception handling code. Unit tests that trigger common errors verify quality of diagnostic messages.
+|===
+
+== 6  Non-Functional Requirements – Maintainability & Portability
+
+[cols="1,5,4",options="header"]
+|===
+|ID |Requirement |Verification
+|CB-NF-MP-001 |The library **must** be compatible with and fully functional on at least the last three LTS versions of Java (e.g., Java 11, 17, 21), with clear documentation on any version-specific behaviour or performance characteristics. Support for Java 8 may be maintained on a best-effort basis if critical. |Full test suite execution on all declared supported Java versions in CI.
+|CB-NF-MP-002 |The codebase **must** adhere to OpenHFT coding standards and conventions (e.g., style, naming, design patterns). Module dependencies should be minimized to reduce complexity and potential conflicts. |Static analysis (Checkstyle, PMD, SonarLint) in build; dependency tree review (`mvn dependency:tree`).
+|CB-NF-MP-003 |Public APIs **must** have a defined backward compatibility policy (e.g., semantic versioning 2.0.0). Deprecation of APIs should follow a clear process with advance notice (e.g., via `@Deprecated` javadoc, release notes) and migration paths. |Changelog review; API evolution documentation; use of tools like Revapi for checking API changes.
+|CB-NF-MP-004 |The library should build and pass all tests on common operating systems used in development and deployment (e.g., Linux x86-64, macOS x86-64/ARM64, Windows x86-64). |CI jobs for each supported OS/architecture combination.
+|CB-NF-MP-005 |Internal components should be well-encapsulated to facilitate future refactoring and evolution without breaking public contracts. |Code reviews focusing on API design and internal module structure.
+|===
+
+== 7  Documentation Obligations
+
+[cols="1,5,4",options="header"]
+|===
+|ID |Requirement |Compliance Check
+|CB-DOC-001 |All AsciiDoc and Javadoc **must** use British English and ASCII-7 (or UTF-8 where essential, clearly marked). |Automated spell- and byte-range scan in Maven `verify`.
+|CB-DOC-002 |Javadoc first sentence is a concise behavioural summary; blocks
+must not duplicate information manifest from the signature. All public classes and methods must have Javadoc. |Checkstyle custom rule or equivalent. Javadoc generation and spot checks.
+|CB-DOC-003 |`docs/chronicle-bytes-manual.adoc` includes a worked example for
+each public factory method/common use case and a performance-tuning section (covering memory types, pooling, alignment, string encodings). |Peer review before release. Review of example code for correctness and clarity.
+|CB-DOC-004 |`README.md` links to key performance figures (e.g., representative latency/throughput from CB-NF-P benchmarks) produced by latest CI
+benchmark run. |CI pipeline updates badge or embedded figures on commit/release.
+|CB-DOC-005 |Document the thread-safety model of `Bytes` and `BytesStore` explicitly, including safe usage patterns for concurrent access and an explanation of the reference counting mechanism. |Peer review of documentation section on concurrency and memory management.
+|CB-DOC-006 |Provide clear examples and explanations for managing the lifecycle of different `BytesStore` types, especially for off-heap and memory-mapped resources, including typical error handling and resource reclamation patterns (`releaseLast`/`close`). |Peer review of resource management documentation and examples.
+|CB-DOC-007 |Glossary (`CB-GLOSS-001`) must be comprehensive and cover all specialized terms used in the library and its documentation. |Peer review of glossary against documentation and codebase.
+|===
+
+== 8  Test Obligations
+
+[cols="1,5,4",options="header"]
+|===
+|ID |Requirement |Test Strategy
+|CB-TEST-001 |Public API coverage ≥ 90 % (lines and branches), excluding generated code or trivial getters/setters unless they contain logic. |Jacoco/Cobertura fails build below threshold.
+|CB-TEST-002 |Property-based tests over random input sizes and sequences of operations verify no indexing
+exceptions, correct round-trip serialisation for all supported types, and consistent state. |JUnit with QuickTheories/jqwik.
+|CB-TEST-003 |Soak test: continuous mixed read/write operations (including atomics and elastic resizing) on various buffer types (direct, mapped, pooled) for ≥ 12 hours shows ≤ 5 % native-memory drift from steady state and no deadlocks or correctness issues. |Nightly soak profile with detailed memory and performance logging.
+|CB-TEST-004 |Benchmark suite must complete under Linux and macOS within CI
+budget of 15 min (for standard checks) and 1 hour (for full performance regression suite). |CI gate with tiered benchmark execution.
+|CB-TEST-005 |Include tests for all supported string encodings (UTF-8, ISO-8859-1, etc.) covering common characters, boundary conditions, multi-byte sequences, and malformed inputs. |Unit tests with predefined and generated string data.
+|CB-TEST-006 |Ensure robustness of bounds checking by specifically testing edge cases for all read/write operations, slice creation, and buffer manipulations at limits. |Targeted unit and property-based tests focusing on buffer limits and cursor positions.
+|CB-TEST-007 |Concurrency tests for all operations documented as thread-safe (e.g., atomic operations, concurrent reads, pooled access) under high contention. |JUnit tests using `ExecutorService` and `CyclicBarrier`/`CountDownLatch` to simulate contention.
+|CB-TEST-008 |Tests for resource management, ensuring `releaseLast`/`close` correctly deallocates resources and that use-after-release throws appropriate exceptions. Leak detection tests verify warnings (CB-NF-O-003). |Unit tests instrumenting resource allocation/deallocation; specific tests for use-after-release behaviour.
+|===
+
+== 9  Risk & Compliance
+
+[cols="1,5,4",options="header"]
+|===
+|ID |Requirement |Mitigation Proof
+|CB-RISK-001 |Fail fast on endianness mismatch between writer and reader when
+using raw wire format or if endianness-sensitive operations are exposed. (Note: Chronicle Wire handles this mostly). |Integration test swaps endianness (if applicable at Bytes level) and expects exception or defines clear behaviour.
+|CB-RISK-002 |Open-source build throws `UnsupportedOperationException` or similar if
+Enterprise-only features (e.g. encrypted queue files at a higher level, specific `BytesStore` types) are attempted to be used. |Unit test verifies.
+|CB-RISK-003 |Ensure that direct use of `sun.misc.Unsafe` is clearly demarcated, justified, and encapsulated. Fallback mechanisms should be considered if `Unsafe` is unavailable, or clear documentation of `Unsafe` necessity. |Code review and documentation justifying `Unsafe` use; tests for fallback mechanisms if any, or CI runs with `Unsafe` restricted.
+|CB-RISK-004 |Potential for `OutOfMemoryError` (both Java heap and native memory) if not managed correctly by users. |Clear documentation (CB-DOC-006) on resource lifecycle and typical patterns to avoid leaks. `BytesMetrics` (CB-NF-O-002) for monitoring.
+|===
+
+== 10  Operational Concerns
+
+[cols="1,5,4",options="header"]
+|===
+|ID |Requirement |Notes
+|CB-OPS-001 |`./mvnw -q verify` completes with zero warnings or test failures in
+reference build container `Dockerfile.build`. |CI.
+|CB-OPS-002 |Artefacts pushed to Maven Central **must** be reproducible; local
+`mvn -Prelease` output must equal CI artefact byte-for-byte. |Diff script in release pipeline. Reproducible-builds Maven plugin.
+|CB-OPS-003 |The library **must** clearly list its runtime dependencies and their versions, ensuring they are available from standard public repositories like Maven Central. Transitive dependencies should be audited for compatibility and potential conflicts. |Review of `pom.xml` or build scripts; CI checks for dependency resolution and conflicts (`mvn dependency:analyze`).
+|CB-OPS-004 |Provide a mechanism for users to report issues and get support (e.g., GitHub Issues, community forum/mailing list). |Link to issue tracker and support channels in `README.md` and project website.
+|CB-OPS-005 |Release notes must accompany each release, detailing new features, bug fixes, performance improvements, and any breaking changes or deprecations. |Process for drafting and reviewing release notes as part of release cycle.
+|===
+
+== 11  Glossary
+
+ASCII-7 ::  American Standard Code for Information Interchange, 7-bit.
+atomic operations ::  Operations that complete in a single, indivisible step, often used for thread-safe updates to shared memory.
+direct memory ::  Off-heap memory managed by the JVM, not part of the Java heap, accessed via `java.nio.ByteBuffer.allocateDirect` or `Unsafe`.
+elastic buffer ::  A buffer that grows automatically when additional capacity is
+needed, up to a defined maximum or available system memory.
+endianness ::  The order in which bytes are arranged to represent multi-byte data types (e.g., big-endian, little-endian).
+hot cache ::  CPU cache (L1/L2/L3) that currently holds the data being accessed, leading to faster retrieval.
+JMH ::  Java Microbenchmark Harness, a toolkit for building, running, and analysing nano/micro/milli/macro benchmarks in Java.
+JMX ::  Java Management Extensions, a technology for monitoring and managing Java applications.
+mapped bytes ::  A `Bytes` whose `BytesStore` is backed by an OS memory-mapped
+file, allowing file content to be accessed as if it were in memory.
+off-heap memory ::  Memory allocated outside the Java garbage-collected heap.
+on-heap memory ::  Memory allocated within the Java garbage-collected heap, typically as `byte[]`.
+property-based testing ::  A testing technique where properties of the code are checked against a wide range of auto-generated inputs.
+reference counting ::  A mechanism to track the number of active references to a resource, enabling deterministic deallocation when the count reaches zero.
+SLF4J ::  Simple Logging Facade for Java, an abstraction for various logging frameworks.
+stop-bit encoding ::  Variable-length integer encoding using one bit (often the MSB) in each byte as a continuation flag.
+UTF-8 ::  Unicode Transformation Format, 8-bit, a variable-width character encoding capable of encoding all possible Unicode code points.
+zero-copy ::  Operations that avoid copying data between different memory areas, e.g., reading from a file directly into a target buffer without intermediate copies.
+

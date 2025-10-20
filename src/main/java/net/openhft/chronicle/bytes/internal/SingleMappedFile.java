@@ -1,7 +1,5 @@
 /*
- * Copyright (c) 2016-2022 chronicle.software
- *
- *     https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,8 +36,11 @@ import java.nio.channels.FileLock;
 import static net.openhft.chronicle.core.io.Closeable.closeQuietly;
 
 /**
- * A memory mapped files which can be randomly accessed in a single chunk. It has no overlapping region to
- * avoid wasting bytes at the end of file.
+ * Maps an entire file into a single contiguous region. No chunking or overlap is
+ * used, making it suitable for relatively small files that fit comfortably in
+ * process address space.
+ * {@link MappedFile} implementation that maps the entire file as one contiguous
+ * region. Suitable when the full capacity fits into the process address space.
  */
 @SuppressWarnings({"rawtypes", "restriction"})
 public class SingleMappedFile extends MappedFile {
@@ -72,6 +73,9 @@ public class SingleMappedFile extends MappedFile {
      * @param capacity the capacity of the mapped file.
      * @param readOnly if the file is read-only.
      * @throws IORuntimeException if any I/O error occurs.
+     */
+    /**
+     * Creates a new mapping for the entire {@code file}.
      */
     @SuppressWarnings("this-escape")
     public SingleMappedFile(@NotNull final File file,
@@ -160,6 +164,11 @@ public class SingleMappedFile extends MappedFile {
         return store;
     }
 
+    /**
+     * Ensures {@link RandomAccessFile#length()} is at least {@code minSize}.
+     * Synchronises on the file's canonical path to coordinate with other
+     * processes.
+     */
     @SuppressWarnings("try")
     private void resizeRafIfTooSmall(@NonNegative final long minSize)
             throws IOException {
@@ -204,7 +213,8 @@ public class SingleMappedFile extends MappedFile {
     }
 
     /**
-     * Releases resources held by this mapped file
+     * Releases the single {@link MappedBytesStore} and closes the underlying
+     * {@link RandomAccessFile}.
      */
     @Override
     protected void performRelease() {
@@ -253,18 +263,14 @@ public class SingleMappedFile extends MappedFile {
     }
 
     /**
-     * Returns the size of chunks in this mapped file
-     *
-     * @return The size of chunks in this mapped file
+     * @return capacity of the single mapping
      */
     public long chunkSize() {
         return capacity;
     }
 
     /**
-     * Returns the size of overlaps in this mapped file
-     *
-     * @return The size of overlaps in this mapped file
+     * @return always {@code 0} as no overlap is used
      */
     public long overlapSize() {
         return 0;

@@ -1,7 +1,5 @@
 /*
- * Copyright (c) 2016-2022 chronicle.software
- *
- *     https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,18 +15,31 @@
  */
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.Jvm;
 import org.junit.Test;
 
 import java.nio.ByteBuffer;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assume.assumeFalse;
 
 public class CopyToTest {
 
     @Test
-    public void testCopyFromBytesIntoByteBuffer() {
+    public void testCopyFromDirectBytesIntoByteBuffer() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         Bytes<?> bytesToTest = Bytes.fromDirect("THIS IS A TEST STRING");
         ByteBuffer copyToDestination = ByteBuffer.allocateDirect(128);
+        copyToDestination.limit((int) bytesToTest.readLimit());
+        bytesToTest.copyTo(copyToDestination);
+        assertEquals("THIS IS A TEST STRING", Bytes.wrapForRead(copyToDestination).toUtf8String());
+    }
+
+    @Test
+    public void testCopyFromHeapBytesIntoByteBuffer() {
+        Bytes<?> bytesToTest = Bytes.from("THIS IS A TEST STRING");
+        ByteBuffer copyToDestination = ByteBuffer.allocate(128);
         copyToDestination.limit((int) bytesToTest.readLimit());
         bytesToTest.copyTo(copyToDestination);
         assertEquals("THIS IS A TEST STRING", Bytes.wrapForRead(copyToDestination).toUtf8String());

@@ -1,7 +1,5 @@
 /*
- * Copyright (c) 2016-2022 chronicle.software
- *
- *     https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -245,6 +243,8 @@ public class ByteStringAppenderTest extends BytesTestCommon {
 
     @Test
     public void testAppend8bit() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         BytesStore<?, ByteBuffer> bs = BytesStore.elasticByteBuffer(4, 16);
         bs.write(0, " -\n".getBytes());
 

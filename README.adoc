@@ -7,7 +7,7 @@ Chronicle Software
 
 image:https://maven-badges.herokuapp.com/maven-central/net.openhft/chronicle-bytes/badge.svg[caption="",link=https://maven-badges.herokuapp.com/maven-central/net.openhft/chronicle-bytes]
 image:https://javadoc.io/badge2/net.openhft/chronicle-bytes/javadoc.svg[link="https://www.javadoc.io/doc/net.openhft/chronicle-bytes/latest/index.html"]
-//image:https://javadoc-badge.appspot.com/net.openhft/chronicle-bytes.svg?label=javadoc[JavaDoc, link=https://www.javadoc.io/doc/net.openhft/chronicle-bytes]
+// image:https://javadoc-badge.appspot.com/net.openhft/chronicle-bytes.svg?label=javadoc[JavaDoc, link=https://www.javadoc.io/doc/net.openhft/chronicle-bytes]
 image:https://img.shields.io/github/license/OpenHFT/Chronicle-Bytes[GitHub]
 image:https://img.shields.io/badge/release%20notes-subscribe-brightgreen[link="https://chronicle.software/release-notes/"]
 image:https://sonarcloud.io/api/project_badges/measure?project=OpenHFT_Chronicle-Bytes&metric=alert_status[link="https://sonarcloud.io/dashboard?id=OpenHFT_Chronicle-Bytes"]
@@ -24,13 +24,13 @@ It is constructed on the foundations of Chronicle Core, taking advantage of its 
 In essence, Chronicle Bytes serves a similar purpose to Java's Non-blocking I/O (NIO) ByteBuffer, but with several additional features.
 The API offers:
 
-- Support for 63-bit sizes.
-- Encoding for UTF-8 and ISO-8859-1 strings.
-- Thread-safe operations for off-heap memory.
-- Deterministic resource release through reference counting.
-- Compression for data types such as stop bit encoding.
-- Elastic ByteBuffer wrappers that resize as needed.
-- Direct parsing and writing of text to off-heap bytes.
+* Support for 63-bit sizes.
+* Encoding for UTF-8 and ISO-8859-1 strings.
+* Thread-safe operations for off-heap memory.
+* Deterministic resource release through reference counting.
+* Compression for data types such as stop bit encoding.
+* Elastic ByteBuffer wrappers that resize as needed.
+* Direct parsing and writing of text to off-heap bytes.
 
 === Supported Data Types
 
@@ -144,17 +144,17 @@ bytes.releaseLast();
 
 A `Bytes` buffer provides the following properties:
 
-- *start*: The smallest index in the buffer.
+* *start*: The smallest index in the buffer.
 This is always '0L' for most implementations.
 For Memory Mappings it is the offset within the file.
-- *capacity*: The maximum possible capacity for the buffer, which is usually 2147483632 (or more) for a `Bytes` buffer.
-- *realCapacity*: The current capacity of the buffer.
+* *capacity*: The maximum possible capacity for the buffer, which is usually 2147483632 (or more) for a `Bytes` buffer.
+* *realCapacity*: The current capacity of the buffer.
 This value is dynamically extended as required.
-- *readLimit*: The maximum index that can be read from.
-- *writeLimit*: The maximum index that can be written to.
-- *readPosition*: The index from which to read.
+* *readLimit*: The maximum index that can be read from.
+* *writeLimit*: The maximum index that can be written to.
+* *readPosition*: The index from which to read.
 This value should always be less than `writePosition`.
-- *writePosition*: The index at which to write.
+* *writePosition*: The index at which to write.
 
 [#img-Bytes]
 .The diagram below illustrates a `Bytes` buffer with its read/write position markers.
@@ -223,7 +223,7 @@ System.out.println( bs.to8bitString());
 
 ==== Bytes versus BytesStore
 
-- In contrast to a BytesStore, a Bytes extends if you write data into it which is larger than the realCapacity of the Bytes.
+* In contrast to a BytesStore, a Bytes extends if you write data into it which is larger than the realCapacity of the Bytes.
 
 [source,Java]
 ----
@@ -246,7 +246,7 @@ realCapacity 4096
 start 0
 ----
 
-- Bytes gives you access to the cursors, thus you can use them to read/write from/into a desired index.
+* Bytes gives you access to the cursors, thus you can use them to read/write from/into a desired index.
 In contrast, you cannot use the cursors with a BytesStore.
 
 [source,Java]
@@ -266,14 +266,14 @@ String st = bb.to8bitString();
 System.out.println(st);
 ----
 
-- In contrast to Bytes, BytesStore can be shared safely across threads provided that the referenced data is accessed in a thread-safe manner.
+* In contrast to Bytes, BytesStore can be shared safely across threads provided that the referenced data is accessed in a thread-safe manner.
 
 === bytesForRead() and bytesForWrite()
 
 The `bytesForRead()` and `bytesForWrite()` methods can be used to create Bytes from a section of a BytesStore or a Bytes.
 The size of the new Bytes depends on the `limit` and `position` cursors of the original Object.
 
-- Create bytesForRead/Write From BytesStore:
+* Create bytesForRead/Write From BytesStore:
 
 . When you use bytesForWrite() `readLimit` and `writePosition` cursors are set to `start`.
 
@@ -332,7 +332,7 @@ realCapacity 18
 start 0
 ----
 
-- Create bytesForRead/Write from a Bytes:
+* Create bytesForRead/Write from a Bytes:
 . When you use bytesForWrite() `writeLimit` is set to `capacity` and the new Bytes is elastic.
 
 . When you use bytesForRead() `readPosition` is set to `start`, and `writeLimit` is set to `realCapacity` and the new Bytes is *not* elastic.
@@ -1143,7 +1143,8 @@ The above table provides a clear comparison of the various memory access feature
 
 == Converting bytes instances to string
 
-`Bytes` instances provided a number of `toString` methods depending on the encoding of the data within the buffer. As `Bytes` supports encoding of string data in both ISO-8859-1 and UTF-8, you will need to pick an appropriate `toString` method based on the encoding of the data within the buffer.
+`Bytes` instances provided a number of `toString` methods depending on the encoding of the data within the buffer.
+As `Bytes` supports encoding of string data in both ISO-8859-1 and UTF-8, you will need to pick an appropriate `toString` method based on the encoding of the data within the buffer.
 
 `toString` methods provided:
 

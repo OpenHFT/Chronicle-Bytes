@@ -1,7 +1,5 @@
 /*
- * Copyright (c) 2016-2022 chronicle.software
- *
- *     https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +16,7 @@
 package net.openhft.chronicle.bytes.issue;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.core.Jvm;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -30,6 +29,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class Issue462Test {
 
     static Stream<Bytes<ByteBuffer>> bytesToTest() {
+        if (Jvm.maxDirectMemory() == 0) {
+            return Stream.of(
+                    Bytes.elasticHeapByteBuffer(),
+                    Bytes.elasticHeapByteBuffer(128));
+        }
         return Stream.of(
                 Bytes.elasticByteBuffer(),
                 Bytes.elasticByteBuffer(128),

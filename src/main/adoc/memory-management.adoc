@@ -1,0 +1,68 @@
+= Chronicle Bytes Memory Management
+:doctype: book
+:toc:
+:toclevels: 3
+:sectnums:
+:lang: en-GB
+
+Chronicle Bytes allocates and manages memory outside the Java heap to minimise
+GC pauses. This guide explains how that memory is handled and how to avoid
+leaks or stalls when working with off-heap buffers.
+
+== 1  Reference Counting
+
+All off-heap stores implement `ReferenceCounted`. Each call to `reserve()`
+increments the count. `release()` decrements it and `releaseLast()` frees the
+resource when the count reaches zero <<CB-NF-O-001>>.
+
+Common pitfalls:
+
+* Forgetting to call `release()` leads to native memory leaks.
+* Calling `release()` too many times throws `IllegalStateException`.
+
+Use try-with-resources around `Closeable` `Bytes` objects or manage ownership via
+`ReferenceOwner` to avoid mistakes. `ReferenceCountedTracer` can help debug
+leaks by recording where a store was reserved.
+
+== 2  Native Memory
+
+`NativeBytesStore` allocates direct memory using `Unsafe`. `releaseLast()`
+returns the memory to the OS. For mapped files `MappedBytesStore` delegates to
+`MappedFile` which may unmap via an internal `Unmapper` or the JDK
+`Cleaner`. Failure to release prevents the memory from being reclaimed.
+
+== 3  Memory-Mapped Files
+
+`MappedFile` maps a file region into memory. Acquire a `MappedBytes` view to
+read or write. When finished, call `releaseLast()` on both the `MappedBytes` and
+its store. Chunked mappings use fixed-size regions, while single mappings cover
+an entire file. Synchronisation with the filesystem is controlled via
+`SyncMode`.
+
+== 4  On-Heap Stores
+
+`HeapBytesStore` wraps a `byte[]`. The JVM manages the array but the surrounding
+`Bytes` object may still need explicit release if it holds other off-heap
+resources.
+
+== 5  Resource Tracing
+
+Enable `Jvm.isResourceTracing()` during testing to record stack traces for
+allocations. This helps locate leaks if `releaseLast()` is not called.
+
+== 6  Elastic Buffers
+
+Elastic `Bytes` can grow when more space is required. For native buffers a new
+`NativeBytesStore` is allocated and the existing data copied. On-heap elastic
+buffers resize the underlying array similarly. Pre-sizing reduces the overhead of
+the first expansion.
+
+== 7  Best Practices
+
+* Always release native or mapped buffers in a `finally` block or via
+  try-with-resources.
+* Keep references to stores short-lived when possible to lower the risk of leaks.
+* Use atomic operations on the store for thread-safe updates rather than sharing
+  a single mutable `Bytes` instance.
+* Monitor application logs for warnings about unreleased stores when resource
+  tracing is enabled.

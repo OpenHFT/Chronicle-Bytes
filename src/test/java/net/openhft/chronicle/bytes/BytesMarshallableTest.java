@@ -1,7 +1,5 @@
 /*
- * Copyright (c) 2016-2022 chronicle.software
- *
- *     https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -692,8 +690,8 @@ public class BytesMarshallableTest extends BytesTestCommon {
         }
     }
 
-    private static final class BM3 implements BytesMarshallable {
-        long value;
+    public static final class BM3 implements BytesMarshallable {
+        public long value;
 
         @Override
         public boolean equals(Object o) {
@@ -709,7 +707,7 @@ public class BytesMarshallableTest extends BytesTestCommon {
         }
     }
 
-    private static final class BMA implements BytesMarshallable {
+    public static final class BMA implements BytesMarshallable {
         byte[] bytes;
         int[] ints;
         float[] floats;

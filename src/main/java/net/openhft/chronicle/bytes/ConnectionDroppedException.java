@@ -1,7 +1,5 @@
 /*
- * Copyright (c) 2016-2022 chronicle.software
- *
- *     https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,14 +18,8 @@ package net.openhft.chronicle.bytes;
 import net.openhft.chronicle.core.io.IORuntimeException;
 
 /**
- * Exception thrown when the TcpChannelHub loses its connection to the server.
- * <p>
- * This exception is a runtime exception, which means that it does not need to be
- * declared in a method or constructor's {@code throws} clause if it can be thrown
- * by the execution of the method or constructor and propagate outside the method
- * or constructor boundary.
- * <p>
- * TODO Move to network where it is used.
+ * {@link IORuntimeException} signalling an unexpected loss of connection, typically used by
+ * networking components.
  */
 public class ConnectionDroppedException extends IORuntimeException {
     private static final long serialVersionUID = 0L;

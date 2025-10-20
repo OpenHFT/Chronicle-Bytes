@@ -1,7 +1,5 @@
 /*
- * Copyright (c) 2016-2022 chronicle.software
- *
- *     https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +19,7 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.ReferenceOwner;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
@@ -33,11 +32,17 @@ import static net.openhft.chronicle.bytes.MappedBytes.singleMappedBytes;
 import static net.openhft.chronicle.bytes.MappedFile.mappedFile;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
+import static org.junit.Assume.assumeFalse;
 
 public class MappedMemoryTest extends BytesTestCommon {
 
     private static final long SHIFT = 27L;
     private static final long BLOCK_SIZE = 1L << SHIFT;
+
+    @Before
+    public void directEnabled() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+    }
 
     // on i7-3970X ~ 3.3 ns
     @Test

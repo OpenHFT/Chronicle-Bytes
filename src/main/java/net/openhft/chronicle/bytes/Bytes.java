@@ -1,7 +1,5 @@
 /*
- * Copyright (c) 2016-2022 chronicle.software
- *
- *     https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +18,7 @@ package net.openhft.chronicle.bytes;
 import net.openhft.chronicle.bytes.internal.BytesInternal;
 import net.openhft.chronicle.bytes.internal.EmbeddedBytes;
 import net.openhft.chronicle.bytes.util.DecoratedBufferOverflowException;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.annotation.SingleThreaded;
 import net.openhft.chronicle.core.annotation.UsedViaReflection;
@@ -43,53 +42,12 @@ import static net.openhft.chronicle.core.util.Longs.requireNonNegative;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
 /**
- * The {@code Bytes} class is a versatile container for raw byte data, providing rich functionality to read and write
- * data in various formats including integers, longs, floating-point values, strings, and more. It also supports
- * advanced operations such as seeking, slicing, and copying.
- * <p>
- * This class serves as an abstraction layer over a ByteBuffer, byte[], POJO, or native memory
+ * Mutable buffer for raw byte data with separate 63‑bit read and write cursors.
+ * A {@code Bytes} wraps a {@link BytesStore} which may reside on‑heap, in
+ * native memory or in a memory‑mapped file. Instances may be elastic and are
+ * {@link ReferenceCounted}. They are not thread‑safe.
  *
- * <p>
- * Besides basic primitive types, {@code Bytes} can serialize and deserialize more complex structures,
- * including custom user-defined objects that implement {@code ReadBytesMarshallable} or {@code WriteBytesMarshallable}.
- *
- * <p>
- * {@code Bytes} can be used for a variety of purposes such as:
- * <ul>
- *     <li>Reading and writing binary data to and from files</li>
- *     <li>Bytes level serialization and deserialization of objects</li>
- *     <li>Performing low-level binary manipulation for networking applications</li>
- *     <li>Temporary storage (in-memory) of binary data</li>
- *     <li>Shared memory in memory mapped files</li>
- * </ul>
- *
- * <p>
- * {@code Bytes} is essentially a view of a region within a {@link BytesStore} and is equipped with separate read and
- * write cursors, boasting a 63-bit addressing capacity (approximately 8 EiB), as opposed to Java's built-in
- * {@link ByteBuffer}, which only supports 31-bit addressing with a single cursor.
- *
- * <p>
- * A {@code Bytes} instance can represent either a fixed region of memory or an elastic buffer that dynamically
- * resizes as needed. It is mutable and designed for single-threaded use as it is not thread-safe.
- *
- * <p>
- * The cursors within Bytes consist of a write-position and a read-position, which must adhere to these constraints:
- * <ul>
- *     <li>{@code start() <= readPosition() <= writePosition() <= writeLimit() <= capacity()}</li>
- *     <li>{@code readLimit() == writePosition() && readPosition() <= safeLimit()}</li>
- * </ul>
- * <p>
- * It is important to note that a Bytes object is a resource that is ReferenceCounted. Operations on a Bytes
- * object that has been released may result in an {@link IllegalStateException}.
- * <p>
- * Note: Some operations on {@code Bytes} may throw {@code IllegalStateException} if the underlying storage has been released.
- * Always ensure proper release of resources when finished with a {@code Bytes} instance, especially if it's backed by system resources
- * like file handles or network sockets.
- *
- * @param <U> The type of the {@link BytesStore} that backs this {@code Bytes} instance.
- * @see BytesStore
- * @see ReadBytesMarshallable
- * @see WriteBytesMarshallable
+ * @param <U> underlying store type
  */
 @SingleThreaded
 @SuppressWarnings({"rawtypes", "unchecked"})
@@ -100,18 +58,16 @@ public interface Bytes<U> extends
         SingleThreadedChecked {
 
     /**
-     * The maximum capacity a Bytes object can have, approximately 8 EiB (Exbibytes) minus 16 bytes.
+     * Maximum supported capacity – roughly eight exbibytes.
      */
     long MAX_CAPACITY = Long.MAX_VALUE & ~0xF;
 
     /**
-     * The maximum capacity a Bytes object can have if it is allocated on the heap, which is 2 GiB (Gibibytes) minus 16 bytes.
+     * Practical limit for heap‑backed {@code Bytes} instances.
      */
     int MAX_HEAP_CAPACITY = Integer.MAX_VALUE & ~0xF;
 
-    /**
-     * The default initial size of an elastic Bytes object backed by a ByteBuffer, which is 256 bytes.
-     */
+    /** Default initial capacity for elastic direct buffers. */
     int DEFAULT_BYTE_BUFFER_CAPACITY = 256;
 
     /**
@@ -530,6 +486,13 @@ public interface Bytes<U> extends
     }
 
     /**
+     * Allocate an elastic bytes as direct if available, or on heap if not.
+     */
+    static Bytes<?> allocateElastic() {
+        return Jvm.maxDirectMemory() == 0 ? allocateElasticOnHeap() : allocateElasticDirect();
+    }
+
+    /**
      * Creates and returns a new elastic wrapper for memory allocated on the heap,
      * with the specified {@code initialCapacity}. The capacity of the wrapper will
      * be automatically resized as needed.
@@ -550,6 +513,14 @@ public interface Bytes<U> extends
         } finally {
             wrap.release(INIT);
         }
+    }
+
+    /**
+     * Allocate an elastic bytes as direct if available, or on heap if not.
+     * @param initialCapacity to allocate
+     */
+    static Bytes<?> allocateElastic(@NonNegative int initialCapacity) {
+        return Jvm.maxDirectMemory() == 0 ? allocateElasticOnHeap(initialCapacity) : allocateElasticDirect(initialCapacity);
     }
 
     /**
@@ -630,7 +601,7 @@ public interface Bytes<U> extends
             try {
                 @NotNull final StringBuilder builder = new StringBuilder();
                 while (buffer.readRemaining() > 0) {
-                    builder.append((char) buffer.readByte());
+                    builder.append((char) buffer.readUnsignedByte());
                 }
 
                 // remove the last comma
@@ -882,15 +853,8 @@ public interface Bytes<U> extends
     }
 
     /**
-     * Creates and returns a new slice of this Bytes object with its start position set to the current
-     * read position and its capacity determined by the current limit.
-     * <p>
-     * Note that the slice is a subsection of this Bytes object and will not be elastic regardless of
-     * the elasticity of the parent Bytes object.
-     *
-     * @return A new slice of this Bytes object.
-     * @throws ClosedIllegalStateException    If the resource has been released or closed.
-     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
+     * Returns a view of the readable bytes from {@link #readPosition()} to
+     * {@link #readLimit()}.
      */
     @NotNull
     @Override
@@ -906,14 +870,8 @@ public interface Bytes<U> extends
     }
 
     /**
-     * Creates and returns a Bytes object that wraps the bytesStore of this Bytes object,
-     * ranging from the {@code start} position to the {@code realCapacity}.
-     * <p>
-     * The returned Bytes object is non-elastic and supports both read and write operations using cursors.
-     *
-     * @return A Bytes object wrapping the bytesStore of this Bytes object.
-     * @throws ClosedIllegalStateException    If the resource has been released or closed.
-     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
+     * Returns a view of the writable region from {@link #writePosition()} to
+     * {@link #writeLimit()}.
      */
     @Override
     @NotNull
@@ -939,16 +897,7 @@ public interface Bytes<U> extends
     BytesStore<?, U> bytesStore();
 
     /**
-     * Compares the contents of this Bytes object with the provided {@code other} string for equality.
-     * <p>
-     * This method returns {@code true} if the contents of this Bytes object is equal to the contents
-     * of the {@code other} string. Otherwise, it returns {@code false}.
-     *
-     * @param other The string to compare with the contents of this Bytes object, can be null.
-     * @return {@code true} if the contents of this Bytes object equals the contents of the provided
-     * {@code other} string; {@code false} otherwise.
-     * @throws ClosedIllegalStateException    If the resource has been released or closed.
-     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
+     * Compares the readable bytes with {@code other} using ISO‑8959‑1 encoding.
      */
     default boolean isEqual(@Nullable String other)
             throws IllegalStateException {

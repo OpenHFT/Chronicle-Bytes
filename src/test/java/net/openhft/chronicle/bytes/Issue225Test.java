@@ -1,7 +1,5 @@
 /*
- * Copyright (c) 2016-2022 chronicle.software
- *
- *     https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +29,7 @@ public class Issue225Test extends BytesTestCommon {
                 valueStr = "" + (long) value;
             else
                 valueStr = "" + value;
-            Bytes<?> bytes = Bytes.elasticByteBuffer();
+            Bytes<?> bytes = Bytes.allocateElastic(32);
             byte[] rbytes = new byte[24];
             bytes.append(value);
             assertEquals(value, bytes.parseDouble(), 0.0);

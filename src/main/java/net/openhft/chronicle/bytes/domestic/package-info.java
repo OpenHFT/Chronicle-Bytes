@@ -1,15 +1,14 @@
 /**
- * The package contains classes related to handling bytes in a reentrant manner.
+ * Utilities used internally by Chronicle Bytes.
  * <p>
- * The primary class in this package is {@link net.openhft.chronicle.bytes.domestic.ReentrantFileLock},
- * a way of acquiring exclusive locks on files in a re-entrant fashion. This class ensures that
- * a single thread that uses this interface to acquire locks won't cause an
- * {@link java.nio.channels.OverlappingFileLockException}. Separate threads will not be
- * prevented from taking overlapping file locks.
+ * The primary class is {@link net.openhft.chronicle.bytes.domestic.ReentrantFileLock},
+ * which allows the same thread to acquire a {@link java.nio.channels.FileLock} multiple times
+ * without triggering {@link java.nio.channels.OverlappingFileLockException}. Other threads may
+ * still take overlapping locks.
  * <p>
- * This package is a part of the open-source library Chronicle Bytes.
- * Please visit <a href="https://chronicle.software">chronicle.software</a> for more information.
- *
- * @see net.openhft.chronicle.bytes.domestic.ReentrantFileLock
+ * This package is not considered a stable public API and binary compatibility is not
+ * guaranteed between releases.
+ * <p>
+ * See the AsciiDoc module overview {@code domestic-overview.adoc} for examples and further notes.
  */
 package net.openhft.chronicle.bytes.domestic;

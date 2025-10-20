@@ -1,7 +1,5 @@
 /*
- * Copyright (c) 2016-2022 chronicle.software
- *
- *     https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +15,9 @@
  */
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.Closeable;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
@@ -25,6 +25,7 @@ import java.nio.BufferOverflowException;
 import java.nio.file.Files;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assume.assumeFalse;
 
 public class CopyBytesTest extends BytesTestCommon {
 
@@ -53,6 +54,11 @@ public class CopyBytesTest extends BytesTestCommon {
             // close if closeable.
             Closeable.closeQuietly(toTest);
         }
+    }
+
+    @Before
+    public void directEnabled() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
     }
 
     @Test

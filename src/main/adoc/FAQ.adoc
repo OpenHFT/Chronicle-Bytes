@@ -1,0 +1,304 @@
+= Chronicle Bytes Frequently Asked Questions
+:doctype: book
+:toc:
+:toclevels: 2
+:sectnums:
+:lang: en-GB
+// British English, ASCII-7 only.
+
+// -------------------------------------------------------------------
+// This FAQ collects common questions we receive on
+// mailing-lists, GitHub issues and customer support. Links point to
+// other `.adoc` guides where deeper detail is available.
+// -------------------------------------------------------------------
+
+== 1  General
+
+. **What is Chronicle Bytes in one sentence?** A low-level Java library that provides direct, high-performance, and GC-friendly access to on-heap, off-heap (native), and memory-mapped file regions.
+(See `architecture-overview.adoc`).
+
+. **How does it differ from `java.nio.ByteBuffer`?** Chronicle `Bytes` supports 64-bit indices/sizes, elastic resizing, a richer API for typed data (including specific string encodings), atomic CAS operations on off-heap memory, and deterministic release of native resources.
+(See `api-guide.adoc`).
+
+. **Is Chronicle Bytes open source?** Yes, the core `chronicle-bytes` library is licensed under Apache 2.0. Some advanced features or enterprise-level utilities (e.g., specific MMF locking, replication in Chronicle Queue) may be part of commercial offerings from Chronicle Software.
+
+. **Which JVM versions are supported?** Java 8 LTS through the latest Java LTS (e.g., Java 21).
+Primary testing and focus are on LTS versions.
+Check the project's `pom.xml` or README for the most current matrix.
+(See `CB-NF-MP-001`).
+
+. **Which operating systems are recommended?** Linux x86-64 (e.g., RHEL, Ubuntu, CentOS) is the primary reference platform for production due to its performance and features like `mlock`.
+macOS is well-supported for development.
+Windows works, but memory-mapped file performance and some OS-level features may differ.
+
+. **Does it run on ARM servers (e.g., AWS Graviton)?** Yes, Chronicle Bytes is tested and runs effectively on ARM64 architectures like AWS Graviton and Apple Silicon.
+When sharing memory-mapped files or raw byte streams between x86 and ARM systems, be mindful of potential endianness differences if using `RAW` Wire format or direct `BytesMarshallable` implementations without endian-aware logic.
+
+. **Is Chronicle Bytes thread-safe?** `Bytes` instances (which manage cursors like `readPosition`, `writePosition`) are **not** thread-safe for concurrent modification of these cursors or for concurrent writes.
+However:
+* Reading the same `Bytes` instance by multiple threads is safe if no modifications occur.
+* The underlying `BytesStore` content can be safely accessed and modified concurrently using its atomic operations (e.g., `compareAndSwapLong`, `addAndGetLong`).
+* Different threads can safely operate on distinct, non-overlapping regions of a `BytesStore`, potentially using separate `Bytes` views (slices).
+(See `concurrency-patterns.adoc` and `CB-NF-O-005`).
+
+. **Can I use it with Kotlin or Scala?** Yes, any JVM language that interoperates with Java can use Chronicle Bytes.
+You will typically use the Java static factory methods (e.g., `Bytes.allocateElasticDirect()`) for creating instances.
+
+. **Does it require `sun.misc.Unsafe`?** For direct off-heap memory access and some performance-critical operations, `sun.misc.Unsafe` is typically used.
+If `Unsafe` is unavailable or restricted (e.g., by JVM flags or future Java versions), Chronicle Bytes aims to fall back to alternatives like `VarHandles` or `MappedByteBuffer` methods where possible, though this might impact performance or limit certain features for off-heap operations.
+(See `CB-RISK-003`).
+
+. **Is there an off-the-shelf object pool for `Bytes` instances?** Chronicle Bytes provides a basic `BytesPool`.
+However, for high-performance scenarios, common patterns are to allocate one `Bytes` buffer per thread (using `ThreadLocal` and resetting it via `clear()`) or to use try-with-resources for short-lived, method-local `Bytes` instances to ensure timely release.
+(See `api-guide.adoc` Performance Tips).
+
+. **What is the relationship between `Bytes`, `BytesStore`, and the memory backing them?** `BytesStore` represents the actual block of memory (e.g., a `byte[]` on heap, a region of direct native memory, or a memory-mapped file).
+`Bytes` is a view or handle to a `BytesStore`, providing methods to read and write data using cursors and limits.
+Multiple `Bytes` instances can view the same or overlapping regions of a `BytesStore`.
+
+== 2  Performance
+
+. **What is the typical latency for writing 32 bytes to an off-heap `Bytes` buffer?** On a modern server (e.g., 3.2 GHz x86-64), mean latency is typically around 9 ns, with 99.9th percentile around 90 ns, assuming the buffer is hot in CPU cache.
+
+. **How fast is `Bytes.equalTo(BytesStore)` check versus `ByteBuffer.equals()`?** For reasonably sized payloads (e.g., 32 KiB), `Bytes.equalTo()` can be significantly faster, often 3x or more, partly due to optimized routines and potential use of JVM intrinsics like `VectorizedMismatch`.
+(See `CB-NF-P-002`).
+
+. **Does endianness affect speed for primitive reads/writes?** Chronicle `Bytes` methods for reading/writing primitives (e.g., `readLong`, `writeInt`) use native hardware endianness by default.
+This avoids conditional logic or byte-swapping operations on the hot path, maximizing speed.
+If you need to interoperate with a system of different endianness, you must handle the byte swapping explicitly (e.g., using `Integer.reverseBytes()`), which would then incur a performance cost.
+
+. **How large can a direct (off-heap) or memory-mapped buffer grow?** * **Direct off-heap (`allocateDirect`, `allocateElasticDirect`):** Limited by the available native process memory and the `-XX:MaxDirectMemorySize` JVM parameter.
+* **Memory-mapped files (`MappedBytes`):** Can address up to 256 TB on modern operating systems, and up to 2^63 bytes theoretically (Java `long` for size/offset).
+Practically limited by available disk space, OS virtual address space limits (very large on 64-bit OSes), and file system limits.
+
+. **Is stop-bit encoding (`readStopBitLong`, `writeStopBitLong`) slower than fixed 8-byte longs?** * For small integer values (e.g., fitting in 1-3 bytes with stop-bit encoding), it's often faster due to fewer bytes being written/read, leading to better cache utilization and reduced I/O.
+* For large integer values that would require 5 or more bytes with stop-bit encoding (especially those needing all 8 or 9 bytes), a fixed-width `writeLong`/`readLong` is generally faster.
+
+. **How many Compare-And-Swap (CAS) operations per second can I expect on an off-heap `BytesStore`?** On a single modern CPU core (e.g., Intel Xeon), uncontended CAS operations (`compareAndSwapLong`) can achieve 25-60 million operations per second.
+Performance degrades with increased contention from multiple threads on the same cache line.
+(See `CB-NF-P-005`).
+
+. **Do elastic buffer resizes hurt latency?** Yes, significantly.
+When an elastic buffer (`Bytes.allocateElasticDirect` or `allocateElasticOnHeap`) outgrows its current capacity, it needs to allocate a larger underlying `BytesStore` and copy existing data.
+This copy operation can cause a noticeable latency spike.
+Pre-size elastic buffers with a reasonable initial capacity if this is a concern.
+(See `api-guide.adoc` Gotchas).
+
+. **Should I call `ensureCapacity()` or `ensureWritable()` before every write?** Not necessarily on the critical hot path, as it adds a check.
+If you know your message sizes well, you can pre-allocate or ensure capacity at logical boundaries.
+However, calling `ensureWritable(needed)` is generally cheaper than catching a `BufferOverflowException` and handling a resize reactively.
+Profile your specific use case.
+
+. **What is the overhead of JMX metrics exposed by `BytesMetrics`?** Negligible for most applications.
+The metrics are typically updated via simple volatile long increments or CAS operations.
+Polling these JMX MBeans (e.g., once per second) should not impact application performance.
+(See `CB-NF-O-002`).
+
+. **Does compiling Chronicle Bytes with GraalVM Native Image significantly improve speed?** Performance is generally comparable to a well-warmed-up HotSpot C2 compiler for Chronicle Bytes' core operations, as these are already heavily optimized and often inlined.
+GraalVM Native Image can offer startup time improvements and reduced memory footprint, which might be beneficial in certain deployment scenarios.
+
+== 3  Memory Management
+
+. **How do I correctly release native memory used by off-heap `Bytes`?** Call the `releaseLast()` method on the `Bytes` instance (or its underlying `BytesStore` if accessed directly) when you are completely finished with it.
+For `Bytes` instances that implement `java.io.Closeable` (most off-heap ones do), the best practice is to use a try-with-resources statement to ensure `close()` (which typically calls `releaseLast()`) is invoked.
+(See `memory-management.adoc`).
+
+. **What happens if I forget to `releaseLast()` an off-heap `Bytes` instance?** The native memory will leak, at least temporarily.
+Chronicle Bytes often registers a `java.lang.ref.Cleaner` (or uses a finalizer in older versions) that attempts to free the native memory when the Java `Bytes` wrapper object is garbage collected.
+A warning message (including the allocation stack trace) is typically logged to SLF4J <<CB-NF-O-003>>.
+However, relying on this is bad practice as GC is non-deterministic, and your application's memory footprint can grow excessively before cleanup occurs.
+
+. **Can I share one `Bytes` instance (or its underlying data) across processes?** Yes, this is a primary use case for `Bytes` backed by memory-mapped files (`MappedBytesStore`).
+Each process maps the same file into its address space.
+Each process should use its own `Bytes` instances (views) with their own independent cursors to read from or write to the shared memory region.
+Proper synchronization (e.g., using atomics provided by `BytesStore`, or higher-level constructs like Chronicle Queue) is essential if multiple processes are writing.
+(See `architecture-overview.adoc`).
+
+. **Does `-XX:MaxDirectMemorySize` limit memory allocated by Chronicle Bytes?** Yes, for direct off-heap memory allocated via `Bytes.allocateDirect()` or `Bytes.allocateElasticDirect()` (which internally uses `java.nio.ByteBuffer.allocateDirect` or `Unsafe.allocateMemory`).
+This counts against the JVM's direct memory limit.
+Memory-mapped file regions do not typically count against this specific limit but rather against available process virtual address space.
+
+. **How do I pin a memory-mapped file in RAM to prevent page faults?** Chronicle Software offers an Enterprise feature, `MappedBytes.lockMemory()`, which uses system calls like `mlock()` (on Linux) to attempt to lock the mapped memory region into physical RAM.
+Standard Chronicle Bytes does not expose this directly, but you can pre-touch pages by iterating through them (`bytes.warmUp()` or manual reads).
+
+. **Is there any data copying when a file is memory-mapped by `MappedBytesStore`?** No, not in the traditional sense of a buffer copy.
+The operating system maps the file's pages directly into the application's virtual address space.
+Data is read from/written to disk by the OS as needed (lazily or via `msync`).
+
+. **Can I "compact" a Chronicle Queue file (which uses `MappedBytes`) to remove old/unused space?** Chronicle Queue files themselves are typically append-only for a given roll cycle.
+Compaction is not an in-place operation.
+Retention and space reclamation are managed by deleting older queue cycle files based on a retention policy, often implemented with external scripts or a higher-level process that archives and then deletes old data.
+
+. **Why does my process's Resident Set Size (RSS) exceed `BytesUtil.nativeMemoryUsed()`?** RSS includes all memory used by the process: Java heap, metaspace, thread stacks, JIT compiled code, loaded native libraries, other native allocations by your application or third-party libraries, *and* direct memory/memory-mapped files used by Chronicle Bytes.
+`BytesUtil.nativeMemoryUsed()` (or `BytesMetrics`) specifically tracks native memory allocated *by the Chronicle Bytes library itself* for its off-heap stores.
+
+. **Can I allocate more off-heap memory (direct or mapped) than physical RAM?** * **Memory-mapped files:** Yes, you can map files much larger than physical RAM.
+The OS will page data in and out as needed.
+However, if the working set exceeds RAM, performance will degrade significantly due to page faults (swapping).
+* **Direct memory (`allocateDirect`):** Generally, you should not allocate more direct memory than available physical RAM (minus OS/heap needs), as this can lead to swapping or `OutOfMemoryError` for native allocations.
+On Linux, set `vm.swappiness=0` (or a very low value) on production servers to discourage swapping of process memory.
+
+. **How do I monitor for native memory leaks in CI tests?** Use `BytesUtil.nativeMemoryUsed()` or `Bytes.SPECTRAL_NATIVE_MEMORY_USED` before and after each test or test suite.
+If the "after" value is significantly greater than the "before" value (accounting for any intentionally persistent stores), a leak may have occurred.
+(See `CB-TEST-003`).
+Chronicle's test framework often includes utilities for this.
+
+== 4  Serialisation with Chronicle Wire
+
+. **Do I *need* to use Chronicle Wire to use Chronicle Bytes?** No.
+You can use Chronicle Bytes to read and write primitive data types, byte arrays, and strings directly.
+Chronicle Wire is a higher-level serialization library that *uses* Chronicle Bytes as its underlying data transport, making it easier to serialize complex objects, method calls, and structured data.
+(See `wire-integration.adoc`).
+
+. **Which Chronicle Wire format is generally the fastest for performance-critical paths?** `RAW` Wire is the absolute fastest if your schema is fixed and known by both reader and writer, as it stores minimal metadata.
+`BINARY_LIGHT` (backed by `VanillaWire`) is very fast and offers more flexibility with field identifiers, making it a common choice for high-performance, evolvable schemas.
+
+. **If I use `YAML_ONLY` Wire with Chronicle Queue, can I read the queue files with `tail -f`?** Yes.
+When `YAML_ONLY` is used, the messages in the Chronicle Queue segment files are stored as plain YAML text, making them human-readable and suitable for observation with standard text utilities like `tail`, `cat`, or `grep`.
+
+. **How do I evolve a data schema safely when using Chronicle Wire?** The best approach depends on the Wire type.
+For `BINARY_LIGHT`, `YAML_ONLY`, or `TEXT`:
+* **Additive changes are safest:** Add new fields to your `Marshallable` objects or new methods to the end of your `MethodWriter` interfaces.
+Older readers will typically ignore these new fields/methods.
+* **Field removal/type change:** These are generally breaking changes.
+Plan carefully and version your data or interfaces.
+(See `wire-integration.adoc` for detailed schema evolution strategies).
+
+. **Is using `JSON` Wire format significantly heavy on GC (Garbage Collection)?** Yes, parsing and generating JSON typically involves more String object allocations (for field names and string values) compared to binary formats.
+This can lead to increased GC pressure if used extensively on a very hot path.
+For critical low-latency sections, prefer binary formats.
+
+. **Can I integrate Chronicle Wire/Bytes with other serialization frameworks like SBE (Simple Binary Encoding)?** Yes.
+You can read/write SBE messages directly into/from a Chronicle `Bytes` buffer.
+If SBE uses Agrona's `DirectBuffer`, you can wrap it with `Bytes.wrapForRead(directBuffer.byteBuffer())` or similar, or copy data between them.
+
+. **Does Chronicle Wire support data compression (e.g., Gzip, Snappy) out-of-the-box?** No, Chronicle Wire itself focuses on efficient data representation, not compression.
+If compression is needed, it's typically applied at a different layer – for example, by compressing the entire `Bytes` buffer before network transmission or storage, or by features in higher-level libraries like Chronicle Queue Enterprise for replication.
+
+. **My `MethodReader` loop (`while (reader.readOne())`) seems to spin without reading messages.
+Why?** This usually means `reader.readOne()` is consistently returning `false`, indicating no complete message was found.
+Possible reasons:
+* The writer has not written any (or any complete) messages to the `Bytes` buffer.
+* The `Bytes` buffer's `readPosition` is at or past the `readLimit`, or the `readLimit` doesn't encompass a full message.
+Ensure `bytes.flip()` or similar cursor adjustment was done after writing and before reading.
+* The writer and reader are not looking at the same `Bytes` buffer or file region.
+
+. **Can a single message (Wire frame) written to `Bytes` cross the 2 GiB boundary?** While `Bytes` itself supports 63-bit sizes (~ 256 TiB in practice), a single Wire message (document) is typically length-prefixed with a 32-bit integer.
+This implicitly limits a single, self-contained Wire message to less than 2 GiB.
+For larger data, you would need to chunk it into multiple messages or use `BytesMarshallable` with custom length prefixing if `Bytes` is being used directly for very large payloads.
+Chronicle Queue files can be much larger than 2GiB, containing many such messages.
+
+. **Are field names stored in `BINARY_LIGHT` Wire format?** No, not the full string names.
+`BINARY_LIGHT` uses compact numeric field identifiers (field numbers) derived from the field names (or explicitly annotated with `@WireKey(core = true)` or event names).
+This significantly reduces bandwidth and processing overhead compared to text formats.
+`RAW` format omits field identifiers altogether.
+
+== 5  Integration
+
+. **Is Chronicle Bytes compatible with Netty `ByteBuf`?** Yes.
+You can wrap a Netty `ByteBuf` to be used as a Chronicle `Bytes` instance using `Bytes.wrapForRead(nettyByteBuf.nioBuffer())` or `Bytes.wrapForWrite(nettyByteBuf.nioBuffer())`.
+This allows interoperation, for example, reading data from a Netty pipeline into a `Bytes` buffer for processing by Chronicle libraries.
+
+. **Can I use Chronicle Bytes with Aeron buffers (Agrona `DirectBuffer`)?** Yes, similar to Netty.
+Agrona's `DirectBuffer` can expose a `java.nio.ByteBuffer` view, which can then be wrapped by `Bytes.wrapForRead()` or `Bytes.wrapForWrite()`.
+Be mindful of buffer lifecycle management and potential alignment differences if accessing directly.
+
+. **Does Chronicle Bytes work well within a Spring Boot application?** Yes, Chronicle Bytes can be used as a library within a Spring Boot application.
+However, for performance-critical sections that rely on Chronicle Bytes' low-latency characteristics, try to keep those hot paths independent of Spring's dependency injection and AOP overhead.
+Beans that manage `Bytes` resources should implement `DisposableBean` or use `@PreDestroy` for proper `releaseLast()` calls.
+
+. **How do I expose Chronicle Bytes metrics (e.g., from `BytesMetrics`) to Prometheus?** Chronicle Bytes exposes JMX MBeans for its metrics (see `CB-NF-O-002`).
+You can use a JMX to Prometheus exporter (like the Prometheus JMX Exporter) to scrape these MBeans.
+Alternatively, you could create a custom metrics collector in your application that polls the `BytesMetrics` programmatically and exposes them in Prometheus format.
+
+. **Can I send data held in a Chronicle `Bytes` buffer over gRPC?** Yes.
+You'd typically copy the relevant segment of the `Bytes` buffer into a gRPC `ByteString`.
+For zero-copy (or reduced-copy) approaches with gRPC (which is more advanced), you might explore direct `ByteBuffer` manipulation if the gRPC implementation allows passing `ByteBuffer`s that wrap native memory.
+
+. **Is Android officially supported for Chronicle Bytes?** No, Android is not an officially supported platform.
+Android's restrictions on `sun.misc.Unsafe` and differences in its JVM/ART runtime mean that off-heap features central to Chronicle Bytes may not work as expected or at all.
+On-heap `Bytes` usage might be possible but would lose many of the library's benefits.
+
+. **What kind of database or storage system can ingest Chronicle Queue files (which use `Bytes` and Wire) directly?** Chronicle Queue files are typically sequences of binary messages.
+While not directly SQL-database compatible, systems that can process raw binary files or columnar data might be adaptable.
+For example, you could write a custom importer for systems like ClickHouse to parse the binary messages.
+Analytics often involves dedicated ETL processes.
+
+. **Can I mirror Chronicle Queue files to cloud storage like Amazon S3?** Yes.
+Chronicle Queue Enterprise includes features for replicating queue data, which can be adapted or extended for archiving to S3 or similar object stores.
+For the open-source version, you would typically implement this as an external process that monitors for closed queue cycle files and uploads them.
+
+. **How do I replay events from a Chronicle Queue for back-testing or debugging?** Use a Chronicle Queue `ExcerptTailer`.
+You can move the tailer to a specific index or time using `moveToIndex()` or `direction(TailerDirection.BACKWARD).moveToCycle()`.
+Then, you can read messages sequentially as they were originally written.
+`ExcerptTailer.toStart()` and `toEnd()` are also useful.
+
+. **Does running Chronicle Bytes applications inside Docker containers impose extra latency?** Generally minimal if Docker is configured correctly.
+* **Network:** `host` networking mode typically offers the lowest network latency.
+* **Storage:** Avoid `overlayfs` for memory-mapped files used by Chronicle Queue if extremely low disk latency is critical.
+Instead, mount queue directories using Docker volumes mapped to fast host paths, or use `--tmpfs` for ephemeral, in-memory queues.
+CPU pinning and resource limits should also be managed carefully.
+
+== 6  Troubleshooting
+
+. **I'm getting `IllegalStateException: unable to move a position ... past the readLimit ...` or similar buffer boundary exceptions.
+Why?** This usually means your read/write cursors or limits are inconsistent.
+Common causes:
+* Forgetting to call `bytes.flip()` (or manually adjusting `readPosition`/`readLimit`) after writing to a `Bytes` buffer and before attempting to read from its start.
+* Incorrectly setting `readLimit()` or `writeLimit()`.
+* Off-by-one errors in calculating offsets or lengths.
+(Review cursor management in `api-guide.adoc`).
+
+. **Why does my Compare-And-Swap (CAS) operation fail continuously or have high contention?** * **High Contention:** Multiple threads are trying to update the same memory location (cache line) simultaneously.
+Consider strategies like distributing counters, using try-lock patterns with back-off, or redesigning to reduce shared mutable state.
+* **Incorrect Expected Value:** The `expected` value passed to `compareAndSwapX(offset, expected, newValue)` does not match the actual current value at that offset.
+
+. **A `MappedBytes` instance throws `java.nio.channels.ClosedChannelException`.
+What happened?** The underlying `java.nio.channels.FileChannel` associated with the memory-mapped file has been closed.
+This can happen if:
+* The `MappedFile` object from which the `MappedBytesStore` (and subsequently `MappedBytes`) was derived has been closed prematurely.
+* Another part of your application, or another process with write access, truncated or deleted the file.
+Ensure `MappedFile` resources are managed correctly, typically with try-with-resources, and are kept open as long as any `MappedBytes` views are active.
+
+. **Native memory usage (RSS) jumps significantly when I attach a Java profiler.** Java profilers (especially those using the JVMTI agent interface) often allocate their own native memory for instrumentation, data collection, and communication.
+This is expected.
+For accurate native memory profiling of your application *without* profiler overhead, measure using OS tools or `BytesMetrics` when the profiler is not attached.
+
+. **My Chronicle Queue `ExcerptTailer` shows the queue as empty, but the queue file on disk is growing in size.** Possible reasons:
+* **Different Roll Cycle:** The tailer might be configured to look at an older, completed roll cycle file, while the appender is writing to a new current cycle file.
+Verify your `RollCycles` configuration.
+* **Indexing Delay:** There might be a slight delay before an appended entry is fully indexed and visible to a tailer, though this is usually very short.
+* **Incorrect Tailer Initialization:** The tailer might not be initialized to the correct starting point or might have been inadvertently moved to the end.
+
+. **`bytes.readUtf8()` or `wire.read("someString").text()` returns `null`.
+Why?** This is the expected behavior if a `null` string reference was explicitly written.
+Chronicle Wire (and `Bytes` string methods) can distinguish between an empty string (`""`) and a `null` string.
+If an empty string was written, it would be read back as an empty string.
+
+. **My YAML dump (e.g., from a queue file) shows strange characters like `?\u0000??` or `!binary` tags.** This usually means binary data (or a non-text Wire format like `BINARY_LIGHT`) was written to the `Bytes` buffer, but you are attempting to interpret or dump it as if it were `YAML_ONLY` or plain text.
+Ensure your `WireType` is consistent or use appropriate tools for dumping binary formats.
+
+. **Why is the clean shutdown of my application slow when using many Chronicle Bytes resources?** If you have a very large number of off-heap `Bytes` instances (especially small ones that weren't part of a larger, single `MappedFile` or `NativeBytesStore`), releasing each one individually during shutdown can take time as each `releaseLast()` might involve deallocation logic or Cleaner actions.
+Consider:
+* Reusing `Bytes` instances where possible (e.g., thread-local buffers).
+* Grouping smaller allocations into larger, fewer `BytesStore` instances if feasible.
+
+. **I've configured SLF4J logging levels to WARN/ERROR, but I still see performance impact or allocations on the hot path.** Double-check your code:
+* Ensure no `logger.debug(...)` or `logger.info(...)` calls (even with guards like `if (logger.isDebugEnabled())`) are accidentally placed within extremely performance-sensitive, tight loops.
+The check itself can have a tiny cost.
+* Verify that string concatenation or argument formatting for log messages is not happening *before* the level check (e.g., `logger.debug("Value is " + value);` will always perform the concatenation).
+Use parameterized logging: `logger.debug("Value is {}", value);`.
+(See `CB-NF-O-004`).
+
+. **The Java `Cleaner` thread shows high CPU usage in my application.** This is a strong indication that you are frequently allocating and then dereferencing (leaking from your code's perspective) Java wrapper objects for native resources (like off-heap `Bytes` instances) without calling `releaseLast()` or `close()` properly.
+The `Cleaner` thread is working hard to reclaim the associated native memory when the Java objects become phantom reachable.
+You *must* fix these leaks by ensuring deterministic release of resources.
+Enable `-Dchronicle.bytes.disableCleaners=false` (if it was disabled) and logging for `CB-NF-O-003` to help trace offenders.
+
+== 7  Licensing and Governance
+
+. **Is there a Contributor License Agreement (CLA) for Chronicle Bytes?** Yes, contributions to OpenHFT projects, including Chronicle Bytes, typically require signing a CLA.
+This is usually managed automatically via GitHub when you make your first Pull Request.
+
+. **What coding standards or style guides should Pull Requests (PRs) adhere to?** OpenHFT projects generally follow the Google Java Style Guide, with some Chronicle-specific modifications or conventions.
+Look for a `CONTRIBUTING.md` file or style guide (like `AGENT.md` mentioned in the requirements) in the specific GitHub repository.

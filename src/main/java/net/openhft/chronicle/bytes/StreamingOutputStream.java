@@ -1,7 +1,5 @@
 /*
- * Copyright (c) 2016-2022 chronicle.software
- *
- *     https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,13 +24,9 @@ import java.io.OutputStream;
 import java.nio.BufferOverflowException;
 
 /**
- * A special kind of OutputStream implementation which writes data to a StreamingDataOutput instance.
- *
- * <p>This class provides a way to connect APIs expecting an OutputStream with data destinations
- * encapsulated in StreamingDataOutput instances.
- *
- * @see StreamingDataOutput
- * @see OutputStream
+ * An {@link OutputStream} adapter that writes its bytes to a
+ * {@link StreamingDataOutput}. This allows Chronicle Bytes streams to be used
+ * where a standard {@code OutputStream} is required.
  */
 @SuppressWarnings("rawtypes")
 public class StreamingOutputStream extends OutputStream {
@@ -67,6 +61,12 @@ public class StreamingOutputStream extends OutputStream {
     }
 
     @Override
+    /**
+     * Writes bytes from the given array to the underlying {@link StreamingDataOutput}.
+     * Any {@link BufferOverflowException}, {@link IllegalArgumentException} or
+     * {@link IllegalStateException} from the target is wrapped in an
+     * {@link IOException}.
+     */
     public void write(byte[] b, @NonNegative int off, @NonNegative int len)
             throws IOException {
         try {
@@ -78,6 +78,10 @@ public class StreamingOutputStream extends OutputStream {
     }
 
     @Override
+    /**
+     * Writes a single byte value. Exceptions thrown by the target
+     * {@link StreamingDataOutput} are wrapped in an {@link IOException}.
+     */
     public void write(int b)
             throws IOException {
         try {

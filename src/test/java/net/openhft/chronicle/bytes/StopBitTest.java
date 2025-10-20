@@ -1,7 +1,5 @@
 /*
- * Copyright (c) 2016-2022 chronicle.software
- *
- *     https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +35,7 @@ public class StopBitTest extends BytesTestCommon {
 
             final Bytes<byte[]> expectedBytes = Bytes.from(expected);
 
-            final Bytes<ByteBuffer> b = Bytes.elasticByteBuffer();
+            final Bytes<?> b = Bytes.allocateElastic();
             try {
                 if (expectedBytes == null) {
                     b.writeStopBit(-1);
@@ -72,7 +70,7 @@ public class StopBitTest extends BytesTestCommon {
 
         final Bytes<byte[]> bytes = Bytes.from(s);
 
-        final Bytes<ByteBuffer> b = Bytes.elasticByteBuffer();
+        final Bytes<?> b = Bytes.allocateElastic();
         try {
             if (bytes == null) {
                 b.writeStopBit(-1);

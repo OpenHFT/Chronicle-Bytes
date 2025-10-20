@@ -1,7 +1,5 @@
 /*
- * Copyright (c) 2016-2022 chronicle.software
- *
- *     https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,15 +31,11 @@ import java.nio.BufferUnderflowException;
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 
 /**
- * TextLongArrayReference is an implementation of a reference to a long array, represented
- * in text wire format. It extends AbstractReference and implements ByteableLongArrayValues.
- * The text representation is formatted to resemble a JSON-like content for an array of long values with a lock indicator.
- * <p>
- * The format of the text representation is:
- * {@code { capacity: 12345678901234567890, used: 00000000000000000000, values: [ 12345678901234567890, ... ] }}
- * 
+ * Fixed-width text array of 64-bit integers for diagnostics.
+ * <p>Each entry is zero padded to twenty digits and guarded by a spin-lock flag.</p>
  *
- * @author Peter Lawrey
+ * <p> Constants such as {@code TRU} and {@code FALS} encode the lock state.
+ * <p> For debugging only, not tuned for throughput.
  */
 @SuppressWarnings("rawtypes")
 public class TextLongArrayReference extends AbstractReference implements ByteableLongArrayValues {
@@ -255,7 +249,7 @@ public class TextLongArrayReference extends AbstractReference implements Byteabl
             throws IllegalStateException, BufferOverflowException, IllegalArgumentException {
         throwExceptionIfClosedInSetter();
 
-        long peakLength = 0;
+        long peakLength;
         try {
             peakLength = peakLength(bytes, offset);
         } catch (BufferUnderflowException e) {

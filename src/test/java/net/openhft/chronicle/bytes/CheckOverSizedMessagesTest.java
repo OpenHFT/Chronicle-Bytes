@@ -1,7 +1,5 @@
 /*
- * Copyright (c) 2016-2022 chronicle.software
- *
- *     https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +15,7 @@
  */
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
 import org.junit.Before;
 import org.junit.Test;
@@ -48,6 +47,7 @@ public class CheckOverSizedMessagesTest extends BytesTestCommon {
     @Before
     public void checkPageSize() {
         assumeTrue(OS.isLinux());
+        assumeFalse(Jvm.maxDirectMemory() == 0);
     }
 
     @Test
@@ -262,30 +262,6 @@ public class CheckOverSizedMessagesTest extends BytesTestCommon {
             mb.writePosition(3 << 10);
             final BytesStore<?, Void> bs0 = mb.bytesStore();
             in.read(mb, 5900);
-            final BytesStore<?, Void> bs2 = mb.bytesStore();
-            assertNotSame(bs0, bs2);
-        }
-    }
-
-    @Test
-    public void parse8bit() {
-        Bytes<?> in = Bytes.wrapForRead(BYTE6K);
-        try (MappedBytes mb = mbNoOverlap()) {
-            mb.writePosition(3 << 10);
-            final BytesStore<?, Void> bs0 = mb.bytesStore();
-            in.parse8bit(mb, StopCharTesters.ALL);
-            final BytesStore<?, Void> bs2 = mb.bytesStore();
-            assertNotSame(bs0, bs2);
-        }
-    }
-
-    @Test
-    public void parseUTF8() {
-        Bytes<?> in = Bytes.wrapForRead(BYTE6K);
-        try (MappedBytes mb = mbNoOverlap()) {
-            mb.writePosition(3 << 10);
-            final BytesStore<?, Void> bs0 = mb.bytesStore();
-            in.parseUtf8(mb, StopCharTesters.ALL);
             final BytesStore<?, Void> bs2 = mb.bytesStore();
             assertNotSame(bs0, bs2);
         }

@@ -1,7 +1,5 @@
 /*
- * Copyright (c) 2016-2022 chronicle.software
- *
- *     https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +15,7 @@
  */
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IOTools;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -28,6 +27,7 @@ import java.util.stream.Stream;
 
 import static net.openhft.chronicle.core.Jvm.uncheckedCast;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assume.assumeFalse;
 
 @RunWith(Parameterized.class)
 public class SyncModeTest extends BytesTestCommon {
@@ -44,6 +44,8 @@ public class SyncModeTest extends BytesTestCommon {
 
     @Test
     public void largeFile() throws FileNotFoundException {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         File tmpfile = IOTools.createTempFile("sync.dat");
         try (MappedFile mappedFile = MappedFile.mappedFile(tmpfile, 64 << 20);
              MappedBytes bytes = MappedBytes.mappedBytes(mappedFile)) {

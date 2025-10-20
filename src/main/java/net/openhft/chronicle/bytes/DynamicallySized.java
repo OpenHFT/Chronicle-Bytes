@@ -1,7 +1,5 @@
 /*
- * Copyright (c) 2016-2022 chronicle.software
- *
- *     https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,13 +16,7 @@
 package net.openhft.chronicle.bytes;
 
 /**
- * An interface that indicates an implementor of {@link Byteable} has dynamic size requirements.
- *
- * <p>
- * A class implementing the {@code DynamicallySized} interface indicates that
- * the size of its instances in bytes cannot be determined statically (at compile time) but
- * instead is dependent on the state of the individual object instances.
- * 
+ * Marker for {@link Byteable} objects whose encoded length may vary with their state.
  */
 public interface DynamicallySized {
 }

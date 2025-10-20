@@ -1,7 +1,5 @@
 /*
- * Copyright (c) 2016-2022 chronicle.software
- *
- *     https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,11 +33,11 @@ import java.util.regex.Pattern;
 import static java.text.MessageFormat.format;
 
 /**
- * Provides file systems' page size auto-resolving.
- * Linux and hugetlbfs specific only for now.
+ * Utility to determine page size for memory mapping, aware of hugetlbfs mounts.
  */
 public final class PageUtil {
 
+    /** assumed page size when no explicit value is found */
     public static final int DEFAULT_HUGE_PAGE_SIZE = 2 * 1024 * 1024;
 
     private static final Pattern PAGE_SIZE_PATTERN = Pattern.compile("pagesize=([0-9]+)([KkMmGg])");

@@ -1,7 +1,5 @@
 /*
- * Copyright (c) 2016-2022 chronicle.software
- *
- *     https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +16,7 @@
 package net.openhft.chronicle.bytes.internal;
 
 import net.openhft.chronicle.bytes.*;
-import net.openhft.chronicle.bytes.internal.BytesInternal;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 import org.junit.AfterClass;
@@ -34,6 +32,7 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import static org.junit.Assert.*;
+import static org.junit.Assume.assumeFalse;
 
 @SuppressWarnings("rawtypes")
 @RunWith(Parameterized.class)
@@ -73,6 +72,8 @@ public class BytesInternalGuardedTest extends BytesTestCommon {
     @Test
     public void testParse8bitAndStringBuilderWithUtf16Coder()
             throws BufferUnderflowException, IOException {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         @NotNull BytesStore<?, ?> bs = BytesStore.nativeStore(32);
         bs.write(0, new byte[]{0x76, 0x61, 0x6c, 0x75, 0x65}); // "value" string
 
@@ -141,6 +142,8 @@ public class BytesInternalGuardedTest extends BytesTestCommon {
 
     @Test
     public void contentsEqual() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         Bytes<?> a = Bytes.elasticByteBuffer(9, 20)
                 .append(Bytes.from("Hello"))
                 .readLimit(16);

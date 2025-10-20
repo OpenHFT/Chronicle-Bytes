@@ -1,7 +1,5 @@
 /*
- * Copyright (c) 2016-2022 chronicle.software
- *
- *     https://chronicle.software
+ * Copyright 2016-2025 chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +31,8 @@ public class TextIntArrayReferenceTest extends BytesTestCommon {
 
     @Test
     public void testWriteAndReadArray() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         Bytes<?> bytes = Bytes.allocateDirect(256);
         long capacity = 5;
         TextIntArrayReference.write(bytes, capacity);
@@ -52,6 +52,8 @@ public class TextIntArrayReferenceTest extends BytesTestCommon {
 
     @Test
     public void testPeakLength() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         Bytes<?> bytes = Bytes.allocateDirect(256);
         long capacity = 10;
         TextIntArrayReference.write(bytes, capacity);
@@ -129,6 +131,8 @@ public class TextIntArrayReferenceTest extends BytesTestCommon {
     @SuppressWarnings("rawtypes")
     @Test
     public void getSetValues() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         int length = 5 * 12 + 70;
         Bytes<?> bytes = Bytes.allocateDirect(length);
         TextIntArrayReference.write(bytes, 5);
