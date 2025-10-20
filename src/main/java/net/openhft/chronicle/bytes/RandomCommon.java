@@ -30,7 +30,7 @@ import java.nio.ByteOrder;
  * It defines start position, capacity and cursor operations.
  * Extends {@link net.openhft.chronicle.core.io.ReferenceCounted} for lifecycle management and underpins {@link RandomDataInput} and {@link RandomDataOutput}.
  */
-interface RandomCommon extends ReferenceCounted {
+public interface RandomCommon extends ReferenceCounted {
     /**
      * @return The smallest position allowed in this buffer.
      */
