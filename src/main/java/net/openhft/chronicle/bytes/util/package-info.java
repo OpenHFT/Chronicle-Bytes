@@ -23,6 +23,5 @@
  *
  * @see net.openhft.chronicle.bytes.Bytes
  * @see net.openhft.chronicle.bytes.BytesStore
- * @see net.openhft.chronicle.bytes.render
  */
 package net.openhft.chronicle.bytes.util;

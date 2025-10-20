@@ -32,20 +32,29 @@ import java.util.stream.Stream;
 import static net.openhft.chronicle.core.Jvm.uncheckedCast;
 
 /**
- * Abstract base class for an interning mechanism designed to reduce memory allocation
- * by reusing immutable objects that are content equal. When a byte sequence is presented,
- * the interner attempts to return a previously cached instance. If no such instance exists
- * a new one is created via {@link #getValue(BytesStore, int)}, cached and returned.
- *
- * <p>The cache is capacity bounded and entries are replaced in a pseudo-LRU fashion
- * using the {@link #toggle()} heuristic. Hashing relies on
- * {@link net.openhft.chronicle.bytes.algo.BytesStoreHash#hash32(BytesStore, long)}
- * and collisions are resolved by probing two slots.</p>
- *
- * <p>The cache guarantees equality of the returned objects' contents but does not guarantee
- * object identity across invocations or threads. This class itself does not ensure
- * thread safety. Concurrent access may result in benign races where later inserts overwrite
- * earlier ones.</p>
+ * This class provides a caching mechanism that returns a value which matches the decoded bytes. It does not
+ * guarantee the return of the same object across different invocations or from different threads, but it
+ * guarantees that the contents will be the same. Although not strictly thread-safe, it behaves correctly
+ * under concurrent access.
+ * <p>
+ * The main usage is to reduce the amount of memory used by creating new objects when the same byte sequence is
+ * repeatedly decoded into an object.
+ * <p>
+ * This cache only guarantees it will provide a String which matches the decoded bytes.
+ * <p>
+ * It doesn't guarantee it will always return the same object,
+ * nor that different threads will return the same object,
+ * though the contents should always be the same.
+ * <p>
+ * While not technically thread safe, it should still behave correctly.
+ * <p>
+ * Abstract base class for implementing an interning mechanism, which helps
+ * in reusing instances of immutable objects. This class is designed to store objects
+ * and return previously stored instances that are equal to the required instance.
+ * <p>
+ * Note: The interning cache may not always return the same object instance, but
+ * the contents of the instances will be equal.
+ * *
  *
  * @param <T> the type of the object being interned
  */
@@ -100,11 +109,13 @@ public abstract class AbstractInterner<T> {
     }
 
     /**
-     * Interns the given {@link Bytes} instance using all remaining readable bytes
-     * starting from its {@code readPosition()}.
+     * Interns the specified Bytes object. If the Bytes object is already in the cache,
+     * this method returns the cached instance; otherwise, it adds the Bytes object to the cache
+     * and returns the newly cached instance. The length of Bytes object for interning is determined
+     * by the remaining readable bytes.
      *
      * @param cs the Bytes object to intern
-     * @return the cached object instance
+     * @return the interned instance
      * @throws IORuntimeException       If an I/O error occurs
      * @throws NullPointerException     if {@code cs} is {@code null}
      * @throws BufferUnderflowException If there is not enough data in the buffer
@@ -117,8 +128,10 @@ public abstract class AbstractInterner<T> {
     }
 
     /**
-     * Interns the given {@link BytesStore} instance using all readable bytes starting
-     * from its {@code readPosition()}.
+     * Interns the specified BytesStore object. If the BytesStore object is already in the cache,
+     * this method returns the cached instance; otherwise, it adds the BytesStore object to the cache
+     * and returns the newly cached instance. The length of BytesStore object for interning is determined
+     * by the remaining readable bytes.
      *
      * @param cs the BytesStore object to intern
      * @return the cached object instance
@@ -134,8 +147,9 @@ public abstract class AbstractInterner<T> {
     }
 
     /**
-     * Interns the specified {@link Bytes} instance reading exactly {@code length}
-     * bytes from {@code cs.readPosition()}.
+     * Interns the specified Bytes object of a given length. If the Bytes object is already in the cache,
+     * this method returns the cached instance; otherwise, it adds the Bytes object to the cache
+     * and returns the newly cached instance.
      *
      * @param cs     the Bytes object to intern
      * @param length the length of the Bytes object to intern
@@ -152,10 +166,8 @@ public abstract class AbstractInterner<T> {
     }
 
     /**
-     * Interns the specified {@link BytesStore}. Two possible cache slots are
-     * examined for a match using primary and secondary hashes. If neither slot
-     * contains a matching entry a new value is created via {@link #getValue(BytesStore, int)}
-     * and cached.
+     * Interns the specified Bytes. If the Bytes are already in the cache, this method returns the cached instance;
+     * otherwise, it adds the Bytes to the cache and returns the newly cached instance.
      *
      * @param cs     the Bytes to intern
      * @param length number of bytes to read from {@code cs}
@@ -170,6 +182,7 @@ public abstract class AbstractInterner<T> {
             throws IORuntimeException, BufferUnderflowException, IllegalStateException {
         if (length > entries.length)
             return getValue(cs, length);
+        // Todo: This needs to be reviewed: UnsafeMemory UNSAFE loadFence
         int hash = hash32(cs, length);
         int h = hash & mask;
         InternerEntry<T> s = entries[h];
