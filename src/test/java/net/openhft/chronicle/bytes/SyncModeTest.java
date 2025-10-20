@@ -15,6 +15,7 @@
  */
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IOTools;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -26,6 +27,7 @@ import java.util.stream.Stream;
 
 import static net.openhft.chronicle.core.Jvm.uncheckedCast;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assume.assumeFalse;
 
 @RunWith(Parameterized.class)
 public class SyncModeTest extends BytesTestCommon {
@@ -42,6 +44,8 @@ public class SyncModeTest extends BytesTestCommon {
 
     @Test
     public void largeFile() throws FileNotFoundException {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         File tmpfile = IOTools.createTempFile("sync.dat");
         try (MappedFile mappedFile = MappedFile.mappedFile(tmpfile, 64 << 20);
              MappedBytes bytes = MappedBytes.mappedBytes(mappedFile)) {

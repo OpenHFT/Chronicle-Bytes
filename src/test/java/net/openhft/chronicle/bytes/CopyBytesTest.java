@@ -15,7 +15,9 @@
  */
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.Closeable;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
@@ -23,6 +25,7 @@ import java.nio.BufferOverflowException;
 import java.nio.file.Files;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assume.assumeFalse;
 
 public class CopyBytesTest extends BytesTestCommon {
 
@@ -51,6 +54,11 @@ public class CopyBytesTest extends BytesTestCommon {
             // close if closeable.
             Closeable.closeQuietly(toTest);
         }
+    }
+
+    @Before
+    public void directEnabled() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
     }
 
     @Test

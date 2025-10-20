@@ -15,7 +15,9 @@
  */
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
+import net.openhft.chronicle.core.io.Closeable;
 import net.openhft.chronicle.core.io.ClosedIllegalStateException;
 import net.openhft.chronicle.core.io.ReferenceOwner;
 import org.junit.After;
@@ -26,6 +28,7 @@ import java.io.File;
 import java.io.IOException;
 
 import static org.junit.Assert.*;
+import static org.junit.Assume.assumeFalse;
 
 public class MappedBytesStoreTest extends BytesTestCommon implements ReferenceOwner {
     public static final int PAGE_SIZE = OS.defaultOsPageSize();
@@ -34,6 +37,8 @@ public class MappedBytesStoreTest extends BytesTestCommon implements ReferenceOw
 
     @Before
     public void setup() throws IOException {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         String filePath = OS.getTarget() + "/test" + System.nanoTime() + ".deleteme";
         mappedFile = MappedFile.mappedFile(filePath, PAGE_SIZE, PAGE_SIZE);
         mappedBytesStore = mappedFile.acquireByteStore(this, 0);
@@ -44,7 +49,7 @@ public class MappedBytesStoreTest extends BytesTestCommon implements ReferenceOw
     public void tearDown() {
         if (mappedBytesStore != null)
             mappedBytesStore.release(this);
-        mappedFile.close();
+        Closeable.closeQuietly(mappedFile);
     }
 
     @Test

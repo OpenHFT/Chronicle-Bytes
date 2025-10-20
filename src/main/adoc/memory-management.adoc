@@ -26,14 +26,10 @@ leaks by recording where a store was reserved.
 
 == 2  Native Memory
 
-`NativeBytesStore` allocates direct memory using `Unsafe`. It also
-reflectively accesses the backing `ByteBuffer` fields to obtain the raw
-address and capacity for speed. If this reflective access is blocked by
-the module system or a security manager the library logs a warning and the
-optimisation is disabled. `releaseLast()` returns the memory to the OS. For
-mapped files `MappedBytesStore` delegates to `MappedFile` which may unmap
-via an internal `Unmapper` or the JDK `Cleaner`. Failure to release prevents
-the memory from being reclaimed.
+`NativeBytesStore` allocates direct memory using `Unsafe`. `releaseLast()`
+returns the memory to the OS. For mapped files `MappedBytesStore` delegates to
+`MappedFile` which may unmap via an internal `Unmapper` or the JDK
+`Cleaner`. Failure to release prevents the memory from being reclaimed.
 
 == 3  Memory-Mapped Files
 

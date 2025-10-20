@@ -108,10 +108,8 @@ public enum BytesUtil {
     }
 
     /**
-     * Checks if the given class is trivially copyable.
-     *
-     * @param clazz Class to check.
-     * @return true if the class is trivially copyable, false otherwise.
+     * Returns {@code true} if all primitive fields of {@code clazz} occupy a contiguous range allowing
+     * direct memory copies.
      */
     public static boolean isTriviallyCopyable(@NotNull Class<?> clazz) {
         final int[] ints = TRIVIALLY_COPYABLE.get(clazz);

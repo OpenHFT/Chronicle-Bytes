@@ -157,7 +157,6 @@ using raw wire format or if endianness-sensitive operations are exposed. (Note: 
 Enterprise-only features (e.g. encrypted queue files at a higher level, specific `BytesStore` types) are attempted to be used. |Unit test verifies.
 |CB-RISK-003 |Ensure that direct use of `sun.misc.Unsafe` is clearly demarcated, justified, and encapsulated. Fallback mechanisms should be considered if `Unsafe` is unavailable, or clear documentation of `Unsafe` necessity. |Code review and documentation justifying `Unsafe` use; tests for fallback mechanisms if any, or CI runs with `Unsafe` restricted.
 |CB-RISK-004 |Potential for `OutOfMemoryError` (both Java heap and native memory) if not managed correctly by users. |Clear documentation (CB-DOC-006) on resource lifecycle and typical patterns to avoid leaks. `BytesMetrics` (CB-NF-O-002) for monitoring.
-|CB-RISK-005 |Reflection on internal JDK fields (e.g., direct `ByteBuffer` address) must fail gracefully when blocked by the module system or security manager. A warning should be logged and a safe fallback used. |Unit test installs a restrictive security manager and verifies warning output and functional behaviour.
 |===
 
 == 10  Operational Concerns

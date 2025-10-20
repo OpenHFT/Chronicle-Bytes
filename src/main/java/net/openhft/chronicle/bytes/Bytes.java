@@ -18,6 +18,7 @@ package net.openhft.chronicle.bytes;
 import net.openhft.chronicle.bytes.internal.BytesInternal;
 import net.openhft.chronicle.bytes.internal.EmbeddedBytes;
 import net.openhft.chronicle.bytes.util.DecoratedBufferOverflowException;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.annotation.SingleThreaded;
 import net.openhft.chronicle.core.annotation.UsedViaReflection;
@@ -485,6 +486,13 @@ public interface Bytes<U> extends
     }
 
     /**
+     * Allocate an elastic bytes as direct if available, or on heap if not.
+     */
+    static Bytes<?> allocateElastic() {
+        return Jvm.maxDirectMemory() == 0 ? allocateElasticOnHeap() : allocateElasticDirect();
+    }
+
+    /**
      * Creates and returns a new elastic wrapper for memory allocated on the heap,
      * with the specified {@code initialCapacity}. The capacity of the wrapper will
      * be automatically resized as needed.
@@ -505,6 +513,14 @@ public interface Bytes<U> extends
         } finally {
             wrap.release(INIT);
         }
+    }
+
+    /**
+     * Allocate an elastic bytes as direct if available, or on heap if not.
+     * @param initialCapacity to allocate
+     */
+    static Bytes<?> allocateElastic(@NonNegative int initialCapacity) {
+        return Jvm.maxDirectMemory() == 0 ? allocateElasticOnHeap(initialCapacity) : allocateElasticDirect(initialCapacity);
     }
 
     /**
@@ -585,7 +601,7 @@ public interface Bytes<U> extends
             try {
                 @NotNull final StringBuilder builder = new StringBuilder();
                 while (buffer.readRemaining() > 0) {
-                    builder.append((char) buffer.readByte());
+                    builder.append((char) buffer.readUnsignedByte());
                 }
 
                 // remove the last comma

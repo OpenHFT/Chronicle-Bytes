@@ -15,6 +15,7 @@
  */
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -28,6 +29,7 @@ import static net.openhft.chronicle.bytes.Allocator.HEAP;
 import static net.openhft.chronicle.bytes.Allocator.NATIVE;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeFalse;
 
 @RunWith(Parameterized.class)
 public class Bytes2Test extends BytesTestCommon {
@@ -42,6 +44,8 @@ public class Bytes2Test extends BytesTestCommon {
 
     @Parameterized.Parameters
     public static Collection<Object[]> data() {
+        if (Jvm.maxDirectMemory() == 0)
+            return Arrays.asList(new Object[][]{{HEAP, HEAP}});
         return Arrays.asList(new Object[][]{
                 {NATIVE, NATIVE}, {HEAP, NATIVE}, {NATIVE, HEAP}, {HEAP, HEAP}
         });
@@ -49,6 +53,8 @@ public class Bytes2Test extends BytesTestCommon {
 
     @Test
     public void testPartialWrite() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         Bytes<?> from = alloc1.elasticBytes(1);
         Bytes<?> to = alloc2.fixedBytes(6);
 
@@ -67,6 +73,7 @@ public class Bytes2Test extends BytesTestCommon {
 
     @Test
     public void testPartialWrite64plus() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
         Bytes<?> from = alloc1.elasticBytes(1);
         Bytes<?> to = alloc2.fixedBytes(6);
 
