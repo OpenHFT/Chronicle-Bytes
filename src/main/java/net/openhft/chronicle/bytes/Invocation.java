@@ -35,10 +35,9 @@ public interface Invocation {
      * @param args the arguments to be passed to the method, may be {@code null}
      * @return the result of the invocation or {@code null} if the method returns void
      * @throws InvocationTargetException if the underlying method throws an exception
-     * @throws IllegalAccessException    if the method is not accessible
      * @throws IllegalArgumentException  if the arguments do not match the method signature
      * @throws NullPointerException      if {@code m} is {@code null}
      */
     Object invoke(Method m, Object o, Object[] args)
-            throws InvocationTargetException, IllegalAccessException;
+            throws InvocationTargetException;
 }
