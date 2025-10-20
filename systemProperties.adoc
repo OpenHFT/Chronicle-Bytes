@@ -15,4 +15,5 @@ NOTE: All boolean properties below are read using link:https://javadoc.io/static
 | user.name | unknown | The default user name, unless otherwise specified | _USER_NAME_ (String)
 | timestamp.dir | OS.TMP | Returns directory of file as timestamp | _TIME_STAMP_DIR_ (String)
 | timestamp.path | unknown | Returns file path of timestamp.dir file | _TIME_STAMP_PATH_(String)
+| bytes.max-array-len | 16777216 | Maximum array length accepted when reading | _MAX_ARRAY_LEN_ (int)
 |===

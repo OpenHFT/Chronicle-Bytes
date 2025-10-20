@@ -15,7 +15,9 @@
  */
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.InvalidMarshallableException;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -24,6 +26,10 @@ import static junit.framework.TestCase.assertEquals;
 import static org.junit.Assume.assumeFalse;
 
 public class BytesTextMethodTesterTest extends BytesTestCommon {
+    @Before
+    public void directEnabled() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+    }
 
     @Test
     public void run()

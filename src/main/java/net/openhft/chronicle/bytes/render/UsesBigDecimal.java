@@ -21,13 +21,12 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 
 /**
- * An implementation of {@link Decimaliser} that uses {@link BigDecimal} for higher-precision conversions of floating-point
- * numbers to decimal representation.
- * <p>
- * This implementation is designed for scenarios where precision is of utmost importance, and is suitable for handling
- * very large numbers or numbers with a large number of decimal places.
- * <p>
- * Note: Using {@link BigDecimal} might incur a performance overhead compared to more lightweight approaches.
+ * Decimaliser based on {@link BigDecimal} for high precision conversions.
+ *
+ * <p>Using {@code BigDecimal} allocates objects and may be slower than the
+ * lightweight strategies. Reflection is used to access the internal
+ * {@code intCompact} field when available; this may break on future JVMs or
+ * under a security manager. The code falls back to {@link BigDecimal#unscaledValue()} if reflective access fails.
  */
 public class UsesBigDecimal implements Decimaliser {
 
@@ -38,10 +37,11 @@ public class UsesBigDecimal implements Decimaliser {
     public static final Decimaliser USES_BIG_DECIMAL = new UsesBigDecimal();
 
     /**
-     * Field reference to the internal storage of {@link BigDecimal} values. It is used to access
-     * implementation details of {@link BigDecimal}, specifically the unscaled value of the number.
+     * Reference to the private {@code intCompact} field of {@link BigDecimal}.
+     * Access may fail on some JVMs, in which case a slower fallback is used.
      */
-    private static final java.lang.reflect.Field INT_COMPACT = Jvm.getFieldOrNull(BigDecimal.class, "intCompact");
+    private static final java.lang.reflect.Field INT_COMPACT =
+            Jvm.getFieldOrNull(BigDecimal.class, "intCompact");
 
     /**
      * Constant representing the bits of negative zero in floating point representation.

@@ -17,6 +17,7 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.bytes.internal.BytesInternal;
 import net.openhft.chronicle.bytes.internal.NativeBytesStore;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.annotation.Java9;
 import net.openhft.chronicle.core.annotation.NonNegative;
@@ -32,7 +33,9 @@ import java.nio.BufferUnderflowException;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
 /**
- * Utility class for working with Appendable objects such as StringBuilder and Bytes.
+ * Utility methods for manipulating {@link Appendable} implementations such as
+ * {@link StringBuilder} and {@link Bytes}. These helpers are used throughout
+ * the text parsing and formatting code paths.
  */
 @SuppressWarnings("rawtypes")
 public enum AppendableUtil {
@@ -42,13 +45,11 @@ public enum AppendableUtil {
     private static final String MALFORMED_INPUT_AROUND_BYTE = "malformed input around byte ";
 
     /**
-     * Sets a character at a specified index in the given Appendable.
+     * Writes {@code ch} at {@code index} in the supplied {@code Appendable}.
+     * Only {@link StringBuilder} and {@link Bytes} are supported.
      *
-     * @param sb    the Appendable to modify
-     * @param index the index at which to set the character
-     * @param ch    the character to set
-     * @throws IllegalArgumentException If the Appendable is not of type StringBuilder or Bytes
-     * @throws BufferOverflowException  If the index is larger than the buffer's capacity
+     * @throws IllegalArgumentException if {@code sb} is not a supported type
+     * @throws BufferOverflowException  if {@code index} exceeds the capacity of the target
      */
     public static void setCharAt(@NotNull Appendable sb, @NonNegative int index, char ch)
             throws IllegalArgumentException, BufferOverflowException {
@@ -61,15 +62,11 @@ public enum AppendableUtil {
     }
 
     /**
-     * Parses a UTF-8 BytesStore into a StringBuilder.
+     * Decodes {@code length} bytes from {@code bs} as either UTF-8 or ISO-8859-1
+     * and appends the text to {@code sb}.
      *
-     * @param bs     the BytesStore to parse
-     * @param sb     the StringBuilder to append to
-     * @param utf    whether to parse as UTF-8
-     * @param length the length of characters to parse
-     * @throws UTFDataFormatRuntimeException If invalid UTF-8 sequence is encountered
-     * @throws BufferUnderflowException      If the BytesStore doesn't contain enough data
-     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @param utf when {@code true} treat the bytes as UTF-8, otherwise ISO-8859-1
+     * @throws UTFDataFormatRuntimeException if the data is malformed UTF-8
      */
     public static void parseUtf8(@NotNull BytesStore<?, ?> bs, StringBuilder sb, boolean utf, @NonNegative int length)
             throws UTFDataFormatRuntimeException, BufferUnderflowException, ClosedIllegalStateException {
@@ -77,13 +74,8 @@ public enum AppendableUtil {
     }
 
     /**
-     * Sets the length of the given Appendable.
-     *
-     * @param sb        the Appendable to modify
-     * @param newLength the new length to set
-     * @throws IllegalArgumentException    If the Appendable is not of type StringBuilder or Bytes
-     * @throws ClosedIllegalStateException    If the resource has been released or closed.
-     * @throws BufferUnderflowException    If the new length is greater than the Bytes's capacity
+     * Adjusts the logical length of {@code sb}. For {@link Bytes} this moves the
+     * write position to {@code newLength}.
      */
     public static void setLength(@NotNull Appendable sb, @NonNegative int newLength)
             throws IllegalArgumentException, ClosedIllegalStateException, BufferUnderflowException {
@@ -97,13 +89,8 @@ public enum AppendableUtil {
     }
 
     /**
-     * Appends a double value to the given Appendable.
-     *
-     * @param sb    the Appendable to append to
-     * @param value the double value to append
-     * @throws IllegalArgumentException    If the Appendable is not of type StringBuilder or Bytes
-     * @throws BufferOverflowException     If there is not enough space in the Bytes to append the value
-     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * Appends {@code value} to {@code sb}. For {@link Bytes} the configured
+     * {@link net.openhft.chronicle.bytes.render.Decimaliser} is used.
      */
     public static void append(@NotNull Appendable sb, double value)
             throws IllegalArgumentException, BufferOverflowException, ClosedIllegalStateException {
@@ -116,13 +103,7 @@ public enum AppendableUtil {
     }
 
     /**
-     * Appends a long value to the given Appendable.
-     *
-     * @param sb    the Appendable to append to
-     * @param value the long value to append
-     * @throws IllegalArgumentException    If the Appendable is not of type StringBuilder or Bytes
-     * @throws BufferOverflowException     If there is not enough space in the Bytes to append the value
-     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * Appends {@code value} in decimal form to {@code sb}.
      */
     public static void append(@NotNull Appendable sb, long value)
             throws IllegalArgumentException, BufferOverflowException, ClosedIllegalStateException {
@@ -149,13 +130,8 @@ public enum AppendableUtil {
     }
 
     /**
-     * Reads an 8-bit character from a StreamingDataInput and appends it to a StringBuilder
-     * until a stop character as defined by the given StopCharsTester is encountered.
-     *
-     * @param bytes      the StreamingDataInput to read from
-     * @param appendable the StringBuilder to append to
-     * @param tester     the StopCharsTester defining the stop character
-     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * Reads 8-bit characters from {@code bytes} appending each to
+     * {@code appendable} until {@code tester} signals a stop or the input ends.
      */
     public static void read8bitAndAppend(@NotNull StreamingDataInput bytes,
                                          @NotNull StringBuilder appendable,
@@ -172,14 +148,8 @@ public enum AppendableUtil {
     }
 
     /**
-     * Reads an 8-bit character from a StreamingDataInput and appends it to an Appendable
-     * until a stop character as defined by the given StopCharsTester is encountered.
-     *
-     * @param bytes      the StreamingDataInput to read from
-     * @param appendable the Appendable to append to
-     * @param tester     the StopCharsTester defining the stop character
-     * @throws BufferUnderflowException    If the StreamingDataInput is exhausted
-     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * Reads 8-bit characters and appends them to {@code appendable} until
+     * {@code tester} requests a stop.
      */
     public static void readUTFAndAppend(@NotNull StreamingDataInput bytes,
                                         @NotNull Appendable appendable,
@@ -193,15 +163,8 @@ public enum AppendableUtil {
     }
 
     /**
-     * Reads a UTF-8 encoded character from a StreamingDataInput and appends it to an Appendable
-     * until a stop character as defined by the given StopCharsTester is encountered.
-     *
-     * @param bytes      the StreamingDataInput to read from
-     * @param appendable the Appendable to append to
-     * @param tester     the StopCharsTester defining the stop character
-     * @throws BufferUnderflowException    If the StreamingDataInput is exhausted
-     * @throws IOException                 If an I/O error occurs
-     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * Reads UTF-8 characters from {@code bytes} and appends them to
+     * {@code appendable} until {@code tester} signals a stop or the input ends.
      */
     public static void readUtf8AndAppend(@NotNull StreamingDataInput bytes,
                                          @NotNull Appendable appendable,
@@ -327,7 +290,7 @@ public enum AppendableUtil {
      */
     public static void parse8bit(@NotNull StreamingDataInput bytes, Appendable appendable, @NonNegative int utflen)
             throws BufferUnderflowException, IOException, ClosedIllegalStateException {
-        if (appendable instanceof StringBuilder) {
+        if (appendable instanceof StringBuilder && Jvm.maxDirectMemory() > 0) {
             @NotNull final StringBuilder sb = (StringBuilder) appendable;
             if (bytes instanceof Bytes && ((Bytes) bytes).bytesStore() instanceof NativeBytesStore) {
                 parse8bit_SB1((Bytes) bytes, sb, utflen);
@@ -366,11 +329,7 @@ public enum AppendableUtil {
     }
 
     /**
-     * Calculates the length of a CharSequence in UTF-8 format.
-     *
-     * @param str the CharSequence to calculate the length of
-     * @return the length of the CharSequence in UTF-8
-     * @throws IndexOutOfBoundsException If the CharSequence has invalid indices
+     * Determines how many bytes {@code str} will occupy when encoded as UTF-8.
      */
     public static long findUtf8Length(@NotNull CharSequence str)
             throws IndexOutOfBoundsException {
@@ -387,11 +346,8 @@ public enum AppendableUtil {
     }
 
     /**
-     * Calculates the length of a byte array in UTF-8 format.
-     *
-     * @param bytes the byte array to calculate the length of
-     * @param coder a coder indicating the type of the content
-     * @return the length of the byte array in UTF-8
+     * Returns the number of bytes required to UTF-8 encode the supplied
+     * {@code bytes} using the given {@code coder} representation.
      */
     @Java9
     public static long findUtf8Length(byte[] bytes, byte coder) {
@@ -431,10 +387,7 @@ public enum AppendableUtil {
     }
 
     /**
-     * Calculates the length of a byte array in UTF-8 format.
-     *
-     * @param chars the byte array to calculate the length of
-     * @return the length of the byte array in UTF-8
+     * Computes the UTF-8 byte length of the provided 8-bit encoded character array.
      */
     @Java9
     public static long findUtf8Length(byte[] chars) {
@@ -464,12 +417,7 @@ public enum AppendableUtil {
     }
 
     /**
-     * Calculates the length of a character array in UTF-8 format, from a given offset up to the specified length.
-     *
-     * @param chars  the character array to calculate the length of
-     * @param offset the starting index in the character array
-     * @param length the number of characters to include in the calculation
-     * @return the length of the specified segment of the character array in UTF-8
+     * Returns the UTF-8 byte length of a portion of {@code chars}.
      */
     public static long findUtf8Length(char[] chars, @NonNegative int offset, @NonNegative int length) {
         requireNonNull(chars);
@@ -489,10 +437,8 @@ public enum AppendableUtil {
     }
 
     /**
-     * Calculates the length of a character array in UTF-8 format.
-     *
-     * @param chars the character array to calculate the length of
-     * @return the length of the character array in UTF-8
+     * Convenience overload of {@link #findUtf8Length(char[], int, int)} for the
+     * whole array.
      */
     public static long findUtf8Length(char[] chars) {
         return findUtf8Length(chars, 0, chars.length);

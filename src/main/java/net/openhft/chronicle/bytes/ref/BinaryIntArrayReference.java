@@ -35,17 +35,10 @@ import static net.openhft.chronicle.bytes.HexDumpBytes.MASK;
 import static net.openhft.chronicle.bytes.ref.BinaryIntReference.INT_NOT_COMPLETE;
 
 /**
- * Represents a binary array of integers, backed by a {@link BytesStore}.
- * <p>
- * This class provides operations to access and manipulate an array of integers in binary form.
- * The integers are stored in a BytesStore, and this class provides various methods to perform
- * atomic operations, read/write values, and manage the state of the array.
- * <p>
- * The BinaryIntArrayReference class also contains the ability to throw exceptions in cases
- * of buffer underflows or illegal states, and to read the array in a volatile fashion,
- * ensuring a happens-before relationship between threads.
- * <p>
- * Example usage:
+ * Array of 32-bit values laid out as
+ * {@code [capacity][used][values...]} in little-endian order.
+ * Each entry is shifted by {@code SHIFT} bytes from {@code VALUES}.
+ * <p>Example usage:</p>
  * <pre>
  * BytesStore bytesStore = ...
  * BinaryIntArrayReference arrayRef = new BinaryIntArrayReference();
@@ -54,8 +47,8 @@ import static net.openhft.chronicle.bytes.ref.BinaryIntReference.INT_NOT_COMPLET
  * int value = arrayRef.getValueAt(5);
  * </pre>
  * <p>
- * Note: This class is not thread-safe, and external synchronization may be necessary if instances
- * are shared between threads. The data referenced is thread safe when the appropriate methods are used.
+ * Note: This class is not thread-safe. External synchronisation may be
+ * required if instances are shared between threads.
  */
 @SuppressWarnings("rawtypes")
 public class BinaryIntArrayReference extends AbstractReference implements ByteableIntArrayValues, BytesMarshallable {

@@ -30,28 +30,40 @@ import java.nio.ByteOrder;
 import static net.openhft.chronicle.bytes.algo.VanillaBytesStoreHash.*;
 
 /**
- * Optimized hashing algorithm for BytesStore.
+ * Optimised hashing algorithm for BytesStore.
  * <p>
- * This enumeration implements BytesStoreHash for optimized hashing of BytesStore
- * depending on the size of the data and architecture of the system.
+ * This enumeration implements BytesStoreHash for optimised hashing of BytesStore
+ * depending on the data size and whether the {@code BytesStore} resides in direct memory,
+ * leveraging system architecture details like endianness for performance.
  */
 @SuppressWarnings("rawtypes")
 public enum OptimisedBytesStoreHash implements BytesStoreHash<BytesStore<?,?>> {
     INSTANCE;
 
+    /**
+     * Provides access to low-level memory operations for optimised hashing.
+     */
     public static final Memory MEMORY = OS.memory();
+    /**
+     * Flag indicating if the native byte order of the system is little-endian.
+     */
     public static final boolean IS_LITTLE_ENDIAN = ByteOrder.nativeOrder() == ByteOrder.LITTLE_ENDIAN;
+    /**
+     * Offset used to select the top four bytes of a long, dependent on system endianness.
+     */
     private static final int TOP_BYTES = IS_LITTLE_ENDIAN ? 4 : 0;
 
     /**
      * Computes a 64-bit hash value for the given BytesStore for data sizes between 1 to 7 bytes.
      *
      * @param store     The {@link BytesStore} to compute the hash for.
-     * @param remaining The number of bytes to process.
+     * @param remaining The number of bytes to process (between 1 and 7 inclusive).
      * @return A 64-bit hash value.
      * @throws BufferUnderflowException If there is not enough data.
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
+     *
+     * <p> This method is on the hot path for small direct {@link BytesStore} instances and allocates no objects.
      */
     static long applyAsLong1to7(@NotNull BytesStore<?, ?> store, @NonNegative int remaining) throws IllegalStateException, BufferUnderflowException {
         final long address = store.addressForRead(store.readPosition());
@@ -67,6 +79,8 @@ public enum OptimisedBytesStoreHash implements BytesStoreHash<BytesStore<?,?>> {
      * @throws BufferUnderflowException If there is not enough data.
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
+     *
+     * <p> Suitable for hot paths and performs no allocation.
      */
     static long applyAsLong8(@NotNull BytesStore<?, ?> store) throws IllegalStateException, BufferUnderflowException {
         final long address = store.addressForRead(store.readPosition());
@@ -99,9 +113,11 @@ public enum OptimisedBytesStoreHash implements BytesStoreHash<BytesStore<?,?>> {
      * Computes a 64-bit hash value for the given BytesStore for data sizes between 9 to 16 bytes.
      *
      * @param store     The {@link BytesStore} to compute the hash for.
-     * @param remaining The number of bytes to process.
+     * @param remaining The number of bytes to process (between 9 and 16 inclusive).
      * @return A 64-bit hash value.
      * @throws BufferUnderflowException If there is not enough data.
+     *
+     * <p> Handles medium sized payloads without allocation.
      */
     static long applyAsLong9to16(@NotNull BytesStore<?, ?> store, @NonNegative int remaining) throws BufferUnderflowException {
         @NotNull final BytesStore<?, ?> bytesStore = store.bytesStore();
@@ -133,9 +149,11 @@ public enum OptimisedBytesStoreHash implements BytesStoreHash<BytesStore<?,?>> {
      * Computes a 64-bit hash value for the given BytesStore for data sizes between 17 to 32 bytes.
      *
      * @param store     The {@link BytesStore} to compute the hash for.
-     * @param remaining The number of bytes to process.
+     * @param remaining The number of bytes to process (between 17 and 32 inclusive).
      * @return A 64-bit hash value.
      * @throws BufferUnderflowException If there is not enough data.
+     *
+     * <p> Designed for medium payloads, free from allocation.
      */
     static long applyAsLong17to32(@NotNull BytesStore<?, ?> store, @NonNegative int remaining) throws BufferUnderflowException {
         @NotNull final BytesStore<?, ?> bytesStore = store.bytesStore();
@@ -167,9 +185,11 @@ public enum OptimisedBytesStoreHash implements BytesStoreHash<BytesStore<?,?>> {
      * Computes a 64-bit hash value for the given BytesStore for data sizes that are multiple of 32 bytes.
      *
      * @param store     The {@link BytesStore} to compute the hash for.
-     * @param remaining The number of bytes to process.
+     * @param remaining The number of bytes to process (must be a multiple of 32).
      * @return A 64-bit hash value.
      * @throws BufferUnderflowException If there is not enough data.
+     *
+     * <p> Intended for large direct {@link BytesStore} blocks.
      */
     public static long applyAsLong32bytesMultiple(@NotNull BytesStore<?, ?> store, @NonNegative int remaining) throws BufferUnderflowException {
         @NotNull final BytesStore<?, ?> bytesStore = store.bytesStore();
@@ -211,9 +231,11 @@ public enum OptimisedBytesStoreHash implements BytesStoreHash<BytesStore<?,?>> {
      * Computes a 64-bit hash value for the given BytesStore for any size of data.
      *
      * @param store     The {@link BytesStore} to compute the hash for.
-     * @param remaining The number of bytes to process.
+     * @param remaining The number of bytes to process (must be non-negative).
      * @return A 64-bit hash value.
      * @throws BufferUnderflowException If there is not enough data.
+     *
+     * <p> Fallback for arbitrary lengths; still avoids allocation.
      */
     public static long applyAsLongAny(@NotNull BytesStore<?, ?> store, @NonNegative long remaining) throws BufferUnderflowException {
         @NotNull final BytesStore<?, ?> bytesStore = store.bytesStore();
@@ -297,9 +319,9 @@ public enum OptimisedBytesStoreHash implements BytesStoreHash<BytesStore<?,?>> {
      * it reads as many bytes as specified and converts them to a long.
      * Endianness is considered for reading bytes.
      *
-     * @param address the starting address of the memory to read from.
-     * @param len     the number of bytes to read (between 1 and 7, inclusive).
-     * @return the value read from memory converted to a {@code long}.
+     * @param address the starting address of the memory to read from
+     * @param len     the number of bytes to read (must be non-negative). Reads up to eight bytes
+     * @return the value read from memory converted to a {@code long}. Returns {@code 0} if {@code len} is 0 or negative
      */
     static long readIncompleteLong(long address, @NonNegative int len) {
         switch (len) {

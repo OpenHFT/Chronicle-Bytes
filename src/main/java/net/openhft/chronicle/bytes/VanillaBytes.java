@@ -36,10 +36,12 @@ import static net.openhft.chronicle.core.util.Longs.requireNonNegative;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
 /**
- * A simple Bytes implementation that is non-elastic. It does not support dynamic resizing.
- * This class provides functionality to work with a sequence of bytes, offering various read and write operations.
+ * Base implementation of {@link Bytes} backed by a fixed-capacity
+ * {@link BytesStore}. Subclasses such as {@link NativeBytes} or
+ * {@link OnHeapBytes} provide concrete behaviour. This class itself is not
+ * elastic.
  *
- * @param <U> the type of the underlying object representation
+ * @param <U> type of the object representation
  */
 @SuppressWarnings("rawtypes")
 public class VanillaBytes<U>
@@ -91,10 +93,9 @@ public class VanillaBytes<U>
     }
 
     /**
-     * Factory method for creating an instance of VanillaBytes with no initial ByteStore.
-     * This can be used in scenarios where the ByteStore is to be replaced or provided at a later point.
-     *
-     * @return a new instance of VanillaBytes with no ByteStore.
+     * Creates a new {@code VanillaBytes} backed by an empty native store.
+     * The returned instance is elastic as it actually delegates to
+     * {@link NativeBytes}.
      */
     @NotNull
     public static VanillaBytes<Void> vanillaBytes() {
@@ -246,7 +247,7 @@ public class VanillaBytes<U>
 
         long realLength = realReadRemaining();
 
-        if (Jvm.isJava9Plus()) {
+        if (Jvm.isJava9Plus() && Jvm.maxDirectMemory() > 0) {
             byte[] bytes = StringUtils.extractBytes(other);
             byte coder = StringUtils.getStringCoder(other);
             if (bytesStore instanceof NativeBytesStore && realLength == readRemaining()) {
@@ -362,7 +363,7 @@ public class VanillaBytes<U>
                     write((BytesStore) str, start, (long) end - start);
                     return this;
                 }
-                if (str instanceof String) {
+                if (str instanceof String && Jvm.maxDirectMemory() > 0) {
                     if (Jvm.isJava9Plus()) {
                         byte coder = StringUtils.getStringCoder((String) str);
                         appendUtf8(StringUtils.extractBytes((String) str), start, end - start, coder);
@@ -396,7 +397,7 @@ public class VanillaBytes<U>
                     write((BytesStore) str, 0L, str.length());
                     return this;
                 }
-                if (str instanceof String) {
+                if (str instanceof String && Jvm.maxDirectMemory() > 0) {
                     if (Jvm.isJava9Plus()) {
                         String str1 = (String) str;
                         byte coder = StringUtils.getStringCoder(str1);
@@ -496,7 +497,7 @@ public class VanillaBytes<U>
             throw new NullPointerException("byteStore.memory is null.");
         }
 
-        if (Jvm.isJava9Plus()) {
+        if (Jvm.isJava9Plus() && Jvm.maxDirectMemory() > 0) {
             final byte[] chars = StringUtils.extractBytes(s);
 
             int i;

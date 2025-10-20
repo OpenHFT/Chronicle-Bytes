@@ -22,25 +22,23 @@ import net.openhft.chronicle.core.io.ReferenceOwner;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * A functional interface that serves as a factory for creating instances of {@link MappedBytesStore}.
- * <p>
- * This interface is meant to be implemented by classes that can create MappedBytesStore instances based on provided parameters.
+ * Factory for creating {@link MappedBytesStore} instances.
  */
 @FunctionalInterface
 public interface MappedBytesStoreFactory {
 
     /**
-     * Creates a {@link MappedBytesStore} instance with the given parameters.
+     * Creates a {@link MappedBytesStore} for the given mapping parameters.
      *
-     * @param owner        The owner of the MappedBytesStore to be created.
-     * @param mappedFile   The MappedFile to be wrapped by the created BytesStore.
-     * @param start        The start position within the MappedFile.
-     * @param address      The memory address of the mapped data.
-     * @param capacity     The capacity of the mapped data.
-     * @param safeCapacity The safe capacity of the mapped data. Accessing data beyond the safe capacity might lead to a crash.
-     * @param pageSize     Page size to use to check alignment
-     * @return The created MappedBytesStore instance.
-     * @throws ClosedIllegalStateException If the MappedFile has already been released.
+     * @param owner        reference owner for the created store
+     * @param mappedFile   parent mapped file
+     * @param start        logical start offset within the file
+     * @param address      native memory address of the mapping
+     * @param capacity     total size of the mapped region
+     * @param safeCapacity portion of the region accessible without remapping
+     * @param pageSize     page size for alignment checks
+     * @return the created store
+     * @throws ClosedIllegalStateException if the mapped file has been closed
      */
     @NotNull
     MappedBytesStore create(ReferenceOwner owner, MappedFile mappedFile, @NonNegative long start, @NonNegative long address, @NonNegative long capacity, @NonNegative long safeCapacity, @Positive int pageSize)

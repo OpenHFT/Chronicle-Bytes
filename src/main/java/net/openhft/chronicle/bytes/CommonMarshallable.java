@@ -18,20 +18,17 @@ package net.openhft.chronicle.bytes;
 import net.openhft.chronicle.core.annotation.DontChain;
 
 /**
- * Defines common behavior for marshallable objects, i.e., objects that can be converted to and from
- * a series of bytes. An object of a class implementing this interface can be written as a
- * self-describing message, meaning that it includes metadata about its own structure.
+ * Marker for objects that can be serialised to bytes.  Implementations may choose to embed
+ * type or structural metadata so that the resulting message is self describing.
  */
 @DontChain
 public interface CommonMarshallable {
 
     /**
-     * Determines whether the message produced by this object is self-describing.
-     * A self-describing message includes metadata about its structure, which aids
-     * in decoding the message without prior knowledge of its structure.
+     * Indicates whether the serialised form should contain enough metadata for a generic parser to
+     * understand it without prior knowledge of the concrete type.
      *
-     * @return {@code true} if the message should be self-describing, {@code false} otherwise.
-     * By default, this method returns {@code true}.
+     * @return {@code true} by default
      */
     default boolean usesSelfDescribingMessage() {
         return true;

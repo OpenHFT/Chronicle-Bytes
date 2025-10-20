@@ -1,0 +1,80 @@
+= Chronicle Bytes Hash Algorithms
+:doctype: book
+:toc:
+:toclevels: 2
+:lang: en-GB
+
+This module provides non-cryptographic hash functions for `BytesStore` data. [cite: 136]
+It is typically used for in-memory indexes and integrity checks where speed is more important than collision resistance.
+The available algorithms are designed for efficiency when processing byte sequences.
+
+== Available Algorithms
+
+Chronicle Bytes provides several hashing implementations:
+
+* **`OptimisedBytesStoreHash`**: This algorithm dynamically selects an optimised hashing strategy based on the size of the data and whether it resides in direct memory. [cite: 116, 125] It considers system architecture details like endianness for performance. [cite: 116]
+* **`VanillaBytesStoreHash`**: A general-purpose hashing algorithm for `BytesStore` instances. [cite: 133] It provides a consistent hashing approach suitable for various data sizes.
+* **`XxHash`**: An implementation of the xxHash algorithm, known for its speed.
+This version is migrated from the Zero-Allocation-Hashing project and supports a configurable seed. [cite: 128]
+
+All hashing algorithms implement the `BytesStoreHash` interface. [cite: 126, 136]
+
+== Usage
+
+The primary interface for using these hash functions is `BytesStoreHash`.
+You can obtain an instance of a specific algorithm or use the static helper methods.
+
+.Common call flow using `OptimisedBytesStoreHash`
+[source,java]
+----
+import net.openhft.chronicle.bytes.BytesStore;
+import net.openhft.chronicle.bytes.algo.BytesStoreHash;
+import net.openhft.chronicle.bytes.algo.OptimisedBytesStoreHash;
+
+// Obtain a BytesStore instance (e.g., from Bytes.from("some data"))
+BytesStore<?, ?> bytesStore = ...;
+
+// Get an instance of the desired hash algorithm
+BytesStoreHash hashAlgorithm = OptimisedBytesStoreHash.INSTANCE;
+
+// Calculate the hash for the readable portion of the BytesStore
+long hashValue = hashAlgorithm.applyAsLong(bytesStore, bytesStore.readRemaining());
+----
+
+Alternatively, you can use the static convenience methods in `BytesStoreHash`:
+
+.Static helper method usage
+[source,java]
+----
+import net.openhft.chronicle.bytes.BytesStore;
+import net.openhft.chronicle.bytes.algo.BytesStoreHash;
+
+BytesStore<?, ?> bytesStore = ...;
+
+// Compute a 64-bit hash; this internally selects an optimised algorithm
+// if the BytesStore is in direct memory.
+long hash64 = BytesStoreHash.hash(bytesStore);
+
+// Compute a 32-bit hash
+int hash32 = BytesStoreHash.hash32(bytesStore);
+
+// Compute a hash for a specific length
+long partialHash64 = BytesStoreHash.hash(bytesStore, lengthToHash);
+int partialHash32 = BytesStoreHash.hash32(bytesStore, (int) lengthToHash);
+----
+
+== Performance Considerations
+
+* `OptimisedBytesStoreHash` aims to provide the best performance for `BytesStore` instances in direct memory by using specialized routines for different data lengths (e.g., 1-7 bytes, 8 bytes, 9-16 bytes, etc.). [cite: 116, 125]
+* For on-heap `BytesStore` instances, or when a direct memory optimized version is not available, hashing typically falls back to implementations like `VanillaBytesStoreHash`. [cite: 126]
+* Endianness (`IS_LITTLE_ENDIAN`) and specific memory access methods (`MEMORY.readLong`, `MEMORY.readInt`) are utilized by `OptimisedBytesStoreHash` to enhance speed. [cite: 116]
+* `XxHash` is also designed for high speed. [cite: 128, 136]
+
+== Important Notes
+
+* These hash functions are **non-cryptographic**.
+They should not be used for security-sensitive applications where collision resistance against malicious attacks is required. [cite: 136]
+* The hash computation depends on the readable bytes in the `BytesStore`.
+Ensure the `readPosition` and `readLimit` (or the specified length) accurately reflect the data you intend to hash.
+
+See `memory-management.adoc` for details about memory ownership and lifetimes, which is relevant when dealing with `BytesStore` instances.

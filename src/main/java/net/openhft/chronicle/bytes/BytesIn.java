@@ -26,19 +26,10 @@ import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 
 /**
- * Defines an interface for reading bytes. This interface extends several interfaces
- * that provide methods for reading random data, streaming data, and string parsing.
- * It provides methods for reading Marshallable objects, creating a MethodReader for
- * reading methods serialized to the file, and a builder for the MethodReader. It also
- * provides a method to read an object of a specific class.
- * <p>
- * This interface supports reading of basic data types, Strings, Enums, and
- * BytesMarshallable objects. If an unsupported class is specified in the readObject method,
- * an UnsupportedOperationException is thrown.
- * <p>
- * The classes implementing this interface should handle any necessary synchronization.
+ * Reads data from a byte stream or buffer. Combines random access, sequential
+ * streaming, and text parsing capabilities.
  *
- * @param <U> the type of the bytes in this input.
+ * @param <U> underlying buffer type
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
 public interface BytesIn<U> extends
@@ -46,10 +37,12 @@ public interface BytesIn<U> extends
         StreamingDataInput<Bytes<U>>,
         ByteStringParser<Bytes<U>> {
     /**
-     * Creates a MethodReader for reading methods serialized to the MarshallableOut.
+     * Creates a {@link MethodReader} that decodes method calls from this input
+     * and dispatches them to the supplied handler objects.
      *
-     * @param objects which implement the methods serialized to the MarshallableOut.
-     * @return a MethodReader which will read one Excerpt at a time.
+     * @param objects handler instances implementing the expected interfaces
+     * @return a reader that processes one message per invocation of
+     *         {@link MethodReader#readOne()}
      */
     @NotNull
     default MethodReader bytesMethodReader(@NotNull Object... objects) {
@@ -67,31 +60,22 @@ public interface BytesIn<U> extends
     }
 
     /**
-     * Reads a Marshallable object of a specific class from this BytesIn.
+     * Reads a {@link ReadBytesMarshallable} prefixed with a 16‑bit length.
      *
-     * @param tClass the class of the Marshallable object to be read.
-     * @param using  the object to be used for reading, can be null.
-     * @return the read Marshallable object.
-     * @throws BufferUnderflowException     If there are not enough bytes left to read.
-     * @throws InvalidMarshallableException If the object cannot be read due to invalid data.
-     * @throws ClosedIllegalStateException    If the resource has been released or closed.
-     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
+     * @param tClass type of object to create when {@code using} is {@code null}
+     * @param using  optional instance to reuse
+     * @return the populated instance
      */
     <T extends ReadBytesMarshallable> T readMarshallableLength16(@NotNull Class<T> tClass, @Nullable T using)
             throws BufferUnderflowException, InvalidMarshallableException, ClosedIllegalStateException, ThreadingIllegalStateException;
 
     /**
-     * Reads an object of a specific class from this BytesIn.
+     * Reads a simple object such as {@code String}, {@code Long} or an
+     * implementation of {@link BytesMarshallable}.
      *
-     * @param componentType0 the class of the object to be read.
-     * @return the read object.
-     * @throws BufferUnderflowException      If there are not enough bytes left to read.
-     * @throws ClosedIllegalStateException    If the resource has been released or closed.
-     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
-     * @throws ArithmeticException           If there is an arithmetic error.
-     * @throws BufferOverflowException       If there are too many bytes left to read.
-     * @throws InvalidMarshallableException  If the object cannot be read due to invalid data.
-     * @throws UnsupportedOperationException If an unsupported class is specified.
+     * @param componentType0 expected result type
+     * @return the deserialised object
+     * @throws UnsupportedOperationException if {@code componentType0} is not supported
      */
     default <T> T readObject(@NotNull Class<T> componentType0)
             throws BufferUnderflowException, ArithmeticException, BufferOverflowException, InvalidMarshallableException, ClosedIllegalStateException, ThreadingIllegalStateException {

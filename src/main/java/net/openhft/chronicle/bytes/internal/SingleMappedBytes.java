@@ -37,22 +37,13 @@ import static net.openhft.chronicle.core.util.Longs.requireNonNegative;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
 /**
- * A class that extends the {@link CommonMappedBytes} to provide a mechanism to wrap memory-mapped data.
- * This allows for high-performance file I/O operations by loading file segments into memory for
- * byte-level manipulations.
- *
- * <p> Note: Instances of this class are not safe for use by multiple concurrent threads.
- *
- * @see CommonMappedBytes
+ * {@link CommonMappedBytes} implementation that uses a single contiguous memory
+ * mapping supplied by {@link SingleMappedFile}.
  */
 public class SingleMappedBytes extends CommonMappedBytes {
 
     /**
-     * Constructs a SingleMappedBytes object wrapping the memory mapped to the specified file.
-     *
-     * @param mappedFile The MappedFile object to be wrapped.
-     * @throws ClosedIllegalStateException    If the resource has been released or closed.
-     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
+     * @param mappedFile file providing the single mapping
      */
     public SingleMappedBytes(@NotNull final MappedFile mappedFile)
             throws IllegalStateException {
@@ -60,12 +51,8 @@ public class SingleMappedBytes extends CommonMappedBytes {
     }
 
     /**
-     * Constructs a SingleMappedBytes object wrapping the memory mapped to the specified file and associates it with the specified name.
-     *
-     * @param mappedFile The MappedFile object to be wrapped.
-     * @param name       The name to be associated with the SingleMappedBytes object.
-     * @throws ClosedIllegalStateException    If the resource has been released or closed.
-     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
+     * @param mappedFile file providing the mapping
+     * @param name optional debug name
      */
     @SuppressWarnings("this-escape")
     protected SingleMappedBytes(@NotNull final MappedFile mappedFile, final String name)
@@ -213,6 +200,10 @@ public class SingleMappedBytes extends CommonMappedBytes {
 
     @SuppressWarnings("restriction")
     @Override
+    /**
+     * Performs a volatile read of an int at the current read position using a
+     * fast path if the address falls within a single cache line.
+     */
     public int peekVolatileInt()
             throws IllegalStateException {
 

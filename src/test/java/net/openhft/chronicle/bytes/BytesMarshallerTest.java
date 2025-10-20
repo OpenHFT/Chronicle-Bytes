@@ -118,6 +118,7 @@ class BytesMarshallerTest {
     void setValueWithNonEmptyArray() throws IllegalAccessException {
         // Simulate reading 2 for array size, then read strings
         when(bytesIn.readStopBit()).thenReturn(2L);
+        when(bytesIn.readRemaining()).thenReturn(12L);
         when(bytesIn.readObject(String.class)).thenReturn("hello", "world");
         fieldAccess.setValue(testObject, bytesIn);
         assert Arrays.equals(testObject.stringArray, new String[]{"hello", "world"});

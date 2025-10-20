@@ -18,35 +18,22 @@ package net.openhft.chronicle.bytes.render;
 import java.math.BigDecimal;
 
 /**
- * A versatile implementation of {@link Decimaliser} which employs a hybrid approach to convert floating-point numbers
- * to decimal representation. Initially, it attempts a lightweight conversion strategy. If that fails or is unsuitable
- * due to the number's magnitude, it then falls back on a {@link BigDecimal}-based strategy for higher precision.
- * <p>
- * This implementation is designed to achieve a balance between performance and precision. It is particularly well-suited
- * for converting numbers that are usually within a certain range, but occasionally can be very large or have a high degree
- * of precision.
- * <p>
- * Note: Numbers are represented in scientific notation if they are 1e45 or larger, or 1e-29 or smaller, to maintain compactness.
+ * Decimaliser that first tries {@link SimpleDecimaliser} and then
+ * {@link UsesBigDecimal} if more precision is needed.
+ * Values outside the range [1e-29, 1e45) are rejected.
  */
 public class GeneralDecimaliser implements Decimaliser {
 
     /**
-     * A singleton instance of {@link GeneralDecimaliser} for convenient reuse.
-     * This instance combines both lightweight and {@link BigDecimal}-based conversion strategies.
-     * It is thread-safe and can be used across multiple threads without synchronization.
+     * Preferred entry point combining lightweight and {@link BigDecimal} strategies.
+     * This singleton is stateless and thread-safe.
      */
     public static final Decimaliser GENERAL = new GeneralDecimaliser();
 
     /**
-     * Converts a double value to its decimal representation by first trying a lightweight approach and then,
-     * if necessary, falling back to a {@link BigDecimal}-based approach for higher precision. Appends the result
-     * to the provided {@link DecimalAppender}.
-     * <p>
-     * The conversion is attempted if the absolute value is 0, or if it's in the range of 1e-29 to 1e45 (both inclusive).
-     *
-     * @param value           The double value to be converted.
-     * @param decimalAppender The {@link DecimalAppender} to which the converted decimal value is appended.
-     * @return {@code true} if the conversion and appending were successful, {@code false} otherwise.
+     * Convert {@code value} using the simple decimaliser then fall back to
+     * {@link UsesBigDecimal} if necessary.
+     * Values outside [1e-29, 1e45) are rejected.
      */
     @Override
     public boolean toDecimal(double value, DecimalAppender decimalAppender) {
@@ -64,15 +51,9 @@ public class GeneralDecimaliser implements Decimaliser {
     }
 
     /**
-     * Converts a float value to its decimal representation by first trying a lightweight approach and then,
-     * if necessary, falling back to a {@link BigDecimal}-based approach for higher precision. Appends the result
-     * to the provided {@link DecimalAppender}.
-     * <p>
-     * The conversion is attempted if the absolute value is 0, or if it's equal to or larger than 1e-29f.
-     *
-     * @param value           The float value to be converted.
-     * @param decimalAppender The {@link DecimalAppender} to which the converted decimal value is appended.
-     * @return {@code true} if the conversion and appending were successful, {@code false} otherwise.
+     * Convert {@code value} using the simple decimaliser then fall back to
+     * {@link UsesBigDecimal} if necessary. Values with absolute value below
+     * {@code 1e-29f} are rejected.
      */
     @Override
     public boolean toDecimal(float value, DecimalAppender decimalAppender) {

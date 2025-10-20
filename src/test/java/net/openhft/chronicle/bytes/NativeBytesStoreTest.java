@@ -23,6 +23,7 @@ import net.openhft.chronicle.core.util.Histogram;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 import javax.crypto.Cipher;
@@ -42,6 +43,11 @@ import static org.junit.Assume.assumeFalse;
 public class NativeBytesStoreTest extends BytesTestCommon {
 
     volatile int bcs;
+
+    @Before
+    public void hasDirectMemory() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+    }
 
     private static void generate(final @NotNull Bytes<?> bytes, final int t) {
         bytes.clear();
@@ -64,15 +70,13 @@ public class NativeBytesStoreTest extends BytesTestCommon {
 
             bytesStore.write8bit(0, bytes);
 
-            // System.out.printf("0x%04x : 0x%02x, 0x%02x%n", i, bytesStore.readByte(0), bytesStore.readByte(1));
-
             final StringBuilder sb = new StringBuilder();
             bytesStore.readUtf8(0, sb);
 
             Assert.assertEquals("failed at " + i, expected, sb.toString());
 
             bytes.releaseLast();
-            expected = expected + "a";
+            expected = expected + "aaaaaaaaaaaaaaaaaaaaaaa"; // 23 characters
         }
     }
 
