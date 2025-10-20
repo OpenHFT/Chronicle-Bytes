@@ -56,7 +56,7 @@ public class HexDumpBytes
     public static final long MASK = 0xFFFFFFFFL;
     private static final char[] HEXADECIMAL = "0123456789abcdef".toCharArray();
     private static final Pattern HEX_PATTERN = Pattern.compile("[0-9a-fA-F]{1,2}");
-    private final NativeBytes<Void> base;
+    private final Bytes<Void> base;
     private final Bytes<byte[]> text;
     private final Bytes<byte[]> comment = Bytes.allocateElasticOnHeap(64);
     private OffsetFormat offsetFormat = null;
@@ -75,6 +75,16 @@ public class HexDumpBytes
     }
 
     /**
+     * Constructs a HexDumpBytes instance with the specified base bytes.
+     * THis can be used with MappedBytes or NativeBytes.
+     */
+    @SuppressWarnings("unchecked")
+    public HexDumpBytes(@NotNull Bytes<?> base) {
+        this.base = (Bytes<Void>) base;
+        this.text = Bytes.allocateElasticOnHeap(1024);
+    }
+
+    /**
      * Internal constructor used when copying an existing dump.
      */
     HexDumpBytes(@NotNull Bytes<?> base, @NotNull BytesStore<?, ?> text) {
@@ -84,6 +94,7 @@ public class HexDumpBytes
         this.text = Bytes.allocateElasticOnHeap((int) text.readRemaining());
         this.text.write(text);
     }
+
 
     /**
      * Parses a textual hex dump and returns a populated instance.
@@ -287,6 +298,11 @@ public class HexDumpBytes
     @Override
     public @NonNegative long capacity() {
         return base.capacity();
+    }
+
+    @Override
+    public long realCapacity() {
+        return base.realCapacity();
     }
 
     @Override

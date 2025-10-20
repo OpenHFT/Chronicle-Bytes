@@ -35,7 +35,7 @@ public class StopBitTest extends BytesTestCommon {
 
             final Bytes<byte[]> expectedBytes = Bytes.from(expected);
 
-            final Bytes<ByteBuffer> b = Bytes.elasticByteBuffer();
+            final Bytes<?> b = Bytes.allocateElastic();
             try {
                 if (expectedBytes == null) {
                     b.writeStopBit(-1);
@@ -70,7 +70,7 @@ public class StopBitTest extends BytesTestCommon {
 
         final Bytes<byte[]> bytes = Bytes.from(s);
 
-        final Bytes<ByteBuffer> b = Bytes.elasticByteBuffer();
+        final Bytes<?> b = Bytes.allocateElastic();
         try {
             if (bytes == null) {
                 b.writeStopBit(-1);

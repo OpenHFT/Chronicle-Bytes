@@ -971,11 +971,11 @@ public class NativeBytesStore<U>
     }
 
     private final class Finalizer {
-        @SuppressWarnings({"deprecation", "removal"})
-        @Override
         /*
          * This finalize() is used to detect when a component is not released deterministically. It is not required to be run, but provides a warning
          */
+        @Override
+        @SuppressWarnings({"deprecation", "removal"})
         protected void finalize()
                 throws Throwable {
             super.finalize();

@@ -24,7 +24,7 @@
         <afterEachLine> </afterEachLine>
         <firstLineDetectionPattern>(\s|\t)*/\*.*$</firstLineDetectionPattern>
         <lastLineDetectionPattern>.*\*/(\s|\t)*$</lastLineDetectionPattern>
-        <allowBlankLines>false</allowBlankLines>
+        <allowBlankLines>true</allowBlankLines>
         <isMultiline>true</isMultiline>
         <padLines>false</padLines>
     </javadoc_style>

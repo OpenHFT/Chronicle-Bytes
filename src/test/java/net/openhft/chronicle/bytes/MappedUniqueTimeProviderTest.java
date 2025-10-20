@@ -30,6 +30,7 @@ import java.util.stream.IntStream;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeFalse;
 
 public class MappedUniqueTimeProviderTest extends BytesTestCommon {
 
@@ -37,6 +38,8 @@ public class MappedUniqueTimeProviderTest extends BytesTestCommon {
     @Before
     @BeforeEach
     public void threadDump() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         super.threadDump();
     }
 

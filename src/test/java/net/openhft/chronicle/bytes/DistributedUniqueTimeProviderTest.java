@@ -35,6 +35,7 @@ import java.util.concurrent.Executors;
 import java.util.stream.IntStream;
 
 import static org.junit.Assert.*;
+import static org.junit.Assume.assumeFalse;
 
 public class DistributedUniqueTimeProviderTest extends BytesTestCommon {
 
@@ -43,6 +44,8 @@ public class DistributedUniqueTimeProviderTest extends BytesTestCommon {
 
     @Before
     public void setUp() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         timeProvider = DistributedUniqueTimeProvider.instance();
         setTimeProvider = new SetTimeProvider(SystemTimeProvider.INSTANCE.currentTimeNanos());
         timeProvider.provider(setTimeProvider);
