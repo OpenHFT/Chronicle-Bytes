@@ -33,12 +33,15 @@ import static net.openhft.chronicle.core.io.Closeable.closeQuietly;
 /**
  * A way of acquiring exclusive locks on files in a re-entrant fashion.
  * <p>
- * It will prevent a single thread that uses this interface to acquire locks from causing
+ * It will prevent a single thread that uses the static {@link #lock(File, FileChannel)} or
+ * {@link #tryLock(File, FileChannel)} methods to acquire locks from causing
  * an {@link OverlappingFileLockException}. Separate threads will not be prevented from taking
  * overlapping file locks.
  * <p>
  * All the usual caveats around file locks apply, shared locks and locks for specific ranges are
  * not supported.
+ *
+ * See {@code domestic-overview.adoc} for usage notes.
  */
 public final class ReentrantFileLock extends FileLock {
 
@@ -108,6 +111,9 @@ public final class ReentrantFileLock extends FileLock {
 
     /**
      * Releases the lock.
+     *
+     * Decrements the re-entrance counter and only releases the underlying file lock
+     * when the counter reaches zero.
      *
      * @throws IOException If an I/O error occurs.
      */
@@ -191,7 +197,7 @@ public final class ReentrantFileLock extends FileLock {
     }
 
     /**
-     * Log an error if someone is passing around ReentrantFileLocks between threads
+     * Logs an error via {@link Jvm#error()} if a lock created by one thread is used on another.
      */
     private void checkThreadAccess() {
         @SuppressWarnings("deprecation")

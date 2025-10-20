@@ -74,6 +74,8 @@ public class MappedBytesTest extends BytesTestCommon {
     @Before
     @BeforeEach
     public void threadDump() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         super.threadDump();
     }
 

@@ -23,10 +23,11 @@ import org.jetbrains.annotations.NotNull;
 import java.nio.BufferUnderflowException;
 
 /**
- * A {@code SubBytes} object represents a subsection of a {@link BytesStore} from a given start index up to a specified capacity.
- * This is useful when you want to handle a specific part of the data within a larger BytesStore.
+ * Represents a fixed size view over a region of another {@link BytesStore}.
+ * The view has its own start offset and capacity, effectively creating a slice
+ * of the parent store. It is non elastic and extends {@link VanillaBytes}.
  *
- * @param <U> the type of the BytesStore
+ * @param <U> the type of the underlying object
  */
 @SuppressWarnings("rawtypes")
 public class SubBytes<U> extends VanillaBytes<U> {
@@ -34,16 +35,17 @@ public class SubBytes<U> extends VanillaBytes<U> {
     private final long capacity;
 
     /**
-     * Class constructor. Creates a SubBytes from the bytes in a specified BytesStore from a specified Offset to
-     * a specified index (excluding).
+     * Creates a sub region view of the supplied {@code bytesStore}.
+     * The new view spans from {@code start} for {@code capacity} bytes.
+     * The initial read and write positions are set to {@code start} and the
+     * write limit to {@code start + capacity}.
      *
-     * @param bytesStore the parent BytesStore that contains the data
-     * @param start      the start index in the parent BytesStore from which the SubBytes start
-     * @param capacity   the number of elements from the start index that the SubBytes cover
-     * @throws BufferUnderflowException       If the capacity is less than the start index
-     * @throws IllegalArgumentException       If any other argument issue occurs
-     * @throws ClosedIllegalStateException    If the resource has been released or closed.
-     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
+     * @param bytesStore the parent store
+     * @param start      absolute start offset within {@code bytesStore}
+     * @param capacity   number of bytes in the sub region
+     * @throws BufferUnderflowException       if {@code start + capacity} exceeds the parent capacity
+     * @throws ClosedIllegalStateException    if the resource has been released or closed
+     * @throws ThreadingIllegalStateException if accessed by multiple threads in an unsafe way
      */
     @SuppressWarnings("this-escape")
     public SubBytes(@NotNull BytesStore<?, ?> bytesStore, @NonNegative long start, @NonNegative long capacity)
@@ -56,7 +58,7 @@ public class SubBytes<U> extends VanillaBytes<U> {
     }
 
     /**
-     * @return the capacity as a long value
+     * Returns the fixed capacity supplied at construction.
      */
     @NonNegative
     @Override
@@ -65,7 +67,7 @@ public class SubBytes<U> extends VanillaBytes<U> {
     }
 
     /**
-     * @return the start index as a long value
+     * Returns the absolute start offset within the parent store.
      */
     @NonNegative
     @Override
@@ -74,7 +76,7 @@ public class SubBytes<U> extends VanillaBytes<U> {
     }
 
     /**
-     * @return the capacity as a long value
+     * Returns the real capacity, which is identical to {@link #capacity()} for this view.
      */
     @NonNegative
     @Override

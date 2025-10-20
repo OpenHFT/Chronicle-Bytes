@@ -23,37 +23,37 @@ import net.openhft.chronicle.core.io.ThreadingIllegalStateException;
 import net.openhft.chronicle.core.values.LongArrayValues;
 
 /**
- * Represents an array of long integer values, where each long integer in the array is byteable and dynamically sized.
+ * Off-heap, contiguous array of signed 64-bit values.
  * <p>
- * Implementations of this interface should provide means to manage the array of long integers, with
- * support for resizing the array dynamically. It is meant to be used where direct, low-level access
- * to the bytes representing the long integer values is needed.
- * 
+ * Implementations must store each value contiguously according to
+ * {@link BinaryLongArrayReference#SHIFT} and are expected to use
+ * little-endian aligned storage.
  *
  * @see LongArrayValues
  * @see Byteable
  * @see DynamicallySized
+ * @see BinaryLongArrayReference
  */
 @SuppressWarnings("rawtypes")
 public interface ByteableLongArrayValues extends LongArrayValues, Byteable, DynamicallySized {
 
     /**
-     * Calculates the size in bytes needed to store the given number of long integers.
+     * Calculates the byte size required to hold the provided element capacity.
      *
-     * @param sizeInBytes the number of long integers to be stored.
-     * @return the size in bytes needed to store the specified number of long integers.
+     * @param capacity the number of elements
+     * @return total bytes needed for this capacity
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     @Override
-    long sizeInBytes(@NonNegative long sizeInBytes)
+    long sizeInBytes(@NonNegative long capacity)
             throws IllegalStateException;
 
     /**
-     * Sets the capacity of the array, in terms of the number of long integers it can hold.
+     * Sets the capacity of the array as a count of elements, not bytes.
      *
-     * @param arrayLength the desired array capacity, in number of long integers.
-     * @return this {@code ByteableLongArrayValues} instance.
+     * @param arrayLength the desired element count
+     * @return this instance for chaining
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */

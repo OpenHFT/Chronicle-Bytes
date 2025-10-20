@@ -1,0 +1,53 @@
+= Chronicle Bytes Domestic Utilities
+:doctype: book
+:toc:
+:toclevels: 2
+:lang: en-GB
+
+The `net.openhft.chronicle.bytes.domestic` package contains helper classes primarily used internally by Chronicle Bytes. These are not intended as a stable public API, and their behaviour may change between releases without prior notice.
+
+== ReentrantFileLock
+
+The main utility in this package is `ReentrantFileLock`. This class provides a mechanism for acquiring exclusive, re-entrant locks on files.
+
+=== Purpose
+`ReentrantFileLock` is designed to prevent `OverlappingFileLockException` when the same thread attempts to acquire a lock on the same file multiple times. It achieves this by tracking locks on a per-thread basis using the canonical path of the file. Note that it does not prevent separate threads or processes from taking overlapping file locks if they are not using this specific re-entrant mechanism.
+
+=== Features
+* **Re-entrant Locking**: Allows a thread to acquire a lock multiple times on the same file without throwing an exception. The lock is only released when the corresponding number of `release()` calls have been made.
+* **Canonical Path Based**: Uses the canonical file path to identify locks, ensuring that different paths referring to the same file are treated as a single lockable entity.
+* **Thread-Local Tracking**: Manages held locks using thread-local storage.
+* **Standard `FileLock` Delegate**: Wraps a standard `java.nio.channels.FileLock`.
+
+=== Typical Usage
+The `ReentrantFileLock` is typically used in a try-with-resources block to ensure locks are properly released.
+
+[source,java]
+----
+import net.openhft.chronicle.bytes.domestic.ReentrantFileLock;
+import java.io.File;
+import java.nio.channels.FileChannel;
+import java.nio.file.StandardOpenOption;
+
+File fileToLock = new File("mydata.lock");
+// Obtain a FileChannel, for example:
+try (FileChannel channel = FileChannel.open(fileToLock.toPath(), StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE)) {
+    // Acquire the lock
+    try (ReentrantFileLock lock = ReentrantFileLock.lock(fileToLock, channel)) {
+        // Work with the file exclusively within this thread
+        // The lock is automatically released at the end of this try-with-resources block
+    } catch (IOException e) {
+        // Handle lock acquisition or release errors
+    }
+} catch (IOException e) {
+    // Handle channel opening errors
+}
+----
+
+Two main static methods are provided for acquiring locks:
+* `ReentrantFileLock.lock(File file, FileChannel fileChannel)`: Blocks until the lock is acquired.
+* `ReentrantFileLock.tryLock(File file, FileChannel fileChannel)`: Attempts to acquire the lock without blocking, returning `null` if the lock cannot be acquired immediately.
+
+It's also possible to check if the current thread holds a lock on a file using `ReentrantFileLock.isHeldByCurrentThread(File file)`.
+
+For general memory management information concerning `Bytes` and `BytesStore` which might be used in conjunction with file operations, refer to `memory-management.adoc` and `architecture-overview.adoc`.

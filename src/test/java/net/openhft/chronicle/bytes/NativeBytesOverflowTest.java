@@ -15,6 +15,7 @@
  */
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.Jvm;
 import org.junit.Test;
 
 import java.nio.BufferOverflowException;
@@ -22,6 +23,7 @@ import java.nio.ByteBuffer;
 
 import static net.openhft.chronicle.bytes.BytesStore.wrap;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeFalse;
 
 public class NativeBytesOverflowTest extends BytesTestCommon {
 
@@ -50,6 +52,8 @@ public class NativeBytesOverflowTest extends BytesTestCommon {
 
     @Test(expected = BufferOverflowException.class)
     public void testElastic() {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
         Bytes<?> bytes = Bytes.elasticByteBuffer();
         try {
             bytes.writeLimit(2).writePosition(0);

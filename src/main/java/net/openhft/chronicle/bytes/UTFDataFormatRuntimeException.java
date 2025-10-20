@@ -18,9 +18,8 @@ package net.openhft.chronicle.bytes;
 import net.openhft.chronicle.core.io.IORuntimeException;
 
 /**
- * An unchecked exception thrown when there is an issue with encoding or decoding UTF-8 data.
- * This exception extends {@link IORuntimeException}, which is a base class for exceptions that can
- * be thrown during reading and writing operations.
+ * Thrown to indicate a failure when encoding or decoding UTF-8 data. Extends
+ * {@link IORuntimeException} so callers need not catch it.
  */
 public class UTFDataFormatRuntimeException extends IORuntimeException {
     private static final long serialVersionUID = 0L;

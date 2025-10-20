@@ -26,11 +26,13 @@ import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
 /**
- * The {@code BytesTextMethodTester} class is a utility for comparing the expected and actual results
- * of executing a method from a given interface that manipulates bytes. It utilizes hexadecimal data
- * from the input and output files to perform this comparison.
+ * Utility for exercising an interface backed by {@link Bytes} using a textual description of the
+ * method calls.  The input file typically contains a hex dump with optional comments describing
+ * the invocations.  These calls are dispatched to a component supplied by {@code componentFunction}
+ * and the resulting output is serialised to text and compared with the expected output file.
+ * It is a convenient way to perform data driven tests of writer/reader style APIs.
  *
- * @param <T> the type of the interface that includes the methods to be tested.
+ * @param <T> interface type whose methods are recorded and verified
  */
 @SuppressWarnings("rawtypes")
 public class BytesTextMethodTester<T> {
@@ -46,12 +48,12 @@ public class BytesTextMethodTester<T> {
     private String actual;
 
     /**
-     * Constructs a {@code BytesTextMethodTester} instance with the provided parameters.
+     * Creates a tester configured with the given files and component builder.
      *
-     * @param input             The input file containing hexadecimal data to feed into the methods of the class under test.
-     * @param componentFunction A function that defines how to instantiate or manipulate the object that the class under test needs.
-     * @param outputClass       The class of the interface that includes the methods to be tested.
-     * @param output            The output file containing the expected hexadecimal results of the tested methods.
+     * @param input             path to the text (usually hex) file describing the method invocations
+     * @param componentFunction function producing the component(s) that will process the invocations
+     * @param outputClass       interface class defining the methods encoded in the files
+     * @param output            path to the expected output file
      */
     public BytesTextMethodTester(String input, Function<T, Object> componentFunction, Class<T> outputClass, String output) {
         this.input = input;
@@ -60,20 +62,38 @@ public class BytesTextMethodTester<T> {
         this.componentFunction = componentFunction;
     }
 
+    /**
+     * Returns the path to the optional setup file.
+     */
     public String setup() {
         return setup;
     }
 
+    /**
+     * Sets a setup file to be processed before the main input.
+     *
+     * @param setup path to the setup file
+     * @return this tester for chaining
+     */
     @NotNull
     public BytesTextMethodTester setup(String setup) {
         this.setup = setup;
         return this;
     }
 
+    /**
+     * Returns the post-processing function applied to actual and expected output.
+     */
     public Function<String, String> afterRun() {
         return afterRun;
     }
 
+    /**
+     * Sets a post-processing function applied to both expected and actual output before comparison.
+     *
+     * @param afterRun normalising function
+     * @return this tester for chaining
+     */
     @NotNull
     public BytesTextMethodTester afterRun(UnaryOperator<String> afterRun) {
         this.afterRun = afterRun;
@@ -81,11 +101,13 @@ public class BytesTextMethodTester<T> {
     }
 
     /**
-     * Runs the methods of the class under test using the hexadecimal data from the input file,
-     * then compares the results with the expected output from the output file.
+     * Executes the test.  The input (and optional setup) files are parsed and the resulting
+     * invocations dispatched to the component.  All calls made to the output writer are captured
+     * and written back to text for comparison with the expected output file.  The processed
+     * strings can be retrieved via {@link #expected()} and {@link #actual()}.
      *
-     * @return The instance of {@code BytesTextMethodTester}, allowing for method chaining.
-     * @throws IOException              If an I/O error occurs when reading the files or writing the results.
+     * @return this tester for chaining
+     * @throws IOException if any of the files cannot be read
      */
     @NotNull
     public BytesTextMethodTester run()
@@ -142,15 +164,25 @@ public class BytesTextMethodTester<T> {
         return this;
     }
 
+    /**
+     * Default handler invoked when a message id is not recognised while parsing the input stream.
+     * The remaining bytes of that message are skipped and a warning is logged.
+     */
     private void unknownMessageId(long id, BytesIn<?> b) {
         Jvm.warn().on(getClass(), "Unknown message id " + Long.toHexString(id));
         b.readPosition(b.readLimit());
     }
 
+    /**
+     * Returns the contents of the expected output file after optional post-processing.
+     */
     public String expected() {
         return expected;
     }
 
+    /**
+     * Returns the text generated from running the component under test.
+     */
     public String actual() {
         return actual;
     }
