@@ -17,8 +17,8 @@
  * <p>
  * This package forms part of Chronicle Bytes which is optimised for low level I/O,
  * serialisation and data manipulation.
- *
- * @implNote Most classes are not thread safe unless stated otherwise.
+ * <p>
+ * Note: Most classes are not thread safe unless stated otherwise.
  * 
  *
  * @see net.openhft.chronicle.bytes.Bytes

@@ -35,7 +35,7 @@ import org.jetbrains.annotations.NotNull;
  *   <li>32-bit: 2 147 483 647 bytes</li>
  * </ul>
  *
- * @implNote Each {@code writeLength} call performs a store fence as required by
+ * Note: Each {@code writeLength} call performs a store fence as required by
  * JSR-133 to ensure the length is visible to other threads.
  */
 public enum BinaryLengthLength {
