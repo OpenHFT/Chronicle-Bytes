@@ -70,7 +70,7 @@ public enum Allocator {
         Bytes<?> fixedBytes(int capacity) {
             final ByteBuffer byteBuffer = byteBuffer(capacity);
 
-            BytesStore<?, ByteBuffer> bs = new NativeBytesStore<>(byteBuffer, false, byteBuffer.capacity());
+            BytesStore<?, ByteBuffer> bs = new NativeBytesStore<>(byteBuffer, false, (long) byteBuffer.capacity());
             try {
                 Bytes<ByteBuffer> bbb = bs.bytesForWrite();
                 bbb.writePosition(byteBuffer.position());
