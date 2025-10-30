@@ -96,6 +96,7 @@ class UncheckedNativeBytesTest {
         assertTrue(result);
         verify(underlyingBytes.bytesStore()).compareAndSwapInt(eq(offset), eq(expected), eq(value));
     }
+
     @Test
     void ensureCapacityShouldExpandCapacityIfNeeded() {
         // Example test: Ensure capacity expands as expected.

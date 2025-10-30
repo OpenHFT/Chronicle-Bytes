@@ -20,7 +20,6 @@
  * <p>
  * Note: Most classes are not thread safe unless stated otherwise.
  *
- *
  * @see net.openhft.chronicle.bytes.Bytes
  * @see net.openhft.chronicle.bytes.BytesStore
  */

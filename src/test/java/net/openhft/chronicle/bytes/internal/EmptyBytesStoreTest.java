@@ -44,7 +44,7 @@ public class EmptyBytesStoreTest extends BytesTestCommon {
 
     private final BytesStore<?, ?> instance;
 
-    public EmptyBytesStoreTest(String type, BytesStore<?,?> instance) {
+    public EmptyBytesStoreTest(String type, BytesStore<?, ?> instance) {
         this.instance = instance;
     }
 
@@ -507,7 +507,7 @@ public class EmptyBytesStoreTest extends BytesTestCommon {
 //        assertThrows(BufferOverflowException.class, () -> INSTANCE.zeroOut(1, 2));
     }
 
-    public void read(final ObjLongConsumer<BytesStore<?,?>> getter) {
+    public void read(final ObjLongConsumer<BytesStore<?, ?>> getter) {
         assumeFalse(instance instanceof NativeBytesStore);
         assertThrowsBufferException(() -> getter.accept(instance, 0));
         assertThrows(IllegalArgumentException.class, () -> getter.accept(instance, -1));

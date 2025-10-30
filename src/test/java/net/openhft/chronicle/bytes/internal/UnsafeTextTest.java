@@ -223,7 +223,7 @@ public class UnsafeTextTest extends BytesTestCommon {
         if (end != 0L)
             fail("Overwrite: " + Long.toHexString(end));
         return LongStream.range(address, endAddress)
-                .mapToInt(addr -> OS.memory().readByte( addr))
+                .mapToInt(addr -> OS.memory().readByte(addr))
                 .mapToObj(c -> (char) c)
                 .reduce(new StringBuilder(), StringBuilder::append, StringBuilder::append)
                 .toString();
