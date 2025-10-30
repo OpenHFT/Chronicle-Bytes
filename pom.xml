@@ -43,8 +43,8 @@
         <findsecbugs.version>1.14.0</findsecbugs.version>
         <maven-pmd-plugin.version>3.28.0</maven-pmd-plugin.version>
         <jacoco-maven-plugin.version>0.8.14</jacoco-maven-plugin.version>
-        <jacoco.line.coverage>0.80</jacoco.line.coverage>
-        <jacoco.branch.coverage>0.70</jacoco.branch.coverage>
+        <jacoco.line.coverage>0.8859</jacoco.line.coverage>
+        <jacoco.branch.coverage>0.7543</jacoco.branch.coverage>
     </properties>
 
     <dependencyManagement>
