@@ -66,7 +66,7 @@ public class SimpleDecimaliser implements Decimaliser {
             // Scale and round the value.
             long mantissa = Math.round(absValue * factor);
             // Check if the scaled and rounded value matches the original.
-            if ((double) mantissa / factor == absValue) {
+            if (Double.compare((double) mantissa / factor, absValue) == 0) {
                 // Append the representation to the decimal appender.
                 decimalAppender.append(isNegative, mantissa, exponent);
                 return true;
@@ -100,7 +100,7 @@ public class SimpleDecimaliser implements Decimaliser {
             // Scale and round the value.
             long mantissa = Math.round(absValue * (double) factor);
             // Check if the scaled and rounded value matches the original.
-            if ((float) mantissa / factor == absValue) {
+            if (Float.compare((float) mantissa / factor, absValue) == 0) {
                 // Append the representation to the decimal appender.
                 decimalAppender.append(sign, mantissa, exponent);
                 return true;

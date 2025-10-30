@@ -60,7 +60,7 @@ public interface BytesIn<U> extends
     }
 
     /**
-     * Reads a {@link ReadBytesMarshallable} prefixed with a 16‑bit length.
+     * Reads a {@link ReadBytesMarshallable} prefixed with a 16-bit length.
      *
      * @param tClass type of object to create when {@code using} is {@code null}
      * @param using  optional instance to reuse

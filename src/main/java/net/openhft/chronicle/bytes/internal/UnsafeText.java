@@ -18,7 +18,6 @@ package net.openhft.chronicle.bytes.internal;
 import net.openhft.chronicle.core.*;
 
 import static net.openhft.chronicle.core.UnsafeMemory.MEMORY;
-import static net.openhft.chronicle.core.UnsafeMemory.UNSAFE;
 
 /**
  * Utility with highly optimised methods for writing textual representations

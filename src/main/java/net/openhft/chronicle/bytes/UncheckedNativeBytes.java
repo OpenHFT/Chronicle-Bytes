@@ -22,7 +22,6 @@ import net.openhft.chronicle.bytes.render.Decimaliser;
 import net.openhft.chronicle.bytes.render.StandardDecimaliser;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Memory;
-import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.UnsafeMemory;
 import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.io.*;

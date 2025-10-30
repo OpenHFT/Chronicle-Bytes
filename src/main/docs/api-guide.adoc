@@ -8,12 +8,12 @@
 This is a hands-on cookbook for day-to-day coding with Chronicle Bytes.
 It complements the formal project-requirements.adoc by showing concrete idioms for common tasks, highlighting potential pitfalls, and offering performance hints for developers.
 
-== 1  Getting Started
+== Getting Started
 
 Chronicle Bytes provides versatile, low-latency byte manipulation capabilities.
 This section covers initial setup and core concepts.
 
-=== 1.1  Maven / Gradle Dependency
+=== Maven / Gradle Dependency
 
 To include Chronicle Bytes in your project, add the following dependency:
 
@@ -32,7 +32,7 @@ To include Chronicle Bytes in your project, add the following dependency:
 implementation 'net.openhft:chronicle-bytes:${chronicle.bytes.version}' // Use the latest version
 ----
 
-=== 1.2  Core Interfaces
+=== Core Interfaces
 
 Understanding these interfaces is key to using Chronicle Bytes effectively:
 
@@ -45,13 +45,13 @@ Most daily interactions happen via a `Bytes` instance.
 Interfaces for cursor-driven sequential read/write operations, implemented by `Bytes`.
 * `RandomDataInput` / `RandomDataOutput`: Interfaces for offset-based read/write operations, implemented by `Bytes` and `BytesStore`.
 
-== 2  Creating `Bytes` Instances
+== Creating `Bytes` Instances
 
 Chronicle Bytes offers flexibility in how buffers are created and managed.
 Always ensure off-heap `Bytes` instances are released to prevent memory leaks <<CB-NF-O-001>>.
 Using try-with-resources is highly recommended for `Bytes` instances that implement `java.io.Closeable`.
 
-=== 2.1  Off-Heap Buffers (Direct Memory)
+=== Off-Heap Buffers (Direct Memory)
 
 These buffers are allocated outside the Java heap, reducing GC pressure.
 
@@ -88,7 +88,7 @@ try (Bytes<Void> fixedBytes = Bytes.allocateDirect(capacity)) {
 }
 ----
 
-=== 2.2  On-Heap Buffers
+=== On-Heap Buffers
 
 These buffers use standard Java `byte[]` arrays.
 
@@ -115,7 +115,7 @@ wrappedBytes.writeUtf8("Data in array");
 // wrappedBytes.releaseLast() typically does nothing for simple byte[] wraps.
 ----
 
-=== 2.3  Memory-Mapped File Buffers
+=== Memory-Mapped File Buffers
 
 For large datasets or inter-process communication (IPC).
 See `memory-management.adoc` for details.
@@ -138,10 +138,10 @@ long fileSize = 1024 * 1024; // 1MB
 // See Chronicle Queue or Map for higher-level usage.
 ----
 
-*Note*: Direct usage of `MappedFile` and `MappedBytesStore` is advanced.
+_Note_: Direct usage of `MappedFile` and `MappedBytesStore` is advanced.
 Higher-level libraries like Chronicle Queue abstract much of this complexity.
 
-=== 2.4  Wrapping `java.nio.ByteBuffer`
+=== Wrapping `java.nio.ByteBuffer`
 
 [source,java]
 ----
@@ -156,7 +156,7 @@ assert nioBuffer.getInt() == 100;
 // bytesFromNio.releaseLast() typically does nothing to the underlying ByteBuffer.
 ----
 
-== 3  Understanding Cursors and Limits (CB-FN-001)
+== Understanding Cursors and Limits (CB-FN-001)
 
 `Bytes` instances manage separate read and write cursors (positions) and limits.
 
@@ -175,7 +175,7 @@ assert nioBuffer.getInt() == 100;
 |`compact()` |Discards bytes before `readPosition()`, shifts remaining bytes to the start. Updates positions and limits.
 |===
 
-*Invariant Rule*: `start() <= readPosition() <= writePosition() <= writeLimit() <= capacity()`.
+_Invariant Rule_: `start() <= readPosition() <= writePosition() <= writeLimit() <= capacity()`.
 And `readPosition() <= readLimit()`.
 Violating this invariant (e.g., reading past `readLimit()`) throws `BufferUnderflowException` or `BufferOverflowException`.
 
@@ -201,11 +201,11 @@ try (Bytes<Void> bytes = Bytes.allocateElasticDirect(256)) {
 }
 ----
 
-== 4  Reading and Writing Data
+== Reading and Writing Data
 
 `Bytes` provides a rich set of methods for reading and writing various data types.
 
-=== 4.1  Primitives
+=== Primitives
 
 Methods like `readLong()`, `writeInt(int value)`, `readDouble(long offset)`, `writeFloat(long offset, float f)` allow for both sequential (cursor-based) and random (offset-based) access.
 
@@ -239,7 +239,7 @@ try (Bytes<Void> bytes = Bytes.allocateElasticDirect(16)) {
 }
 ----
 
-=== 4.2  Strings
+=== Strings
 
 Chronicle Bytes supports various string encodings and formats <<CB-FN-009>>.
 UTF-8 is common.
@@ -252,7 +252,7 @@ Inputs that exceed the remaining readable bytes trigger `BufferUnderflowExceptio
 [source,java]
 ----
 try (Bytes<Void> bytes = Bytes.allocateElasticDirect()) {
-    String originalText = "Hello, 世界!"; // Contains multi-byte UTF-8 chars
+    String originalText = "Hello, \u4e16\u754c!"; // Contains multi-byte UTF-8 chars
     bytes.writeUtf8(originalText);
     bytes.write8bit("ShortAscii"); // For ISO-8859-1 or ASCII
 
@@ -263,7 +263,7 @@ try (Bytes<Void> bytes = Bytes.allocateElasticDirect()) {
 }
 ----
 
-=== 4.3  Bulk Operations (byte[], ByteBuffer, Bytes)
+=== Bulk Operations (byte[], ByteBuffer, Bytes)
 
 Efficiently transfer blocks of data.
 
@@ -290,7 +290,7 @@ try (Bytes<Void> bytes = Bytes.allocateElasticDirect(256)) {
 }
 ----
 
-=== 4.4  Error Handling
+=== Error Handling
 
 Chronicle Bytes throws specific exceptions when cursor invariants are violated or
 when attempts are made to operate on a closed buffer.
@@ -303,9 +303,9 @@ when attempts are made to operate on a closed buffer.
 Always check capacities and use try-with-resources for off-heap buffers to ensure
 they are closed properly.
 
-== 5  Common Patterns and Use Cases
+== Common Patterns and Use Cases
 
-=== 5.1  Zero-Copy Slicing (CB-FN-006)
+=== Zero-Copy Slicing (CB-FN-006)
 
 Create lightweight views into existing `Bytes` or `BytesStore` without copying data.
 
@@ -330,11 +330,11 @@ try (Bytes<Void> originalBytes = Bytes.allocateElasticDirect(256)) {
 }
 ----
 
-*Important*: The slice shares the reference count of the original `BytesStore`.
+_Important_: The slice shares the reference count of the original `BytesStore`.
 Ensure the original `BytesStore` (or the `Bytes` that owns it) is released only when all views are done.
 Using try-with-resources for slices derived from a `Bytes` that is itself a try-with-resources variable is a safe pattern.
 
-=== 5.2  Thread-Safe Atomic Operations on `BytesStore` (CB-FN-004)
+=== Thread-Safe Atomic Operations on `BytesStore` (CB-FN-004)
 
 For lock-free concurrent updates directly on the memory backing `Bytes`.
 
@@ -363,7 +363,7 @@ try (NativeBytesStore<Void> store = NativeBytesStore.nativeStoreWithFixedCapacit
 } // store.releaseLast() is called.
 ----
 
-=== 5.3  Stop-Bit Encoding for Variable-Length Integers (CB-FN-005)
+=== Stop-Bit Encoding for Variable-Length Integers (CB-FN-005)
 
 Efficiently store integers where smaller values use fewer bytes.
 
@@ -382,7 +382,7 @@ try (Bytes<Void> bytes = Bytes.allocateElasticDirect()) {
 }
 ----
 
-=== 5.4  Hex Dump for Debugging (CB-FN-007)
+=== Hex Dump for Debugging (CB-FN-007)
 
 Inspect byte content in a human-readable hexadecimal format.
 
@@ -406,7 +406,7 @@ try (HexDumpBytes hd = new HexDumpBytes()) {
 }
 ----
 
-=== 5.5  Using `Bytes` as a Buffer for Chronicle Wire (CB-FN-008)
+=== Using `Bytes` as a Buffer for Chronicle Wire (CB-FN-008)
 
 Chronicle Bytes provides the underlying memory for Chronicle Wire's serialization.
 
@@ -443,9 +443,9 @@ try (Bytes<Void> bytes = Bytes.allocateElasticDirect()) {
 }
 ----
 
-== 6  Advanced Operations
+== Advanced Operations
 
-=== 6.1  Pre-touching Memory-Mapped Files
+=== Pre-touching Memory-Mapped Files
 
 To avoid page faults on first access in latency-sensitive code, "warm up" the memory.
 
@@ -459,12 +459,12 @@ To avoid page faults on first access in latency-sensitive code, "warm up" the me
 // } catch (IOException e) { /* ... */ }
 ----
 
-*Note*: `warmUp()` iterates through pages.
+_Note_: `warmUp()` iterates through pages.
 Effectiveness depends on OS and usage.
 
-=== 6.2  Endianness Considerations (CB-RISK-001)
+=== Endianness Considerations (CB-RISK-001)
 
-Chronicle Bytes methods (e.g., `writeInt`, `readLong`) use **native byte order** by default for performance.
+Chronicle Bytes methods (e.g., `writeInt`, `readLong`) use *native byte order* by default for performance.
 When interoperating with external systems or file formats that expect a specific endianness (e.g., big-endian network order), you must handle byte swapping manually if the native order differs.
 
 * Use `java.nio.ByteBuffer` with `order(ByteOrder.BIG_ENDIAN)` and then wrap it with `Bytes.wrapForWrite()`, or
@@ -473,7 +473,7 @@ When interoperating with external systems or file formats that expect a specific
 
 Chronicle Bytes itself does not typically provide explicit `readIntBigEndian()` methods; it prioritizes speed with native order.
 
-=== 6.3  Memory Fences and Volatile Access
+=== Memory Fences and Volatile Access
 
 For ensuring cross-thread visibility of updates to shared `BytesStore` regions without full locks, use volatile operations.
 
@@ -496,7 +496,7 @@ These provide acquire/release semantics.
 Consult Java Memory Model details for precise semantics.
 These are low-level primitives.
 
-=== 6.4  Alignment
+=== Alignment
 
 For certain platforms or direct hardware interaction, data alignment can be critical for performance or correctness.
 Chronicle Bytes typically ensures that its primitive access methods handle alignment internally or work correctly on platforms allowing unaligned access (like x86).
@@ -508,36 +508,49 @@ The standard read/write methods for primitives (`readInt`, `readLong`, etc.) on 
 Performance implications of unaligned access are platform-dependent.
 <<CB-FN-012>> calls for correct handling.
 
-== 7  Common Pitfalls and Best Practices ("Gotchas")
+== Common Pitfalls and Best Practices ("Gotchas")
 
-* **Cursor Confusion**: Forgetting to `flip()` (or otherwise adjust `readPosition`/`readLimit`) after writes and before reads is a common source of `BufferUnderflowException` or reading incorrect data.
-* **Elastic Growth Stalls**: The first time an elastic buffer needs to grow significantly, it may involve copying the existing data to a new, larger underlying buffer.
+Cursor Confusion ::
+Forgetting to `flip()` (or otherwise adjust `readPosition`/`readLimit`) after writes and before reads is a common source of `BufferUnderflowException` or reading incorrect data.
+Elastic Growth Stalls ::
+The first time an elastic buffer needs to grow significantly, it may involve copying the existing data to a new, larger underlying buffer.
 This can cause a latency spike.
 Pre-size elastic buffers generously (`Bytes.allocateElasticDirect(expectedCapacity)`) if initial write latency is critical.
-* **Leaked Off-Heap Buffers**: Forgetting to call `releaseLast()` (or `close()` on `Closeable` `Bytes`) on off-heap `Bytes` instances leads to native memory leaks.
-This memory is *not* reclaimed by the Java GC.
+Leaked Off-Heap Buffers ::
+Forgetting to call `releaseLast()` (or `close()` on `Closeable` `Bytes`) on off-heap `Bytes` instances leads to native memory leaks.
+This memory is _not_ reclaimed by the Java GC.
 Use try-with-resources diligently <<CB-NF-O-003>>.
-* **`Bytes.wrapForRead(ByteBuffer)` Lifecycle**: When wrapping a `java.nio.ByteBuffer`, the `Bytes` instance shares the lifecycle of the original `ByteBuffer`.
-Do not release the `Bytes` instance in a way that expects to free the underlying direct `ByteBuffer` if it's managed elsewhere. `releaseLast()` on such a wrapper typically does nothing to the `ByteBuffer` itself.
-* **Thread Safety**: `Bytes` instances are **not** generally thread-safe for concurrent modification of their state (cursors, content) by multiple threads.
-* Safe: Multiple threads reading from the same `Bytes` instance *if no modifications occur*.
+`Bytes.wrapForRead(ByteBuffer)` Lifecycle ::
+When wrapping a `java.nio.ByteBuffer`, the `Bytes` instance shares the lifecycle of the original `ByteBuffer`.
+Do not release the `Bytes` instance in a way that expects to free the underlying direct `ByteBuffer` if it's managed elsewhere.
+`releaseLast()` on such a wrapper typically does nothing to the `ByteBuffer` itself.
+Thread Safety ::
+`Bytes` instances are *not* generally thread-safe for concurrent modification of their state (cursors, content) by multiple threads.
+* Safe: Multiple threads reading from the same `Bytes` instance _if no modifications occur_.
 * Safe: Using `BytesStore`'s atomic operations (e.g., `compareAndSwapLong()`, `addAndGetLong()`) from multiple threads on shared offsets.
 * Unsafe: Multiple threads calling mutating methods like `writeX()`, `readX()` (which moves cursors), `flip()`, `clear()` on the same `Bytes` instance without external synchronization.
 * For concurrent producers/consumers, use proper SPSC/MPSC/SPMC/MPMC queue implementations (like Chronicle Queue) or careful external locking.
-* **Modifying `BytesStore` under an active `Bytes` view**: If you obtain the `BytesStore` from a `Bytes` object and modify it directly, the `Bytes` object's view might become inconsistent if not handled carefully (especially regarding cached values or internal state).
+Modifying `BytesStore` under an active `Bytes` view ::
+If you obtain the `BytesStore` from a `Bytes` object and modify it directly, the `Bytes` object's view might become inconsistent if not handled carefully (especially regarding cached values or internal state).
 
-== 8  Performance Tips
+== Performance Tips
 
-* **Thread Affinity**: Pin critical threads to specific CPU cores (e.g., using `AffinityLock`) to improve cache utilization (L1/L2) and reduce context switching.
-* **Buffer Reuse**: For frequently needed, fixed-size buffers, consider pooling `Bytes` instances or, more commonly, allocating them once per thread (using `ThreadLocal`) and reusing them by calling `clear()` or resetting cursors.
-* **Bulk Operations**: Use bulk methods like `Bytes.write(BytesStore anotherBytes, long offset, long length)` or `Bytes.unsafeWriteObject(Object obj, long offset, int length)` (with extreme care) for copying large chunks of data, as they often have lower per-byte overhead than repeated individual primitive writes.
-* **JVM Options**: Experiment with relevant JVM options (e.g., `-XX:+UnlockDiagnosticVMOptions -XX:PrintAssembly` to inspect generated code, `-XX:+UseLargePages` for off-heap memory).
-* **Disable Debug Fields (Production)**: If Chronicle Bytes has compile-time or runtime flags to strip debug assertions or fields (e.g., `-Dbytes.compact=true` if such a flag exists), enable them in production for minimal overhead.
+Thread Affinity ::
+Pin critical threads to specific CPU cores (e.g., using `AffinityLock`) to improve cache utilization (L1/L2) and reduce context switching.
+Buffer Reuse ::
+For frequently needed, fixed-size buffers, consider pooling `Bytes` instances or, more commonly, allocating them once per thread (using `ThreadLocal`) and reusing them by calling `clear()` or resetting cursors.
+Bulk Operations ::
+Use bulk methods like `Bytes.write(BytesStore anotherBytes, long offset, long length)` or `Bytes.unsafeWriteObject(Object obj, long offset, int length)` (with extreme care) for copying large chunks of data, as they often have lower per-byte overhead than repeated individual primitive writes.
+JVM Options ::
+Experiment with relevant JVM options (e.g., `-XX:+UnlockDiagnosticVMOptions -XX:PrintAssembly` to inspect generated code, `-XX:+UseLargePages` for off-heap memory).
+Disable Debug Fields (Production) ::
+If Chronicle Bytes has compile-time or runtime flags to strip debug assertions or fields (e.g., `-Dbytes.compact=true` if such a flag exists), enable them in production for minimal overhead.
 (Verify specific flags with library documentation).
-* **Understand `BytesStore` Types**: Choose the right `BytesStore` (on-heap, direct, mapped) for your use case.
+Understand `BytesStore` Types ::
+Choose the right `BytesStore` (on-heap, direct, mapped) for your use case.
 Direct and mapped are generally better for low-latency/high-throughput off-heap needs.
 
-== 9  When Not to Use Chronicle Bytes
+== When Not to Use Chronicle Bytes
 
 While powerful, Chronicle Bytes is not a universal solution.
 Consider alternatives when:
@@ -551,7 +564,7 @@ Consider alternatives when:
 |High-level stream processing or complex event processing where byte-level manipulation is an unnecessary detail. |Apache Kafka Streams, Flink, or other stream processing frameworks.
 |===
 
-== 10  FAQ
+== FAQ
 
 Q: How large can a single `MappedBytes` (memory-mapped file) be?
 A: Theoretically, up to `2^63 - 1` bytes (the maximum value of a `long` representing size/offset).

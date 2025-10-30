@@ -221,7 +221,7 @@ public class BytesReadWriteJLBH implements JLBHTask {
             }
         },
 
-        UTF8('Έ', 'Ͽ') {
+        UTF8('\u0388', '\u03ff') {
             @Override
             long writeString(Bytes<?> bytes, String string) {
                 return bytes.writeUtf8(0, string);

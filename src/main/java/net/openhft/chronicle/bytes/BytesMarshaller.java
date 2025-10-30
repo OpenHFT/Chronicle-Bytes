@@ -33,9 +33,9 @@ import java.util.function.Supplier;
 import static net.openhft.chronicle.core.Jvm.uncheckedCast;
 
 /**
- * Reflection‑based marshaller for simple objects. It inspects the fields of a
+ * Reflection-based marshaller for simple objects. It inspects the fields of a
  * class and serialises/deserialises them sequentially using {@link FieldAccess}
- * helpers. This approach is generic but slower than hand‑written marshalling.
+ * helpers. This approach is generic but slower than hand-written marshalling.
  *
  * @param <T> type being marshalled
  */

@@ -78,7 +78,7 @@ public class BytesInternalGuardedTest extends BytesTestCommon {
         bs.write(0, new byte[]{0x76, 0x61, 0x6c, 0x75, 0x65}); // "value" string
 
         StringBuilder sb = new StringBuilder();
-        sb.append("你好");
+        sb.append("\u4f60\u597d");
 
         BytesInternal.parse8bit(0, bs, sb, 5);
         String actual = sb.toString();
@@ -100,13 +100,13 @@ public class BytesInternalGuardedTest extends BytesTestCommon {
         assertTrue(BytesInternal.compareUtf8(bs, 0, null));
         assertFalse(BytesInternal.compareUtf8(bs, 0, "test"));
 
-        bs.writeUtf8(1, "£€");
+        bs.writeUtf8(1, "\u00a3\u20ac");
         @NotNull StringBuilder sb = new StringBuilder();
         bs.readUtf8(1, sb);
-        assertEquals("£€", sb.toString());
-        assertTrue(BytesInternal.compareUtf8(bs, 1, "£€"));
-        assertFalse(BytesInternal.compareUtf8(bs, 1, "£"));
-        assertFalse(BytesInternal.compareUtf8(bs, 1, "£€$"));
+        assertEquals("\u00a3\u20ac", sb.toString());
+        assertTrue(BytesInternal.compareUtf8(bs, 1, "\u00a3\u20ac"));
+        assertFalse(BytesInternal.compareUtf8(bs, 1, "\u00a3"));
+        assertFalse(BytesInternal.compareUtf8(bs, 1, "\u00a3\u20ac$"));
         bs.releaseLast();
     }
 

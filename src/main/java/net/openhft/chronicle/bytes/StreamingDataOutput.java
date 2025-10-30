@@ -192,14 +192,14 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
         double ad = Math.abs(d);
         long value;
         int scale = 0;
-        if ((long) ad == ad) {
+        if (Double.compare(Math.rint(ad), ad) == 0) {
             value = (long) ad * 10;
 
         } else {
             double factor = 1;
             while (scale < 9) {
                 double v = ad * factor;
-                if (v >= 1e14 || (long) v == v)
+                if (v >= 1e14 || Double.compare(Math.rint(v), v) == 0)
                     break;
                 factor *= 10;
                 scale++;

@@ -110,7 +110,8 @@ public class BinaryLongReference extends AbstractReference implements LongRefere
     @Override
     public long getValue()
             throws IllegalStateException {
-        return bytesStore == null ? 0L : bytesStore.readLong(offset);
+        BytesStore<?, ?> store = bytesStore;
+        return store == null ? 0L : store.readLong(offset);
     }
 
     /**
@@ -123,12 +124,7 @@ public class BinaryLongReference extends AbstractReference implements LongRefere
     @Override
     public void setValue(long value)
             throws IllegalStateException {
-        try {
-            bytesStore.writeLong(offset, value);
-        } catch (NullPointerException e) {
-            throwExceptionIfClosed();
-            throw e;
-        }
+        requireBytesStore().writeLong(offset, value);
     }
 
     /**
@@ -141,12 +137,7 @@ public class BinaryLongReference extends AbstractReference implements LongRefere
     @Override
     public long getVolatileValue()
             throws IllegalStateException {
-        try {
-            return bytesStore.readVolatileLong(offset);
-        } catch (NullPointerException e) {
-            throwExceptionIfClosed();
-            throw e;
-        }
+        return requireBytesStore().readVolatileLong(offset);
     }
 
     /**
@@ -159,12 +150,7 @@ public class BinaryLongReference extends AbstractReference implements LongRefere
     @Override
     public void setVolatileValue(long value)
             throws IllegalStateException {
-        try {
-            bytesStore.writeVolatileLong(offset, value);
-        } catch (NullPointerException e) {
-            throwExceptionIfClosed();
-            throw e;
-        }
+        requireBytesStore().writeVolatileLong(offset, value);
     }
 
     /**
@@ -177,12 +163,7 @@ public class BinaryLongReference extends AbstractReference implements LongRefere
     @Override
     public void setOrderedValue(long value)
             throws IllegalStateException {
-        try {
-            bytesStore.writeOrderedLong(offset, value);
-        } catch (NullPointerException e) {
-            throwExceptionIfClosed();
-            throw e;
-        }
+        requireBytesStore().writeOrderedLong(offset, value);
     }
 
     /**
@@ -196,12 +177,7 @@ public class BinaryLongReference extends AbstractReference implements LongRefere
     @Override
     public long addValue(long delta)
             throws IllegalStateException {
-        try {
-            return bytesStore.addAndGetLong(offset, delta);
-        } catch (NullPointerException e) {
-            throwExceptionIfClosed();
-            throw e;
-        }
+        return requireBytesStore().addAndGetLong(offset, delta);
     }
 
     /**
@@ -231,11 +207,6 @@ public class BinaryLongReference extends AbstractReference implements LongRefere
     @Override
     public boolean compareAndSwapValue(long expected, long value)
             throws IllegalStateException {
-        try {
-            return bytesStore.compareAndSwapLong(offset, expected, value);
-        } catch (NullPointerException e) {
-            throwExceptionIfClosed();
-            throw e;
-        }
+        return requireBytesStore().compareAndSwapLong(offset, expected, value);
     }
 }

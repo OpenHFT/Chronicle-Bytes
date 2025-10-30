@@ -94,7 +94,7 @@ public class BinaryBooleanReference extends AbstractReference implements Boolean
             throws IllegalStateException, BufferUnderflowException {
         throwExceptionIfClosed();
 
-        byte b = bytesStore.readByte(offset);
+        byte b = requireBytesStore().readByte(offset);
         if (b == FALSE)
             return false;
         if (b == TRUE)
@@ -115,6 +115,6 @@ public class BinaryBooleanReference extends AbstractReference implements Boolean
             throws IllegalStateException {
         throwExceptionIfClosed();
 
-        bytesStore.writeByte(offset, flag ? TRUE : FALSE);
+        requireBytesStore().writeByte(offset, flag ? TRUE : FALSE);
     }
 }

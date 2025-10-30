@@ -62,7 +62,7 @@ public class MaximumPrecision implements Decimaliser {
             // Calculate mantissa based on the current factor.
             long mantissa = Math.round(absValue * factor);
             // Check if rounding is accurate for this precision.
-            if ((double) mantissa / factor == absValue) {
+            if (Double.compare((double) mantissa / factor, absValue) == 0) {
                 // Append to decimal appender.
                 decimalAppender.append(isNegative, mantissa, exponent);
                 return true;
@@ -110,7 +110,7 @@ public class MaximumPrecision implements Decimaliser {
             // Calculate mantissa based on the current factor.
             long mantissa = Math.round((double) absValue * factor);
             // Check if rounding is accurate for this precision.
-            if ((float) ((double) mantissa / factor) == absValue) {
+            if (Float.compare((float) ((double) mantissa / factor), absValue) == 0) {
                 // Append to decimal appender.
                 decimalAppender.append(isNegative, mantissa, exponent);
                 return true;

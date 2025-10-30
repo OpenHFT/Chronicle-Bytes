@@ -33,7 +33,6 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
-import java.util.Objects;
 
 import static net.openhft.chronicle.core.Jvm.uncheckedCast;
 import static net.openhft.chronicle.core.util.Ints.requireNonNegative;
@@ -181,7 +180,7 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
     /**
      * Move the read position to {@code position}, loading the correct chunk if needed.
      * <p>
-     * Uses the chunk’s hard upper bound so we only grow the file when absolutely required.
+     * Uses the chunk's hard upper bound so we only grow the file when absolutely required.
      *
      * @param position new read position (>= 0)
      * @return this instance
@@ -203,7 +202,7 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
     /**
      * Move the write limit to {@code limit}, loading the correct chunk if needed.
      * <p>
-     * Uses the chunk’s hard upper bound so we only grow the file when absolutely required.
+     * Uses the chunk's hard upper bound so we only grow the file when absolutely required.
      *
      * @param limit new write limit (>= 0)
      * @return this instance
@@ -221,7 +220,7 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
     /**
      * Move the write position to {@code position}, loading the correct chunk if needed.
      * <p>
-     * Uses the chunk’s safe upper bound so we can safely write a significant block of data after this without checking the size regularly.
+     * Uses the chunk's safe upper bound so we can safely write a significant block of data after this without checking the size regularly.
      *
      * @param position new write position (>= 0)
      * @return this instance

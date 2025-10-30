@@ -57,7 +57,7 @@ public interface BytesOut<U> extends
     }
 
     /**
-     * Serialises {@code marshallable} prefixed with a 16‑bit length.
+     * Serialises {@code marshallable} prefixed with a 16-bit length.
      */
     void writeMarshallableLength16(WriteBytesMarshallable marshallable)
             throws IllegalArgumentException, BufferOverflowException, BufferUnderflowException, InvalidMarshallableException, ClosedIllegalStateException, ThreadingIllegalStateException;

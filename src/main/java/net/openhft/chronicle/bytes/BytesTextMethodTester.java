@@ -16,12 +16,9 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Jvm;
-import net.openhft.chronicle.core.io.ClosedIllegalStateException;
-import net.openhft.chronicle.core.io.ThreadingIllegalStateException;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
-import java.nio.BufferUnderflowException;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
 

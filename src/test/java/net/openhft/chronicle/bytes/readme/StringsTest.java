@@ -43,10 +43,10 @@ public class StringsTest extends BytesTestCommon {
 
         final HexDumpBytes bytes = new HexDumpBytes();
         try {
-            bytes.writeHexDumpDescription("write8bit").write8bit("£ 1");
-            bytes.writeHexDumpDescription("writeUtf8").writeUtf8("£ 1");
-            bytes.writeHexDumpDescription("append8bit").append8bit("£ 1").append('\n');
-            bytes.writeHexDumpDescription("appendUtf8").appendUtf8("£ 1").append('\n');
+            bytes.writeHexDumpDescription("write8bit").write8bit("\u00a3 1");
+            bytes.writeHexDumpDescription("writeUtf8").writeUtf8("\u00a3 1");
+            bytes.writeHexDumpDescription("append8bit").append8bit("\u00a3 1").append('\n');
+            bytes.writeHexDumpDescription("appendUtf8").appendUtf8("\u00a3 1").append('\n');
 
             // System.out.println(bytes.toHexString());
 
@@ -54,10 +54,10 @@ public class StringsTest extends BytesTestCommon {
             final String b = bytes.readUtf8();
             final String c = bytes.parse8bit(StopCharTesters.CONTROL_STOP);
             final String d = bytes.parseUtf8(StopCharTesters.CONTROL_STOP);
-            assertEquals("£ 1", a);
-            assertEquals("£ 1", b);
-            assertEquals("£ 1", c);
-            assertEquals("£ 1", d);
+            assertEquals("\u00a3 1", a);
+            assertEquals("\u00a3 1", b);
+            assertEquals("\u00a3 1", c);
+            assertEquals("\u00a3 1", d);
 
             // System.out.println(System.identityHashCode(a));
             // System.out.println(System.identityHashCode(b));

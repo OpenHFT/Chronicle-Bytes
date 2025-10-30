@@ -191,4 +191,16 @@ public abstract class AbstractReference extends AbstractCloseable implements Byt
         super.unmonitor();
         Monitorable.unmonitor(bytesStore);
     }
+
+    /**
+     * Returns the current {@link BytesStore} or throws if it has been cleared.
+     */
+    @NotNull
+    protected BytesStore<?, ?> requireBytesStore() {
+        BytesStore<?, ?> store = this.bytesStore;
+        if (store == null) {
+            throw new ClosedIllegalStateException("BytesStore is not bound");
+        }
+        return store;
+    }
 }

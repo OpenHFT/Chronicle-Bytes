@@ -24,6 +24,7 @@ import net.openhft.chronicle.core.io.ThreadingIllegalStateException;
 import net.openhft.chronicle.core.pool.StringInterner;
 import net.openhft.chronicle.core.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.nio.BufferUnderflowException;
 
@@ -64,8 +65,12 @@ public class StringInternerBytes extends StringInterner {
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
-    public String intern(@NotNull final Bytes<?> bytes)
+    @Nullable
+    public String intern(@Nullable final Bytes<?> bytes)
             throws ArithmeticException, IllegalStateException, BufferUnderflowException {
+        if (bytes == null) {
+            return null;
+        }
         return intern(bytes, Maths.toUInt31(bytes.readRemaining()));
     }
 

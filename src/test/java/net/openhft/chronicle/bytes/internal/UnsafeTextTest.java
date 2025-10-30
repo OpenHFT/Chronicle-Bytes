@@ -26,7 +26,6 @@ import java.util.Random;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 
-import static net.openhft.chronicle.core.UnsafeMemory.UNSAFE;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 

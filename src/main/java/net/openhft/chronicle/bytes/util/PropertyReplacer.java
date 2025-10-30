@@ -18,6 +18,7 @@ package net.openhft.chronicle.bytes.util;
 import net.openhft.chronicle.core.Jvm;
 import org.jetbrains.annotations.NotNull;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -115,7 +116,8 @@ public enum PropertyReplacer {
      */
     @NotNull
     private static String convertStreamToString(@NotNull java.io.InputStream is) {
-        java.util.Scanner s = new java.util.Scanner(is).useDelimiter("\\A");
-        return s.hasNext() ? s.next() : "";
+        try (java.util.Scanner s = new java.util.Scanner(is, StandardCharsets.ISO_8859_1.name()).useDelimiter("\\A")) {
+            return s.hasNext() ? s.next() : "";
+        }
     }
 }

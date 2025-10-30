@@ -27,7 +27,7 @@ import static org.junit.Assume.assumeFalse;
 
 public class UTF8BytesTest extends BytesTestCommon {
 
-    private static final String MESSAGE = "awésome-message-1";
+    private static final String MESSAGE = "aw\u00e9some-message-1";
 
     @Test
     public void testUtfEncoding() throws IOException {

@@ -16,7 +16,6 @@
 package net.openhft.chronicle.bytes.internal;
 
 import net.openhft.chronicle.bytes.ByteStringAppender;
-import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.io.ClosedIllegalStateException;
 import org.jetbrains.annotations.NotNull;

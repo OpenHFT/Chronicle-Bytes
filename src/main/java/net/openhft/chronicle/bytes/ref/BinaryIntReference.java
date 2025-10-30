@@ -119,7 +119,8 @@ public class BinaryIntReference extends AbstractReference implements IntValue {
             throws IllegalStateException, BufferUnderflowException {
         throwExceptionIfClosed();
 
-        return bytesStore == null ? 0 : bytesStore.readInt(offset);
+        BytesStore<?, ?> store = bytesStore;
+        return store == null ? 0 : store.readInt(offset);
     }
 
     /**
@@ -135,7 +136,7 @@ public class BinaryIntReference extends AbstractReference implements IntValue {
             throws IllegalStateException, BufferOverflowException {
         throwExceptionIfClosedInSetter();
 
-        bytesStore.writeInt(offset, value);
+        requireBytesStore().writeInt(offset, value);
     }
 
     /**
@@ -151,7 +152,7 @@ public class BinaryIntReference extends AbstractReference implements IntValue {
             throws IllegalStateException, BufferUnderflowException {
         throwExceptionIfClosed();
 
-        return bytesStore.readVolatileInt(offset);
+        return requireBytesStore().readVolatileInt(offset);
     }
 
     /**
@@ -167,7 +168,7 @@ public class BinaryIntReference extends AbstractReference implements IntValue {
             throws IllegalStateException, BufferOverflowException {
         throwExceptionIfClosedInSetter();
 
-        bytesStore.writeOrderedInt(offset, value);
+        requireBytesStore().writeOrderedInt(offset, value);
     }
 
     /**
@@ -186,7 +187,7 @@ public class BinaryIntReference extends AbstractReference implements IntValue {
             throws IllegalStateException, BufferUnderflowException {
         throwExceptionIfClosed();
 
-        return bytesStore.addAndGetInt(offset, delta);
+        return requireBytesStore().addAndGetInt(offset, delta);
     }
 
     /**
@@ -224,6 +225,6 @@ public class BinaryIntReference extends AbstractReference implements IntValue {
             throws IllegalStateException, BufferOverflowException {
         throwExceptionIfClosed();
 
-        return bytesStore.compareAndSwapInt(offset, expected, value);
+        return requireBytesStore().compareAndSwapInt(offset, expected, value);
     }
 }

@@ -93,22 +93,22 @@ public class NativeBytesTest extends BytesTestCommon {
     @Test
     public void testAppendCharArrayNonAscii() {
         Bytes<?> b = alloc.elasticBytes(4);
-        b.appendUtf8('Δ');
-        final byte[] bytes = "Δ".getBytes(StandardCharsets.UTF_8);
+        b.appendUtf8('\u0394');
+        final byte[] bytes = "\u0394".getBytes(StandardCharsets.UTF_8);
         assertEquals(Bytes.wrapForRead(bytes).toHexString(), b.toHexString());
 
         StringBuilder sb = new StringBuilder();
         b.parseUtf8(sb, 2);
-        assertEquals("Δ", sb.toString());
+        assertEquals("\u0394", sb.toString());
 
         b.readPosition(0);
         b.parseUtf8(sb, false, 1);
-        assertEquals("Δ", sb.toString());
+        assertEquals("\u0394", sb.toString());
 
         b.clear();
-        b.appendUtf8(new char[]{'Δ'}, 0, 1);
+        b.appendUtf8(new char[]{'\u0394'}, 0, 1);
         b.parseUtf8(sb, 2);
-        assertEquals("Δ", sb.toString());
+        assertEquals("\u0394", sb.toString());
 
         b.readPosition(0);
         assertEquals(new String(bytes, ISO_8859_1), b.toString());
@@ -119,8 +119,8 @@ public class NativeBytesTest extends BytesTestCommon {
     public void testAppendCharArrayNonAsciiToShort() {
         Bytes<?> b = alloc.elasticBytes(4);
         try {
-            b.appendUtf8('Δ');
-            final byte[] bytes = "Δ".getBytes(StandardCharsets.UTF_8);
+            b.appendUtf8('\u0394');
+            final byte[] bytes = "\u0394".getBytes(StandardCharsets.UTF_8);
             assertEquals(Bytes.wrapForRead(bytes).toHexString(), b.toHexString());
 
             StringBuilder sb = new StringBuilder();

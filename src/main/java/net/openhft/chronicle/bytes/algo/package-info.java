@@ -19,6 +19,6 @@
  *
  * @see net.openhft.chronicle.bytes.BytesStore
  * @see net.openhft.chronicle.bytes.algo.BytesStoreHash
- * @see <a href="../../../../src/main/adoc/algo-overview.adoc">algo-overview.adoc</a>
+ * @see <a href="../../../../src/main/docs/algo-overview.adoc">algo-overview.adoc</a>
  */
 package net.openhft.chronicle.bytes.algo;

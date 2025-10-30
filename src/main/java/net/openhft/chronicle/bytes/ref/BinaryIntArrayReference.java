@@ -222,7 +222,7 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
             throws IllegalStateException, BufferUnderflowException {
         throwExceptionIfClosed();
 
-        return bytesStore.readVolatileInt(offset + USED);
+        return requireBytesStore().readVolatileLong(offset + USED);
     }
 
     /**
@@ -238,7 +238,7 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
             throws IllegalStateException, BufferUnderflowException {
         throwExceptionIfClosedInSetter();
 
-        bytesStore.writeMaxLong(offset + USED, usedAtLeast);
+        requireBytesStore().writeMaxLong(offset + USED, usedAtLeast);
     }
 
     /**
@@ -255,7 +255,7 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
             throws IllegalStateException, BufferUnderflowException {
         throwExceptionIfClosed();
 
-        return bytesStore.readInt(VALUES + offset + (index << SHIFT));
+        return requireBytesStore().readInt(VALUES + offset + (index << SHIFT));
     }
 
     /**
@@ -272,7 +272,7 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
             throws IllegalStateException, BufferOverflowException {
         throwExceptionIfClosedInSetter();
 
-        bytesStore.writeInt(VALUES + offset + (index << SHIFT), value);
+        requireBytesStore().writeInt(VALUES + offset + (index << SHIFT), value);
     }
 
     /**
@@ -289,7 +289,7 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
             throws IllegalStateException, BufferUnderflowException {
         throwExceptionIfClosed();
 
-        return bytesStore.readVolatileInt(VALUES + offset + (index << SHIFT));
+        return requireBytesStore().readVolatileInt(VALUES + offset + (index << SHIFT));
     }
 
     /**
@@ -307,7 +307,7 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
             throws IllegalStateException, BufferOverflowException, IllegalArgumentException {
         throwExceptionIfClosed();
 
-        ((BinaryIntReference) value).bytesStore(bytesStore, VALUES + offset + (index << SHIFT), 8);
+        ((BinaryIntReference) value).bytesStore(requireBytesStore(), VALUES + offset + (index << SHIFT), Integer.BYTES);
     }
 
     /**
@@ -324,7 +324,7 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
             throws BufferOverflowException, IllegalStateException {
         throwExceptionIfClosedInSetter();
 
-        bytesStore.writeOrderedInt(VALUES + offset + (index << SHIFT), value);
+        requireBytesStore().writeOrderedInt(VALUES + offset + (index << SHIFT), value);
     }
 
     /**
@@ -586,6 +586,6 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
 
         if (value == INT_NOT_COMPLETE && binaryIntArrayReferences != null)
             binaryIntArrayReferences.add(new WeakReference<>(this));
-        return bytesStore.compareAndSwapInt(VALUES + offset + (index << SHIFT), expected, value);
+        return requireBytesStore().compareAndSwapInt(VALUES + offset + (index << SHIFT), expected, value);
     }
 }

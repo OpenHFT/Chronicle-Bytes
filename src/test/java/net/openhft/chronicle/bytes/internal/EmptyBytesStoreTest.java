@@ -19,7 +19,6 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.bytes.BytesTestCommon;
 import net.openhft.chronicle.bytes.RandomDataOutput;
-import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IOTools;
 import org.junit.After;
 import org.junit.Test;
@@ -540,4 +539,3 @@ public class EmptyBytesStoreTest extends BytesTestCommon {
         throw new AssertionFailedError("expected Buffer*Exception");
     }
 }
-

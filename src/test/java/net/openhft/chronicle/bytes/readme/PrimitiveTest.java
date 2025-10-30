@@ -184,9 +184,9 @@ public class PrimitiveTest extends BytesTestCommon {
             bytes.writePosition(35);
 
             final String expected =
-                    "00000000 59 01 02 03 00 04 00 06  00 00 00 07 00 00 00 08 Y······· ········\n" +
-                            "00000010 00 00 00 00 00 00 00 00  00 10 41 00 00 00 00 00 ········ ··A·····\n" +
-                            "00000020 00 24 40                                         ·$@              \n";
+                    "00000000 59 01 02 03 00 04 00 06  00 00 00 07 00 00 00 08 Y\u00b7\u00b7\u00b7\u00b7\u00b7\u00b7\u00b7 \u00b7\u00b7\u00b7\u00b7\u00b7\u00b7\u00b7\u00b7\n" +
+                            "00000010 00 00 00 00 00 00 00 00  00 10 41 00 00 00 00 00 \u00b7\u00b7\u00b7\u00b7\u00b7\u00b7\u00b7\u00b7 \u00b7\u00b7A\u00b7\u00b7\u00b7\u00b7\u00b7\n" +
+                            "00000020 00 24 40                                         \u00b7$@              \n";
 
             final String actual = bytes.toHexString();
 
@@ -246,9 +246,9 @@ public class PrimitiveTest extends BytesTestCommon {
             bytes.append(6.2999999, 3).append('\n');
             bytes.append(Double.NaN).append('\n');
 
-            final String expected = "00000000 54 0a 31 0a 32 0a 33 0a  34 2e 31 0a 35 2e 32 0a T·1·2·3· 4.1·5.2·\n" +
-                    "00000010 2d 49 6e 66 69 6e 69 74  79 0a 36 2e 33 30 30 0a -Infinit y·6.300·\n" +
-                    "00000020 4e 61 4e 0a                                      NaN·             \n";
+            final String expected = "00000000 54 0a 31 0a 32 0a 33 0a  34 2e 31 0a 35 2e 32 0a T\u00b71\u00b72\u00b73\u00b7 4.1\u00b75.2\u00b7\n" +
+                    "00000010 2d 49 6e 66 69 6e 69 74  79 0a 36 2e 33 30 30 0a -Infinit y\u00b76.300\u00b7\n" +
+                    "00000020 4e 61 4e 0a                                      NaN\u00b7             \n";
 
             final String actual = bytes.toHexString();
 

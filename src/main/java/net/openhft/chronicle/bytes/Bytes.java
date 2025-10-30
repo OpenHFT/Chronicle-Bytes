@@ -42,10 +42,10 @@ import static net.openhft.chronicle.core.util.Longs.requireNonNegative;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
 /**
- * Mutable buffer for raw byte data with separate 63‑bit read and write cursors.
- * A {@code Bytes} wraps a {@link BytesStore} which may reside on‑heap, in
- * native memory or in a memory‑mapped file. Instances may be elastic and are
- * {@link ReferenceCounted}. They are not thread‑safe.
+ * Mutable buffer for raw byte data with separate 63-bit read and write cursors.
+ * A {@code Bytes} wraps a {@link BytesStore} which may reside on-heap, in
+ * native memory or in a memory-mapped file. Instances may be elastic and are
+ * {@link ReferenceCounted}. They are not thread-safe.
  *
  * @param <U> underlying store type
  */
@@ -58,12 +58,12 @@ public interface Bytes<U> extends
         SingleThreadedChecked {
 
     /**
-     * Maximum supported capacity – roughly eight exbibytes.
+     * Maximum supported capacity - roughly eight exbibytes.
      */
     long MAX_CAPACITY = Long.MAX_VALUE & ~0xF;
 
     /**
-     * Practical limit for heap‑backed {@code Bytes} instances.
+     * Practical limit for heap-backed {@code Bytes} instances.
      */
     int MAX_HEAP_CAPACITY = Integer.MAX_VALUE & ~0xF;
 
@@ -897,7 +897,7 @@ public interface Bytes<U> extends
     BytesStore<?, U> bytesStore();
 
     /**
-     * Compares the readable bytes with {@code other} using ISO‑8959‑1 encoding.
+     * Compares the readable bytes with {@code other} using ISO-8959-1 encoding.
      */
     default boolean isEqual(@Nullable String other)
             throws IllegalStateException {

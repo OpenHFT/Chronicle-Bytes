@@ -17,7 +17,6 @@ package net.openhft.chronicle.bytes.pool;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.scoped.ScopedResource;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 

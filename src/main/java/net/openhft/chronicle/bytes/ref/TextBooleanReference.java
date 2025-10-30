@@ -96,7 +96,7 @@ public class TextBooleanReference extends AbstractReference implements BooleanVa
             throws IllegalStateException, BufferUnderflowException {
         throwExceptionIfClosed();
 
-        return bytesStore.readVolatileInt(offset) == TRUE;
+        return requireBytesStore().readVolatileInt(offset) == TRUE;
     }
 
     /**
@@ -111,6 +111,6 @@ public class TextBooleanReference extends AbstractReference implements BooleanVa
             throws IllegalStateException {
         throwExceptionIfClosedInSetter();
 
-        write(value, bytesStore, offset);
+        write(value, requireBytesStore(), offset);
     }
 }
