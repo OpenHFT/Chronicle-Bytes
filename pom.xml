@@ -276,8 +276,8 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
-                    <!-- Include JaCoCo agent args; support both default and custom property names -->
-                    <argLine>${argLine} ${surefireArgLine}</argLine>
+                    <!-- Use standard JaCoCo argLine when present -->
+                    <argLine>${argLine}</argLine>
                     <forkCount>4</forkCount>
                     <reuseForks>true</reuseForks>
                     <runOrder>hourly</runOrder>
@@ -412,14 +412,10 @@
                         <executions>
                             <execution>
                                 <id>prepare-agent</id>
-                                <phase>initialize</phase>
                                 <goals>
                                     <goal>prepare-agent</goal>
                                 </goals>
-                                <configuration>
-                                    <!-- Publish agent args to ${surefireArgLine} so Surefire can consume them explicitly -->
-                                    <propertyName>surefireArgLine</propertyName>
-                                </configuration>
+                                <phase>initialize</phase>
                             </execution>
                             <execution>
                                 <id>report</id>
