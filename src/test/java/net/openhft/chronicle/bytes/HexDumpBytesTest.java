@@ -16,8 +16,10 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.core.OS;
 import org.junit.Test;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 
 import static org.junit.Assert.assertEquals;
@@ -50,7 +52,8 @@ public class HexDumpBytesTest extends BytesTestCommon {
     public void memoryMapped() throws FileNotFoundException {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
-        try (MappedBytes mappedBytes = MappedBytes.mappedBytes("test.dat", 64 * 1024)) {
+        File file = new File(OS.getTarget(), "test.dat");
+        try (MappedBytes mappedBytes = MappedBytes.mappedBytes(file, 64 * 1024)) {
             doTest(new HexDumpBytes(mappedBytes));
         }
     }
