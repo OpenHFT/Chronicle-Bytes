@@ -26,10 +26,13 @@ import java.io.IOException;
 
 import static org.junit.Assert.*;
 
-public class BytesInternalCopyTest extends BytesTestCommon {
+/**
+ * Consolidated IO and copy tests for BytesInternal.
+ */
+public class BytesInternalIOCopyTest extends BytesTestCommon {
 
     @Test
-    public void copyRandomDataInputToOutputStream() throws IOException {
+    public void copyFromRandomDataInputToOutputStreamAndToByteArray() throws IOException {
         final Bytes<?> src = Bytes.from("abcdef");
         final ByteArrayOutputStream bos = new ByteArrayOutputStream();
         try {
@@ -51,14 +54,16 @@ public class BytesInternalCopyTest extends BytesTestCommon {
     }
 
     @Test
-    public void copyInputStreamToStreamingDataOutputAndDirectToByteArray() throws IOException {
-        final ByteArrayInputStream bis = new ByteArrayInputStream("XYZ".getBytes());
-        final Bytes<?> out = Bytes.allocateElasticOnHeap(8);
+    public void copyInputStreamLargeAndDirectToArray() throws Exception {
+        byte[] data = new byte[2000];
+        for (int i = 0; i < data.length; i++) data[i] = (byte) (i & 0x7F);
+        ByteArrayInputStream bis = new ByteArrayInputStream(data);
+        Bytes<?> out = Bytes.allocateElasticOnHeap(128);
         try {
             BytesInternal.copy(bis, out);
-            assertEquals("XYZ", out.toString());
+            assertEquals(data.length, out.length());
 
-            // exercise direct memory variant of toByteArray
+            // direct memory variant of toByteArray
             Bytes<?> direct = Bytes.allocateDirect(6);
             try {
                 direct.append("123456");
@@ -73,3 +78,4 @@ public class BytesInternalCopyTest extends BytesTestCommon {
         }
     }
 }
+

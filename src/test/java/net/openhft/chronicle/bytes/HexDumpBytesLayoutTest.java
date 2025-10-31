@@ -19,10 +19,29 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertTrue;
 
-public class HexDumpBytesFormattingTest extends BytesTestCommon {
+/**
+ * Consolidated layout tests for HexDumpBytes covering wrap widths,
+ * offset formatting and description handling without data.
+ */
+public class HexDumpBytesLayoutTest extends BytesTestCommon {
 
     @Test
-    public void wrapsOffsetsAndNestedBlocks() {
+    public void zeroLengthDescriptionIsEmitted() {
+        HexDumpBytes hdb = new HexDumpBytes();
+        try {
+            hdb.numberWrap(8).offsetFormat((o, b) -> b.appendBase16(o, 2));
+            hdb.writeHexDumpDescription("empty");
+            // write a single byte so the description line is emitted
+            hdb.write(new byte[1]);
+            String s = hdb.toHexString();
+            assertTrue(s.contains("empty"));
+        } finally {
+            hdb.releaseLast();
+        }
+    }
+
+    @Test
+    public void formattingWithNestedBlocksAndOffsets() {
         HexDumpBytes hdb = new HexDumpBytes();
         try {
             hdb.numberWrap(8).offsetFormat((o, b) -> b.appendBase16(o, 2));
@@ -41,17 +60,20 @@ public class HexDumpBytesFormattingTest extends BytesTestCommon {
     }
 
     @Test
-    public void fromTextSkipsCommentsAndWraps() {
-        HexDumpBytes parsed = HexDumpBytes.fromText("00 01 02\n# comment\n03 04 05 06 07");
+    public void wrapWidthOneProducesPerByteLines() {
+        HexDumpBytes hdb = new HexDumpBytes();
         try {
-            parsed.numberWrap(4).offsetFormat((offset, builder) -> builder.appendBase16(offset, 4));
-            String dump = parsed.toHexString();
-            assertTrue("Expected comment to be preserved", dump.contains("# comment"));
-            assertTrue(dump.contains("00 01 02"));
-            String[] lines = dump.split("\\R");
-            assertTrue("Expected wrap to create multiple lines", lines.length > 1);
+            hdb.numberWrap(1).offsetFormat((o, b) -> b.appendBase16(o, 2));
+            hdb.writeHexDumpDescription("wrap1");
+            hdb.write(new byte[5]);
+            String s = hdb.toHexString();
+            String[] lines = s.split("\\R");
+            // 1 header + 5 data lines (wrapping every byte) + possibly a trailing empty line
+            assertTrue("Expected multiple wrapped lines", lines.length >= 5);
+            assertTrue(s.contains("wrap1"));
         } finally {
-            parsed.releaseLast();
+            hdb.releaseLast();
         }
     }
 }
+
