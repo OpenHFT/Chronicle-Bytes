@@ -413,7 +413,7 @@
                             <argLine>${argLine} ${jvm.requiredArgs} -Djvm.coverage=true</argLine>
                             <!-- Use a single fork to ensure JaCoCo agent reliably writes execution data -->
                             <forkCount>1</forkCount>
-                            <reuseForks>true</reuseForks>
+                            <reuseForks>false</reuseForks>
                         </configuration>
                     </plugin>
                     <plugin>
