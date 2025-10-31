@@ -330,6 +330,9 @@
                         <exclude>src/test/resources/**</exclude>
                         <exclude>src/main/resources/**</exclude>
                         <exclude>src/main/config/**</exclude>
+                        <!-- Exclude AsciiDoc from license header checks/formatting -->
+                        <exclude>**/*.adoc</exclude>
+                        <exclude>src/main/docs/**</exclude>
                     </excludes>
                 </configuration>
 
