@@ -19,17 +19,23 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
-public class UncheckedNativeBytesTest extends BytesTestCommon {
+public class BytesCopyOfTest extends BytesTestCommon {
 
     @Test
-    public void uncheckedWrapEnsureCapacityAndAppend() {
-        Bytes<?> b = Bytes.allocateDirect(8);
-        Bytes<?> u = b.unchecked(true);
+    public void copyOfReturnsDirectBytesWithSameReadableContent() {
+        Bytes<?> src = Bytes.allocateElasticOnHeap(32);
         try {
-            u.append("abc");
-            assertEquals("abc", u.toString());
+            src.append("lorem-ipsum");
+            src.readSkip(6); // point to "ipsum"
+            Bytes<Void> copy = BytesUtil.copyOf(src);
+            try {
+                assertEquals("ipsum", copy.toString());
+                // copy is direct; avoid growing it to keep within fixed capacity
+            } finally {
+                copy.releaseLast();
+            }
         } finally {
-            u.releaseLast();
+            src.releaseLast();
         }
     }
 }

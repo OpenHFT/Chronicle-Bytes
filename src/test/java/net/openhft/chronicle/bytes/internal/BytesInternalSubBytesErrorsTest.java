@@ -13,23 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package net.openhft.chronicle.bytes;
+package net.openhft.chronicle.bytes.internal;
 
+import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.BytesTestCommon;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import java.nio.BufferUnderflowException;
 
-public class UncheckedNativeBytesTest extends BytesTestCommon {
+public class BytesInternalSubBytesErrorsTest extends BytesTestCommon {
 
-    @Test
-    public void uncheckedWrapEnsureCapacityAndAppend() {
-        Bytes<?> b = Bytes.allocateDirect(8);
-        Bytes<?> u = b.unchecked(true);
+    @Test(expected = BufferUnderflowException.class)
+    public void subBytesThrowsWhenLengthTooLarge() {
+        Bytes<?> src = Bytes.from("abc");
         try {
-            u.append("abc");
-            assertEquals("abc", u.toString());
+            // request a sub view longer than remaining
+            BytesInternal.subBytes(src, 0, 10);
         } finally {
-            u.releaseLast();
+            src.releaseLast();
         }
     }
 }
+

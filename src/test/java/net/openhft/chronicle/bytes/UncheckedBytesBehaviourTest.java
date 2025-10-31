@@ -17,19 +17,27 @@ package net.openhft.chronicle.bytes;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
-public class UncheckedNativeBytesTest extends BytesTestCommon {
+public class UncheckedBytesBehaviourTest extends BytesTestCommon {
 
     @Test
-    public void uncheckedWrapEnsureCapacityAndAppend() {
-        Bytes<?> b = Bytes.allocateDirect(8);
-        Bytes<?> u = b.unchecked(true);
+    public void uncheckedOnDirectAndNoopWhenFalse() {
+        Bytes<?> d = Bytes.allocateDirect(16);
+        Bytes<?> u = d.unchecked(true);
         try {
-            u.append("abc");
-            assertEquals("abc", u.toString());
+            u.append("zz");
+            assertEquals("zz", u.toString());
         } finally {
             u.releaseLast();
+        }
+
+        Bytes<?> h = Bytes.allocateElasticOnHeap(8);
+        try {
+            Bytes<?> same = h.unchecked(false);
+            assertSame(h, same);
+        } finally {
+            h.releaseLast();
         }
     }
 }

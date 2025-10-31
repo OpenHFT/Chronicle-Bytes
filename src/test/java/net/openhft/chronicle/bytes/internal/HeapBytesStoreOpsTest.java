@@ -13,23 +13,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package net.openhft.chronicle.bytes;
+package net.openhft.chronicle.bytes.internal;
 
+import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.BytesStore;
+import net.openhft.chronicle.bytes.BytesTestCommon;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
-public class UncheckedNativeBytesTest extends BytesTestCommon {
+public class HeapBytesStoreOpsTest extends BytesTestCommon {
 
     @Test
-    public void uncheckedWrapEnsureCapacityAndAppend() {
-        Bytes<?> b = Bytes.allocateDirect(8);
-        Bytes<?> u = b.unchecked(true);
+    public void heapStorePrimitiveOps() {
+        Bytes<?> heap = Bytes.allocateElasticOnHeap(32);
         try {
-            u.append("abc");
-            assertEquals("abc", u.toString());
+            BytesStore<?, ?> store = heap.bytesStore();
+            long off = heap.start();
+            store.writeInt(off, 0x11223344);
+            assertEquals(0x11223344, store.readInt(off));
+            store.writeOrderedInt(off, 0x55667788);
+            assertEquals(0x55667788, store.readInt(off));
         } finally {
-            u.releaseLast();
+            heap.releaseLast();
         }
     }
 }
+

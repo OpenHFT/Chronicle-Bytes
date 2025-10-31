@@ -19,17 +19,26 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
-public class UncheckedNativeBytesTest extends BytesTestCommon {
+public class VanillaBytesOpsTest extends BytesTestCommon {
 
     @Test
-    public void uncheckedWrapEnsureCapacityAndAppend() {
-        Bytes<?> b = Bytes.allocateDirect(8);
-        Bytes<?> u = b.unchecked(true);
+    public void writeReadPrimitivesAndZeroOut() {
+        Bytes<?> b = Bytes.allocateElasticOnHeap(64);
         try {
-            u.append("abc");
-            assertEquals("abc", u.toString());
+            b.writeInt(0x11223344);
+            b.writeLong(0x0102030405060708L);
+
+            b.readPosition(0);
+            assertEquals(0x11223344, b.readInt());
+            assertEquals(0x0102030405060708L, b.readLong());
+
+            // zero out the int we wrote and check
+            b.zeroOut(0, 4);
+            assertEquals(0, b.peekUnsignedByte(0));
+            assertEquals(0, b.peekUnsignedByte(1));
         } finally {
-            u.releaseLast();
+            b.releaseLast();
         }
     }
 }
+

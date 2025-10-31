@@ -17,19 +17,28 @@ package net.openhft.chronicle.bytes;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
-public class UncheckedNativeBytesTest extends BytesTestCommon {
+public class HexDumpBytesAdvancedTest extends BytesTestCommon {
 
     @Test
-    public void uncheckedWrapEnsureCapacityAndAppend() {
-        Bytes<?> b = Bytes.allocateDirect(8);
-        Bytes<?> u = b.unchecked(true);
+    public void numberWrapAndIndentation() {
+        HexDumpBytes hdb = new HexDumpBytes();
         try {
-            u.append("abc");
-            assertEquals("abc", u.toString());
+            hdb.numberWrap(16).offsetFormat((o, b) -> b.appendBase16(o, 2));
+            hdb.writeHexDumpDescription("hdr");
+            hdb.write("1234567890abcdefghij".getBytes());
+            hdb.adjustHexDumpIndentation(2);
+            hdb.writeHexDumpDescription("nest");
+            hdb.write("zz".getBytes());
+
+            final String s = hdb.toHexString();
+            assertTrue(s.contains("hdr"));
+            assertTrue(s.contains("nest"));
+            assertTrue(s.contains("00"));
         } finally {
-            u.releaseLast();
+            hdb.releaseLast();
         }
     }
 }
+

@@ -17,19 +17,22 @@ package net.openhft.chronicle.bytes;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
-public class UncheckedNativeBytesTest extends BytesTestCommon {
+public class HexDumpBytesZeroLengthTest extends BytesTestCommon {
 
     @Test
-    public void uncheckedWrapEnsureCapacityAndAppend() {
-        Bytes<?> b = Bytes.allocateDirect(8);
-        Bytes<?> u = b.unchecked(true);
+    public void descriptionWithoutDataStillFormats() {
+        HexDumpBytes hdb = new HexDumpBytes();
         try {
-            u.append("abc");
-            assertEquals("abc", u.toString());
+            hdb.numberWrap(8).offsetFormat((o, b) -> b.appendBase16(o, 2));
+            hdb.writeHexDumpDescription("empty");
+            // write a single byte so the description line is emitted
+            hdb.write(new byte[1]);
+            String s = hdb.toHexString();
+            assertTrue(s.contains("empty"));
         } finally {
-            u.releaseLast();
+            hdb.releaseLast();
         }
     }
 }
