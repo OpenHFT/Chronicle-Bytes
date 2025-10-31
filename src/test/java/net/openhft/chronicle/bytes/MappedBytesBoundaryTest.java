@@ -89,4 +89,41 @@ public class MappedBytesBoundaryTest extends BytesTestCommon {
 
         Files.deleteIfExists(file.toPath());
     }
+
+    @Test
+    public void writeSkipReservesSpaceLikeQueueWriters() throws IOException {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
+        File file = new File(OS.getTarget(), "mapped-write-skip-" + System.nanoTime() + ".dat");
+        Files.createDirectories(file.getParentFile().toPath());
+        try (MappedBytes bytes = MappedBytes.mappedBytes(file, OS.pageSize())) {
+            bytes.writeSkip(1024);
+            assertEquals(1024, bytes.writePosition());
+
+            bytes.writeByte((byte) 0x5A);
+            bytes.readPosition(1024);
+            assertEquals((byte) 0x5A, bytes.readByte());
+        } finally {
+            Files.deleteIfExists(file.toPath());
+        }
+    }
+
+    @Test
+    public void write8bitUsesOptimisedPathForAsciiStrings() throws IOException {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
+        File file = new File(OS.getTarget(), "mapped-write8bit-" + System.nanoTime() + ".dat");
+        Files.createDirectories(file.getParentFile().toPath());
+        String message = "OrderAccepted";
+        try (MappedBytes bytes = MappedBytes.mappedBytes(file, OS.pageSize())) {
+            bytes.writePosition(0);
+            bytes.write8bit(message);
+
+            bytes.readPosition(0);
+            assertEquals(message, bytes.read8bit());
+            assertTrue("Expected bytes to advance past written payload", bytes.writePosition() > message.length());
+        } finally {
+            Files.deleteIfExists(file.toPath());
+        }
+    }
 }

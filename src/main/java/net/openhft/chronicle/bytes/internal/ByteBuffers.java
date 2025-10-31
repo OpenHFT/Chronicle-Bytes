@@ -41,8 +41,8 @@ public final class ByteBuffers {
         try {
             address = Jvm.getField(direct.getClass(), "address");
             capacity = Jvm.getField(direct.getClass(), "capacity");
-        } catch (Throwable t) {
-            Jvm.warn().on(ByteBuffers.class, "Unable to access direct ByteBuffer fields", t);
+        } catch (Exception e) {
+            Jvm.warn().on(ByteBuffers.class, "Unable to access direct ByteBuffer fields", e);
         }
         ADDRESS = address;
         CAPACITY = capacity;

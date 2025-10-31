@@ -67,8 +67,8 @@ public class NativeBytesStore<U>
             address = Jvm.getField(directBB, "address");
             capacity = Jvm.getField(directBB, "capacity");
             att = Jvm.getField(directBB, "att");
-        } catch (Throwable t) {
-            Jvm.warn().on(NativeBytesStore.class, "Unable to access ByteBuffer fields", t);
+        } catch (Exception e) {
+            Jvm.warn().on(NativeBytesStore.class, "Unable to access ByteBuffer fields", e);
         }
         BB_ADDRESS = address;
         BB_CAPACITY = capacity;

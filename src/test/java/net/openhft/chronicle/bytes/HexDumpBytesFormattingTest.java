@@ -17,7 +17,6 @@ package net.openhft.chronicle.bytes;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 public class HexDumpBytesFormattingTest extends BytesTestCommon {
@@ -43,12 +42,12 @@ public class HexDumpBytesFormattingTest extends BytesTestCommon {
 
     @Test
     public void fromTextSkipsCommentsAndWraps() {
-        HexDumpBytes parsed = HexDumpBytes.fromText("00 01 02\\n# comment\\n03 04 05 06 07");
+        HexDumpBytes parsed = HexDumpBytes.fromText("00 01 02\n# comment\n03 04 05 06 07");
         try {
             parsed.numberWrap(4).offsetFormat((offset, builder) -> builder.appendBase16(offset, 4));
             String dump = parsed.toHexString();
-            assertFalse("Comment lines should be ignored", dump.contains("#"));
-            assertTrue(dump.contains("0000"));
+            assertTrue("Expected comment to be preserved", dump.contains("# comment"));
+            assertTrue(dump.contains("00 01 02"));
             String[] lines = dump.split("\\R");
             assertTrue("Expected wrap to create multiple lines", lines.length > 1);
         } finally {

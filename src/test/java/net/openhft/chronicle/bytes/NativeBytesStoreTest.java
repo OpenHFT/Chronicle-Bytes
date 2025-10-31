@@ -63,7 +63,8 @@ public class NativeBytesStoreTest extends BytesTestCommon {
 
         final NativeBytesStore<Void> bytesStore = NativeBytesStore.nativeStoreWithFixedCapacity(maxLen + 5);
 
-        String expected = "";
+        StringBuilder expectedSb = new StringBuilder();
+        String expected = expectedSb.toString();
 
         for (int i = 0; i < maxLen; i += stepLength) {
             final Bytes<byte[]> bytes = Bytes.from(expected);
@@ -76,7 +77,8 @@ public class NativeBytesStoreTest extends BytesTestCommon {
             Assert.assertEquals("failed at " + i, expected, sb.toString());
 
             bytes.releaseLast();
-            expected = expected + "aaaaaaaaaaaaaaaaaaaaaaa"; // 23 characters
+            expectedSb.append("aaaaaaaaaaaaaaaaaaaaaaa"); // 23 characters
+            expected = expectedSb.toString();
         }
     }
 

@@ -39,11 +39,14 @@ public class MappedBytesEdgeTest extends BytesTestCommon {
     private final int size;
     private final ReadWrite rw;
     private final Consumer<Bytes<?>> doit;
+    @SuppressWarnings("unused")
+    private final String name;
 
     public MappedBytesEdgeTest(int size, ReadWrite rw, String name, Consumer<Bytes<?>> doit) {
         this.size = size;
         this.rw = rw;
         this.doit = doit;
+        this.name = name;
     }
 
     @Parameterized.Parameters(name = "{2} size={0} rw={1}")
