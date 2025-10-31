@@ -165,22 +165,7 @@
 
     <build>
         <plugins>
-            <plugin>
-                <groupId>com.github.ekryd.sortpom</groupId>
-                <artifactId>sortpom-maven-plugin</artifactId>
-                <version>3.0.1</version>
-                <configuration>
-                    <nrOfIndentSpace>4</nrOfIndentSpace>
-                </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>sort</goal>
-                        </goals>
-                        <phase>verify</phase>
-                    </execution>
-                </executions>
-            </plugin>
+            <!-- SortPom moved to an opt-in profile to avoid automatic sorting during normal builds -->
             <plugin>
                 <groupId>net.openhft</groupId>
                 <artifactId>binary-compatibility-enforcer-plugin</artifactId>
