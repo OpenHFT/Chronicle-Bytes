@@ -406,6 +406,14 @@
                         <artifactId>sonar-maven-plugin</artifactId>
                     </plugin>
                     <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <!-- Mark tests as running under coverage to relax perf-sensitive checks -->
+                            <argLine>${argLine} -Djvm.coverage=true</argLine>
+                        </configuration>
+                    </plugin>
+                    <plugin>
                         <groupId>org.jacoco</groupId>
                         <artifactId>jacoco-maven-plugin</artifactId>
                         <version>${jacoco-maven-plugin.version}</version>
