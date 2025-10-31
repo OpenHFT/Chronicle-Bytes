@@ -35,15 +35,8 @@ public class BytesInternalContentEqualTest extends BytesTestCommon {
             heap.readPosition(0);
             direct.readPosition(0);
 
-            BytesStore<?, ?> a = heap.bytesStore();
-            BytesStore<?, ?> b = direct.bytesStore();
-            a.readPosition(0);
-            b.readPosition(0);
-            a.readLimit(heap.readLimit());
-            b.readLimit(direct.readLimit());
-
             assertTrue("Expected equal content across heap and direct stores",
-                    BytesInternal.contentEqual(a, b));
+                    BytesInternal.contentEqual(heap.bytesStore(), direct.bytesStore()));
         } finally {
             heap.releaseLast();
             direct.releaseLast();
@@ -74,4 +67,3 @@ public class BytesInternalContentEqualTest extends BytesTestCommon {
         }
     }
 }
-
