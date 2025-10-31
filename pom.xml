@@ -1,18 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright 2016-2025 chronicle.software
-  ~
-  ~ Licensed under the Apache License, Version 2.0 (the "License");
-  ~ you may not use this file except in compliance with the License.
-  ~ You may obtain a copy of the License at
-  ~
-  ~     http://www.apache.org/licenses/LICENSE-2.0
-  ~
-  ~ Unless required by applicable law or agreed to in writing, software
-  ~ distributed under the License is distributed on an "AS IS" BASIS,
-  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  ~ See the License for the specific language governing permissions and
-  ~ limitations under the License.
+
+    Copyright 2016-2025 chronicle.software
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
@@ -22,14 +24,21 @@
         <groupId>net.openhft</groupId>
         <artifactId>java-parent-pom</artifactId>
         <version>1.27ea1</version>
-        <relativePath />
+        <relativePath></relativePath>
     </parent>
 
     <artifactId>chronicle-bytes</artifactId>
     <version>2.27ea9-SNAPSHOT</version>
+    <packaging>bundle</packaging>
     <name>OpenHFT/Chronicle Bytes</name>
     <description>Chronicle-Bytes</description>
-    <packaging>bundle</packaging>
+
+    <scm>
+        <connection>scm:git:git@github.com:OpenHFT/Chronicle-Bytes.git</connection>
+        <developerConnection>scm:git:git@github.com:OpenHFT/Chronicle-Bytes.git</developerConnection>
+        <tag>ea</tag>
+        <url>scm:git:git@github.com:OpenHFT/Chronicle-Bytes.git</url>
+    </scm>
 
     <properties>
         <zero.cost.assertions>disabled</zero.cost.assertions>
@@ -177,10 +186,10 @@
                 <artifactId>binary-compatibility-enforcer-plugin</artifactId>
                 <executions>
                     <execution>
-                        <phase>verify</phase>
                         <goals>
                             <goal>enforcer</goal>
                         </goals>
+                        <phase>verify</phase>
                         <configuration>
                             <referenceVersion>2.27ea0</referenceVersion>
                             <artifactsURI>https://teamcity.chronicle.software/repository/download</artifactsURI>
@@ -216,10 +225,8 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-scm-publish-plugin</artifactId>
                 <configuration>
-                    <checkoutDirectory>${project.build.directory}/scmpublish/javadoc
-                    </checkoutDirectory>
-                    <checkinComment>Publishing javadoc for ${project.artifactId}:${project.version}
-                    </checkinComment>
+                    <checkoutDirectory>${project.build.directory}/scmpublish/javadoc</checkoutDirectory>
+                    <checkinComment>Publishing javadoc for ${project.artifactId}:${project.version}</checkinComment>
                     <content>${project.reporting.outputDirectory}</content>
                     <skipDeletedFiles>true</skipDeletedFiles>
                     <pubScmUrl>scm:git:git@github.com:OpenHFT/Chronicle-Bytes</pubScmUrl>
@@ -284,13 +291,9 @@
                         <Bundle-SymbolicName>${project.groupId}.${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>OpenHFT :: ${project.artifactId}</Bundle-Name>
                         <Bundle-Version>${project.version}</Bundle-Version>
-                        <Export-Package>
-                            net.openhft.chronicle.bytes.*;-noimport:=true
-                        </Export-Package>
-                        <Import-Package>
-                            org.xerial.snappy;resolution:=optional,
-                            *
-                        </Import-Package>
+                        <Export-Package>net.openhft.chronicle.bytes.*;-noimport:=true</Export-Package>
+                        <Import-Package>org.xerial.snappy;resolution:=optional,
+                            *</Import-Package>
                     </instructions>
                 </configuration>
                 <executions>
@@ -456,7 +459,6 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-invoker-plugin</artifactId>
-
                         <configuration>
                             <pom>microbenchmarks/pom.xml</pom>
                             <goals>clean,integration-test</goals>
@@ -488,106 +490,98 @@
                         <executions>
                             <execution>
                                 <id>NativeBytesArrayReadWriteJLBH</id>
-                                <phase>test</phase>
                                 <goals>
                                     <goal>exec</goal>
                                 </goals>
+                                <phase>test</phase>
                                 <configuration>
                                     <executable>${java.home}/bin/java</executable>
                                     <commandlineArgs>${jvm.requiredArgs} -Djvm.resource.tracing=false -classpath
-                                        %classpath net.openhft.chronicle.bytes.perf.NativeBytesReadWriteJLBH
-                                    </commandlineArgs>
+                                        %classpath net.openhft.chronicle.bytes.perf.NativeBytesReadWriteJLBH</commandlineArgs>
                                 </configuration>
                             </execution>
                             <execution>
                                 <id>OnHeapBytesArrayReadWriteJLBH</id>
-                                <phase>test</phase>
                                 <goals>
                                     <goal>exec</goal>
                                 </goals>
+                                <phase>test</phase>
                                 <configuration>
                                     <executable>${java.home}/bin/java</executable>
                                     <commandlineArgs>${jvm.requiredArgs} -Djvm.resource.tracing=false -classpath
-                                        %classpath net.openhft.chronicle.bytes.perf.OnHeapBytesReadWriteJLBH
-                                    </commandlineArgs>
+                                        %classpath net.openhft.chronicle.bytes.perf.OnHeapBytesReadWriteJLBH</commandlineArgs>
                                 </configuration>
                             </execution>
                             <execution>
                                 <id>ChunkedMappedBytesArrayReadWriteJLBH</id>
-                                <phase>test</phase>
                                 <goals>
                                     <goal>exec</goal>
                                 </goals>
+                                <phase>test</phase>
                                 <configuration>
                                     <executable>${java.home}/bin/java</executable>
                                     <commandlineArgs>${jvm.requiredArgs} -Djvm.resource.tracing=false -classpath
-                                        %classpath net.openhft.chronicle.bytes.perf.ChunkedMappedBytesReadWriteJLBH
-                                    </commandlineArgs>
+                                        %classpath net.openhft.chronicle.bytes.perf.ChunkedMappedBytesReadWriteJLBH</commandlineArgs>
                                 </configuration>
                             </execution>
                             <execution>
                                 <id>SingleMappedBytesArrayReadWriteJLBH</id>
-                                <phase>test</phase>
                                 <goals>
                                     <goal>exec</goal>
                                 </goals>
+                                <phase>test</phase>
                                 <configuration>
                                     <executable>${java.home}/bin/java</executable>
                                     <commandlineArgs>${jvm.requiredArgs} -Djvm.resource.tracing=false -classpath
-                                        %classpath net.openhft.chronicle.bytes.perf.SingleMappedBytesReadWriteJLBH
-                                    </commandlineArgs>
+                                        %classpath net.openhft.chronicle.bytes.perf.SingleMappedBytesReadWriteJLBH</commandlineArgs>
                                 </configuration>
                             </execution>
                             <execution>
                                 <id>ContentEqual2JLBH</id>
-                                <phase>test</phase>
                                 <goals>
                                     <goal>exec</goal>
                                 </goals>
+                                <phase>test</phase>
                                 <configuration>
                                     <executable>${java.home}/bin/java</executable>
                                     <commandlineArgs>${jvm.requiredArgs} -Djvm.resource.tracing=false -classpath
-                                        %classpath net.openhft.chronicle.bytes.perf.ContentEqual2JLBH
-                                    </commandlineArgs>
+                                        %classpath net.openhft.chronicle.bytes.perf.ContentEqual2JLBH</commandlineArgs>
                                 </configuration>
                             </execution>
                             <execution>
                                 <id>ContentEqual20JLBH</id>
-                                <phase>test</phase>
                                 <goals>
                                     <goal>exec</goal>
                                 </goals>
+                                <phase>test</phase>
                                 <configuration>
                                     <executable>${java.home}/bin/java</executable>
                                     <commandlineArgs>${jvm.requiredArgs} -Djvm.resource.tracing=false -classpath
-                                        %classpath net.openhft.chronicle.bytes.perf.ContentEqual20JLBH
-                                    </commandlineArgs>
+                                        %classpath net.openhft.chronicle.bytes.perf.ContentEqual20JLBH</commandlineArgs>
                                 </configuration>
                             </execution>
                             <execution>
                                 <id>ContentEqual128JLBH</id>
-                                <phase>test</phase>
                                 <goals>
                                     <goal>exec</goal>
                                 </goals>
+                                <phase>test</phase>
                                 <configuration>
                                     <executable>${java.home}/bin/java</executable>
                                     <commandlineArgs>${jvm.requiredArgs} -Djvm.resource.tracing=false -classpath
-                                        %classpath net.openhft.chronicle.bytes.perf.ContentEqual128JLBH
-                                    </commandlineArgs>
+                                        %classpath net.openhft.chronicle.bytes.perf.ContentEqual128JLBH</commandlineArgs>
                                 </configuration>
                             </execution>
                             <execution>
                                 <id>ContentEqual8192JLBH</id>
-                                <phase>test</phase>
                                 <goals>
                                     <goal>exec</goal>
                                 </goals>
+                                <phase>test</phase>
                                 <configuration>
                                     <executable>${java.home}/bin/java</executable>
                                     <commandlineArgs>${jvm.requiredArgs} -Djvm.resource.tracing=false -classpath
-                                        %classpath net.openhft.chronicle.bytes.perf.ContentEqual8192JLBH
-                                    </commandlineArgs>
+                                        %classpath net.openhft.chronicle.bytes.perf.ContentEqual8192JLBH</commandlineArgs>
                                 </configuration>
                             </execution>
                         </executions>
@@ -604,12 +598,4 @@
             </build>
         </profile>
     </profiles>
-
-    <scm>
-        <url>scm:git:git@github.com:OpenHFT/Chronicle-Bytes.git</url>
-        <connection>scm:git:git@github.com:OpenHFT/Chronicle-Bytes.git</connection>
-        <developerConnection>scm:git:git@github.com:OpenHFT/Chronicle-Bytes.git
-        </developerConnection>
-        <tag>ea</tag>
-    </scm>
 </project>
