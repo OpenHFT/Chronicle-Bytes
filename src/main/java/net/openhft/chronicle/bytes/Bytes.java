@@ -488,6 +488,12 @@ public interface Bytes<U> extends
     /**
      * Allocate an elastic bytes as direct if available, or on heap if not.
      */
+    /**
+     * Returns an elastic Bytes, preferring direct when available. The underlying store type depends
+     * on the runtime (direct or heap), so the return uses a wildcard. Prefer calling
+     * {@link #allocateElasticDirect()} or {@link #allocateElasticOnHeap()} for a concrete type.
+     */
+    @SuppressWarnings("java:S1452")
     static Bytes<?> allocateElastic() {
         return Jvm.maxDirectMemory() == 0 ? allocateElasticOnHeap() : allocateElasticDirect();
     }
@@ -519,6 +525,12 @@ public interface Bytes<U> extends
      * Allocate an elastic bytes as direct if available, or on heap if not.
      * @param initialCapacity to allocate
      */
+    /**
+     * Returns an elastic Bytes with an initial capacity. The underlying store type depends on the
+     * runtime (direct or heap), so the return uses a wildcard. Prefer calling
+     * {@link #allocateElasticDirect(long)} or {@link #allocateElasticOnHeap(int)} for a concrete type.
+     */
+    @SuppressWarnings("java:S1452")
     static Bytes<?> allocateElastic(@NonNegative int initialCapacity) {
         return Jvm.maxDirectMemory() == 0 ? allocateElasticOnHeap(initialCapacity) : allocateElasticDirect(initialCapacity);
     }
