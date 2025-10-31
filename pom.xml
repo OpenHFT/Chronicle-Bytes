@@ -395,10 +395,7 @@
             <activation>
                 <activeByDefault>false</activeByDefault>
             </activation>
-            <properties>
-                <jacoco.line.coverage>0.72</jacoco.line.coverage>
-                <jacoco.branch.coverage>0.60</jacoco.branch.coverage>
-            </properties>
+            <!-- Use top-level jacoco.* coverage properties as the single source of truth -->
             <build>
                 <plugins>
                     <plugin>
