@@ -439,6 +439,13 @@
                                     <goal>report</goal>
                                 </goals>
                                 <phase>verify</phase>
+                                <configuration>
+                                    <excludes>
+                                        <!-- Low-level reflection/unsafe helpers where behaviour is JVM/architecture gated -->
+                                        <exclude>net/openhft/chronicle/bytes/internal/ByteBuffers*</exclude>
+                                        <exclude>net/openhft/chronicle/bytes/internal/UnsafeText*</exclude>
+                                    </excludes>
+                                </configuration>
                             </execution>
                             <execution>
                                 <id>check</id>
@@ -447,6 +454,11 @@
                                 </goals>
                                 <phase>verify</phase>
                                 <configuration>
+                                    <excludes>
+                                        <!-- Mirror report excludes for consistency of thresholds -->
+                                        <exclude>net/openhft/chronicle/bytes/internal/ByteBuffers*</exclude>
+                                        <exclude>net/openhft/chronicle/bytes/internal/UnsafeText*</exclude>
+                                    </excludes>
                                     <rules>
                                         <rule>
                                             <element>BUNDLE</element>

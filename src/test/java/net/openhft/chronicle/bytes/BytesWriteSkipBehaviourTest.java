@@ -49,9 +49,11 @@ public class BytesWriteSkipBehaviourTest extends BytesTestCommon {
     public void backtrackOneRemovesTrailingSeparator() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(32);
         try {
-            bytes.append("abc,");
+            // Use length-prefixed UTF-8 so readUtf8() is valid
+            bytes.writeUtf8("abc,");
+            // Overwrite the last payload byte (comma) with 'd'
             bytes.writeSkip(-1); // drop comma
-            bytes.append('d');
+            bytes.writeByte((byte) 'd');
             bytes.readPosition(0);
             assertEquals("abcd", bytes.readUtf8());
         } finally {
@@ -71,4 +73,3 @@ public class BytesWriteSkipBehaviourTest extends BytesTestCommon {
         }
     }
 }
-
