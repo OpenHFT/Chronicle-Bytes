@@ -20,7 +20,10 @@ import net.openhft.chronicle.bytes.BytesTestCommon;
 import net.openhft.chronicle.bytes.StopCharTesters;
 import org.junit.Test;
 
+import java.nio.charset.StandardCharsets;
+
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class BytesInternalUtf8MoreTest extends BytesTestCommon {
 
@@ -36,6 +39,63 @@ public class BytesInternalUtf8MoreTest extends BytesTestCommon {
             assertEquals(expected, out.toString());
         } finally {
             out.releaseLast();
+        }
+    }
+
+    @Test
+    public void appendUtf8ToRandomDataOutputHandlesSupplementaryChars() {
+        Bytes<?> out = Bytes.allocateElasticOnHeap(64);
+        try {
+            String text = "ascii \u00A3 \u20AC";
+            long endOffset = BytesInternal.appendUtf8(out, out.writePosition(), text, 0, text.length());
+            out.writePosition(endOffset);
+            out.readLimit(endOffset);
+            out.readPosition(0);
+            byte[] actual = BytesInternal.toByteArray(out);
+            assertEquals(text, new String(actual, StandardCharsets.UTF_8));
+            assertEquals(endOffset, out.writePosition());
+        } finally {
+            out.releaseLast();
+        }
+    }
+
+    @Test
+    public void parseUtf8WithExplicitLengthHonoursUtfFlag() {
+        Bytes<?> bytes = Bytes.allocateElasticOnHeap(64);
+        try {
+            String text = "\u00A3elastic";
+            BytesInternal.appendUtf8(bytes, text, 0, text.length());
+            bytes.readLimit(bytes.writePosition());
+            bytes.readPosition(0);
+
+            StringBuilder utfBuilder = new StringBuilder();
+            BytesInternal.parseUtf8(bytes, utfBuilder, true, (int) bytes.readRemaining());
+            assertEquals(text, utfBuilder.toString());
+
+            bytes.readPosition(0);
+            StringBuilder latinBuilder = new StringBuilder();
+            BytesInternal.parseUtf8(bytes, latinBuilder, false, (int) bytes.readRemaining());
+            assertEquals(text, latinBuilder.toString());
+        } finally {
+            bytes.releaseLast();
+        }
+    }
+
+    @Test
+    public void parseUtf8StopsAtTesterBoundary() {
+        Bytes<?> source = Bytes.allocateElasticOnHeap(64);
+        try {
+            String payload = "token1,token2";
+            BytesInternal.appendUtf8(source, payload, 0, payload.length());
+            source.readLimit(source.writePosition());
+            source.readPosition(0);
+
+            StringBuilder sb = new StringBuilder();
+            BytesInternal.parseUtf8(source, sb, StopCharTesters.COMMA_STOP);
+            assertEquals("token1", sb.toString());
+            assertTrue(source.readRemaining() > 0);
+        } finally {
+            source.releaseLast();
         }
     }
 

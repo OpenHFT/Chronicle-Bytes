@@ -15,15 +15,23 @@
  */
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.bytes.internal.CommonMappedBytes;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
 import org.junit.Test;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.RandomAccessFile;
+import java.nio.BufferOverflowException;
+import java.nio.ReadOnlyBufferException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 
 import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeFalse;
 
 public class MappedBytesBoundaryTest extends BytesTestCommon {
@@ -52,5 +60,33 @@ public class MappedBytesBoundaryTest extends BytesTestCommon {
             assertArrayEquals(expected, actual);
         }
     }
-}
 
+    @Test
+    public void readOnlyMappingRejectsWritesAndReportsFlag() throws IOException {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
+        File file = new File(OS.getTarget(), "mapped-readonly-" + System.nanoTime() + ".dat");
+        Files.createDirectories(file.getParentFile().toPath());
+        try (RandomAccessFile raf = new RandomAccessFile(file, "rw")) {
+            raf.setLength(OS.pageSize());
+        }
+
+        try (MappedBytes writable = MappedBytes.singleMappedBytes(file, OS.pageSize())) {
+            writable.writeSkip(32);
+            assertEquals(32, writable.writePosition());
+        }
+
+        try (MappedBytes readOnly = MappedBytes.singleMappedBytes(file, OS.pageSize(), true)) {
+            assertTrue(((CommonMappedBytes) readOnly).isBackingFileReadOnly());
+            boolean writeFailed = false;
+            try {
+                readOnly.writeByte((byte) 0x7F);
+            } catch (ReadOnlyBufferException | BufferOverflowException | IllegalStateException expected) {
+                writeFailed = true;
+            }
+            assertTrue("Expected write to read-only mapping to fail", writeFailed);
+        }
+
+        Files.deleteIfExists(file.toPath());
+    }
+}
