@@ -424,6 +424,11 @@
                                     <goal>prepare-agent</goal>
                                 </goals>
                                 <phase>initialize</phase>
+                                <configuration>
+                                    <!-- Ensure exec is written even with forks; reuse the default dest -->
+                                    <append>true</append>
+                                    <destFile>${project.build.directory}/jacoco.exec</destFile>
+                                </configuration>
                             </execution>
                             <execution>
                                 <id>report</id>
