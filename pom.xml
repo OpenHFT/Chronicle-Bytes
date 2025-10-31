@@ -185,6 +185,16 @@
                             <referenceVersion>2.27ea0</referenceVersion>
                             <artifactsURI>https://teamcity.chronicle.software/repository/download</artifactsURI>
                             <binaryCompatibilityPercentageRequired>100</binaryCompatibilityPercentageRequired>
+                            <extraOptions>
+                                <!--This skips "internal" but checks "impl"-->
+                                <extraOption>
+                                    <name>-keep-internal</name>
+                                </extraOption>
+                                <extraOption>
+                                    <name>skip-internal-packages</name>
+                                    <value>.*internal.*</value>
+                                </extraOption>
+                            </extraOptions>
                         </configuration>
                     </execution>
                 </executions>
@@ -214,6 +224,23 @@
                     <skipDeletedFiles>true</skipDeletedFiles>
                     <pubScmUrl>scm:git:git@github.com:OpenHFT/Chronicle-Bytes</pubScmUrl>
                     <scmBranch>gh-pages</scmBranch>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <addClasspath>true</addClasspath>
+                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                            <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+                        </manifest>
+                        <manifestEntries>
+                            <Automatic-Module-Name>chronicle.bytes</Automatic-Module-Name>
+                        </manifestEntries>
+                    </archive>
                 </configuration>
             </plugin>
 
@@ -254,8 +281,7 @@
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
-                        <Bundle-SymbolicName>${project.groupId}.${project.artifactId}
-                        </Bundle-SymbolicName>
+                        <Bundle-SymbolicName>${project.groupId}.${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>OpenHFT :: ${project.artifactId}</Bundle-Name>
                         <Bundle-Version>${project.version}</Bundle-Version>
                         <Export-Package>
@@ -278,23 +304,6 @@
                         </goals>
                     </execution>
                 </executions>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <configuration>
-                    <archive>
-                        <manifest>
-                            <addClasspath>true</addClasspath>
-                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
-                            <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
-                        </manifest>
-                        <manifestEntries>
-                            <Automatic-Module-Name>chronicle.bytes</Automatic-Module-Name>
-                        </manifestEntries>
-                    </archive>
-                </configuration>
             </plugin>
 
             <plugin>
@@ -371,7 +380,13 @@
 
     <profiles>
         <profile>
-            <id>code-review</id>
+            <id>assertions</id>
+            <properties>
+                <zero.cost.assertions>enabled</zero.cost.assertions>
+            </properties>
+        </profile>
+        <profile>
+            <id>sonar</id>
             <activation>
                 <activeByDefault>false</activeByDefault>
             </activation>
@@ -381,6 +396,10 @@
             </properties>
             <build>
                 <plugins>
+                    <plugin>
+                        <groupId>org.sonarsource.scanner.maven</groupId>
+                        <artifactId>sonar-maven-plugin</artifactId>
+                    </plugin>
                     <plugin>
                         <groupId>org.jacoco</groupId>
                         <artifactId>jacoco-maven-plugin</artifactId>
@@ -431,37 +450,13 @@
             </build>
         </profile>
         <profile>
-            <id>assertions</id>
-            <properties>
-                <zero.cost.assertions>enabled</zero.cost.assertions>
-            </properties>
-        </profile>
-        <profile>
-            <id>sonar</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.sonarsource.scanner.maven</groupId>
-                        <artifactId>sonar-maven-plugin</artifactId>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-        <profile>
             <id>run-benchmarks</id>
             <build>
                 <plugins>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-invoker-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <phase>test</phase>
-                                <goals>
-                                    <goal>run</goal>
-                                </goals>
-                            </execution>
-                        </executions>
+
                         <configuration>
                             <pom>microbenchmarks/pom.xml</pom>
                             <goals>clean,integration-test</goals>
@@ -474,6 +469,14 @@
                             </properties>
                             <streamLogs>true</streamLogs>
                         </configuration>
+                        <executions>
+                            <execution>
+                                <phase>test</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                            </execution>
+                        </executions>
                     </plugin>
                     <plugin>
                         <groupId>org.codehaus.mojo</groupId>
