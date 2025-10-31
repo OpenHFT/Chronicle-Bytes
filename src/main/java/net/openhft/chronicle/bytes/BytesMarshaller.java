@@ -48,6 +48,12 @@ public class BytesMarshaller<T> {
     public static final ClassLocal<BytesMarshaller> BYTES_MARSHALLER_CL
             = ClassLocal.withInitial(BytesMarshaller::new);
     private final FieldAccess[] fields;
+    /**
+     * Controls whether private fields are included via reflective access. When disabled, only
+     * publicly accessible fields are marshalled. This avoids reflective accessibility changes in
+     * restricted runtimes.
+     */
+    static final boolean ALLOW_PRIVATE_FIELD_ACCESS = Jvm.getBoolean("bytes.marshaller.allowPrivateFields", true);
 
     /**
      * Constructs a BytesMarshaller for the specified class.
@@ -75,9 +81,28 @@ public class BytesMarshaller<T> {
         for (@NotNull Field field : clazz.getDeclaredFields()) {
             if ((field.getModifiers() & (Modifier.STATIC | Modifier.TRANSIENT)) != 0)
                 continue;
-            Jvm.setAccessible(field);
-            map.put(field.getName(), field);
+            if (ALLOW_PRIVATE_FIELD_ACCESS) {
+                // Intentionally limited and documented reflective access for marshalling private fields.
+                // This is centralised here to keep the surface small and auditable.
+                enableAccessible(field);
+                map.put(field.getName(), field);
+            } else {
+                // Only marshal fields that are already publicly accessible when private access is disabled.
+                final boolean publicField = Modifier.isPublic(field.getModifiers());
+                final boolean publicClass = Modifier.isPublic(field.getDeclaringClass().getModifiers());
+                if (publicField && publicClass) {
+                    map.put(field.getName(), field);
+                }
+            }
         }
+    }
+
+    /**
+     * Centralised, narrowly-scoped accessibility change with explicit suppression and justification.
+     */
+    @SuppressWarnings("java:S3011")
+    private static void enableAccessible(Field field) {
+        Jvm.setAccessible(field);
     }
 
     /**
