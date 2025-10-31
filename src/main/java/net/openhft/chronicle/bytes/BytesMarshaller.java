@@ -343,8 +343,10 @@ public class BytesMarshaller<T> {
             if (c == null) {
                 c = (Object[]) Array.newInstance(field.getType().getComponentType(), elementCount);
                 field.set(o, c);
-            } else if (c.length != elementCount)
-                field.set(o, c = Arrays.copyOf(c, elementCount));
+            } else if (c.length != elementCount) {
+                c = Arrays.copyOf(c, elementCount);
+                field.set(o, c);
+            }
             for (int i = 0; i < elementCount; i++) {
                 Object o2 = c[i];
                 if (o2 instanceof BytesMarshallable)
@@ -417,8 +419,10 @@ public class BytesMarshaller<T> {
             }
             BytesUtil.checkArrayLength(length, read.readRemaining());
 
-            if (c == null)
-                field.set(o, c = collectionSupplier.get());
+            if (c == null) {
+                c = collectionSupplier.get();
+                field.set(o, c);
+            }
             else
                 c.clear();
 
@@ -485,7 +489,8 @@ public class BytesMarshaller<T> {
             }
             BytesUtil.checkArrayLength(numEntries, read.readRemaining());
             if (m == null) {
-                field.set(o, m = collectionSupplier.get());
+                m = collectionSupplier.get();
+                field.set(o, m);
             } else {
                 m.clear();
             }
