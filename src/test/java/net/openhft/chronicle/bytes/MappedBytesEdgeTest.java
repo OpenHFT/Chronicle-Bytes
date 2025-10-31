@@ -41,6 +41,7 @@ public class MappedBytesEdgeTest extends BytesTestCommon {
     private final Consumer<Bytes<?>> doit;
 
     public MappedBytesEdgeTest(int size, ReadWrite rw, String name, Consumer<Bytes<?>> doit) {
+        java.util.Objects.requireNonNull(name); // used for Parameterized display only
         this.size = size;
         this.rw = rw;
         this.doit = doit;

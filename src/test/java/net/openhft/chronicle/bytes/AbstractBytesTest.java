@@ -71,59 +71,59 @@ public class AbstractBytesTest {
 
     @Test
     public void isDirectMemory_ReturnsExpectedValue() {
-        BytesStore<Bytes<ByteBuffer>, ByteBuffer> mockBytesStore = mock(BytesStore.class);
-        when(mockBytesStore.isDirectMemory()).thenReturn(true);
+        BytesStore<Bytes<ByteBuffer>, ByteBuffer> localBytesStore = mock(BytesStore.class);
+        when(localBytesStore.isDirectMemory()).thenReturn(true);
 
-        ConcreteBytes bytes = new ConcreteBytes(mockBytesStore, 0, 100);
-        assertTrue("Expected isDirectMemory to return true", bytes.isDirectMemory());
+        ConcreteBytes localBytes = new ConcreteBytes(localBytesStore, 0, 100);
+        assertTrue("Expected isDirectMemory to return true", localBytes.isDirectMemory());
     }
 
     @Test
     public void canReadDirect_WithSufficientRemaining_ReturnsTrue() throws Exception {
-        BytesStore<Bytes<ByteBuffer>, ByteBuffer> mockBytesStore = mock(BytesStore.class);
-        when(mockBytesStore.isDirectMemory()).thenReturn(true);
+        BytesStore<Bytes<ByteBuffer>, ByteBuffer> localBytesStore = mock(BytesStore.class);
+        when(localBytesStore.isDirectMemory()).thenReturn(true);
 
-        ConcreteBytes bytes = new ConcreteBytes(mockBytesStore, 0, 100);
-        bytes.writePosition(50); // Simulate that we have written some data
+        ConcreteBytes localBytes = new ConcreteBytes(localBytesStore, 0, 100);
+        localBytes.writePosition(50); // Simulate that we have written some data
 
-        assertTrue("Expected canReadDirect to return true for length <= remaining", bytes.canReadDirect(10));
+        assertTrue("Expected canReadDirect to return true for length <= remaining", localBytes.canReadDirect(10));
     }
 
     @Test
     public void canReadDirect_WithInsufficientRemaining_ReturnsFalse() throws Exception {
-        BytesStore<Bytes<ByteBuffer>, ByteBuffer> mockBytesStore = mock(BytesStore.class);
-        when(mockBytesStore.isDirectMemory()).thenReturn(true);
+        BytesStore<Bytes<ByteBuffer>, ByteBuffer> localBytesStore = mock(BytesStore.class);
+        when(localBytesStore.isDirectMemory()).thenReturn(true);
 
-        ConcreteBytes bytes = new ConcreteBytes(mockBytesStore, 0, 100);
-        bytes.writePosition(50); // Simulate that we have written some data
+        ConcreteBytes localBytes = new ConcreteBytes(localBytesStore, 0, 100);
+        localBytes.writePosition(50); // Simulate that we have written some data
 
-        assertFalse("Expected canReadDirect to return false for length > remaining", bytes.canReadDirect(51));
+        assertFalse("Expected canReadDirect to return false for length > remaining", localBytes.canReadDirect(51));
     }
 
     @Test
     public void clear_ResetsPositionsAndLimits() throws Exception {
-        BytesStore<Bytes<ByteBuffer>, ByteBuffer> mockBytesStore = mock(BytesStore.class);
-        when(mockBytesStore.capacity()).thenReturn(100L);
+        BytesStore<Bytes<ByteBuffer>, ByteBuffer> localBytesStore = mock(BytesStore.class);
+        when(localBytesStore.capacity()).thenReturn(100L);
 
-        ConcreteBytes bytes = new ConcreteBytes(mockBytesStore, 10, 90);
-        bytes.clear();
+        ConcreteBytes localBytes = new ConcreteBytes(localBytesStore, 10, 90);
+        localBytes.clear();
 
-        assertEquals("Expected readPosition to reset", 0, bytes.readPosition());
-        assertEquals("Expected writePosition to reset", 0, bytes.writePosition());
-        assertEquals("Expected writeLimit to match capacity", 100, bytes.writeLimit());
+        assertEquals("Expected readPosition to reset", 0, localBytes.readPosition());
+        assertEquals("Expected writePosition to reset", 0, localBytes.writePosition());
+        assertEquals("Expected writeLimit to match capacity", 100, localBytes.writeLimit());
     }
 
     @Test
     public void clearAndPad_SetsPositionsAndLimitsCorrectly() throws Exception {
-        BytesStore<Bytes<ByteBuffer>, ByteBuffer> mockBytesStore = mock(BytesStore.class);
-        when(mockBytesStore.capacity()).thenReturn(100L);
+        BytesStore<Bytes<ByteBuffer>, ByteBuffer> localBytesStore = mock(BytesStore.class);
+        when(localBytesStore.capacity()).thenReturn(100L);
 
-        ConcreteBytes bytes = new ConcreteBytes(mockBytesStore, 0, 100);
-        bytes.clearAndPad(20);
+        ConcreteBytes localBytes = new ConcreteBytes(localBytesStore, 0, 100);
+        localBytes.clearAndPad(20);
 
-        assertEquals("Expected readPosition to be set correctly after padding", 20, bytes.readPosition());
-        assertEquals("Expected writePosition to be set correctly after padding", 20, bytes.writePosition());
-        assertEquals("Expected writeLimit to match capacity", 100, bytes.writeLimit());
+        assertEquals("Expected readPosition to be set correctly after padding", 20, localBytes.readPosition());
+        assertEquals("Expected writePosition to be set correctly after padding", 20, localBytes.writePosition());
+        assertEquals("Expected writeLimit to match capacity", 100, localBytes.writeLimit());
     }
 
     @Test

@@ -181,7 +181,7 @@ public class ByteStoreTest extends BytesTestCommon {
     public void testWriteReadUtf8()
             throws IORuntimeException {
         bytes.writeUtf8(null);
-        final String[] words = new String[]{"Hello", "World!", "Bye\u00a3\u20ac!", ""};
+        final String[] words = new String[]{"Hello", "World!", "Bye£\u20ac!", ""};
         for (String word : words) {
             bytes.writeUtf8(word);
         }

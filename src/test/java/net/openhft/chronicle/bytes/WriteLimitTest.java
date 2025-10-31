@@ -55,7 +55,7 @@ public class WriteLimitTest extends BytesTestCommon {
         addTest("short", b -> b.writeShort((short) 1), 2);
         addTest("unsigned-short", b -> b.writeUnsignedShort(1), 2);
         addTest("char $", b -> b.writeChar('$'), 1);
-        addTest("char \u00a3", b -> b.writeChar('\u00a3'), 2);
+        addTest("char £", b -> b.writeChar('£'), 2);
         addTest("char " + (char) (1 << 14), b -> b.writeChar((char) (1 << 14)), 3);
         addTest("int", b -> b.writeInt(1), 4);
         addTest("unsigned-int", b -> b.writeUnsignedInt(1), 4);
