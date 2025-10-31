@@ -1,22 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-
-    Copyright 2016-2025 chronicle.software
-
-    Licensed under the Apache License, Version 2.0 (the "License");
-    you may not use this file except in compliance with the License.
-    You may obtain a copy of the License at
-
-        http://www.apache.org/licenses/LICENSE-2.0
-
-    Unless required by applicable law or agreed to in writing, software
-    distributed under the License is distributed on an "AS IS" BASIS,
-    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-    See the License for the specific language governing permissions and
-    limitations under the License.
-
+  ~ Copyright 2016-2025 chronicle.software
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -36,6 +35,9 @@
         <zero.cost.assertions>disabled</zero.cost.assertions>
         <sonar.organization>openhft</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
+        <jacoco-maven-plugin.version>0.8.14</jacoco-maven-plugin.version>
+        <jacoco.line.coverage>0.80</jacoco.line.coverage>
+        <jacoco.branch.coverage>0.70</jacoco.branch.coverage>
     </properties>
 
     <dependencyManagement>
@@ -47,6 +49,7 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+
             <dependency>
                 <groupId>net.openhft</groupId>
                 <artifactId>chronicle-bom</artifactId>
@@ -54,7 +57,6 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
-
         </dependencies>
     </dependencyManagement>
 
@@ -136,29 +138,40 @@
 
     <repositories>
         <repository>
-            <id>chronicle-enterprise-snapshots</id>
-            <name>Snapshot Repository</name>
-            <url>
-                https://nexus.chronicle.software/content/repositories/snapshots
-            </url>
             <snapshots>
                 <enabled>true</enabled>
             </snapshots>
+            <id>chronicle-enterprise-snapshots</id>
+            <name>Snapshot Repository</name>
+            <url>https://nexus.chronicle.software/content/repositories/snapshots</url>
         </repository>
         <repository>
-            <id>chronicle-enterprise-release</id>
-            <url>
-                https://nexus.chronicle.software/content/repositories/releases
-            </url>
             <releases>
                 <enabled>true</enabled>
             </releases>
+            <id>chronicle-enterprise-release</id>
+            <url>https://nexus.chronicle.software/content/repositories/releases</url>
         </repository>
     </repositories>
 
     <build>
         <plugins>
-
+            <plugin>
+                <groupId>com.github.ekryd.sortpom</groupId>
+                <artifactId>sortpom-maven-plugin</artifactId>
+                <version>3.0.1</version>
+                <configuration>
+                    <nrOfIndentSpace>4</nrOfIndentSpace>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>sort</goal>
+                        </goals>
+                        <phase>verify</phase>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>net.openhft</groupId>
                 <artifactId>binary-compatibility-enforcer-plugin</artifactId>
@@ -175,16 +188,6 @@
                         </configuration>
                     </execution>
                 </executions>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <configuration>
-                    <forkCount>4</forkCount>
-                    <reuseForks>true</reuseForks>
-                    <runOrder>hourly</runOrder>
-                </configuration>
             </plugin>
 
             <plugin>
@@ -233,6 +236,16 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <forkCount>4</forkCount>
+                    <reuseForks>true</reuseForks>
+                    <runOrder>hourly</runOrder>
+                </configuration>
             </plugin>
 
             <plugin>
@@ -298,11 +311,11 @@
                         <headerDefinition>license_header_def.xml</headerDefinition>
                     </headerDefinitions>
                     <excludes>
-                        <exclude>**/package-info.java</exclude>
                         <exclude>**/*.versionsBackup</exclude>
                         <exclude>LICENSE</exclude>
                         <exclude>src/test/resources/**</exclude>
                         <exclude>src/main/resources/**</exclude>
+                        <exclude>src/main/config/**</exclude>
                     </excludes>
                 </configuration>
 
@@ -356,15 +369,67 @@
         </plugins>
     </build>
 
-    <scm>
-        <url>scm:git:git@github.com:OpenHFT/Chronicle-Bytes.git</url>
-        <connection>scm:git:git@github.com:OpenHFT/Chronicle-Bytes.git</connection>
-        <developerConnection>scm:git:git@github.com:OpenHFT/Chronicle-Bytes.git
-        </developerConnection>
-        <tag>ea</tag>
-    </scm>
-
     <profiles>
+        <profile>
+            <id>code-review</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <properties>
+                <jacoco.line.coverage>0.73</jacoco.line.coverage>
+                <jacoco.branch.coverage>0.62</jacoco.branch.coverage>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.jacoco</groupId>
+                        <artifactId>jacoco-maven-plugin</artifactId>
+                        <version>${jacoco-maven-plugin.version}</version>
+                        <executions>
+                            <execution>
+                                <id>prepare-agent</id>
+                                <goals>
+                                    <goal>prepare-agent</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>report</id>
+                                <goals>
+                                    <goal>report</goal>
+                                </goals>
+                                <phase>verify</phase>
+                            </execution>
+                            <execution>
+                                <id>check</id>
+                                <goals>
+                                    <goal>check</goal>
+                                </goals>
+                                <phase>verify</phase>
+                                <configuration>
+                                    <rules>
+                                        <rule>
+                                            <element>BUNDLE</element>
+                                            <limits>
+                                                <limit>
+                                                    <counter>LINE</counter>
+                                                    <value>COVEREDRATIO</value>
+                                                    <minimum>${jacoco.line.coverage}</minimum>
+                                                </limit>
+                                                <limit>
+                                                    <counter>BRANCH</counter>
+                                                    <value>COVEREDRATIO</value>
+                                                    <minimum>${jacoco.branch.coverage}</minimum>
+                                                </limit>
+                                            </limits>
+                                        </rule>
+                                    </rules>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
         <profile>
             <id>assertions</id>
             <properties>
@@ -375,35 +440,6 @@
             <id>sonar</id>
             <build>
                 <plugins>
-                    <plugin>
-                        <groupId>org.jacoco</groupId>
-                        <artifactId>jacoco-maven-plugin</artifactId>
-                        <configuration>
-                            <excludes>
-                                <!--<exclude>META-INF/**</exclude>-->
-                                <exclude>*.jar</exclude>
-                                <!--                                <exclude>net/openhft/chronicle/bytes/AbstractBytes.class</exclude>
-                                                                <exclude>net/openhft/chronicle/bytes/AppendableUtil.class</exclude>
-                                                                <exclude>net/openhft/chronicle/bytes/BinaryBytesMethodWriterInvocationHandler.class</exclude>
-                                                                <exclude>net/openhft/chronicle/bytes/BinaryWireCode.class</exclude>
-                                                                <exclude>net/openhft/chronicle/bytes/*.class</exclude>-->
-                            </excludes>
-                        </configuration>
-                        <executions>
-                            <execution>
-                                <goals>
-                                    <goal>prepare-agent</goal>
-                                </goals>
-                            </execution>
-                            <execution>
-                                <id>report</id>
-                                <phase>prepare-package</phase>
-                                <goals>
-                                    <goal>report</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
                     <plugin>
                         <groupId>org.sonarsource.scanner.maven</groupId>
                         <artifactId>sonar-maven-plugin</artifactId>
@@ -416,6 +452,7 @@
             <build>
                 <plugins>
                     <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-invoker-plugin</artifactId>
                         <executions>
                             <execution>
@@ -565,4 +602,11 @@
         </profile>
     </profiles>
 
+    <scm>
+        <url>scm:git:git@github.com:OpenHFT/Chronicle-Bytes.git</url>
+        <connection>scm:git:git@github.com:OpenHFT/Chronicle-Bytes.git</connection>
+        <developerConnection>scm:git:git@github.com:OpenHFT/Chronicle-Bytes.git
+        </developerConnection>
+        <tag>ea</tag>
+    </scm>
 </project>
