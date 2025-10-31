@@ -564,28 +564,9 @@ public interface RandomDataInput extends RandomCommon {
         long remaining = requireNonNegative(readLimit() - offset);
         if (remaining < 1)
             throw new BufferUnderflowException();
-
-        long utfLen;
-        if ((utfLen = readByte(offset++)) < 0) {
-            utfLen &= 0x7FL;
-            long b;
-            int count = 7;
-            while ((b = readByte(offset++)) < 0) {
-                utfLen |= (b & 0x7FL) << count;
-                count += 7;
-            }
-            if (b != 0) {
-                if (count > 56)
-                    throw new IORuntimeException(
-                            "Cannot read more than 9 stop bits of positive value");
-                utfLen |= (b << count);
-            } else {
-                if (count > 63)
-                    throw new IORuntimeException(
-                            "Cannot read more than 10 stop bits of negative value");
-                utfLen = ~utfLen;
-            }
-        }
+        StopBitDecoded decoded = decodeStopBit(this, offset);
+        long utfLen = decoded.value;
+        offset = decoded.nextOffset;
         if (utfLen == -1)
             return ~offset;
         if (utfLen > maxUtf8Len)
@@ -595,6 +576,39 @@ public interface RandomDataInput extends RandomCommon {
             throw new BufferUnderflowException();
         BytesInternal.parseUtf8(this, offset, sb, true, (int) utfLen);
         return offset + utfLen;
+    }
+
+    /** Minimal holder for a decoded stop-bit value and the next offset. */
+    final class StopBitDecoded {
+        public final long value;
+        public final long nextOffset;
+        StopBitDecoded(long value, long nextOffset) {
+            this.value = value;
+            this.nextOffset = nextOffset;
+        }
+    }
+
+    static StopBitDecoded decodeStopBit(@NotNull RandomDataInput in, long offset)
+            throws IORuntimeException, ClosedIllegalStateException {
+        long v = in.readByte(offset++);
+        if (v >= 0) return new StopBitDecoded(v, offset);
+        v &= 0x7FL;
+        long b;
+        int count = 7;
+        while ((b = in.readByte(offset++)) < 0) {
+            v |= (b & 0x7FL) << count;
+            count += 7;
+        }
+        if (b != 0) {
+            if (count > 56)
+                throw new IORuntimeException("Cannot read more than 9 stop bits of positive value");
+            v |= (b << count);
+        } else {
+            if (count > 63)
+                throw new IORuntimeException("Cannot read more than 10 stop bits of negative value");
+            v = ~v;
+        }
+        return new StopBitDecoded(v, offset);
     }
 
     /**
