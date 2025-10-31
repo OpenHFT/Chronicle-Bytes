@@ -52,9 +52,17 @@ public class HexDumpBytesTest extends BytesTestCommon {
     public void memoryMapped() throws FileNotFoundException {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
-        File file = new File(OS.getTarget(), "test.dat");
+        File file = new File(OS.getTarget(), "HexDumpBytesTest-" + System.nanoTime() + ".dat");
+        File parent = file.getParentFile();
+        if (parent != null && !parent.exists()) {
+            parent.mkdirs();
+        }
         try (MappedBytes mappedBytes = MappedBytes.mappedBytes(file, 64 * 1024)) {
             doTest(new HexDumpBytes(mappedBytes));
+        } finally {
+            if (!file.delete()) {
+                file.deleteOnExit();
+            }
         }
     }
 }

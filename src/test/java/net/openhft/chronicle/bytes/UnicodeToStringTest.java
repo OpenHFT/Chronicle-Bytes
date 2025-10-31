@@ -28,14 +28,14 @@ public class UnicodeToStringTest {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         Bytes<?> bytes = Bytes.elasticByteBuffer();
-        bytes.appendUtf8("óaóó");
-        assertEquals("óaóó", bytes.toUtf8String());
+        bytes.appendUtf8("\u00f3a\u00f3\u00f3");
+        assertEquals("\u00f3a\u00f3\u00f3", bytes.toUtf8String());
     }
 
     @Test
     public void testUtfStringInAndOutOnHeap() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
-        bytes.appendUtf8("óaóó");
-        assertEquals("óaóó", bytes.toUtf8String());
+        bytes.appendUtf8("\u00f3a\u00f3\u00f3");
+        assertEquals("\u00f3a\u00f3\u00f3", bytes.toUtf8String());
     }
 }

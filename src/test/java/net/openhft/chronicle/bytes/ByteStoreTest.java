@@ -181,7 +181,7 @@ public class ByteStoreTest extends BytesTestCommon {
     public void testWriteReadUtf8()
             throws IORuntimeException {
         bytes.writeUtf8(null);
-        final String[] words = new String[]{"Hello", "World!", "Bye£€!", ""};
+        final String[] words = new String[]{"Hello", "World!", "Bye\u00a3\u20ac!", ""};
         for (String word : words) {
             bytes.writeUtf8(word);
         }
@@ -206,7 +206,7 @@ public class ByteStoreTest extends BytesTestCommon {
 
     @Test
     public void testWriteReadUTF() {
-        final String[] words = "Hello,World!,Bye£€!".split(",");
+        final String[] words = "Hello,World!,Bye\u00a3\u20ac!".split(",");
         for (String word : words) {
             bytes.writeUtf8(word);
         }
@@ -573,30 +573,30 @@ public class ByteStoreTest extends BytesTestCommon {
         final Bytes<?> bytes = bytes0.bytesForWrite();
         bytes0.release(INIT);
         try {
-            assertEquals("[pos: 0, rlim: 0, wlim: 8EiB, cap: 8EiB ] ǁ‡٠٠٠٠٠٠٠٠", bytes.toDebugString());
+            assertEquals("[pos: 0, rlim: 0, wlim: 8EiB, cap: 8EiB ] \u01c1\u2021\u0660\u0660\u0660\u0660\u0660\u0660\u0660\u0660", bytes.toDebugString());
             bytes.writeUnsignedByte(1);
             System.gc();
             assertEquals(1, bytes.refCount());
-            assertEquals("[pos: 0, rlim: 1, wlim: 8EiB, cap: 8EiB ] ǁ⒈‡٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠", bytes.toDebugString());
+            assertEquals("[pos: 0, rlim: 1, wlim: 8EiB, cap: 8EiB ] \u01c1\u2488\u2021\u0660\u0660\u0660\u0660\u0660\u0660\u0660\u0660\u0660\u0660\u0660\u0660\u0660\u0660\u0660", bytes.toDebugString());
             bytes.writeUnsignedByte(2);
             bytes.readByte();
-            assertEquals("[pos: 1, rlim: 2, wlim: 8EiB, cap: 8EiB ] ⒈ǁ⒉‡٠٠٠٠٠٠٠٠٠٠٠٠٠٠", bytes.toDebugString());
+            assertEquals("[pos: 1, rlim: 2, wlim: 8EiB, cap: 8EiB ] \u2488\u01c1\u2489\u2021\u0660\u0660\u0660\u0660\u0660\u0660\u0660\u0660\u0660\u0660\u0660\u0660\u0660\u0660", bytes.toDebugString());
             bytes.writeUnsignedByte(3);
-            assertEquals("[pos: 1, rlim: 3, wlim: 8EiB, cap: 8EiB ] ⒈ǁ⒉⒊‡٠٠٠٠٠٠٠٠٠٠٠٠٠", bytes.toDebugString());
+            assertEquals("[pos: 1, rlim: 3, wlim: 8EiB, cap: 8EiB ] \u2488\u01c1\u2489\u248a\u2021\u0660\u0660\u0660\u0660\u0660\u0660\u0660\u0660\u0660\u0660\u0660\u0660\u0660", bytes.toDebugString());
             bytes.writeUnsignedByte(4);
             bytes.readByte();
-            assertEquals("[pos: 2, rlim: 4, wlim: 8EiB, cap: 8EiB ] ⒈⒉ǁ⒊⒋‡٠٠٠٠٠٠٠٠٠٠٠٠", bytes.toDebugString());
+            assertEquals("[pos: 2, rlim: 4, wlim: 8EiB, cap: 8EiB ] \u2488\u2489\u01c1\u248a\u248b\u2021\u0660\u0660\u0660\u0660\u0660\u0660\u0660\u0660\u0660\u0660\u0660\u0660", bytes.toDebugString());
             bytes.writeUnsignedByte(5);
-            assertEquals("[pos: 2, rlim: 5, wlim: 8EiB, cap: 8EiB ] ⒈⒉ǁ⒊⒋⒌‡٠٠٠٠٠٠٠٠٠٠٠", bytes.toDebugString());
+            assertEquals("[pos: 2, rlim: 5, wlim: 8EiB, cap: 8EiB ] \u2488\u2489\u01c1\u248a\u248b\u248c\u2021\u0660\u0660\u0660\u0660\u0660\u0660\u0660\u0660\u0660\u0660\u0660", bytes.toDebugString());
             bytes.writeUnsignedByte(6);
             bytes.readByte();
             System.gc();
             assertEquals(1, bytes.refCount());
-            assertEquals("[pos: 3, rlim: 6, wlim: 8EiB, cap: 8EiB ] ⒈⒉⒊ǁ⒋⒌⒍‡٠٠٠٠٠٠٠٠٠٠", bytes.toDebugString());
+            assertEquals("[pos: 3, rlim: 6, wlim: 8EiB, cap: 8EiB ] \u2488\u2489\u248a\u01c1\u248b\u248c\u248d\u2021\u0660\u0660\u0660\u0660\u0660\u0660\u0660\u0660\u0660\u0660", bytes.toDebugString());
             bytes.writeUnsignedByte(7);
-            assertEquals("[pos: 3, rlim: 7, wlim: 8EiB, cap: 8EiB ] ⒈⒉⒊ǁ⒋⒌⒍⒎‡٠٠٠٠٠٠٠٠٠", bytes.toDebugString());
+            assertEquals("[pos: 3, rlim: 7, wlim: 8EiB, cap: 8EiB ] \u2488\u2489\u248a\u01c1\u248b\u248c\u248d\u248e\u2021\u0660\u0660\u0660\u0660\u0660\u0660\u0660\u0660\u0660", bytes.toDebugString());
             bytes.writeUnsignedByte(8);
-            assertEquals("[pos: 3, rlim: 8, wlim: 8EiB, cap: 8EiB ] ⒈⒉⒊ǁ⒋⒌⒍⒎⒏‡٠٠٠٠٠٠٠٠", bytes.toDebugString());
+            assertEquals("[pos: 3, rlim: 8, wlim: 8EiB, cap: 8EiB ] \u2488\u2489\u248a\u01c1\u248b\u248c\u248d\u248e\u248f\u2021\u0660\u0660\u0660\u0660\u0660\u0660\u0660\u0660", bytes.toDebugString());
         } finally {
             bytes.releaseLast();
             assertEquals(0, bytes.refCount());

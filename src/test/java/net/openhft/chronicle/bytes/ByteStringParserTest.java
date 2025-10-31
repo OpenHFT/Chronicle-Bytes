@@ -95,15 +95,15 @@ public class ByteStringParserTest extends BytesTestCommon {
     public void testAppendParse()
             throws IORuntimeException {
         assumeFalse(GuardedNativeBytes.areNewGuarded());
-        bytes.write("word£€) ".getBytes(StandardCharsets.UTF_8));
-        bytes.append("word£€)").append(' ');
+        bytes.write("word\u00a3\u20ac) ".getBytes(StandardCharsets.UTF_8));
+        bytes.append("word\u00a3\u20ac)").append(' ');
         bytes.append(1234).append(' ');
         bytes.append(123456L).append(' ');
         bytes.append(1.2345).append(' ');
         bytes.append(0.0012345).append(' ');
 
-        assertEquals("word£€)", bytes.parseUtf8(SPACE_STOP));
-        assertEquals("word£€)", bytes.parseUtf8(SPACE_STOP));
+        assertEquals("word\u00a3\u20ac)", bytes.parseUtf8(SPACE_STOP));
+        assertEquals("word\u00a3\u20ac)", bytes.parseUtf8(SPACE_STOP));
         assertEquals(1234, bytes.parseLong());
         assertEquals(123456L, bytes.parseLong());
         assertEquals(1.2345, bytes.parseDouble(), 0);
@@ -192,7 +192,7 @@ public class ByteStringParserTest extends BytesTestCommon {
     @Test
     public void testAppendParseUTF() {
         assumeFalse(GuardedNativeBytes.areNewGuarded());
-        @NotNull String[] words = "Hello,World!,Bye£€!".split(",");
+        @NotNull String[] words = "Hello,World!,Bye\u00a3\u20ac!".split(",");
         for (@NotNull String word : words) {
             bytes.append(word).append('\t');
         }

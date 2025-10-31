@@ -239,15 +239,15 @@ public class BytesTest extends BytesTestCommon {
             bytes.append("Hello World");
             assertEquals("00000000 48 65 6c 6c 6f 20 57 6f  72 6c 64                Hello Wo rld     \n", bytes.toHexString());
             bytes.readLimit(bytes.realCapacity());
-            assertEquals("00000000 48 65 6c 6c 6f 20 57 6f  72 6c 64 00 00 00 00 00 Hello Wo rld·····\n" +
-                    "00000010 00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00 ········ ········\n" +
+            assertEquals("00000000 48 65 6c 6c 6f 20 57 6f  72 6c 64 00 00 00 00 00 Hello Wo rld\u00b7\u00b7\u00b7\u00b7\u00b7\n" +
+                    "00000010 00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00 \u00b7\u00b7\u00b7\u00b7\u00b7\u00b7\u00b7\u00b7 \u00b7\u00b7\u00b7\u00b7\u00b7\u00b7\u00b7\u00b7\n" +
                     "........\n" +
-                    "000003f0 00 00 00 00 00 00 00 00  00 00 00 00             ········ ····    \n", bytes.toHexString());
+                    "000003f0 00 00 00 00 00 00 00 00  00 00 00 00             \u00b7\u00b7\u00b7\u00b7\u00b7\u00b7\u00b7\u00b7 \u00b7\u00b7\u00b7\u00b7    \n", bytes.toHexString());
 
-            assertEquals("00000000 48 65 6c 6c 6f 20 57 6f  72 6c 64 00 00 00 00 00 Hello Wo rld·····\n" +
-                    "00000010 00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00 ········ ········\n" +
+            assertEquals("00000000 48 65 6c 6c 6f 20 57 6f  72 6c 64 00 00 00 00 00 Hello Wo rld\u00b7\u00b7\u00b7\u00b7\u00b7\n" +
+                    "00000010 00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00 \u00b7\u00b7\u00b7\u00b7\u00b7\u00b7\u00b7\u00b7 \u00b7\u00b7\u00b7\u00b7\u00b7\u00b7\u00b7\u00b7\n" +
                     "........\n" +
-                    "000000f0 00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00 ········ ········\n" +
+                    "000000f0 00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00 \u00b7\u00b7\u00b7\u00b7\u00b7\u00b7\u00b7\u00b7 \u00b7\u00b7\u00b7\u00b7\u00b7\u00b7\u00b7\u00b7\n" +
                     "... truncated", bytes.toHexString(256));
         } finally {
             postTest(bytes);
@@ -312,14 +312,14 @@ public class BytesTest extends BytesTestCommon {
         try {
             testSBD(b, -0.0, "00000000 40                                               @         " +
                     "       \n");
-            testSBD(b, -1.0, "00000000 DF 7C                                            ·|               \n");
-            testSBD(b, -12345678, "00000000 E0 D9 F1 C2 4E                                   ····N            \n");
-            testSBD(b, 0.0, "00000000 00                                               ·                \n");
-            testSBD(b, 1.0, "00000000 9F 7C                                            ·|               \n");
-            testSBD(b, 1024, "00000000 A0 24                                            ·$               \n");
-            testSBD(b, 1000000, "00000000 A0 CB D0 48                                      ···H             \n");
-            testSBD(b, 0.1, "00000000 9F EE B3 99 CC E6 B3 99  4D                      ········ M       \n");
-            testSBD(b, Double.NaN, "00000000 BF 7E                                            ·~               \n");
+            testSBD(b, -1.0, "00000000 DF 7C                                            \u00b7|               \n");
+            testSBD(b, -12345678, "00000000 E0 D9 F1 C2 4E                                   \u00b7\u00b7\u00b7\u00b7N            \n");
+            testSBD(b, 0.0, "00000000 00                                               \u00b7                \n");
+            testSBD(b, 1.0, "00000000 9F 7C                                            \u00b7|               \n");
+            testSBD(b, 1024, "00000000 A0 24                                            \u00b7$               \n");
+            testSBD(b, 1000000, "00000000 A0 CB D0 48                                      \u00b7\u00b7\u00b7H             \n");
+            testSBD(b, 0.1, "00000000 9F EE B3 99 CC E6 B3 99  4D                      \u00b7\u00b7\u00b7\u00b7\u00b7\u00b7\u00b7\u00b7 M       \n");
+            testSBD(b, Double.NaN, "00000000 BF 7E                                            \u00b7~               \n");
         } finally {
             postTest(b);
         }
