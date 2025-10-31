@@ -118,8 +118,10 @@ public class UncheckedLongReference extends UnsafeCloseable implements LongRefer
             return "addressForRead is 0";
         try {
             return "value: " + getValue();
-        } catch (Throwable e) {
+        } catch (Exception e) {
             return "value: " + e;
+        } catch (Error err) {
+            throw err;
         }
     }
 

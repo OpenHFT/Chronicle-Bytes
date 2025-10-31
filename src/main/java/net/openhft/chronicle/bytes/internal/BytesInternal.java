@@ -236,12 +236,18 @@ enum BytesInternal {
             }
 
             final int length = (int) left.realReadRemaining();
-            final int invoke = (int) VECTORIZED_MISMATCH_METHOD_HANDLE.invoke(leftObject,
-                    leftOffset,
-                    rightObject,
-                    rightOffset,
-                    length,
-                    0);
+            final int invoke;
+            try {
+                invoke = (int) VECTORIZED_MISMATCH_METHOD_HANDLE.invoke(leftObject,
+                        leftOffset,
+                        rightObject,
+                        rightOffset,
+                        length,
+                        0);
+            } catch (Throwable t) { // MethodHandle.invoke declares Throwable
+                Jvm.warn().on(BytesInternal.class, t);
+                return null;
+            }
 
             if (invoke >= 0)
                 return Boolean.FALSE;
@@ -256,9 +262,11 @@ enum BytesInternal {
             }
 
             return Boolean.TRUE;
-        } catch (Throwable e) {
+        } catch (Exception e) {
             Jvm.warn().on(BytesInternal.class, e);
             return null;
+        } catch (Error err) {
+            throw err;
         }
     }
 

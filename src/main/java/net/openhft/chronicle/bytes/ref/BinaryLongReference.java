@@ -95,8 +95,10 @@ public class BinaryLongReference extends AbstractReference implements LongRefere
         if (bytesStore == null) return "bytes is null";
         try {
             return "value: " + getValue();
-        } catch (Throwable e) {
+        } catch (Exception e) {
             return e.toString();
+        } catch (Error err) {
+            throw err;
         }
     }
 

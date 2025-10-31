@@ -65,9 +65,12 @@ public class BinaryBytesMethodWriterInvocationHandler extends AbstractInvocation
                 out.writeHexDumpDescription(method.getName());
                 out.writeStopBit(info.messageId());
                 info.encode(args, out);
-            } catch (Throwable t) {
+            } catch (Exception t) {
                 out.writePosition(pos);
                 throw t;
+            } catch (Error err) {
+                out.writePosition(pos);
+                throw err;
             }
         }
         return null;

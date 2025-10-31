@@ -423,8 +423,10 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
             if (i < getCapacity())
                 sb.append(" ...");
 
-        } catch (Throwable e) {
+        } catch (Exception e) {
             sb.append(" ").append(e);
+        } catch (Error err) {
+            throw err;
         }
         return sb.toString();
     }

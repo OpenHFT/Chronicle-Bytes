@@ -180,8 +180,10 @@ public class HexDumpBytes
             throwExceptionIfReleased(this);
             if (lineLength() > 0) newLine();
             return text.toString();
-        } catch (Throwable e) {
+        } catch (Exception e) {
             return e.toString();
+        } catch (Error err) {
+            throw err;
         }
     }
 

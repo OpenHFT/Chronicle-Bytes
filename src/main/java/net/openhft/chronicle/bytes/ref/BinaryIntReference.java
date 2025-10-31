@@ -101,8 +101,10 @@ public class BinaryIntReference extends AbstractReference implements IntValue {
             return "bytes is null";
         try {
             return "value: " + getValue();
-        } catch (Throwable e) {
+        } catch (Exception e) {
             return "value: " + e;
+        } catch (Error err) {
+            throw err;
         }
     }
 
