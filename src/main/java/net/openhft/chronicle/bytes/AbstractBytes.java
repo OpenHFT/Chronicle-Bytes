@@ -84,7 +84,7 @@ public abstract class AbstractBytes<U>
 
     private final UncheckedRandomDataInput uncheckedRandomDataInput = new UncheckedRandomDataInputHolder();
     @NotNull
-    protected BytesStore<?, U> bytesStore;
+    protected BytesStore<?, U> bytesStore = BytesStore.empty();
     /** Offset, from {@link #start()}, of the next byte to read. */
     protected long readPosition;
     /** Highest byte index that may be written. */
@@ -128,7 +128,7 @@ public abstract class AbstractBytes<U>
                   @NonNegative long writeLimit,
                   String name)
             throws ClosedIllegalStateException, ThreadingIllegalStateException {
-        super(bytesStore.isDirectMemory());
+        super(java.util.Objects.requireNonNull(bytesStore, "bytesStore").isDirectMemory());
         this.bytesStore(bytesStore);
         bytesStore.reserve(this);
         readPosition = bytesStore.readPosition();
