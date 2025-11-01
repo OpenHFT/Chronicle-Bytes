@@ -160,6 +160,16 @@
                             <referenceVersion>2.27ea0</referenceVersion>
                             <artifactsURI>https://teamcity.chronicle.software/repository/download</artifactsURI>
                             <binaryCompatibilityPercentageRequired>100</binaryCompatibilityPercentageRequired>
+                            <extraOptions>
+                                <!--This skips "internal" but checks "impl"-->
+                                <extraOption>
+                                    <name>-keep-internal</name>
+                                </extraOption>
+                                <extraOption>
+                                    <name>skip-internal-packages</name>
+                                    <value>.*internal.*</value>
+                                </extraOption>
+                            </extraOptions>
                         </configuration>
                     </execution>
                 </executions>
