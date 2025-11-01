@@ -1,3 +1,6 @@
+/*
+ * Copyright 2016-2025 chronicle.software; SPDX-License-Identifier: Apache-2.0
+ */
 /**
  * Provides classes for non-cryptographic hash computations on {@link net.openhft.chronicle.bytes.BytesStore} objects.
  * <p>
