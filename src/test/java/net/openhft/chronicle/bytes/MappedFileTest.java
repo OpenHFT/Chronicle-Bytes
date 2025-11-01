@@ -26,6 +26,7 @@ public class MappedFileTest extends BytesTestCommon {
     @Rule
     public final TemporaryFolder tmpDir = new TemporaryFolder();
 
+    @SuppressWarnings("java:S5826") // JUnit 4 lifecycle retained; class mixes Vintage and Jupiter
     @Before
     public void ignoreCouldntDisable() {
         if (Jvm.maxDirectMemory() == 0) {

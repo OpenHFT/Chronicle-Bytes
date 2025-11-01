@@ -42,6 +42,7 @@ public class BinaryBytesMethodWriterInvocationHandler extends AbstractInvocation
      * write position is rolled back to preserve stream integrity.
      */
     @Override
+    @SuppressWarnings("java:S1181") // Reset writePosition on any Throwable to preserve stream integrity; rethrow immediately
     protected Object doInvoke(Object proxy, Method method, Object[] args)
             throws IllegalStateException, BufferOverflowException, BufferUnderflowException, IllegalArgumentException, ArithmeticException, InvalidMarshallableException {
         MethodEncoder info = methodToIdMap.computeIfAbsent(method, methodToId);
