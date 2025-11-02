@@ -7,6 +7,7 @@ import net.openhft.chronicle.bytes.internal.CommonMappedBytes;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.BackgroundResourceReleaser;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
@@ -24,6 +25,11 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeFalse;
 
 public class MappedBytesBoundaryTest extends BytesTestCommon {
+    @Before
+    public void setUp() {
+        if (OS.isWindows())
+            ignoreException("Unable to delete");
+    }
 
     @Test
     public void writeAcrossChunkBoundary() throws IOException {
