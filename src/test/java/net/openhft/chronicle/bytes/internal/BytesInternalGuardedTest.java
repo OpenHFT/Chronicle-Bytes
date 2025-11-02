@@ -81,13 +81,13 @@ public class BytesInternalGuardedTest extends BytesTestCommon {
         assertTrue(BytesInternal.compareUtf8(bs, 0, null));
         assertFalse(BytesInternal.compareUtf8(bs, 0, "test"));
 
-        bs.writeUtf8(1, "£€");
+        bs.writeUtf8(1, "£\u20ac");
         @NotNull StringBuilder sb = new StringBuilder();
         bs.readUtf8(1, sb);
-        assertEquals("£€", sb.toString());
-        assertTrue(BytesInternal.compareUtf8(bs, 1, "£€"));
+        assertEquals("£\u20ac", sb.toString());
+        assertTrue(BytesInternal.compareUtf8(bs, 1, "£\u20ac"));
         assertFalse(BytesInternal.compareUtf8(bs, 1, "£"));
-        assertFalse(BytesInternal.compareUtf8(bs, 1, "£€$"));
+        assertFalse(BytesInternal.compareUtf8(bs, 1, "£\u20ac$"));
         bs.releaseLast();
     }
 

@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 
 import java.nio.BufferOverflowException;
 
+import static java.util.Objects.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -62,7 +63,7 @@ class UncheckedNativeBytesTest {
         long offset = 10;
         byte value = 5;
         uncheckedBytes.writeByte(offset, value);
-        verify(underlyingBytes.bytesStore()).writeByte(eq(offset), eq(value));
+        requireNonNull(verify(underlyingBytes.bytesStore())).writeByte(eq(offset), eq(value));
     }
 
     @Test
@@ -70,7 +71,7 @@ class UncheckedNativeBytesTest {
         long offset = 20;
         int value = 123456789;
         uncheckedBytes.writeInt(offset, value);
-        verify(underlyingBytes.bytesStore()).writeInt(eq(offset), eq(value));
+        requireNonNull(verify(underlyingBytes.bytesStore())).writeInt(eq(offset), eq(value));
     }
 
     @Test
@@ -78,11 +79,11 @@ class UncheckedNativeBytesTest {
         long offset = 10;
         int expected = 100;
         int value = 200;
-        when(underlyingBytes.bytesStore().compareAndSwapInt(offset, expected, value)).thenReturn(true);
+        when(requireNonNull(underlyingBytes.bytesStore()).compareAndSwapInt(offset, expected, value)).thenReturn(true);
 
         boolean result = uncheckedBytes.compareAndSwapInt(offset, expected, value);
         assertTrue(result);
-        verify(underlyingBytes.bytesStore()).compareAndSwapInt(eq(offset), eq(expected), eq(value));
+        requireNonNull(verify(underlyingBytes.bytesStore())).compareAndSwapInt(eq(offset), eq(expected), eq(value));
     }
 
     @Test
@@ -208,6 +209,19 @@ class UncheckedNativeBytesTest {
         uncheckedBytes.readPosition(0);
         uncheckedBytes.readLong();
         assertEquals(8, uncheckedBytes.readPosition());
+    }
+
+
+    @Test
+    public void uncheckedWrapEnsureCapacityAndAppend() {
+        Bytes<?> b = Bytes.allocateDirect(8);
+        Bytes<?> u = b.unchecked(true);
+        try {
+            u.append("abc");
+            assertEquals("abc", u.toString());
+        } finally {
+            u.releaseLast();
+        }
     }
 
     private UncheckedNativeBytes<?> createUncheckedNativeBytes() {
