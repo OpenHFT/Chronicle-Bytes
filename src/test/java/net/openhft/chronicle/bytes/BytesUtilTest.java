@@ -5,6 +5,7 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
+import net.openhft.chronicle.core.io.BackgroundResourceReleaser;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -30,6 +31,7 @@ public class BytesUtilTest extends BytesTestCommon {
 
     @After
     public void tearDown() throws IOException {
+        BackgroundResourceReleaser.releasePendingResources();
         Files.deleteIfExists(testFile.toPath());
     }
 

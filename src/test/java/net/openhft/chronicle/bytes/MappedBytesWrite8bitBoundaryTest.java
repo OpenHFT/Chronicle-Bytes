@@ -36,8 +36,8 @@ public class MappedBytesWrite8bitBoundaryTest extends BytesTestCommon {
                 String got = mb.read8bit();
                 assertEquals(msg, got);
             }
-            BackgroundResourceReleaser.releasePendingResources();
         } finally {
+            BackgroundResourceReleaser.releasePendingResources();
             Files.deleteIfExists(file.toPath());
         }
     }

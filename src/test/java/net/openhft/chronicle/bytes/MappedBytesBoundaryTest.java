@@ -76,6 +76,7 @@ public class MappedBytesBoundaryTest extends BytesTestCommon {
             assertTrue("Expected write to read-only mapping to fail", writeFailed);
         }
 
+        BackgroundResourceReleaser.releasePendingResources();
         Files.deleteIfExists(file.toPath());
     }
 
@@ -93,6 +94,7 @@ public class MappedBytesBoundaryTest extends BytesTestCommon {
             bytes.readPosition(1024);
             assertEquals((byte) 0x5A, bytes.readByte());
         } finally {
+            BackgroundResourceReleaser.releasePendingResources();
             Files.deleteIfExists(file.toPath());
         }
     }
@@ -113,8 +115,8 @@ public class MappedBytesBoundaryTest extends BytesTestCommon {
                 assertEquals(message, bytes.read8bit());
                 assertTrue("Expected bytes to advance past written payload", bytes.writePosition() > message.length());
             }
-            BackgroundResourceReleaser.releasePendingResources();
         } finally {
+            BackgroundResourceReleaser.releasePendingResources();
             Files.deleteIfExists(file.toPath());
         }
     }
