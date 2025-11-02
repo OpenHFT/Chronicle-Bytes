@@ -26,7 +26,7 @@ import static org.junit.Assume.assumeFalse;
 public class MappedBytesBoundaryTest extends BytesTestCommon {
 
     @Test
-    public void writeAcrossChunkBoundary() throws FileNotFoundException {
+    public void writeAcrossChunkBoundary() throws IOException {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         final int chunk = 4096;
@@ -48,6 +48,7 @@ public class MappedBytesBoundaryTest extends BytesTestCommon {
             mb.read(actual);
             assertArrayEquals(expected, actual);
         }
+        deleteIfPossible(file);
     }
 
     @Test
@@ -76,8 +77,7 @@ public class MappedBytesBoundaryTest extends BytesTestCommon {
             assertTrue("Expected write to read-only mapping to fail", writeFailed);
         }
 
-        BackgroundResourceReleaser.releasePendingResources();
-        Files.deleteIfExists(file.toPath());
+        deleteIfPossible(file);
     }
 
     @Test
@@ -94,8 +94,7 @@ public class MappedBytesBoundaryTest extends BytesTestCommon {
             bytes.readPosition(1024);
             assertEquals((byte) 0x5A, bytes.readByte());
         } finally {
-            BackgroundResourceReleaser.releasePendingResources();
-            Files.deleteIfExists(file.toPath());
+            deleteIfPossible(file);
         }
     }
 
@@ -116,8 +115,7 @@ public class MappedBytesBoundaryTest extends BytesTestCommon {
                 assertTrue("Expected bytes to advance past written payload", bytes.writePosition() > message.length());
             }
         } finally {
-            BackgroundResourceReleaser.releasePendingResources();
-            Files.deleteIfExists(file.toPath());
+            deleteIfPossible(file);
         }
     }
 }
