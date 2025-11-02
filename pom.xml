@@ -375,6 +375,13 @@
         </profile>
         <profile>
             <id>sonar</id>
+            <!-- If you keep thresholds as properties, define them here
+                 (or in the parent) so they resolve during this profile) -->
+            <properties>
+                <jacoco.line.coverage>0.7</jacoco.line.coverage>
+                <jacoco.branch.coverage>0.6</jacoco.branch.coverage>
+            </properties>
+
             <build>
                 <plugins>
                     <plugin>
@@ -385,9 +392,7 @@
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-surefire-plugin</artifactId>
                         <configuration>
-                            <!-- Include JPMS flags from parent and coverage flag for sonar runs -->
-                            <argLine>${argLine} ${jvm.requiredArgs} -Djvm.coverage=true</argLine>
-                            <!-- Use a single fork to ensure JaCoCo agent reliably writes execution data -->
+                            <argLine>${surefireArgLine} ${jvm.requiredArgs} -Djvm.coverage=true</argLine>
                             <forkCount>1</forkCount>
                             <reuseForks>false</reuseForks>
                         </configuration>
@@ -402,20 +407,8 @@
                                 <goals>
                                     <goal>prepare-agent</goal>
                                 </goals>
-                                <phase>initialize</phase>
                                 <configuration>
-                                    <!-- Ensure exec is written even with forks; reuse the default dest -->
-                                    <append>true</append>
-                                    <destFile>${project.build.directory}/jacoco.exec</destFile>
-                                </configuration>
-                            </execution>
-                            <execution>
-                                <id>report</id>
-                                <goals>
-                                    <goal>report</goal>
-                                </goals>
-                                <phase>verify</phase>
-                                <configuration>
+                                    <propertyName>surefireArgLine</propertyName>
                                     <excludes>
                                         <!-- Low-level reflection/unsafe helpers where behaviour is JVM/architecture gated -->
                                         <exclude>net/openhft/chronicle/bytes/internal/ByteBuffers*</exclude>
@@ -423,18 +416,22 @@
                                     </excludes>
                                 </configuration>
                             </execution>
+
+                            <execution>
+                                <id>report</id>
+                                <goals>
+                                    <goal>report</goal>
+                                </goals>
+                                <phase>verify</phase>
+                            </execution>
+
                             <execution>
                                 <id>check</id>
                                 <goals>
                                     <goal>check</goal>
                                 </goals>
-                                <phase>prepare-package</phase>
+                                <phase>verify</phase>
                                 <configuration>
-                                    <excludes>
-                                        <!-- Mirror report excludes for consistency of thresholds -->
-                                        <exclude>net/openhft/chronicle/bytes/internal/ByteBuffers*</exclude>
-                                        <exclude>net/openhft/chronicle/bytes/internal/UnsafeText*</exclude>
-                                    </excludes>
                                     <rules>
                                         <rule>
                                             <element>BUNDLE</element>
