@@ -16,7 +16,6 @@ import java.io.RandomAccessFile;
 import java.nio.BufferOverflowException;
 import java.nio.ReadOnlyBufferException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.FileSystemException;
 import java.nio.file.Files;
 
 import static org.junit.Assert.assertArrayEquals;

@@ -19,7 +19,7 @@ public class BytesInternalUtf8MoreTest extends BytesTestCommon {
     public void appendUtf8WithLatin1MultibyteChars() {
         Bytes<?> out = Bytes.allocateElasticOnHeap(64);
         try {
-            String s = "ab\u00A3\u00E9cd"; // contains '£' and 'é'
+            String s = "ab£écd"; // contains '£' and 'é'
             BytesInternal.appendUtf8(out, s, 0, s.length());
             // Bytes.toString decodes ISO-8859-1; compare using the same codec on the UTF-8 bytes
             String expected = new String(s.getBytes(java.nio.charset.StandardCharsets.UTF_8),
@@ -34,7 +34,7 @@ public class BytesInternalUtf8MoreTest extends BytesTestCommon {
     public void appendUtf8ToRandomDataOutputHandlesSupplementaryChars() {
         Bytes<?> out = Bytes.allocateElasticOnHeap(64);
         try {
-            String text = "ascii \u00A3 \u20AC";
+            String text = "ascii £ €";
             long endOffset = BytesInternal.appendUtf8(out, out.writePosition(), text, 0, text.length());
             out.writePosition(endOffset);
             out.readLimit(endOffset);
@@ -51,7 +51,7 @@ public class BytesInternalUtf8MoreTest extends BytesTestCommon {
     public void parseUtf8WithExplicitLengthHonoursUtfFlag() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(64);
         try {
-            String text = "\u00A3elastic";
+            String text = "£elastic";
             BytesInternal.appendUtf8(bytes, text, 0, text.length());
             bytes.readLimit(bytes.writePosition());
             bytes.readPosition(0);

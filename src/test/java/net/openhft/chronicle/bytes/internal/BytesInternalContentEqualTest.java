@@ -4,7 +4,6 @@
 package net.openhft.chronicle.bytes.internal;
 
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.bytes.BytesTestCommon;
 import org.junit.Test;
 

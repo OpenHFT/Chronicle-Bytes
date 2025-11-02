@@ -4,15 +4,16 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Jvm;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.io.TempDir;
-import org.junit.jupiter.api.AfterEach;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 
@@ -26,16 +27,14 @@ public class BytesUtilTest extends BytesTestCommon {
 
     File testFile;
 
-    @BeforeEach
-    void setUp() {
+    @Before
+    public void setUp() {
         testFile = new File(tempDir.toFile(), "testFile.bin");
     }
 
-    @AfterEach
-    void tearDown() {
-        if (testFile.exists()) {
-            testFile.delete();
-        }
+    @After
+    public void tearDown() throws IOException {
+        Files.deleteIfExists(testFile.toPath());
     }
 
     @Test

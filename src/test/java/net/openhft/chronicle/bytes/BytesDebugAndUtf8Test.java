@@ -5,8 +5,7 @@ package net.openhft.chronicle.bytes;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class BytesDebugAndUtf8Test extends BytesTestCommon {
 
@@ -22,10 +21,9 @@ public class BytesDebugAndUtf8Test extends BytesTestCommon {
 
             // debug string contains representation
             String dbg = BytesUtil.toDebugString(b, rp, 5);
-            assertTrue(dbg.length() > 0);
+            assertFalse(dbg.isEmpty());
         } finally {
             b.releaseLast();
         }
     }
 }
-

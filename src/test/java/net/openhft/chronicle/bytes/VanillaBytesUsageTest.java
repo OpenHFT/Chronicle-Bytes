@@ -11,7 +11,7 @@ import static org.junit.Assert.assertEquals;
 public class VanillaBytesUsageTest extends BytesTestCommon {
 
     @Test
-    public void wrapNativeStoreMaintainsOffsets() throws Exception {
+    public void wrapNativeStoreMaintainsOffsets() {
         NativeBytesStore<Void> store = NativeBytesStore.nativeStoreWithFixedCapacity(64);
         try {
             store.writeLong(0, 0x1122334455667788L);
@@ -30,7 +30,7 @@ public class VanillaBytesUsageTest extends BytesTestCommon {
     }
 
     @Test
-    public void vanillaBytesCanSwapUnderlyingStore() throws Exception {
+    public void vanillaBytesCanSwapUnderlyingStore() {
         NativeBytesStore<Void> storeA = NativeBytesStore.nativeStoreWithFixedCapacity(32);
         NativeBytesStore<Void> storeB = NativeBytesStore.nativeStoreWithFixedCapacity(32);
         try {

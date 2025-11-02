@@ -19,7 +19,7 @@ public class Utf8ParsingBoundaryTest extends BytesTestCommon {
     public void parsesExplicitLengthAtBoundaries() {
         Bytes<?> b = Bytes.allocateElasticOnHeap(32);
         String ascii = "A";
-        String multi = "£\u20ac"; // euro escaped; pound is ISO-8859-1
+        String multi = "£€"; // euro escaped; pound is ISO-8859-1
         try {
             b.append(ascii).append(multi);
             b.readPosition(0);
@@ -76,4 +76,3 @@ public class Utf8ParsingBoundaryTest extends BytesTestCommon {
         }
     }
 }
-
