@@ -40,16 +40,13 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
         extends RandomDataInput, RandomDataOutput<B>, ReferenceCounted, CharSequence {
 
     /**
-     * Converts a CharSequence into a BytesStore. The characters are encoded using ISO_8859_1.
+     * Converts a CharSequence into a BytesStore. The component type depends on the input,
+     * hence the wildcard in the return. Prefer using the typed overloads when possible.
      *
      * @param cs the CharSequence to be converted
      * @return a BytesStore which contains the bytes from the CharSequence
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
-     */
-    /**
-     * Converts a CharSequence into a BytesStore. The component type depends on the input,
-     * hence the wildcard in the return. Prefer using the typed overloads when possible.
      */
     @SuppressWarnings("java:S1452")
     static BytesStore<?, ?> from(@NotNull CharSequence cs) throws ClosedIllegalStateException, ThreadingIllegalStateException {
@@ -106,10 +103,6 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
     }
 
     /**
-     * Takes ownership of {@code bb} and returns a store backed by it. Closing
-     * the store will deallocate the buffer if it is direct.
-     */
-    /**
      * Takes ownership of {@code bb} and returns a store backed by it. The wildcard is used for the
      * store type parameter; for strict typing use {@link NativeBytesStore#wrap(ByteBuffer)} directly
      * for direct buffers, or {@link HeapBytesStore#wrap(ByteBuffer)} for heap buffers.
@@ -122,10 +115,6 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
                 : HeapBytesStore.wrap(bb);
     }
 
-    /**
-     * Returns a store that references {@code bb} without assuming ownership.
-     * Closing the store does not deallocate a direct buffer.
-     */
     /**
      * Returns a store that references {@code bb} without assuming ownership. The wildcard is used for the
      * store type parameter; use {@link NativeBytesStore#follow(ByteBuffer)} or
