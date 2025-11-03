@@ -9,8 +9,8 @@ import static org.junit.Assert.assertEquals;
 
 public class StringRWPerfTest extends BytesTestCommon {
 
-    public static final String UTF8 = "0123456789£123456789€123456789";
-    public static final String ASCII = "012345678901234567890123456789";
+    private static final String UTF8 = "0123456789£123456789€123456789";
+    private static final String ASCII = "012345678901234567890123456789";
     private Bytes<?> bytes;
 
     @Override

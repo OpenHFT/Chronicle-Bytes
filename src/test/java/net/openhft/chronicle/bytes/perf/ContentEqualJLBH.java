@@ -17,14 +17,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
-public class ContentEqualJLBH implements JLBHTask {
+class ContentEqualJLBH implements JLBHTask {
     private static final int ITERATIONS = 5_000_000;
     private final Bytes<?> bytes1;
     private final Bytes<?>[] comparisons;
     private JLBH jlbh;
     private int counter;
 
-    public ContentEqualJLBH(Supplier<Bytes<?>> bytesSupplier) {
+    private ContentEqualJLBH(Supplier<Bytes<?>> bytesSupplier) {
         bytes1 = bytesSupplier.get();
         comparisons = generateComparisons(bytesSupplier);
     }

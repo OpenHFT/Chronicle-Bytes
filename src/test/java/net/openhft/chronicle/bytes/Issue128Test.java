@@ -41,7 +41,7 @@ public class Issue128Test extends BytesTestCommon {
         }
     }
 
-    public void doTest(Bytes<?> bytes, double v) {
+    private void doTest(Bytes<?> bytes, double v) {
         String format = DF.format(v);
         String output = testAppendDouble(bytes, v);
         if (Double.parseDouble(output) != v || format.length() != output.length()) {

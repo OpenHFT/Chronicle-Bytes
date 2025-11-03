@@ -40,7 +40,7 @@ class ReentrantFileLockTest extends BytesTestCommon {
     private File fileToLock;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         fileToLock = IOTools.createTempFile("fileToLock");
     }
 
@@ -52,13 +52,13 @@ class ReentrantFileLockTest extends BytesTestCommon {
     }
 
     @AfterEach
-    public void tearDown() {
+    void tearDown() {
         fileToLock.delete();
     }
 
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
-    public void willAcquireLockOnFileWhenAvailableAndReleaseOnLastRelease(boolean useTryLock) throws IOException {
+    void willAcquireLockOnFileWhenAvailableAndReleaseOnLastRelease(boolean useTryLock) throws IOException {
         try (FileChannel channel = FileChannel.open(fileToLock.toPath(), StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE)) {
             final ReentrantFileLock lock = acquireLock(useTryLock, fileToLock, channel);
             final ReentrantFileLock secondLock = acquireLock(useTryLock, fileToLock, channel);
@@ -72,7 +72,7 @@ class ReentrantFileLockTest extends BytesTestCommon {
 
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
-    public void willThrowOverlappingFileLockExceptionWhenAnOverlappingLockIsHeldDirectly(boolean useTryLock) throws IOException {
+    void willThrowOverlappingFileLockExceptionWhenAnOverlappingLockIsHeldDirectly(boolean useTryLock) throws IOException {
         try (FileChannel channel = FileChannel.open(fileToLock.toPath(), StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE)) {
             final FileLock lock = channel.lock();
             assertThrows(OverlappingFileLockException.class, () -> acquireLock(useTryLock, fileToLock, channel));
@@ -82,7 +82,7 @@ class ReentrantFileLockTest extends BytesTestCommon {
 
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
-    public void willPropagateOtherExceptionsOnAcquire(boolean useTryLock) throws IOException {
+    void willPropagateOtherExceptionsOnAcquire(boolean useTryLock) throws IOException {
         FileChannel closedChannel;
         try (FileChannel channel = FileChannel.open(fileToLock.toPath(), StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE)) {
             closedChannel = channel;
@@ -93,7 +93,7 @@ class ReentrantFileLockTest extends BytesTestCommon {
 
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
-    public void unlockWillPropagateChannelClosedExceptionOnUnlock(boolean useTryLock) throws IOException {
+    void unlockWillPropagateChannelClosedExceptionOnUnlock(boolean useTryLock) throws IOException {
         final ReentrantFileLock rtsfl;
         try (FileChannel channel = FileChannel.open(fileToLock.toPath(), StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE)) {
             rtsfl = acquireLock(useTryLock, fileToLock, channel);
@@ -104,7 +104,7 @@ class ReentrantFileLockTest extends BytesTestCommon {
 
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
-    public void errorIsLoggedWhenLocksArePassedBetweenThreads(boolean useTryLock) throws IOException, ExecutionException, InterruptedException {
+    void errorIsLoggedWhenLocksArePassedBetweenThreads(boolean useTryLock) throws IOException, ExecutionException, InterruptedException {
         try (FileChannel channel = FileChannel.open(fileToLock.toPath(), StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE)) {
             final ReentrantFileLock lock = acquireLock(useTryLock, fileToLock, channel);
             final AtomicLong spawnedThreadId = new AtomicLong();
@@ -118,7 +118,7 @@ class ReentrantFileLockTest extends BytesTestCommon {
 
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
-    public void providesMutualExclusionBetweenProcesses(boolean useTryLock) throws IOException {
+    void providesMutualExclusionBetweenProcesses(boolean useTryLock) throws IOException {
         List<Process> processes = new ArrayList<>();
         for (int i = 0; i < NUM_THREADS; i++) {
             processes.add(JavaProcessBuilder.create(LockerThread.class)
@@ -139,7 +139,7 @@ class ReentrantFileLockTest extends BytesTestCommon {
     }
 
     @Test
-    public void noLockIsCachedOnFailedTryLock() throws IOException, InterruptedException {
+    void noLockIsCachedOnFailedTryLock() throws IOException, InterruptedException {
         final Process processHoldingLock = JavaProcessBuilder.create(LockUntilInterruptedThread.class)
                 .withProgramArguments(fileToLock.getCanonicalPath())
                 .start();
@@ -174,7 +174,7 @@ class ReentrantFileLockTest extends BytesTestCommon {
             new LockUntilInterruptedThread(args[0]).run();
         }
 
-        public LockUntilInterruptedThread(String filePath) {
+        LockUntilInterruptedThread(String filePath) {
             this.filePath = filePath;
         }
 
@@ -208,7 +208,7 @@ class ReentrantFileLockTest extends BytesTestCommon {
             new LockerThread(args[0], Integer.parseInt(args[1]), Boolean.parseBoolean(args[2])).run();
         }
 
-        public LockerThread(String filePath, int identifier, boolean useTryLock) {
+        LockerThread(String filePath, int identifier, boolean useTryLock) {
             this.filePath = filePath;
             this.identifier = identifier;
             this.useTryLock = useTryLock;

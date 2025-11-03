@@ -17,9 +17,9 @@ import java.util.Locale;
 import static org.junit.Assume.assumeFalse;
 
 public class Issue85Test extends BytesTestCommon {
-    int different = 0;
-    int different2 = 0;
-    DecimalFormat df = new DecimalFormat();
+    private int different = 0;
+    private int different2 = 0;
+    private DecimalFormat df = new DecimalFormat();
 
     {
         df.setMaximumIntegerDigits(99);
@@ -91,7 +91,7 @@ public class Issue85Test extends BytesTestCommon {
                     " parsing: " + 100.0 * different2 / count + "%");
     }
 
-    protected void doTest(Bytes<ByteBuffer> bytes, int i, double d) {
+    private void doTest(Bytes<ByteBuffer> bytes, int i, double d) {
         String s = df.format(d);
         bytes.clear().append(s);
         double d2 = bytes.parseDouble();

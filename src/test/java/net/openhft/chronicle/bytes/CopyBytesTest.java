@@ -17,7 +17,7 @@ import static org.junit.Assume.assumeFalse;
 
 public class CopyBytesTest extends BytesTestCommon {
 
-    static void doTest(Bytes<?> toTest, int from) {
+    private static void doTest(Bytes<?> toTest, int from) {
         Bytes<?> toCopy = Bytes.allocateDirect(32);
         Bytes<?> toValidate = Bytes.allocateDirect(32);
         try {

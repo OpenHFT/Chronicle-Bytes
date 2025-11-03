@@ -24,7 +24,7 @@ public class BytesUtilTest extends BytesTestCommon {
     @TempDir
     Path tempDir;
 
-    File testFile;
+    private File testFile;
 
     @BeforeEach
     void setUp() {
@@ -233,11 +233,11 @@ public class BytesUtilTest extends BytesTestCommon {
         char ch;
     }
 
-    static class A3 extends A2 {
+    private static class A3 extends A2 {
         String user;
     }
 
-    static class B {
+    private static class B {
         int i;
         long l;
         double d;
@@ -265,7 +265,7 @@ public class BytesUtilTest extends BytesTestCommon {
         int i;
     }
 
-    class SubNested extends Nested {
+    private class SubNested extends Nested {
         int j;
     }
 }

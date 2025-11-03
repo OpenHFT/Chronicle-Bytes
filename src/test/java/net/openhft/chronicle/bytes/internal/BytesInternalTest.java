@@ -470,7 +470,7 @@ public class BytesInternalTest extends BytesTestCommon {
     }
 
     static class Nested {
-        public static final int LENGTH;
+        static final int LENGTH;
 
         static {
             long maxMemory = Runtime.getRuntime().maxMemory();
@@ -481,7 +481,7 @@ public class BytesInternalTest extends BytesTestCommon {
         }
     }
 
-    public static void simpleWriteFully1(@NotNull RandomDataInput bytes, @NonNegative long offset, long length, @NotNull StreamingDataOutput<?> sdo)
+    private static void simpleWriteFully1(@NotNull RandomDataInput bytes, @NonNegative long offset, long length, @NotNull StreamingDataOutput<?> sdo)
             throws BufferUnderflowException, BufferOverflowException, IllegalStateException {
         long i = 0;
         for (; i < length - 7; i += 8)
@@ -490,7 +490,7 @@ public class BytesInternalTest extends BytesTestCommon {
             sdo.rawWriteByte(bytes.readByte(offset + i));
     }
 
-    public static void simpleWriteFully2(@NotNull RandomDataInput bytes, @NonNegative long offset, long length, @NotNull StreamingDataOutput<?> sdo)
+    private static void simpleWriteFully2(@NotNull RandomDataInput bytes, @NonNegative long offset, long length, @NotNull StreamingDataOutput<?> sdo)
             throws BufferUnderflowException, BufferOverflowException, IllegalStateException {
         long i = 0;
         for (; i < length - 7; i += 8)
@@ -503,7 +503,7 @@ public class BytesInternalTest extends BytesTestCommon {
             sdo.rawWriteByte(bytes.readByte(offset + i));
     }
 
-    public static void simpleWriteFully3(@NotNull RandomDataInput bytes, @NonNegative long offset, long length, @NotNull StreamingDataOutput<?> sdo)
+    private static void simpleWriteFully3(@NotNull RandomDataInput bytes, @NonNegative long offset, long length, @NotNull StreamingDataOutput<?> sdo)
             throws BufferUnderflowException, BufferOverflowException, IllegalStateException {
         int i = 0;
         for (; i < length - 7; i += 8)
@@ -516,7 +516,7 @@ public class BytesInternalTest extends BytesTestCommon {
             sdo.rawWriteByte(bytes.readByte(offset + i));
     }
 
-    public static void simpleWriteFully4(@NotNull RandomDataInput bytes, @NonNegative long offset, long length, @NotNull StreamingDataOutput<?> sdo)
+    private static void simpleWriteFully4(@NotNull RandomDataInput bytes, @NonNegative long offset, long length, @NotNull StreamingDataOutput<?> sdo)
             throws BufferUnderflowException, BufferOverflowException, IllegalStateException {
         int i = 0;
         for (; i < length - 7; i += 8)
@@ -529,7 +529,7 @@ public class BytesInternalTest extends BytesTestCommon {
             sdo.rawWriteByte(bytes.readByte(offset + i));
     }
 
-    public static void oldWriteFully(@NotNull RandomDataInput bytes, @NonNegative long offset, long length, @NotNull StreamingDataOutput<?> sdo)
+    private static void oldWriteFully(@NotNull RandomDataInput bytes, @NonNegative long offset, long length, @NotNull StreamingDataOutput<?> sdo)
             throws BufferUnderflowException, BufferOverflowException, IllegalStateException {
         long i = 0;
         for (; i < length - 3; i += 4)

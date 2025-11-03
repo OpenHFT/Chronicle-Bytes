@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @SuppressWarnings({"unchecked", "rawtypes"})
-public class UncheckedBytesTest {
+class UncheckedBytesTest {
 
     private Bytes<?> underlyingBytes;
     private UncheckedBytes<?> uncheckedBytes;

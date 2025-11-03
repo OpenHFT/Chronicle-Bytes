@@ -38,7 +38,7 @@ public class BytesTextMethodTesterTest extends BytesTestCommon {
         btmttTest("btmtt-invalid/prim-input.txt", "btmtt-invalid/prim-output.txt");
     }
 
-    protected void btmttTest(String input, String output)
+    private void btmttTest(String input, String output)
             throws IOException {
         BytesTextMethodTester<IBytesMethod> tester = new BytesTextMethodTester<>(
                 input,

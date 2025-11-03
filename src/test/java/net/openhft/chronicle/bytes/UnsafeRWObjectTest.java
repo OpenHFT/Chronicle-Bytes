@@ -12,9 +12,9 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
-public class UnsafeRWObjectTest extends BytesTestCommon {
+class UnsafeRWObjectTest extends BytesTestCommon {
     @Test
-    public void longObjectElasticBuffer() {
+    void longObjectElasticBuffer() {
         assumeTrue(Jvm.is64bit());
         String expected0 = Jvm.isAzulZing() ? "[8, 72]" : "[16, 80]";
         assertEquals(expected0,
@@ -44,7 +44,7 @@ public class UnsafeRWObjectTest extends BytesTestCommon {
     }
 
     @Test
-    public void shortObject() {
+    void shortObject() {
         assumeTrue(Jvm.is64bit());
         String expected0 = Jvm.isAzulZing() ? "[8, 28]" : "[12, 32]";
         assertEquals(expected0,
@@ -69,7 +69,7 @@ public class UnsafeRWObjectTest extends BytesTestCommon {
     }
 
     @Test
-    public void longObject() {
+    void longObject() {
         assumeTrue(Jvm.is64bit());
         String expected0 = Jvm.isAzulZing() ? "[8, 72]" : "[16, 80]";
         int[] ints = BytesUtil.triviallyCopyableRange(BB.class);
@@ -95,7 +95,7 @@ public class UnsafeRWObjectTest extends BytesTestCommon {
     }
 
     @Test
-    public void doubleObject() {
+    void doubleObject() {
         assumeTrue(Jvm.is64bit());
         String expected0 = Jvm.isAzulZing() ? "[8, 72]" : "[16, 80]";
         int[] ints = BytesUtil.triviallyCopyableRange(DD.class);
@@ -121,7 +121,7 @@ public class UnsafeRWObjectTest extends BytesTestCommon {
     }
 
     @Test
-    public void arrayByte() {
+    void arrayByte() {
         assumeTrue(Jvm.is64bit());
         assertEquals("[16]",
                 Arrays.toString(
@@ -142,7 +142,7 @@ public class UnsafeRWObjectTest extends BytesTestCommon {
     }
 
     @Test
-    public void arrayInt() {
+    void arrayInt() {
         assumeTrue(Jvm.is64bit());
         assertEquals("[16]",
                 Arrays.toString(
@@ -166,7 +166,7 @@ public class UnsafeRWObjectTest extends BytesTestCommon {
         long l;
         double d;
 
-        public AA(int i, long l, double d) {
+        AA(int i, long l, double d) {
             this.i = i;
             this.l = l;
             this.d = d;
@@ -176,7 +176,7 @@ public class UnsafeRWObjectTest extends BytesTestCommon {
     static class BB {
         long l0, l1, l2, l3, l4, l5, l6, l7;
 
-        public BB(long l0, long l1, long l2, long l3, long l4, long l5, long l6, long l7) {
+        BB(long l0, long l1, long l2, long l3, long l4, long l5, long l6, long l7) {
             this.l0 = l0;
             this.l1 = l1;
             this.l2 = l2;
@@ -204,7 +204,7 @@ public class UnsafeRWObjectTest extends BytesTestCommon {
     static class DD {
         double l0, l1, l2, l3, l4, l5, l6, l7;
 
-        public DD(double l0, double l1, double l2, double l3, double l4, double l5, double l6, double l7) {
+        DD(double l0, double l1, double l2, double l3, double l4, double l5, double l6, double l7) {
             this.l0 = l0;
             this.l1 = l1;
             this.l2 = l2;

@@ -59,7 +59,7 @@ class Bytes4Test extends BytesTestCommon {
             fail("No address range check");
     }
 
-    public static void main(String[] args) {
+    static void main(String[] args) {
 
         {
             byte[] arr = new byte[4];

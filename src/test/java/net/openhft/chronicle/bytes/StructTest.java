@@ -26,10 +26,10 @@ public class StructTest extends BytesTestCommon {
      * Common base for structs to take care of initialisation and other boilerplating
      */
     static abstract class Struct<S extends Struct<S>> {
-        protected Bytes<?> self;
-        protected final Bytes<Void> bytes;
+        Bytes<?> self;
+        final Bytes<Void> bytes;
         private final int size;
-        protected long address;
+        long address;
 
         // return a default constructed standalone instance
         // (logically this is static, but then we can't force with abstract)
@@ -40,7 +40,7 @@ public class StructTest extends BytesTestCommon {
          *
          * @param size
          */
-        protected Struct(int size) {
+        Struct(int size) {
             this.size = size;
             bytes = new NativeBytes<>(new PointerBytesStore(), size);
             IOTools.unmonitor(bytes);
@@ -53,7 +53,7 @@ public class StructTest extends BytesTestCommon {
          * @param size
          * @param address
          */
-        protected Struct(int size, long address) {
+        Struct(int size, long address) {
             this.size = size;
             bytes = new NativeBytes<>(new PointerBytesStore(), size);
             IOTools.unmonitor(bytes);
@@ -64,7 +64,7 @@ public class StructTest extends BytesTestCommon {
          * return a new instance distinct copy of self - equivalent to c++ copy constructor
          * default is bitwise copy
          */
-        public S copy() {
+        S copy() {
             S s = construct(0);
             s.copy(uncheckedCast(this));
             return s;
@@ -73,7 +73,7 @@ public class StructTest extends BytesTestCommon {
         /**
          * return a new instance shared copy of self
          */
-        public S share() {
+        S share() {
             return construct(this.address);
         }
 
@@ -83,7 +83,7 @@ public class StructTest extends BytesTestCommon {
          * @param s - the instance to copy
          * @return - self
          */
-        protected S copy(S s) {
+        S copy(S s) {
             if (self == null || s.address != this.address) {
                 allocateAndInitialise();
                 UnsafeMemory.copyMemory(s.address, this.address, size);
@@ -97,7 +97,7 @@ public class StructTest extends BytesTestCommon {
          * @param s - the instance to share
          * @return - self
          */
-        protected S share(S s) {
+        S share(S s) {
             if (self != null || s.address != this.address) {
                 deallocate();
                 initialise(s.address);
@@ -112,7 +112,7 @@ public class StructTest extends BytesTestCommon {
          *
          * @param address
          */
-        protected void initialise(final long address) {
+        void initialise(final long address) {
             assert address != 0;
 
             @SuppressWarnings({"unchecked", "rawtypes"})
@@ -128,7 +128,7 @@ public class StructTest extends BytesTestCommon {
          *
          * @return - the underlying bytes corresponding to this instance's members
          */
-        public Bytes<?> bytes() {
+        Bytes<?> bytes() {
             return bytes;
         }
 
@@ -312,7 +312,7 @@ public class StructTest extends BytesTestCommon {
             GENDERS = Stream.of(values()).sorted(Comparator.comparing(Gender::code)).toArray(Gender[]::new);
         }
 
-        public int code() {
+        int code() {
             return code;
         }
 
@@ -332,46 +332,46 @@ public class StructTest extends BytesTestCommon {
         }
 
         // standard new - allocate private memory
-        public Date() {
+        Date() {
             super(SIZE);
         }
 
         // placement new - memory is provided and/or managed externally
-        public Date(final long address) {
+        Date(final long address) {
             super(SIZE, address);
         }
 
         // construct with data
-        public Date(short year, byte month, byte day) {
+        Date(short year, byte month, byte day) {
             super(SIZE);
             year(year);
             month(month);
             day(day);
         }
 
-        public short year() {
+        short year() {
             return MEMORY.readShort(address + YEAR);
         }
 
-        public Date year(short year) {
+        Date year(short year) {
             MEMORY.writeShort(address + YEAR, year);
             return this;
         }
 
-        public byte month() {
+        byte month() {
             return MEMORY.readByte(address + MONTH);
         }
 
-        public Date month(byte month) {
+        Date month(byte month) {
             MEMORY.writeByte(address + MONTH, month);
             return this;
         }
 
-        public byte day() {
+        byte day() {
             return MEMORY.readByte(address + DAY);
         }
 
-        public Date day(byte day) {
+        Date day(byte day) {
             MEMORY.writeByte(address + DAY, day);
             return this;
         }
@@ -424,12 +424,12 @@ public class StructTest extends BytesTestCommon {
         }
 
         // standard new - we own the memory
-        public Student() {
+        Student() {
             super(SIZE);
         }
 
         // placement new - memory is provided to us
-        public Student(final long address) {
+        Student(final long address) {
             super(SIZE, address);
         }
 
@@ -463,21 +463,21 @@ public class StructTest extends BytesTestCommon {
             Locks.unlock(address);
         }
 
-        public Gender gender() {
+        Gender gender() {
             return Gender.GENDERS[MEMORY.readInt(address + GENDER)];
         }
 
-        public Student gender(Gender gender) {
+        Student gender(Gender gender) {
             MEMORY.writeInt(address + GENDER, gender.code);
             return this;
         }
 
         // return a shared ptr to the this birth member
-        public Date birth() {
+        Date birth() {
             return birth;
         }
 
-        public Student birth(int year, int month, int day) {
+        Student birth(int year, int month, int day) {
             birth.year((short) year).month((byte) month).day((byte) day);
             return this;
         }
@@ -488,7 +488,7 @@ public class StructTest extends BytesTestCommon {
             return this;
         }
 
-        public String name() {
+        String name() {
             // use a String pool
             return nameStr != null
                     ? nameStr
@@ -504,7 +504,7 @@ public class StructTest extends BytesTestCommon {
             return sb;
         }
 
-        public Student name(CharSequence cs) {
+        Student name(CharSequence cs) {
             name.clear().append8bit(cs);
             if (name.writeRemaining() > 0)
                 name.append('\0');
@@ -516,19 +516,19 @@ public class StructTest extends BytesTestCommon {
             return MEMORY.readFloat(address + GRADES + Float.BYTES * n);
         }
 
-        public Student grade(int n, float f) {
+        Student grade(int n, float f) {
             assert 0 <= n && n < NUM_GRADES;
             MEMORY.writeFloat(address + GRADES + Float.BYTES * n, f);
             return this;
         }
 
-        public Student next() {
+        Student next() {
             long address = Jvm.is64bit() ? MEMORY.readLong(this.address + NEXT) : MEMORY.readInt(this.address + NEXT);
             next.reset(address);
             return next.get();
         }
 
-        public Student next(Student s) {
+        Student next(Student s) {
             long address = s == null ? 0 : s.address;
 
             if (Jvm.is64bit())
@@ -557,7 +557,7 @@ public class StructTest extends BytesTestCommon {
     enum Locks {
         ; // none
 
-        public static void lock(long address) {
+        static void lock(long address) {
             int threadId = Affinity.getThreadId();
             if (MEMORY.compareAndSwapInt(address, 0, threadId))
                 return;
@@ -569,7 +569,7 @@ public class StructTest extends BytesTestCommon {
             throw new IllegalStateException("Failed to obtain a lock from process " + MEMORY.readVolatileInt(address));
         }
 
-        public static void unlock(long address) {
+        static void unlock(long address) {
             int threadId = Affinity.getThreadId();
             if (MEMORY.compareAndSwapInt(address, threadId, 0))
                 return;

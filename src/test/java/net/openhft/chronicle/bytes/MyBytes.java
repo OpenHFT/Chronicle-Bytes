@@ -7,8 +7,8 @@ import java.io.Closeable;
 import java.io.IOException;
 
 class MyBytes implements BytesMarshallable, Closeable {
-    Bytes<?> bytes1;
-    Bytes<?> bytes2;
+    private Bytes<?> bytes1;
+    private Bytes<?> bytes2;
 
     public MyBytes() {
     }

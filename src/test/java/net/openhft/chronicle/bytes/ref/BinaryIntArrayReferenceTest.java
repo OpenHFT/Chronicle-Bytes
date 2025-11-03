@@ -73,12 +73,12 @@ public class BinaryIntArrayReferenceTest extends BytesTestCommon {
         BinaryIntArrayReference first = new BinaryIntArrayReference();
         BinaryIntArrayReference second = new BinaryIntArrayReference();
 
-        public IntArrays(int firstLength, int secondLength) {
+        IntArrays(int firstLength, int secondLength) {
             first.capacity(firstLength);
             second.capacity(secondLength);
         }
 
-        public void closeAll() {
+        void closeAll() {
             first.close();
             second.close();
         }

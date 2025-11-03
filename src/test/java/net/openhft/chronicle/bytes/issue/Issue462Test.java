@@ -14,9 +14,9 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class Issue462Test {
+class Issue462Test {
 
-    static Stream<Bytes<ByteBuffer>> bytesToTest() {
+    private static Stream<Bytes<ByteBuffer>> bytesToTest() {
         if (Jvm.maxDirectMemory() == 0) {
             return Stream.of(
                     Bytes.elasticHeapByteBuffer(),
@@ -32,7 +32,7 @@ public class Issue462Test {
 
     @ParameterizedTest
     @MethodSource("bytesToTest")
-    public void testByteBufferByteOrder(Bytes<ByteBuffer> bytes) {
+    void testByteBufferByteOrder(Bytes<ByteBuffer> bytes) {
         final long value = 0x0102030405060708L;
         bytes.writeLong(value);
         final ByteBuffer byteBuffer = bytes.underlyingObject();

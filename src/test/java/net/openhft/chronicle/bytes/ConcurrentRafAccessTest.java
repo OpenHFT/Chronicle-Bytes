@@ -149,7 +149,7 @@ public class ConcurrentRafAccessTest extends BytesTestCommon {
         private final RandomAccessFile raf;
         private final FileChannel fc;
 
-        public Worker(final File f, final RandomAccessFile raf, final FileChannel fc) {
+        Worker(final File f, final RandomAccessFile raf, final FileChannel fc) {
             this.f = f;
             this.raf = raf;
             this.fc = fc;

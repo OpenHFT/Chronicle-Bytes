@@ -13,7 +13,7 @@ import static org.junit.Assert.assertEquals;
 
 public class UnsafeTextBytesTest extends BytesTestCommon {
 
-    static void testAppendBase10(final Bytes<?> bytes, final long l) {
+    private static void testAppendBase10(final Bytes<?> bytes, final long l) {
         final long address = bytes.clear().addressForRead(0);
         final long end = UnsafeText.appendFixed(address, l);
         bytes.readLimit(end - address);
@@ -30,9 +30,9 @@ public class UnsafeTextBytesTest extends BytesTestCommon {
         return message;
     }
 
-    static void testAppendFixed(final Bytes<?> bytes,
-                                final double l,
-                                final int digits) {
+    private static void testAppendFixed(final Bytes<?> bytes,
+                                        final double l,
+                                        final int digits) {
         final long address = bytes.clear().addressForRead(0);
         final long end = UnsafeText.appendFixed(address, l, digits);
         bytes.readLimit(end - address);

@@ -7,10 +7,10 @@ import net.openhft.chronicle.bytes.MappedBytes;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.UnsafeMemory;
 
-public class MemoryMessager {
+class MemoryMessager {
 
     public static final int NOT_READY = Integer.MIN_VALUE;
-    public static final int HEADER_LENGTH = 20;
+    private static final int HEADER_LENGTH = 20;
     private final MappedBytes bytes;
     private final int padTo;
     private final int padMask;

@@ -18,8 +18,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @RunWith(Parameterized.class)
 public class BytesCompactTest {
 
-    final String name;
-    final Bytes<?> bytes;
+    private final String name;
+    private final Bytes<?> bytes;
 
     /**
      * Constructor for parameterized test with name and bytes.

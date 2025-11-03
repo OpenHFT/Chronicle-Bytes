@@ -7,15 +7,15 @@ import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import net.openhft.chronicle.core.io.Validatable;
 import org.jetbrains.annotations.NotNull;
 
-public class MyByteable implements BytesMarshallable, Validatable {
-    boolean flag;
+class MyByteable implements BytesMarshallable, Validatable {
+    private boolean flag;
     byte b;
     short s;
-    char c;
-    int i;
-    float f;
-    long l;
-    double d;
+    private char c;
+    private int i;
+    private float f;
+    private long l;
+    private double d;
 
     public MyByteable() {
     }

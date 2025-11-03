@@ -29,17 +29,17 @@ public class BytesTestCommon {
 
     private final Map<Predicate<ExceptionKey>, String> ignoredExceptions = new LinkedHashMap<>();
     private final Map<Predicate<ExceptionKey>, String> expectedExceptions = new LinkedHashMap<>();
-    protected ThreadDump threadDump;
-    protected Map<ExceptionKey, Integer> exceptions;
-    protected boolean finishedNormally;
+    private ThreadDump threadDump;
+    private Map<ExceptionKey, Integer> exceptions;
+    boolean finishedNormally;
 
     @SuppressWarnings("this-escape")
-    public BytesTestCommon() {
+    protected BytesTestCommon() {
         // Allocation of 0 chunk in D:\BuildAgent\work\9605994e6a194885\single-mapped-file21723892241386086929bin took 0.509 ms.
         ignoreException("Allocation of ");
     }
 
-    static boolean contains(String text, String message) {
+    private static boolean contains(String text, String message) {
         return text != null && text.contains(message);
     }
 
@@ -53,7 +53,7 @@ public class BytesTestCommon {
         threadDump = new ThreadDump();
     }
 
-    public void checkThreadDump() {
+    private void checkThreadDump() {
         if (threadDump != null)
             threadDump.assertNoNewThreads();
     }
@@ -69,23 +69,23 @@ public class BytesTestCommon {
         finishedNormally = true;
     }
 
-    public void ignoreException(String message) {
+    void ignoreException(String message) {
         ignoreException(k -> contains(k.message, message) || (k.throwable != null && contains(k.throwable.getMessage(), message)), message);
     }
 
-    public void expectException(String message) {
+    protected void expectException(String message) {
         expectException(k -> contains(k.message, message) || (k.throwable != null && contains(k.throwable.getMessage(), message)), message);
     }
 
-    public void ignoreException(Predicate<ExceptionKey> predicate, String description) {
+    private void ignoreException(Predicate<ExceptionKey> predicate, String description) {
         ignoredExceptions.put(predicate, description);
     }
 
-    public void expectException(Predicate<ExceptionKey> predicate, String description) {
+    void expectException(Predicate<ExceptionKey> predicate, String description) {
         expectedExceptions.put(predicate, description);
     }
 
-    public void checkExceptions() {
+    private void checkExceptions() {
         for (Map.Entry<Predicate<ExceptionKey>, String> expectedException : expectedExceptions.entrySet()) {
             if (!exceptions.keySet().removeIf(expectedException.getKey()))
                 throw new AssertionError("No error for " + expectedException.getValue());
@@ -125,7 +125,7 @@ public class BytesTestCommon {
         BackgroundResourceReleaser.releasePendingResources();
     }
 
-    protected static void deleteIfPossible(@NotNull final File file) {
+    static void deleteIfPossible(@NotNull final File file) {
         if (!file.exists() || file.delete()) {
             return;
         }

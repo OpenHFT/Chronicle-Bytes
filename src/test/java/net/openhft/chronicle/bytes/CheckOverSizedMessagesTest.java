@@ -20,9 +20,9 @@ import static org.junit.Assume.assumeTrue;
 
 public class CheckOverSizedMessagesTest extends BytesTestCommon {
 
-    public static final byte[] BYTE6K = new byte[6000];
+    private static final byte[] BYTE6K = new byte[6000];
 
-    public static MappedBytes mbNoOverlap() {
+    private static MappedBytes mbNoOverlap() {
         File path = new File(OS.getTarget(), "oversized-" + System.nanoTime());
         path.deleteOnExit();
         try {

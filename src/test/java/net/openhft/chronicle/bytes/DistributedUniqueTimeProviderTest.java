@@ -39,7 +39,7 @@ public class DistributedUniqueTimeProviderTest extends BytesTestCommon {
         timeProvider.provider(setTimeProvider);
     }
 
-    static volatile long blackHole;
+    private static volatile long blackHole;
 
     @BeforeClass
     public static void checks() throws IOException {

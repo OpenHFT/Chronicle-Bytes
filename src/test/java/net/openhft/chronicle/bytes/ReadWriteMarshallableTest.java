@@ -38,7 +38,7 @@ public class ReadWriteMarshallableTest extends BytesTestCommon {
     static class RWOuter implements BytesMarshallable {
         RWInner i1, i2;
 
-        public RWOuter(RWInner i1, RWInner i2) {
+        RWOuter(RWInner i1, RWInner i2) {
             this.i1 = i1;
             this.i2 = i2;
         }
@@ -61,7 +61,7 @@ public class ReadWriteMarshallableTest extends BytesTestCommon {
     static class RWInner implements BytesMarshallable {
         Bytes<?> data;
 
-        public RWInner(Bytes<?> data) {
+        RWInner(Bytes<?> data) {
             this.data = data;
         }
 

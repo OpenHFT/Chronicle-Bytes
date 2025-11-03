@@ -79,12 +79,12 @@ public class BinaryLongArrayReferenceTest extends BytesTestCommon {
         BinaryLongArrayReference first = new BinaryLongArrayReference();
         BinaryLongArrayReference second = new BinaryLongArrayReference();
 
-        public LongArrays(int firstLength, int secondLength) {
+        LongArrays(int firstLength, int secondLength) {
             first.capacity(firstLength);
             second.capacity(secondLength);
         }
 
-        public void closeAll() {
+        void closeAll() {
             first.close();
             second.close();
         }

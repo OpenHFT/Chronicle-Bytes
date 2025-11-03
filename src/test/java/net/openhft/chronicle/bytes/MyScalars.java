@@ -13,15 +13,15 @@ import java.time.LocalTime;
 import java.time.ZonedDateTime;
 import java.util.UUID;
 
-public class MyScalars implements BytesMarshallable {
-    String s;
-    BigInteger bi;
-    BigDecimal bd;
-    LocalDate date;
-    LocalTime time;
-    LocalDateTime dateTime;
-    ZonedDateTime zonedDateTime;
-    UUID uuid;
+class MyScalars implements BytesMarshallable {
+    private String s;
+    private BigInteger bi;
+    private BigDecimal bd;
+    private LocalDate date;
+    private LocalTime time;
+    private LocalDateTime dateTime;
+    private ZonedDateTime zonedDateTime;
+    private UUID uuid;
 
     public MyScalars() {
     }

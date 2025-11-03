@@ -20,7 +20,7 @@ public class ContentEqualsJLBHMain {
 
     static boolean isDirect = true;
 
-    static int size = 1024;
+    private static int size = 1024;
 
     private final Bytes<?> left = Bytes.allocateElasticDirect();
     private final Bytes<?> right = Bytes.allocateElasticDirect();

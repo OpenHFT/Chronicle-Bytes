@@ -36,8 +36,8 @@ Ping pong rate: 52,590,468 ping-pong/second
 Ping pong rate: 52,661,971 ping-pong/second
  */
 public class MMapPingPongMain {
-    static final boolean PONG = Jvm.getBoolean("pong");
-    static final boolean USE_AFFINITY = Jvm.getBoolean("useAffinity");
+    private static final boolean PONG = Jvm.getBoolean("pong");
+    private static final boolean USE_AFFINITY = Jvm.getBoolean("useAffinity");
 
     public static void main(String[] args) throws FileNotFoundException {
         File tmpFile = new File(OS.getTmp(), "ping-pong-" + OS.getUserName() + ".tmp");

@@ -31,8 +31,8 @@ import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
 final class BytesFactoryUtil {
 
-    static final int SIZE = 128;
-    static final int CHUNK_SIZE = 64 << 10;
+    private static final int SIZE = 128;
+    private static final int CHUNK_SIZE = 64 << 10;
     private static final AtomicInteger CNT = new AtomicInteger();
     private BytesFactoryUtil() {
     }
@@ -121,7 +121,7 @@ final class BytesFactoryUtil {
         }
     }
 
-    static File create(final File file, int byteSize) {
+    private static File create(final File file, int byteSize) {
         try {
             Files.write(file.toPath(), new byte[byteSize], StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE);
             return file;
@@ -197,7 +197,7 @@ final class BytesFactoryUtil {
 
         private final ThrowingConsumer<O, T> delegate;
 
-        public ThrowingConsumerWrapper(ThrowingConsumer<O, T> delegate) {
+        ThrowingConsumerWrapper(ThrowingConsumer<O, T> delegate) {
             this.delegate = delegate;
         }
 

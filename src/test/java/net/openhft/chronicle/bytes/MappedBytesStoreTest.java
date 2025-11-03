@@ -19,7 +19,7 @@ import static org.junit.Assert.*;
 import static org.junit.Assume.assumeFalse;
 
 public class MappedBytesStoreTest extends BytesTestCommon implements ReferenceOwner {
-    public static final int PAGE_SIZE = OS.defaultOsPageSize();
+    private static final int PAGE_SIZE = OS.defaultOsPageSize();
     private MappedFile mappedFile;
     private MappedBytesStore mappedBytesStore;
 

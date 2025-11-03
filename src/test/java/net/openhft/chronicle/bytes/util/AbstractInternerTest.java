@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test;
 class AbstractInternerTest {
 
     private static final class TestInterner extends AbstractInterner<String> {
-        protected TestInterner(int capacity) {
+        TestInterner(int capacity) {
             super(capacity);
         }
 

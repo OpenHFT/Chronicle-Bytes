@@ -30,7 +30,7 @@ import static org.junit.Assume.assumeFalse;
 
 public class NativeBytesStoreTest extends BytesTestCommon {
 
-    volatile int bcs;
+    private volatile int bcs;
 
     @Before
     public void hasDirectMemory() {

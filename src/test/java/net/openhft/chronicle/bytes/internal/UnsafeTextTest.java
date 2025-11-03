@@ -19,7 +19,7 @@ import static org.junit.Assert.fail;
 
 public class UnsafeTextTest extends BytesTestCommon {
 
-    static long blackhole;
+    private static long blackhole;
 
     @SuppressWarnings("EmptyMethod")
     @Override
@@ -140,7 +140,7 @@ public class UnsafeTextTest extends BytesTestCommon {
 
     }
 
-    public void testAppendDoubleOnce(double value, String expectedValue) {
+    private void testAppendDoubleOnce(double value, String expectedValue) {
         int size = max + 8;
         long address = OS.memory().allocate(size);
         try {
@@ -151,7 +151,7 @@ public class UnsafeTextTest extends BytesTestCommon {
         }
     }
 
-    static final int max = 32;
+    private static final int max = 32;
 
     @Test
     public void testRandom() {
@@ -202,7 +202,7 @@ public class UnsafeTextTest extends BytesTestCommon {
         });
     }
 
-    public String appendDoubleToString(double value, long address) {
+    private String appendDoubleToString(double value, long address) {
         OS.memory().writeLong(address + max, 0L);
         final long endAddress = UnsafeText.appendDouble(address, value);
         if (endAddress > address + max)

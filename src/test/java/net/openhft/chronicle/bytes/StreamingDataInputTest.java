@@ -90,10 +90,10 @@ public class StreamingDataInputTest extends BytesTestCommon {
         long i1;
         boolean b1;
 
-        public TestObject() {
+        TestObject() {
         }
 
-        public TestObject(long l1, int i1, boolean b1) {
+        TestObject(long l1, int i1, boolean b1) {
             this.l1 = l1;
             this.i1 = i1;
             this.b1 = b1;

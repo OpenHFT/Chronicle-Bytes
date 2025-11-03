@@ -40,7 +40,7 @@ public class Issue523Test extends BytesTestCommon {
         doTestAppendDoubles(Bytes::allocateElasticDirect);
     }
 
-    public void doTestAppendDoubles(Supplier<Bytes<?>> bytesSupplier) {
+    private void doTestAppendDoubles(Supplier<Bytes<?>> bytesSupplier) {
         Set<String> collect = IntStream.range(0, 1000)
                 .parallel()
                 .mapToObj(i -> {

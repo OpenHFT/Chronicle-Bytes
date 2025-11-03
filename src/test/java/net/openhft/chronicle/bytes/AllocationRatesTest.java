@@ -21,9 +21,9 @@ buffers 128 KB took an average of 10,768 ns for heap ByteBuffer, 21,444 ns for d
 buffers 128 KB took an average of 8,739 ns for heap ByteBuffer, 22,684 ns for direct ByteBuffer and 890 for DirectStore
  */
 public class AllocationRatesTest extends BytesTestCommon {
-    public static final int BATCH = 10;
-    static final int BUFFER_SIZE = 128 * 1024;
-    static final int ALLOCATIONS = 10000;
+    private static final int BATCH = 10;
+    private static final int BUFFER_SIZE = 128 * 1024;
+    private static final int ALLOCATIONS = 10000;
 
     @Test
     public void compareAllocationRates() {

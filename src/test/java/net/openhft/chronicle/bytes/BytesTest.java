@@ -44,7 +44,7 @@ import static org.junit.Assume.assumeTrue;
 public class BytesTest extends BytesTestCommon {
 
     private final Allocator alloc1;
-    boolean parseDouble;
+    private boolean parseDouble;
 
     public BytesTest(String ignored, Allocator alloc1) {
         this.alloc1 = alloc1;

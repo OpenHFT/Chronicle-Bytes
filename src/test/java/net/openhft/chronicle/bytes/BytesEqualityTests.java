@@ -89,7 +89,7 @@ class BytesEqualityTests {
             assertEquals(left, right);
         }
 
-        public Stream<Arguments> bufferArguments() {
+        Stream<Arguments> bufferArguments() {
             return Stream.of(
                     Arguments.of(Bytes.allocateElasticOnHeap(), Bytes.allocateElasticDirect()), // heap, direct
                     Arguments.of(Bytes.allocateElasticDirect(), Bytes.allocateElasticOnHeap()), // direct, heap

@@ -53,7 +53,7 @@ public class MappedUniqueTimeProviderTest extends BytesTestCommon {
         }
     }
 
-    static volatile long blackHole;
+    private static volatile long blackHole;
 
     @Test
     public void currentTimeMillisPerf() {

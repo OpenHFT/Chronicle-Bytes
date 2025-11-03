@@ -19,52 +19,52 @@ import static org.junit.Assume.assumeFalse;
 @SuppressWarnings({"squid:S2699", "squid:S5786"})
 class DecimaliserDoubleTest extends BytesTestCommon {
 
-    public static final DecimalAppender CHECK_OK = (negative, mantissa, exponent) -> {
+    private static final DecimalAppender CHECK_OK = (negative, mantissa, exponent) -> {
         // ok
     };
-    public static final DecimalAppender CHECK_NEG314 = (negative, mantissa, exponent) -> {
+    private static final DecimalAppender CHECK_NEG314 = (negative, mantissa, exponent) -> {
         assertTrue(negative);
         assertEquals(314, mantissa);
         assertEquals(2, exponent);
     };
-    public static final DecimalAppender CHECK_123456789_012345 = (negative, mantissa, exponent) -> {
+    private static final DecimalAppender CHECK_123456789_012345 = (negative, mantissa, exponent) -> {
         assertFalse(negative);
         assertEquals(123456789012345L, mantissa);
         assertEquals(6, exponent);
         assertEquals(123456789.012345, mantissa / 1e6, 0.0);
     };
-    public static final DecimalAppender CHECK_NEG_PI = (negative, mantissa, exponent) -> {
+    private static final DecimalAppender CHECK_NEG_PI = (negative, mantissa, exponent) -> {
         assertTrue(negative);
         assertEquals(3141592653589793L, mantissa);
         assertEquals(15, exponent);
         assertEquals(Math.PI, mantissa / 1e15, 0.0);
     };
-    public static final DecimalAppender CHECK_ZERO = (negative, mantissa, exponent) -> {
+    private static final DecimalAppender CHECK_ZERO = (negative, mantissa, exponent) -> {
         assertFalse(negative);
         assertEquals(0, mantissa);
         if (exponent != 0)
             assertEquals(1, exponent);
     };
-    public static final DecimalAppender CHECK_NEG_ZERO = (negative, mantissa, exponent) -> {
+    private static final DecimalAppender CHECK_NEG_ZERO = (negative, mantissa, exponent) -> {
         assertTrue(negative);
         assertEquals(0, mantissa);
         if (exponent != 0)
             assertEquals(1, exponent);
     };
-    public static final double HARD_TO_DECIMALISE = 4.8846945805332034E-12;
+    private static final double HARD_TO_DECIMALISE = 4.8846945805332034E-12;
 
     @BeforeEach
-    public void hasDirect() {
+    void hasDirect() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
     }
 
     @Test
-    public void toDoubleTestTest() {
+    void toDoubleTestTest() {
         assertFalse(SimpleDecimaliser.SIMPLE.toDecimal(HARD_TO_DECIMALISE, CHECK_OK));
     }
 
     @Test
-    public void toDoubleLimitedTestTest() {
+    void toDoubleLimitedTestTest() {
         DecimalAppender check = (negative, mantissa, exponent) -> {
             assertFalse(negative);
             assertEquals(48847, mantissa);
@@ -74,7 +74,7 @@ class DecimaliserDoubleTest extends BytesTestCommon {
     }
 
     @Test
-    public void toDoubleTest() {
+    void toDoubleTest() {
         DecimalAppender check = (negative, mantissa, exponent) -> {
             assertFalse(negative);
             assertEquals(48846945805332034L, mantissa);
@@ -84,7 +84,7 @@ class DecimaliserDoubleTest extends BytesTestCommon {
     }
 
     @Test
-    public void toDoubleTest1e_6() {
+    void toDoubleTest1e_6() {
         DecimalAppender check = (negative, mantissa, exponent) -> {
             assertFalse(negative);
             assertEquals(1, mantissa);
@@ -103,7 +103,7 @@ class DecimaliserDoubleTest extends BytesTestCommon {
     }
 
     @Test
-    public void toDoubleTestRounding() {
+    void toDoubleTestRounding() {
         DecimalAppender check = (negative, mantissa, exponent) -> {
             assertFalse(negative);
             assertEquals(1, mantissa);
@@ -115,7 +115,7 @@ class DecimaliserDoubleTest extends BytesTestCommon {
     }
 
     @Test
-    public void toDoubleLiteAndBigDecimal() {
+    void toDoubleLiteAndBigDecimal() {
         LongStream.range(0, 100_000L)
 //                .parallel()
                 .forEach(x -> {
@@ -137,7 +137,7 @@ class DecimaliserDoubleTest extends BytesTestCommon {
     }
 
     @Test
-    public void toDoubleLarge() {
+    void toDoubleLarge() {
         DecimalAppender check = (negative, mantissa, exponent) -> {
             assertTrue(0 <= exponent);
             assertTrue("exponent: " + exponent, exponent <= 18);
@@ -153,47 +153,47 @@ class DecimaliserDoubleTest extends BytesTestCommon {
     }
 
     @Test
-    public void testNegativeValue() {
+    void testNegativeValue() {
         SimpleDecimaliser.SIMPLE.toDecimal(-3.14, CHECK_NEG314);
     }
 
     @Test
-    public void testPositive() {
+    void testPositive() {
         SimpleDecimaliser.SIMPLE.toDecimal(123456789.012345, CHECK_123456789_012345);
     }
 
     @Test
-    public void testPositiveBD() {
+    void testPositiveBD() {
         UsesBigDecimal.USES_BIG_DECIMAL.toDecimal(123456789.012345, CHECK_123456789_012345);
     }
 
     @Test
-    public void testNegativePI() {
+    void testNegativePI() {
         SimpleDecimaliser.SIMPLE.toDecimal(-Math.PI, CHECK_NEG_PI);
     }
 
     @Test
-    public void testNegativePIBD() {
+    void testNegativePIBD() {
         UsesBigDecimal.USES_BIG_DECIMAL.toDecimal(-Math.PI, CHECK_NEG_PI);
     }
 
     @Test
-    public void testZero() {
+    void testZero() {
         SimpleDecimaliser.SIMPLE.toDecimal(0.0, CHECK_ZERO);
     }
 
     @Test
-    public void testZeroBD() {
+    void testZeroBD() {
         UsesBigDecimal.USES_BIG_DECIMAL.toDecimal(0.0, CHECK_ZERO);
     }
 
     @Test
-    public void testNegZero() {
+    void testNegZero() {
         SimpleDecimaliser.SIMPLE.toDecimal(-0.0, CHECK_NEG_ZERO);
     }
 
     @Test
-    public void testNegLongMinValueBD() {
+    void testNegLongMinValueBD() {
         DecimalAppender check = (negative, mantissa, exponent) -> {
             // -9223372036854775808
             assertTrue(negative);
@@ -204,7 +204,7 @@ class DecimaliserDoubleTest extends BytesTestCommon {
     }
 
     @Test
-    public void testDouble1() {
+    void testDouble1() {
         DecimalAppender check = (negative, mantissa, exponent) -> {
             assertFalse(negative);
             assertEquals(16666666666666785L, mantissa);

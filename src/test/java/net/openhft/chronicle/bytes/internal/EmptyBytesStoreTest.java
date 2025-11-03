@@ -495,13 +495,13 @@ public class EmptyBytesStoreTest extends BytesTestCommon {
 //        assertThrows(BufferOverflowException.class, () -> INSTANCE.zeroOut(1, 2));
     }
 
-    public void read(final ObjLongConsumer<BytesStore<?, ?>> getter) {
+    private void read(final ObjLongConsumer<BytesStore<?, ?>> getter) {
         assumeFalse(instance instanceof NativeBytesStore);
         assertThrowsBufferException(() -> getter.accept(instance, 0));
         assertThrows(IllegalArgumentException.class, () -> getter.accept(instance, -1));
     }
 
-    public void assertThrows(Class<? extends Throwable> tClass, Runnable runnable) {
+    private void assertThrows(Class<? extends Throwable> tClass, Runnable runnable) {
         try {
             runnable.run();
 
@@ -515,7 +515,7 @@ public class EmptyBytesStoreTest extends BytesTestCommon {
         throw new AssertionFailedError("expected " + tClass);
     }
 
-    public void assertThrowsBufferException(final Runnable consumer) {
+    private void assertThrowsBufferException(final Runnable consumer) {
         try {
             consumer.run();
 

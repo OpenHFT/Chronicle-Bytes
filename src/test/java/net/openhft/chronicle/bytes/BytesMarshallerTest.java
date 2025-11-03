@@ -3,6 +3,7 @@
  */
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.annotation.UsedViaReflection;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -15,6 +16,8 @@ import static org.junit.jupiter.api.Assertions.*;
 class BytesMarshallerTest {
 
     static class TestClass {
+        @SuppressWarnings("WeakerAccess")
+        @UsedViaReflection
         public String[] stringArray;
     }
 

@@ -38,7 +38,7 @@ final class Issue384ReplaceByteStoreOnEmptyArrayTest extends BytesTestCommon {
         assertTrue(replacedOrRefused);
     }
 
-    static Stream<Arguments> bytesToTest() {
+    private static Stream<Arguments> bytesToTest() {
         return Stream.of(
                         Bytes.allocateElasticDirect(),
                         Bytes.allocateElasticDirect(0),

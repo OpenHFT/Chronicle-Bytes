@@ -18,7 +18,7 @@ import static java.lang.System.setProperty;
 public class BytesReadWriteJLBH implements JLBHTask {
 
     public static final int SHORT_LENGTH = 37;
-    public static final int LONG_LENGTH = 1_024;
+    private static final int LONG_LENGTH = 1_024;
     private static final int ARRAY_SIZE = 1024 * 50;
     private static final byte[] BYTE_ARRAY = new byte[ARRAY_SIZE];
     private static final int ITERATIONS = 50_000;
@@ -39,7 +39,7 @@ public class BytesReadWriteJLBH implements JLBHTask {
     private Bytes<?> targetBytes;
     private int length;
 
-    public BytesReadWriteJLBH(Bytes<?> bytes, int length) {
+    private BytesReadWriteJLBH(Bytes<?> bytes, int length) {
         this.bytesImpl = bytes;
         this.length = length;
     }
@@ -48,7 +48,7 @@ public class BytesReadWriteJLBH implements JLBHTask {
         runForBytes(bytes, LONG_LENGTH);
     }
 
-    public static void runForBytes(Bytes<?> bytes, int length) {
+    private static void runForBytes(Bytes<?> bytes, int length) {
         setProperty("jvm.resource.tracing", "false");
         new JLBH(new JLBHOptions()
                 .warmUpIterations(15_000)
@@ -229,7 +229,7 @@ public class BytesReadWriteJLBH implements JLBHTask {
 
         abstract long writeString(Bytes<?> bytes, String string);
 
-        public long writeString(Bytes<?> bytes, int length) {
+        long writeString(Bytes<?> bytes, int length) {
             return writeString(bytes, stringForLength(length));
         }
 
@@ -239,7 +239,7 @@ public class BytesReadWriteJLBH implements JLBHTask {
          * @param lengthInBytes the length in bytes to generate to
          * @return the generated string
          */
-        public String stringForLength(int lengthInBytes) {
+        String stringForLength(int lengthInBytes) {
             if (stringsForLength.containsKey(lengthInBytes)) {
                 return stringsForLength.get(lengthInBytes);
             }
@@ -265,7 +265,7 @@ public class BytesReadWriteJLBH implements JLBHTask {
          * @param length The length in bytes requested
          * @return The actual length generated (may not == length)
          */
-        public int lengthOfEncodedString(int length) {
+        int lengthOfEncodedString(int length) {
             stringForLength(length);
             return lengthOfEncodedStrings.get(length);
         }
@@ -276,7 +276,7 @@ public class BytesReadWriteJLBH implements JLBHTask {
          * @param length The length in bytes requested
          * @return The actual length generated, excluding the length prefix
          */
-        public int lengthOfEncodedStringWithoutLength(int length) {
+        int lengthOfEncodedStringWithoutLength(int length) {
             stringForLength(length);
             return lengthOfEncodedStringsWithoutLength.get(length);
         }

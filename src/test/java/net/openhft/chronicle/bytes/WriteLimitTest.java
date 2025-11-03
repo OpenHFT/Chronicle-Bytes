@@ -19,13 +19,13 @@ import static org.junit.Assert.fail;
 
 @RunWith(Parameterized.class)
 public class WriteLimitTest extends BytesTestCommon {
-    static final Allocator[] ALLOCATORS = {Allocator.HEAP, Allocator.HEAP_EMBEDDED, Allocator.HEAP_UNCHECKED};
-    static List<Object[]> tests;
+    private static final Allocator[] ALLOCATORS = {Allocator.HEAP, Allocator.HEAP_EMBEDDED, Allocator.HEAP_UNCHECKED};
+    private static List<Object[]> tests;
     static Random random = new Random();
-    final String name;
-    final Allocator allocator;
-    final Consumer<Bytes<?>> action;
-    final int length;
+    private final String name;
+    private final Allocator allocator;
+    private final Consumer<Bytes<?>> action;
+    private final int length;
 
     public WriteLimitTest(String name, Allocator allocator, Consumer<Bytes<?>> action, int length) {
         this.name = name;
@@ -53,7 +53,7 @@ public class WriteLimitTest extends BytesTestCommon {
         return tests;
     }
 
-    static void addTest(String name, Consumer<Bytes<?>> action, int length) {
+    private static void addTest(String name, Consumer<Bytes<?>> action, int length) {
         Allocator[] allocators = Jvm.maxDirectMemory() == 0 ? ALLOCATORS : Allocator.values();
         for (Allocator a : allocators)
             tests.add(new Object[]{a + " " + name, a, action, length});

@@ -154,9 +154,9 @@ public class BytesMarshallableTest extends BytesTestCommon {
         }
     }
 
-    public void doSerializeScalars(@NotNull final Bytes<?> bytes,
-                                   @NotNull final MyScalars mb1,
-                                   @NotNull final MyScalars mb2) {
+    private void doSerializeScalars(@NotNull final Bytes<?> bytes,
+                                    @NotNull final MyScalars mb1,
+                                    @NotNull final MyScalars mb2) {
         final MyScalars mb3 = new MyScalars();
         final MyScalars mb4 = new MyScalars();
         assertEquals(1, bytes.readUnsignedByte());
@@ -678,8 +678,8 @@ public class BytesMarshallableTest extends BytesTestCommon {
         }
     }
 
-    public static final class BM3 implements BytesMarshallable {
-        public long value;
+    static final class BM3 implements BytesMarshallable {
+        long value;
 
         @Override
         public boolean equals(Object o) {
@@ -695,7 +695,7 @@ public class BytesMarshallableTest extends BytesTestCommon {
         }
     }
 
-    public static final class BMA implements BytesMarshallable {
+    static final class BMA implements BytesMarshallable {
         byte[] bytes;
         int[] ints;
         float[] floats;

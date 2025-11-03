@@ -13,16 +13,16 @@ import java.io.File;
 import java.io.IOException;
 
 public class MemoryWriteJitterMain {
-    public static final String PROFILE_OF_THE_THREAD = "profile of the thread";
+    private static final String PROFILE_OF_THE_THREAD = "profile of the thread";
 
-    static int runTime = Integer.getInteger("runTime", 600); // seconds
-    static int size = Integer.getInteger("size", 128); // bytes
-    static int padTo = Integer.getInteger("pad", 0); // bytes
-    static int sampleTime = Integer.getInteger("sampleTime", 2); // micro-seconds
-    static int throughput = Integer.getInteger("throughput", 20_000); // per second
-    static volatile boolean running = true;
-    static volatile boolean writing = false;
-    static volatile int count = 0;
+    private static int runTime = Integer.getInteger("runTime", 600); // seconds
+    private static int size = Integer.getInteger("size", 128); // bytes
+    private static int padTo = Integer.getInteger("pad", 0); // bytes
+    private static int sampleTime = Integer.getInteger("sampleTime", 2); // micro-seconds
+    private static int throughput = Integer.getInteger("throughput", 20_000); // per second
+    private static volatile boolean running = true;
+    private static volatile boolean writing = false;
+    private static volatile int count = 0;
 
     static {
         System.setProperty("jvm.safepoint.enabled", "true");

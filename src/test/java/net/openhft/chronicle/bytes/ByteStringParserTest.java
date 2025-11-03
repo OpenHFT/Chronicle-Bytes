@@ -20,6 +20,7 @@ import static org.junit.Assume.assumeFalse;
 
 public class ByteStringParserTest extends BytesTestCommon {
     @NotNull
+    private
     Bytes<?> bytes = Bytes.allocateElastic();
 
     @Override

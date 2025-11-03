@@ -5,6 +5,7 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
+import net.openhft.chronicle.core.annotation.UsedViaReflection;
 import net.openhft.chronicle.core.io.IOTools;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -21,6 +22,7 @@ import java.util.function.Consumer;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assume.assumeFalse;
 
+@SuppressWarnings("OverlyStrongTypeCast")
 @RunWith(Parameterized.class)
 public class MappedBytesEdgeTest extends BytesTestCommon {
     private static final int CHUNK_SIZE = 262144;
@@ -28,6 +30,7 @@ public class MappedBytesEdgeTest extends BytesTestCommon {
     private final ReadWrite rw;
     private final Consumer<Bytes<?>> doit;
 
+    @UsedViaReflection
     public MappedBytesEdgeTest(int size, ReadWrite rw, String name, Consumer<Bytes<?>> doit) {
         this.size = size;
         this.rw = rw;
@@ -60,7 +63,7 @@ public class MappedBytesEdgeTest extends BytesTestCommon {
         });
     }
 
-    static Bytes<?> unmonitored(Bytes<?> bytes) {
+    private static Bytes<?> unmonitored(Bytes<?> bytes) {
         IOTools.unmonitor(bytes);
         return bytes;
     }
@@ -125,7 +128,7 @@ public class MappedBytesEdgeTest extends BytesTestCommon {
         }
     }
 
-    protected long overlap(long chunkSize) {
+    private long overlap(long chunkSize) {
         return chunkSize / 4;
     }
 

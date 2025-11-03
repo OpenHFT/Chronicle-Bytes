@@ -266,57 +266,57 @@ public class PrimitiveTest extends BytesTestCommon {
         }
     }
 
-    public static final class Outer implements BytesMarshallable {
+    static final class Outer implements BytesMarshallable {
 
-        public String name;
-        public Inner innerA;
-        public Inner innerB;
+        String name;
+        Inner innerA;
+        Inner innerB;
 
-        public Outer(final String name,
-                     final Inner innerA,
-                     final Inner innerB) {
+        Outer(final String name,
+              final Inner innerA,
+              final Inner innerB) {
             this.name = name;
             this.innerA = innerA;
             this.innerB = innerB;
         }
 
-        public Outer() {
+        Outer() {
             this(null, new Inner(), new Inner());
         }
     }
 
     public static final class Inner implements BytesMarshallable {
 
-        public String key;
-        public double value;
+        String key;
+        double value;
 
-        public Inner(String key, double value) {
+        Inner(String key, double value) {
             this.key = key;
             this.value = value;
         }
 
-        public Inner() {
+        Inner() {
         }
     }
 
-    public static class PrimitiveDTO implements BytesMarshallable {
-        public boolean flag;
-        public byte s8;
-        public short s16;
-        public char ch;
-        public int s32;
-        public long s64;
-        public float f32;
-        public double f64;
+    static class PrimitiveDTO implements BytesMarshallable {
+        boolean flag;
+        byte s8;
+        short s16;
+        char ch;
+        int s32;
+        long s64;
+        float f32;
+        double f64;
 
-        public PrimitiveDTO(final boolean flag,
-                            final byte s8,
-                            final short s16,
-                            final char ch,
-                            final int s32,
-                            final long s64,
-                            final float f32,
-                            final double f64) {
+        PrimitiveDTO(final boolean flag,
+                     final byte s8,
+                     final short s16,
+                     final char ch,
+                     final int s32,
+                     final long s64,
+                     final float f32,
+                     final double f64) {
             this.flag = flag;
             this.s8 = s8;
             this.s16 = s16;
@@ -327,7 +327,7 @@ public class PrimitiveTest extends BytesTestCommon {
             this.f64 = f64;
         }
 
-        public PrimitiveDTO() {
+        PrimitiveDTO() {
         }
     }
 }

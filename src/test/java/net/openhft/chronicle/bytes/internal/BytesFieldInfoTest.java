@@ -31,7 +31,7 @@ public class BytesFieldInfoTest extends BytesTestCommon {
         assertEquals("4050000", Integer.toHexString(lookup3.description()));
     }
 
-    static class Groups1 {
+    private static class Groups1 {
         @FieldGroup("header")
         int header;
         @FieldGroup("pad")
@@ -46,7 +46,7 @@ public class BytesFieldInfoTest extends BytesTestCommon {
         int add1, add2, add3, add4;
     }
 
-    static class Groups2 {
+    private static class Groups2 {
         @FieldGroup("pad")
         long pad0, pad1, pad3, pad2;
         @FieldGroup("hi")
@@ -60,7 +60,7 @@ public class BytesFieldInfoTest extends BytesTestCommon {
         long pad0, pad1, pad3, pad2;
     }
 
-    static class Groups3 extends GroupsBase {
+    private static class Groups3 extends GroupsBase {
         @FieldGroup("hi")
         int hi99;
         @FieldGroup("add")
