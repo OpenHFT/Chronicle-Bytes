@@ -146,6 +146,8 @@ public class XxHash implements BytesStoreHash<BytesStore<?, ?>> {
     public long applyAsLong(BytesStore<?, ?> bytes, @NonNegative long length) throws IllegalStateException, BufferUnderflowException {
         long hash;
         long remaining = length;
+        if (remaining < 0 || length > bytes.readRemaining())
+            throw new BufferUnderflowException();
         long off = bytes.readPosition();
 
         if (remaining >= 32) {

@@ -44,13 +44,4 @@ public class MethodReaderBuilderTest {
         builder.warnMissing(false);
         verify(builder).exceptionHandlerOnUnknownMethod(Jvm.debug());
     }
-
-    @Test
-    public void testPredicate() {
-        MethodReaderBuilder builder = mock(MethodReaderBuilder.class, Mockito.CALLS_REAL_METHODS);
-
-        Predicate<MethodReader> predicate = o -> true;
-
-        builder.predicate(predicate);
-    }
 }

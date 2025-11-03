@@ -277,6 +277,7 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
      * @return A new MappedFile instance.
      * @throws IOException If an I/O error occurs.
      */
+    @SuppressWarnings("java:S2095")
     @NotNull
     public static MappedFile mappedFile(@NotNull final File file,
                                         @NonNegative final long capacity,

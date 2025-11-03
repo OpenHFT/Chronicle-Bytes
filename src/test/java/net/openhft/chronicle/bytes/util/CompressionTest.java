@@ -27,5 +27,6 @@ public class CompressionTest {
         Bytes<?> compressed = mock(Bytes.class);
 
         Compression.compress("unsupported_algo", uncompressed, compressed);
+        verify(compressed, never()).write(any(Bytes.class));
     }
 }

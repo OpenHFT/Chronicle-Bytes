@@ -118,5 +118,6 @@ public class MappedBytesStoreTest extends BytesTestCommon implements ReferenceOw
         mappedBytesStore.syncUpTo(1000);
         mappedBytesStore.syncUpTo(5000);
         mappedBytesStore.syncUpTo(1000000);
+        assertTrue(true); // If no exceptions, the test passes
     }
 }

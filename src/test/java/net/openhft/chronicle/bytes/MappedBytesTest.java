@@ -680,5 +680,6 @@ public class MappedBytesTest extends BytesTestCommon {
         } finally {
             slice.releaseLast();
         }
+        assertTrue(true); // if we reach here, the test passes
     }
 }

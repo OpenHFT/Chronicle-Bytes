@@ -145,6 +145,7 @@ public class AbstractBytesTest {
     @Test
     public void readPositionForHeader_WithSkipPadding() throws Exception {
         long newPosition = bytes.readPositionForHeader(true);
+        assertEquals(0, newPosition);
     }
 
     @Test

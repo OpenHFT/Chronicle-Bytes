@@ -21,6 +21,8 @@ import org.junit.Test;
 
 import java.nio.BufferUnderflowException;
 
+import static org.junit.Assert.assertEquals;
+
 public class XxHashTest {
 
     @Test
@@ -41,7 +43,7 @@ public class XxHashTest {
         long hash2 = XxHash.INSTANCE.applyAsLong(bytesStore2);
 
         // Assert that hashes for identical data are equal
-        Assert.assertEquals(hash1, hash2);
+        assertEquals(hash1, hash2);
     }
 
     @Test
@@ -54,8 +56,8 @@ public class XxHashTest {
         Assert.assertNotEquals(fullHash, partialHash);
     }
 
-    @Test
-    public void testHashBeyondLengthThrowsException() throws BufferUnderflowException {
+    @Test(expected = BufferUnderflowException.class)
+    public void testHashBeyondLengthThrowsException() {
         BytesStore<?, ?> bytesStore = BytesStore.from("short");
         // Attempt to hash beyond the available length
         XxHash.INSTANCE.applyAsLong(bytesStore, bytesStore.readRemaining() + 1);

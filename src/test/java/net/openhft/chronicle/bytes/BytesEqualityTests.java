@@ -114,6 +114,7 @@ class BytesEqualityTests {
     /**
      * A suite of tests for exercising contentEquals and a variety of different heap and direct buffer combinations.
      */
+    @SuppressWarnings("java:S5976")
     @Nested
     class DirectVsHeapContentEqualsTests {
 
