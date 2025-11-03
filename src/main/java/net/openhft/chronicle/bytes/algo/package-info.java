@@ -1,3 +1,6 @@
+/*
+ * Copyright 2016-2025 chronicle.software; SPDX-License-Identifier: Apache-2.0
+ */
 /**
  * Provides classes for non-cryptographic hash computations on {@link net.openhft.chronicle.bytes.BytesStore} objects.
  * <p>
@@ -19,6 +22,6 @@
  *
  * @see net.openhft.chronicle.bytes.BytesStore
  * @see net.openhft.chronicle.bytes.algo.BytesStoreHash
- * @see <a href="../../../../src/main/adoc/algo-overview.adoc">algo-overview.adoc</a>
+ * @see <a href="../../../../src/main/docs/algo-overview.adoc">algo-overview.adoc</a>
  */
 package net.openhft.chronicle.bytes.algo;

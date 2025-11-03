@@ -1,3 +1,6 @@
+/*
+ * Copyright 2016-2025 chronicle.software; SPDX-License-Identifier: Apache-2.0
+ */
 /**
  * Provides references to primitive values and arrays stored directly in a {@link net.openhft.chronicle.bytes.BytesStore}.
  * These references permit low-level manipulation of off-heap or memory-mapped data.

@@ -1,17 +1,5 @@
 /*
- * Copyright 2016-2025 chronicle.software
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Copyright 2016-2025 chronicle.software; SPDX-License-Identifier: Apache-2.0
  */
 package net.openhft.chronicle.bytes.internal;
 
@@ -33,7 +21,6 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
-import java.util.Objects;
 
 import static net.openhft.chronicle.core.Jvm.uncheckedCast;
 import static net.openhft.chronicle.core.util.Ints.requireNonNegative;
@@ -181,7 +168,7 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
     /**
      * Move the read position to {@code position}, loading the correct chunk if needed.
      * <p>
-     * Uses the chunk’s hard upper bound so we only grow the file when absolutely required.
+     * Uses the chunk's hard upper bound so we only grow the file when absolutely required.
      *
      * @param position new read position (>= 0)
      * @return this instance
@@ -203,7 +190,7 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
     /**
      * Move the write limit to {@code limit}, loading the correct chunk if needed.
      * <p>
-     * Uses the chunk’s hard upper bound so we only grow the file when absolutely required.
+     * Uses the chunk's hard upper bound so we only grow the file when absolutely required.
      *
      * @param limit new write limit (>= 0)
      * @return this instance
@@ -221,7 +208,7 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
     /**
      * Move the write position to {@code position}, loading the correct chunk if needed.
      * <p>
-     * Uses the chunk’s safe upper bound so we can safely write a significant block of data after this without checking the size regularly.
+     * Uses the chunk's safe upper bound so we can safely write a significant block of data after this without checking the size regularly.
      *
      * @param position new write position (>= 0)
      * @return this instance

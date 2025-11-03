@@ -1,10 +1,13 @@
+/*
+ * Copyright 2016-2025 chronicle.software; SPDX-License-Identifier: Apache-2.0
+ */
 /**
  * Internal helper classes and interfaces used by Chronicle Bytes.
  * <p>
  * These utilities follow Chronicle's zero-allocation, low-latency design philosophy
  * and may change between minor releases. They live outside the public API and
  * carry no binary-compatibility guarantees. Features include:
- * 
+ *
  * <ul>
  *     <li>Specialised exceptions for buffer overflow and underflow, allowing custom messages.</li>
  *     <li>Interning utilities for strings in various character encodings, and utilities for
@@ -19,7 +22,6 @@
  * serialisation and data manipulation.
  * <p>
  * Note: Most classes are not thread safe unless stated otherwise.
- * 
  *
  * @see net.openhft.chronicle.bytes.Bytes
  * @see net.openhft.chronicle.bytes.BytesStore

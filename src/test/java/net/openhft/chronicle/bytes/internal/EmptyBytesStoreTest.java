@@ -1,17 +1,5 @@
 /*
- * Copyright 2016-2025 chronicle.software
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Copyright 2016-2025 chronicle.software; SPDX-License-Identifier: Apache-2.0
  */
 package net.openhft.chronicle.bytes.internal;
 
@@ -19,7 +7,6 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.bytes.BytesTestCommon;
 import net.openhft.chronicle.bytes.RandomDataOutput;
-import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IOTools;
 import org.junit.After;
 import org.junit.Test;
@@ -45,7 +32,7 @@ public class EmptyBytesStoreTest extends BytesTestCommon {
 
     private final BytesStore<?, ?> instance;
 
-    public EmptyBytesStoreTest(String type, BytesStore<?,?> instance) {
+    public EmptyBytesStoreTest(String type, BytesStore<?, ?> instance) {
         this.instance = instance;
     }
 
@@ -508,7 +495,7 @@ public class EmptyBytesStoreTest extends BytesTestCommon {
 //        assertThrows(BufferOverflowException.class, () -> INSTANCE.zeroOut(1, 2));
     }
 
-    public void read(final ObjLongConsumer<BytesStore<?,?>> getter) {
+    public void read(final ObjLongConsumer<BytesStore<?, ?>> getter) {
         assumeFalse(instance instanceof NativeBytesStore);
         assertThrowsBufferException(() -> getter.accept(instance, 0));
         assertThrows(IllegalArgumentException.class, () -> getter.accept(instance, -1));
@@ -540,4 +527,3 @@ public class EmptyBytesStoreTest extends BytesTestCommon {
         throw new AssertionFailedError("expected Buffer*Exception");
     }
 }
-

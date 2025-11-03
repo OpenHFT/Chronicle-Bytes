@@ -32,6 +32,8 @@ The API offers:
 * Elastic ByteBuffer wrappers that resize as needed.
 * Direct parsing and writing of text to off-heap bytes.
 
+A number of relevant system properties are listed in link:docs/systemProperties.adoc[systemProperties.adoc].
+
 === Supported Data Types
 
 The following table outlines the operations and data types supported by Chronicle Bytes:
@@ -1184,4 +1186,3 @@ image::/docs/images/customize-data-views.png[]
 === Note on Code Coverage
 
 When conducting code coverage, it may be beneficial to exclude `AbstractBytes` as it can significantly reduce the execution speed of unit tests.
-

@@ -1,17 +1,5 @@
 /*
- * Copyright 2016-2025 chronicle.software
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Copyright 2016-2025 chronicle.software; SPDX-License-Identifier: Apache-2.0
  */
 package net.openhft.chronicle.bytes;
 
@@ -52,13 +40,15 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
         extends RandomDataInput, RandomDataOutput<B>, ReferenceCounted, CharSequence {
 
     /**
-     * Converts a CharSequence into a BytesStore. The characters are encoded using ISO_8859_1.
+     * Converts a CharSequence into a BytesStore. The component type depends on the input,
+     * hence the wildcard in the return. Prefer using the typed overloads when possible.
      *
      * @param cs the CharSequence to be converted
      * @return a BytesStore which contains the bytes from the CharSequence
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
+    @SuppressWarnings("java:S1452")
     static BytesStore<?, ?> from(@NotNull CharSequence cs) throws ClosedIllegalStateException, ThreadingIllegalStateException {
         if (cs.length() == 0)
             return empty();
@@ -113,9 +103,11 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
     }
 
     /**
-     * Takes ownership of {@code bb} and returns a store backed by it. Closing
-     * the store will deallocate the buffer if it is direct.
+     * Takes ownership of {@code bb} and returns a store backed by it. The wildcard is used for the
+     * store type parameter; for strict typing use {@link NativeBytesStore#wrap(ByteBuffer)} directly
+     * for direct buffers, or {@link HeapBytesStore#wrap(ByteBuffer)} for heap buffers.
      */
+    @SuppressWarnings("java:S1452")
     @NotNull
     static BytesStore<?, ByteBuffer> wrap(@NotNull ByteBuffer bb) {
         return bb.isDirect()
@@ -124,9 +116,11 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
     }
 
     /**
-     * Returns a store that references {@code bb} without assuming ownership.
-     * Closing the store does not deallocate a direct buffer.
+     * Returns a store that references {@code bb} without assuming ownership. The wildcard is used for the
+     * store type parameter; use {@link NativeBytesStore#follow(ByteBuffer)} or
+     * {@link HeapBytesStore#wrap(ByteBuffer)} for strict typing.
      */
+    @SuppressWarnings("java:S1452")
     @NotNull
     static BytesStore<?, ByteBuffer> follow(@NotNull ByteBuffer bb) {
         return bb.isDirect()

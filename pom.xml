@@ -1,19 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright 2016-2025 chronicle.software
-
-    Licensed under the Apache License, Version 2.0 (the "License");
-    you may not use this file except in compliance with the License.
-    You may obtain a copy of the License at
-
-        http://www.apache.org/licenses/LICENSE-2.0
-
-    Unless required by applicable law or agreed to in writing, software
-    distributed under the License is distributed on an "AS IS" BASIS,
-    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-    See the License for the specific language governing permissions and
-    limitations under the License.
+    Copyright 2016-2025 chronicle.software; SPDX-License-Identifier: Apache-2.0
 
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
@@ -27,7 +15,7 @@
     </parent>
 
     <artifactId>chronicle-bytes</artifactId>
-    <version>2.27ea8-SNAPSHOT</version>
+    <version>2.27ea9-SNAPSHOT</version>
     <name>OpenHFT/Chronicle Bytes</name>
     <description>Chronicle-Bytes</description>
     <packaging>bundle</packaging>
@@ -54,7 +42,6 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
-
         </dependencies>
     </dependencyManagement>
 
@@ -158,7 +145,7 @@
 
     <build>
         <plugins>
-
+            <!-- SortPom moved to an opt-in profile to avoid automatic sorting during normal builds -->
             <plugin>
                 <groupId>net.openhft</groupId>
                 <artifactId>binary-compatibility-enforcer-plugin</artifactId>
@@ -172,19 +159,19 @@
                             <referenceVersion>2.27ea0</referenceVersion>
                             <artifactsURI>https://teamcity.chronicle.software/repository/download</artifactsURI>
                             <binaryCompatibilityPercentageRequired>100</binaryCompatibilityPercentageRequired>
+                            <extraOptions>
+                                <!--This skips "internal" but checks "impl"-->
+                                <extraOption>
+                                    <name>-keep-internal</name>
+                                </extraOption>
+                                <extraOption>
+                                    <name>skip-internal-packages</name>
+                                    <value>.*internal.*</value>
+                                </extraOption>
+                            </extraOptions>
                         </configuration>
                     </execution>
                 </executions>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <configuration>
-                    <forkCount>4</forkCount>
-                    <reuseForks>true</reuseForks>
-                    <runOrder>hourly</runOrder>
-                </configuration>
             </plugin>
 
             <plugin>
@@ -214,6 +201,23 @@
                 </configuration>
             </plugin>
 
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <addClasspath>true</addClasspath>
+                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                            <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+                        </manifest>
+                        <manifestEntries>
+                            <Automatic-Module-Name>chronicle.bytes</Automatic-Module-Name>
+                        </manifestEntries>
+                    </archive>
+                </configuration>
+            </plugin>
+
             <!--
                 generate maven dependencies versions file that can be used later
                 to install the right bundle in test phase.
@@ -233,6 +237,18 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <!-- Include JaCoCo argLine when present and required JPMS flags from parent -->
+                    <argLine>${argLine} ${jvm.requiredArgs}</argLine>
+                    <forkCount>4</forkCount>
+                    <reuseForks>true</reuseForks>
+                    <runOrder>hourly</runOrder>
+                </configuration>
             </plugin>
 
             <plugin>
@@ -268,41 +284,25 @@
             </plugin>
 
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <configuration>
-                    <archive>
-                        <manifest>
-                            <addClasspath>true</addClasspath>
-                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
-                            <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
-                        </manifest>
-                        <manifestEntries>
-                            <Automatic-Module-Name>chronicle.bytes</Automatic-Module-Name>
-                        </manifestEntries>
-                    </archive>
-                </configuration>
-            </plugin>
-
-            <plugin>
                 <groupId>com.mycila</groupId>
                 <artifactId>license-maven-plugin</artifactId>
                 <version>4.1</version>
 
                 <configuration>
-                    <header>license_header.txt</header>
-                    <properties>
-                        <currentYear>2025</currentYear>
-                    </properties>
-                    <headerDefinitions>
-                        <headerDefinition>license_header_def.xml</headerDefinition>
-                    </headerDefinitions>
+                    <!-- One-line header; no newlines -->
+                    <inlineHeader>Copyright 2016-2025 chronicle.software; SPDX-License-Identifier: Apache-2.0</inlineHeader>
                     <excludes>
-                        <exclude>**/package-info.java</exclude>
-                        <exclude>**/*.versionsBackup</exclude>
                         <exclude>LICENSE</exclude>
-                        <exclude>src/test/resources/**</exclude>
+                        <exclude>**/*.adoc</exclude>
+                        <exclude>**/*.md</exclude>
+                        <exclude>**/*.txt</exclude>
+                        <exclude>docs/antora/**</exclude>
+                        <exclude>src/main/config/**</exclude>
+                        <exclude>src/main/docs/**</exclude>
                         <exclude>src/main/resources/**</exclude>
+                        <exclude>src/test/resources/**</exclude>
+                        <exclude>target/**</exclude>
+                        <exclude>**/*.versionsBackup</exclude>
                     </excludes>
                 </configuration>
 
@@ -376,24 +376,36 @@
             <build>
                 <plugins>
                     <plugin>
+                        <groupId>org.sonarsource.scanner.maven</groupId>
+                        <artifactId>sonar-maven-plugin</artifactId>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <!-- Include JPMS flags from parent and coverage flag for sonar runs -->
+                            <argLine>${argLine} ${jvm.requiredArgs} -Djvm.coverage=true</argLine>
+                            <!-- Use a single fork to ensure JaCoCo agent reliably writes execution data -->
+                            <forkCount>1</forkCount>
+                            <reuseForks>false</reuseForks>
+                        </configuration>
+                    </plugin>
+                    <plugin>
                         <groupId>org.jacoco</groupId>
                         <artifactId>jacoco-maven-plugin</artifactId>
-                        <configuration>
-                            <excludes>
-                                <!--<exclude>META-INF/**</exclude>-->
-                                <exclude>*.jar</exclude>
-                                <!--                                <exclude>net/openhft/chronicle/bytes/AbstractBytes.class</exclude>
-                                                                <exclude>net/openhft/chronicle/bytes/AppendableUtil.class</exclude>
-                                                                <exclude>net/openhft/chronicle/bytes/BinaryBytesMethodWriterInvocationHandler.class</exclude>
-                                                                <exclude>net/openhft/chronicle/bytes/BinaryWireCode.class</exclude>
-                                                                <exclude>net/openhft/chronicle/bytes/*.class</exclude>-->
-                            </excludes>
-                        </configuration>
+                        <version>${jacoco-maven-plugin.version}</version>
                         <executions>
                             <execution>
+                                <id>prepare-agent</id>
                                 <goals>
                                     <goal>prepare-agent</goal>
                                 </goals>
+                                <phase>initialize</phase>
+                                <configuration>
+                                    <!-- Ensure exec is written even with forks; reuse the default dest -->
+                                    <append>true</append>
+                                    <destFile>${project.build.directory}/jacoco.exec</destFile>
+                                </configuration>
                             </execution>
                             <execution>
                                 <id>report</id>
@@ -404,10 +416,6 @@
                             </execution>
                         </executions>
                     </plugin>
-                    <plugin>
-                        <groupId>org.sonarsource.scanner.maven</groupId>
-                        <artifactId>sonar-maven-plugin</artifactId>
-                    </plugin>
                 </plugins>
             </build>
         </profile>
@@ -416,15 +424,8 @@
             <build>
                 <plugins>
                     <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-invoker-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <phase>test</phase>
-                                <goals>
-                                    <goal>run</goal>
-                                </goals>
-                            </execution>
-                        </executions>
                         <configuration>
                             <pom>microbenchmarks/pom.xml</pom>
                             <goals>clean,integration-test</goals>
@@ -437,6 +438,14 @@
                             </properties>
                             <streamLogs>true</streamLogs>
                         </configuration>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <phase>test</phase>
+                            </execution>
+                        </executions>
                     </plugin>
                     <plugin>
                         <groupId>org.codehaus.mojo</groupId>
@@ -564,5 +573,4 @@
             </build>
         </profile>
     </profiles>
-
 </project>

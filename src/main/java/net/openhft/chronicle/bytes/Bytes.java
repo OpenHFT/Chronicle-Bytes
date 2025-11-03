@@ -1,17 +1,5 @@
 /*
- * Copyright 2016-2025 chronicle.software
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Copyright 2016-2025 chronicle.software; SPDX-License-Identifier: Apache-2.0
  */
 package net.openhft.chronicle.bytes;
 
@@ -42,10 +30,10 @@ import static net.openhft.chronicle.core.util.Longs.requireNonNegative;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
 /**
- * Mutable buffer for raw byte data with separate 63‑bit read and write cursors.
- * A {@code Bytes} wraps a {@link BytesStore} which may reside on‑heap, in
- * native memory or in a memory‑mapped file. Instances may be elastic and are
- * {@link ReferenceCounted}. They are not thread‑safe.
+ * Mutable buffer for raw byte data with separate 63-bit read and write cursors.
+ * A {@code Bytes} wraps a {@link BytesStore} which may reside on-heap, in
+ * native memory or in a memory-mapped file. Instances may be elastic and are
+ * {@link ReferenceCounted}. They are not thread-safe.
  *
  * @param <U> underlying store type
  */
@@ -58,12 +46,12 @@ public interface Bytes<U> extends
         SingleThreadedChecked {
 
     /**
-     * Maximum supported capacity – roughly eight exbibytes.
+     * Maximum supported capacity - roughly eight exbibytes.
      */
     long MAX_CAPACITY = Long.MAX_VALUE & ~0xF;
 
     /**
-     * Practical limit for heap‑backed {@code Bytes} instances.
+     * Practical limit for heap-backed {@code Bytes} instances.
      */
     int MAX_HEAP_CAPACITY = Integer.MAX_VALUE & ~0xF;
 
@@ -486,8 +474,11 @@ public interface Bytes<U> extends
     }
 
     /**
-     * Allocate an elastic bytes as direct if available, or on heap if not.
+     * Returns an elastic Bytes, preferring direct when available. The underlying store type depends
+     * on the runtime (direct or heap), so the return uses a wildcard. Prefer calling
+     * {@link #allocateElasticDirect()} or {@link #allocateElasticOnHeap()} for a concrete type.
      */
+    @SuppressWarnings("java:S1452")
     static Bytes<?> allocateElastic() {
         return Jvm.maxDirectMemory() == 0 ? allocateElasticOnHeap() : allocateElasticDirect();
     }
@@ -516,9 +507,11 @@ public interface Bytes<U> extends
     }
 
     /**
-     * Allocate an elastic bytes as direct if available, or on heap if not.
-     * @param initialCapacity to allocate
+     * Returns an elastic Bytes with an initial capacity. The underlying store type depends on the
+     * runtime (direct or heap), so the return uses a wildcard. Prefer calling
+     * {@link #allocateElasticDirect(long)} or {@link #allocateElasticOnHeap(int)} for a concrete type.
      */
+    @SuppressWarnings("java:S1452")
     static Bytes<?> allocateElastic(@NonNegative int initialCapacity) {
         return Jvm.maxDirectMemory() == 0 ? allocateElasticOnHeap(initialCapacity) : allocateElasticDirect(initialCapacity);
     }
@@ -897,7 +890,7 @@ public interface Bytes<U> extends
     BytesStore<?, U> bytesStore();
 
     /**
-     * Compares the readable bytes with {@code other} using ISO‑8959‑1 encoding.
+     * Compares the readable bytes with {@code other} using ISO-8959-1 encoding.
      */
     default boolean isEqual(@Nullable String other)
             throws IllegalStateException {

@@ -1,3 +1,6 @@
+/*
+ * Copyright 2016-2025 chronicle.software; SPDX-License-Identifier: Apache-2.0
+ */
 /**
  * This package provides a pool for managing {@link net.openhft.chronicle.bytes.Bytes} instances.
  * <p>
