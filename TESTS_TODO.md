@@ -21,6 +21,8 @@ Keeps track of Byte-specific test work (including batch additions beyond the mod
 6. Added `MappedBytesTest.zeroOutRespectsCustomPageSize` to cover single mapping zero-out behaviour when the mapping page size is larger than the OS default.
 7. Added `TempDirectoryIntegrationTest` to verify `IOTools.createTempDirectory` locates paths beneath `OS.getTarget()` and that `deleteDirWithFiles` removes them.
 8. Added `ReferenceTracingLeakTest` to confirm `AbstractReferenceCounted.assertReferencesReleased()` surfaces leaks with the recorded `createdHere` trace.
+9. Added `DecoratedBufferOverflowExceptionTest` to spell out the null-cause semantics (`DecoratedBufferOverflowException` mirrors the single-argument constructor when tracing is disabled).
+10. Extended `NativeBytesOverflowTest` with `overflowWithoutTracingKeepsCauseNull` so we catch regressions where `createdHere()` returns `null` (ties back to <<CB-NF-O-006>> diagnostics in `memory-management.adoc`).
 
 ## Outstanding Batches
 
