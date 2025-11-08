@@ -58,7 +58,9 @@ resizing failure reports both the write that triggered it and where the buffer
 originated. This is invaluable when multiple components reuse elastic buffers
 and you need to pinpoint which call chain produced a leaked or overgrown
 instance. The richer exception context fulfils the diagnostic requirement in
-<<CB-NF-O-006>>.
+<<CB-NF-O-006>>. When tracing is disabled `createdHere()` returns `null`, so
+Chronicle Bytes automatically falls back to the standard constructor to avoid
+raising a misleading `NullPointerException`.
 
 == 6  Elastic Buffers
 

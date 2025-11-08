@@ -186,7 +186,11 @@ public class NativeBytes<U>
 
     @NotNull
     private DecoratedBufferOverflowException newDBOE(long writeEnd) {
-        return new DecoratedBufferOverflowException("Write cannot grow Bytes to " + writeEnd + ", capacity: " + capacity);
+        StackTrace created = createdHere();
+        String message = "Write cannot grow Bytes to " + writeEnd + ", capacity: " + capacity;
+        return created == null
+                ? new DecoratedBufferOverflowException(message)
+                : new DecoratedBufferOverflowException(message, created);
     }
 
     @Override
@@ -269,11 +273,11 @@ public class NativeBytes<U>
                     "this bytes' underlyingObject() is ByteBuffer, NullPointerException is likely to be thrown. " +
                     stack);
         }
-        // native block of 128 KiB or more have an individual memory mapping so are more expensive.
-        if (endOfBuffer >= 128 << 10 && realCapacity > 0)
-            Jvm.perf().on(getClass(), "Resizing buffer was " + realCapacity / 1024 + " KB, " +
+        // Flag large allocations
+        if (endOfBuffer >= 8L << 20 && realCapacity > 0)
+            Jvm.perf().on(getClass(), "Resizing buffer was " + 10 * realCapacity / 1024 / 1024 / 10.0 + " MiB, " +
                     "needs " + (endOfBuffer - realCapacity) + " bytes more, " +
-                    "new-size " + size / 1024 + " KB");
+                    "new-size " + 10 * size / 1024 / 1024 / 10.0 + " MiB");
         resizeHelper(size, isByteBufferBacked);
     }
 
