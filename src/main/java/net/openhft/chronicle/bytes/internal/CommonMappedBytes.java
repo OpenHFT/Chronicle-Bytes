@@ -537,10 +537,10 @@ public abstract class CommonMappedBytes extends MappedBytes {
         return this;
     }
 
-    @Override
     /**
      * @return whether the underlying mapped file was opened read only
      */
+    @Override
     public boolean isBackingFileReadOnly() {
         return backingFileIsReadOnly;
     }

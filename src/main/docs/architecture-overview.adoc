@@ -212,6 +212,7 @@ This architecture directly supports and enables the fulfilment of the functional
 
 * Core API exposure for various memory types and operations (CB-FN-001 .. CB-FN-008, CB-FN-012, CB-FN-014).
 * Performance targets for serialization, access speed, and atomic operations (e.g., <<CB-NF-P-001>>, <<CB-NF-P-003>>, <<CB-NF-P-004>>).
+* Multi-JDK build coverage ensures both baseline Java 8 users and teams piloting the latest releases stay unblocked (<<CB-NF-MP-006>>).
 * Operability hooks like JMX metrics for `BytesMetrics` (CB-NF-O-002) allow integration into standard monitoring dashboards.
 * Security considerations like robust bounds checking (CB-NF-S-001) are integral to the `Bytes` API design.
 

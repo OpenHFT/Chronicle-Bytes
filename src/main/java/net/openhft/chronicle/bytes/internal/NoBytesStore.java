@@ -27,8 +27,8 @@ public final class NoBytesStore implements BytesStore<NoBytesStore, Void> {
     public static final BytesStore<?, ?> NO_BYTES_STORE = new NoBytesStore();
     /** shared zeroed page */
     public static final long NO_PAGE;
-    @NotNull
     /** empty Bytes backed by {@link #NO_BYTES_STORE} */
+    @NotNull
     public static final Bytes<?> NO_BYTES;
     private static final ByteBuffer BYTE_BUFFER = ByteBuffer.allocate(4 << 10);
 
@@ -270,14 +270,14 @@ public final class NoBytesStore implements BytesStore<NoBytesStore, Void> {
         return VanillaBytes.wrap(this);
     }
 
-    @Override
     /** @return always {@code 0} */
+    @Override
     public @NonNegative long capacity() {
         return 0;
     }
 
-    @Override
     /** @return always {@code null} */
+    @Override
     public Void underlyingObject() {
         return null;
     }

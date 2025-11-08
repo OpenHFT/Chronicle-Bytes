@@ -184,12 +184,12 @@ public class SingleMappedBytes extends CommonMappedBytes {
         return this;
     }
 
-    @SuppressWarnings("restriction")
-    @Override
     /**
      * Performs a volatile read of an int at the current read position using a
      * fast path if the address falls within a single cache line.
      */
+    @SuppressWarnings("restriction")
+    @Override
     public int peekVolatileInt()
             throws IllegalStateException {
 

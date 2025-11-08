@@ -80,11 +80,11 @@ public class UncheckedBytes<U>
         this.underlyingBytes = bytes;
     }
 
-    @Override
     /**
      * Delegates capacity checks to the wrapped instance and updates this view
      * if the underlying store changes.
      */
+    @Override
     public void ensureCapacity(@NonNegative long desiredCapacity)
             throws IllegalArgumentException, IllegalStateException {
         if (desiredCapacity > realCapacity()) {
@@ -93,10 +93,10 @@ public class UncheckedBytes<U>
         }
     }
 
-    @Override
     /**
      * Always returns this instance as it is already unchecked.
      */
+    @Override
     @NotNull
     public Bytes<U> unchecked(boolean unchecked) {
         throwExceptionIfReleased();
@@ -165,11 +165,11 @@ public class UncheckedBytes<U>
         return this;
     }
 
-    @NotNull
-    @Override
     /**
      * Unsupported for unchecked views as copying would reintroduce checks.
      */
+    @NotNull
+    @Override
     public BytesStore<Bytes<U>, U> copy() {
         throwExceptionIfReleased();
         throw new UnsupportedOperationException("todo");

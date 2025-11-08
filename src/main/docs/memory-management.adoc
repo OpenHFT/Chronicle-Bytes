@@ -50,6 +50,16 @@ resources.
 Enable `Jvm.isResourceTracing()` during testing to record stack traces for
 allocations. This helps locate leaks if `releaseLast()` is not called.
 
+`AbstractReferenceCounted` implements `ReferenceCountedTracer`, so classes such
+as `NativeBytes` can call `createdHere()` to recover the stack trace of the
+allocation site. Chronicle Bytes feeds that trace into diagnostics like
+`DecoratedBufferOverflowException` in `NativeBytes.newDBOE(...)`, which means a
+resizing failure reports both the write that triggered it and where the buffer
+originated. This is invaluable when multiple components reuse elastic buffers
+and you need to pinpoint which call chain produced a leaked or overgrown
+instance. The richer exception context fulfils the diagnostic requirement in
+<<CB-NF-O-006>>.
+
 == 6  Elastic Buffers
 
 Elastic `Bytes` can grow when more space is required. For native buffers a new

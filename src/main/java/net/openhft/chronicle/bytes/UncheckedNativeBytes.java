@@ -87,11 +87,11 @@ public class UncheckedNativeBytes<U>
         writeLimit = Math.min(capacity, underlyingBytes.writeLimit());
     }
 
-    @Override
     /**
      * Delegates capacity expansion to the wrapped bytes and updates this view
      * if the underlying store changes.
      */
+    @Override
     public void ensureCapacity(@NonNegative long desiredCapacity)
             throws IllegalArgumentException, IllegalStateException {
         if (desiredCapacity > realCapacity()) {
@@ -100,18 +100,18 @@ public class UncheckedNativeBytes<U>
         }
     }
 
-    @Override
     /**
      * Indicates that this bytes instance performs no bounds checks.
      */
+    @Override
     public boolean unchecked() {
         return true;
     }
 
-    @Override
     /**
      * Returns {@code true} as this bytes instance operates on native memory.
      */
+    @Override
     public boolean isDirectMemory() {
         return true;
     }

@@ -54,16 +54,14 @@ public class SingleMappedFile extends MappedFile {
     private final long capacity;
 
     /**
-     * Constructs a new SingleMappedFile with specified parameters.
+     * Constructs a new {@link SingleMappedFile} mapping the entire {@code file}.
      *
-     * @param file     the file to be mapped.
-     * @param raf      the RandomAccessFile associated with the file.
-     * @param capacity the capacity of the mapped file.
-     * @param readOnly if the file is read-only.
-     * @throws IORuntimeException if any I/O error occurs.
-     */
-    /**
-     * Creates a new mapping for the entire {@code file}.
+     * @param file     the file to map
+     * @param raf      the open {@link RandomAccessFile}
+     * @param capacity desired capacity of the mapping
+     * @param pageSize OS page size to align against
+     * @param readOnly whether the mapping is read only
+     * @throws IORuntimeException on IO failures
      */
     @SuppressWarnings("this-escape")
     public SingleMappedFile(@NotNull final File file,

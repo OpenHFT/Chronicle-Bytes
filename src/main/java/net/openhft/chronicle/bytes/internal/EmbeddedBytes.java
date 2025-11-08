@@ -43,20 +43,20 @@ public class EmbeddedBytes<U> extends VanillaBytes<U> {
         return new EmbeddedBytes<>(bytesStore, wp, wp + length);
     }
 
-    @Override
     /**
      * Sets the write position and updates the length byte stored before this
      * field group.
      */
+    @Override
     protected void uncheckedWritePosition(@NonNegative long writePosition) {
         super.uncheckedWritePosition(writePosition);
         bytesStore.writeUnsignedByte(lengthOffset(), (int) writePosition);
     }
 
-    @Override
     /**
      * Reads the current length prefix and returns it as the write position.
      */
+    @Override
     public @NonNegative long writePosition() {
         try {
             return bytesStore.readUnsignedByte(lengthOffset());

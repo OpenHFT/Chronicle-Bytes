@@ -17,16 +17,17 @@ Keeps track of Byte-specific test work (including batch additions beyond the mod
 2. Added `BytesCopyMatrixTest` (heap→native copy and direct→`OutputStream` copy coverage).
 3. Extended `UncheckedBytesBehaviourTest` with `uncheckedModeAllowsWritePastLimit`.
 4. Targeted tests run via `mvn -q -Dtest=BytesLifecycleTest,BytesCopyMatrixTest,UncheckedBytesBehaviourTest test` – presently passing.
+5. Added `MappedFileTest.insideHonoursSafeLimitWhenPageSizeDiffers` to exercise `MappedBytesStore#inside` across custom page sizes.
+6. Added `MappedBytesTest.zeroOutRespectsCustomPageSize` to cover single mapping zero-out behaviour when the mapping page size is larger than the OS default.
+7. Added `TempDirectoryIntegrationTest` to verify `IOTools.createTempDirectory` locates paths beneath `OS.getTarget()` and that `deleteDirWithFiles` removes them.
+8. Added `ReferenceTracingLeakTest` to confirm `AbstractReferenceCounted.assertReferencesReleased()` surfaces leaks with the recorded `createdHere` trace.
 
 ## Outstanding Batches
 
 The following scenarios (from the user brief) remain **unimplemented** and should be prioritised next:
 
-1. **OS/Safe Page Size Matrix** – parameterised test over synthetic page sizes verifying `MappedBytesStore#inside` and `SingleMappedBytes.zapPage` when `OS.defaultOsPageSize()` differs from actual page size. Add to `MappedBytesStoreTest` or `MappedBytesTest`.
-2. **Safe-Page Block Size for Builders** – test builder defaults so Windows uses `OS.SAFE_PAGE_SIZE` while other OSes use `OS.pageSize()`. Add a new `MappedBytesQueueBuilderTest` or equivalent.
-3. **Temp Directory Integration** – ensure Bytes’ use of `IOTools.createTempDirectory` returns paths under `OS.getTarget()` and cleans up (likely add a dedicated test leveraging `BytesTestCommon`).
-4. **Reference Tracing Hook** – add `AbstractBytesReferenceTest` that leaks a `Bytes` subclass intentionally and asserts `enableReferenceTracing()` reports the leak (mirrors similar Chronicle Core test).
-5. **OS.pageAlign Consumers** – assert `MappedBytesStore.map()` (or helpers) align offsets using `OS.pageAlign`, especially for large offsets/Windows safe pages; extend `MappedBytesTest` with a synthetic offset scenario.
+1. **Safe-Page Block Size for Builders** – test builder defaults so Windows uses `OS.SAFE_PAGE_SIZE` while other OSes use `OS.pageSize()`. Add a new `MappedBytesQueueBuilderTest` or equivalent.
+2. **OS.pageAlign Consumers** – assert `MappedBytesStore.map()` (or helpers) align offsets using `OS.pageAlign`, especially for large offsets/Windows safe pages; extend `MappedBytesTest` with a synthetic offset scenario.
 
 ## Additional Proposed Tests
 

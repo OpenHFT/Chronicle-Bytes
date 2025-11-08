@@ -33,10 +33,10 @@ public final class Unmapper implements Runnable {
         this.pageSize = pageSize;
     }
 
-    @Override
     /**
      * Performs the unmap. If already unmapped the call is ignored.
      */
+    @Override
     public void run() {
         if (address == 0)
             return;

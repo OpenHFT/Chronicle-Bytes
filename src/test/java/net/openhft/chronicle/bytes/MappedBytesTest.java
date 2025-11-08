@@ -528,6 +528,30 @@ public class MappedBytesTest extends BytesTestCommon {
     }
 
     @Test
+    public void zeroOutRespectsCustomPageSize() throws Exception {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
+        final File file = newTempBinary("zero-custom-page");
+        final int customPageSize = Math.max(OS.pageSize(), 4096) * 2;
+        final long chunkSize = customPageSize * 2L;
+        final long range = customPageSize + 256L;
+
+        try (MappedBytes bytes = MappedBytes.mappedBytes(file, chunkSize, 0, customPageSize, false)) {
+            for (long offset = 0; offset < range; offset++) {
+                bytes.writeByte(offset, (byte) 0x5A);
+            }
+
+            bytes.zeroOut(0, range);
+
+            for (long offset = 0; offset < range; offset++) {
+                assertEquals("offset " + offset + " should be cleared", 0, bytes.readUnsignedByte(offset));
+            }
+        } finally {
+            assertTrue("Failed to delete " + file, file.delete());
+        }
+    }
+
+    @Test
     public void memoryOverlapRegions() throws Exception {
         String tmpfile = IOTools.createTempFile("memoryOverlapRegions").getAbsolutePath();
         int chunkSize = 256 << 16;
@@ -669,5 +693,13 @@ public class MappedBytesTest extends BytesTestCommon {
             slice.releaseLast();
         }
         assertTrue(true); // if we reach here, the test passes
+    }
+
+    private static File newTempBinary(String prefix) throws IOException {
+        File target = new File(OS.getTarget());
+        target.mkdirs();
+        File file = File.createTempFile(prefix, ".dat", target);
+        file.deleteOnExit();
+        return file;
     }
 }

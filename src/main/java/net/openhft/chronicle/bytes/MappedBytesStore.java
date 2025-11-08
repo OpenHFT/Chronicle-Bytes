@@ -118,18 +118,18 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
         return new NativeBytes<>(this);
     }
 
-    @Override
     /**
      * Returns {@code true} if the given offset lies within this mapping's safe range.
      */
+    @Override
     public boolean inside(@NonNegative long offset) {
         return start <= offset && offset < safeLimit;
     }
 
-    @Override
     /**
      * Same as {@link #inside(long)} but also checks the end of the supplied range.
      */
+    @Override
     public boolean inside(@NonNegative long offset, @NonNegative long bufferSize) {
         return start <= offset && offset + bufferSize <= limit;
     }
@@ -154,10 +154,10 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
         return this;
     }
 
-    @Override
     /**
      * Converts a logical offset in the file into an offset relative to this mapped region.
      */
+    @Override
     public long translate(@NonNegative long offset) {
         assert SKIP_ASSERTIONS || offset >= start;
         assert SKIP_ASSERTIONS || offset < limit;
@@ -397,14 +397,11 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
     }
 
     /**
-     * Sync the ByteStore if required.
+     * Syncs the ByteStore if required.
      *
-     * @param offset   the offset within the ByteStore from the start to sync, offset must be a multiple of 4K
-     * @param length   the length to sync, length must be a multiple of 4K
-     * @param syncMode the mode to sync
-     */
-    /**
-     * Helper performing the actual msync call.
+     * @param offset   offset within the ByteStore (must be 4 KiB aligned)
+     * @param length   length to sync (must be 4 KiB aligned)
+     * @param syncMode mode to use when flushing to disk
      */
     private void performMsync(@NonNegative long offset, long length, SyncMode syncMode) {
         if (syncMode == SyncMode.NONE)
