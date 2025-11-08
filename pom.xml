@@ -379,11 +379,13 @@
             <!-- If you keep thresholds as properties, define them here
                  (or in the parent) so they resolve during this profile) -->
             <properties>
-                <jacoco.line.coverage>0.7</jacoco.line.coverage>
-                <jacoco.branch.coverage>0.6</jacoco.branch.coverage>
+                <!-- Baseline to match previously achieved coverage (ratchet up) -->
+                <jacoco.line.coverage>0.70</jacoco.line.coverage>
+                <jacoco.branch.coverage>0.62</jacoco.branch.coverage>
             </properties>
 
             <build>
+                <defaultGoal>verify</defaultGoal>
                 <plugins>
                     <plugin>
                         <groupId>org.sonarsource.scanner.maven</groupId>
