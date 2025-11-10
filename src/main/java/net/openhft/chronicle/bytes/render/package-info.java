@@ -1,10 +1,6 @@
 //
 // Copyright 2013-2025 chronicle.software; SPDX-License-Identifier: Apache-2.0
 //
-
-/*
- * Copyright 2016-2025 chronicle.software; SPDX-License-Identifier: Apache-2.0
- */
 /**
  * Utility classes that convert floating point values to fixed-width decimal byte sequences.
  * <p>

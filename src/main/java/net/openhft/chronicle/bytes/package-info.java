@@ -1,10 +1,6 @@
 //
 // Copyright 2013-2025 chronicle.software; SPDX-License-Identifier: Apache-2.0
 //
-
-/*
- * Copyright 2016-2025 chronicle.software; SPDX-License-Identifier: Apache-2.0
- */
 /**
  * Provides versatile, high-performance access to contiguous regions of memory.
  * Implementations cover on-heap arrays, native memory and memory-mapped files.
