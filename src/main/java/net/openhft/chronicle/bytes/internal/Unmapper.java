@@ -1,6 +1,6 @@
-//
-// Copyright 2013-2025 chronicle.software; SPDX-License-Identifier: Apache-2.0
-//
+/*
+ * Copyright 2013-2025 chronicle.software; SPDX-License-Identifier: Apache-2.0
+ */
 package net.openhft.chronicle.bytes.internal;
 
 import net.openhft.chronicle.core.Jvm;
@@ -33,10 +33,10 @@ public final class Unmapper implements Runnable {
         this.pageSize = pageSize;
     }
 
-    @Override
     /**
      * Performs the unmap. If already unmapped the call is ignored.
      */
+    @Override
     public void run() {
         if (address == 0)
             return;

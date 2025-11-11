@@ -65,7 +65,7 @@ Here is an explanation for each operation supported by Chronicle Bytes:
 | Read/Write Other | Reading and writing of other data types
 | Data Driven Tests | Refer to https://en.wikipedia.org/wiki/Data-driven_testing[Data-Driven Testing]
 | CAS (Compare-and-Swap) | An atomic instruction used in multithreading for synchronization. It compares the contents of a memory location with a given value and, only if they match, updates the contents of that memory location to a new given value
-| Volatile Read/Write | Refer to http://tutorials.jenkov.com/java-concurrency/volatile.html[Volatile Variables]
+| Volatile Read/Write | Refer to https://jenkov.com/java-concurrency/volatile.html[Volatile Variables]
 | Peek | An operation that retrieves the value of the bytes without affecting its read position
 | Stop Bit Compression | Refer to https://github.com/OpenHFT/RFC/tree/master/Stop-Bit-Encoding[Stop Bit Encoding]
 | Search | Any algorithm that addresses the search problem i.e., retrieving information stored within a data structure

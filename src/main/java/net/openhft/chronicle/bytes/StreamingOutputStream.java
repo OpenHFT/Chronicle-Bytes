@@ -1,6 +1,6 @@
-//
-// Copyright 2013-2025 chronicle.software; SPDX-License-Identifier: Apache-2.0
-//
+/*
+ * Copyright 2013-2025 chronicle.software; SPDX-License-Identifier: Apache-2.0
+ */
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.bytes.internal.NoBytesStore;
@@ -48,13 +48,13 @@ public class StreamingOutputStream extends OutputStream {
         return this;
     }
 
-    @Override
     /**
      * Writes bytes from the given array to the underlying {@link StreamingDataOutput}.
      * Any {@link BufferOverflowException}, {@link IllegalArgumentException} or
      * {@link IllegalStateException} from the target is wrapped in an
      * {@link IOException}.
      */
+    @Override
     public void write(byte[] b, @NonNegative int off, @NonNegative int len)
             throws IOException {
         try {
@@ -65,11 +65,11 @@ public class StreamingOutputStream extends OutputStream {
         }
     }
 
-    @Override
     /**
      * Writes a single byte value. Exceptions thrown by the target
      * {@link StreamingDataOutput} are wrapped in an {@link IOException}.
      */
+    @Override
     public void write(int b)
             throws IOException {
         try {

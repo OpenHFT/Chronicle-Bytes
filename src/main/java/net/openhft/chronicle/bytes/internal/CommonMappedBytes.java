@@ -1,6 +1,6 @@
-//
-// Copyright 2013-2025 chronicle.software; SPDX-License-Identifier: Apache-2.0
-//
+/*
+ * Copyright 2013-2025 chronicle.software; SPDX-License-Identifier: Apache-2.0
+ */
 package net.openhft.chronicle.bytes.internal;
 
 import net.openhft.chronicle.bytes.*;
@@ -537,10 +537,10 @@ public abstract class CommonMappedBytes extends MappedBytes {
         return this;
     }
 
-    @Override
     /**
      * @return whether the underlying mapped file was opened read only
      */
+    @Override
     public boolean isBackingFileReadOnly() {
         return backingFileIsReadOnly;
     }

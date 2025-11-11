@@ -1,6 +1,6 @@
-//
-// Copyright 2013-2025 chronicle.software; SPDX-License-Identifier: Apache-2.0
-//
+/*
+ * Copyright 2013-2025 chronicle.software; SPDX-License-Identifier: Apache-2.0
+ */
 package net.openhft.chronicle.bytes.internal;
 
 import net.openhft.chronicle.bytes.*;
@@ -30,13 +30,13 @@ import static net.openhft.chronicle.core.util.Ints.requireNonNegative;
 import static net.openhft.chronicle.core.util.Longs.requireNonNegative;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
-@SuppressWarnings({"restriction", "rawtypes"})
 /**
  * A {@link net.openhft.chronicle.bytes.BytesStore} backed by off-heap native
  * memory. Instances are reference counted and must be released to free the
  * underlying memory. The store may be elastic or fixed in size depending on
  * how it was created.
  */
+@SuppressWarnings({"restriction", "rawtypes"})
 public class NativeBytesStore<U>
         extends AbstractBytesStore<NativeBytesStore<U>, U> {
     private static final SimpleCleaner NO_DEALLOCATOR = new NoDeallocator();

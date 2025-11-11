@@ -1,6 +1,6 @@
-//
-// Copyright 2013-2025 chronicle.software; SPDX-License-Identifier: Apache-2.0
-//
+/*
+ * Copyright 2013-2025 chronicle.software; SPDX-License-Identifier: Apache-2.0
+ */
 package net.openhft.chronicle.bytes.internal;
 
 import net.openhft.chronicle.bytes.*;
@@ -54,16 +54,14 @@ public class SingleMappedFile extends MappedFile {
     private final long capacity;
 
     /**
-     * Constructs a new SingleMappedFile with specified parameters.
+     * Constructs a new SingleMappedFile with specified parameters, creating a
+     * mapping for the entire {@code file}.
      *
      * @param file     the file to be mapped.
      * @param raf      the RandomAccessFile associated with the file.
      * @param capacity the capacity of the mapped file.
      * @param readOnly if the file is read-only.
      * @throws IORuntimeException if any I/O error occurs.
-     */
-    /**
-     * Creates a new mapping for the entire {@code file}.
      */
     @SuppressWarnings("this-escape")
     public SingleMappedFile(@NotNull final File file,
