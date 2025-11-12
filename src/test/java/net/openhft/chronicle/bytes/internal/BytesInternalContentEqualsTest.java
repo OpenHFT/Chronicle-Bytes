@@ -25,16 +25,16 @@ public class BytesInternalContentEqualsTest extends BytesTestCommon {
     @Parameterized.Parameters
     public static Collection<Object[]> data() {
         List<Object[]> tests = new ArrayList<>(Arrays.asList(new Object[][]{
-                {Bytes.allocateElasticOnHeap(), Bytes.allocateElasticOnHeap()}
-                , {Bytes.elasticHeapByteBuffer(), Bytes.elasticHeapByteBuffer()}
+                {Bytes.allocateElasticOnHeap(), Bytes.allocateElasticOnHeap()},
+                {Bytes.elasticHeapByteBuffer(), Bytes.elasticHeapByteBuffer()}
         }));
         if (Jvm.maxDirectMemory() > 0) {
             tests.addAll(Arrays.asList(new Object[][]{
-                    {Bytes.allocateElasticDirect(), Bytes.allocateElasticOnHeap()}
-                    , {Bytes.elasticByteBuffer(), Bytes.elasticByteBuffer()}
-                    , {Bytes.allocateElasticDirect(), Bytes.allocateElasticDirect()}
-                    , {Bytes.allocateElasticOnHeap(), Bytes.allocateElasticDirect()}
-                    , {Bytes.elasticHeapByteBuffer(), Bytes.elasticByteBuffer()}
+                    {Bytes.allocateElasticDirect(), Bytes.allocateElasticOnHeap()},
+                    {Bytes.elasticByteBuffer(), Bytes.elasticByteBuffer()},
+                    {Bytes.allocateElasticDirect(), Bytes.allocateElasticDirect()},
+                    {Bytes.allocateElasticOnHeap(), Bytes.allocateElasticDirect()},
+                    {Bytes.elasticHeapByteBuffer(), Bytes.elasticByteBuffer()}
             }));
         }
         return tests;

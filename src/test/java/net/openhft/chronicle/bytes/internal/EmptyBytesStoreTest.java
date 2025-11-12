@@ -491,8 +491,8 @@ public class EmptyBytesStoreTest extends BytesTestCommon {
     public void zeroOut() {
         assertDoesNotThrow(() -> instance.zeroOut(0, 0));
         // outside bounds are ignored
-//        assertThrows(BufferOverflowException.class, () -> INSTANCE.zeroOut(0, 1));
-//        assertThrows(BufferOverflowException.class, () -> INSTANCE.zeroOut(1, 2));
+        //        assertThrows(BufferOverflowException.class, () -> INSTANCE.zeroOut(0, 1));
+        //        assertThrows(BufferOverflowException.class, () -> INSTANCE.zeroOut(1, 2));
     }
 
     private void read(final ObjLongConsumer<BytesStore<?, ?>> getter) {

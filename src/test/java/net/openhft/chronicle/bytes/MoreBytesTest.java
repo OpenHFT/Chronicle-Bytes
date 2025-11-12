@@ -104,7 +104,8 @@ public class MoreBytesTest extends BytesTestCommon {
             } finally {
                 to.releaseLast();
             }
-        } catch (Exception ignore) {
+        } catch (Exception ex) {
+            assertTrue(ex instanceof BufferOverflowException);
         }
     }
 

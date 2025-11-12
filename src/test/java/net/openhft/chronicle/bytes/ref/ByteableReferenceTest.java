@@ -38,12 +38,10 @@ public class ByteableReferenceTest extends BytesTestCommon {
                 datum(TextBooleanReference::new),
                 datum(TextIntReference::new),
                 datum(TextLongReference::new)
-                /*
-                 * unhelpful implementations below this point
-                 * datum(new TextLongArrayReference()),
-                 * datum(new BinaryLongArrayReference()),
-                 * datum(new UncheckedLongReference())
-                 */
+                // unhelpful implementations below this point
+                // datum(new TextLongArrayReference()),
+                // datum(new BinaryLongArrayReference()),
+                // datum(new UncheckedLongReference())
         );
         AbstractCloseable.disableCloseableTracing();
         AbstractReferenceCounted.disableReferenceTracing();

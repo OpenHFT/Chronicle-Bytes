@@ -64,10 +64,10 @@ public class BytesUtilTest extends BytesTestCommon {
     public void fromFileInJar()
             throws IOException {
         Bytes<?> bytes = BytesUtil.readFile("/net/openhft/chronicle/core/onoes/Google.properties");
-        Bytes<?> apache_license = Bytes.from("Apache License");
-        long n = bytes.indexOf(apache_license);
+        Bytes<?> apacheLicense = Bytes.from("Apache License");
+        long n = bytes.indexOf(apacheLicense);
         assertTrue(n > 0);
-        apache_license.releaseLast();
+        apacheLicense.releaseLast();
     }
 
     @Test
