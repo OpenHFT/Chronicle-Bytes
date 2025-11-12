@@ -6,11 +6,9 @@
 :lang: en-GB
 // British English, ASCII-7 only.
 
-// -------------------------------------------------------------------
 // This FAQ collects common questions we receive on
 // mailing-lists, GitHub issues and customer support. Links point to
 // other `.adoc` guides where deeper detail is available.
-// -------------------------------------------------------------------
 
 == 1  General
 

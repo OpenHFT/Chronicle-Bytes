@@ -3,16 +3,13 @@
 :toc:
 :lang: en-GB
 
-// -------------------------------------------------------------------
 // Legend
-// -------------------------------------------------------------------
 // Requirement identifiers follow the company nine-box taxonomy:
 // \<Scope\>-\<Tag\>-NNN where
 // Scope  = CB (Chronicle Bytes)
 // Tag    = FN | NF-P | NF-S | NF-O | NF-MP | TEST | DOC | OPS | RISK
 // NNN    = sequential number with three digits
 // All text is British English and ASCII-7 only, per AGENT.md section 2.
-// -------------------------------------------------------------------
 
 == 1  Scope
 
