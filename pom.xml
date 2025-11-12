@@ -23,8 +23,9 @@
     <properties>
         <zero.cost.assertions>disabled</zero.cost.assertions>
         <!-- Define the target coverage thresholds as properties -->
-        <jacoco.line.coverage>0.7</jacoco.line.coverage>
-        <jacoco.branch.coverage>0.6</jacoco.branch.coverage>
+        <jacoco.line.coverage>0.710</jacoco.line.coverage>
+        <jacoco.branch.coverage>0.623</jacoco.branch.coverage>
+        <surefireArgLine/>
     </properties>
 
     <dependencyManagement>
@@ -244,7 +245,7 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
-                    <argLine>${argLine} ${jvm.requiredArgs}</argLine>
+                    <argLine>${surefireArgLine} ${jvm.requiredArgs}</argLine>
                     <forkCount>4</forkCount>
                     <reuseForks>true</reuseForks>
                     <runOrder>hourly</runOrder>
