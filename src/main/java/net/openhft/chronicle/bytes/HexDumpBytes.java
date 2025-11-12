@@ -83,7 +83,6 @@ public class HexDumpBytes
         this.text.write(text);
     }
 
-
     /**
      * Parses a textual hex dump and returns a populated instance.
      */

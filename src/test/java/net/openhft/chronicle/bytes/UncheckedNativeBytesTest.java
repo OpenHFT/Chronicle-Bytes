@@ -211,7 +211,6 @@ class UncheckedNativeBytesTest {
         assertEquals(8, uncheckedBytes.readPosition());
     }
 
-
     @Test
     public void uncheckedWrapEnsureCapacityAndAppend() {
         Bytes<?> b = Bytes.allocateDirect(8);

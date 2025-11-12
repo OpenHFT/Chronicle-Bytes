@@ -121,7 +121,6 @@ public class AppendableUtilTest extends BytesTestCommon {
         assertEquals("test", sb.toString());
     }
 
-
     @SuppressWarnings("rawtypes")
     @Test
     public void setLength() {

@@ -214,7 +214,6 @@ public class BytesUtilTest extends BytesTestCommon {
         doTestCombineDoubleNewline("AA   ", "AA   ");
     }
 
-
     @Test
     public void bytesEqualAndCharsEqual() {
         Bytes<?> a = Bytes.from("abcdef");
