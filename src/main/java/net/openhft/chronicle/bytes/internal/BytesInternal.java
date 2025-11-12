@@ -536,7 +536,7 @@ enum BytesInternal {
                 && length < 1 << 20
                 && utf) {
             // todo fix, a problem with very long sequences. #35
-            parseUtf8_SB1((Bytes) bytes, (StringBuilder) appendable, utf, length);
+            parseUtf8Sb1((Bytes) bytes, (StringBuilder) appendable, utf, length);
         } else {
             parseUtf81(bytes, appendable, utf, length);
         }
@@ -566,12 +566,12 @@ enum BytesInternal {
         throwExceptionIfReleased(appendable);
         if (appendable instanceof StringBuilder) {
             if (input instanceof NativeBytesStore) {
-                parseUtf8_SB1((NativeBytesStore) input, offset, (StringBuilder) appendable, length);
+                parseUtf8Sb1((NativeBytesStore) input, offset, (StringBuilder) appendable, length);
                 return;
             } else if (input instanceof Bytes
                     && ((Bytes) input).bytesStore() instanceof NativeBytesStore) {
                 @Nullable NativeBytesStore bs = (NativeBytesStore) ((Bytes) input).bytesStore();
-                parseUtf8_SB1(bs, offset, (StringBuilder) appendable, length);
+                parseUtf8Sb1(bs, offset, (StringBuilder) appendable, length);
                 return;
             }
         }
@@ -704,7 +704,7 @@ enum BytesInternal {
         throwExceptionIfReleased(appendable);
         if (bytesStore instanceof NativeBytesStore
                 && appendable instanceof StringBuilder) {
-            parse8bit_SB1(offset, (NativeBytesStore) bytesStore, (StringBuilder) appendable, utflen);
+            parse8bitSb1(offset, (NativeBytesStore) bytesStore, (StringBuilder) appendable, utflen);
         } else {
             parse8bit1(offset, bytesStore, appendable, utflen);
         }
@@ -809,7 +809,8 @@ enum BytesInternal {
         }
     }
 
-    public static void parseUtf8_SB1(@NotNull Bytes<?> bytes, @NotNull StringBuilder sb, boolean utf, @NonNegative int utflen)
+    //CHECKSTYLE:OFF MethodName
+    public static void parseUtf8Sb1(@NotNull Bytes<?> bytes, @NotNull StringBuilder sb, boolean utf, @NonNegative int utflen)
             throws UTFDataFormatRuntimeException, BufferUnderflowException {
         try {
             throwExceptionIfReleased(bytes);
@@ -867,7 +868,7 @@ enum BytesInternal {
         return count;
     }
 
-    public static void parseUtf8_SB1(@NotNull NativeBytesStore bytes, @NonNegative long offset,
+    public static void parseUtf8Sb1(@NotNull NativeBytesStore bytes, @NonNegative long offset,
                                      @NotNull StringBuilder sb, @NonNegative int utflen)
             throws UTFDataFormatRuntimeException, BufferUnderflowException, ClosedIllegalStateException {
         throwExceptionIfReleased(bytes);
@@ -917,7 +918,7 @@ enum BytesInternal {
      * @param length number of bytes to parse
      * @return number of characters appended
      */
-    public static int parse8bit_SB1(@NonNegative long offset, @NotNull NativeBytesStore nbs, @NotNull StringBuilder sb, @NonNegative int length) {
+    public static int parse8bitSb1(@NonNegative long offset, @NotNull NativeBytesStore nbs, @NotNull StringBuilder sb, @NonNegative int length) {
         throwExceptionIfReleased(nbs);
         requireNonNull(sb);
         long address = nbs.address + nbs.translate(offset);
@@ -2391,7 +2392,7 @@ enum BytesInternal {
                 @NotNull Bytes<?> vb = (Bytes) bytes;
                 @NotNull StringBuilder sb = (StringBuilder) builder;
                 sb.setLength(0);
-                readUtf8_SB1(vb, sb, tester);
+                readUtf8Sb1(vb, sb, tester);
             } else {
                 AppendableUtil.setLength(builder, 0);
                 readUtf81(bytes, builder, tester);
@@ -2405,7 +2406,7 @@ enum BytesInternal {
         }
     }
 
-    private static void readUtf8_SB1(
+    private static void readUtf8Sb1(
             @NotNull Bytes<?> bytes, @NotNull StringBuilder appendable, @NotNull StopCharTester tester)
             throws IOException, ClosedIllegalStateException {
 
@@ -2445,11 +2446,12 @@ enum BytesInternal {
         StringUtils.setCount(appendable, i);
         bytes.readSkip(i);
         if (i < len) {
-            readUtf8_SB2(bytes, appendable, tester);
+            readUtf8Sb2(bytes, appendable, tester);
         }
     }
+    //CHECKSTYLE:ON MethodName
 
-    private static void readUtf8_SB2(@NotNull StreamingDataInput bytes, @NotNull StringBuilder appendable, @NotNull StopCharTester tester)
+    private static void readUtf8Sb2(@NotNull StreamingDataInput bytes, @NotNull StringBuilder appendable, @NotNull StopCharTester tester)
             throws UTFDataFormatException, ClosedIllegalStateException {
         while (true) {
             int c = bytes.readUnsignedByte();
@@ -2952,6 +2954,7 @@ enum BytesInternal {
                 break;
             } else if (b == '_' || b == '+') {
                 // ignore
+                continue;
             } else {
                 break;
             }
@@ -2979,6 +2982,7 @@ enum BytesInternal {
                 break;
             } else if (b == '_') {
                 // ignore
+                continue;
             } else {
                 break;
             }
@@ -3023,6 +3027,7 @@ enum BytesInternal {
             } else if (b == '_' || b == '+') {
                 // ignore
                 first = false;
+                continue;
             } else if (!first || b > ' ') {
                 break;
             } else if (b == 0) {
@@ -3051,6 +3056,7 @@ enum BytesInternal {
                 break;
             } else if (b == '_') {
                 // ignore
+                continue;
             } else {
                 break;
             }

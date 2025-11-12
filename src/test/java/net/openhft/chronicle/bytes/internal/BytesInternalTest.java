@@ -186,7 +186,7 @@ public class BytesInternalTest extends BytesTestCommon {
 
         @NotNull StringBuilder sb = new StringBuilder();
 
-        BytesInternal.parseUtf8_SB1(bytes, sb, true, length);
+        BytesInternal.parseUtf8Sb1(bytes, sb, true, length);
         assertEquals(length, sb.length());
         assertEquals(new String(bytes2, US_ASCII), sb.toString());
 
@@ -194,7 +194,7 @@ public class BytesInternalTest extends BytesTestCommon {
         sb.setLength(0);
 
 /*
-        BytesInternal.parseUtf8_SB1(bytes, sb, false, length);
+        BytesInternal.parseUtf8Sb1(bytes, sb, false, length);
         assertEquals(length, sb.length());
         assertEquals(new String(bytes2, US_ASCII), sb.toString());
 */

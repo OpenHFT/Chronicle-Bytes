@@ -551,6 +551,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
     /**
      * <p>
      * This is assumed to be used to print the contents on a best effort basis. If an Error occurs it will be returned in the String.
+     *
      * @param maxLength the maximum length of the output
      * @return this BytesStore as a DebugString.
      */

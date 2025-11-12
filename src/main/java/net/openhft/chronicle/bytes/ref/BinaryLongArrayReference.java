@@ -310,6 +310,7 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
         this.length = length;
     }
 
+    //CHECKSTYLE:OFF VariableDeclarationUsageDistance
     @Override
     public void readMarshallable(BytesIn<?> bytes)
             throws IORuntimeException, IllegalStateException, BufferUnderflowException {
@@ -331,6 +332,7 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
         long len = bytes.readPosition() - position;
         bytesStore((Bytes) bytes, position, len);
     }
+    //CHECKSTYLE:ON VariableDeclarationUsageDistance
 
     @Override
     public void writeMarshallable(BytesOut<?> bytes)

@@ -22,7 +22,7 @@ public class PrintVdsoMain {
                     end = Long.parseLong(parts[1], 16);
                 }
 
-//                System.out.println(line);
+                // System.out.println(line);
             }
         } catch (IOException ioe) {
             throw ioe;

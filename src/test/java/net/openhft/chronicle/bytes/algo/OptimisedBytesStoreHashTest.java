@@ -43,13 +43,13 @@ public class OptimisedBytesStoreHashTest extends BytesTestCommon {
         @NotNull NativeBytesStore nb = NativeBytesStore.nativeStore(64);
         for (int i = 1; i <= 64; i++)
             nb.writeUnsignedByte(i - 1, i);
-/*
+        /*
         assertEquals(0L, applyAsLong1to7(nb, 0));
         for (int i = 1; i <= 7; i++)
             assertEquals(applyAsLong1to7(nb, i), applyAsLong9to16(nb, i));
         assertEquals(applyAsLong8(nb), applyAsLong1to7(nb, 8));
         assertEquals(applyAsLong8(nb), applyAsLong9to16(nb, 8));
-*/
+        */
         for (int i = 1; i <= 16; i++)
             assertEquals("i: " + i, applyAsLong9to16(nb, i), applyAsLongAny(nb, i));
         for (int i = 17; i <= 32; i++)
@@ -95,8 +95,8 @@ public class OptimisedBytesStoreHashTest extends BytesTestCommon {
                     }
                 }
             scoreSum += 1.0 / score;
-//            if (t % 50 == 0)
-//                System.out.println(t + " - Score: " + score);
+            //            if (t % 50 == 0)
+            //                System.out.println(t + " - Score: " + score);
         }
         System.out.println("Average score: " + (long) (runs / scoreSum));
         System.out.printf("Average time %.3f us%n", time / timeCount / 1e3);
@@ -108,7 +108,7 @@ public class OptimisedBytesStoreHashTest extends BytesTestCommon {
             throws IOException {
         long time = 0, timeCount = 0;
         long scoreSum = 0;
-//        StringBuilder sb = new StringBuilder();
+        //        StringBuilder sb = new StringBuilder();
 
         for (int t = 0; t < 500; t++) {
             @NotNull long[] hashs = new long[8192];
@@ -123,7 +123,7 @@ public class OptimisedBytesStoreHashTest extends BytesTestCommon {
                 time += System.nanoTime() - start;
                 timeCount++;
 
-/*               if (true) {
+                /*               if (true) {
                     sb.setLength(0);
                     sb.append(b);
                     assertEquals(hashs[i], Maths.longHash(sb));

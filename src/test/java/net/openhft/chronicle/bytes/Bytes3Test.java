@@ -48,7 +48,7 @@ public class Bytes3Test extends BytesTestCommon {
                 {"Bytes.wrapForWrite(new byte[1024])", (Supplier<Bytes<?>>) () -> Bytes.wrapForWrite(new byte[1024])},
                 {"new HexDumpBytes()", (Supplier<Bytes<?>>) HexDumpBytes::new},
         }));
-        if (Jvm.maxDirectMemory()>0 ) {
+        if (Jvm.maxDirectMemory() > 0) {
             tests.addAll(Arrays.asList(new Object[][]{
                     {"Bytes.elasticByteBuffer(260)", (Supplier<Bytes<?>>) () -> Bytes.elasticByteBuffer(260)},
                     {"Bytes.elasticByteBuffer(260, 1025)", (Supplier<Bytes<?>>) () -> Bytes.elasticByteBuffer(260, 1025)},

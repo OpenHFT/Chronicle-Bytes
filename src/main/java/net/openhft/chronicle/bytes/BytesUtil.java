@@ -110,7 +110,7 @@ public enum BytesUtil {
      */
     static int[] isTriviallyCopyable0(@NotNull Class<?> clazz) {
         if (clazz.isArray()) {
-            Class<?>componentType = clazz.getComponentType();
+            Class<?> componentType = clazz.getComponentType();
             if (componentType.isPrimitive())
                 return new int[]{MEMORY.arrayBaseOffset(clazz)};
             return NO_INTS;
@@ -155,7 +155,7 @@ public enum BytesUtil {
      * @param length Length of the field area.
      * @return true if all fields in the range are trivially copyable, false otherwise.
      */
-    public static boolean isTriviallyCopyable(Class<?>clazz, @NonNegative int offset, @NonNegative int length) {
+    public static boolean isTriviallyCopyable(Class<?> clazz, @NonNegative int offset, @NonNegative int length) {
         int[] ints = TRIVIALLY_COPYABLE.get(clazz);
         if (ints.length == 0)
             return false;
@@ -165,21 +165,21 @@ public enum BytesUtil {
     /**
      * Returns {@code [start, end]} offsets for the contiguous primitive block of {@code clazz}.
      */
-    public static int[] triviallyCopyableRange(Class<?>clazz) {
+    public static int[] triviallyCopyableRange(Class<?> clazz) {
         return TRIVIALLY_COPYABLE.get(clazz);
     }
 
     /**
      * Offset of the first trivially copyable byte within {@code clazz}.
      */
-    public static int triviallyCopyableStart(Class<?>clazz) {
+    public static int triviallyCopyableStart(Class<?> clazz) {
         return triviallyCopyableRange(clazz)[0];
     }
 
     /**
      * Length in bytes of the trivially copyable region of {@code clazz}.
      */
-    public static int triviallyCopyableLength(Class<?>clazz) {
+    public static int triviallyCopyableLength(Class<?> clazz) {
         final int[] startEnd = triviallyCopyableRange(clazz);
         return startEnd[1] - startEnd[0];
     }
@@ -686,6 +686,8 @@ public enum BytesUtil {
                     }
                 }
             }
+            default:
+                return;
         }
     }
 

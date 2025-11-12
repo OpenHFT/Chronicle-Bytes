@@ -31,13 +31,13 @@ public final class UnsafeText {
      * @return the address just past the last byte written
      */
     public static long appendFixed(long address, long num) {
-        if (num >= 0) {
-            // nothing
-        } else if (num > Long.MIN_VALUE) {
-            MEMORY.writeByte(address++, (byte) '-');
-            num = -num;
-        } else {
-            return appendText(address, MIN_VALUE_STR);
+        if (num < 0) {
+            if (num > Long.MIN_VALUE) {
+                MEMORY.writeByte(address++, (byte) '-');
+                num = -num;
+            } else {
+                return appendText(address, MIN_VALUE_STR);
+            }
         }
 
         long start = address;
@@ -80,13 +80,13 @@ public final class UnsafeText {
      * from the end.
      */
     public static long appendBase10d(long address, long num, int decimal) {
-        if (num >= 0) {
-            // nothing
-        } else if (num > Long.MIN_VALUE) {
-            MEMORY.writeByte(address++, (byte) '-');
-            num = -num;
-        } else {
-            throw new AssertionError();
+        if (num < 0) {
+            if (num > Long.MIN_VALUE) {
+                MEMORY.writeByte(address++, (byte) '-');
+                num = -num;
+            } else {
+                throw new AssertionError();
+            }
         }
 
         long start = address;

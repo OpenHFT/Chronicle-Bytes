@@ -1013,13 +1013,12 @@ public interface Bytes<U> extends
      * @throws NullPointerException        If the provided {@code source} is null.
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      */
+    //CHECKSTYLE:OFF VariableDeclarationUsageDistance
     default long indexOf(@NotNull Bytes source)
             throws ClosedIllegalStateException {
         // TODO use indexOf(Bytes, long);
         throwExceptionIfReleased(this);
         throwExceptionIfReleased(source);
-        long sourceOffset = readPosition();
-        long otherOffset = source.readPosition();
         long sourceCount = readRemaining();
         long otherCount = source.readRemaining();
 
@@ -1029,6 +1028,8 @@ public interface Bytes<U> extends
         if (otherCount == 0) {
             return 0;
         }
+        long sourceOffset = readPosition();
+        long otherOffset = source.readPosition();
         byte firstByte = source.readByte(otherOffset);
         long max = sourceOffset + (sourceCount - otherCount);
 
@@ -1042,8 +1043,10 @@ public interface Bytes<U> extends
             if (i <= max) {
                 long j = i + 1;
                 long end = j + otherCount - 1;
-                for (long k = otherOffset + 1; j < end && readByte(j) == source.readByte(k); j++, k++) {
-                    // Do nothing
+                long k = otherOffset + 1;
+                while (j < end && readByte(j) == source.readByte(k)) {
+                    j++;
+                    k++;
                 }
 
                 if (j == end) {
@@ -1080,16 +1083,16 @@ public interface Bytes<U> extends
         throwExceptionIfReleased(this);
         throwExceptionIfReleased(source);
         long sourceOffset = readPosition();
-        long otherOffset = source.readPosition();
         long sourceCount = readRemaining();
-        long otherCount = source.readRemaining();
 
         if (fromIndex < 0) {
             fromIndex = 0;
         }
+        long otherCount = source.readRemaining();
         if (fromIndex >= sourceCount) {
             return Math.toIntExact(otherCount == 0 ? sourceCount : -1);
         }
+        long otherOffset = source.readPosition();
         if (otherCount == 0) {
             return fromIndex;
         }
@@ -1107,8 +1110,10 @@ public interface Bytes<U> extends
             if (i <= max) {
                 long j = i + 1;
                 long end = j + otherCount - 1;
-                for (long k = otherOffset + 1; j < end && readByte(j) == source.readByte(k); j++, k++) {
-                    // Do nothing
+                long k = otherOffset + 1;
+                while (j < end && readByte(j) == source.readByte(k)) {
+                    j++;
+                    k++;
                 }
 
                 if (j == end) {
@@ -1119,6 +1124,7 @@ public interface Bytes<U> extends
         }
         return -1;
     }
+    //CHECKSTYLE:ON VariableDeclarationUsageDistance
 
     /**
      * Clears the content of this Bytes object and resets its state.
@@ -1232,6 +1238,7 @@ public interface Bytes<U> extends
      * @throws NullPointerException        If the provided {@code marshallable} is null.
      * @see #readMarshallableLength16(Class, ReadBytesMarshallable)
      */
+    //CHECKSTYLE:OFF VariableDeclarationUsageDistance
     default void writeMarshallableLength16(@NotNull final WriteBytesMarshallable marshallable)
             throws BufferOverflowException, ClosedIllegalStateException, BufferUnderflowException, InvalidMarshallableException, ThreadingIllegalStateException {
         requireNonNull(marshallable);
@@ -1244,6 +1251,7 @@ public interface Bytes<U> extends
             throw new IllegalStateException("Marshallable " + marshallable.getClass() + " too long was " + length);
         writeUnsignedShort(position, (int) length);
     }
+    //CHECKSTYLE:ON VariableDeclarationUsageDistance
 
     /**
      * Writes the contents of the provided {@code inputStream} into this Bytes object. Continues reading from the

@@ -90,16 +90,16 @@ class PageUtilTest {
 
     @Test
     void insertTest() throws Exception {
-        int G = 1 << 30;
+        int gigabyte = 1 << 30;
         Field field = Jvm.getField(PageUtil.class, "root");
         field.setAccessible(true);
         PageUtil.TrieNode root = (PageUtil.TrieNode) field.get(null);
 
-        PageUtil.insert("/mnt/huge", G);
+        PageUtil.insert("/mnt/huge", gigabyte);
 
         assertNotNull(root);
         assertNotNull(root.childs.get("mnt"));
         assertNotNull(root.childs.get("mnt").childs.get("huge"));
-        assertEquals(G, root.childs.get("mnt").childs.get("huge").pageSize);
+        assertEquals(gigabyte, root.childs.get("mnt").childs.get("huge").pageSize);
     }
 }

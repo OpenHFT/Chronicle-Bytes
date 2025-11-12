@@ -97,11 +97,19 @@ public class AppendableUtilTest extends BytesTestCommon {
     public void setCharAtWithUnsupportedAppendable() {
         Appendable appendable = new Appendable() {
             @Override
-            public Appendable append(CharSequence csq) { return this; }
+            public Appendable append(CharSequence csq) {
+                return this;
+            }
+
             @Override
-            public Appendable append(CharSequence csq, int start, int end) { return this; }
+            public Appendable append(CharSequence csq, int start, int end) {
+                return this;
+            }
+
             @Override
-            public Appendable append(char c) { return this; }
+            public Appendable append(char c) {
+                return this;
+            }
         };
 
         assertThrows(IllegalArgumentException.class, () -> AppendableUtil.setCharAt(appendable, 1, 'a'));

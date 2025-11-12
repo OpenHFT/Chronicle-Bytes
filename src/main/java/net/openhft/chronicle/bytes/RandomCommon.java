@@ -45,7 +45,8 @@ public interface RandomCommon extends ReferenceCounted {
     }
 
     /**
-    /**
+     * Returns the current read position.
+     *
      * @return the current read position.
      * Typically {@code start() <= readPosition() <= writePosition()} and {@code readPosition() <= readLimit()}.
      */

@@ -217,11 +217,11 @@ final class BytesJavaDocComplianceTest extends BytesTestCommon {
                 NamedConsumer.of(bytes -> bytes.readUtf8((StringBuilder) null), "readUtf8(StringBuilder)"),
                 NamedConsumer.of(bytes -> bytes.readUtf8((Bytes<?>) null), "readUtf8(Bytes)")
 
-                // readHistogram
+        // readHistogram
 
-                // Todo: add unsafe...
-                // Todo: add read operations
-                // Todo: add prewrite
+        // Todo: add unsafe...
+        // Todo: add read operations
+        // Todo: add prewrite
         );
     }
 

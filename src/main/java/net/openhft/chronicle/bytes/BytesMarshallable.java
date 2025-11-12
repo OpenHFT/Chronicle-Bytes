@@ -49,6 +49,8 @@ public interface BytesMarshallable extends ReadBytesMarshallable, WriteBytesMars
     /**
      * Dumps the binary form of this object as a hex string for debugging.
      */
+    //CHECKSTYLE:OFF MethodName
+    @SuppressWarnings("MethodName")
     default String $toString() {
         ValidatableUtil.startValidateDisabled();
         try {
@@ -63,4 +65,5 @@ public interface BytesMarshallable extends ReadBytesMarshallable, WriteBytesMars
             ValidatableUtil.endValidateDisabled();
         }
     }
+    //CHECKSTYLE:ON MethodName
 }

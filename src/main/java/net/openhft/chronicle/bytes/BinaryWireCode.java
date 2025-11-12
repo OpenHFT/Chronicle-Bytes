@@ -169,6 +169,7 @@ public interface BinaryWireCode {
     /**
      * Builds {@link #STRING_FOR_CODE} by reflecting over constant fields.
      */
+    //CHECKSTYLE:OFF MethodName
     static String[] _stringForCode(Class<?> clazz) {
         String[] stringForCode = new String[256];
         try {
@@ -196,4 +197,5 @@ public interface BinaryWireCode {
         }
         return stringForCode;
     }
+    //CHECKSTYLE:ON MethodName
 }

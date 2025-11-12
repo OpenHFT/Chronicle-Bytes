@@ -55,7 +55,7 @@ public interface BytesOut<U> extends
      * include {@link String}, boxed primitives, {@link BytesStore} and
      * {@link BytesMarshallable} implementations.
      */
-    default void writeObject(Class<?>componentType, Object obj)
+    default void writeObject(Class<?> componentType, Object obj)
             throws IllegalArgumentException, BufferOverflowException, ArithmeticException, ClosedIllegalStateException, BufferUnderflowException, InvalidMarshallableException, ThreadingIllegalStateException {
         if (!componentType.isInstance(obj))
             throw new IllegalArgumentException("Cannot serialize " + obj.getClass() + " as an " + componentType);

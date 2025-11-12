@@ -81,7 +81,7 @@ public class MemoryWriteJitterMain {
             if (writing) {
                 long start1 = System.nanoTime();
                 while (System.nanoTime() < start1 + sampleNS) {
-                    // wait one micro-second.
+                    Jvm.safepoint();
                 }
                 if (writing) {
                     StackTraceElement[] stes = writer.getStackTrace();

@@ -63,17 +63,10 @@ public class MemoryReadJitterMain {
                             continue;
                         }
                     }
-                    long startTimeNs = System.nanoTime();
-                    Jvm.safepoint();
-                    long last = mm.consumeBytes();
-                    if (found)
-                        Jvm.safepoint();
-                    else
-                        Jvm.safepoint();
+                    long readDurationNs = consumeAndMeasure(mm, lastRead);
                     long now = System.nanoTime();
-                    histoRead.sampleNanos(now - startTimeNs);
+                    histoRead.sampleNanos(readDurationNs);
                     histoReadWrite.sampleNanos(now - mm.firstLong());
-                    lastRead.lazySet(last);
                     if (found)
                         Jvm.safepoint();
                     else
@@ -102,11 +95,11 @@ public class MemoryReadJitterMain {
             histoWrite.sampleNanos(System.nanoTime() - startTimeNs);
             long start1 = System.nanoTime();
             while (System.nanoTime() < start1 + sampleNS) {
-                // wait one micro-second.
+                Jvm.safepoint();
             }
-            if (lastRead.get() != count) {
-                StackTraceElement[] stes = reader.getStackTrace();
-                if (lastRead.get() != count || ++subSampler > 100) { // 1% of race condition samples arbitrarily chosen.
+                    if (lastRead.get() != count) {
+                        StackTraceElement[] stes = reader.getStackTrace();
+                        if (lastRead.get() != count || ++subSampler > 100) { // 1% of race condition samples arbitrarily chosen.
                     StringBuilder sb = new StringBuilder();
                     sb.append(PROFILE_OF_THE_THREAD);
                     Jvm.trimStackTrace(sb, stes);
@@ -126,5 +119,13 @@ public class MemoryReadJitterMain {
         System.out.println("histoRead     =" + histoRead.toMicrosFormat());
         System.out.println("histoWrite    =" + histoWrite.toMicrosFormat());
         System.out.println("histoReadWrite=" + histoReadWrite.toMicrosFormat());
+    }
+
+    private static long consumeAndMeasure(MemoryMessager mm, java.util.concurrent.atomic.AtomicLong lastRead) {
+        long start = System.nanoTime();
+        Jvm.safepoint();
+        long value = mm.consumeBytes();
+        lastRead.lazySet(value);
+        return System.nanoTime() - start;
     }
 }
