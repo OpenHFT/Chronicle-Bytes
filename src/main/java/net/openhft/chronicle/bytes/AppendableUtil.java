@@ -256,7 +256,7 @@ public enum AppendableUtil {
      * @throws BufferUnderflowException    If there are not enough characters available in the input
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      */
-    public static void parse8bitSb1(@NotNull Bytes<?> bytes, @NotNull StringBuilder sb, @NonNegative int length)
+    public static void parse8bit_SB1(@NotNull Bytes<?> bytes, @NotNull StringBuilder sb, @NonNegative int length)
             throws BufferUnderflowException, ClosedIllegalStateException {
         if (length > bytes.readRemaining())
             throw new BufferUnderflowException();
@@ -281,7 +281,7 @@ public enum AppendableUtil {
         if (appendable instanceof StringBuilder && Jvm.maxDirectMemory() > 0) {
             @NotNull final StringBuilder sb = (StringBuilder) appendable;
             if (bytes instanceof Bytes && ((Bytes) bytes).bytesStore() instanceof NativeBytesStore) {
-                parse8bitSb1((Bytes) bytes, sb, utflen);
+                parse8bit_SB1((Bytes) bytes, sb, utflen);
             } else {
                 BytesInternal.parse8bit1(bytes, sb, utflen);
             }
