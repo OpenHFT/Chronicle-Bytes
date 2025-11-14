@@ -3,6 +3,7 @@
 :toc:
 :toclevels: 2
 :lang: en-GB
+:source-highlighter: rouge
 
 This page summarises the options in the `net.openhft.chronicle.bytes.render` package.
 It accompanies the Javadoc and shows how to render floating point values into

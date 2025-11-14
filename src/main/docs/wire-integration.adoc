@@ -2,12 +2,14 @@
 :doctype: book
 :toc:
 :toclevels: 3
+:sectnums:
 :lang: en-GB
+:source-highlighter: rouge
 
 Explains how Chronicle Wire builds on Chronicle Bytes to provide ultra-low-latency serialisation.
 This guide shows practical patterns for choosing wire formats, serializing objects and method calls, tuning performance, and evolving schemas.
 
-== 1  What Is Chronicle Wire?
+== What Is Chronicle Wire?
 
 *Chronicle Wire* is a high-performance serialization framework meticulously layered directly on
 `Chronicle Bytes` instances <<CB-FN-008>>.
@@ -21,7 +23,7 @@ The core design philosophy emphasizes:
 
 All write and read operations ultimately use the same cursor API provided by `Bytes`, meaning the cost of serialization is primarily the encoding logic itself, rather than I/O overhead.
 
-=== 1.1 Core Concepts and Components
+=== Core Concepts and Components
 
 * `Wire`: The central interface (e.g., `YamlWire`, `BinaryWire`) providing methods to read and write data.
 It's obtained from a `WireType` applied to a `Bytes` instance.
@@ -38,7 +40,7 @@ Requires implementing `readMarshallable` and `writeMarshallable`.
 * `BytesMarshallable`: For objects that need to read/write directly to/from `Bytes` for ultimate control, bypassing most Wire formatting for their payload.
 * `WireMarshallable`: For objects that need custom control over how they are represented in a specific `Wire` format.
 
-=== 1.2  Supported Wire Types
+=== Supported Wire Types
 
 Chronicle Wire provides multiple *wire types*, each with different characteristics:
 
@@ -89,7 +91,7 @@ Chronicle Wire provides multiple *wire types*, each with different characteristi
 
 All types largely share the same `Wire` API for reading and writing common Java types and `Marshallable` objects; you can often switch formats with a single line change.
 
-== 2  Choosing a Wire Type
+== Choosing a Wire Type
 
 Consider these factors when selecting a `WireType`:
 
@@ -114,7 +116,7 @@ Performance example for serializing/deserializing a simple 6-field object (<<CB-
 
 *Actual performance depends heavily on data structure, field types, and access patterns.*
 
-== 3  Serializing `Marshallable` Objects
+== Serializing `Marshallable` Objects
 
 The primary way to serialize custom Java objects is by implementing `SelfDescribingMarshallable`.
 
@@ -196,7 +198,7 @@ public class WireExample {
 }
 ----
 
-=== 3.1 Using `BytesMarshallable`
+=== Using `BytesMarshallable`
 
 For performance-critical sections where you need to write raw bytes directly, bypassing Wire's field formatting for a portion of the object.
 
@@ -243,7 +245,7 @@ public class RawPayloadData implements BytesMarshallable {
 *Note*: When using `BytesMarshallable`, you are responsible for all byte ordering and formatting within its methods.
 `FIELDLESS_BINARY` wire type is often used with `BytesMarshallable` objects.
 
-== 4  MethodWriter / MethodReader Pattern
+== MethodWriter / MethodReader Pattern
 
 This powerful idiom turns a Java interface into an RPC-style channel over `Bytes` with minimal overhead and no generated garbage on the hot path.
 
@@ -306,7 +308,7 @@ Key aspects of MethodWriter/Reader:
 * **Replayability:** Consumers can replay messages from the `Bytes` stream or skip messages.
 * **Schema Evolution:** Adding new methods to the *end* of the interface generally maintains binary compatibility with older readers (they will ignore unknown method calls).
 
-== 5  Schema Evolution Strategies
+== Schema Evolution Strategies
 
 Managing changes to your data structures over time is crucial.
 
@@ -349,7 +351,7 @@ else { throw new IllegalStateException("Unsupported version: " + version); }
         }
 ----
 
-== 6  Inter-Process Communication (IPC) & Chronicle Queue
+== Inter-Process Communication (IPC) & Chronicle Queue
 
 Chronicle Wire is fundamental to Chronicle Queue.
 Messages written to a queue are typically Wire frames serialized onto `MappedBytes` (memory-mapped files).
@@ -367,7 +369,7 @@ This architecture allows for extremely fast IPC, with typical same-host latencie
 
 Cross-host replication (e.g., Chronicle Queue Enterprise) also benefits, as the compact Wire frames (already in `Bytes`) are efficiently sent over TCP.
 
-== 7  Debugging Techniques
+== Debugging Techniques
 
 * **Switch to `YAML_ONLY` or `TEXT`:** Temporarily change the `WireType` for a specific component (e.g., a writer or a reader) to make its `Bytes` output human-readable.
 This can be invaluable for inspecting message content.
@@ -377,7 +379,7 @@ This can be invaluable for inspecting message content.
 * **`WireDumper`:** Utility to dump the structure of a wire stream, showing field names and types.
 * **`WireType` Debugging:** Use `WireType.dump()` to print the structure of a `WireType`, which can help understand how fields are encoded and what types are expected.
 
-== 8  Common Pitfalls and Avoidance
+== Common Pitfalls and Avoidance
 
 [cols="1,3",options="header"]
 |===
@@ -412,7 +414,7 @@ Standard Wire formats like `BINARY_LIGHT` handle this.
 | Ensure the class definition for deserialized objects is available on the classpath of the reading application.
 |===
 
-== 9  Performance Tuning Checklist
+== Performance Tuning Checklist
 
 * **Reuse `Wire` Instances:** Avoid re-creating `Wire` objects (e.g., `WireType.BINARY_LIGHT.apply(bytes)`) repeatedly on the hot path.
 If the underlying `Bytes` instance is long-lived and thread-local, the `Wire` instance can often be too.

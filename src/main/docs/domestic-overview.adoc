@@ -3,6 +3,7 @@
 :toc:
 :toclevels: 2
 :lang: en-GB
+:source-highlighter: rouge
 
 The `net.openhft.chronicle.bytes.domestic` package contains helper classes primarily used internally by Chronicle Bytes.
 These are not intended as a stable public API, and their behaviour may change between releases without prior notice.

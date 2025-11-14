@@ -3,6 +3,7 @@
 :toc:
 :toclevels: 2
 :lang: en-GB
+:source-highlighter: rouge
 
 This overview describes the collection of helper types that reside in the
 `net.openhft.chronicle.bytes.util` package.

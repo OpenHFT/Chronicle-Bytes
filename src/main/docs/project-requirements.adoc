@@ -1,7 +1,9 @@
 = Chronicle Bytes Project Requirements
 :doctype: book
 :toc:
+:sectnums:
 :lang: en-GB
+:source-highlighter: rouge
 
 // Legend
 // Requirement identifiers follow the company nine-box taxonomy:
@@ -11,12 +13,12 @@
 // NNN    = sequential number with three digits
 // All text is British English and ASCII-7 only, per AGENT.md section 2.
 
-== 1  Scope
+== Scope
 
 Chronicle Bytes is the low-level memory-access layer for the wider OpenHFT stack.
 These requirements define the contracts, performance envelopes and operational obligations that the library **must** meet to be accepted into the Chronicle Software code-base.
 
-== 2  Functional Requirements
+== Functional Requirements
 
 [cols="1,5,4",options="header"]
 |===
@@ -50,7 +52,7 @@ integrity and listener invocation.
 |CB-FN-014 |Support for acquiring and releasing `Bytes` instances from a configurable pool to reduce allocation overhead and GC pressure. |JMH benchmark showing performance benefits of pooling under high churn. Unit tests for pool lifecycle and instance re-use.
 |===
 
-== 3  Non-Functional Requirements – Performance
+== Non-Functional Requirements – Performance
 
 [cols="1,5,4",options="header"]
 |===
@@ -73,7 +75,7 @@ calibration with multiple contending threads.
 |CB-NF-P-009 |Acquiring a pooled off-heap `Bytes` instance (1KB) and releasing it must be ≤ 100 ns mean time. |JMH benchmark focusing on pool `acquire`/`release` cycle.
 |===
 
-== 4  Non-Functional Requirements – Security
+== Non-Functional Requirements – Security
 
 [cols="1,5,4",options="header"]
 |===
@@ -84,7 +86,7 @@ calibration with multiple contending threads.
 |CB-NF-S-004 |Operations that can potentially lead to excessive memory allocation (e.g., elastic buffer growth with very large inputs) should have documented safeguards or configurable limits where appropriate, or clear warnings about potential `OutOfMemoryError`. |Documentation review; specific tests attempting to trigger excessive allocation.
 |===
 
-== 5  Non-Functional Requirements – Operability
+== Non-Functional Requirements – Operability
 
 [cols="1,5,4",options="header"]
 |===
@@ -97,7 +99,7 @@ calibration with multiple contending threads.
 |CB-NF-O-006 |The library should provide clear diagnostic information (e.g., detailed exception messages, relevant state) when common errors occur (e.g., out-of-bounds access, resource leaks, mapping failures). |Review of exception handling code. Unit tests that trigger common errors verify quality of diagnostic messages.
 |===
 
-== 6  Non-Functional Requirements – Maintainability & Portability
+== Non-Functional Requirements – Maintainability & Portability
 
 [cols="1,5,4",options="header"]
 |===
@@ -109,7 +111,7 @@ calibration with multiple contending threads.
 |CB-NF-MP-005 |Internal components should be well-encapsulated to facilitate future refactoring and evolution without breaking public contracts. |Code reviews focusing on API design and internal module structure.
 |===
 
-== 7  Documentation Obligations
+== Documentation Obligations
 
 [cols="1,5,4",options="header"]
 |===
@@ -126,7 +128,7 @@ benchmark run. |CI pipeline updates badge or embedded figures on commit/release.
 |CB-DOC-007 |Glossary (`CB-GLOSS-001`) must be comprehensive and cover all specialized terms used in the library and its documentation. |Peer review of glossary against documentation and codebase.
 |===
 
-== 8  Test Obligations
+== Test Obligations
 
 [cols="1,5,4",options="header"]
 |===
@@ -143,7 +145,7 @@ budget of 15 min (for standard checks) and 1 hour (for full performance regressi
 |CB-TEST-008 |Tests for resource management, ensuring `releaseLast`/`close` correctly deallocates resources and that use-after-release throws appropriate exceptions. Leak detection tests verify warnings (CB-NF-O-003). |Unit tests instrumenting resource allocation/deallocation; specific tests for use-after-release behaviour.
 |===
 
-== 9  Risk & Compliance
+== Risk & Compliance
 
 [cols="1,5,4",options="header"]
 |===
@@ -156,7 +158,7 @@ Enterprise-only features (e.g. encrypted queue files at a higher level, specific
 |CB-RISK-004 |Potential for `OutOfMemoryError` (both Java heap and native memory) if not managed correctly by users. |Clear documentation (CB-DOC-006) on resource lifecycle and typical patterns to avoid leaks. `BytesMetrics` (CB-NF-O-002) for monitoring.
 |===
 
-== 10  Operational Concerns
+== Operational Concerns
 
 [cols="1,5,4",options="header"]
 |===
@@ -170,7 +172,7 @@ reference build container `Dockerfile.build`. |CI.
 |CB-OPS-005 |Release notes must accompany each release, detailing new features, bug fixes, performance improvements, and any breaking changes or deprecations. |Process for drafting and reviewing release notes as part of release cycle.
 |===
 
-== 11  Glossary
+== Glossary
 
 ASCII-7 ::  American Standard Code for Information Interchange, 7-bit.
 atomic operations ::  Operations that complete in a single, indivisible step, often used for thread-safe updates to shared memory.
@@ -191,4 +193,3 @@ SLF4J ::  Simple Logging Facade for Java, an abstraction for various logging fra
 stop-bit encoding ::  Variable-length integer encoding using one bit (often the MSB) in each byte as a continuation flag.
 UTF-8 ::  Unicode Transformation Format, 8-bit, a variable-width character encoding capable of encoding all possible Unicode code points.
 zero-copy ::  Operations that avoid copying data between different memory areas, e.g., reading from a file directly into a target buffer without intermediate copies.
-
