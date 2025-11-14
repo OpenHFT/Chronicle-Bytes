@@ -129,7 +129,6 @@ public enum BytesUtil {
         int min = 0;
         int max = 0;
         for (Field field : fields) {
-            final FieldGroup fieldGroup = Jvm.findAnnotation(field, FieldGroup.class);
             int start = (int) MEMORY.objectFieldOffset(field);
             int size = sizeOf(field.getType());
             int end = start + size;

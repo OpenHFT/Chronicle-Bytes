@@ -93,7 +93,7 @@ public class ChunkedMappedFile extends MappedFile {
     /**
      * Not compatible with hugetlbfs
      */
-    public static void warmup() {
+    public static void warmupInternal() {
         final List<Exception> errorsDuringWarmup = new ArrayList<>();
         ExceptionHandler error = Jvm.error().defaultHandler();
         ExceptionHandler warn = Jvm.warn().defaultHandler();

@@ -53,6 +53,7 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
     private static final int MAX_TO_STRING = 1024;
     @Nullable
     private static Set<WeakReference<BinaryLongArrayReference>> binaryLongArrayReferences = null;
+    private static final Object COLLECT_LOCK = new Object();
     private long length;
 
     /**
@@ -79,7 +80,12 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
      * This method is used for debugging and monitoring. It should not be used in production environments.
      */
     public static void startCollecting() {
-        binaryLongArrayReferences = Collections.newSetFromMap(new IdentityHashMap<>());
+        synchronized (COLLECT_LOCK) {
+            if (binaryLongArrayReferences == null)
+                binaryLongArrayReferences = Collections.newSetFromMap(new IdentityHashMap<>());
+            else
+                binaryLongArrayReferences.clear();
+        }
     }
 
     /**
@@ -93,16 +99,18 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
      */
     public static void forceAllToNotCompleteState()
             throws IllegalStateException, BufferOverflowException {
-        if (binaryLongArrayReferences == null)
-            return;
+        synchronized (COLLECT_LOCK) {
+            if (binaryLongArrayReferences == null)
+                return;
 
-        for (WeakReference<BinaryLongArrayReference> x : binaryLongArrayReferences) {
-            @Nullable BinaryLongArrayReference binaryLongReference = x.get();
-            if (binaryLongReference != null) {
-                binaryLongReference.setValueAt(0, LONG_NOT_COMPLETE);
+            for (WeakReference<BinaryLongArrayReference> x : binaryLongArrayReferences) {
+                @Nullable BinaryLongArrayReference binaryLongReference = x.get();
+                if (binaryLongReference != null) {
+                    binaryLongReference.setValueAt(0, LONG_NOT_COMPLETE);
+                }
             }
+            binaryLongArrayReferences = null;
         }
-        binaryLongArrayReferences = null;
     }
 
     @Override
@@ -277,7 +285,11 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
             throws IllegalStateException, BufferOverflowException {
         throwExceptionIfClosed();
 
-        ((BinaryLongReference) value).bytesStore(bytesStore, VALUES + offset + (index << SHIFT), 8);
+        if (!(value instanceof BinaryLongReference)) {
+            throw new IllegalArgumentException("Expected BinaryLongReference but got " + value.getClass().getName());
+        }
+        BinaryLongReference longRef = (BinaryLongReference) value;
+        longRef.bytesStore(bytesStore, VALUES + offset + (index << SHIFT), 8);
     }
 
     @Override
@@ -449,8 +461,13 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
             throws BufferOverflowException, IllegalStateException {
         throwExceptionIfClosed();
 
-        if (value == LONG_NOT_COMPLETE && binaryLongArrayReferences != null)
-            binaryLongArrayReferences.add(new WeakReference<>(this));
+        if (value == LONG_NOT_COMPLETE) {
+            synchronized (COLLECT_LOCK) {
+                if (binaryLongArrayReferences != null) {
+                    binaryLongArrayReferences.add(new WeakReference<>(this));
+                }
+            }
+        }
         return bytesStore.compareAndSwapLong(VALUES + offset + (index << SHIFT), expected, value);
     }
 }

@@ -12,6 +12,8 @@ import net.openhft.chronicle.core.time.SystemTimeProvider;
 import net.openhft.chronicle.core.time.TimeProvider;
 
 import java.io.File;
+import java.util.Objects;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * {@link TimeProvider} that yields monotonically increasing timestamps shared
@@ -26,7 +28,7 @@ public enum MappedUniqueTimeProvider implements TimeProvider, ReferenceOwner {
     private static final int NANOS_PER_MICRO = 1000;
 
     private final BytesStore<?, ?> bytesStore;
-    private TimeProvider provider = SystemTimeProvider.INSTANCE;
+    private final AtomicReference<TimeProvider> provider = new AtomicReference<>(SystemTimeProvider.INSTANCE);
 
     MappedUniqueTimeProvider() {
         try {
@@ -49,7 +51,7 @@ public enum MappedUniqueTimeProvider implements TimeProvider, ReferenceOwner {
      * Sets the underlying time source.
      */
     public MappedUniqueTimeProvider provider(TimeProvider provider) {
-        this.provider = provider;
+        this.provider.set(Objects.requireNonNull(provider));
         return this;
     }
 
@@ -59,13 +61,13 @@ public enum MappedUniqueTimeProvider implements TimeProvider, ReferenceOwner {
      */
     @Override
     public long currentTimeMillis() {
-        return provider.currentTimeMillis();
+        return provider.get().currentTimeMillis();
     }
 
     @Override
     public long currentTimeMicros()
             throws IllegalStateException {
-        long timeus = provider.currentTimeMicros();
+        long timeus = provider.get().currentTimeMicros();
         while (true) {
             final long time0 = lastTimeStored();
             long time0us = time0 / NANOS_PER_MICRO;
@@ -83,7 +85,7 @@ public enum MappedUniqueTimeProvider implements TimeProvider, ReferenceOwner {
     @Override
     public long currentTimeNanos()
             throws IllegalStateException {
-        long time = provider.currentTimeNanos();
+        long time = provider.get().currentTimeNanos();
         long time5 = time >>> 5;
 
         long time0 = lastTimeStored();

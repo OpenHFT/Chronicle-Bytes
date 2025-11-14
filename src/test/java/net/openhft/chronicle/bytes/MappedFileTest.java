@@ -87,8 +87,9 @@ public class MappedFileTest extends BytesTestCommon {
             chunkSize = 64;
         } else if (Jvm.isMacArm()) {
             chunkSize = 16;
-        } else
+        } else {
             chunkSize = 4;
+        }
         chunkSize = chunkSize / 4 * PageUtil.getPageSize(tmp.getAbsolutePath());
 
         try (MappedFile mf = MappedFile.mappedFile(tmp, chunkSize, 0)) {

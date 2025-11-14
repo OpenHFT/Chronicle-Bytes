@@ -50,6 +50,7 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
 
     @Nullable
     private static Set<WeakReference<BinaryIntArrayReference>> binaryIntArrayReferences = null;
+    private static final Object COLLECT_LOCK = new Object();
     private long length;
 
     /**
@@ -72,7 +73,12 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
      * Initializes the collection that keeps references to BinaryIntArrayReference instances.
      */
     public static void startCollecting() {
-        binaryIntArrayReferences = Collections.newSetFromMap(new IdentityHashMap<>());
+        synchronized (COLLECT_LOCK) {
+            if (binaryIntArrayReferences == null)
+                binaryIntArrayReferences = Collections.newSetFromMap(new IdentityHashMap<>());
+            else
+                binaryIntArrayReferences.clear();
+        }
     }
 
     /**
@@ -84,17 +90,19 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
      */
     public static void forceAllToNotCompleteState()
             throws IllegalStateException, BufferOverflowException {
-        if (binaryIntArrayReferences == null)
-            return;
+        synchronized (COLLECT_LOCK) {
+            if (binaryIntArrayReferences == null)
+                return;
 
-        for (WeakReference<BinaryIntArrayReference> x : binaryIntArrayReferences) {
-            @Nullable BinaryIntArrayReference binaryLongReference = x.get();
-            if (binaryLongReference != null) {
-                binaryLongReference.setValueAt(0, INT_NOT_COMPLETE);
+            for (WeakReference<BinaryIntArrayReference> x : binaryIntArrayReferences) {
+                @Nullable BinaryIntArrayReference binaryLongReference = x.get();
+                if (binaryLongReference != null) {
+                    binaryLongReference.setValueAt(0, INT_NOT_COMPLETE);
+                }
             }
-        }
 
-        binaryIntArrayReferences = null;
+            binaryIntArrayReferences = null;
+        }
     }
 
     /**
@@ -295,7 +303,11 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
             throws IllegalStateException, BufferOverflowException, IllegalArgumentException {
         throwExceptionIfClosed();
 
-        ((BinaryIntReference) value).bytesStore(bytesStore, VALUES + offset + (index << SHIFT), 8);
+        if (!(value instanceof BinaryIntReference)) {
+            throw new IllegalArgumentException("Expected BinaryIntReference but got " + value.getClass().getName());
+        }
+        BinaryIntReference intRef = (BinaryIntReference) value;
+        intRef.bytesStore(bytesStore, VALUES + offset + (index << SHIFT), 8);
     }
 
     /**
@@ -574,8 +586,13 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
             throws BufferOverflowException, IllegalStateException {
         throwExceptionIfClosed();
 
-        if (value == INT_NOT_COMPLETE && binaryIntArrayReferences != null)
-            binaryIntArrayReferences.add(new WeakReference<>(this));
+        if (value == INT_NOT_COMPLETE) {
+            synchronized (COLLECT_LOCK) {
+                if (binaryIntArrayReferences != null) {
+                    binaryIntArrayReferences.add(new WeakReference<>(this));
+                }
+            }
+        }
         return bytesStore.compareAndSwapInt(VALUES + offset + (index << SHIFT), expected, value);
     }
 }

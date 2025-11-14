@@ -200,7 +200,7 @@ enum BytesInternal {
             } else {
                 BytesStore<?, ?> bytesStore = left.bytesStore();
                 if (!(bytesStore instanceof HeapBytesStore))
-                    return null;
+                    throw new UnsupportedOperationException("Vectorized mismatch requires HeapBytesStore");
 
                 HeapBytesStore heapBytesStore = (HeapBytesStore) bytesStore;
                 leftObject = heapBytesStore.realUnderlyingObject();
@@ -216,7 +216,7 @@ enum BytesInternal {
             } else {
                 BytesStore<?, ?> bytesStore = right.bytesStore();
                 if (!(bytesStore instanceof HeapBytesStore))
-                    return null;
+                    throw new UnsupportedOperationException("Vectorized mismatch requires HeapBytesStore");
 
                 HeapBytesStore heapBytesStore = (HeapBytesStore) bytesStore;
                 rightObject = heapBytesStore.realUnderlyingObject();
@@ -244,9 +244,11 @@ enum BytesInternal {
             }
 
             return Boolean.TRUE;
+        } catch (UnsupportedOperationException e) {
+            throw e;
         } catch (Throwable e) {
             Jvm.warn().on(BytesInternal.class, e);
-            return null;
+            throw new UnsupportedOperationException(e);
         }
     }
 
@@ -2805,8 +2807,9 @@ enum BytesInternal {
                     if (-absValue < -MAX_VALUE_DIVIDE_10) {
                         throw new IORuntimeException("Can't parse flexible long as it goes beyond the range: " +
                                 "multiplication of " + absValue + " by 10");
-                    } else
+                    } else {
                         absValue *= 10;
+                    }
                 }
 
                 return sign * absValue;

@@ -20,6 +20,7 @@ import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileLock;
+import java.util.Objects;
 
 import static net.openhft.chronicle.assertions.AssertUtil.SKIP_ASSERTIONS;
 import static net.openhft.chronicle.core.util.Longs.requireNonNegative;
@@ -459,5 +460,21 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
         final long length2 = pageEnd - syncStart;
         performMsync(syncStart, length2, syncMode);
         syncLength = positionFromStart;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof MappedBytesStore)) return false;
+        if (!super.equals(o)) return false;
+        MappedBytesStore that = (MappedBytesStore) o;
+        return start == that.start
+                && safeLimit == that.safeLimit
+                && Objects.equals(mappedFile.file(), that.mappedFile.file());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), mappedFile.file(), start, safeLimit);
     }
 }

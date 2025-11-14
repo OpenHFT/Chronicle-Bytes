@@ -93,17 +93,4 @@ public enum PropertyReplacer {
         return result.toString();
     }
 
-    /**
-     * Converts the content of an {@link java.io.InputStream} to a String. This
-     * helper is used instead of {@link java.io.InputStream#readAllBytes()} for
-     * compatibility with earlier Java versions.
-     *
-     * @param is the InputStream to be converted.
-     * @return the content of the InputStream as a String.
-     */
-    @NotNull
-    private static String convertStreamToString(@NotNull java.io.InputStream is) {
-        java.util.Scanner s = new java.util.Scanner(is).useDelimiter("\\A");
-        return s.hasNext() ? s.next() : "";
-    }
 }

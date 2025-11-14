@@ -284,7 +284,7 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
      * Warms up the memory-mapped file by accessing its contents.
      */
     public static void warmup() {
-        ChunkedMappedFile.warmup();
+        ChunkedMappedFile.warmupInternal();
     }
 
     /**
