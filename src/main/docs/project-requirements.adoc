@@ -11,7 +11,7 @@
 // Scope  = CB (Chronicle Bytes)
 // Tag    = FN | NF-P | NF-S | NF-O | NF-MP | TEST | DOC | OPS | RISK
 // NNN    = sequential number with three digits
-// All text is British English and ASCII-7 only, per AGENT.md section 2.
+// All text is British English and ISO-8859-1 only, per AGENTS.md section 2.
 
 == Scope
 
@@ -116,7 +116,7 @@ calibration with multiple contending threads.
 [cols="1,5,4",options="header"]
 |===
 |ID |Requirement |Compliance Check
-|CB-DOC-001 |All AsciiDoc and Javadoc **must** use British English and ASCII-7 (or UTF-8 where essential, clearly marked). |Automated spell- and byte-range scan in Maven `verify`.
+|CB-DOC-001 |All AsciiDoc and Javadoc **must** use British English and ISO-8859-1 (or UTF-8 where essential, clearly marked). |Automated spell- and byte-range scan in Maven `verify`.
 |CB-DOC-002 |Javadoc first sentence is a concise behavioural summary; blocks
 must not duplicate information manifest from the signature. All public classes and methods must have Javadoc. |Checkstyle custom rule or equivalent. Javadoc generation and spot checks.
 |CB-DOC-003 |`docs/chronicle-bytes-manual.adoc` includes a worked example for
@@ -174,7 +174,7 @@ reference build container `Dockerfile.build`. |CI.
 
 == Glossary
 
-ASCII-7 ::  American Standard Code for Information Interchange, 7-bit.
+ASCII-7 ::  American Standard Code for Information Interchange, 7-bit subset commonly used within ISO-8859-1.
 atomic operations ::  Operations that complete in a single, indivisible step, often used for thread-safe updates to shared memory.
 direct memory ::  Off-heap memory managed by the JVM, not part of the Java heap, accessed via `java.nio.ByteBuffer.allocateDirect` or `Unsafe`.
 elastic buffer ::  A buffer that grows automatically when additional capacity is
