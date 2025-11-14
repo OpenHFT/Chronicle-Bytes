@@ -1,9 +1,11 @@
 = Chronicle Bytes
 Chronicle Software
 :css-signature: demo
-:toc: macro
+:toc:
 :toclevels: 2
 :icons: font
+:lang: en-GB
+:source-highlighter: rouge
 
 image:https://maven-badges.herokuapp.com/maven-central/net.openhft/chronicle-bytes/badge.svg[caption="",link=https://maven-badges.herokuapp.com/maven-central/net.openhft/chronicle-bytes]
 image:https://javadoc.io/badge2/net.openhft/chronicle-bytes/javadoc.svg[link="https://www.javadoc.io/doc/net.openhft/chronicle-bytes/latest/index.html"]
@@ -13,8 +15,6 @@ image:https://img.shields.io/badge/release%20notes-subscribe-brightgreen[link="h
 image:https://sonarcloud.io/api/project_badges/measure?project=OpenHFT_Chronicle-Bytes&metric=alert_status[link="https://sonarcloud.io/dashboard?id=OpenHFT_Chronicle-Bytes"]
 
 image::images/Bytes_line.png[width=20%]
-
-toc::[]
 
 == Introduction
 
@@ -32,7 +32,7 @@ The API offers:
 * Elastic ByteBuffer wrappers that resize as needed.
 * Direct parsing and writing of text to off-heap bytes.
 
-A number of relevant system properties are listed in link:docs/systemProperties.adoc[systemProperties.adoc].
+A number of relevant system properties are listed in link:docs/systemProperties.adoc[systemProperties.adoc]. For detailed requirements and design rationale, see link:src/main/docs/project-requirements.adoc[project-requirements.adoc] and link:src/main/docs/decision-log.adoc[decision-log.adoc].
 
 === Supported Data Types
 
