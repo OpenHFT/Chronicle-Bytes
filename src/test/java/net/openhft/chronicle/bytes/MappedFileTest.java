@@ -35,6 +35,29 @@ public class MappedFileTest extends BytesTestCommon {
         }
     }
 
+    @Test
+    public void insideHonoursSafeLimitWhenPageSizeDiffers() throws Exception {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+        final File file = tmpDir.newFile();
+        final long chunkSize = OS.pageAlign(64 << 10);
+        final long overlapSize = OS.pageAlign(4 << 10);
+        final int enlargedPageSize = Math.max(OS.pageSize(), 4096) * 2;
+        final ReferenceOwner owner = ReferenceOwner.temporary("page-matrix");
+
+        try (MappedFile mappedFile = MappedFile.of(file, chunkSize, overlapSize, enlargedPageSize, false)) {
+            final long offset = chunkSize;
+            final MappedBytesStore store = mappedFile.acquireByteStore(owner, offset);
+            try {
+                final long safeLimit = store.safeLimit();
+                assertEquals(store.start() + chunkSize, safeLimit);
+                assertTrue(store.inside(safeLimit - 1));
+                assertFalse(store.inside(safeLimit));
+            } finally {
+                store.release(owner);
+            }
+        }
+    }
+
     @org.junit.jupiter.api.Test
     void testWarmup() {
         try {

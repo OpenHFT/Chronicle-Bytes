@@ -28,4 +28,18 @@ public class UncheckedBytesBehaviourTest extends BytesTestCommon {
             h.releaseLast();
         }
     }
+
+    @Test
+    public void uncheckedModeAllowsWritePastLimit() {
+        Bytes<?> checked = Bytes.allocateElasticOnHeap(16);
+        Bytes<?> unchecked = checked.unchecked(true);
+        try {
+            unchecked.writeLimit(4);
+            unchecked.writeLong(0x0102030405060708L);
+            assertEquals("Unchecked write should advance writePosition", 8, unchecked.writePosition());
+            assertEquals("Checked view remains at start", 0, checked.readPosition());
+        } finally {
+            unchecked.releaseLast();
+        }
+    }
 }
