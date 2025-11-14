@@ -1,0 +1,63 @@
+= Chronicle Bytes – Functional Requirements
+:toc:
+:lang: en-GB
+:source-highlighter: rouge
+
+== Purpose
+
+This document highlights the core functional behaviours that Chronicle Bytes must provide and keep stable across releases.
+It organises the `CB-FN-*` requirements from `project-requirements.adoc` into domains and links them to verification mechanisms
+(tests, benchmarks and documentation). The full catalogue, including non-functional and risk requirements, remains in
+`project-requirements.adoc`.
+
+== Domain Overview
+
+[cols="1,3,3",options="header"]
+|===
+| Tag range | Domain | Notes
+| CB-FN-001 .. CB-FN-008 | Core API and storage semantics | Bytes and BytesStore split, cursor model, storage variants, Wire integration.
+| CB-FN-009 .. CB-FN-013 | Encoding, decoding and byte-level utilities | String encodings, alignment-sensitive operations, search and comparison helpers.
+| CB-FN-014 | Pooling and lifecycle | Acquisition and release of pooled `Bytes` instances.
+|===
+
+== Core API and Storage Semantics (CB-FN-001 .. CB-FN-008)
+
+[cols="1,4,3",options="header"]
+|===
+| ID | Requirement (summary) | Verification
+| CB-FN-001 | Provide the `Bytes<T>` API exposing separate read and write cursors, limits and capacity over arbitrary memory regions. | Unit tests in `src/test/java/net/openhft/chronicle/bytes` covering cursor movement, bounds checks and data integrity; examples and discussion in `project-requirements.adoc`.
+| CB-FN-002 | Implement `BytesStore<B, U>` as the backing store for `Bytes`, supporting on-heap, direct (off-heap) and memory-mapped variants. | Integration tests that open each variant, write and re-read data, plus architecture notes in `architecture-overview.adoc`.
+| CB-FN-003 | Support elastic `Bytes` instances that grow transparently up to the maximum real capacity of the underlying `BytesStore`. | Micro-benchmarks and tests exercising growth behaviour and asserting correctness up to real capacity as described in `project-requirements.adoc`.
+| CB-FN-004 | Expose atomic operations (compare-and-swap, get-and-add) for relevant primitives located in off-heap memory. | Concurrency and stress tests that contend on the same address, verifying correctness and performance targets (`CB-NF-P-*`), plus documentation in `architecture-overview.adoc` and `memory-management.adoc`.
+| CB-FN-005 | Provide stop-bit encoding and decoding utilities for signed and unsigned integers. | Round-trip tests over representative value ranges and negative cases, as described in the verification column of `project-requirements.adoc`.
+| CB-FN-006 | Allow creation of lightweight slice views (for example `bytesForRead`, `bytesForWrite`, `slice`) without copying underlying data. | Tests validating shared backing storage, independent cursors and bounds enforcement for slices; see memory-management and pool documentation.
+| CB-FN-007 | Offer hex-dump debugging support (for example via `HexDumpBytes`) for inspecting byte regions. | Unit tests that construct dumps for mixed content and compare against expected ASCII layouts.
+| CB-FN-008 | Integrate with Chronicle Wire so `MethodWriter` and `MethodReader` can serialise over any supported `Bytes` implementation. | End-to-end integration tests that serialise and deserialise objects or messages using multiple `WireType` values, as described in the Bytes and Wire project requirements.
+|===
+
+== Encoding, Decoding and Byte-Level Utilities (CB-FN-009 .. CB-FN-013)
+
+[cols="1,4,3",options="header"]
+|===
+| ID | Requirement (summary) | Verification
+| CB-FN-009 | Support efficient parsing and formatting for common string encodings (including UTF-8, ISO-8859-1 and US-ASCII), with control over length prefixes and error handling. | Unit tests for well-formed and malformed input, boundary conditions and round-trip fidelity; property-based tests where present; cross-references to performance targets `CB-NF-P-006` and related entries.
+| CB-FN-010 | Wrap existing `byte[]` arrays (including sub-regions) and `java.nio.ByteBuffer` instances without copying data. | Tests that wrap arrays and buffers, perform read and write operations, and assert data integrity and absence of copies as described in `project-requirements.adoc`.
+| CB-FN-011 | Provide efficient bulk data transfer between `Bytes` instances and between `BytesStore` and IO channels. | Benchmarks and tests comparing bulk transfer methods with manual loops and `java.nio` alternatives, ensuring throughput meets or exceeds the targets set in the project requirements.
+| CB-FN-012 | Handle alignment correctly for primitive access on off-heap and memory-mapped stores, including dedicated aligned access methods. | Micro-benchmarks for aligned versus unaligned access and unit tests that confirm correctness of aligned methods, in line with the project requirements.
+| CB-FN-013 | Provide utility methods for common byte-level operations (searching for bytes or sequences, comparing regions). | Tests that exercise search and comparison over varied patterns and lengths, validating correctness and edge cases.
+|===
+
+== Pooling and Lifecycle (CB-FN-014)
+
+[cols="1,4,3",options="header"]
+|===
+| ID | Requirement (summary) | Verification
+| CB-FN-014 | Provide pooling for `Bytes` instances to reduce allocation overhead and garbage collection pressure under high churn workloads. | Benchmarks demonstrating improvements when using pooled instances compared with non-pooled usage, together with unit tests for pool lifecycle, reuse and safety; see `project-requirements.adoc` for detailed benchmark criteria and acceptance thresholds. |
+|===
+
+== Traceability
+
+- Each row above references an existing requirement in `project-requirements.adoc`; that file remains the canonical source of full wording and benchmark targets.
+- Tests in `src/test/java/net/openhft/chronicle/bytes` and related harnesses should reference the `CB-FN-*` identifiers to make requirement coverage easy to audit.
+- Decisions in `src/main/docs/decision-log.adoc` (for example `CB-FN-101` and `CB-FN-102`) explain the rationale behind key design choices that implement these requirements.
+
