@@ -365,7 +365,7 @@ When using `BINARY_LIGHT` or `RAW`, the serialized data is compact and can be di
 * **Same-Host IPC**: When processes share the same host, they can use `Bytes.allocateElasticDirect()` to create a shared memory buffer.
 This allows one process to write messages that another process can read without copying data between JVMs.
 
-This architecture allows for extremely fast IPC, with typical same-host latencies around 1 microsecond (p99) including Wire deserialization, because data often only moves between CPU caches.
+This architecture allows for extremely fast IPC, with typical same-host latencies around 1 µs (p99) including Wire deserialization, because data often only moves between CPU caches.
 
 Cross-host replication (e.g., Chronicle Queue Enterprise) also benefits, as the compact Wire frames (already in `Bytes`) are efficiently sent over TCP.
 

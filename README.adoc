@@ -870,11 +870,11 @@ The simplest Lambda function is stateless, however this has limited application.
 They are useful for message translation.
 
 If you need a stateful Lambda function, you can consider the input to the function to be every message it has ever consumed.
-Obviously this is inefficient, however with appropriate caches in your lamdba function, you can process and produce result incrementally.
+Obviously this is inefficient, however with appropriate caches in your lambda function, you can process and produce results incrementally.
 
 === Data in and out.
 
-We module a Lambda function as having an interface for inputs and another for outputs.
+We model a Lambda function as having an interface for inputs and another for outputs.
 These interfaces can be the same.
 
 .Sample interface for Lambda function
