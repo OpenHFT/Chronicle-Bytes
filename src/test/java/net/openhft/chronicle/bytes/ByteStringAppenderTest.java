@@ -30,7 +30,7 @@ public class ByteStringAppenderTest extends BytesTestCommon {
     @Parameterized.Parameters(name = "{0}")
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][]{
-//                {"heap", false},
+                // {"heap", false},
                 {"native", true}
         });
     }
@@ -78,7 +78,7 @@ public class ByteStringAppenderTest extends BytesTestCommon {
             bytes.append(",");
             bytes.append(-expected);
             bytes.append(",");
-//            System.out.println(bytes);
+            // System.out.println(bytes);
             assertEquals(expected, bytes.parseLong());
             assertEquals(-expected, bytes.parseLong());
         }
@@ -109,14 +109,14 @@ public class ByteStringAppenderTest extends BytesTestCommon {
             throws IORuntimeException {
         assumeFalse(GuardedNativeBytes.areNewGuarded());
         testAppendDouble0(-1.42278619425894E11);
-/*
+        /*
         @NotNull Random random = new Random(1);
         for (int i = 0; i < 100000; i++) {
             double d = Math.pow(1e32, random.nextDouble()) / 1e6;
             if (i % 3 == 0) d = -d;
             testAppendDouble0(d);
         }
-*/
+        */
     }
 
     private void testAppendDouble0(double d)
@@ -127,13 +127,13 @@ public class ByteStringAppenderTest extends BytesTestCommon {
         double d2 = bytes.parseDouble();
         assertEquals(d, d2, 0);
 
-/* assumes self terminating.
+        /* assumes self terminating.
         bytes.clear();
         bytes.appendDouble(d);
         bytes.flip();
         double d3 = bytes.parseDouble();
         Assert.assertEquals(d, d3, 0);
-*/
+        */
     }
 
     @Test

@@ -117,7 +117,7 @@ class DecimaliserDoubleTest extends BytesTestCommon {
     @Test
     void toDoubleLiteAndBigDecimal() {
         LongStream.range(0, 100_000L)
-//                .parallel()
+                // .parallel()
                 .forEach(x -> {
                     long f = 1;
                     for (int i = 0; i <= 18; i++) {
@@ -216,4 +216,3 @@ class DecimaliserDoubleTest extends BytesTestCommon {
         assertFalse(SimpleDecimaliser.SIMPLE.toDecimal(value, check));
     }
 }
-

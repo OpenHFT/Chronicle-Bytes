@@ -116,7 +116,7 @@ public class BytesInternalGuardedTest extends BytesTestCommon {
         if (s.length() != bytes.readRemaining()) {
             assertEquals(d, Double.parseDouble(s), 0.0);
             String s2 = bytes.toString();
-//            System.out.println(s + " != " + s2);
+            // System.out.println(s + " != " + s2);
         }
         bytes.releaseLast();
     }

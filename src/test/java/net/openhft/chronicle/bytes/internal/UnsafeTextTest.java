@@ -35,7 +35,7 @@ public class UnsafeTextTest extends BytesTestCommon {
         try {
 
             new CoolerTester(CpuCoolers.PAUSE1, CpuCoolers.BUSY1)
-//                .add("noop", () -> null)
+                    // .add("noop", () -> null)
                     .add("20d", () -> {
                         blackhole = UnsafeText.appendFixed(address, -Integer.MAX_VALUE);
                         return null;
@@ -82,7 +82,7 @@ public class UnsafeTextTest extends BytesTestCommon {
         testAppendDoubleOnce(0.7205789375929972, "0.7205789375929972");
         testAppendDoubleOnce(1.7205789375929972E-8, "1.7205789375929972E-8");
         testAppendDoubleOnce(1.000000459754255, "1.000000459754255");
-//        testAppendDoubleOnce(1.0000004597542552, "1.0000004597542552");
+        // testAppendDoubleOnce(1.0000004597542552, "1.0000004597542552");
         testAppendDoubleOnce(-0.0042633243189823394, "-0.0042633243189823394");
         // too high
         testAppendDoubleOnce(4.3634067645459027E-4, "0.00043634067645459027");
@@ -97,7 +97,7 @@ public class UnsafeTextTest extends BytesTestCommon {
         testAppendDoubleOnce(1.0272238286878982E-7, "0.00000010272238286878982");
         testAppendDoubleOnce(9.077547054210796E-8, "0.00000009077547054210796");
         testAppendDoubleOnce(-1.1914407211387385E-7, "-0.00000011914407211387385");
-//        testAppendDoubleOnce(1.0626477603237785E-10, "0.00000000010626477603237785");
+        // testAppendDoubleOnce(1.0626477603237785E-10, "0.00000000010626477603237785");
         testAppendDoubleOnce(8.871684275243539E-4, "0.0008871684275243539");
         testAppendDoubleOnce(8.807878708605213E-4, "0.0008807878708605213");
         testAppendDoubleOnce(8.417670165790972E-4, "0.0008417670165790972");

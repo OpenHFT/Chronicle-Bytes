@@ -1355,7 +1355,7 @@ public class BytesTest extends BytesTestCommon {
             assertEquals(!expectedDecimal9.isEmpty(), decimal);
             String actual3 = a.toString();
             assertEquals(expectedDecimal9, actual3);
-//            System.out.println("testAppendDoubleOnce(" + value + ", \"" + actual + "\", \"" + actual2 + "\", \"" + actualg + "\", \"" + actual3 + "\");");
+            // System.out.println("testAppendDoubleOnce(" + value + ", \"" + actual + "\", \"" + actual2 + "\", \"" + actualg + "\", \"" + actual3 + "\");");
 
         } finally {
             a.releaseLast();

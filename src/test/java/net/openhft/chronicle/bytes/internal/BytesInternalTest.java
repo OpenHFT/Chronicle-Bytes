@@ -193,11 +193,11 @@ public class BytesInternalTest extends BytesTestCommon {
         bytes.readPosition(0);
         sb.setLength(0);
 
-/*
+        /*
         BytesInternal.parseUtf8Sb1(bytes, sb, false, length);
         assertEquals(length, sb.length());
         assertEquals(new String(bytes2, US_ASCII), sb.toString());
-*/
+        */
 
         bytes.releaseLast();
     }
@@ -353,7 +353,7 @@ public class BytesInternalTest extends BytesTestCommon {
         double d2 = from.parseDouble();
         from.releaseLast();
         if (d != d2) {
-//            System.out.println(d + " != " + d2);
+            // System.out.println(d + " != " + d2);
             ++different;
         }
         return different;
@@ -538,4 +538,3 @@ public class BytesInternalTest extends BytesTestCommon {
             sdo.rawWriteByte(bytes.readByte(offset + i));
     }
 }
-

@@ -113,31 +113,31 @@ public class BytesMarshallableTest extends BytesTestCommon {
             bytes.writeHexDumpDescription("mb2").writeUnsignedByte(2);
             mb2.writeMarshallable(bytes);
 
-/*
-        assertEquals(
-                "01                                              # mb1\n" +
-                        "   05 48 65 6c 6c 6f                               # s\n" +
-                        "   01 31                                           # bi\n" +
-                        "   02 31 30                                        # bd\n" +
-                        "   0a 32 30 31 37 2d 31 31 2d 30 36                # date\n" +
-                        "   0c 31 32 3a 32 37 3a 34 34 2e 33 33 30          # time\n" +
-                        "   17 32 30 31 37 2d 31 31 2d 30 36 54 31 32 3a 32 # dateTime\n" +
-                        "   37 3a 34 34 2e 33 33 30 27 32 30 31 37 2d 31 31 # zonedDateTime\n" +
-                        "   2d 30 36 54 31 32 3a 32 37 3a 34 34 2e 33 33 31\n" +
-                        "   5a 5b 45 75 72 6f 70 65 2f 4c 6f 6e 64 6f 6e 5d # uuid\n" +
-                        "   24 63 35 66 33 34 62 39 63 2d 36 34 35 34 2d 34\n" +
-                        "   62 61 63 2d 61 32 66 37 2d 66 37 31 36 35 32 33\n" +
-                        "   62 62 32 64 33\n" +
-                        "02                                              # mb2\n" +
-                        "   05 57 6f 72 6c 64                               # s\n" +
-                        "   01 30                                           # bi\n" +
-                        "   01 30                                           # bd\n" +
-                        "   0a 32 30 31 37 2d 31 31 2d 30 36                # date\n" +
-                        "   0c 31 32 3a 32 37 3a 34 34 2e 33 33 36          # time\n" +
-                        "   17 32 30 31 37 2d 31 31 2d 30 36 54 31 32 3a 32 # dateTime\n" +
-                        "   37 3a 34 34 2e 33 33 36 27 32 30 31 37 2d 31 31 # zonedDateTime\n" +
-                        "   2d 30 36 54 31 32 3a 32 37 3a 34 34 2e 33 33 36\n" +
-                        "   5a 5b 45 75 72 6f 70 65 2f 4c 6f 6e 64 6f 6e 5d # uuid\n" +
+            /*
+            assertEquals(
+                    "01                                              # mb1\n" +
+                            "   05 48 65 6c 6c 6f                               # s\n" +
+                            "   01 31                                           # bi\n" +
+                            "   02 31 30                                        # bd\n" +
+                            "   0a 32 30 31 37 2d 31 31 2d 30 36                # date\n" +
+                            "   0c 31 32 3a 32 37 3a 34 34 2e 33 33 30          # time\n" +
+                            "   17 32 30 31 37 2d 31 31 2d 30 36 54 31 32 3a 32 # dateTime\n" +
+                            "   37 3a 34 34 2e 33 33 30 27 32 30 31 37 2d 31 31 # zonedDateTime\n" +
+                            "   2d 30 36 54 31 32 3a 32 37 3a 34 34 2e 33 33 31\n" +
+                            "   5a 5b 45 75 72 6f 70 65 2f 4c 6f 6e 64 6f 6e 5d # uuid\n" +
+                            "   24 63 35 66 33 34 62 39 63 2d 36 34 35 34 2d 34\n" +
+                            "   62 61 63 2d 61 32 66 37 2d 66 37 31 36 35 32 33\n" +
+                            "   62 62 32 64 33\n" +
+                            "02                                              # mb2\n" +
+                            "   05 57 6f 72 6c 64                               # s\n" +
+                            "   01 30                                           # bi\n" +
+                            "   01 30                                           # bd\n" +
+                            "   0a 32 30 31 37 2d 31 31 2d 30 36                # date\n" +
+                            "   0c 31 32 3a 32 37 3a 34 34 2e 33 33 36          # time\n" +
+                            "   17 32 30 31 37 2d 31 31 2d 30 36 54 31 32 3a 32 # dateTime\n" +
+                            "   37 3a 34 34 2e 33 33 36 27 32 30 31 37 2d 31 31 # zonedDateTime\n" +
+                            "   2d 30 36 54 31 32 3a 32 37 3a 34 34 2e 33 33 36\n" +
+                            "   5a 5b 45 75 72 6f 70 65 2f 4c 6f 6e 64 6f 6e 5d # uuid\n" +
                         "   24 32 65 61 35 66 33 34 35 2d 36 65 38 30 2d 34\n" +
                         "   35 66 30 2d 62 66 62 64 2d 63 33 30 37 34 34 33\n" +
                         "   65 32 38 61 34\n", bytes.toHexString());
@@ -352,7 +352,7 @@ public class BytesMarshallableTest extends BytesTestCommon {
 
     @Test
     public void serializeCollections() {
-//        assumeTrue(name.equals("Unguarded"));
+        // assumeTrue(name.equals("Unguarded"));
         final Bytes<?> bytes = new HexDumpBytes();
         try {
             final MyCollections mc = new MyCollections();

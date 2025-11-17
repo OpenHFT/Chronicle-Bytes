@@ -262,7 +262,7 @@ public class ByteStoreTest extends BytesTestCommon {
         final long[] longs = {Long.MIN_VALUE, Long.MAX_VALUE, Integer.MIN_VALUE, Integer.MAX_VALUE};
         for (long i : longs) {
             bytes.writeStopBit(i);
-//            Jvm.debug().on(getClass(), i + " " + bytes.position());
+            // Jvm.debug().on(getClass(), i + " " + bytes.position());
         }
         assertEquals(9 + 10, 5 + 6, bytes.writePosition());
 
@@ -363,7 +363,7 @@ public class ByteStoreTest extends BytesTestCommon {
         bytes.writePosition(32);
         for (long i = 32; i < 64; i += 8)
             bytes.writeOrderedLong(i);
-//        Jvm.debug().on(getClass(), bytes.bytes().toDebugString());
+        // Jvm.debug().on(getClass(), bytes.bytes().toDebugString());
 
         for (long i = 0; i < 32; i += 8)
             assertEquals(i, bytes.readVolatileLong());

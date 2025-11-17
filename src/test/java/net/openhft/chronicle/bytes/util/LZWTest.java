@@ -35,7 +35,7 @@ public class LZWTest extends BytesTestCommon {
         for (int i = 0; i < bytes.length; i += 40)
             bytes[rand.nextInt(bytes.length)] = '1';
         byte[] compress = LZW.compress(bytes);
-//        System.out.println(compress.length);
+        // System.out.println(compress.length);
 
         Bytes<?> bytes2 = Bytes.wrapForRead(bytes);
         @NotNull Bytes<?> bytes3 = Bytes.allocateElasticDirect();
@@ -44,18 +44,18 @@ public class LZWTest extends BytesTestCommon {
         byte[] bytes5 = LZW.uncompress(bytes4);
         assertNotNull(bytes5);
 
-//        assertEquals(Arrays.toString(bytes).replace(", ", "\n"),
-//                Arrays.toString(bytes5).replace(", ", "\n"));
-//        assertEquals(Arrays.toString(compress).replace(", ", "\n"),
-//                Arrays.toString(bytes4).replace(", ", "\n"));
+        // assertEquals(Arrays.toString(bytes).replace(", ", "\n"),
+        //         Arrays.toString(bytes5).replace(", ", "\n"));
+        // assertEquals(Arrays.toString(compress).replace(", ", "\n"),
+        //         Arrays.toString(bytes4).replace(", ", "\n"));
         assertEquals(compress.length, bytes4.length);
         assertArrayEquals(compress, bytes4);
 
         @NotNull Bytes<?> bytes6 = Bytes.allocateElasticDirect();
         LZW.uncompress(bytes3, bytes6);
         assertArrayEquals(bytes, bytes6.toByteArray());
-//        assertEquals(Arrays.toString(bytes).replace(", ", "\n"),
-//                Arrays.toString(bytes6.toByteArray()).replace(", ", "\n"));
+        // assertEquals(Arrays.toString(bytes).replace(", ", "\n"),
+        //         Arrays.toString(bytes6.toByteArray()).replace(", ", "\n"));
         bytes2.releaseLast();
         bytes3.releaseLast();
         bytes6.releaseLast();

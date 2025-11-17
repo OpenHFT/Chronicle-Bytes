@@ -99,7 +99,7 @@ public class NativeBytesStoreTest extends BytesTestCommon {
                     hist.sampleNanos(time);
                 }
                 assertEquals(expected, dec.toString());
-//                System.out.println("Encrypt/Decrypt took " + hist.toMicrosFormat());
+                // System.out.println("Encrypt/Decrypt took " + hist.toMicrosFormat());
             }
         } finally {
             bytes.releaseLast();
@@ -132,12 +132,12 @@ public class NativeBytesStoreTest extends BytesTestCommon {
                 final long len = enc.lengthWritten(pos) - 1;
                 assertEquals(0, len % 16);
                 enc.writeUnsignedByte(pos, Maths.toUInt8(len));
-//                System.out.println(len);
+                // System.out.println(len);
             }
-//            System.out.println("reading");
+            // System.out.println("reading");
             for (int t = 0; t < 9; t++) {
                 final int len = enc.readUnsignedByte();
-//                System.out.println(len);
+                // System.out.println(len);
                 assertEquals(0, len % 16);
                 final long pos = enc.readPosition();
                 enc.readPositionRemaining(pos, len);
@@ -267,7 +267,7 @@ public class NativeBytesStoreTest extends BytesTestCommon {
         @NotNull NativeBytesStore hbs = NativeBytesStore.from("Hello".getBytes());
         @NotNull NativeBytesStore hbs2 = NativeBytesStore.from("Hello".getBytes());
         @NotNull NativeBytesStore hbs3 = NativeBytesStore.from("He!!o".getBytes());
-        @NotNull NativeBytesStore hbs4 = NativeBytesStore.from("Hi".getBytes());
+        @NotNull final NativeBytesStore hbs4 = NativeBytesStore.from("Hi".getBytes());
         assertEquals(hbs, hbs2);
         assertEquals(hbs2, hbs);
         assertNotEquals(hbs, hbs3);

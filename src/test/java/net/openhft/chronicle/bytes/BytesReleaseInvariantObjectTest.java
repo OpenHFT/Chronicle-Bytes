@@ -69,18 +69,20 @@ final class BytesReleaseInvariantObjectTest extends BytesTestCommon {
         }
     }
 
-    //@Test
+    // @Test
     void manualTest() {
-/*        provideBytesObjects()
+        /*
+        provideBytesObjects()
                 .map(BytesFactoryUtil::bytes)
                 .filter(bytes -> bytes.getClass().getSimpleName().contains("Unchecked"))
                 .forEach(bytes -> {
                     bytes.append("Arne");
                     releaseAndAssertReleased(bytes);
                     bytes.toString();
-                });*/
+                });
+        */
 
-        //Bytes bytes = wipe(Bytes.allocateDirect(SIZE).unchecked(true));
+        // Bytes bytes = wipe(Bytes.allocateDirect(SIZE).unchecked(true));
         HexDumpBytes bytes = wipe(new HexDumpBytes());
         // bytes.contentDependentHashcodeAndEquals(false);
         bytes.append("Arne");

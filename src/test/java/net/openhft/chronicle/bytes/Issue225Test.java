@@ -18,7 +18,7 @@ public class Issue225Test extends BytesTestCommon {
             else
                 valueStr = "" + value;
             Bytes<?> bytes = Bytes.allocateElastic(32);
-            byte[] rbytes = new byte[24];
+            final byte[] rbytes = new byte[24];
             bytes.append(value);
             assertEquals(value, bytes.parseDouble(), 0.0);
             if ((long) value == value)
