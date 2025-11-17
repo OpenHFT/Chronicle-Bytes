@@ -23,6 +23,25 @@ The core design philosophy emphasizes:
 
 All write and read operations ultimately use the same cursor API provided by `Bytes`, meaning the cost of serialization is primarily the encoding logic itself, rather than I/O overhead.
 
+.High-level interaction between application, Wire, and Bytes
+[source,mermaid]
+----
+sequenceDiagram
+    participant App as Application Code
+    participant Wire as Chronicle Wire
+    participant Bytes as Bytes Buffer
+
+    App->>Wire: write(MyData)
+    Wire->>Bytes: encode fields into bytes
+    Bytes-->>Wire: confirm write positions
+    Wire-->>App: return
+
+    App->>Wire: read(MyData)
+    Wire->>Bytes: read bytes via cursors
+    Bytes-->>Wire: provide raw data
+    Wire-->>App: return populated MyData
+----
+
 === Core Concepts and Components
 
 * `Wire`: The central interface (e.g., `YamlWire`, `BinaryWire`) providing methods to read and write data.
@@ -90,6 +109,11 @@ Chronicle Wire provides multiple *wire types*, each with different characteristi
 |===
 
 All types largely share the same `Wire` API for reading and writing common Java types and `Marshallable` objects; you can often switch formats with a single line change.
+
+For a deeper treatment of Chronicle Wire itself, including its own architecture diagrams and requirements, refer to:
+
+* link:../../Chronicle-Wire/src/main/docs/architecture-overview.adoc[Chronicle Wire Architecture]
+* link:../../Chronicle-Wire/src/main/docs/wire-architecture.adoc[Wire Architecture Details]
 
 == Choosing a Wire Type
 

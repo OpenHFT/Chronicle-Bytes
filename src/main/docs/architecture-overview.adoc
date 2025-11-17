@@ -94,6 +94,20 @@ The design and implementation of Chronicle Bytes adhere to several core principl
 * **Deterministic Resource Management:** Providing explicit control over off-heap memory lifecycle via reference counting and `Closeable` interfaces
 <<CB-NF-O-001>>.
 
+== Performance Characteristics
+
+Chronicle Bytes is designed to meet strict performance envelopes defined in the non-functional requirements (`CB-NF-P-*`) in `project-requirements.adoc`.
+At a high level:
+
+* **Serialisation and deserialisation latency** – End-to-end object encoding/decoding over YAML Wire must remain in the sub-microsecond range on reference hardware <<CB-NF-P-001>>.
+* **Bulk comparison and copy throughput** – Region comparison and bulk copy operations are required to significantly outperform equivalent `java.nio.ByteBuffer` methods for typical payload sizes <<CB-NF-P-002>>.
+* **Elastic buffer lifecycle** – Allocation, resizing and release of elastic off-heap buffers must stay within tight microsecond budgets <<CB-NF-P-003>>, <<CB-NF-P-008>>.
+* **Aligned access and atomics** – Aligned reads from hot-cache mapped regions and contended atomic operations on off-heap memory are constrained by nanosecond-level targets <<CB-NF-P-004>>, <<CB-NF-P-005>>.
+* **String encoding throughput** – UTF-8 and related encodings must sustain hundreds of megabytes per second per core under JMH benchmarks <<CB-NF-P-006>>.
+
+These targets are verified via the benchmark and soak tests described in `project-requirements.adoc` and `testing-strategy.adoc`.
+Where benchmarks cannot run in every CI job, they are treated as release and regression gates.
+
 == Container Diagram (C4 level 2)
 
 The system can be visualized at a container level as follows, showing components within a typical High-Frequency Trading (HFT) application:
@@ -182,6 +196,10 @@ This facilitates extremely fast inter-process communication (IPC) via shared mem
 * **Chronicle Map:** Utilizes off-heap `BytesStore` implementations to store its keys and values, allowing for very large, GC-free, persistent (if backed by MMFs) key-value stores.
 It leverages atomic operations from `Bytes` (e.g., `compareAndSwapLong`) for thread-safe concurrent access.
 * **Chronicle FIX (and other protocol engines):** Often use `Bytes` for parsing and constructing messages directly from/to network buffers or memory-mapped files, minimizing copying and GC overhead.
+
+For a deeper description of the low-level primitives and utilities that Chronicle Bytes builds upon, see the Chronicle Core architecture overview:
+
+* link:../../Chronicle-Core/src/main/docs/architecture-overview.adoc[Chronicle Core Architecture]
 
 == Key Design Decisions
 

@@ -25,6 +25,18 @@ Use try-with-resources around `Closeable` `Bytes` objects or manage ownership vi
 `ReferenceOwner` to avoid mistakes. `ReferenceCountedTracer` can help debug
 leaks by recording where a store was reserved.
 
+.Reference counting lifecycle (conceptual)
+[source,mermaid]
+----
+stateDiagram-v2
+    [*] --> Unallocated
+    Unallocated --> Allocated: reserve()
+    Allocated --> Allocated: reserve()
+    Allocated --> Allocated: release()
+    Allocated --> Freed: releaseLast() / refCount == 0
+    Freed --> [*]
+----
+
 == Native Memory
 
 `NativeBytesStore` allocates direct memory using `Unsafe`. `releaseLast()`
@@ -79,3 +91,8 @@ the first expansion.
   a single mutable `Bytes` instance.
 * Monitor application logs for warnings about unreleased stores when resource
   tracing is enabled.
+
+For a wider architectural context on how these practices are applied in higher-level libraries, see:
+
+* link:../../Chronicle-Queue/src/main/docs/architecture-overview.adoc[Chronicle Queue Architecture]
+* link:../../Chronicle-Wire/src/main/docs/architecture-overview.adoc[Chronicle Wire Architecture]

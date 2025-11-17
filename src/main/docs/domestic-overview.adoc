@@ -58,4 +58,23 @@ Two main static methods are provided for acquiring locks:
 
 It's also possible to check if the current thread holds a lock on a file using `ReentrantFileLock.isHeldByCurrentThread(File file)`. [cite: 1396]
 
+== Trade-offs and Alternatives
+
+The re-entrant locking approach used here trades strict global guarantees for low overhead and developer ergonomics:
+
+* **Pros**
+** Simple API that mirrors `FileLock` while avoiding `OverlappingFileLockException` for the same thread.
+** No global registry beyond thread-local tracking, keeping contention and allocation overhead low.
+** Works well for single-process, multi-threaded applications where Chronicle Bytes already manages the mapped files.
+* **Cons**
+** Does not coordinate with other JVMs or processes unless they also use `ReentrantFileLock`; OS-level semantics still apply.
+** Misuse (for example forgetting to use try-with-resources) can lead to locks held longer than intended.
+
+Alternatives include:
+
+* relying solely on `java.nio.channels.FileLock` and handling `OverlappingFileLockException` manually;
+* using higher-level coordination mechanisms in Chronicle Queue or external co-ordination services (for example system-level file locks or cluster co-ordination).
+
+== Further Reading
+
 For general memory management information concerning `Bytes` and `BytesStore` which might be used in conjunction with file operations, refer to `memory-management.adoc` and `architecture-overview.adoc`.

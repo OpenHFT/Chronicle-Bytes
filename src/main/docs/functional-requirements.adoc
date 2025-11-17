@@ -20,6 +20,20 @@ It organises the `CB-FN-*` requirements from `project-requirements.adoc` into do
 | CB-FN-014 | Pooling and lifecycle | Acquisition and release of pooled `Bytes` instances.
 |===
 
+.Requirement domains at a glance
+[source,mermaid]
+----
+graph TD
+    core[Core API & storage\nCB-FN-001..008] --> docArch[architecture-overview.adoc]
+    core --> docApi[api-guide.adoc]
+
+    util[Encoding & utilities\nCB-FN-009..013] --> docUtil[util-overview.adoc]
+    util --> docAlgo[algo-overview.adoc]
+
+    pool[Pooling & lifecycle\nCB-FN-014] --> docPool[pool-overview.adoc]
+    pool --> docMem[memory-management.adoc]
+----
+
 == Core API and Storage Semantics (CB-FN-001 .. CB-FN-008)
 
 [cols="1,4,3",options="header"]
@@ -60,4 +74,3 @@ It organises the `CB-FN-*` requirements from `project-requirements.adoc` into do
 - Each row above references an existing requirement in `project-requirements.adoc`; that file remains the canonical source of full wording and benchmark targets.
 - Tests in `src/test/java/net/openhft/chronicle/bytes` and related harnesses should reference the `CB-FN-*` identifiers to make requirement coverage easy to audit.
 - Decisions in `src/main/docs/decision-log.adoc` (for example `CB-FN-101` and `CB-FN-102`) explain the rationale behind key design choices that implement these requirements.
-
