@@ -1,0 +1,69 @@
+= Chronicle Bytes CI Data Summary (TODO)
+:toc:
+:lang: en-GB
+:source-highlighter: rouge
+
+This page tracks the CI evidence needed to satisfy the Chronicle-Bytes CI TODO list
+(`Chronicle-Bytes/CI_DATA_CHECKLIST.md`) and related requirements from
+`project-requirements.adoc`.
+
+== Requirements, Tests and Coverage
+
+TODO:
+
+* Define an automated way to extract a mapping from `CB-*` requirement IDs to test classes/methods (for example by scanning comments or a dedicated mapping file).
+* Configure CI to publish JaCoCo coverage reports for Chronicle-Bytes and expose:
+** overall line and branch coverage; and
+** package-level coverage for `net.openhft.chronicle.bytes.*`.
+* Generate a small summary file (for example `Chronicle-Bytes/target/ci/requirements-coverage.json`) that records:
+** total number of Chronicle-Bytes requirements; and
+** how many have at least one mapped test.
+
+== Static Analysis and Code Quality
+
+TODO:
+
+* Ensure Checkstyle and SpotBugs are enabled for Chronicle-Bytes in the root build and that CI jobs fail on new violations.
+* Add a brief summary (for example `Chronicle-Bytes/target/ci/static-analysis-summary.json`) listing:
+** number of Checkstyle violations by severity; and
+** number of SpotBugs warnings by category (including security patterns).
+
+== Dependencies and Vulnerability Management
+
+TODO:
+
+* Capture a dependency tree for Chronicle-Bytes (for example `Chronicle-Bytes/target/ci/dependency-tree.txt`).
+* If an SBOM is produced by the root build, record the path to the Chronicle-Bytes section here.
+* Store the latest SCA (for example Dependency-Check or Snyk) report that covers Chronicle-Bytes, and note:
+** how many dependencies have known CVEs; and
+** the status of remediation for each high/critical CVE.
+
+== Performance and Benchmarks
+
+TODO:
+
+* Align existing JMH benchmarks with the `CB-NF-P-*` entries in `project-requirements.adoc` and document the mapping.
+* Configure a CI job that runs the Chronicle-Bytes benchmark suite on reference hardware and publishes results under a well-known path.
+* Generate a summary artefact (for example `Chronicle-Bytes/target/ci/performance-status.json`) with a simple pass/fail flag per `CB-NF-P-*` requirement.
+
+== Platform and JDK Matrix
+
+TODO:
+
+* Document which CI jobs run Chronicle-Bytes tests on which combinations of OS and JDK (for example in a small table in this file).
+* Verify that `CB-NF-MP-*` requirements are covered by at least one CI job per supported JDK version.
+
+== Security Testing
+
+TODO:
+
+* Identify and document any security- or fuzz-focused test jobs that exercise Chronicle-Bytes (for example string encoding fuzzers, bounds-checking harnesses).
+* Ensure their configuration and last-run status is recorded here, with links into CI where available.
+
+== Process and Review Evidence
+
+TODO:
+
+* Summarise the PR rules that apply to Chronicle-Bytes (required reviews, required checks).
+* Link to the Chronicle-Bytes changelog or release-notes location and describe how requirement IDs are referenced there.
+

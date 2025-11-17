@@ -1,0 +1,103 @@
+= Chronicle Bytes Security Review
+:doctype: book
+:toc:
+:toclevels: 2
+:sectnums:
+:lang: en-GB
+:source-highlighter: rouge
+
+This document summarises the main security considerations for Chronicle Bytes.
+It complements the formal security requirements in `project-requirements.adoc` (`CB-NF-S-*`) and applies the ISO 27001 topics referenced in the architecture TODO files.
+
+== Scope and Threat Model
+
+Chronicle Bytes is a low-level byte-access library and typically runs in-process as a dependency of higher-level systems (for example Chronicle Wire, Chronicle Queue, Chronicle Map).
+It assumes callers run in a trusted environment and does not implement authentication or authorisation itself.
+
+The primary security risks are:
+
+* memory-safety issues (for example out-of-bounds access in off-heap or memory-mapped regions);
+* data corruption when multiple processes or threads share mapped files incorrectly;
+* misuse of powerful primitives such as `Unsafe` or elastic buffers leading to resource exhaustion.
+
+Chronicle Bytes **does not** provide:
+
+* transport-level encryption (for example TLS);
+* application-level access control;
+* input validation for application payloads.
+
+Those are the responsibility of callers and higher-level modules.
+
+== Secure Coding and Bounds Checking (CB-NF-S-001, CB-NF-S-003)
+
+All memory access operations are expected to perform bounds checks and fail with deterministic exceptions such as `BufferOverflowException`, `BufferUnderflowException` or `IndexOutOfBoundsException` rather than invoking undefined behaviour.
+This requirement is captured by `CB-NF-S-001` in `project-requirements.adoc` and is enforced by unit tests and static analysis tools (for example SpotBugs).
+
+Use of `sun.misc.Unsafe` and other native mechanisms is encapsulated in dedicated classes.
+The implementation is reviewed with `CB-NF-S-003` in mind to ensure only the minimum necessary surface is exposed and usage is documented in Javadoc and `.adoc` guides such as `memory-management.adoc`.
+
+When writing new code that touches off-heap or mapped memory:
+
+* prefer existing `Bytes`/`BytesStore` APIs that already enforce bounds;
+* avoid caching raw addresses unless strictly necessary for performance;
+* ensure any new native or `Unsafe` usage is justified, covered by tests and referenced from `project-requirements.adoc`.
+
+== Memory-Mapped Files and Sharing (CB-NF-S-002)
+
+Chronicle Bytes uses memory-mapped files for durable storage and inter-process communication via classes such as `MappedBytesStore` and `MappedFile`.
+Requirement `CB-NF-S-002` mandates appropriate default behaviour and documentation when files may be shared.
+
+Key points:
+
+* sharing the same mapped file between multiple processes is possible but requires careful coordination by higher-level libraries (for example Chronicle Queue) to avoid corruption;
+* file locking helpers (for example `ReentrantFileLock` in the `domestic` package) are used to avoid overlapping locks in a single JVM, but they do not enforce global cross-process discipline;
+* documentation must highlight safe sharing patterns, particularly when addressing rolling logs or queue files.
+
+When integrating Chronicle Bytes into systems that share files across processes or hosts:
+
+* ensure a single writer pattern for mutation of shared regions;
+* use OS-level file permissions appropriate to the deployment environment;
+* consider higher-level replication protocols that detect and reconcile inconsistent states rather than relying on the raw byte layer.
+
+== Resource Exhaustion and Elastic Buffers (CB-NF-S-004, CB-FN-003)
+
+Chronicle Bytes exposes elastic `Bytes` variants that grow up to a documented real capacity (`CB-FN-003`, `CB-FN-102`).
+Unbounded growth can exhaust heap or native memory if misused.
+
+Mitigations:
+
+* elastic buffers grow only up to their configured real capacity; beyond that callers must handle failure explicitly;
+* pooling (`CB-FN-014`) and reference counting (`CB-NF-O-001`) help to recycle resources rather than leaking them;
+* performance and stress benchmarks in `project-requirements.adoc` are designed to reveal pathological allocation patterns.
+
+When designing new features:
+
+* set conservative defaults for real capacity on public factory methods;
+* document any configuration properties that influence buffer sizes;
+* test behaviour under large or untrusted inputs to ensure predictable failure modes.
+
+== Static Analysis, Testing and Tooling
+
+Security-related requirements depend on both static and dynamic checks:
+
+* SpotBugs and other static analysis tools are used to detect common misuse of arrays, buffers and `Unsafe`;
+* unit and integration tests exercise out-of-bounds scenarios, concurrent access and failure paths;
+* dependency scanning tools (for example OWASP Dependency-Check) are expected to run in CI to surface CVEs in transitive libraries.
+
+When adding new dependencies or changing low-level algorithms:
+
+* prefer well-maintained libraries with established security practices;
+* avoid introducing ad-hoc cryptographic code;
+* update documentation if threat assumptions or mitigations change.
+
+== Summary and Future Work
+
+Existing documentation (for example `project-requirements.adoc`, `memory-management.adoc`, `architecture-overview.adoc`) already captures most security obligations through `CB-NF-S-*` and related requirements.
+This `security-review.adoc` consolidates those concerns into a single view to support ISO 27001 style reviews.
+
+Future improvements may include:
+
+* a more formal threat model for deployments that expose Bytes-backed storage to untrusted input;
+* additional fuzz testing around encoding, decoding and bulk copy routines;
+* clearer integration guidance for modules that build higher-level security guarantees on top of Chronicle Bytes.
+
