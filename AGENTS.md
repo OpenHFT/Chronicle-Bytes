@@ -56,10 +56,10 @@ For static analysis and coverage:
 
 * From the repo root, run `mvn -P quality clean verify` to apply the shared Checkstyle and SpotBugs rules from `root-parent-pom`.
 * From the repo root, run `mvn -P sonar clean verify` to generate JaCoCo coverage and SonarCloud inputs.
-* For a single-module quality pass on Chronicle-Bytes with SpotBugs bound to `process-classes`, run:
+* For a single-module quality pass on Chronicle-Bytes with Checkstyle and SpotBugs bound as gating checks on Java 11+, run:
 
 ```bash
-mvn -q -pl :chronicle-bytes -am -P module-quality clean verify
+mvn -q -pl :chronicle-bytes -am clean verify
 ```
 
 ## Commit-message & PR etiquette

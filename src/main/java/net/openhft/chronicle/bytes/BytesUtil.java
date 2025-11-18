@@ -27,9 +27,9 @@ import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 
+import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static net.openhft.chronicle.core.UnsafeMemory.MEMORY;
 import static net.openhft.chronicle.core.io.IOTools.*;
 
@@ -324,7 +324,7 @@ public enum BytesUtil {
      * @return The integer value of the string.
      */
     public static int asInt(@NotNull String str) {
-        @NotNull ByteBuffer bb = ByteBuffer.wrap(str.getBytes(StandardCharsets.ISO_8859_1)).order(ByteOrder.nativeOrder());
+        @NotNull ByteBuffer bb = ByteBuffer.wrap(str.getBytes(ISO_8859_1)).order(ByteOrder.nativeOrder());
         return bb.getInt();
     }
 

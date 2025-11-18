@@ -23,8 +23,8 @@ import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.ReadOnlyBufferException;
-import java.nio.charset.StandardCharsets;
 
+import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static net.openhft.chronicle.bytes.internal.ReferenceCountedUtil.throwExceptionIfReleased;
 import static net.openhft.chronicle.core.util.Longs.requireNonNegative;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
@@ -375,7 +375,7 @@ public interface Bytes<U> extends
      */
     @NotNull
     static Bytes<byte[]> from(@NotNull String text) {
-        return wrapForRead(text.getBytes(StandardCharsets.ISO_8859_1));
+        return wrapForRead(text.getBytes(ISO_8859_1));
     }
 
     /**

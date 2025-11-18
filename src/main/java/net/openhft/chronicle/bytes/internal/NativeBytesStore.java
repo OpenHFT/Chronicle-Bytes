@@ -21,8 +21,8 @@ import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.charset.StandardCharsets;
 
+import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static net.openhft.chronicle.bytes.Bytes.MAX_CAPACITY;
 import static net.openhft.chronicle.core.Jvm.uncheckedCast;
 import static net.openhft.chronicle.core.UnsafeMemory.MEMORY;
@@ -212,7 +212,7 @@ public class NativeBytesStore<U>
 
     @NotNull
     public static NativeBytesStore from(@NotNull String text) {
-        return from(text.getBytes(StandardCharsets.ISO_8859_1));
+        return from(text.getBytes(ISO_8859_1));
     }
 
     @NotNull

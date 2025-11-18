@@ -28,13 +28,13 @@ It is a baseline snapshot to accompany the TODOs in `CI_DATA_CHECKLIST.md` and `
 == Static Analysis and Code Quality (Configuration Overview)
 
 * Checkstyle:
-** The root parent POM defines a `quality` profile using `maven-checkstyle-plugin` and Chronicle quality rules; Chronicle Bytes also adds a thin module-local Checkstyle configuration so tests are analysed when the module is built in isolation.
+** The root parent POM defines a `quality` profile using `maven-checkstyle-plugin` and Chronicle quality rules; Chronicle Bytes also uses a module-local `quality` profile so Checkstyle runs as a gating check when the module is built in isolation on Java 11+.
 ** CODE_REVIEW_STATUS.md describes a shared `code-review` profile (Checkstyle, SpotBugs, PMD, JaCoCo) used across modules, including Chronicle Bytes, for more intensive review passes.
 * SpotBugs and PMD:
-** SpotBugs guidance now lives in `QUALITY_PLAYBOOK.md`, which also documents the low-violation rule set; Chronicle Bytes uses the shared filters via the parent POM and exposes a `module-quality` profile that binds SpotBugs to `process-classes`.
+** SpotBugs guidance now lives in `QUALITY_PLAYBOOK.md`, which also documents the low-violation rule set; Chronicle Bytes uses the shared filters via the parent POM and exposes a `quality` profile that binds SpotBugs as a gating `check` goal on `process-test-classes` for Java 11+.
 ** PMD remains part of the `code-review` profile described in CODE_REVIEW_STATUS.md for other modules; Chronicle Bytes is expected to use the same `code-review` profile when it is enabled in this workspace.
 * Current state (this workspace):
-** Running `mvn -q -pl :chronicle-bytes -am -P module-quality clean verify` under Java 21 now runs Checkstyle and SpotBugs with the Chronicle rules for Chronicle Bytes; remaining PMD and JaCoCo tuning is tracked in CODE_REVIEW_STATUS.md and CI documentation.
+** Running `mvn -q -pl :chronicle-bytes -am clean verify` under Java 21 now runs Checkstyle and SpotBugs with the Chronicle rules for Chronicle Bytes; remaining PMD and JaCoCo tuning is tracked in CODE_REVIEW_STATUS.md and CI documentation.
 
 == Dependencies and Vulnerability Management (Configuration Overview)
 
