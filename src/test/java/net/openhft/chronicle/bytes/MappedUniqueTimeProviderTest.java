@@ -65,6 +65,7 @@ public class MappedUniqueTimeProviderTest extends BytesTestCommon {
             count += 1000;
         } while (System.currentTimeMillis() < start + 500);
         System.out.println("currentTimeMillisPerf count/sec: " + count * 2);
+        assertTrue("blackHole must be updated", blackHole != 0L || count > 0);
         assertTrue(count > 1_000_000 / 2); // half the speed of Rasberry Pi
     }
 
@@ -78,6 +79,7 @@ public class MappedUniqueTimeProviderTest extends BytesTestCommon {
             count += 1000;
         } while (System.currentTimeMillis() < start + 500);
         System.out.println("nanoTimePerf count/sec: " + count * 2);
+        assertTrue("blackHole must be updated", blackHole != 0L || count > 0);
         assertTrue(count > 800_000 / 2); // half the speed of Rasberry Pi
     }
 
@@ -92,6 +94,7 @@ public class MappedUniqueTimeProviderTest extends BytesTestCommon {
             count += 1000;
         } while (System.currentTimeMillis() < start + 500);
         System.out.println("currentTimeMicrosPerf count/sec: " + count * 2);
+        assertTrue("blackHole must be updated", blackHole != 0L || count > 0);
         assertTrue(count > 230_000 / 2); // half the speed of Rasberry Pi
     }
 
@@ -106,6 +109,7 @@ public class MappedUniqueTimeProviderTest extends BytesTestCommon {
             count += 1000;
         } while (System.currentTimeMillis() < start + 500);
         System.out.println("currentTimeNanosPerf count/sec: " + count * 2);
+        assertTrue("blackHole must be updated", blackHole != 0L || count > 0);
         assertTrue(count > 320_000 / 2); // half the speed of Rasberry Pi
     }
 

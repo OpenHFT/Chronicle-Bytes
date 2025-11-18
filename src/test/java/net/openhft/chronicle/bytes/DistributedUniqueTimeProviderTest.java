@@ -29,6 +29,7 @@ public class DistributedUniqueTimeProviderTest extends BytesTestCommon {
 
     private DistributedUniqueTimeProvider timeProvider;
     private SetTimeProvider setTimeProvider;
+    private static volatile long blackHole;
 
     @Before
     public void setUp() {
@@ -38,8 +39,6 @@ public class DistributedUniqueTimeProviderTest extends BytesTestCommon {
         setTimeProvider = new SetTimeProvider(SystemTimeProvider.INSTANCE.currentTimeNanos());
         timeProvider.provider(setTimeProvider);
     }
-
-    private static volatile long blackHole;
 
     @BeforeClass
     public static void checks() throws IOException {
@@ -72,6 +71,7 @@ public class DistributedUniqueTimeProviderTest extends BytesTestCommon {
                 blackHole = ((TimeProvider) timeProvider).currentTimeMicros();
             count += 1000;
         } while ((end = System.currentTimeMillis()) < start + 500);
+        assertTrue("blackHole must be updated", blackHole != 0L || count > 0);
         long rate = 1000L * count / (end - start);
         System.out.printf("currentTimeMicrosPerf count/sec: %,d%n", rate);
         assertTrue(count > 128_000 / 2); // half the speed of Rasberry Pi
@@ -86,6 +86,7 @@ public class DistributedUniqueTimeProviderTest extends BytesTestCommon {
                 blackHole = ((TimeProvider) timeProvider).currentTimeNanos();
             count += 1000;
         } while ((end = System.currentTimeMillis()) < start + 500);
+        assertTrue("blackHole must be updated", blackHole != 0L || count > 0);
         long rate = 1000L * count / (end - start);
         System.out.printf("currentTimeNanosPerf count/sec: %,d%n", rate);
         assertTrue(count > 202_000 / 2); // half the speed of Rasberry Pi

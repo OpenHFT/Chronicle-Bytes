@@ -287,8 +287,12 @@ public class BytesTest extends BytesTestCommon {
             store2 = alloc1.elasticBytes(64).append("TW-TRSY-20181217-NY572677_3256N15");
             assertFalse(store1.equalBytes(store2, store2.length()));
         } finally {
-            store1.releaseLast();
-            store2.releaseLast();
+            if (store1 != null) {
+                store1.releaseLast();
+            }
+            if (store2 != null) {
+                store2.releaseLast();
+            }
         }
     }
 
@@ -479,13 +483,14 @@ public class BytesTest extends BytesTestCommon {
             throws IllegalStateException {
         assumeFalse(NativeBytes.areNewGuarded());
         Bytes<?> bytes = alloc1.elasticBytes(1);
-        @NotNull PrintWriter writer = new PrintWriter(bytes.writer());
-        writer.println(1);
-        writer.println("Hello");
-        writer.println(12.34);
-        writer.append('a').append('\n');
-        writer.append("bye\n");
-        writer.append("for now\nxxxx", 0, 8);
+        try (PrintWriter writer = new PrintWriter(bytes.writer())) {
+            writer.println(1);
+            writer.println("Hello");
+            writer.println(12.34);
+            writer.append('a').append('\n');
+            writer.append("bye\n");
+            writer.append("for now\nxxxx", 0, 8);
+        }
         assertEquals("1\n" +
                 "Hello\n" +
                 "12.34\n" +
@@ -924,11 +929,8 @@ public class BytesTest extends BytesTestCommon {
         Bytes<?> nbytes2 = Bytes.allocateDirect(36);
         StringBuilder sb = new StringBuilder();
         try {
-            for (int i = 0; i <= 36; i++) {
-                nbytes.clear().append(sb);
-                if (nbytes == null) {
-                    bytes.writeStopBit(-1);
-                } else {
+                for (int i = 0; i <= 36; i++) {
+                    nbytes.clear().append(sb);
                     long offset = nbytes.readPosition();
                     long readRemaining = Math.min(bytes.writeRemaining(), nbytes.readLimit() - offset);
                     bytes.writeStopBit(readRemaining);
@@ -937,7 +939,6 @@ public class BytesTest extends BytesTestCommon {
                     } catch (BufferUnderflowException | IllegalArgumentException e) {
                         throw new AssertionError(e);
                     }
-                }
                 bytes.read8bit(nbytes2.clear());
 
                 final String s = sb.toString();
@@ -960,11 +961,8 @@ public class BytesTest extends BytesTestCommon {
         Bytes<?> nbytes2 = Bytes.allocateElasticOnHeap(36);
         StringBuilder sb = new StringBuilder();
         try {
-            for (int i = 0; i <= 36; i++) {
-                nbytes.clear().append(sb);
-                if (nbytes == null) {
-                    bytes.writeStopBit(-1);
-                } else {
+                for (int i = 0; i <= 36; i++) {
+                    nbytes.clear().append(sb);
                     long offset = nbytes.readPosition();
                     long readRemaining = Math.min(bytes.writeRemaining(), nbytes.readLimit() - offset);
                     bytes.writeStopBit(readRemaining);
@@ -973,7 +971,6 @@ public class BytesTest extends BytesTestCommon {
                     } catch (BufferUnderflowException | IllegalArgumentException e) {
                         throw new AssertionError(e);
                     }
-                }
                 bytes.read8bit(nbytes2.clear());
 
                 assertEquals(sb.toString(), nbytes2.toString());
@@ -1282,7 +1279,7 @@ public class BytesTest extends BytesTestCommon {
         ba[0] = '0';
         ba[1] = '1';
         bytes.read(offsetInRDI, ba, offset, bytes.length() - offsetInRDI);
-        assertEquals("01ello", new String(ba));
+        assertEquals("01ello", new String(ba, ISO_8859_1));
         bytes.releaseLast();
     }
 

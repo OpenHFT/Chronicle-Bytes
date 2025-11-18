@@ -83,15 +83,7 @@ final class BytesPrimitiveParameterTest { // too hard to ensure resources are re
     }
 
     private static Stream<NamedConsumer<Bytes<Object>>> provideNegativeNonNegativeOperations() {
-        final OutputStream os = new OutputStream() {
-            @Override
-            public void write(int b) throws IOException {
-                throw new UnsupportedEncodingException();
-            }
-        };
         final BytesStore<?, ?> bs = BytesStore.from(SILLY_NAME);
-        final Bytes<?> bytes = Bytes.from(SILLY_NAME);
-        final ByteBuffer bb = ByteBuffer.allocate(10);
         return Stream.of(
 
                 NamedConsumer.of(b -> b.write(-1, new byte[1]), "write(-1, new byte[1])"),
@@ -155,24 +147,6 @@ final class BytesPrimitiveParameterTest { // too hard to ensure resources are re
 
                 NamedConsumer.of(b -> b.addressForWrite(-1), "addressForWrite(-1)"),
 
-                NamedConsumer.of(b -> b.writePosition(-1), "writePosition(-1)")
-
-        );
-    }
-
-    // The stream below represents operations that are not checked for reasons specified
-    private static Stream<NamedConsumer<Bytes<Object>>> provideNegativeNonNegativeOperationsOtherException() {
-        final OutputStream os = new OutputStream() {
-            @Override
-            public void write(int b) throws IOException {
-                throw new UnsupportedEncodingException();
-            }
-        };
-        final BytesStore<?, ?> bs = BytesStore.from(SILLY_NAME);
-        final Bytes<?> bytes = Bytes.from(SILLY_NAME);
-        final ByteBuffer bb = ByteBuffer.allocate(10);
-        return Stream.of(
-                // Acceptable: This will produce an Exception but not an IllegalArgumentException.
                 NamedConsumer.of(b -> b.writePosition(-1), "writePosition(-1)")
 
         );

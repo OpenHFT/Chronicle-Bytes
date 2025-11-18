@@ -54,7 +54,9 @@ class ReentrantFileLockTest extends BytesTestCommon {
 
     @AfterEach
     void tearDown() {
-        fileToLock.delete();
+        if (!fileToLock.delete()) {
+            fileToLock.deleteOnExit();
+        }
     }
 
     @ParameterizedTest
@@ -76,6 +78,7 @@ class ReentrantFileLockTest extends BytesTestCommon {
     void willThrowOverlappingFileLockExceptionWhenAnOverlappingLockIsHeldDirectly(boolean useTryLock) throws IOException {
         try (FileChannel channel = FileChannel.open(fileToLock.toPath(), StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE)) {
             final FileLock lock = channel.lock();
+            assertNotNull(lock);
             assertThrows(OverlappingFileLockException.class, () -> acquireLock(useTryLock, fileToLock, channel));
             assertFalse(ReentrantFileLock.isHeldByCurrentThread(fileToLock));
         }

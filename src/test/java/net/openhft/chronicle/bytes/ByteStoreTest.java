@@ -426,10 +426,11 @@ public class ByteStoreTest extends BytesTestCommon {
 
             try (GZIPInputStream in = new GZIPInputStream(bytes2.inputStream())) {
                 final byte[] bytes = new byte[12];
-                for (int i = 0; i < 12; i++)
+                for (int i = 0; i < 12; i++) {
                     bytes[i] = (byte) in.read();
+                }
                 Assert.assertEquals(-1, in.read());
-                Assert.assertEquals("Hello world\n", new String(bytes));
+                Assert.assertEquals("Hello world\n", new String(bytes, ISO_8859_1));
             }
         } finally {
             bytes2.releaseLast();
@@ -506,7 +507,7 @@ public class ByteStoreTest extends BytesTestCommon {
 
     private void checkAddAndGetLong() {
         for (int i = 0; i < 10; i++)
-            assertEquals((i + 1) * 10, bytesStore.addAndGetLong(0L, 10));
+            assertEquals((i + 1L) * 10L, bytesStore.addAndGetLong(0L, 10));
         assertEquals(100, bytesStore.readLong(0L));
         assertEquals(0, bytesStore.readLong(8L));
 

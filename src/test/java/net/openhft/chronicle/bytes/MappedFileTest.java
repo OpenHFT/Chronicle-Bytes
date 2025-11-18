@@ -18,6 +18,7 @@ import java.io.OutputStreamWriter;
 import java.nio.BufferUnderflowException;
 import java.nio.file.Files;
 
+import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static org.junit.Assert.*;
 import static org.junit.Assume.assumeFalse;
 
@@ -236,7 +237,7 @@ public class MappedFileTest extends BytesTestCommon {
         @NotNull File file = Files.createTempFile("readOnlyOpenFile", "deleteme").toFile();
 
         // write some stuff to a file so it exits using stock java APIs
-        @NotNull OutputStreamWriter outWrite = new OutputStreamWriter(new FileOutputStream(file));
+        @NotNull OutputStreamWriter outWrite = new OutputStreamWriter(new FileOutputStream(file), ISO_8859_1);
         outWrite.append(text);
         outWrite.flush();
         outWrite.close();
@@ -247,7 +248,7 @@ public class MappedFileTest extends BytesTestCommon {
         try (@NotNull MappedBytes mapBuf = MappedBytes.readOnly(file)) {
             mapBuf.readLimit(file.length());
             int readLen = mapBuf.read(tmp, 0, tmp.length);
-            assertEquals(text, new String(tmp, 0, readLen));
+            assertEquals(text, new String(tmp, 0, readLen, ISO_8859_1));
         }
 
         // open up the same file via a mapped file
@@ -257,7 +258,7 @@ public class MappedFileTest extends BytesTestCommon {
             @NotNull Bytes<?> buf = mapFile.acquireBytesForRead(temp, 0);
             buf.readLimit(file.length());
             int readLen = buf.read(tmp, 0, tmp.length);
-            assertEquals(text, new String(tmp, 0, readLen));
+            assertEquals(text, new String(tmp, 0, readLen, ISO_8859_1));
             buf.releaseLast(temp);
         }
 

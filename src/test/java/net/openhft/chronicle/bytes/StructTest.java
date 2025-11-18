@@ -513,12 +513,12 @@ public class StructTest extends BytesTestCommon {
 
         public float grade(int n) {
             assert 0 <= n && n < NUM_GRADES;
-            return MEMORY.readFloat(address + GRADES + Float.BYTES * n);
+            return MEMORY.readFloat(address + GRADES + (long) Float.BYTES * n);
         }
 
         Student grade(int n, float f) {
             assert 0 <= n && n < NUM_GRADES;
-            MEMORY.writeFloat(address + GRADES + Float.BYTES * n, f);
+            MEMORY.writeFloat(address + GRADES + (long) Float.BYTES * n, f);
             return this;
         }
 

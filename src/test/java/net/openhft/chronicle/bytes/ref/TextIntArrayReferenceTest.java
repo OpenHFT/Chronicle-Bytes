@@ -78,8 +78,8 @@ public class TextIntArrayReferenceTest extends BytesTestCommon {
 
     @Test(expected = UnsupportedOperationException.class)
     public void testBindValueAt() {
-        try (TextIntArrayReference ref = new TextIntArrayReference()) {
-            IntValue value = null; // Placeholder for actual IntValue implementation
+        try (TextIntArrayReference ref = new TextIntArrayReference();
+             BinaryIntReference value = new BinaryIntReference()) {
             ref.bindValueAt(0, value);
             fail("Expected to throw UnsupportedOperationException");
         }

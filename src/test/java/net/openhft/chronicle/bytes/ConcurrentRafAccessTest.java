@@ -87,7 +87,7 @@ public class ConcurrentRafAccessTest extends BytesTestCommon {
                 .skip(4)
                 .summaryStatistics();
 
-        //        System.out.println("testParallel2: " + summaryStatistics);
+        org.junit.Assert.assertTrue(summaryStatistics.getCount() > 0);
     }
 
     @Test
@@ -97,7 +97,7 @@ public class ConcurrentRafAccessTest extends BytesTestCommon {
                 .skip(4)
                 .summaryStatistics();
 
-        //        System.out.println("testSequential: " + summaryStatistics);
+        org.junit.Assert.assertTrue(summaryStatistics.getCount() > 0);
 
     }
 
@@ -108,7 +108,7 @@ public class ConcurrentRafAccessTest extends BytesTestCommon {
                 .skip(4)
                 .summaryStatistics();
 
-        //        System.out.println("testParallel: " + summaryStatistics);
+        org.junit.Assert.assertTrue(summaryStatistics.getCount() > 0);
     }
 
     @Test
@@ -118,7 +118,7 @@ public class ConcurrentRafAccessTest extends BytesTestCommon {
                 .skip(4)
                 .summaryStatistics();
 
-        //        System.out.println("testSequential2: " + summaryStatistics);
+        org.junit.Assert.assertTrue(summaryStatistics.getCount() > 0);
 
     }
 
@@ -167,7 +167,7 @@ public class ConcurrentRafAccessTest extends BytesTestCommon {
                 }
             }
             final long elapsedNs = System.nanoTime() - beginNs;
-            //            System.out.format("%s: elapsedNs = %,d%n", Thread.currentThread().getName(), elapsedNs);
+            org.junit.Assert.assertTrue(elapsedNs >= 0);
         }
     }
 }

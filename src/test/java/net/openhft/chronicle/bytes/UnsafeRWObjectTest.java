@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 
+import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
@@ -127,7 +128,7 @@ class UnsafeRWObjectTest extends BytesTestCommon {
                 Arrays.toString(
                         BytesUtil.triviallyCopyableRange(byte[].class)));
         Bytes<?> bytes = Bytes.allocateDirect(32);
-        byte[] byteArray = "Hello World.".getBytes();
+        byte[] byteArray = "Hello World.".getBytes(ISO_8859_1);
         int offset = BytesUtil.triviallyCopyableStart(((Object) byteArray).getClass());
         bytes.unsafeWriteObject(byteArray, offset, byteArray.length);
         assertEquals("00000000 48 65 6c 6c 6f 20 57 6f  72 6c 64 2e             Hello Wo rld.    \n",
@@ -136,7 +137,7 @@ class UnsafeRWObjectTest extends BytesTestCommon {
         bytes.unsafeReadObject(byteArray2, offset, byteArray.length);
         assertArrayEquals(byteArray, byteArray2);
 
-        assertEquals("Hello World.", new String(byteArray2));
+        assertEquals("Hello World.", new String(byteArray2, ISO_8859_1));
         bytes.releaseLast();
 
     }

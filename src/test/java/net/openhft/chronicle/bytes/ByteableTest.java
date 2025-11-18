@@ -13,13 +13,11 @@ import static org.mockito.Mockito.*;
 public class ByteableTest {
 
     private Byteable byteable;
-    private BytesStore<?, ?> bytesStore;
 
     @SuppressWarnings("unchecked")
     @Before
     public void setUp() throws IOException {
         byteable = mock(Byteable.class);
-        bytesStore = mock(BytesStore.class);
         doThrow(UnsupportedOperationException.class).when(byteable).address();
         doThrow(UnsupportedOperationException.class).when(byteable).lock(true);
         doThrow(UnsupportedOperationException.class).when(byteable).tryLock(true);

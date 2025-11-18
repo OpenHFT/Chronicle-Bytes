@@ -35,12 +35,6 @@ final class BytesReleaseInvariantNonPerformantMethodsTest extends BytesTestCommo
     private static final String SILLY_NAME = "Tryggve";
 
     private static Stream<NamedConsumer<Bytes<Object>>> provideNonPerformantOperations() {
-        final OutputStream os = new OutputStream() {
-            @Override
-            public void write(int b) throws IOException {
-                throw new UnsupportedEncodingException();
-            }
-        };
         final BytesStore<?, ?> bs = BytesStore.from(SILLY_NAME);
         final Bytes<?> bytes = Bytes.from(SILLY_NAME);
         return Stream.of(
@@ -71,7 +65,16 @@ final class BytesReleaseInvariantNonPerformantMethodsTest extends BytesTestCommo
                 NamedConsumer.of(b -> b.unchecked(false), "unchecked(false)"),
                 // Copy operations
                 NamedConsumer.of(Bytes::copy, "copy()"),
-                NamedConsumer.ofThrowing(b -> b.copyTo(os), "copyTo(OutputStream)"),
+                NamedConsumer.ofThrowing(b -> {
+                    try (OutputStream os = new OutputStream() {
+                        @Override
+                        public void write(int b) throws IOException {
+                            throw new UnsupportedEncodingException();
+                        }
+                    }) {
+                        b.copyTo(os);
+                    }
+                }, "copyTo(OutputStream)"),
                 NamedConsumer.of(b -> b.copyTo(bs), "copyTo(ByteStore)"),
                 NamedConsumer.of(bs::copyTo, "Bytes.copyTo(b)"),
                 NamedConsumer.of(b -> b.copyTo(new byte[10]), "copyTo(byte[])"),

@@ -152,6 +152,9 @@ public enum Allocator {
             if (capacity >= 256)
                 throw new IllegalArgumentException();
             Padding padding = new Padding();
+            if (padding.start() != 0) {
+                throw new IllegalStateException("Unexpected start value");
+            }
             return Bytes.forFieldGroup(padding, "p").writeLimit(capacity);
         }
     },
@@ -206,7 +209,11 @@ public enum Allocator {
     }
 
     static class Parent {
-        int start;
+        int start = 0;
+
+        int start() {
+            return start;
+        }
     }
 
     static class Padding extends Parent {

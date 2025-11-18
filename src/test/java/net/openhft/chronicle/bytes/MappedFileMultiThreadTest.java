@@ -72,7 +72,6 @@ public class MappedFileMultiThreadTest extends BytesTestCommon {
                         }
                         if (finalI == 0 && offset % 1_000 == 0) {
                             garbage.clear();
-                            System.gc();
                         }
                     }
                 }));

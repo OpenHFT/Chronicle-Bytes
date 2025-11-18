@@ -9,6 +9,7 @@ import org.junit.Test;
 
 import java.nio.BufferUnderflowException;
 
+import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static org.junit.Assert.assertEquals;
 
 public class XxHashTest {
@@ -23,7 +24,7 @@ public class XxHashTest {
 
     @Test
     public void testHashConsistency() {
-        byte[] data = "test data".getBytes();
+        byte[] data = "test data".getBytes(ISO_8859_1);
         BytesStore<?, ?> bytesStore1 = BytesStore.wrap(data);
         BytesStore<?, ?> bytesStore2 = BytesStore.wrap(data.clone());
 

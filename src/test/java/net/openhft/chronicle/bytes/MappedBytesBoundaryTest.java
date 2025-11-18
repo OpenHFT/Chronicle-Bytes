@@ -16,9 +16,9 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.BufferOverflowException;
 import java.nio.ReadOnlyBufferException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 
+import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -37,7 +37,7 @@ public class MappedBytesBoundaryTest extends BytesTestCommon {
 
         final int chunk = 4096;
         final byte[] prefix = new byte[chunk - 4];
-        final byte[] tail = "HELLO".getBytes(StandardCharsets.ISO_8859_1);
+        final byte[] tail = "HELLO".getBytes(ISO_8859_1);
         final byte[] expected = new byte[prefix.length + tail.length];
         System.arraycopy(prefix, 0, expected, 0, prefix.length);
         System.arraycopy(tail, 0, expected, prefix.length, tail.length);

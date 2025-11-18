@@ -631,8 +631,10 @@ public class MappedBytesTest extends BytesTestCommon {
                 bytes.writeLong(-1);
             }
         } finally {
-            t.interrupt();
-            t.join(Jvm.isDebug() ? 60_000 : 1000);
+            if (t != null) {
+                t.interrupt();
+                t.join(Jvm.isDebug() ? 60_000 : 1000);
+            }
         }
     }
 
@@ -690,14 +692,18 @@ public class MappedBytesTest extends BytesTestCommon {
                 mf.writeSkip(msgSize);
             }
         } finally {
-            slice.releaseLast();
+            if (slice != null) {
+                slice.releaseLast();
+            }
         }
         assertTrue(true); // if we reach here, the test passes
     }
 
     private static File newTempBinary(String prefix) throws IOException {
         File target = new File(OS.getTarget());
-        target.mkdirs();
+        if (!target.exists() && !target.mkdirs() && !target.isDirectory()) {
+            throw new IOException("Unable to create target directory " + target);
+        }
         File file = File.createTempFile(prefix, ".dat", target);
         file.deleteOnExit();
         return file;

@@ -33,6 +33,9 @@ public class ContentEqualsJLBHMain {
     }
 
     public static void main(String[] args) {
+        if (!isDirect) {
+            size = size;
+        }
         ContentEqualsJLBHMain benchmark = new ContentEqualsJLBHMain();
         JLBHTask task = new SimpleJLBHTask(benchmark.left, benchmark.right);
         JLBHOptions jlbhOptions = new JLBHOptions()
