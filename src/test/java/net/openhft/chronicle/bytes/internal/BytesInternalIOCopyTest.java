@@ -11,8 +11,8 @@ import org.junit.Test;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 
+import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static org.junit.Assert.*;
 
 /**
@@ -26,17 +26,17 @@ public class BytesInternalIOCopyTest extends BytesTestCommon {
         final ByteArrayOutputStream bos = new ByteArrayOutputStream();
         try {
             BytesInternal.copy(src, bos);
-            assertArrayEquals("abcdef".getBytes(StandardCharsets.ISO_8859_1), bos.toByteArray());
+            assertArrayEquals("abcdef".getBytes(ISO_8859_1), bos.toByteArray());
 
             byte[] arr = BytesInternal.toByteArray(src);
-            assertArrayEquals("abcdef".getBytes(StandardCharsets.ISO_8859_1), arr);
+            assertArrayEquals("abcdef".getBytes(ISO_8859_1), arr);
 
             // subBytes view from heap-backed input
             BytesStore<?, ?> sub = BytesInternal.subBytes(src, 2, 3);
             byte[] got = new byte[3];
             long n = sub.read(0, got, 0, 3);
             assertEquals(3L, n);
-            assertArrayEquals("cde".getBytes(StandardCharsets.ISO_8859_1), got);
+            assertArrayEquals("cde".getBytes(ISO_8859_1), got);
         } finally {
             src.releaseLast();
         }
@@ -58,7 +58,7 @@ public class BytesInternalIOCopyTest extends BytesTestCommon {
                 direct.append("123456");
                 direct.readPosition(0);
                 byte[] arr = BytesInternal.toByteArray(direct);
-                assertArrayEquals("123456".getBytes(StandardCharsets.ISO_8859_1), arr);
+                assertArrayEquals("123456".getBytes(ISO_8859_1), arr);
             } finally {
                 direct.releaseLast();
             }

@@ -9,8 +9,7 @@ import net.openhft.chronicle.bytes.BytesTestCommon;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
-import java.nio.charset.StandardCharsets;
-
+import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static org.junit.Assert.*;
 
 public class BooleanReferenceTest extends BytesTestCommon {
@@ -45,7 +44,7 @@ public class BooleanReferenceTest extends BytesTestCommon {
         try (@NotNull TextBooleanReference ref = new TextBooleanReference()) {
 
             // First value
-            nbs.write(0, "false".getBytes(StandardCharsets.ISO_8859_1));
+            nbs.write(0, "false".getBytes(ISO_8859_1));
 
             ref.bytesStore(nbs, 0, 5);
 
@@ -53,7 +52,7 @@ public class BooleanReferenceTest extends BytesTestCommon {
             ref.setValue(true);
 
             // Second value
-            nbs.write(5, " true".getBytes(StandardCharsets.ISO_8859_1));
+            nbs.write(5, " true".getBytes(ISO_8859_1));
 
             ref.bytesStore(nbs, 5, 5);
             assertTrue(ref.getValue());

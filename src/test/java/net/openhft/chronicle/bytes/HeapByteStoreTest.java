@@ -7,22 +7,21 @@ import net.openhft.chronicle.bytes.internal.HeapBytesStore;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
-import java.nio.charset.StandardCharsets;
-
+import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static org.junit.Assert.*;
 
 public class HeapByteStoreTest extends BytesTestCommon {
     @SuppressWarnings("rawtypes")
     @Test
     public void testEquals() {
-        @NotNull HeapBytesStore hbs = HeapBytesStore.wrap("Hello".getBytes(StandardCharsets.ISO_8859_1));
-        @NotNull HeapBytesStore hbs2 = HeapBytesStore.wrap("Hello".getBytes(StandardCharsets.ISO_8859_1));
-        @NotNull HeapBytesStore hbs3 = HeapBytesStore.wrap("He!!o".getBytes(StandardCharsets.ISO_8859_1));
+        @NotNull HeapBytesStore hbs = HeapBytesStore.wrap("Hello".getBytes(ISO_8859_1));
+        @NotNull HeapBytesStore hbs2 = HeapBytesStore.wrap("Hello".getBytes(ISO_8859_1));
+        @NotNull HeapBytesStore hbs3 = HeapBytesStore.wrap("He!!o".getBytes(ISO_8859_1));
         assertEquals(hbs, hbs2);
         assertEquals(hbs2, hbs);
         assertNotEquals(hbs, hbs3);
         assertNotEquals(hbs3, hbs);
-        @NotNull HeapBytesStore hbs4 = HeapBytesStore.wrap("Hi".getBytes(StandardCharsets.ISO_8859_1));
+        @NotNull HeapBytesStore hbs4 = HeapBytesStore.wrap("Hi".getBytes(ISO_8859_1));
         assertNotEquals(hbs, hbs4);
         assertNotEquals(hbs4, hbs);
     }

@@ -11,8 +11,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.nio.charset.StandardCharsets;
 
+import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static org.junit.Assert.*;
 
 public class CanonicalPathUtilTest extends BytesTestCommon {
@@ -27,7 +27,7 @@ public class CanonicalPathUtilTest extends BytesTestCommon {
         // ensure file exists
         File parent = f2.getParentFile();
         assertTrue(parent.mkdirs() || parent.isDirectory());
-        try (OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(f2), StandardCharsets.ISO_8859_1)) {
+        try (OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(f2), ISO_8859_1)) {
             writer.write("x");
         }
 

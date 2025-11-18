@@ -14,11 +14,11 @@ import org.junit.Test;
 
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.Random;
 
+import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static java.nio.charset.StandardCharsets.US_ASCII;
 import static net.openhft.chronicle.bytes.internal.BytesInternalTest.Nested.LENGTH;
 import static org.junit.Assert.*;
@@ -345,7 +345,7 @@ public class BytesInternalTest extends BytesTestCommon {
 
         final byte[] buffer = new byte[100];
         final int copiedLen = src.copyTo(buffer);
-        assertEquals(new String(buffer, 0, copiedLen, StandardCharsets.ISO_8859_1), src.toString());
+        assertEquals(new String(buffer, 0, copiedLen, ISO_8859_1), src.toString());
     }
 
     private int checkParse(int different, String s) {
