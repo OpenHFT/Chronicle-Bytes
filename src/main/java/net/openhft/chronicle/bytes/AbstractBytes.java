@@ -15,16 +15,13 @@ import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.UnsafeMemory;
 import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.annotation.UsedViaReflection;
-import net.openhft.chronicle.bytes.internal.UnsafeText;
 import net.openhft.chronicle.core.io.*;
-import net.openhft.chronicle.core.scoped.ScopedResource;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
-import net.openhft.chronicle.bytes.internal.BufferUtil;
 import java.nio.ByteOrder;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
@@ -67,36 +64,56 @@ public abstract class AbstractBytes<U>
     @Deprecated(/* to remove in x.28 */)
     private static final boolean APPEND_0 = Jvm.getBoolean("bytes.append.0", true);
 
-    /** Optional name for debugging only. */
+    /**
+     * Optional name for debugging only.
+     */
     @UsedViaReflection
     private final String name;
 
     private final UncheckedRandomDataInput uncheckedRandomDataInput = new UncheckedRandomDataInputHolder();
     @NotNull
     protected BytesStore<?, U> bytesStore = NoBytesStore.noBytesStore();
-    /** Offset, from {@link #start()}, of the next byte to read. */
+    /**
+     * Offset, from {@link #start()}, of the next byte to read.
+     */
     protected long readPosition;
-    /** Highest byte index that may be written. */
+    /**
+     * Highest byte index that may be written.
+     */
     protected long writeLimit;
-    /** Whether the underlying store is open. */
+    /**
+     * Whether the underlying store is open.
+     */
     protected boolean isPresent;
-    /** Offset for the next byte to write. */
+    /**
+     * Offset for the next byte to write.
+     */
     private long writePosition;
-    /** Number of decimal places of the last appended floating-point value. */
+    /**
+     * Number of decimal places of the last appended floating-point value.
+     */
     private int lastDecimalPlaces = 0;
-    /** Lenient mode suppresses {@link BufferUnderflowException} on some reads. */
+    /**
+     * Lenient mode suppresses {@link BufferUnderflowException} on some reads.
+     */
     private boolean lenient = false;
-    /** Tracks whether the last parsed number contained digits. */
+    /**
+     * Tracks whether the last parsed number contained digits.
+     */
     private boolean lastNumberHadDigits = false;
-    /** Strategy used when appending decimal numbers. */
+    /**
+     * Strategy used when appending decimal numbers.
+     */
     private Decimaliser decimaliser = StandardDecimaliser.STANDARD;
-    /** Whether to append the ".0" suffix for whole numbers. */
+    /**
+     * Whether to append the ".0" suffix for whole numbers.
+     */
     private boolean append0 = APPEND_0;
 
     /**
      * Creates a bytes view over the provided store.
      *
-     * @param bytesStore   the underlying store
+     * @param bytesStore    the underlying store
      * @param writePosition initial {@link #writePosition()} relative to {@link #start()}
      * @param writeLimit    initial {@link #writeLimit()}
      * @throws ClosedIllegalStateException    if the store is closed
