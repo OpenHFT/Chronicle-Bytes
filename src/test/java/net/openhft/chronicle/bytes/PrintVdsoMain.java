@@ -7,6 +7,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
 
+import static java.nio.charset.StandardCharsets.ISO_8859_1;
+
 public class PrintVdsoMain {
     public static void main(String[] args)
             throws IOException, IllegalStateException {
@@ -14,7 +16,7 @@ public class PrintVdsoMain {
         long end = 0;
         @NotNull String maps = "/proc/self/maps";
         if (!new File(maps).exists()) return;
-        try (@NotNull BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(maps)))) {
+        try (@NotNull BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(maps), ISO_8859_1))) {
             for (String line; (line = br.readLine()) != null; ) {
                 if (line.endsWith("[vdso]")) {
                     @NotNull String[] parts = line.split("[- ]");

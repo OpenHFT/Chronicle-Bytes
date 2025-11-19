@@ -5,7 +5,10 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
-import net.openhft.chronicle.core.time.*;
+import net.openhft.chronicle.core.time.LongTime;
+import net.openhft.chronicle.core.time.SetTimeProvider;
+import net.openhft.chronicle.core.time.SystemTimeProvider;
+import net.openhft.chronicle.core.time.TimeProvider;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -29,6 +32,7 @@ public class DistributedUniqueTimeProviderTest extends BytesTestCommon {
 
     private DistributedUniqueTimeProvider timeProvider;
     private SetTimeProvider setTimeProvider;
+    private static volatile long blackHole;
 
     @Before
     public void setUp() {
@@ -38,8 +42,6 @@ public class DistributedUniqueTimeProviderTest extends BytesTestCommon {
         setTimeProvider = new SetTimeProvider(SystemTimeProvider.INSTANCE.currentTimeNanos());
         timeProvider.provider(setTimeProvider);
     }
-
-    private static volatile long blackHole;
 
     @BeforeClass
     public static void checks() throws IOException {
@@ -69,9 +71,10 @@ public class DistributedUniqueTimeProviderTest extends BytesTestCommon {
         int count = 0;
         do {
             for (int i = 0; i < 1000; i++)
-                blackHole = ((TimeProvider) timeProvider).currentTimeMicros();
+                blackHole = timeProvider.currentTimeMicros();
             count += 1000;
         } while ((end = System.currentTimeMillis()) < start + 500);
+        assertTrue("blackHole must be updated", blackHole != 0L || count > 0);
         long rate = 1000L * count / (end - start);
         System.out.printf("currentTimeMicrosPerf count/sec: %,d%n", rate);
         assertTrue(count > 128_000 / 2); // half the speed of Raspberry Pi
@@ -83,9 +86,10 @@ public class DistributedUniqueTimeProviderTest extends BytesTestCommon {
         int count = 0;
         do {
             for (int i = 0; i < 1000; i++)
-                blackHole = ((TimeProvider) timeProvider).currentTimeNanos();
+                blackHole = timeProvider.currentTimeNanos();
             count += 1000;
         } while ((end = System.currentTimeMillis()) < start + 500);
+        assertTrue("blackHole must be updated", blackHole != 0L || count > 0);
         long rate = 1000L * count / (end - start);
         System.out.printf("currentTimeNanosPerf count/sec: %,d%n", rate);
         assertTrue(count > 202_000 / 2); // half the speed of Raspberry Pi
@@ -93,7 +97,7 @@ public class DistributedUniqueTimeProviderTest extends BytesTestCommon {
 
     @Test
     public void currentTimeNanos() {
-        long start = ((TimeProvider) timeProvider).currentTimeNanos();
+        long start = timeProvider.currentTimeNanos();
         long last = start;
         int count = 0;
         long runTime = Jvm.isArm() ? 3_000_000_000L : 500_000_000L;

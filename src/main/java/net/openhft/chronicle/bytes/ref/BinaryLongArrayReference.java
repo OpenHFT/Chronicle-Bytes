@@ -277,7 +277,11 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
             throws IllegalStateException, BufferOverflowException {
         throwExceptionIfClosed();
 
-        ((BinaryLongReference) value).bytesStore(bytesStore, VALUES + offset + (index << SHIFT), 8);
+        if (!(value instanceof BinaryLongReference)) {
+            throw new IllegalArgumentException("Expected BinaryLongReference but got " + value.getClass().getName());
+        }
+        BinaryLongReference longRef = (BinaryLongReference) value;
+        longRef.bytesStore(bytesStore, VALUES + offset + (index << SHIFT), 8);
     }
 
     @Override

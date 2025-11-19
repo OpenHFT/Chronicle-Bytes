@@ -58,7 +58,8 @@ public class MappedMemoryTest extends BytesTestCommon {
                     bytesStore.release(test);
                 }
                 assertEquals(file0.referenceCounts(), 0, file0.refCount());
-                Jvm.perf().on(getClass(), "With RawMemory,\t\t time= " + 80 * (System.nanoTime() - startTime) / BLOCK_SIZE / 10.0 + " ns, number of longs written=" + BLOCK_SIZE / 8);
+                double avgNanos = 80.0 * (System.nanoTime() - startTime) / (double) BLOCK_SIZE / 10.0;
+                Jvm.perf().on(getClass(), "With RawMemory,\t\t time= " + avgNanos + " ns, number of longs written=" + BLOCK_SIZE / 8);
             } finally {
                 deleteIfPossible(tempFile);
             }
@@ -82,7 +83,8 @@ public class MappedMemoryTest extends BytesTestCommon {
                 }
                 bytes.releaseLast();
                 assertEquals(0, bytes.refCount());
-                Jvm.perf().on(getClass(), "With MappedNativeBytes, avg time= " + 80 * (System.nanoTime() - startTime) / BLOCK_SIZE / 10.0 + " ns, number of longs written=" + BLOCK_SIZE / 8);
+                double avgNanos = 80.0 * (System.nanoTime() - startTime) / (double) BLOCK_SIZE / 10.0;
+                Jvm.perf().on(getClass(), "With MappedNativeBytes, avg time= " + avgNanos + " ns, number of longs written=" + BLOCK_SIZE / 8);
             } finally {
                 deleteIfPossible(tempFile);
             }
@@ -113,7 +115,8 @@ public class MappedMemoryTest extends BytesTestCommon {
                     }
                     bytes.releaseLast(test);
 
-                    Jvm.perf().on(getClass(), "With NativeBytes,\t\t time= " + 80 * (System.nanoTime() - startTime) / BLOCK_SIZE / 10.0 + " ns, number of longs written=" + BLOCK_SIZE / 8);
+                    double avgNanos = 80.0 * (System.nanoTime() - startTime) / (double) BLOCK_SIZE / 10.0;
+                    Jvm.perf().on(getClass(), "With NativeBytes,\t\t time= " + avgNanos + " ns, number of longs written=" + BLOCK_SIZE / 8);
                 } catch (Throwable throwable) {
                     // Performance test so just make sure the test ran
                     fail(throwable.getMessage());
@@ -171,7 +174,7 @@ public class MappedMemoryTest extends BytesTestCommon {
         final File tempFile = Files.createTempFile("chronicle", "q").toFile();
         Bytes<?> bytes0;
         try {
-            try (MappedBytes bytes = singleMappedBytes(tempFile, OS.pageSize() * 8)) {
+            try (MappedBytes bytes = singleMappedBytes(tempFile, OS.pageSize() * 8L)) {
                 bytes0 = bytes;
                 final ReferenceOwner test = ReferenceOwner.temporary("test");
                 try {

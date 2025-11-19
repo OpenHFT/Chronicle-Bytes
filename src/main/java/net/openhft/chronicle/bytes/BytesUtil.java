@@ -27,7 +27,6 @@ import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import static net.openhft.chronicle.core.UnsafeMemory.MEMORY;
@@ -110,7 +109,7 @@ public enum BytesUtil {
      */
     static int[] isTriviallyCopyable0(@NotNull Class<?> clazz) {
         if (clazz.isArray()) {
-            Class<?>componentType = clazz.getComponentType();
+            Class<?> componentType = clazz.getComponentType();
             if (componentType.isPrimitive())
                 return new int[]{MEMORY.arrayBaseOffset(clazz)};
             return NO_INTS;
@@ -129,7 +128,6 @@ public enum BytesUtil {
         int min = 0;
         int max = 0;
         for (Field field : fields) {
-            final FieldGroup fieldGroup = Jvm.findAnnotation(field, FieldGroup.class);
             int start = (int) MEMORY.objectFieldOffset(field);
             int size = sizeOf(field.getType());
             int end = start + size;
@@ -155,7 +153,7 @@ public enum BytesUtil {
      * @param length Length of the field area.
      * @return true if all fields in the range are trivially copyable, false otherwise.
      */
-    public static boolean isTriviallyCopyable(Class<?>clazz, @NonNegative int offset, @NonNegative int length) {
+    public static boolean isTriviallyCopyable(Class<?> clazz, @NonNegative int offset, @NonNegative int length) {
         int[] ints = TRIVIALLY_COPYABLE.get(clazz);
         if (ints.length == 0)
             return false;
@@ -165,21 +163,21 @@ public enum BytesUtil {
     /**
      * Returns {@code [start, end]} offsets for the contiguous primitive block of {@code clazz}.
      */
-    public static int[] triviallyCopyableRange(Class<?>clazz) {
+    public static int[] triviallyCopyableRange(Class<?> clazz) {
         return TRIVIALLY_COPYABLE.get(clazz);
     }
 
     /**
      * Offset of the first trivially copyable byte within {@code clazz}.
      */
-    public static int triviallyCopyableStart(Class<?>clazz) {
+    public static int triviallyCopyableStart(Class<?> clazz) {
         return triviallyCopyableRange(clazz)[0];
     }
 
     /**
      * Length in bytes of the trivially copyable region of {@code clazz}.
      */
-    public static int triviallyCopyableLength(Class<?>clazz) {
+    public static int triviallyCopyableLength(Class<?> clazz) {
         final int[] startEnd = triviallyCopyableRange(clazz);
         return startEnd[1] - startEnd[0];
     }
@@ -252,7 +250,7 @@ public enum BytesUtil {
      * @param secondOffset The starting position in the second object.
      * @param len          The number of bytes to compare.
      * @return true if the bytes are equal, false otherwise.
-     * @throws BufferUnderflowException If there is insufficient data.
+     * @throws BufferUnderflowException       If there is insufficient data.
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
@@ -289,7 +287,7 @@ public enum BytesUtil {
      * @param offset The starting position in the RandomDataInput object.
      * @param length The number of bytes to compare.
      * @return true if the bytes are equal to the CharSequence, false otherwise.
-     * @throws BufferUnderflowException If there is insufficient data.
+     * @throws BufferUnderflowException       If there is insufficient data.
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
@@ -325,7 +323,7 @@ public enum BytesUtil {
      * @return The integer value of the string.
      */
     public static int asInt(@NotNull String str) {
-        @NotNull ByteBuffer bb = ByteBuffer.wrap(str.getBytes(StandardCharsets.ISO_8859_1)).order(ByteOrder.nativeOrder());
+        @NotNull ByteBuffer bb = ByteBuffer.wrap(str.getBytes(ISO_8859_1)).order(ByteOrder.nativeOrder());
         return bb.getInt();
     }
 
@@ -351,8 +349,8 @@ public enum BytesUtil {
      *
      * @param bytes The Bytes object to convert.
      * @return The character array converted from the bytes.
-     * @throws ArithmeticException      If there is an arithmetic error.
-     * @throws BufferUnderflowException If there is insufficient data.
+     * @throws ArithmeticException            If there is an arithmetic error.
+     * @throws BufferUnderflowException       If there is insufficient data.
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
@@ -374,7 +372,7 @@ public enum BytesUtil {
      * @param position The starting position in the Bytes object.
      * @param length   The number of bytes to convert.
      * @return The character array converted from the bytes.
-     * @throws BufferUnderflowException If there is insufficient data.
+     * @throws BufferUnderflowException       If there is insufficient data.
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
@@ -395,7 +393,7 @@ public enum BytesUtil {
      *
      * @param in The StreamingDataInput to read from.
      * @return The integer read.
-     * @throws IORuntimeException    If an IO error occurs.
+     * @throws IORuntimeException             If an IO error occurs.
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
@@ -409,7 +407,7 @@ public enum BytesUtil {
      *
      * @param out The StreamingDataOutput to write to.
      * @param n   The integer to write.
-     * @throws BufferOverflowException If there is insufficient space.
+     * @throws BufferOverflowException        If there is insufficient space.
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
@@ -425,7 +423,7 @@ public enum BytesUtil {
      * @param offset The position in the BytesStore to start writing.
      * @param n      The integer to write.
      * @return The resulting offset after writing.
-     * @throws BufferOverflowException If there is insufficient space.
+     * @throws BufferOverflowException        If there is insufficient space.
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
@@ -440,7 +438,7 @@ public enum BytesUtil {
      * @param addr The memory address to write to.
      * @param n    The integer to write.
      * @return The resulting memory address after writing.
-     * @throws BufferOverflowException If there is insufficient space.
+     * @throws BufferOverflowException        If there is insufficient space.
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
@@ -455,8 +453,8 @@ public enum BytesUtil {
      * @param in         The StreamingDataInput to read from.
      * @param appendable The Appendable to append to.
      * @param utflen     The length of the UTF-8 string.
-     * @throws UTFDataFormatRuntimeException If the UTF-8 format is invalid.
-     * @throws BufferUnderflowException      If there is insufficient data.
+     * @throws UTFDataFormatRuntimeException  If the UTF-8 format is invalid.
+     * @throws BufferUnderflowException       If there is insufficient data.
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
@@ -471,7 +469,7 @@ public enum BytesUtil {
      *
      * @param out The StreamingDataOutput to write to.
      * @param cs  The CharSequence to write.
-     * @throws IndexOutOfBoundsException If the CharSequence length is out of bounds.
+     * @throws IndexOutOfBoundsException      If the CharSequence length is out of bounds.
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
@@ -485,7 +483,7 @@ public enum BytesUtil {
      *
      * @param marshallable The Marshallable object to read.
      * @param bytes        The BytesIn object to read from.
-     * @throws InvalidMarshallableException If the Marshallable object is invalid.
+     * @throws InvalidMarshallableException   If the Marshallable object is invalid.
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
@@ -500,10 +498,10 @@ public enum BytesUtil {
      *
      * @param marshallable The Marshallable object to write.
      * @param bytes        The BytesOut object to write to.
-     * @throws BufferOverflowException      If there is insufficient space.
-     * @throws ArithmeticException          If an arithmetic error occurs.
-     * @throws BufferUnderflowException     If there is insufficient data.
-     * @throws InvalidMarshallableException If the Marshallable object is invalid.
+     * @throws BufferOverflowException        If there is insufficient space.
+     * @throws ArithmeticException            If an arithmetic error occurs.
+     * @throws BufferUnderflowException       If there is insufficient data.
+     * @throws InvalidMarshallableException   If the Marshallable object is invalid.
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
@@ -563,7 +561,7 @@ public enum BytesUtil {
      * Reads padding bytes from a Bytes object to align the read position to the nearest 8-byte boundary.
      *
      * @param bytes The Bytes object.
-     * @throws BufferUnderflowException If there is insufficient data.
+     * @throws BufferUnderflowException       If there is insufficient data.
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
@@ -576,7 +574,7 @@ public enum BytesUtil {
      * Writes padding bytes to a Bytes object to align the write position to the nearest 8-byte boundary.
      *
      * @param bytes The Bytes object.
-     * @throws BufferOverflowException If there is insufficient space.
+     * @throws BufferOverflowException        If there is insufficient space.
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
@@ -686,6 +684,9 @@ public enum BytesUtil {
                     }
                 }
             }
+            return;
+            default:
+                return;
         }
     }
 

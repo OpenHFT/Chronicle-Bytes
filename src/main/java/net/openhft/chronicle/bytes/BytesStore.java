@@ -21,10 +21,10 @@ import java.io.OutputStream;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
 import static java.lang.Math.min;
+import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static net.openhft.chronicle.bytes.internal.ReferenceCountedUtil.throwExceptionIfReleased;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
@@ -77,7 +77,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      * @return a BytesStore which contains the bytes from the String
      */
     static BytesStore<?,byte[]> from(@NotNull String cs) {
-        return cs.length() == 0 ? empty() : BytesStore.wrap(cs.getBytes(StandardCharsets.ISO_8859_1));
+        return cs.isEmpty() ? empty() : BytesStore.wrap(cs.getBytes(ISO_8859_1));
     }
 
     /**
@@ -551,6 +551,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
     /**
      * <p>
      * This is assumed to be used to print the contents on a best-effort basis. If an Error occurs it will be returned in the String.
+     *
      * @param maxLength the maximum length of the output
      * @return this BytesStore as a DebugString.
      */

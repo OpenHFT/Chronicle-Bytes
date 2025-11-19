@@ -5,6 +5,7 @@ package net.openhft.chronicle.bytes;
 
 import org.junit.Test;
 
+import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static org.junit.Assert.assertEquals;
 
 public class Issue225Test extends BytesTestCommon {
@@ -18,7 +19,7 @@ public class Issue225Test extends BytesTestCommon {
             else
                 valueStr = "" + value;
             Bytes<?> bytes = Bytes.allocateElastic(32);
-            byte[] rbytes = new byte[24];
+            final byte[] rbytes = new byte[24];
             bytes.append(value);
             assertEquals(value, bytes.parseDouble(), 0.0);
             if ((long) value == value)
@@ -28,7 +29,7 @@ public class Issue225Test extends BytesTestCommon {
             bytes.readPosition(0);
             int length = bytes.read(rbytes);
             assertEquals(valueStr.length(), length);
-            final String substring = new String(rbytes).substring(0, (int) bytes.writePosition());
+            final String substring = new String(rbytes, ISO_8859_1).substring(0, (int) bytes.writePosition());
             assertEquals(valueStr, substring);
             bytes.releaseLast();
         }

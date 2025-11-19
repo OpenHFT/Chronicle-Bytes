@@ -3,6 +3,7 @@
 :toc:
 :toclevels: 2
 :lang: en-GB
+:source-highlighter: rouge
 
 This module provides non-cryptographic hash functions for `BytesStore` data. [cite: 136]
 It is typically used for in-memory indexes and integrity checks where speed is more important than collision resistance.

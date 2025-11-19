@@ -52,7 +52,7 @@ public class StringInternerBytes extends StringInterner {
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
-    public String intern(@NotNull final Bytes<?> bytes)
+    public String intern(final Bytes<?> bytes)
             throws ArithmeticException, IllegalStateException, BufferUnderflowException {
         return intern(bytes, Maths.toUInt31(bytes.readRemaining()));
     }
@@ -70,7 +70,7 @@ public class StringInternerBytes extends StringInterner {
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
-    public String intern(@NotNull final Bytes<?> bytes, @NonNegative int length)
+    public String intern(final Bytes<?> bytes, @NonNegative int length)
             throws IllegalStateException, BufferUnderflowException {
         try {
 

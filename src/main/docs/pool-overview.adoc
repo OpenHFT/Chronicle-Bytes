@@ -3,6 +3,7 @@
 :toc:
 :toclevels: 2
 :lang: en-GB
+:source-highlighter: rouge
 
 Chronicle Bytes provides a pooling mechanism to reuse `Bytes` objects, primarily to minimise allocation overhead and reduce Garbage Collector (GC) pressure in very low-latency scenarios.
 This is particularly beneficial when temporary `Bytes` instances are frequently needed.
@@ -36,6 +37,22 @@ try (ScopedResource<Bytes<?>> sb = bytesPool.get()) {
     // b is automatically cleared and returned to the pool at the end of this block
 }
 ----
+
+== Trade-offs and Alternatives
+
+The pooling mechanism trades a small amount of retained memory per thread for reduced allocation and GC pressure:
+
+* **Benefits**
+** Fewer temporary allocations on hot paths that create short-lived `Bytes` instances.
+** More predictable latency when allocation pauses would otherwise be visible to callers.
+* **Costs**
+** Each thread holds on to a small number of `Bytes` instances for the lifetime of the thread.
+** Pools must be sized carefully in environments with many threads to avoid unexpected native-memory use.
+
+In workloads with low allocation pressure or long-lived `Bytes` instances, callers may choose to:
+
+* use direct factory methods such as `Bytes.allocateElasticDirect()` without pooling;
+* rely on higher-level pooling or resource-management layers in other Chronicle components.
 
 This approach helps in managing the lifecycle of pooled `Bytes` objects efficiently and safely.
 

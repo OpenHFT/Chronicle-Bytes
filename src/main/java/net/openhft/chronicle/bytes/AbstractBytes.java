@@ -72,7 +72,7 @@ public abstract class AbstractBytes<U>
 
     private final UncheckedRandomDataInput uncheckedRandomDataInput = new UncheckedRandomDataInputHolder();
     @NotNull
-    protected BytesStore<?, U> bytesStore;
+    protected BytesStore<?, U> bytesStore = NoBytesStore.noBytesStore();
     /** Offset, from {@link #start()}, of the next byte to read. */
     protected long readPosition;
     /** Highest byte index that may be written. */
@@ -320,24 +320,6 @@ public abstract class AbstractBytes<U>
             throws BufferOverflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
         if (!decimaliser().toDecimal(d, this))
             append8bit(Double.toString(d));
-        return this;
-    }
-
-    @NotNull
-    private AbstractBytes<U> appendX23(double d) throws ClosedIllegalStateException, ThreadingIllegalStateException {
-        boolean fits = canWriteDirect(32);
-        if (fits) {
-            long address = addressForWrite(writePosition());
-            long address2 = UnsafeText.appendDouble(address, d);
-            writeSkip(address2 - address);
-            return this;
-        } else {
-            try (ScopedResource<Bytes<?>> stlBytes = BytesInternal.acquireBytesScoped()) {
-                Bytes<?> bytes = stlBytes.get();
-                bytes.append(d);
-                append(bytes);
-            }
-        }
         return this;
     }
 

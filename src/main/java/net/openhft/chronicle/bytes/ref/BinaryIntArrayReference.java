@@ -295,7 +295,11 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
             throws IllegalStateException, BufferOverflowException, IllegalArgumentException {
         throwExceptionIfClosed();
 
-        ((BinaryIntReference) value).bytesStore(bytesStore, VALUES + offset + (index << SHIFT), 8);
+        if (!(value instanceof BinaryIntReference)) {
+            throw new IllegalArgumentException("Expected BinaryIntReference but got " + value.getClass().getName());
+        }
+        BinaryIntReference intRef = (BinaryIntReference) value;
+        intRef.bytesStore(bytesStore, VALUES + offset + (index << SHIFT), 8);
     }
 
     /**

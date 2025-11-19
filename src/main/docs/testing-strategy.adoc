@@ -1,0 +1,79 @@
+= Chronicle Bytes Testing Strategy
+:doctype: book
+:toc:
+:toclevels: 2
+:sectnums:
+:lang: en-GB
+:source-highlighter: rouge
+
+This document outlines the testing approach for Chronicle Bytes and links tests to the Nine-Box requirements defined in `project-requirements.adoc`.
+It supports the ISO 9001 design verification checklist and helps reviewers assess coverage for key behaviours.
+
+== Test Layers
+
+Chronicle Bytes uses several complementary test layers:
+
+* unit tests in `src/test/java/net/openhft/chronicle/bytes` for core API contracts, bounds checking, encoding and pooling behaviour;
+* integration tests that exercise combinations of `Bytes`/`BytesStore` implementations (on-heap, native, memory-mapped) and interactions with other Chronicle modules where appropriate;
+* micro-benchmarks and JMH-based harnesses in the `microbenchmarks` module for performance-related requirements (`CB-NF-P-*`);
+* exploratory and regression tests that capture previously reported bugs and edge cases.
+
+Where practical, test classes and methods reference requirement IDs (for example `CB-FN-001`, `CB-NF-S-001`) in comments or Javadoc to support traceability.
+
+== Unit Testing Approach
+
+Unit tests focus on:
+
+* cursor semantics: movement of `readPosition`, `writePosition`, `limit` and error conditions when attempting to read or write beyond bounds (`CB-FN-001`, `CB-NF-S-001`);
+* storage variants: behaviour of `BytesStore` implementations over `byte[]`, direct native memory and memory-mapped files (`CB-FN-002`);
+* functional utilities: stop-bit encoding/decoding, search and comparison helpers, hex dump output (`CB-FN-005` .. `CB-FN-007`, `CB-FN-013`);
+* pooling and lifecycle: acquisition, reuse and release semantics for `BytesPool` and reference-counted resources (`CB-FN-014`, `CB-NF-O-001`).
+
+Tests are written to avoid non-deterministic timing assumptions and to keep allocations low, reflecting the performance-sensitive nature of the library.
+
+== Integration and Compatibility Tests
+
+Integration tests cover:
+
+* combined usage of `Bytes`/`BytesStore` with Chronicle Wire and other modules where appropriate (`CB-FN-008`);
+* use of memory-mapped files across simulated process boundaries, including file locking helpers from the `domestic` package (`CB-NF-S-002`);
+* behaviour under different JVMs and operating systems, aligned with compatibility requirements (`CB-NF-MP-*`).
+
+Where possible, integration tests reuse production configuration defaults so that changes in settings (for example system properties) are exercised in CI.
+
+== Performance and Benchmarking Strategy
+
+Performance-related requirements (`CB-NF-P-*`) are verified using:
+
+* JMH micro-benchmarks targeting serialisation/deserialisation latency, bulk copy throughput and comparison performance;
+* scenario-style benchmarks in the `microbenchmarks` module that simulate realistic workloads such as queue appending, off-heap updates or encoding-heavy paths.
+
+Benchmark configurations (for example JVM flags, thread pinning, payload sizes) are documented alongside the benchmark source so that results are reproducible and comparable across versions.
+
+While benchmarks may not run on every CI executor, they are treated as gating signals before major releases or significant architectural changes.
+
+== Code Review and Regression Handling
+
+Design verification requires evidence that:
+
+* new features and bug fixes come with corresponding tests or benchmarks;
+* regressions are captured by durable tests where feasible;
+* test names or comments reference the relevant `CB-*` identifiers or issue references.
+
+During code review:
+
+* reviewers confirm that riskier changes (for example new `Unsafe` usage, modified pooling behaviour) include targeted tests and, where appropriate, updated documentation;
+* reviewers consider whether additional negative tests (for example invalid inputs, concurrent access) are needed to cover the intended behaviour.
+
+== Running the Test Suite
+
+From the repository root, run:
+
+[source,bash]
+----
+mvn -q clean verify
+----
+
+This command builds all modules, executes unit and integration tests and runs static analysis tools configured in the Maven build.
+Module-specific test runs can be scoped using Maven's `-pl` flag when iterating, but full `verify` should be executed before releases or pull requests.
+

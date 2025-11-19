@@ -81,7 +81,7 @@ public class MemoryWriteJitterMain {
             if (writing) {
                 long start1 = System.nanoTime();
                 while (System.nanoTime() < start1 + sampleNS) {
-                    // wait one micro-second.
+                    Jvm.safepoint();
                 }
                 if (writing) {
                     StackTraceElement[] stes = writer.getStackTrace();
@@ -104,7 +104,7 @@ public class MemoryWriteJitterMain {
                 histoRead.sampleNanos(now - startTimeNs);
                 histoReadWrite.sampleNanos(now - mm.firstLong());
             }
-        } while (System.currentTimeMillis() < start0 + runTime * 1_000);
+        } while (System.currentTimeMillis() < start0 + runTime * 1_000L);
         running = false;
         mf.releaseLast();
         System.gc();// give it time to release the file so the delete on exit will work on windows.

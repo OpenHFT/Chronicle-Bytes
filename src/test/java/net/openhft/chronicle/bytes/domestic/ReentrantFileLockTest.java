@@ -17,6 +17,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.channels.ClosedChannelException;
 import java.nio.channels.FileChannel;
@@ -53,7 +54,9 @@ class ReentrantFileLockTest extends BytesTestCommon {
 
     @AfterEach
     void tearDown() {
-        fileToLock.delete();
+        if (!fileToLock.delete()) {
+            fileToLock.deleteOnExit();
+        }
     }
 
     @ParameterizedTest
@@ -75,6 +78,7 @@ class ReentrantFileLockTest extends BytesTestCommon {
     void willThrowOverlappingFileLockExceptionWhenAnOverlappingLockIsHeldDirectly(boolean useTryLock) throws IOException {
         try (FileChannel channel = FileChannel.open(fileToLock.toPath(), StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE)) {
             final FileLock lock = channel.lock();
+            assertNotNull(lock);
             assertThrows(OverlappingFileLockException.class, () -> acquireLock(useTryLock, fileToLock, channel));
             assertFalse(ReentrantFileLock.isHeldByCurrentThread(fileToLock));
         }
@@ -239,9 +243,9 @@ class ReentrantFileLockTest extends BytesTestCommon {
 
         private int readIdentifier(FileChannel channel) {
             try {
-                buffer.clear();
+                ((Buffer) buffer).clear();
                 channel.read(buffer, 0);
-                buffer.flip();
+                ((Buffer) buffer).flip();
                 return buffer.getInt();
             } catch (IOException e) {
                 throw new RuntimeException("Couldn't read ID", e);
@@ -250,9 +254,9 @@ class ReentrantFileLockTest extends BytesTestCommon {
 
         private void writeIdentifier(FileChannel channel) {
             try {
-                buffer.clear();
+                ((Buffer) buffer).clear();
                 buffer.putInt(identifier);
-                buffer.flip();
+                ((Buffer) buffer).flip();
                 channel.write(buffer, 0);
             } catch (IOException e) {
                 throw new RuntimeException("Couldn't write ID", e);

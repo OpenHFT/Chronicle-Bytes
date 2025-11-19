@@ -7,6 +7,7 @@ import org.junit.Test;
 
 import java.nio.ByteBuffer;
 
+import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static org.junit.Assert.*;
 
 public class BytesLifecycleTest extends BytesTestCommon {
@@ -90,7 +91,7 @@ public class BytesLifecycleTest extends BytesTestCommon {
                 view.readPositionRemaining(0, copied);
                 byte[] bytes = new byte[(int) copied];
                 view.read(bytes);
-                assertEquals("body", new String(bytes, java.nio.charset.StandardCharsets.ISO_8859_1));
+                assertEquals("body", new String(bytes, ISO_8859_1));
             } finally {
                 view.releaseLast();
             }

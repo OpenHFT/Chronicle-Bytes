@@ -6,7 +6,6 @@ package net.openhft.chronicle.bytes.ref;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesTestCommon;
 import net.openhft.chronicle.core.Jvm;
-import net.openhft.chronicle.core.values.IntValue;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
 import org.junit.Test;
@@ -78,8 +77,8 @@ public class TextIntArrayReferenceTest extends BytesTestCommon {
 
     @Test(expected = UnsupportedOperationException.class)
     public void testBindValueAt() {
-        try (TextIntArrayReference ref = new TextIntArrayReference()) {
-            IntValue value = null; // Placeholder for actual IntValue implementation
+        try (TextIntArrayReference ref = new TextIntArrayReference();
+             BinaryIntReference value = new BinaryIntReference()) {
             ref.bindValueAt(0, value);
             fail("Expected to throw UnsupportedOperationException");
         }

@@ -23,8 +23,8 @@ import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.ReadOnlyBufferException;
-import java.nio.charset.StandardCharsets;
 
+import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static net.openhft.chronicle.bytes.internal.ReferenceCountedUtil.throwExceptionIfReleased;
 import static net.openhft.chronicle.core.util.Longs.requireNonNegative;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
@@ -375,7 +375,7 @@ public interface Bytes<U> extends
      */
     @NotNull
     static Bytes<byte[]> from(@NotNull String text) {
-        return wrapForRead(text.getBytes(StandardCharsets.ISO_8859_1));
+        return wrapForRead(text.getBytes(ISO_8859_1));
     }
 
     /**
@@ -1018,8 +1018,6 @@ public interface Bytes<U> extends
         // TODO use indexOf(Bytes, long);
         throwExceptionIfReleased(this);
         throwExceptionIfReleased(source);
-        long sourceOffset = readPosition();
-        long otherOffset = source.readPosition();
         long sourceCount = readRemaining();
         long otherCount = source.readRemaining();
 
@@ -1029,6 +1027,8 @@ public interface Bytes<U> extends
         if (otherCount == 0) {
             return 0;
         }
+        long sourceOffset = readPosition();
+        long otherOffset = source.readPosition();
         byte firstByte = source.readByte(otherOffset);
         long max = sourceOffset + (sourceCount - otherCount);
 
@@ -1080,16 +1080,16 @@ public interface Bytes<U> extends
         throwExceptionIfReleased(this);
         throwExceptionIfReleased(source);
         long sourceOffset = readPosition();
-        long otherOffset = source.readPosition();
         long sourceCount = readRemaining();
-        long otherCount = source.readRemaining();
 
         if (fromIndex < 0) {
             fromIndex = 0;
         }
+        long otherCount = source.readRemaining();
         if (fromIndex >= sourceCount) {
             return Math.toIntExact(otherCount == 0 ? sourceCount : -1);
         }
+        long otherOffset = source.readPosition();
         if (otherCount == 0) {
             return fromIndex;
         }

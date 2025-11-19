@@ -18,15 +18,13 @@ public class ContentEqualsJLBHMain {
         System.setProperty("jvm.resource.tracing", "false");
     }
 
-    static boolean isDirect = true;
-
-    private static int size = 1024;
+    private static final int SIZE = 1024;
 
     private final Bytes<?> left = Bytes.allocateElasticDirect();
     private final Bytes<?> right = Bytes.allocateElasticDirect();
 
     private ContentEqualsJLBHMain() {
-        for (int i = 0; i < size; i++) {
+        for (int i = 0; i < SIZE; i++) {
             left.append('x');
             right.append('x');
         }

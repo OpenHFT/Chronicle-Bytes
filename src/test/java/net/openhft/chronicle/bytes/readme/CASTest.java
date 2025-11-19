@@ -23,12 +23,12 @@ public class CASTest extends BytesTestCommon {
 
             bytes.writeHexDumpDescription("s32").writeUtf8("s32");
             bytes.writeSkip((-bytes.writePosition()) & (4 - 1));
-            long s32 = bytes.writePosition();
+            final long s32 = bytes.writePosition();
             bytes.writeInt(0);
 
             bytes.writeHexDumpDescription("s64").writeUtf8("s64");
             bytes.writeSkip((-bytes.writePosition()) & (8 - 1));
-            long s64 = bytes.writePosition();
+            final long s64 = bytes.writePosition();
             bytes.writeLong(0);
 
             final String expected1 = "0000 03 73 33 32 00 00 00 00                         # s32\n" +

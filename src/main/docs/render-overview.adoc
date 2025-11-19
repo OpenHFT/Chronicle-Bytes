@@ -3,6 +3,7 @@
 :toc:
 :toclevels: 2
 :lang: en-GB
+:source-highlighter: rouge
 
 This guide explains how Chronicle Bytes converts JVM floating-point values into textual decimal form.
 The package supplies a pluggable **strategy (`Decimaliser`) + consumer (`DecimalAppender`)** model that lets you trade raw speed for accuracy, choose fixed-precision rounding, or fall back to `BigDecimal` when an exact string is required.
@@ -67,4 +68,3 @@ fast18.toDecimal(Math.PI, sci);
 * **Financial/exact output** → `UsesBigDecimal`.
 * **Auto-fallback & wide range** → `GeneralDecimaliser`.
 * **Default for wire formats** → `StandardDecimaliser`.
-
