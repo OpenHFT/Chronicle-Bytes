@@ -285,10 +285,10 @@ public class VanillaBytes<U>
             ByteBuffer bb = ByteBuffer.allocateDirect(Maths.toInt32(readRemaining()));
             @NotNull ByteBuffer bbu = (ByteBuffer) bytesStore.underlyingObject();
             ByteBuffer slice = bbu.slice();
-            slice.position((int) readPosition());
-            slice.limit((int) readLimit());
+            net.openhft.chronicle.bytes.internal.BufferUtil.setPosition(slice, (int) readPosition());
+            net.openhft.chronicle.bytes.internal.BufferUtil.setLimit(slice, (int) readLimit());
             bb.put(slice);
-            bb.clear();
+            net.openhft.chronicle.bytes.internal.BufferUtil.clear(bb);
             return uncheckedCast(BytesStore.wrap(bb));
         } else {
             return uncheckedCast(BytesUtil.copyOf(this));
