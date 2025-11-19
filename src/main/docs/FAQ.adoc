@@ -5,11 +5,6 @@
 :sectnums:
 :lang: en-GB
 :source-highlighter: rouge
-// British English, ISO-8859-1 only.
-
-// This FAQ collects common questions we receive on
-// mailing-lists, GitHub issues and customer support. Links point to
-// other `.adoc` guides where deeper detail is available.
 
 == General
 

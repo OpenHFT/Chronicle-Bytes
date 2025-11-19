@@ -83,7 +83,7 @@ It is good practice to manage the underlying stream's lifecycle separately, ofte
 ====
 
 .Example: compressing and decompressing with `Bytes`
-[source,java]
+[source,java,opts=novalidate]
 ----
 Bytes<?> source = Bytes.allocateElasticOnHeap();
 source.writeUtf8("Hello, compressed world!");

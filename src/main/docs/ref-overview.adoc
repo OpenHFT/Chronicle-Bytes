@@ -32,7 +32,7 @@ Wraps a standard `java.nio.channels.FileLock`.
 === Typical Usage
 The `ReentrantFileLock` is typically used in a try-with-resources block to ensure locks are properly released.
 
-[source,java]
+[source,java,opts=novalidate]
 ----
 import net.openhft.chronicle.bytes.domestic.ReentrantFileLock;
 import java.io.File;

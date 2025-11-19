@@ -37,7 +37,7 @@ boolean ok = d.toDecimal(1.2345, (neg, m, e) -> bytes.append(neg ? '-' : '')
 System.out.println(bytes.toString());
 ----
 
-See the <<wire-integration.adoc,Wire Integration>> guide for details on using
+See the <<chronicle-wire-integration-guide,Wire Integration>> guide for details on using
 these renderers within wire formats.
 
 == Trade-offs and Alternatives

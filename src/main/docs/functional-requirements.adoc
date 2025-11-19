@@ -22,7 +22,7 @@ The full catalogue, including non-functional and risk requirements, remains in
 |===
 
 .Requirement domains at a glance
-[source,mermaid]
+[mermaid]
 ----
 graph TD
     core[Core API & storage\nCB-FN-001..008] --> docArch[architecture-overview.adoc]
@@ -67,7 +67,7 @@ graph TD
 [cols="1,4,3",options="header"]
 |===
 | ID | Requirement (summary) | Verification
-| CB-FN-014 | Provide pooling for `Bytes` instances to reduce allocation overhead and garbage collection pressure under high churn workloads. | Benchmarks demonstrating improvements when using pooled instances compared with non-pooled usage, together with unit tests for pool lifecycle, reuse and safety; see `project-requirements.adoc` for detailed benchmark criteria and acceptance thresholds. |
+| CB-FN-014 | Provide pooling for `Bytes` instances to reduce allocation overhead and garbage collection pressure under high churn workloads. | Benchmarks demonstrating improvements when using pooled instances compared with non-pooled usage, together with unit tests for pool lifecycle, reuse and safety; see `project-requirements.adoc` for detailed benchmark criteria and acceptance thresholds.
 |===
 
 == Traceability

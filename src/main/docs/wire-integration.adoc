@@ -27,7 +27,7 @@ Supporting multiple data formats (wire types) to suit different needs, from huma
 All write and read operations ultimately use the same cursor API provided by `Bytes`, meaning the cost of serialization is primarily the encoding logic itself, rather than I/O overhead.
 
 .High-level interaction between application, Wire, and Bytes
-[source,mermaid]
+[mermaid]
 ----
 sequenceDiagram
     participant App as Application Code
@@ -276,7 +276,7 @@ _Note_: When using `BytesMarshallable`, you are responsible for all byte orderin
 
 This powerful idiom turns a Java interface into an RPC-style channel over `Bytes` with minimal overhead and no generated garbage on the hot path.
 
-[source,java]
+[source,java,opts=novalidate]
 ----
 // 1. Define the contract (interface)
 public interface TickEvents {

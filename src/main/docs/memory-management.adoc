@@ -30,7 +30,7 @@ Use try-with-resources around `Closeable` `Bytes` objects or manage ownership vi
 leaks by recording where a store was reserved.
 
 .Reference counting lifecycle (conceptual)
-[source,mermaid]
+[mermaid]
 ----
 stateDiagram-v2
     [*] --> Unallocated
