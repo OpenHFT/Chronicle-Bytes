@@ -20,7 +20,7 @@ The primary security risks are:
 * data corruption when multiple processes or threads share mapped files incorrectly;
 * misuse of powerful primitives such as `Unsafe` or elastic buffers leading to resource exhaustion.
 
-Chronicle Bytes **does not** provide:
+Chronicle Bytes *does not* provide:
 
 * transport-level encryption (for example TLS);
 * application-level access control;
@@ -37,7 +37,7 @@ Typical sources of untrusted input in systems that depend on Bytes include:
 * on-disk queue files and other persisted logs;
 * application-level payloads passed into APIs such as `writeUtf8`, `write` and related methods.
 
-Bytes does not attempt to validate the *business semantics* of these payloads.
+Bytes does not attempt to validate the _business semantics_ of these payloads.
 Instead:
 
 * invariants at the byte layer (for example indices, lengths and capacities) are checked and failures raise well-defined exceptions;

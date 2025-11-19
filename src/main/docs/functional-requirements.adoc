@@ -7,7 +7,8 @@
 
 This document highlights the core functional behaviours that Chronicle Bytes must provide and keep stable across releases.
 It organises the `CB-FN-*` requirements from `project-requirements.adoc` into domains and links them to verification mechanisms
-(tests, benchmarks and documentation). The full catalogue, including non-functional and risk requirements, remains in
+(tests, benchmarks and documentation).
+The full catalogue, including non-functional and risk requirements, remains in
 `project-requirements.adoc`.
 
 == Domain Overview
@@ -71,6 +72,6 @@ graph TD
 
 == Traceability
 
-- Each row above references an existing requirement in `project-requirements.adoc`; that file remains the canonical source of full wording and benchmark targets.
-- Tests in `src/test/java/net/openhft/chronicle/bytes` and related harnesses should reference the `CB-FN-*` identifiers to make requirement coverage easy to audit.
-- Decisions in `src/main/docs/decision-log.adoc` (for example `CB-FN-101` and `CB-FN-102`) explain the rationale behind key design choices that implement these requirements.
+* Each row above references an existing requirement in `project-requirements.adoc`; that file remains the canonical source of full wording and benchmark targets.
+* Tests in `src/test/java/net/openhft/chronicle/bytes` and related harnesses should reference the `CB-FN-*` identifiers to make requirement coverage easy to audit.
+* Decisions in `src/main/docs/decision-log.adoc` (for example `CB-FN-101` and `CB-FN-102`) explain the rationale behind key design choices that implement these requirements.
