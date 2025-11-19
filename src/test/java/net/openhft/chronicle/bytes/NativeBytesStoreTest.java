@@ -25,6 +25,7 @@ import java.security.SecureRandom;
 import java.util.Random;
 import java.util.stream.Stream;
 
+import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static org.junit.Assert.*;
 import static org.junit.Assume.assumeFalse;
 
@@ -51,20 +52,20 @@ public class NativeBytesStoreTest extends BytesTestCommon {
 
         final NativeBytesStore<Void> bytesStore = NativeBytesStore.nativeStoreWithFixedCapacity(maxLen + 5);
 
-        String expected = "";
+        StringBuilder expected = new StringBuilder();
 
         for (int i = 0; i < maxLen; i += stepLength) {
-            final Bytes<byte[]> bytes = Bytes.from(expected);
+            final Bytes<byte[]> bytes = Bytes.from(expected.toString());
 
             bytesStore.write8bit(0, bytes);
 
             final StringBuilder sb = new StringBuilder();
             bytesStore.readUtf8(0, sb);
 
-            Assert.assertEquals("failed at " + i, expected, sb.toString());
+            Assert.assertEquals("failed at " + i, expected.toString(), sb.toString());
 
             bytes.releaseLast();
-            expected = expected + "aaaaaaaaaaaaaaaaaaaaaaa"; // 23 characters
+            expected.append("aaaaaaaaaaaaaaaaaaaaaaa"); // 23 characters
         }
     }
 
@@ -83,7 +84,7 @@ public class NativeBytesStoreTest extends BytesTestCommon {
             sb.append(" 123456789");
         final String expected = sb.toString();
 
-        final Bytes<?> bytes = Bytes.allocateDirect(expected.getBytes());
+        final Bytes<?> bytes = Bytes.allocateDirect(expected.getBytes(ISO_8859_1));
         final Bytes<?> enc = Bytes.allocateElasticDirect();
         final Bytes<?> dec = Bytes.allocateElasticDirect();
         try {
@@ -221,7 +222,7 @@ public class NativeBytesStoreTest extends BytesTestCommon {
                 NativeBytesStore.nativeStoreWithFixedCapacity(194)
         };
         try {
-            final Random rand = new Random();
+            final Random rand = new Random(1L);
             for (NativeBytesStore<Void> nb : nbs) {
                 final byte[] bytes = new byte[(int) nb.capacity()];
                 rand.nextBytes(bytes);
@@ -264,10 +265,10 @@ public class NativeBytesStoreTest extends BytesTestCommon {
     @SuppressWarnings("rawtypes")
     @Test
     public void testEquals() {
-        @NotNull NativeBytesStore hbs = NativeBytesStore.from("Hello".getBytes());
-        @NotNull NativeBytesStore hbs2 = NativeBytesStore.from("Hello".getBytes());
-        @NotNull NativeBytesStore hbs3 = NativeBytesStore.from("He!!o".getBytes());
-        @NotNull NativeBytesStore hbs4 = NativeBytesStore.from("Hi".getBytes());
+        @NotNull NativeBytesStore hbs = NativeBytesStore.from("Hello".getBytes(ISO_8859_1));
+        @NotNull NativeBytesStore hbs2 = NativeBytesStore.from("Hello".getBytes(ISO_8859_1));
+        @NotNull NativeBytesStore hbs3 = NativeBytesStore.from("He!!o".getBytes(ISO_8859_1));
+        @NotNull final NativeBytesStore hbs4 = NativeBytesStore.from("Hi".getBytes(ISO_8859_1));
         assertEquals(hbs, hbs2);
         assertEquals(hbs2, hbs);
         assertNotEquals(hbs, hbs3);

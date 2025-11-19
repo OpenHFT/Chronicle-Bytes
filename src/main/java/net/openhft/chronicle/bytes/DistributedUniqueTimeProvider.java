@@ -140,6 +140,15 @@ public class DistributedUniqueTimeProvider extends SimpleCloseable implements Ti
     }
 
     /**
+     * Exposes the deduplicator used to co-ordinate timestamps across hosts.
+     *
+     * @return the deduplicator for this instance
+     */
+    DistributedUniqueTimeDeduplicator deduplicator() {
+        return deduplicator;
+    }
+
+    /**
      * NOTE: Calls to this method do not produce unique timestamps, rather just calls the underlying provider.
      * <p>
      * Use {@link #currentTimeMicros()} or {@link #currentTimeNanos()} to generate unique timestamps,

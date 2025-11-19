@@ -4,13 +4,14 @@
 :toclevels: 2
 :sectnums:
 :lang: en-GB
-// British English, ASCII-7 only.
+:source-highlighter: rouge
+// British English, ISO-8859-1 only.
 
 // This FAQ collects common questions we receive on
 // mailing-lists, GitHub issues and customer support. Links point to
 // other `.adoc` guides where deeper detail is available.
 
-== 1  General
+== General
 
 . **What is Chronicle Bytes in one sentence?** A low-level Java library that provides direct, high-performance, and GC-friendly access to on-heap, off-heap (native), and memory-mapped file regions.
 (See `architecture-overview.adoc`).
@@ -54,7 +55,7 @@ However, for high-performance scenarios, common patterns are to allocate one `By
 `Bytes` is a view or handle to a `BytesStore`, providing methods to read and write data using cursors and limits.
 Multiple `Bytes` instances can view the same or overlapping regions of a `BytesStore`.
 
-== 2  Performance
+== Performance
 
 . **What is the typical latency for writing 32 bytes to an off-heap `Bytes` buffer?** On a modern server (e.g., 3.2 GHz x86-64), mean latency is typically around 9 ns, with 99.9th percentile around 90 ns, assuming the buffer is hot in CPU cache.
 
@@ -95,7 +96,7 @@ Polling these JMX MBeans (e.g., once per second) should not impact application p
 . **Does compiling Chronicle Bytes with GraalVM Native Image significantly improve speed?** Performance is generally comparable to a well-warmed-up HotSpot C2 compiler for Chronicle Bytes' core operations, as these are already heavily optimized and often inlined.
 GraalVM Native Image can offer startup time improvements and reduced memory footprint, which might be beneficial in certain deployment scenarios.
 
-== 3  Memory Management
+== Memory Management
 
 . **How do I correctly release native memory used by off-heap `Bytes`?** Call the `releaseLast()` method on the `Bytes` instance (or its underlying `BytesStore` if accessed directly) when you are completely finished with it.
 For `Bytes` instances that implement `java.io.Closeable` (most off-heap ones do), the best practice is to use a try-with-resources statement to ensure `close()` (which typically calls `releaseLast()`) is invoked.
@@ -141,7 +142,7 @@ If the "after" value is significantly greater than the "before" value (accountin
 (See `CB-TEST-003`).
 Chronicle's test framework often includes utilities for this.
 
-== 4  Serialisation with Chronicle Wire
+== Serialisation with Chronicle Wire
 
 . **Do I *need* to use Chronicle Wire to use Chronicle Bytes?** No.
 You can use Chronicle Bytes to read and write primitive data types, byte arrays, and strings directly.
@@ -191,7 +192,7 @@ Chronicle Queue files can be much larger than 2GiB, containing many such message
 This significantly reduces bandwidth and processing overhead compared to text formats.
 `RAW` format omits field identifiers altogether.
 
-== 5  Integration
+== Integration
 
 . **Is Chronicle Bytes compatible with Netty `ByteBuf`?** Yes.
 You can wrap a Netty `ByteBuf` to be used as a Chronicle `Bytes` instance using `Bytes.wrapForRead(nettyByteBuf.nioBuffer())` or `Bytes.wrapForWrite(nettyByteBuf.nioBuffer())`.
@@ -237,7 +238,7 @@ Then, you can read messages sequentially as they were originally written.
 Instead, mount queue directories using Docker volumes mapped to fast host paths, or use `--tmpfs` for ephemeral, in-memory queues.
 CPU pinning and resource limits should also be managed carefully.
 
-== 6  Troubleshooting
+== Troubleshooting
 
 . **I'm getting `IllegalStateException: unable to move a position ... past the readLimit ...` or similar buffer boundary exceptions.
 Why?** This usually means your read/write cursors or limits are inconsistent.
@@ -293,7 +294,7 @@ The `Cleaner` thread is working hard to reclaim the associated native memory whe
 You *must* fix these leaks by ensuring deterministic release of resources.
 Enable `-Dchronicle.bytes.disableCleaners=false` (if it was disabled) and logging for `CB-NF-O-003` to help trace offenders.
 
-== 7  Licensing and Governance
+== Licensing and Governance
 
 . **Is there a Contributor License Agreement (CLA) for Chronicle Bytes?** Yes, contributions to OpenHFT projects, including Chronicle Bytes, typically require signing a CLA.
 This is usually managed automatically via GitHub when you make your first Pull Request.

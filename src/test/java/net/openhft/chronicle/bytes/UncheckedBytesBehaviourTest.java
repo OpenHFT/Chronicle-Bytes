@@ -5,7 +5,8 @@ package net.openhft.chronicle.bytes;
 
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
 
 public class UncheckedBytesBehaviourTest extends BytesTestCommon {
 
@@ -26,6 +27,20 @@ public class UncheckedBytesBehaviourTest extends BytesTestCommon {
             assertSame(h, same);
         } finally {
             h.releaseLast();
+        }
+    }
+
+    @Test
+    public void uncheckedModeAllowsWritePastLimit() {
+        Bytes<?> checked = Bytes.allocateElasticOnHeap(16);
+        Bytes<?> unchecked = checked.unchecked(true);
+        try {
+            unchecked.writeLimit(4);
+            unchecked.writeLong(0x0102030405060708L);
+            assertEquals("Unchecked write should advance writePosition", 8, unchecked.writePosition());
+            assertEquals("Checked view remains at start", 0, checked.readPosition());
+        } finally {
+            unchecked.releaseLast();
         }
     }
 }

@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Assertions;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 
+import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import static org.junit.jupiter.api.Assertions.*;
@@ -81,7 +82,7 @@ public class AppendableUtilTest extends BytesTestCommon {
 
     @Test
     public void testFindUtf8LengthByteArray() {
-        byte[] bytes = "Hello World".getBytes();
+        byte[] bytes = "Hello World".getBytes(ISO_8859_1);
         long length = AppendableUtil.findUtf8Length(bytes);
         Assertions.assertEquals(22, length);
     }
@@ -97,11 +98,19 @@ public class AppendableUtilTest extends BytesTestCommon {
     public void setCharAtWithUnsupportedAppendable() {
         Appendable appendable = new Appendable() {
             @Override
-            public Appendable append(CharSequence csq) { return this; }
+            public Appendable append(CharSequence csq) {
+                return this;
+            }
+
             @Override
-            public Appendable append(CharSequence csq, int start, int end) { return this; }
+            public Appendable append(CharSequence csq, int start, int end) {
+                return this;
+            }
+
             @Override
-            public Appendable append(char c) { return this; }
+            public Appendable append(char c) {
+                return this;
+            }
         };
 
         assertThrows(IllegalArgumentException.class, () -> AppendableUtil.setCharAt(appendable, 1, 'a'));

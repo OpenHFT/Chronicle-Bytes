@@ -99,7 +99,7 @@ public class OptimisedBytesStoreHashTest extends BytesTestCommon {
 //                System.out.println(t + " - Score: " + score);
         }
         System.out.println("Average score: " + (long) (runs / scoreSum));
-        System.out.printf("Average time %.3f us%n", time / timeCount / 1e3);
+        System.out.printf("Average time %.3f us%n", (double) time / (double) timeCount / 1e3);
     }
 
     //@Test
@@ -144,7 +144,7 @@ public class OptimisedBytesStoreHashTest extends BytesTestCommon {
                 System.out.println(t + " - Score: " + score);
         }
         System.out.println("Average score: " + scoreSum / 500);
-        System.out.printf("Average time %.3f us%n", time / timeCount / 1e3);
+        System.out.printf("Average time %.3f us%n", (double) time / (double) timeCount / 1e3);
     }
 
     //@Test

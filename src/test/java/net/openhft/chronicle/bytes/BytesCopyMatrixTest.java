@@ -7,8 +7,8 @@ import org.junit.Test;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 
+import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
@@ -29,7 +29,7 @@ public class BytesCopyMatrixTest extends BytesTestCommon {
             try {
                 byte[] data = new byte[(int) copied];
                 view.read(data);
-                assertArrayEquals("beta".getBytes(StandardCharsets.ISO_8859_1), data);
+                assertArrayEquals("beta".getBytes(ISO_8859_1), data);
             } finally {
                 view.releaseLast();
             }
@@ -47,7 +47,7 @@ public class BytesCopyMatrixTest extends BytesTestCommon {
             source.readPosition(0);
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             source.copyTo(baos);
-            assertEquals("payload", baos.toString(StandardCharsets.ISO_8859_1.name()));
+            assertEquals("payload", baos.toString(ISO_8859_1.name()));
             assertEquals("copyTo(OutputStream) must not move readPosition", 0, source.readPosition());
         } finally {
             source.releaseLast();

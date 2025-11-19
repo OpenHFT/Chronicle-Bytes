@@ -11,6 +11,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeFalse;
 
 public class HexDumpBytesTest extends BytesTestCommon {
@@ -43,7 +44,7 @@ public class HexDumpBytesTest extends BytesTestCommon {
         File file = new File(OS.getTarget(), "HexDumpBytesTest-" + System.nanoTime() + ".dat");
         File parent = file.getParentFile();
         if (parent != null && !parent.exists()) {
-            parent.mkdirs();
+            assertTrue(parent.mkdirs() || parent.isDirectory());
         }
         try (MappedBytes mappedBytes = MappedBytes.mappedBytes(file, 64 * 1024)) {
             doTest(new HexDumpBytes(mappedBytes));

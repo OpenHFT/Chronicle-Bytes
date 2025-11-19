@@ -20,10 +20,10 @@ public class ReadWriteMarshallableTest extends BytesTestCommon {
         assumeFalse(NativeBytes.areNewGuarded());
 
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(128);
-        Bytes<?> hello_world = Bytes.from("Hello World");
+        Bytes<?> helloWorld = Bytes.from("Hello World");
         Bytes<?> bye = Bytes.from("Bye");
         RWOuter o = new RWOuter(
-                new RWInner(hello_world),
+                new RWInner(helloWorld),
                 new RWInner(bye));
 
         bytes.writeMarshallableLength16(o);
@@ -31,7 +31,7 @@ public class ReadWriteMarshallableTest extends BytesTestCommon {
         RWOuter o2 = bytes.readMarshallableLength16(RWOuter.class, null);
         assertEquals("Hello World", o2.i1.data.toString());
         assertEquals("Bye", o2.i2.data.toString());
-        hello_world.releaseLast();
+        helloWorld.releaseLast();
         bye.releaseLast();
     }
 

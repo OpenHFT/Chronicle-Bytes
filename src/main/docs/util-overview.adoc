@@ -3,6 +3,7 @@
 :toc:
 :toclevels: 2
 :lang: en-GB
+:source-highlighter: rouge
 
 This overview describes the collection of helper types that reside in the
 `net.openhft.chronicle.bytes.util` package.
@@ -22,6 +23,39 @@ Every class is designed with Chronicle’s core goals in mind – aiming for **l
 |_Property expansion_ | `PropertyReplacer` (Enum) | Expand `${property}` placeholders within a template string, sourcing values from `System.getProperty` or a supplied `java.util.Properties` object.
 |_Customised exceptions_ | `DecoratedBufferOverflowException`, `DecoratedBufferUnderflowException` | Provide more informative buffer boundary error messages by allowing a pre-formatted string, potentially avoiding the cost of `String.format` at throw time.
 |===
+
+.Utility types and relationships (conceptual)
+[source,mermaid]
+----
+classDiagram
+    class Compression {
+        <<interface>>
+        +compress(byte[])
+        +uncompress(byte[])
+    }
+    class Compressions {
+        <<enum>>
+    }
+    Compression <|.. Compressions
+
+    class AbstractInterner {
+        <<abstract>>
+    }
+    AbstractInterner <|-- StringInternerBytes
+    AbstractInterner <|-- UTF8StringInterner
+    AbstractInterner <|-- Bit8StringInterner
+
+    class BinaryLengthLength {
+        <<enum>>
+    }
+
+    class PropertyReplacer {
+        <<enum>>
+    }
+
+    class DecoratedBufferOverflowException
+    class DecoratedBufferUnderflowException
+----
 
 [#compression]
 == Compression utilities
@@ -47,6 +81,31 @@ All `Compressions` enum constants are thread-safe singletons.
 When using the stream wrappers, they are designed to close the _decorator_ stream but leave the underlying stream open.
 It is good practice to manage the underlying stream's lifecycle separately, often using a `try-with-resources` block for it.
 ====
+
+.Example: compressing and decompressing with `Bytes`
+[source,java]
+----
+Bytes<?> source = Bytes.allocateElasticOnHeap();
+source.writeUtf8("Hello, compressed world!");
+
+Bytes<?> compressed = Bytes.allocateElasticOnHeap();
+Compression lzw = Compressions.LZW;
+
+// Compress from source to compressed
+lzw.compress(source, compressed);
+
+// Prepare a target buffer and decompress back
+Bytes<?> decompressed = Bytes.allocateElasticOnHeap();
+lzw.uncompress(compressed, decompressed);
+
+decompressed.readPosition(0);
+String roundTrip = decompressed.readUtf8();
+assert "Hello, compressed world!".equals(roundTrip);
+
+source.releaseLast();
+compressed.releaseLast();
+decompressed.releaseLast();
+----
 
 [#interning]
 == String interning utilities

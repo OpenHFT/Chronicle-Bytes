@@ -430,7 +430,7 @@ public class EmptyBytesStoreTest extends BytesTestCommon {
             IOTools.unmonitor(bytes);
             assertThrowsBufferException(() -> bytes.writeSkip(1));
         } catch (UnsupportedOperationException ignored) {
-
+            // expected for implementations that do not support writable bytes
         }
     }
 

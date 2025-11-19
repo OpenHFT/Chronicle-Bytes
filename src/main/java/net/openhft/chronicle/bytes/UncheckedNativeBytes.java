@@ -3,7 +3,10 @@
  */
 package net.openhft.chronicle.bytes;
 
-import net.openhft.chronicle.bytes.internal.*;
+import net.openhft.chronicle.bytes.internal.BytesInternal;
+import net.openhft.chronicle.bytes.internal.HasUncheckedRandomDataInput;
+import net.openhft.chronicle.bytes.internal.NativeBytesStore;
+import net.openhft.chronicle.bytes.internal.UncheckedRandomDataInput;
 import net.openhft.chronicle.bytes.internal.migration.HashCodeEqualsUtil;
 import net.openhft.chronicle.bytes.render.DecimalAppender;
 import net.openhft.chronicle.bytes.render.Decimaliser;
@@ -160,6 +163,7 @@ public class UncheckedNativeBytes<U>
         // Return this Bytes object to allow for method chaining
         return this;
     }
+
     @NotNull
     @Override
     public Bytes<U> readPosition(@NonNegative long position) {

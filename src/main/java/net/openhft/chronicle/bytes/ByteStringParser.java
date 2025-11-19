@@ -12,6 +12,7 @@ import net.openhft.chronicle.core.io.ThreadingIllegalStateException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.IOException;
 import java.io.Reader;
 import java.math.BigDecimal;
 import java.nio.BufferOverflowException;
@@ -121,10 +122,15 @@ public interface ByteStringParser<B extends ByteStringParser<B>> extends Streami
      */
     default void parse8bit(Appendable buffer, @NotNull StopCharTester stopCharTester)
             throws BufferUnderflowException, BufferOverflowException, ArithmeticException, ClosedIllegalStateException, ThreadingIllegalStateException {
-        if (buffer instanceof StringBuilder)
+        if (buffer instanceof StringBuilder) {
             BytesInternal.parse8bit(this, (StringBuilder) buffer, stopCharTester);
-        else
+        } else if (buffer instanceof Bytes) {
             BytesInternal.parse8bit(this, (Bytes<?>) buffer, stopCharTester);
+        } else {
+            StringBuilder tmp = new StringBuilder();
+            BytesInternal.parse8bit(this, tmp, stopCharTester);
+            appendTo(buffer, tmp);
+        }
     }
 
     /**
@@ -156,10 +162,15 @@ public interface ByteStringParser<B extends ByteStringParser<B>> extends Streami
      */
     default void parse8bit(Appendable buffer, @NotNull StopCharsTester stopCharsTester)
             throws BufferUnderflowException, BufferOverflowException, ArithmeticException, ClosedIllegalStateException, ThreadingIllegalStateException {
-        if (buffer instanceof StringBuilder)
+        if (buffer instanceof StringBuilder) {
             BytesInternal.parse8bit(this, (StringBuilder) buffer, stopCharsTester);
-        else
+        } else if (buffer instanceof Bytes) {
             BytesInternal.parse8bit(this, (Bytes<?>) buffer, stopCharsTester);
+        } else {
+            StringBuilder tmp = new StringBuilder();
+            BytesInternal.parse8bit(this, tmp, stopCharsTester);
+            appendTo(buffer, tmp);
+        }
     }
 
     /**
@@ -329,5 +340,13 @@ public interface ByteStringParser<B extends ByteStringParser<B>> extends Streami
     default BigDecimal parseBigDecimal()
             throws ArithmeticException, ClosedIllegalStateException, ThreadingIllegalStateException {
         return new BigDecimal(parseUtf8(StopCharTesters.NUMBER_END));
+    }
+
+    static void appendTo(Appendable appendable, CharSequence text) {
+        try {
+            appendable.append(text);
+        } catch (IOException e) {
+            throw new IORuntimeException(e);
+        }
     }
 }

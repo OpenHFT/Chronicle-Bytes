@@ -630,9 +630,9 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
      *
      * @param b the Bytes instance to which the read string will be appended
      * @return {@code true} if there was a String, or {@code false} if it was {@code null}
-     * @throws BufferUnderflowException    If there's not enough data to read
-     * @throws ArithmeticException         If numeric overflow or underflow occurs
-     * @throws BufferOverflowException     If the buffer is full
+     * @throws BufferUnderflowException       If there's not enough data to read
+     * @throws ArithmeticException            If numeric overflow or underflow occurs
+     * @throws BufferOverflowException        If the buffer is full
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
@@ -766,9 +766,9 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
      * Transfers as many bytes as possible from the input stream into the provided Bytes object.
      *
      * @param bytes the Bytes object to fill with the read data
-     * @see StreamingDataOutput#write(BytesStore)
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
+     * @see StreamingDataOutput#write(BytesStore)
      */
     default void read(@NotNull final Bytes<?> bytes) throws ClosedIllegalStateException, ThreadingIllegalStateException {
         int length = Math.toIntExact(Math.min(readRemaining(), bytes.writeRemaining()));

@@ -196,19 +196,19 @@ public enum OptimisedBytesStoreHash implements BytesStoreHash<BytesStore<?,?>> {
                 h3 *= K3;
             }
             long addrI = address + i;
-            long l0 = MEMORY.readLong(addrI);
-            int l0a = MEMORY.readInt(addrI + TOP_BYTES);
-            long l1 = MEMORY.readLong(addrI + 8);
-            int l1a = MEMORY.readInt(addrI + 8 + TOP_BYTES);
-            long l2 = MEMORY.readLong(addrI + 16);
-            int l2a = MEMORY.readInt(addrI + 16 + TOP_BYTES);
-            long l3 = MEMORY.readLong(addrI + 24);
-            int l3a = MEMORY.readInt(addrI + 24 + TOP_BYTES);
+            final long l0 = MEMORY.readLong(addrI);
+            final int l0a = MEMORY.readInt(addrI + TOP_BYTES);
+            final long l1 = MEMORY.readLong(addrI + 8);
+            final int l1a = MEMORY.readInt(addrI + 8 + TOP_BYTES);
+            final long l2 = MEMORY.readLong(addrI + 16);
+            final int l2a = MEMORY.readInt(addrI + 16 + TOP_BYTES);
+            final long l3 = MEMORY.readLong(addrI + 24);
+            final int l3a = MEMORY.readInt(addrI + 24 + TOP_BYTES);
 
+            h3 += (l3 + l0a - l1a) * M3;
             h0 += (l0 + l1a - l2a) * M0;
             h1 += (l1 + l2a - l3a) * M1;
             h2 += (l2 + l3a - l0a) * M2;
-            h3 += (l3 + l0a - l1a) * M3;
         }
 
         return agitate(h0) ^ agitate(h1)
@@ -242,19 +242,19 @@ public enum OptimisedBytesStoreHash implements BytesStoreHash<BytesStore<?,?>> {
                 h3 *= K3;
             }
             long addrI = address + i;
-            long l0 = MEMORY.readLong(addrI);
-            int l0a = MEMORY.readInt(addrI + TOP_BYTES);
-            long l1 = MEMORY.readLong(addrI + 8);
-            int l1a = MEMORY.readInt(addrI + 8 + TOP_BYTES);
-            long l2 = MEMORY.readLong(addrI + 16);
-            int l2a = MEMORY.readInt(addrI + 16 + TOP_BYTES);
-            long l3 = MEMORY.readLong(addrI + 24);
-            int l3a = MEMORY.readInt(addrI + 24 + TOP_BYTES);
+            final long l0 = MEMORY.readLong(addrI);
+            final int l0a = MEMORY.readInt(addrI + TOP_BYTES);
+            final long l1 = MEMORY.readLong(addrI + 8);
+            final int l1a = MEMORY.readInt(addrI + 8 + TOP_BYTES);
+            final long l2 = MEMORY.readLong(addrI + 16);
+            final int l2a = MEMORY.readInt(addrI + 16 + TOP_BYTES);
+            final long l3 = MEMORY.readLong(addrI + 24);
+            final int l3a = MEMORY.readInt(addrI + 24 + TOP_BYTES);
 
+            h3 += (l3 + l0a - l1a) * M3;
             h0 += (l0 + l1a - l2a) * M0;
             h1 += (l1 + l2a - l3a) * M1;
             h2 += (l2 + l3a - l0a) * M2;
-            h3 += (l3 + l0a - l1a) * M3;
         }
         long left = remaining - i;
         if (left > 0) {
@@ -267,34 +267,34 @@ public enum OptimisedBytesStoreHash implements BytesStoreHash<BytesStore<?,?>> {
             long addrI = address + i;
             if (left <= 16) {
 
-                long l0 = readIncompleteLong(addrI, (int) left);
-                int l0a = (int) (l0 >> 32);
-                long l1 = readIncompleteLong(addrI + 8, (int) (left - 8));
-                int l1a = (int) (l1 >> 32);
+                final long l0 = readIncompleteLong(addrI, (int) left);
+                final int l0a = (int) (l0 >> 32);
+                final long l1 = readIncompleteLong(addrI + 8, (int) (left - 8));
+                final int l1a = (int) (l1 >> 32);
                 final long l2 = 0;
                 final int l2a = 0;
                 final long l3 = 0;
                 final int l3a = 0;
 
+                h3 += (l3 + l0a - l1a) * M3;
                 h0 += (l0 + l1a - l2a) * M0;
                 h1 += (l1 + l2a - l3a) * M1;
                 h2 += ((long) -l0a) * M2;
-                h3 += (l3 + l0a - l1a) * M3;
 
             } else {
-                long l0 = MEMORY.readLong(addrI);
-                int l0a = MEMORY.readInt(addrI + TOP_BYTES);
-                long l1 = MEMORY.readLong(addrI + 8);
-                int l1a = MEMORY.readInt(addrI + 8 + TOP_BYTES);
-                long l2 = readIncompleteLong(addrI + 16, (int) (left - 16));
-                int l2a = (int) (l2 >> 32);
-                long l3 = readIncompleteLong(addrI + 24, (int) (left - 24));
-                int l3a = (int) (l3 >> 32);
+                final long l0 = MEMORY.readLong(addrI);
+                final int l0a = MEMORY.readInt(addrI + TOP_BYTES);
+                final long l1 = MEMORY.readLong(addrI + 8);
+                final int l1a = MEMORY.readInt(addrI + 8 + TOP_BYTES);
+                final long l2 = readIncompleteLong(addrI + 16, (int) (left - 16));
+                final int l2a = (int) (l2 >> 32);
+                final long l3 = readIncompleteLong(addrI + 24, (int) (left - 24));
+                final int l3a = (int) (l3 >> 32);
 
+                h3 += (l3 + l0a - l1a) * M3;
                 h0 += (l0 + l1a - l2a) * M0;
                 h1 += (l1 + l2a - l3a) * M1;
                 h2 += (l2 + l3a - l0a) * M2;
-                h3 += (l3 + l0a - l1a) * M3;
             }
         }
 

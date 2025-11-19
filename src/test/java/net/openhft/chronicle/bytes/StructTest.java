@@ -25,7 +25,7 @@ public class StructTest extends BytesTestCommon {
     /**
      * Common base for structs to take care of initialisation and other boilerplating
      */
-    static abstract class Struct<S extends Struct<S>> {
+    abstract static class Struct<S extends Struct<S>> {
         Bytes<?> self;
         final Bytes<Void> bytes;
         private final int size;
@@ -38,7 +38,7 @@ public class StructTest extends BytesTestCommon {
         /**
          * c++ new - construct with memory owned by self
          *
-         * @param size
+         * @param size size of the struct in bytes
          */
         Struct(int size) {
             this.size = size;
@@ -50,8 +50,8 @@ public class StructTest extends BytesTestCommon {
         /**
          * c++ placement new - construct at given address
          *
-         * @param size
-         * @param address
+         * @param size    size of the struct in bytes
+         * @param address address where the struct is placed
          */
         Struct(int size, long address) {
             this.size = size;
@@ -110,7 +110,7 @@ public class StructTest extends BytesTestCommon {
          * Fully initialise self at given address
          * Override if struct contains any members which need specific initialisation
          *
-         * @param address
+         * @param address address where the struct is initialised
          */
         void initialise(final long address) {
             assert address != 0;
@@ -513,12 +513,12 @@ public class StructTest extends BytesTestCommon {
 
         public float grade(int n) {
             assert 0 <= n && n < NUM_GRADES;
-            return MEMORY.readFloat(address + GRADES + Float.BYTES * n);
+            return MEMORY.readFloat(address + GRADES + (long) Float.BYTES * n);
         }
 
         Student grade(int n, float f) {
             assert 0 <= n && n < NUM_GRADES;
-            MEMORY.writeFloat(address + GRADES + Float.BYTES * n, f);
+            MEMORY.writeFloat(address + GRADES + (long) Float.BYTES * n, f);
             return this;
         }
 

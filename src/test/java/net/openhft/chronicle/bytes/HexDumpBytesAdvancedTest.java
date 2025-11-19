@@ -5,6 +5,7 @@ package net.openhft.chronicle.bytes;
 
 import org.junit.Test;
 
+import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static org.junit.Assert.assertTrue;
 
 public class HexDumpBytesAdvancedTest extends BytesTestCommon {
@@ -15,10 +16,10 @@ public class HexDumpBytesAdvancedTest extends BytesTestCommon {
         try {
             hdb.numberWrap(16).offsetFormat((o, b) -> b.appendBase16(o, 2));
             hdb.writeHexDumpDescription("hdr");
-            hdb.write("1234567890abcdefghij".getBytes());
+            hdb.write("1234567890abcdefghij".getBytes(ISO_8859_1));
             hdb.adjustHexDumpIndentation(2);
             hdb.writeHexDumpDescription("nest");
-            hdb.write("zz".getBytes());
+            hdb.write("zz".getBytes(ISO_8859_1));
 
             final String s = hdb.toHexString();
             assertTrue(s.contains("hdr"));
@@ -29,4 +30,3 @@ public class HexDumpBytesAdvancedTest extends BytesTestCommon {
         }
     }
 }
-
