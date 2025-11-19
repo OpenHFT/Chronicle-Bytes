@@ -42,10 +42,10 @@ try (ScopedResource<Bytes<?>> sb = bytesPool.get()) {
 
 The pooling mechanism trades a small amount of retained memory per thread for reduced allocation and GC pressure:
 
-* **Benefits**
+* *Benefits*
 ** Fewer temporary allocations on hot paths that create short-lived `Bytes` instances.
 ** More predictable latency when allocation pauses would otherwise be visible to callers.
-* **Costs**
+* *Costs*
 ** Each thread holds on to a small number of `Bytes` instances for the lifetime of the thread.
 ** Pools must be sized carefully in environments with many threads to avoid unexpected native-memory use.
 

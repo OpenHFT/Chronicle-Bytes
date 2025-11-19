@@ -32,7 +32,8 @@ The API offers:
 * Elastic ByteBuffer wrappers that resize as needed.
 * Direct parsing and writing of text to off-heap bytes.
 
-A number of relevant system properties are listed in link:docs/systemProperties.adoc[systemProperties.adoc]. For detailed requirements and design rationale, see link:src/main/docs/project-requirements.adoc[project-requirements.adoc] and link:src/main/docs/decision-log.adoc[decision-log.adoc].
+A number of relevant system properties are listed in link:docs/systemProperties.adoc[systemProperties.adoc].
+For detailed requirements and design rationale, see link:src/main/docs/project-requirements.adoc[project-requirements.adoc] and link:src/main/docs/decision-log.adoc[decision-log.adoc].
 
 === Supported Data Types
 

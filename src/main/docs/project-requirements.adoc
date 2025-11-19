@@ -16,7 +16,7 @@
 == Scope
 
 Chronicle Bytes is the low-level memory-access layer for the wider OpenHFT stack.
-These requirements define the contracts, performance envelopes and operational obligations that the library **must** meet to be accepted into the Chronicle Software code-base.
+These requirements define the contracts, performance envelopes and operational obligations that the library *must* meet to be accepted into the Chronicle Software code-base.
 
 == Functional Requirements
 
@@ -59,10 +59,10 @@ integrity and listener invocation.
 |ID |Requirement |Benchmark Target
 |[[CB-NF-P-001]]CB-NF-P-001 |Serialise and deserialise a six-field object (string plus enum)
 using YAML Wire in ≤ 0.25 µs mean and ≤ 0.5 µs 99.9 %tile on 3.2 GHz x86-64. |JMH `SampleTime` benchmark, ≥ 10 M ops.
-|[[CB-NF-P-002]]CB-NF-P-002 |`Bytes.equalsBytes()` or equivalent region comparison method must be **≥ 3 ×** faster than
+|[[CB-NF-P-002]]CB-NF-P-002 |`Bytes.equalsBytes()` or equivalent region comparison method must be *≥ 3 ×* faster than
 `java.nio.ByteBuffer.equals` for 32 KiB payloads (on-heap and off-heap). |Custom micro-benchmark
 throughput comparison leveraging JVM intrinsics where possible.
-|[[CB-NF-P-003]]CB-NF-P-003 |Allocate **and** release an elastic off-heap buffer of 1 MiB in
+|[[CB-NF-P-003]]CB-NF-P-003 |Allocate *and* release an elastic off-heap buffer of 1 MiB in
 ≤ 20 µs 99.99 %tile. |JMH `SingleShot` benchmark, ≥ 1 000 repeats.
 |[[CB-NF-P-004]]CB-NF-P-004 |Read an eight-byte aligned long from hot-cache `MappedBytes` in
 ≤ 80 ns mean and ≤ 150 ns 99.9 %tile. |Low-level harness pinned with thread affinity.
@@ -80,9 +80,9 @@ calibration with multiple contending threads.
 [cols="1,5,4",options="header"]
 |===
 |ID |Requirement |Verification
-|[[CB-NF-S-001]]CB-NF-S-001 |All memory access operations **must** perform rigorous bounds checking to prevent buffer overflows or underflows, leading to deterministic exceptions (e.g., `BufferOverflowException`, `IndexOutOfBoundsException`) rather than undefined behaviour or JVM crashes. |Property-based tests attempting out-of-bounds access across all `Bytes` types and operations. Static analysis tool checks (e.g., SpotBugs).
+|[[CB-NF-S-001]]CB-NF-S-001 |All memory access operations *must* perform rigorous bounds checking to prevent buffer overflows or underflows, leading to deterministic exceptions (e.g., `BufferOverflowException`, `IndexOutOfBoundsException`) rather than undefined behaviour or JVM crashes. |Property-based tests attempting out-of-bounds access across all `Bytes` types and operations. Static analysis tool checks (e.g., SpotBugs).
 |[[CB-NF-S-002]]CB-NF-S-002 |For memory-mapped files, ensure appropriate file permissions and locking mechanisms are utilized by default to prevent unintended data corruption when files might be shared between processes, if such sharing is a supported feature. Documentation must highlight safe sharing patterns. |Integration tests simulating multi-process access with varied permission settings. Code review of file handling.
-|[[CB-NF-S-003]]CB-NF-S-003 |The library **must not** introduce vulnerabilities through its own direct JNI/native code (if any beyond standard JDK calls like Unsafe). Any use of `sun.misc.Unsafe` must be encapsulated, its risks understood, documented, and limited to essential use cases. |Code review of any native code or `Unsafe` usage. Dependency vulnerability scan (e.g., OWASP Dependency-Check) as part of CI.
+|[[CB-NF-S-003]]CB-NF-S-003 |The library *must not* introduce vulnerabilities through its own direct JNI/native code (if any beyond standard JDK calls like Unsafe). Any use of `sun.misc.Unsafe` must be encapsulated, its risks understood, documented, and limited to essential use cases. |Code review of any native code or `Unsafe` usage. Dependency vulnerability scan (e.g., OWASP Dependency-Check) as part of CI.
 |[[CB-NF-S-004]]CB-NF-S-004 |Operations that can potentially lead to excessive memory allocation (e.g., elastic buffer growth with very large inputs) should have documented safeguards or configurable limits where appropriate, or clear warnings about potential `OutOfMemoryError`. |Documentation review; specific tests attempting to trigger excessive allocation.
 |===
 
@@ -91,7 +91,7 @@ calibration with multiple contending threads.
 [cols="1,5,4",options="header"]
 |===
 |ID |Requirement |Evidence
-|[[CB-NF-O-001]]CB-NF-O-001 |All off-heap resources (`BytesStore` and `Bytes` instances holding them) **must** implement `java.io.Closeable` and explicit `releaseLast()`/`close()` methods for deterministic reclamation. Reference counting must be robust. |Unit tests track allocated vs released native bytes; stress tests for reference counting correctness under concurrent access if applicable.
+|[[CB-NF-O-001]]CB-NF-O-001 |All off-heap resources (`BytesStore` and `Bytes` instances holding them) *must* implement `java.io.Closeable` and explicit `releaseLast()`/`close()` methods for deterministic reclamation. Reference counting must be robust. |Unit tests track allocated vs released native bytes; stress tests for reference counting correctness under concurrent access if applicable.
 |[[CB-NF-O-002]]CB-NF-O-002 |Expose `BytesMetrics` (e.g., count of active instances, total native memory allocated/used by type – direct, mapped) via JMX MBeans. |Integration test registers MBean and observes counter changes under various load patterns.
 |[[CB-NF-O-003]]CB-NF-O-003 |Log a single WARN with stack trace if a `Bytes`/`BytesStore` instance holding native resources is GC-finalised while still retained (ref-count \> 0). |Fault-injection test leaks a buffer and verifies log output and frequency.
 |[[CB-NF-O-004]]CB-NF-O-004 |All default log messages use SLF4J and allocate zero temporary objects on the hot path when logging is disabled at the configured level (e.g. INFO and above). |JMH probe with logging disabled at various levels. Code review of logging statements.
@@ -104,9 +104,9 @@ calibration with multiple contending threads.
 [cols="1,5,4",options="header"]
 |===
 |ID |Requirement |Verification
-|[[CB-NF-MP-001]]CB-NF-MP-001 |The library **must** be compatible with and fully functional on at least the last three LTS versions of Java (e.g., Java 11, 17, 21), with clear documentation on any version-specific behaviour or performance characteristics. Support for Java 8 may be maintained on a best-effort basis if critical. |Full test suite execution on all declared supported Java versions in CI.
-|[[CB-NF-MP-002]]CB-NF-MP-002 |The codebase **must** adhere to OpenHFT coding standards and conventions (e.g., style, naming, design patterns). Module dependencies should be minimized to reduce complexity and potential conflicts. |Static analysis (Checkstyle, PMD, SonarLint) in build; dependency tree review (`mvn dependency:tree`).
-|[[CB-NF-MP-003]]CB-NF-MP-003 |Public APIs **must** have a defined backward compatibility policy (e.g., semantic versioning 2.0.0). Deprecation of APIs should follow a clear process with advance notice (e.g., via `@Deprecated` javadoc, release notes) and migration paths. |Changelog review; API evolution documentation; use of tools like Revapi for checking API changes.
+|[[CB-NF-MP-001]]CB-NF-MP-001 |The library *must* be compatible with and fully functional on at least the last three LTS versions of Java (e.g., Java 11, 17, 21), with clear documentation on any version-specific behaviour or performance characteristics. Support for Java 8 may be maintained on a best-effort basis if critical. |Full test suite execution on all declared supported Java versions in CI.
+|[[CB-NF-MP-002]]CB-NF-MP-002 |The codebase *must* adhere to OpenHFT coding standards and conventions (e.g., style, naming, design patterns). Module dependencies should be minimized to reduce complexity and potential conflicts. |Static analysis (Checkstyle, PMD, SonarLint) in build; dependency tree review (`mvn dependency:tree`).
+|[[CB-NF-MP-003]]CB-NF-MP-003 |Public APIs *must* have a defined backward compatibility policy (e.g., semantic versioning 2.0.0). Deprecation of APIs should follow a clear process with advance notice (e.g., via `@Deprecated` javadoc, release notes) and migration paths. |Changelog review; API evolution documentation; use of tools like Revapi for checking API changes.
 |[[CB-NF-MP-004]]CB-NF-MP-004 |The library should build and pass all tests on common operating systems used in development and deployment (e.g., Linux x86-64, macOS x86-64/ARM64, Windows x86-64). |CI jobs for each supported OS/architecture combination.
 |[[CB-NF-MP-005]]CB-NF-MP-005 |Internal components should be well-encapsulated to facilitate future refactoring and evolution without breaking public contracts. |Code reviews focusing on API design and internal module structure.
 |===
@@ -116,7 +116,7 @@ calibration with multiple contending threads.
 [cols="1,5,4",options="header"]
 |===
 |ID |Requirement |Compliance Check
-|[[CB-DOC-001]]CB-DOC-001 |All AsciiDoc and Javadoc **must** use British English and ISO-8859-1 (or UTF-8 where essential, clearly marked). |Automated spell- and byte-range scan in Maven `verify`.
+|[[CB-DOC-001]]CB-DOC-001 |All AsciiDoc and Javadoc *must* use British English and ISO-8859-1 (or UTF-8 where essential, clearly marked). |Automated spell- and byte-range scan in Maven `verify`.
 |[[CB-DOC-002]]CB-DOC-002 |Javadoc first sentence is a concise behavioural summary; blocks
 must not duplicate information manifest from the signature. All public classes and methods must have Javadoc. |Checkstyle custom rule or equivalent. Javadoc generation and spot checks.
 |[[CB-DOC-003]]CB-DOC-003 |`docs/chronicle-bytes-manual.adoc` includes a worked example for
@@ -165,9 +165,9 @@ Enterprise-only features (e.g. encrypted queue files at a higher level, specific
 |ID |Requirement |Notes
 |CB-OPS-001 |`./mvnw -q verify` completes with zero warnings or test failures in
 reference build container `Dockerfile.build`. |CI.
-|CB-OPS-002 |Artefacts pushed to Maven Central **must** be reproducible; local
+|CB-OPS-002 |Artefacts pushed to Maven Central *must* be reproducible; local
 `mvn -Prelease` output must equal CI artefact byte-for-byte. |Diff script in release pipeline. Reproducible-builds Maven plugin.
-|CB-OPS-003 |The library **must** clearly list its runtime dependencies and their versions, ensuring they are available from standard public repositories like Maven Central. Transitive dependencies should be audited for compatibility and potential conflicts. |Review of `pom.xml` or build scripts; CI checks for dependency resolution and conflicts (`mvn dependency:analyze`).
+|CB-OPS-003 |The library *must* clearly list its runtime dependencies and their versions, ensuring they are available from standard public repositories like Maven Central. Transitive dependencies should be audited for compatibility and potential conflicts. |Review of `pom.xml` or build scripts; CI checks for dependency resolution and conflicts (`mvn dependency:analyze`).
 |CB-OPS-004 |Provide a mechanism for users to report issues and get support (e.g., GitHub Issues, community forum/mailing list). |Link to issue tracker and support channels in `README.adoc` and project website.
 |CB-OPS-005 |Release notes must accompany each release, detailing new features, bug fixes, performance improvements, and any breaking changes or deprecations. |Process for drafting and reviewing release notes as part of release cycle.
 |===
