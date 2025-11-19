@@ -29,7 +29,7 @@ All implementations are stateless singletons (and therefore thread-safe) except 
 
 == Integration workflow
 
-[source,java]
+[source,java,opts=novalidate]
 ----
 Bytes<?> out = Bytes.allocateElasticOnHeap(64);
 Decimaliser fast18 = StandardDecimaliser.STANDARD;   // pick your strategy
