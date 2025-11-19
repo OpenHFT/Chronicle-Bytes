@@ -665,7 +665,7 @@ public interface RandomDataInput extends RandomCommon {
         ByteBuffer bb = ByteBuffer.allocateDirect(len);
         bb.order(ByteOrder.nativeOrder());
         copyTo(bb);
-        bb.clear();
+        net.openhft.chronicle.bytes.internal.BufferUtil.clear(bb);
         return bb;
     }
 

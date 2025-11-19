@@ -22,6 +22,7 @@ import org.jetbrains.annotations.Nullable;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
+import net.openhft.chronicle.bytes.internal.BufferUtil;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static net.openhft.chronicle.core.Jvm.uncheckedCast;
@@ -794,6 +795,7 @@ public class UncheckedNativeBytes<U>
             throws IllegalStateException {
         bytesStore.write(writePosition, buffer, buffer.position(), buffer.limit());
         writePosition += buffer.remaining();
+        BufferUtil.setPosition(buffer, buffer.limit());
         assert writePosition <= writeLimit();
         return this;
     }

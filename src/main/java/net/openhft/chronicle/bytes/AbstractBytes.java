@@ -24,6 +24,7 @@ import org.jetbrains.annotations.Nullable;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
+import net.openhft.chronicle.bytes.internal.BufferUtil;
 import java.nio.ByteOrder;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
@@ -1361,7 +1362,7 @@ public abstract class AbstractBytes<U>
         ensureCapacity(writePosition() + length);
         bytesStore.write(writePosition(), buffer, buffer.position(), length);
         uncheckedWritePosition(writePosition() + length);
-        buffer.position(buffer.position() + length);
+        BufferUtil.setPosition(buffer, buffer.position() + length);
         return this;
     }
 
