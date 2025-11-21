@@ -19,7 +19,7 @@ import static org.junit.Assume.assumeFalse;
 public class Issue85Test extends BytesTestCommon {
     private int different = 0;
     private int different2 = 0;
-    private DecimalFormat df = new DecimalFormat();
+    private final DecimalFormat df = new DecimalFormat();
     private static final SecureRandom SECURE_RANDOM = new SecureRandom();
 
     {
@@ -63,8 +63,7 @@ public class Issue85Test extends BytesTestCommon {
         long whole = value / fives;
         long rem = value % fives;
         double d = whole + (double) rem / fives;
-        double scalb = Math.scalb(d, -deci - scale2);
-        return scalb;
+        return Math.scalb(d, -deci - scale2);
     }
 
     @Test

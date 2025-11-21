@@ -44,13 +44,13 @@ class StreamingOutputStreamTest {
     }
 
     @Test
-    void writeThrowsIOExceptionOnBufferOverflow() throws IOException {
+    void writeThrowsIOExceptionOnBufferOverflow() {
         doThrow(BufferOverflowException.class).when(sdo).writeUnsignedByte(anyInt());
         assertThrows(IOException.class, () -> sos.write(1));
     }
 
     @Test
-    void writeArrayThrowsIOExceptionOnIllegalArgument() throws IOException {
+    void writeArrayThrowsIOExceptionOnIllegalArgument() {
         byte[] bytes = new byte[]{1, 2, 3, 4, 5};
         doThrow(IllegalArgumentException.class).when(sdo).write(any(byte[].class), anyInt(), anyInt());
         assertThrows(IOException.class, () -> sos.write(bytes, 0, bytes.length));

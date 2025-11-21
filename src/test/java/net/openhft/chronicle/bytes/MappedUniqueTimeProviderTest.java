@@ -146,8 +146,7 @@ public class MappedUniqueTimeProviderTest extends BytesTestCommon {
                 .parallel()
                 .forEach(i -> {
                     TimeProvider tp = MappedUniqueTimeProvider.INSTANCE;
-                    long start = tp.currentTimeNanos();
-                    long last = start;
+                    long last = tp.currentTimeNanos();
                     for (int j = 0; j < runTimeUS; j += stride) {
                         long now = tp.currentTimeNanos();
                         // check the times are different after shifting by 5 bits.

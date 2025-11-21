@@ -46,8 +46,7 @@ public class MappedFileTest extends BytesTestCommon {
         final ReferenceOwner owner = ReferenceOwner.temporary("page-matrix");
 
         try (MappedFile mappedFile = MappedFile.of(file, chunkSize, overlapSize, enlargedPageSize, false)) {
-            final long offset = chunkSize;
-            final MappedBytesStore store = mappedFile.acquireByteStore(owner, offset);
+            final MappedBytesStore store = mappedFile.acquireByteStore(owner, chunkSize);
             try {
                 final long safeLimit = store.safeLimit();
                 assertEquals(store.start() + chunkSize, safeLimit);
@@ -237,7 +236,7 @@ public class MappedFileTest extends BytesTestCommon {
         @NotNull File file = Files.createTempFile("readOnlyOpenFile", "deleteme").toFile();
 
         // write some stuff to a file so it exits using stock java APIs
-        @NotNull OutputStreamWriter outWrite = new OutputStreamWriter(new FileOutputStream(file), ISO_8859_1);
+        @NotNull OutputStreamWriter outWrite = new OutputStreamWriter(Files.newOutputStream(file.toPath()), ISO_8859_1);
         outWrite.append(text);
         outWrite.flush();
         outWrite.close();

@@ -46,7 +46,7 @@ public class ConcurrentRafAccessTest extends BytesTestCommon {
     private List<Worker> workers;
 
     @Rule
-    public TemporaryFolder tmpDir = new TemporaryFolder();
+    public final TemporaryFolder tmpDir = new TemporaryFolder();
 
     private static void bumpSize(File file, final RandomAccessFile raf, final FileChannel fc)
             throws IOException {
@@ -132,9 +132,8 @@ public class ConcurrentRafAccessTest extends BytesTestCommon {
             ie.printStackTrace();
         }
 
-        final long elapsedNs = System.nanoTime() - beginNs;
-//        System.out.format("%s: elapsedNs = %,d%n", name, elapsedNs);
-        return elapsedNs;
+        //        System.out.format("%s: elapsedNs = %,d%n", name, elapsedNs);
+        return System.nanoTime() - beginNs;
     }
 
     private File fileFromInt(int i)

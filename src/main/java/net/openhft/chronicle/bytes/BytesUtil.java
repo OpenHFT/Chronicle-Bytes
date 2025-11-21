@@ -27,6 +27,8 @@ import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.List;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
@@ -228,7 +230,7 @@ public enum BytesUtil {
             url = urlFor(Thread.currentThread().getContextClassLoader(), name);
             file = new File(url.getFile());
         }
-        return Bytes.wrapForRead(readAsBytes(url == null ? new FileInputStream(file) : open(url)));
+        return Bytes.wrapForRead(readAsBytes(url == null ? Files.newInputStream(file.toPath()) : open(url)));
 
     }
 
@@ -237,7 +239,7 @@ public enum BytesUtil {
      */
     public static void writeFile(String file, Bytes<byte[]> bytes)
             throws IOException {
-        try (OutputStream os = new FileOutputStream(file)) {
+        try (OutputStream os = Files.newOutputStream(Paths.get(file))) {
             os.write(bytes.underlyingObject());
         }
     }

@@ -73,7 +73,7 @@ class PageUtilTest {
     }
 
     @Test
-    void parseDefaultPageSize() throws Exception {
+    void parseDefaultPageSize() {
         String line = "136 162 253:2 /local /mnt/local rw,relatime shared:74 - xfs /dev/mapper/rl-home rw,seclabel,attr2,inode64,logbufs=8,logbsize=32k,noquota";
 
         int result = PageUtil.parsePageSize(line);
@@ -81,7 +81,7 @@ class PageUtilTest {
     }
 
     @Test
-    void parseMountPoint() throws Exception {
+    void parseMountPoint() {
         String line = "1110 162 0:61 / /mnt/huge rw,relatime shared:591 - hugetlbfs nodev rw,seclabel,pagesize=4M,size=68719476";
 
         String result = PageUtil.parseMountPoint(line);

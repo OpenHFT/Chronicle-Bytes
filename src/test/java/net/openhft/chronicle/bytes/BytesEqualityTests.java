@@ -3,6 +3,7 @@
  */
 package net.openhft.chronicle.bytes;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -13,8 +14,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 import java.util.stream.Stream;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
 
 class BytesEqualityTests {
 
@@ -25,7 +24,7 @@ class BytesEqualityTests {
         @ParameterizedTest
         @MethodSource("bufferArguments")
         void zeroLength(Bytes<?> left, Bytes<?> right) {
-            assertEquals(left, right);
+            Assertions.assertEquals(left, right);
         }
 
         @ParameterizedTest
@@ -33,7 +32,7 @@ class BytesEqualityTests {
         void differentLength(Bytes<?> left, Bytes<?> right) {
             left.write("tex".getBytes(ISO_8859_1));
             right.write("text".getBytes(ISO_8859_1));
-            assertNotEquals(left, right);
+            Assertions.assertNotEquals(left, right);
         }
 
         @ParameterizedTest
@@ -41,7 +40,7 @@ class BytesEqualityTests {
         void shortEqual(Bytes<?> left, Bytes<?> right) {
             left.write("abc".getBytes(ISO_8859_1));
             right.write("abc".getBytes(ISO_8859_1));
-            assertEquals(left, right);
+            Assertions.assertEquals(left, right);
         }
 
         @ParameterizedTest
@@ -49,7 +48,7 @@ class BytesEqualityTests {
         void longEquals(Bytes<?> left, Bytes<?> right) {
             left.write("abcdefghijklmnopqrstuvwxyz".getBytes(ISO_8859_1));
             right.write("abcdefghijklmnopqrstuvwxyz".getBytes(ISO_8859_1));
-            assertEquals(left, right);
+            Assertions.assertEquals(left, right);
         }
 
         @ParameterizedTest
@@ -57,7 +56,7 @@ class BytesEqualityTests {
         void longNotEquals(Bytes<?> left, Bytes<?> right) {
             left.write("abcdefghijklmnopqrstuvwxyz".getBytes(ISO_8859_1));
             right.write("abcdefghijklmnopqrst_vwxyz".getBytes(ISO_8859_1));
-            assertNotEquals(left, right);
+            Assertions.assertNotEquals(left, right);
         }
 
         @ParameterizedTest
@@ -67,7 +66,7 @@ class BytesEqualityTests {
             left.readSkip(8);
             right.write("_bcdefghijklmnopqrstuvwxyz".getBytes(ISO_8859_1));
             right.readPosition(8);
-            assertEquals(left, right);
+            Assertions.assertEquals(left, right);
         }
 
         @ParameterizedTest
@@ -77,7 +76,7 @@ class BytesEqualityTests {
             left.readSkip(8);
             right.write("abcdefghijklmnopqrstuvwxy_".getBytes(ISO_8859_1));
             right.readPosition(8);
-            assertNotEquals(left, right);
+            Assertions.assertNotEquals(left, right);
         }
 
         @ParameterizedTest
@@ -87,7 +86,7 @@ class BytesEqualityTests {
             left.readSkip(8);
             right.write("abcdefghijklmnopqrstuvwxyz".getBytes(ISO_8859_1));
             right.readSkip(8);
-            assertEquals(left, right);
+            Assertions.assertEquals(left, right);
         }
 
         Stream<Arguments> bufferArguments() {
@@ -116,7 +115,7 @@ class BytesEqualityTests {
             direct.readSkip(8);
             heap.write(source);
             heap.readSkip(8);
-            assertEquals(direct, heap);
+            Assertions.assertEquals(direct, heap);
         }
 
         @Test
@@ -128,7 +127,7 @@ class BytesEqualityTests {
             direct.readSkip(8);
             heap.write(source);
             heap.readSkip(8);
-            assertEquals(heap, direct);
+            Assertions.assertEquals(heap, direct);
         }
 
         @Test
@@ -140,7 +139,7 @@ class BytesEqualityTests {
             direct.readSkip(8);
             heap.write(source);
             heap.readSkip(8);
-            assertEquals(direct, heap);
+            Assertions.assertEquals(direct, heap);
         }
 
         @Test
@@ -152,7 +151,7 @@ class BytesEqualityTests {
             direct.readSkip(1);
             heap.write(source);
             heap.readSkip(1);
-            assertEquals(direct, heap);
+            Assertions.assertEquals(direct, heap);
         }
 
         @Test
@@ -162,7 +161,7 @@ class BytesEqualityTests {
             Bytes<?> heap = Bytes.allocateElasticOnHeap();
             direct.write(source);
             heap.write(source);
-            assertEquals(direct, heap);
+            Assertions.assertEquals(direct, heap);
         }
 
         @Test
@@ -174,7 +173,7 @@ class BytesEqualityTests {
             direct1.readSkip(8);
             direct2.write(source);
             direct2.readSkip(8);
-            assertEquals(direct1, direct2);
+            Assertions.assertEquals(direct1, direct2);
         }
 
         @Test
@@ -184,7 +183,7 @@ class BytesEqualityTests {
             Bytes<?> direct2 = Bytes.allocateElasticDirect();
             direct1.write(source);
             direct2.write(source);
-            assertEquals(direct1, direct2);
+            Assertions.assertEquals(direct1, direct2);
         }
 
         @Test
@@ -196,7 +195,7 @@ class BytesEqualityTests {
             heap1.readSkip(8);
             heap2.write(source);
             heap2.readSkip(8);
-            assertEquals(heap1, heap2);
+            Assertions.assertEquals(heap1, heap2);
         }
 
         @Test
@@ -206,7 +205,7 @@ class BytesEqualityTests {
             Bytes<?> heap2 = Bytes.allocateElasticOnHeap();
             heap1.write(source);
             heap2.write(source);
-            assertEquals(heap1, heap2);
+            Assertions.assertEquals(heap1, heap2);
         }
 
         @Test
@@ -221,7 +220,7 @@ class BytesEqualityTests {
             heap.write(source);
             heap.readSkip(1);
 
-            assertEquals(direct, heap);
+            Assertions.assertEquals(direct, heap);
         }
     }
 }

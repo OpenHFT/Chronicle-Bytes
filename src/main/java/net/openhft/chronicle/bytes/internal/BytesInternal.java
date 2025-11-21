@@ -3446,7 +3446,7 @@ enum BytesInternal {
         try (ScopedResource<Bytes<?>> stlBytes = BytesInternal.acquireBytesScoped()) {
             Bytes<?> sb = stlBytes.get();
             parseUtf8(parser, sb, tester);
-            if (sb.length() == 0)
+            if (sb.isEmpty())
                 return null;
             switch (sb.charAt(0)) {
                 case 't':

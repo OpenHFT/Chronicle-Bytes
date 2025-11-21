@@ -209,7 +209,7 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      */
     @NotNull
     default B append(float f)
-            throws BufferOverflowException, IllegalStateException, ClosedIllegalStateException, ThreadingIllegalStateException {
+            throws BufferOverflowException, IllegalStateException {
         float f2 = Math.abs(f);
         if (f2 > 1e6 || f2 < 1e-3) {
             return append(Float.toString(f));
@@ -224,7 +224,7 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      */
     @NotNull
     default B append(double d)
-            throws BufferOverflowException, IllegalStateException, ClosedIllegalStateException, ThreadingIllegalStateException {
+            throws BufferOverflowException, IllegalStateException {
         try (ScopedResource<Bytes<?>> stlBytes = BytesInternal.acquireBytesScoped()) {
             Bytes<?> bytes = stlBytes.get();
             bytes.append(d);

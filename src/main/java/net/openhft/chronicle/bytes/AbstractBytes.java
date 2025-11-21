@@ -64,12 +64,6 @@ public abstract class AbstractBytes<U>
     @Deprecated(/* to remove in x.28 */)
     private static final boolean APPEND_0 = Jvm.getBoolean("bytes.append.0", true);
 
-    /**
-     * Optional name for debugging only.
-     */
-    @UsedViaReflection
-    private final String name;
-
     private final UncheckedRandomDataInput uncheckedRandomDataInput = new UncheckedRandomDataInputHolder();
     @NotNull
     protected BytesStore<?, U> bytesStore = NoBytesStore.noBytesStore();
@@ -140,8 +134,7 @@ public abstract class AbstractBytes<U>
         readPosition = bytesStore.readPosition();
         this.uncheckedWritePosition(writePosition);
         this.writeLimit = writeLimit;
-        // used for debugging
-        this.name = name;
+        // Optional name for debugging only.
     }
 
     @Override

@@ -73,7 +73,7 @@ public class BytesTest extends BytesTestCommon {
         final Bytes<?> data = alloc1.elasticBytes(120);
         data.write8bit("Test me again");
         data.writeLimit(data.readLimit()); // this breaks the check
-        assertEquals(data.read8bit(), "Test me again");
+        assertEquals("Test me again", data.read8bit());
         data.releaseLast();
     }
 

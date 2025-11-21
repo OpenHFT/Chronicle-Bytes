@@ -162,7 +162,7 @@ public class StructTest extends BytesTestCommon {
      */
     static class Pointer<T extends Struct<T>> {
         T ptr;
-        Function<Long, T> supplier;
+        final Function<Long, T> supplier;
         long address;
 
         Pointer(Function<Long, T> supplier) {
@@ -417,7 +417,7 @@ public class StructTest extends BytesTestCommon {
         Bytes<?> name;
         String nameStr = null;
         Date birth;   // Date instance owned by the this Student
-        Pointer<Student> next = new Pointer<>(this::construct);
+        final Pointer<Student> next = new Pointer<>(this::construct);
 
         protected Student construct(long address) {
             return address == 0 ? new Student() : new Student(address);

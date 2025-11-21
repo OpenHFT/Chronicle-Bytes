@@ -46,9 +46,8 @@ public class ReadWriteMarshallableTest extends BytesTestCommon {
         @Override
         public void readMarshallable(BytesIn<?> bytes)
                 throws IORuntimeException, BufferUnderflowException {
-            BytesIn<?> in = (BytesIn<?>) bytes;
-            i1 = in.readMarshallableLength16(RWInner.class, i1);
-            i2 = in.readMarshallableLength16(RWInner.class, i2);
+            i1 = ((BytesIn<?>) bytes).readMarshallableLength16(RWInner.class, i1);
+            i2 = ((BytesIn<?>) bytes).readMarshallableLength16(RWInner.class, i2);
         }
 
         @Override

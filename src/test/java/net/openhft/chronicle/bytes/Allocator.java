@@ -209,7 +209,7 @@ public enum Allocator {
     }
 
     static class Parent {
-        int start = 0;
+        final int start = 0;
 
         int start() {
             return start;

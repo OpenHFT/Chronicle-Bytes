@@ -670,7 +670,6 @@ public class HeapBytesStore<U>
 
     @Override
     public long appendAndReturnLength(final long writePosition, boolean negative, long mantissa, int exponent, boolean append0) {
-        long start = writePosition;
         long addr = writePosition;
         try {
             throwExceptionIfReleased();
@@ -695,8 +694,8 @@ public class HeapBytesStore<U>
             if (negative) {
                 addr = rawWriteByte(addr, (byte) '-');
             }
-            reverseBytesFrom(start, addr);
-            return addr - start;
+            reverseBytesFrom(writePosition, addr);
+            return addr - writePosition;
         } catch (NullPointerException ifReleased) {
             throwExceptionIfReleased();
             throw ifReleased;

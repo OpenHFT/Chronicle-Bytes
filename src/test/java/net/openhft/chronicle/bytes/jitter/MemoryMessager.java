@@ -57,8 +57,7 @@ class MemoryMessager {
     @SuppressWarnings("restriction")
     public int length() {
         UnsafeMemory.unsafeLoadFence();
-        int length = UnsafeMemory.unsafeGetInt(address);
-        return length;
+        return UnsafeMemory.unsafeGetInt(address);
     }
 
     public long consumeBytes() {

@@ -15,11 +15,11 @@ import java.io.IOException;
 public class MemoryWriteJitterMain {
     private static final String PROFILE_OF_THE_THREAD = "profile of the thread";
 
-    private static int runTime = Integer.getInteger("runTime", 600); // seconds
-    private static int size = Integer.getInteger("size", 128); // bytes
-    private static int padTo = Integer.getInteger("pad", 0); // bytes
-    private static int sampleTime = Integer.getInteger("sampleTime", 2); // micro-seconds
-    private static int throughput = Integer.getInteger("throughput", 20_000); // per second
+    private static final int runTime = Integer.getInteger("runTime", 600); // seconds
+    private static final int size = Integer.getInteger("size", 128); // bytes
+    private static final int padTo = Integer.getInteger("pad", 0); // bytes
+    private static final int sampleTime = Integer.getInteger("sampleTime", 2); // micro-seconds
+    private static final int throughput = Integer.getInteger("throughput", 20_000); // per second
     private static volatile boolean running = true;
     private static volatile boolean writing = false;
     private static volatile int count = 0;
