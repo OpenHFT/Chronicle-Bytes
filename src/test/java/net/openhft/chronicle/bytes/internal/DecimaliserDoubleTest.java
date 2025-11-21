@@ -7,14 +7,13 @@ import net.openhft.chronicle.bytes.BytesTestCommon;
 import net.openhft.chronicle.bytes.render.*;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
-
-import static org.junit.Assert.*;
-import static org.junit.Assume.assumeFalse;
 
 @SuppressWarnings({"squid:S2699", "squid:S5786"})
 class DecimaliserDoubleTest extends BytesTestCommon {
@@ -23,95 +22,95 @@ class DecimaliserDoubleTest extends BytesTestCommon {
         // ok
     };
     private static final DecimalAppender CHECK_NEG314 = (negative, mantissa, exponent) -> {
-        assertTrue(negative);
-        assertEquals(314, mantissa);
-        assertEquals(2, exponent);
+        Assertions.assertTrue(negative);
+        Assertions.assertEquals(314, mantissa);
+        Assertions.assertEquals(2, exponent);
     };
     private static final DecimalAppender CHECK_123456789_012345 = (negative, mantissa, exponent) -> {
-        assertFalse(negative);
-        assertEquals(123456789012345L, mantissa);
-        assertEquals(6, exponent);
-        assertEquals(123456789.012345, mantissa / 1e6, 0.0);
+        Assertions.assertFalse(negative);
+        Assertions.assertEquals(123456789012345L, mantissa);
+        Assertions.assertEquals(6, exponent);
+        Assertions.assertEquals(123456789.012345, mantissa / 1e6, 0.0);
     };
     private static final DecimalAppender CHECK_NEG_PI = (negative, mantissa, exponent) -> {
-        assertTrue(negative);
-        assertEquals(3141592653589793L, mantissa);
-        assertEquals(15, exponent);
-        assertEquals(Math.PI, mantissa / 1e15, 0.0);
+        Assertions.assertTrue(negative);
+        Assertions.assertEquals(3141592653589793L, mantissa);
+        Assertions.assertEquals(15, exponent);
+        Assertions.assertEquals(Math.PI, mantissa / 1e15, 0.0);
     };
     private static final DecimalAppender CHECK_ZERO = (negative, mantissa, exponent) -> {
-        assertFalse(negative);
-        assertEquals(0, mantissa);
+        Assertions.assertFalse(negative);
+        Assertions.assertEquals(0, mantissa);
         if (exponent != 0)
-            assertEquals(1, exponent);
+            Assertions.assertEquals(1, exponent);
     };
     private static final DecimalAppender CHECK_NEG_ZERO = (negative, mantissa, exponent) -> {
-        assertTrue(negative);
-        assertEquals(0, mantissa);
+        Assertions.assertTrue(negative);
+        Assertions.assertEquals(0, mantissa);
         if (exponent != 0)
-            assertEquals(1, exponent);
+            Assertions.assertEquals(1, exponent);
     };
     private static final double HARD_TO_DECIMALISE = 4.8846945805332034E-12;
 
     @BeforeEach
     void hasDirect() {
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+        Assumptions.assumeFalse(Jvm.maxDirectMemory() == 0);
     }
 
     @Test
     void toDoubleTestTest() {
-        assertFalse(SimpleDecimaliser.SIMPLE.toDecimal(HARD_TO_DECIMALISE, CHECK_OK));
+        Assertions.assertFalse(SimpleDecimaliser.SIMPLE.toDecimal(HARD_TO_DECIMALISE, CHECK_OK));
     }
 
     @Test
     void toDoubleLimitedTestTest() {
         DecimalAppender check = (negative, mantissa, exponent) -> {
-            assertFalse(negative);
-            assertEquals(48847, mantissa);
-            assertEquals(16, exponent);
+            Assertions.assertFalse(negative);
+            Assertions.assertEquals(48847, mantissa);
+            Assertions.assertEquals(16, exponent);
         };
-        assertTrue(new MaximumPrecision(16).toDecimal(HARD_TO_DECIMALISE, check));
+        Assertions.assertTrue(new MaximumPrecision(16).toDecimal(HARD_TO_DECIMALISE, check));
     }
 
     @Test
     void toDoubleTest() {
         DecimalAppender check = (negative, mantissa, exponent) -> {
-            assertFalse(negative);
-            assertEquals(48846945805332034L, mantissa);
-            assertEquals(28, exponent);
+            Assertions.assertFalse(negative);
+            Assertions.assertEquals(48846945805332034L, mantissa);
+            Assertions.assertEquals(28, exponent);
         };
-        assertTrue(GeneralDecimaliser.GENERAL.toDecimal(HARD_TO_DECIMALISE, check));
+        Assertions.assertTrue(GeneralDecimaliser.GENERAL.toDecimal(HARD_TO_DECIMALISE, check));
     }
 
     @Test
     void toDoubleTest1e_6() {
         DecimalAppender check = (negative, mantissa, exponent) -> {
-            assertFalse(negative);
-            assertEquals(1, mantissa);
-            assertEquals(6, exponent);
+            Assertions.assertFalse(negative);
+            Assertions.assertEquals(1, mantissa);
+            Assertions.assertEquals(6, exponent);
         };
-        assertTrue(GeneralDecimaliser.GENERAL.toDecimal(1e-6, check));
+        Assertions.assertTrue(GeneralDecimaliser.GENERAL.toDecimal(1e-6, check));
 
-        assertTrue(new MaximumPrecision(7).toDecimal(1e-6, check));
-        assertTrue(new MaximumPrecision(6).toDecimal(1e-6, check));
+        Assertions.assertTrue(new MaximumPrecision(7).toDecimal(1e-6, check));
+        Assertions.assertTrue(new MaximumPrecision(6).toDecimal(1e-6, check));
         DecimalAppender check0 = (negative, mantissa, exponent) -> {
-            assertFalse(negative);
-            assertEquals(0, mantissa);
-            assertEquals(0, exponent);
+            Assertions.assertFalse(negative);
+            Assertions.assertEquals(0, mantissa);
+            Assertions.assertEquals(0, exponent);
         };
-        assertTrue(new MaximumPrecision(5).toDecimal(1e-6, check0));
+        Assertions.assertTrue(new MaximumPrecision(5).toDecimal(1e-6, check0));
     }
 
     @Test
     void toDoubleTestRounding() {
         DecimalAppender check = (negative, mantissa, exponent) -> {
-            assertFalse(negative);
-            assertEquals(1, mantissa);
-            assertEquals(0, exponent);
+            Assertions.assertFalse(negative);
+            Assertions.assertEquals(1, mantissa);
+            Assertions.assertEquals(0, exponent);
         };
         MaximumPrecision lp7 = new MaximumPrecision(7);
-        assertTrue(lp7.toDecimal(1.000000004, check));
-        assertTrue(lp7.toDecimal(0.999999996, check));
+        Assertions.assertTrue(lp7.toDecimal(1.000000004, check));
+        Assertions.assertTrue(lp7.toDecimal(0.999999996, check));
     }
 
     @Test
@@ -123,14 +122,14 @@ class DecimaliserDoubleTest extends BytesTestCommon {
                     for (int i = 0; i <= 18; i++) {
                         // simple decimal is ok
                         double d = (double) x / f;
-                        assertTrue(SimpleDecimaliser.SIMPLE.toDecimal(d, CHECK_OK));
+                        Assertions.assertTrue(SimpleDecimaliser.SIMPLE.toDecimal(d, CHECK_OK));
 
                         // probably requires more precision
                         long l = Double.doubleToLongBits(d);
                         double d2 = -Double.longBitsToDouble(l + x);
                         boolean decimal = UsesBigDecimal.USES_BIG_DECIMAL.toDecimal(d2, CHECK_OK);
                         boolean notZero = d2 < 0; // BigDecimal doesn't handle negative 0
-                        assertEquals("d: " + d, notZero, decimal);
+                        Assertions.assertEquals(notZero, decimal, "d: " + d);
                         f *= 10;
                     }
                 });
@@ -139,16 +138,14 @@ class DecimaliserDoubleTest extends BytesTestCommon {
     @Test
     void toDoubleLarge() {
         DecimalAppender check = (negative, mantissa, exponent) -> {
-            assertTrue(0 <= exponent);
-            assertTrue("exponent: " + exponent, exponent <= 18);
+            Assertions.assertTrue(0 <= exponent);
+            Assertions.assertTrue(exponent <= 18, "exponent: " + exponent);
         };
         IntStream.range(-325, 309)
                 .forEach(x -> {
                     double d = (-18 < x && x < -1) ? 1.0 / Maths.tens(-x) : Math.pow(10, x);
                     double lower = 1e-18;
-                    assertEquals("x: " + x,
-                            d == 0.0 || (lower <= d && d <= 1e18),
-                            SimpleDecimaliser.SIMPLE.toDecimal(d, check));
+                    Assertions.assertEquals(d == 0.0 || (lower <= d && d <= 1e18), SimpleDecimaliser.SIMPLE.toDecimal(d, check), "x: " + x);
                 });
     }
 
@@ -196,23 +193,23 @@ class DecimaliserDoubleTest extends BytesTestCommon {
     void testNegLongMinValueBD() {
         DecimalAppender check = (negative, mantissa, exponent) -> {
             // -9223372036854775808
-            assertTrue(negative);
-            assertEquals(9223372036854776L, mantissa);
-            assertEquals(-3, exponent);
+            Assertions.assertTrue(negative);
+            Assertions.assertEquals(9223372036854776L, mantissa);
+            Assertions.assertEquals(-3, exponent);
         };
-        assertTrue(UsesBigDecimal.USES_BIG_DECIMAL.toDecimal((double) Long.MIN_VALUE, check));
+        Assertions.assertTrue(UsesBigDecimal.USES_BIG_DECIMAL.toDecimal((double) Long.MIN_VALUE, check));
     }
 
     @Test
     void testDouble1() {
         DecimalAppender check = (negative, mantissa, exponent) -> {
-            assertFalse(negative);
-            assertEquals(16666666666666785L, mantissa);
-            assertEquals(17, exponent);
+            Assertions.assertFalse(negative);
+            Assertions.assertEquals(16666666666666785L, mantissa);
+            Assertions.assertEquals(17, exponent);
         };
         double value = 0.16666666666666785d;
-        assertTrue(UsesBigDecimal.USES_BIG_DECIMAL.toDecimal(value, check));
-        assertTrue(GeneralDecimaliser.GENERAL.toDecimal(value, check));
-        assertFalse(SimpleDecimaliser.SIMPLE.toDecimal(value, check));
+        Assertions.assertTrue(UsesBigDecimal.USES_BIG_DECIMAL.toDecimal(value, check));
+        Assertions.assertTrue(GeneralDecimaliser.GENERAL.toDecimal(value, check));
+        Assertions.assertFalse(SimpleDecimaliser.SIMPLE.toDecimal(value, check));
     }
 }

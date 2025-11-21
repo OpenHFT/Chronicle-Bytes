@@ -38,7 +38,7 @@ public class AbstractBytesTest {
         }
 
         @Override
-        public BytesStore<Bytes<ByteBuffer>, ByteBuffer> copy() throws IllegalStateException, ClosedIllegalStateException, ThreadingIllegalStateException {
+        public BytesStore<Bytes<ByteBuffer>, ByteBuffer> copy() throws IllegalStateException {
             return null;
         }
     }
@@ -68,7 +68,7 @@ public class AbstractBytesTest {
     }
 
     @Test
-    public void canReadDirectWithSufficientRemainingReturnsTrue() throws Exception {
+    public void canReadDirectWithSufficientRemainingReturnsTrue() {
         BytesStore<Bytes<ByteBuffer>, ByteBuffer> mockBytesStore = mock(BytesStore.class);
         when(mockBytesStore.isDirectMemory()).thenReturn(true);
 
@@ -79,7 +79,7 @@ public class AbstractBytesTest {
     }
 
     @Test
-    public void canReadDirectWithInsufficientRemainingReturnsFalse() throws Exception {
+    public void canReadDirectWithInsufficientRemainingReturnsFalse() {
         BytesStore<Bytes<ByteBuffer>, ByteBuffer> mockBytesStore = mock(BytesStore.class);
         when(mockBytesStore.isDirectMemory()).thenReturn(true);
 
@@ -90,7 +90,7 @@ public class AbstractBytesTest {
     }
 
     @Test
-    public void clearResetsPositionsAndLimits() throws Exception {
+    public void clearResetsPositionsAndLimits() {
         BytesStore<Bytes<ByteBuffer>, ByteBuffer> mockBytesStore = mock(BytesStore.class);
         when(mockBytesStore.capacity()).thenReturn(100L);
 
@@ -103,7 +103,7 @@ public class AbstractBytesTest {
     }
 
     @Test
-    public void clearAndPadSetsPositionsAndLimitsCorrectly() throws Exception {
+    public void clearAndPadSetsPositionsAndLimitsCorrectly() {
         BytesStore<Bytes<ByteBuffer>, ByteBuffer> mockBytesStore = mock(BytesStore.class);
         when(mockBytesStore.capacity()).thenReturn(100L);
 
@@ -132,7 +132,7 @@ public class AbstractBytesTest {
     }
 
     @Test
-    public void readPositionForHeaderWithSkipPadding() throws Exception {
+    public void readPositionForHeaderWithSkipPadding() {
         long newPosition = bytes.readPositionForHeader(true);
         assertEquals(0, newPosition);
     }

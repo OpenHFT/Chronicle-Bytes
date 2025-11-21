@@ -293,7 +293,7 @@ public class BytesMarshaller<T> {
     }
 
     static class ObjectArrayFieldAccess extends FieldAccess {
-        Class<?> componentType;
+        final Class<?> componentType;
 
         public ObjectArrayFieldAccess(Field field) {
             super(field);

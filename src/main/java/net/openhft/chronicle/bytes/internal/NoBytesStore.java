@@ -393,7 +393,7 @@ public final class NoBytesStore implements BytesStore<NoBytesStore, Void> {
 
     @Override
     public boolean equals(Object obj) {
-        return obj instanceof BytesStore && ((BytesStore) obj).length() == 0;
+        return obj instanceof BytesStore && ((BytesStore) obj).isEmpty();
     }
 
     @Override

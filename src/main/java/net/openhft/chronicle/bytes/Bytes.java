@@ -852,7 +852,7 @@ public interface Bytes<U> extends
     @NotNull
     @Override
     default Bytes<U> bytesForRead()
-            throws IllegalStateException, ClosedIllegalStateException, ThreadingIllegalStateException {
+            throws IllegalStateException {
         throwExceptionIfReleased(this);
 
         BytesStore<?, U> bytesStore = bytesStore();
@@ -869,7 +869,7 @@ public interface Bytes<U> extends
     @Override
     @NotNull
     default Bytes<U> bytesForWrite()
-            throws IllegalStateException, ClosedIllegalStateException {
+            throws IllegalStateException {
         throwExceptionIfReleased(this);
 
         BytesStore<?, U> bytesStore = bytesStore();

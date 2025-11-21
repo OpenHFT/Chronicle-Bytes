@@ -163,9 +163,9 @@ class UnsafeRWObjectTest extends BytesTestCommon {
     }
 
     static class AA {
-        int i;
-        long l;
-        double d;
+        final int i;
+        final long l;
+        final double d;
 
         AA(int i, long l, double d) {
             this.i = i;
@@ -175,7 +175,14 @@ class UnsafeRWObjectTest extends BytesTestCommon {
     }
 
     static class BB {
-        long l0, l1, l2, l3, l4, l5, l6, l7;
+        final long l0;
+        final long l1;
+        final long l2;
+        final long l3;
+        final long l4;
+        final long l5;
+        final long l6;
+        final long l7;
 
         BB(long l0, long l1, long l2, long l3, long l4, long l5, long l6, long l7) {
             this.l0 = l0;
@@ -203,7 +210,14 @@ class UnsafeRWObjectTest extends BytesTestCommon {
     }
 
     static class DD {
-        double l0, l1, l2, l3, l4, l5, l6, l7;
+        final double l0;
+        final double l1;
+        final double l2;
+        final double l3;
+        final double l4;
+        final double l5;
+        final double l6;
+        final double l7;
 
         DD(double l0, double l1, double l2, double l3, double l4, double l5, double l6, double l7) {
             this.l0 = l0;

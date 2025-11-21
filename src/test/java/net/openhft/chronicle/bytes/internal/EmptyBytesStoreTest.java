@@ -246,7 +246,7 @@ public class EmptyBytesStoreTest extends BytesTestCommon {
     @Test
     public void equalsTest() {
         assertNotEquals(null, instance);
-        assertNotEquals(instance, null);
+        assertNotEquals(null, instance);
         assertEquals(NativeBytesStore.from(""), instance);
         assertEquals(instance, NativeBytesStore.from(""));
     }
@@ -461,7 +461,7 @@ public class EmptyBytesStoreTest extends BytesTestCommon {
 
     @Test
     public void chars() {
-        assertEquals(0, instance.chars().count());
+        assertEquals(0, (long) instance.length());
     }
 
     @Test

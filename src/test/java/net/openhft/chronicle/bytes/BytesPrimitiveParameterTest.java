@@ -81,6 +81,7 @@ final class BytesPrimitiveParameterTest { // too hard to ensure resources are re
 
     private static Stream<NamedConsumer<Bytes<Object>>> provideNegativeNonNegativeOperations() {
         final BytesStore<?, ?> bs = BytesStore.from(SILLY_NAME);
+        //noinspection JavacQuirks
         return Stream.of(
 
                 NamedConsumer.of(b -> b.write(-1, new byte[1]), "write(-1, new byte[1])"),

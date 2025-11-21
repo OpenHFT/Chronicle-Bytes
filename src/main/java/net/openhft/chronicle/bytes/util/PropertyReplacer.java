@@ -4,7 +4,6 @@
 package net.openhft.chronicle.bytes.util;
 
 import net.openhft.chronicle.core.Jvm;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Properties;
 import java.util.regex.Matcher;

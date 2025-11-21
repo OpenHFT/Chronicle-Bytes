@@ -268,9 +268,9 @@ public class PrimitiveTest extends BytesTestCommon {
 
     static final class Outer implements BytesMarshallable {
 
-        String name;
-        Inner innerA;
-        Inner innerB;
+        final String name;
+        final Inner innerA;
+        final Inner innerB;
 
         Outer(final String name,
               final Inner innerA,

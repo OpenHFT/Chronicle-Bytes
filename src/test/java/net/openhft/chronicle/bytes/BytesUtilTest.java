@@ -241,7 +241,7 @@ public class BytesUtilTest extends BytesTestCommon {
     @Test
     public void equals_equivalentObjects() {
         // Intentional boxing to create two equivalent but distinct objects
-        assertTrue(BytesUtil.equals(new Integer(1), new Integer(1)));
+        assertTrue(BytesUtil.equals(1, 1));
     }
 
     @Test
@@ -430,7 +430,7 @@ public class BytesUtilTest extends BytesTestCommon {
         int i;
     }
 
-    private class SubNested extends Nested {
+    private static class SubNested extends Nested {
         int j;
     }
 }

@@ -650,16 +650,16 @@ public class BytesMarshallableTest extends BytesTestCommon {
     }
 
     private static final class MyCollections implements BytesMarshallable {
-        List<String> words = new ArrayList<>();
-        Map<Double, Long> scoreCountMap = new LinkedHashMap<>();
-        List<RetentionPolicy> policies = new ArrayList<>();
-        List<Integer> numbers = new ArrayList<>();
+        final List<String> words = new ArrayList<>();
+        final Map<Double, Long> scoreCountMap = new LinkedHashMap<>();
+        final List<RetentionPolicy> policies = new ArrayList<>();
+        final List<Integer> numbers = new ArrayList<>();
     }
 
     private static final class BM1 implements BytesMarshallable {
         int num;
-        BM2 bm2 = new BM2();
-        BM3 bm3 = new BM3();
+        final BM2 bm2 = new BM2();
+        final BM3 bm3 = new BM3();
 
         @Override
         public String toString() {

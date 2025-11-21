@@ -112,12 +112,9 @@ public enum OptimisedBytesStoreHash implements BytesStoreHash<BytesStore<?,?>> {
         final long address = bytesStore.addressForRead(store.readPosition());
         long h0 = (long) remaining * K0;
 
-        int left = remaining;
-        long addrI = address;
-
-        long l0 = readIncompleteLong(addrI, left);
+        long l0 = readIncompleteLong(address, remaining);
         int l0a = (int) (l0 >> 32);
-        long l1 = readIncompleteLong(addrI + 8, left - 8);
+        long l1 = readIncompleteLong(address + 8, remaining - 8);
         int l1a = (int) (l1 >> 32);
         final long l2 = 0;
         final int l2a = 0;
@@ -148,16 +145,13 @@ public enum OptimisedBytesStoreHash implements BytesStoreHash<BytesStore<?,?>> {
         final long address = bytesStore.addressForRead(store.readPosition());
         long h0 = (long) remaining * K0;
 
-        int left = remaining;
-        long addrI = address;
-
-        long l0 = MEMORY.readLong(addrI);
-        int l0a = MEMORY.readInt(addrI + TOP_BYTES);
-        long l1 = MEMORY.readLong(addrI + 8);
-        int l1a = MEMORY.readInt(addrI + 8 + TOP_BYTES);
-        long l2 = readIncompleteLong(addrI + 16, left - 16);
+        long l0 = MEMORY.readLong(address);
+        int l0a = MEMORY.readInt(address + TOP_BYTES);
+        long l1 = MEMORY.readLong(address + 8);
+        int l1a = MEMORY.readInt(address + 8 + TOP_BYTES);
+        long l2 = readIncompleteLong(address + 16, remaining - 16);
         int l2a = (int) (l2 >> 32);
-        long l3 = readIncompleteLong(addrI + 24, left - 24);
+        long l3 = readIncompleteLong(address + 24, remaining - 24);
         int l3a = (int) (l3 >> 32);
 
         h0 += (l0 + l1a - l2a) * M0;
