@@ -301,7 +301,6 @@ public class StructTest extends BytesTestCommon {
      *     unsigned byte day;
      * };
      */
-
     enum Gender {
         MALE(0),
         FEMALE(1);
@@ -402,7 +401,6 @@ public class StructTest extends BytesTestCommon {
      *     float       grades[10];
      *     Student*    next;
      */
-
     static class Student extends Struct<Student> implements BytesMarshallable {
         static final int LOCK = 0;
         static final int GENDER = LOCK + 4;

@@ -45,7 +45,6 @@ public interface ByteableLongArrayValues extends LongArrayValues, Byteable, Dyna
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
-
     ByteableLongArrayValues capacity(@NonNegative long arrayLength)
             throws IllegalStateException;
 }
