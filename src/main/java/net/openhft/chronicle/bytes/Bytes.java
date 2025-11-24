@@ -1040,7 +1040,7 @@ public interface Bytes<U> extends
         for (long i = sourceOffset; i <= max; i++) {
             /* Look for first character. */
             if (readByte(i) != firstByte) {
-                while (++i <= max && readByte(i) != firstByte) ;
+                while (++i <= max && readByte(i) != firstByte);
             }
 
             /* Found first character, now look at the rest of v2 */
@@ -1105,7 +1105,7 @@ public interface Bytes<U> extends
         for (long i = sourceOffset + fromIndex; i <= max; i++) {
             /* Look for first character. */
             if (readByte(i) != firstByte) {
-                while (++i <= max && readByte(i) != firstByte) ;
+                while (++i <= max && readByte(i) != firstByte);
             }
 
             /* Found first character, now look at the rest of v2 */
