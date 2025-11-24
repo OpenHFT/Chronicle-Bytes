@@ -60,7 +60,7 @@ public class MemoryWriteJitterMain {
                     long start = System.nanoTime();
                     Thread.yield();
                     //noinspection StatementWithEmptyBody
-                    while (System.nanoTime() < start + intervalNS) ;
+                    while (System.nanoTime() < start + intervalNS);
                 }
                 mf.releaseLast();
             } catch (Throwable t) {
