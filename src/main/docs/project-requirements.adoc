@@ -1,8 +1,8 @@
 = Chronicle Bytes Project Requirements
-:doctype: book
 :toc:
 :sectnums:
 :lang: en-GB
+:doctype: book
 :source-highlighter: rouge
 
 // Legend

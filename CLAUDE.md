@@ -224,7 +224,7 @@ Set these via `-Dproperty=value`:
 | `trace.mapped.bytes` | `false` | Debug mapped file lifecycle |
 | `bytes.max-array-len` | `16777216` | Max array length for reads |
 
-See `docs/systemProperties.adoc` for complete list.
+See `src/main/docs/system-properties.adoc` for complete list.
 
 ## Documentation Standards
 
@@ -270,5 +270,5 @@ Key documentation files:
 
 - README.adoc - User-facing introduction with examples
 - AGENTS.md - General AI agent guidelines (Javadoc policy, build commands)
-- `docs/systemProperties.adoc` - Complete system property reference
+- `src/main/docs/system-properties.adoc` - Complete system property reference
 - `src/main/docs/decision-log.adoc` - Architecture decisions

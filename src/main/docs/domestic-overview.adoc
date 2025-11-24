@@ -1,8 +1,8 @@
 = Chronicle Bytes Domestic Utilities
-:doctype: book
 :toc:
-:toclevels: 2
 :lang: en-GB
+:toclevels: 2
+:doctype: book
 :source-highlighter: rouge
 
 The `net.openhft.chronicle.bytes.domestic` package contains helper classes primarily used internally by Chronicle Bytes.

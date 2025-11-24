@@ -33,8 +33,12 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 /**
  * A {@link net.openhft.chronicle.bytes.BytesStore} backed by off-heap native
  * memory. Instances are reference counted and must be released to free the
- * underlying memory. The store may be elastic or fixed in size depending on
- * how it was created.
+ * underlying memory. Depending on construction the store can grow elastically
+ * or stay fixed in size. All access honours Chronicle's alignment and padding
+ * rules to reduce false sharing. The implementation coordinates with
+ * {@link CleanerServiceLocator} to unmap or free native resources and exposes
+ * ordered/atomic primitives for concurrent access patterns, but overall thread
+ * safety still depends on how the instance is shared.
  */
 @SuppressWarnings({"restriction", "rawtypes"})
 public class NativeBytesStore<U>

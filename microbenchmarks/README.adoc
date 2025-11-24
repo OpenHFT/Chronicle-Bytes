@@ -1,4 +1,5 @@
 = Chronicle Bytes Microbenchmarks
+:toc:
 :lang: en-GB
 :source-highlighter: rouge
 

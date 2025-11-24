@@ -29,6 +29,11 @@ import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static org.junit.Assert.*;
 import static org.junit.Assume.assumeFalse;
 
+/**
+ * Comprehensive tests for {@link NativeBytesStore}, including encryption
+ * support, histogram utilities, and reference counting edge cases for native
+ * stores.
+ */
 public class NativeBytesStoreTest extends BytesTestCommon {
 
     private volatile int bcs;

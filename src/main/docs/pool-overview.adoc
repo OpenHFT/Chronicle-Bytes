@@ -1,8 +1,8 @@
 = Chronicle Bytes Pooling
-:doctype: book
 :toc:
-:toclevels: 2
 :lang: en-GB
+:toclevels: 2
+:doctype: book
 :source-highlighter: rouge
 
 Chronicle Bytes provides a pooling mechanism to reuse `Bytes` objects, primarily to minimise allocation overhead and reduce Garbage Collector (GC) pressure in very low-latency scenarios.

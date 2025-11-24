@@ -1,9 +1,9 @@
 = Chronicle Bytes API Guide
-:doctype: book
 :toc:
-:toclevels: 3
 :sectnums:
 :lang: en-GB
+:toclevels: 3
+:doctype: book
 :source-highlighter: rouge
 
 This is a hands-on cookbook for day-to-day coding with Chronicle Bytes.

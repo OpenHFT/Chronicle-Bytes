@@ -18,8 +18,11 @@ import java.nio.ByteBuffer;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
 /**
- * Provides methods for writing data to a byte sequence or buffer at arbitrary offsets.
- * Implementations extend {@link RandomCommon}. Use atomic or ordered methods for thread safety.
+ * Random-access write API for {@link BytesStore}-backed buffers.
+ * <p>
+ * Writes primitives and arrays at arbitrary offsets without advancing a cursor; ordered/atomic
+ * variants support concurrent writers when the underlying store allows. Caller is responsible for
+ * respecting capacity and thread-safety guarantees of the backing store.
  *
  * @see RandomDataInput
  */

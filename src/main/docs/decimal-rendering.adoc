@@ -1,8 +1,8 @@
 = Decimal Rendering Strategies
-:doctype: book
 :toc:
-:toclevels: 2
 :lang: en-GB
+:toclevels: 2
+:doctype: book
 :source-highlighter: rouge
 
 This page summarises the options in the `net.openhft.chronicle.bytes.render` package.

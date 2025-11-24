@@ -1,9 +1,9 @@
 = Chronicle Bytes Testing Strategy
-:doctype: book
 :toc:
-:toclevels: 2
 :sectnums:
 :lang: en-GB
+:toclevels: 2
+:doctype: book
 :source-highlighter: rouge
 
 This document outlines the testing approach for Chronicle Bytes and links tests to the Nine-Box requirements defined in `project-requirements.adoc`.
@@ -76,4 +76,3 @@ mvn -q clean verify
 
 This command builds all modules, executes unit and integration tests and runs static analysis tools configured in the Maven build.
 Module-specific test runs can be scoped using Maven's `-pl` flag when iterating, but full `verify` should be executed before releases or pull requests.
-
