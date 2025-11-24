@@ -1,8 +1,8 @@
 = Chronicle Bytes Hash Algorithms
-:doctype: book
 :toc:
-:toclevels: 2
 :lang: en-GB
+:toclevels: 2
+:doctype: book
 :source-highlighter: rouge
 
 This module provides non-cryptographic hash functions for `BytesStore` data.

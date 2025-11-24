@@ -1,9 +1,9 @@
 = Chronicle Bytes Memory Management
-:doctype: book
 :toc:
-:toclevels: 3
 :sectnums:
 :lang: en-GB
+:toclevels: 3
+:doctype: book
 :source-highlighter: rouge
 
 Chronicle Bytes allocates and manages memory outside the Java heap to minimise

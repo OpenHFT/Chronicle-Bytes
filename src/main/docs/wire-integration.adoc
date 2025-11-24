@@ -1,9 +1,9 @@
 = Chronicle Wire Integration Guide
-:doctype: book
 :toc:
-:toclevels: 3
 :sectnums:
 :lang: en-GB
+:toclevels: 3
+:doctype: book
 :source-highlighter: rouge
 
 Explains how Chronicle Wire builds on Chronicle Bytes to provide ultra-low-latency serialisation.

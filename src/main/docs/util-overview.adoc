@@ -1,8 +1,8 @@
 = Chronicle Bytes Utility Helpers (`net.openhft.chronicle.bytes.util`)
-:doctype: book
 :toc:
-:toclevels: 2
 :lang: en-GB
+:toclevels: 2
+:doctype: book
 :source-highlighter: rouge
 
 This overview describes the collection of helper types that reside in the

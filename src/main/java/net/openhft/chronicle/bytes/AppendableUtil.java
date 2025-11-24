@@ -24,6 +24,10 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
  * Utility methods for manipulating {@link Appendable} implementations such as
  * {@link StringBuilder} and {@link Bytes}. These helpers are used throughout
  * the text parsing and formatting code paths.
+ * <p>
+ * The operations are intentionally minimal and non-allocating where possible to preserve
+ * Chronicle's zero-GC expectations. Most methods accept either {@code StringBuilder} or
+ * {@link Bytes} to simplify call sites that work with both heap and off-heap buffers.
  */
 @SuppressWarnings("rawtypes")
 public enum AppendableUtil {

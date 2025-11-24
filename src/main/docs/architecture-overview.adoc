@@ -1,9 +1,9 @@
 = Chronicle Bytes Architecture Overview
-:doctype: book
 :toc:
-:toclevels: 3
 :sectnums:
 :lang: en-GB
+:toclevels: 3
+:doctype: book
 :source-highlighter: rouge
 
 This document positions Chronicle Bytes within the wider OpenHFT landscape, describes its core abstractions and key architectural principles, illustrates runtime interactions, and explains the critical data flows and design decisions that underpin its low-latency performance.

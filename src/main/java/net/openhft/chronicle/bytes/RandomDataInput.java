@@ -23,26 +23,11 @@ import static net.openhft.chronicle.core.util.Longs.requireNonNegative;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
 /**
- * The {@code RandomDataInput} class provides a series of methods for reading data
- * from various types of inputs. It allows to read data from an input source
- * in a non-sequential manner, i.e., the data can be accessed at any offset.
- *
- * <p>This class supports reading of primitive data types like {@code int},
- * {@code long}, {@code double} etc., as well as more complex data structures
- * like {@code byte[]}, {@code String} and {@code ByteBuffer}. It also provides
- * methods for direct reading from memory and for reading with a load barrier.
- *
- * <p>Furthermore, the {@code RandomDataInput} class provides additional methods for
- * advanced operations like copying data to native memory, finding a specific byte,
- * calculating the hash code of a sequence of bytes, and more.
- *
- * <p>Methods in this class may throw {@code BufferUnderflowException} if the offset
- * specified is outside the limits of the byte sequence or {@code ClosedIllegalStateException}
- * if the byte sequence has been released.
- *
- * <p>Note: Implementations of this class are typically not thread-safe. If multiple
- * threads interact with a {@code RandomDataInput} instance concurrently, it must be synchronized
- * externally.
+ * Random-access read API for {@link BytesStore} implementations and other byte sources.
+ * <p>
+ * Supports reading primitives, arrays and strings at arbitrary offsets, bulk transfers to native
+ * memory and helper utilities such as hashing and search. Implementations may be backed by heap,
+ * direct or memory-mapped storage; thread-safety is implementation dependent.
  */
 public interface RandomDataInput extends RandomCommon {
     /**

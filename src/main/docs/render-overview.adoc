@@ -1,8 +1,8 @@
 = Chronicle Bytes Decimal Rendering (`net.openhft.chronicle.bytes.render`)
-:doctype: book
 :toc:
-:toclevels: 2
 :lang: en-GB
+:toclevels: 2
+:doctype: book
 :source-highlighter: rouge
 
 This guide explains how Chronicle Bytes converts JVM floating-point values into textual decimal form.
