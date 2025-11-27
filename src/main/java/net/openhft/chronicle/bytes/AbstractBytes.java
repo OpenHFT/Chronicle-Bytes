@@ -78,6 +78,7 @@ public abstract class AbstractBytes<U>
     /**
      * Whether the underlying store is open.
      */
+    @Deprecated(/* to be removed in 2026 */)
     protected boolean isPresent;
     /**
      * Offset for the next byte to write.
@@ -123,6 +124,7 @@ public abstract class AbstractBytes<U>
     /**
      * Implementation detail constructor allowing a debug name.
      */
+    // TODO Inline this constructor in 2026
     AbstractBytes(@NotNull BytesStore<Bytes<U>, U> bytesStore,
                   @NonNegative long writePosition,
                   @NonNegative long writeLimit,
@@ -968,6 +970,7 @@ public abstract class AbstractBytes<U>
         return this;
     }
 
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public @NotNull Bytes<U> write8bit(@Nullable BytesStore<?, ?> bs)
             throws BufferOverflowException, ClosedIllegalStateException, BufferUnderflowException, ThreadingIllegalStateException {
         if (bs == null) {

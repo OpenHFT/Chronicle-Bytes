@@ -700,6 +700,7 @@ enum BytesInternal {
         return offset == limit && charI == other.length();
     }
 
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public static void parse8bit(@NonNegative long offset, @NotNull RandomDataInput bytesStore, Appendable appendable, @NonNegative int utflen)
             throws BufferUnderflowException, IOException, ClosedIllegalStateException {
         throwExceptionIfReleased(bytesStore);
@@ -1177,6 +1178,7 @@ enum BytesInternal {
     }
 
     @NotNull
+    @Deprecated(/* to be removed in 2027 */)
     public static Bytes<?> asBytes(@NotNull RandomDataOutput bytes, @NonNegative long position, @NonNegative long limit)
             throws ClosedIllegalStateException, BufferOverflowException, BufferUnderflowException {
         throwExceptionIfReleased(bytes);
@@ -3356,6 +3358,7 @@ enum BytesInternal {
         }
     }
 
+    @Deprecated(/* to be removed in 2027 */)
     public static void copyMemory(long from, long to, int length) {
         UnsafeMemory.copyMemory(from, to, length);
     }
@@ -3519,11 +3522,13 @@ enum BytesInternal {
             out.writeStopBit(i);
     }
 
+    @Deprecated(/* to be removed in 2027 */)
     public static ByteBuffer asByteBuffer(@NotNull BytesStore<?, ?> bytesStore)
             throws BufferUnderflowException, ClosedIllegalStateException {
         return asByteBuffer(BYTE_BUFFER_TL, bytesStore);
     }
 
+    @Deprecated(/* to be removed in 2027 */)
     public static ByteBuffer asByteBuffer2(@NotNull BytesStore<?, ?> bytesStore)
             throws BufferUnderflowException, ClosedIllegalStateException {
         return asByteBuffer(BYTE_BUFFER2_TL, bytesStore);
@@ -3593,6 +3598,7 @@ enum BytesInternal {
     }
 
     @SuppressWarnings("unchecked")
+    @Deprecated(/* to be removed in 2027 */)
     public static <T> T uncheckedCast(Object o) {
         return (T) o;
     }

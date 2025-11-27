@@ -221,6 +221,7 @@ public abstract class MappedBytes extends AbstractBytes<Void> implements Closeab
      * @throws ThreadingIllegalStateException if accessed from multiple threads
      */
     @NotNull
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public static MappedBytes readOnly(@NotNull final File file)
             throws FileNotFoundException, ClosedIllegalStateException, ThreadingIllegalStateException {
         final MappedFile mappedFile = MappedFile.readOnly(file);

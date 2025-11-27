@@ -39,6 +39,7 @@ public interface BytesIn<U> extends
      *         {@link MethodReader#readOne()}
      */
     @NotNull
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     default MethodReader bytesMethodReader(@NotNull Object... objects) {
         return new BytesMethodReaderBuilder(this).build(objects);
     }
@@ -60,6 +61,7 @@ public interface BytesIn<U> extends
      * @param using  optional instance to reuse
      * @return the populated instance
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     <T extends ReadBytesMarshallable> T readMarshallableLength16(@NotNull Class<T> tClass, @Nullable T using)
             throws BufferUnderflowException, InvalidMarshallableException, ClosedIllegalStateException, ThreadingIllegalStateException;
 

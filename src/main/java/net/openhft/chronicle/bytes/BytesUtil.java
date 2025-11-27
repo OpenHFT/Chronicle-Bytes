@@ -79,6 +79,7 @@ public enum BytesUtil {
     /**
      * Returns the configured maximum array length.
      */
+    @Deprecated(/* to be removed in 2027 */)
     public static int maxArrayLength() {
         return MAX_ARRAY_LEN;
     }
@@ -101,6 +102,7 @@ public enum BytesUtil {
      * Returns {@code true} if all primitive fields of {@code clazz} occupy a contiguous range allowing
      * direct memory copies.
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public static boolean isTriviallyCopyable(@NotNull Class<?> clazz) {
         final int[] ints = TRIVIALLY_COPYABLE.get(clazz);
         return ints[1] > 0;
@@ -237,6 +239,7 @@ public enum BytesUtil {
     /**
      * Writes the readable bytes to {@code file}, overwriting any existing content.
      */
+    @Deprecated(/* to be removed in 2027 */)
     public static void writeFile(String file, Bytes<byte[]> bytes)
             throws IOException {
         try (OutputStream os = Files.newOutputStream(Paths.get(file))) {
@@ -294,6 +297,7 @@ public enum BytesUtil {
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public static boolean bytesEqual(@Nullable CharSequence cs, @NotNull RandomDataInput bs, @NonNegative long offset, @NonNegative int length)
             throws IllegalStateException, BufferUnderflowException {
         if (cs == null || cs.length() != length)
@@ -312,6 +316,7 @@ public enum BytesUtil {
      * @param o2 The second object to compare.
      * @return true if the objects are equal, false otherwise.
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public static boolean equals(Object o1, Object o2) {
         if (o1 == o2) return true;
         if (o1 instanceof CharSequence && o2 instanceof CharSequence)
@@ -358,6 +363,7 @@ public enum BytesUtil {
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     @NotNull
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public static char[] toCharArray(@NotNull Bytes<?> bytes)
             throws ArithmeticException, IllegalStateException, BufferUnderflowException {
         @NotNull final char[] chars = new char[Maths.toUInt31(bytes.readRemaining())];
@@ -546,6 +552,7 @@ public enum BytesUtil {
      * @param x The value to round up.
      * @return The rounded value.
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public static long roundUpTo64ByteAlign(long x) {
         return (x + 63L) & ~63L;
     }
@@ -568,6 +575,7 @@ public enum BytesUtil {
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public static void read8ByteAlignPadding(Bytes<?> bytes)
             throws IllegalStateException, BufferUnderflowException {
         bytes.readPosition(roundUpTo8ByteAlign(bytes.readPosition()));
@@ -581,6 +589,7 @@ public enum BytesUtil {
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public static void write8ByteAlignPadding(Bytes<?> bytes)
             throws BufferOverflowException, ClosedIllegalStateException {
         long start = bytes.writePosition();
@@ -700,6 +709,7 @@ public enum BytesUtil {
      * @param ch The character to check.
      * @return True if the character is a control space character, false otherwise.
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     static boolean isControlSpace(int ch) {
         return 0 <= ch && ch <= ' ';
     }

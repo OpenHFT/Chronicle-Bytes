@@ -124,6 +124,7 @@ public class HexDumpBytes
      *
      * @return The current number wrap.
      */
+    @Deprecated(/* to be removed in 2027 */)
     public int numberWrap() {
         return numberWrap;
     }

@@ -31,6 +31,7 @@ public interface BytesRingBuffer extends BytesRingBufferStats, BytesConsumer, Cl
      * @return new ring buffer instance
      */
     @NotNull
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     static BytesRingBuffer newInstance(@NotNull BytesStore<?, Void> bytesStore) {
         return newInstance(bytesStore, 1);
     }
@@ -129,6 +130,7 @@ public interface BytesRingBuffer extends BytesRingBufferStats, BytesConsumer, Cl
      * Number of bytes currently available for reading from the default reader
      * perspective.
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     long readRemaining();
 
     /**

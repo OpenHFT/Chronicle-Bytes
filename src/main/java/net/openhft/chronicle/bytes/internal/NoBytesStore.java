@@ -30,6 +30,7 @@ public final class NoBytesStore implements BytesStore<NoBytesStore, Void> {
     /** empty Bytes backed by {@link #NO_BYTES_STORE} */
     @NotNull
     public static final Bytes<?> NO_BYTES;
+    @Deprecated(/* to be removed in 2027 */)
     private static final ByteBuffer BYTE_BUFFER = ByteBuffer.allocate(4 << 10);
 
     static {

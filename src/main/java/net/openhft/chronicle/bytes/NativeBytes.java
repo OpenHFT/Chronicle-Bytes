@@ -70,6 +70,7 @@ public class NativeBytes<U>
      *
      * @return true if new NativeBytes instances will be guarded, false otherwise
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public static boolean areNewGuarded() {
         return newGuarded;
     }
@@ -80,6 +81,7 @@ public class NativeBytes<U>
      * @param guarded true to turn on guarding for new NativeBytes instances, false to turn it off
      * @return true if the operation is successful, false otherwise
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public static boolean setNewGuarded(final boolean guarded) {
         newGuarded = guarded;
         return true;
@@ -88,6 +90,7 @@ public class NativeBytes<U>
     /**
      * Resets the guarded state for new NativeBytes instances to its default value.
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public static void resetNewGuarded() {
         newGuarded = BYTES_GUARDED;
     }
@@ -153,6 +156,7 @@ public class NativeBytes<U>
                 : new NativeBytes<>(bs, capacity);
     }
 
+    @Deprecated(/* to be removed in 2027 */)
     protected static <T> long maxCapacityFor(@NotNull BytesStore<?, T> bs) {
         return bs.underlyingObject() instanceof ByteBuffer
                 || bs.underlyingObject() instanceof byte[]

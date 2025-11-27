@@ -131,6 +131,7 @@ public class DistributedUniqueTimeProvider extends SimpleCloseable implements Ti
     /**
      * Replaces the underlying time source used for wall-clock time.
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public DistributedUniqueTimeProvider provider(TimeProvider provider) {
         // Assign the provided TimeProvider to the instance variable
         this.provider = provider;
@@ -144,6 +145,7 @@ public class DistributedUniqueTimeProvider extends SimpleCloseable implements Ti
      *
      * @return the deduplicator for this instance
      */
+    @Deprecated(/* to be removed in 2027 */)
     DistributedUniqueTimeDeduplicator deduplicator() {
         return deduplicator;
     }

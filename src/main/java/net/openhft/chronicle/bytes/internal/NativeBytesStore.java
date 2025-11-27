@@ -68,6 +68,7 @@ public class NativeBytesStore<U>
     }
 
     /** Finalizer used to warn about unreleased native memory when resource tracing is enabled. */
+    @SuppressWarnings("unused")
     private final Finalizer finalizer;
     /** Base address of the allocated native memory. */
     public long address;
@@ -157,6 +158,7 @@ public class NativeBytesStore<U>
     }
 
     @NotNull
+    @Deprecated(/* to be removed in 2027 */)
     public static <T> NativeBytesStore<T> uninitialized() {
         return new NativeBytesStore<>();
     }
@@ -201,6 +203,7 @@ public class NativeBytesStore<U>
     }
 
     @NotNull
+    @Deprecated(/* to be removed in 2027 */)
     public static NativeBytesStore<ByteBuffer> elasticByteBuffer() {
         return elasticByteBuffer(OS.pageSize(), MAX_CAPACITY);
     }
@@ -215,6 +218,7 @@ public class NativeBytesStore<U>
     }
 
     @NotNull
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public static NativeBytesStore from(@NotNull String text) {
         return from(text.getBytes(ISO_8859_1));
     }
@@ -639,6 +643,7 @@ public class NativeBytesStore<U>
         memoryCopyMemory(address, addressForWrite(position), size);
     }
 
+    @Deprecated(/* to be removed in 2027 */)
     void write8bit(@NonNegative long position, char[] chars, @NonNegative int offset, @NonNegative int length)
             throws ClosedIllegalStateException {
         long addr = address + translate(position);

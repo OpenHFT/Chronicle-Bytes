@@ -593,6 +593,7 @@ public class UncheckedNativeBytes<U>
     }
 
     @SuppressWarnings("EmptyMethod")
+    @Deprecated(/* to be removed in 2027 */)
     void writeCheckOffset(@NonNegative long offset, long adding)
             throws BufferOverflowException {
         // Do nothing
@@ -1025,6 +1026,7 @@ public class UncheckedNativeBytes<U>
         return bytesStore.write8bit(position, s, start, length);
     }
 
+    @Deprecated(/* to be removed in 2027 */)
     public Bytes<U> write8bit(@Nullable BytesStore<?, ?> bs) throws BufferOverflowException, IllegalStateException, BufferUnderflowException {
         if (bs == null) {
             BytesInternal.writeStopBitNeg1(this);
