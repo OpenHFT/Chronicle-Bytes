@@ -29,6 +29,7 @@ import static net.openhft.chronicle.core.io.ReferenceOwner.INIT;
 import static org.junit.Assert.*;
 import static org.junit.Assume.assumeFalse;
 
+@SuppressWarnings("deprecation")
 public class ByteStoreTest extends BytesTestCommon {
 
     private static final int SIZE = 128;

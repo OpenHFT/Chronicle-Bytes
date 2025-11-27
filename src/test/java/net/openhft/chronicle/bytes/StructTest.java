@@ -20,6 +20,7 @@ import static net.openhft.chronicle.core.Jvm.uncheckedCast;
 import static net.openhft.chronicle.core.UnsafeMemory.MEMORY;
 import static org.junit.Assert.assertEquals;
 
+@SuppressWarnings("deprecation")
 public class StructTest extends BytesTestCommon {
 
     /**

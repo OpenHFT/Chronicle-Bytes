@@ -16,6 +16,7 @@ import java.util.Locale;
 
 import static org.junit.Assume.assumeFalse;
 
+@SuppressWarnings("deprecation")
 public class Issue85Test extends BytesTestCommon {
     private int different = 0;
     private int different2 = 0;

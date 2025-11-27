@@ -708,6 +708,7 @@ public interface Bytes<U> extends
     }
 
     @Override
+    @SuppressWarnings("deprecation")
     default boolean isClear() {
         return start() == readPosition() && writeLimit() == capacity();
     }
@@ -1201,6 +1202,7 @@ public interface Bytes<U> extends
      * @throws NullPointerException         If the provided {@code clazz} is null.
      * @see #writeMarshallableLength16(WriteBytesMarshallable)
      */
+    @SuppressWarnings("deprecation")
     default <T extends ReadBytesMarshallable> T readMarshallableLength16(@NotNull final Class<T> clazz,
                                                                          @Nullable final T using)
             throws BufferUnderflowException, ClosedIllegalStateException, InvalidMarshallableException, ThreadingIllegalStateException {
@@ -1239,6 +1241,7 @@ public interface Bytes<U> extends
      * @throws NullPointerException        If the provided {@code marshallable} is null.
      * @see #readMarshallableLength16(Class, ReadBytesMarshallable)
      */
+    @SuppressWarnings("deprecation")
     default void writeMarshallableLength16(@NotNull final WriteBytesMarshallable marshallable)
             throws BufferOverflowException, ClosedIllegalStateException, BufferUnderflowException, InvalidMarshallableException, ThreadingIllegalStateException {
         requireNonNull(marshallable);

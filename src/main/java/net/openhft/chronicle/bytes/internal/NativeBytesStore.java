@@ -40,7 +40,7 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
  * ordered/atomic primitives for concurrent access patterns, but overall thread
  * safety still depends on how the instance is shared.
  */
-@SuppressWarnings({"restriction", "rawtypes"})
+@SuppressWarnings({"restriction", "rawtypes", "deprecation"})
 public class NativeBytesStore<U>
         extends AbstractBytesStore<NativeBytesStore<U>, U> {
     private static final SimpleCleaner NO_DEALLOCATOR = new NoDeallocator();

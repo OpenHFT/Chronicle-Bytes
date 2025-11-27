@@ -21,6 +21,7 @@ import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static org.junit.Assert.*;
 import static org.junit.Assume.assumeTrue;
 
+@SuppressWarnings("deprecation")
 public class BytesUtilTest extends BytesTestCommon {
 
     File testFile;

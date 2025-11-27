@@ -25,7 +25,7 @@ import static java.nio.charset.StandardCharsets.ISO_8859_1;
  * lock state.
  * <p> Debugging aid; not for high-performance operations.
  */
-@SuppressWarnings("rawtypes")
+@SuppressWarnings({"rawtypes", "deprecation"})
 public class TextIntArrayReference extends AbstractReference implements ByteableIntArrayValues {
     private static final byte[] SECTION1 = "{ locked: false, capacity: ".getBytes(ISO_8859_1);
     private static final byte[] SECTION2 = ", used: ".getBytes(ISO_8859_1);

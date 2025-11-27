@@ -22,6 +22,7 @@ import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static org.junit.Assert.*;
 import static org.junit.Assume.assumeFalse;
 
+@SuppressWarnings("deprecation")
 public class MappedFileTest extends BytesTestCommon {
 
     @Rule

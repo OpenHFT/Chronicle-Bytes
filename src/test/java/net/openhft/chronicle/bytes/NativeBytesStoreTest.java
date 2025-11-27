@@ -34,6 +34,7 @@ import static org.junit.Assume.assumeFalse;
  * support, histogram utilities, and reference counting edge cases for native
  * stores.
  */
+@SuppressWarnings("deprecation")
 public class NativeBytesStoreTest extends BytesTestCommon {
 
     private volatile int bcs;

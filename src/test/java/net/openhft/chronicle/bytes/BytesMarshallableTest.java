@@ -27,6 +27,7 @@ import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static org.junit.Assert.*;
 import static org.junit.Assume.assumeFalse;
 
+@SuppressWarnings("deprecation")
 @RunWith(Parameterized.class)
 public class BytesMarshallableTest extends BytesTestCommon {
 

@@ -24,6 +24,7 @@ import java.util.List;
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static org.junit.Assert.*;
 
+@SuppressWarnings("deprecation")
 public class MoreBytesTest extends BytesTestCommon {
 
     private static void testIndexOf(@NotNull final String sourceStr, @NotNull final String subStr) {

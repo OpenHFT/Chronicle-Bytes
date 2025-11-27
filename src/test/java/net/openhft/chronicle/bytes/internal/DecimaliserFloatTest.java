@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Test;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 
-@SuppressWarnings({"squid:S2699", "squid:S5786"})
+@SuppressWarnings({"squid:S2699", "squid:S5786", "deprecation"})
 class DecimaliserFloatTest extends BytesTestCommon {
 
     private static final DecimalAppender CHECK_OK = (negative, mantissa, exponent) -> {
@@ -197,4 +197,3 @@ class DecimaliserFloatTest extends BytesTestCommon {
         Assertions.assertTrue(UsesBigDecimal.USES_BIG_DECIMAL.toDecimal((float) Long.MIN_VALUE, check));
     }
 }
-

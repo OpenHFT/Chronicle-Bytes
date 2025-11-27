@@ -30,6 +30,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 /**
  * Tests if certain non-performant methods works as expected when called on a released Bytes object
  */
+@SuppressWarnings("deprecation")
 final class BytesReleaseInvariantNonPerformantMethodsTest extends BytesTestCommon {
 
     private static final String SILLY_NAME = "Tryggve";

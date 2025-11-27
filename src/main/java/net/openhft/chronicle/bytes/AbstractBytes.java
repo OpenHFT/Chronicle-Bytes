@@ -36,7 +36,7 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
  *
  * @param <U> underlying memory type
  */
-@SuppressWarnings("rawtypes")
+@SuppressWarnings({"rawtypes", "deprecation"})
 public abstract class AbstractBytes<U>
         extends AbstractReferenceCounted
         implements Bytes<U>,
@@ -378,6 +378,7 @@ public abstract class AbstractBytes<U>
     }
 
     @Override
+    @SuppressWarnings("deprecation")
     public Decimaliser decimaliser() {
         return decimaliser;
     }
@@ -1484,6 +1485,7 @@ public abstract class AbstractBytes<U>
     }
 
     @Override
+    @SuppressWarnings("deprecation")
     public boolean lastNumberHadDigits() {
         return lastNumberHadDigits;
     }

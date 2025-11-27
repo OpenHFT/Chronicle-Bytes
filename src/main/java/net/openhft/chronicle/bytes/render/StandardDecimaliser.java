@@ -7,6 +7,7 @@ package net.openhft.chronicle.bytes.render;
  * Default decimaliser that attempts {@link MaximumPrecision} with precision 18
  * and falls back to {@link UsesBigDecimal} for large numbers.
  */
+@SuppressWarnings("deprecation")
 public class StandardDecimaliser implements Decimaliser {
 
     /**

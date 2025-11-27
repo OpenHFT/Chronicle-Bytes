@@ -20,6 +20,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeFalse;
 
+@SuppressWarnings("deprecation")
 @RunWith(Parameterized.class)
 public class ByteStringAppenderTest extends BytesTestCommon {
     private final Bytes<?> bytes;

@@ -15,6 +15,7 @@ import static org.junit.Assert.fail;
 import static org.junit.Assume.assumeFalse;
 import static org.junit.jupiter.api.Assertions.*;
 
+@SuppressWarnings("deprecation")
 public class AppendableUtilTest extends BytesTestCommon {
 
     @Test

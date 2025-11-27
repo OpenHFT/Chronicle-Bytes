@@ -29,7 +29,7 @@ import java.nio.channels.FileLock;
  * @see Byteable
  * @see Closeable
  */
-@SuppressWarnings("rawtypes")
+@SuppressWarnings({"rawtypes", "deprecation"})
 public abstract class AbstractReference extends AbstractCloseable implements Byteable, Closeable {
 
     /**
