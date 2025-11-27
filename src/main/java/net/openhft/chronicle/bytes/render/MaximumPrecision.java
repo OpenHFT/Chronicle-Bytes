@@ -19,6 +19,7 @@ public class MaximumPrecision implements Decimaliser {
      * @param precision number of decimal places, 0-18 inclusive
      * @throws IllegalArgumentException if {@code precision} is outside that range
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public MaximumPrecision(int precision) {
         if (precision < 0 || precision > 18) {
             throw new IllegalArgumentException("Precision must be between 0 and 18, inclusive.");

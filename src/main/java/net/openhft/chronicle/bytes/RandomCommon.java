@@ -120,6 +120,7 @@ public interface RandomCommon extends ReferenceCounted {
      *
      * @return The number of bytes that can still be written with resizing.
      */
+    @Deprecated(/* to be removed in 2027 */)
     default long realWriteRemaining() {
         return Math.min(realCapacity(), writeLimit()) - writePosition();
     }

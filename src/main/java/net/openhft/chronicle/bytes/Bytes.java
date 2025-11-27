@@ -484,6 +484,7 @@ public interface Bytes<U> extends
      * {@link #allocateElasticDirect()} or {@link #allocateElasticOnHeap()} for a concrete type.
      */
     @SuppressWarnings("java:S1452")
+    // TODO Make sure used as intended
     static Bytes<?> allocateElastic() {
         return Jvm.maxDirectMemory() == 0 ? allocateElasticOnHeap() : allocateElasticDirect();
     }
@@ -517,6 +518,7 @@ public interface Bytes<U> extends
      * {@link #allocateElasticDirect(long)} or {@link #allocateElasticOnHeap(int)} for a concrete type.
      */
     @SuppressWarnings("java:S1452")
+    // TODO Make sure used as intended
     static Bytes<?> allocateElastic(@NonNegative int initialCapacity) {
         return Jvm.maxDirectMemory() == 0 ? allocateElasticOnHeap(initialCapacity) : allocateElasticDirect(initialCapacity);
     }

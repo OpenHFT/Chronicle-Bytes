@@ -48,6 +48,7 @@ public enum MappedUniqueTimeProvider implements TimeProvider, ReferenceOwner {
     /**
      * Sets the underlying time source.
      */
+    @Deprecated(/* to be removed in 2027 */)
     public MappedUniqueTimeProvider provider(TimeProvider provider) {
         this.provider = provider;
         return this;

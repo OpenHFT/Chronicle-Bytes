@@ -15,6 +15,7 @@ import java.nio.ByteBuffer;
  * instead so the required cast to {@link Buffer} is explicit and not removed as
  * a "redundant" cast.</p>
  */
+// TODO Check this has been used everywhere needed.
 public final class BufferUtil {
 
     private BufferUtil() {

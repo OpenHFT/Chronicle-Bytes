@@ -71,6 +71,7 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
     /**
      * Initializes the collection that keeps references to BinaryIntArrayReference instances.
      */
+    @Deprecated(/* to be removed in 2027 */)
     public static void startCollecting() {
         binaryIntArrayReferences = Collections.newSetFromMap(new IdentityHashMap<>());
     }
@@ -82,6 +83,7 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
+    @Deprecated(/* to be removed in 2027 */)
     public static void forceAllToNotCompleteState()
             throws IllegalStateException, BufferOverflowException {
         if (binaryIntArrayReferences == null)
@@ -107,6 +109,7 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public static void write(@NotNull Bytes<?> bytes, @NonNegative long capacity)
             throws BufferOverflowException, IllegalArgumentException, IllegalStateException {
         assert (bytes.writePosition() & 0x7) == 0;
@@ -135,6 +138,7 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
+    @Deprecated(/* to be removed in 2027 */)
     public static void lazyWrite(@NotNull Bytes<?> bytes, @NonNegative long capacity)
             throws BufferOverflowException, IllegalStateException {
         assert (bytes.writePosition() & 0x7) == 0;

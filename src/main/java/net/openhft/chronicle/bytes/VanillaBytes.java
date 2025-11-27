@@ -296,6 +296,7 @@ public class VanillaBytes<U>
     }
 
     @SuppressWarnings("deprecation")
+    @Deprecated(/* to be removed in 2027 */)
     protected void optimisedWrite(@NotNull RandomDataInput bytes, @NonNegative long offset, @NonNegative long length)
             throws BufferOverflowException, BufferUnderflowException, ClosedIllegalStateException, IllegalArgumentException, ThreadingIllegalStateException {
         requireNonNull(bytes);

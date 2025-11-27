@@ -52,6 +52,7 @@ public interface BytesOut<U> extends
     /**
      * Serialises {@code marshallable} prefixed with a 16-bit length.
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     void writeMarshallableLength16(WriteBytesMarshallable marshallable)
             throws IllegalArgumentException, BufferOverflowException, BufferUnderflowException, InvalidMarshallableException, ClosedIllegalStateException, ThreadingIllegalStateException;
 
