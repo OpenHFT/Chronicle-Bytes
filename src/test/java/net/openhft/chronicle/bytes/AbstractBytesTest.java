@@ -16,7 +16,7 @@ import java.nio.ByteBuffer;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
-@SuppressWarnings("unchecked")
+@SuppressWarnings({"unchecked", "deprecation"})
 public class AbstractBytesTest {
 
     private ConcreteBytes bytes;

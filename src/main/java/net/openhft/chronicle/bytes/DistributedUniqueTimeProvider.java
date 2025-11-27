@@ -20,6 +20,7 @@ import java.io.File;
  * <p>
  * {@link #currentTimeMillis()} simply delegates to the underlying provider and is therefore not unique.
  */
+@SuppressWarnings("deprecation")
 public class DistributedUniqueTimeProvider extends SimpleCloseable implements TimeProvider, Monitorable {
 
     /** maximum supported host identifiers */

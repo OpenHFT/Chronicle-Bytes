@@ -25,6 +25,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assume.assumeFalse;
 
+@SuppressWarnings("deprecation")
 public class MappedFileMultiThreadTest extends BytesTestCommon {
     private static final int CORES = Integer.getInteger("cores", Runtime.getRuntime().availableProcessors());
     private static final int RUNTIME_MS = Integer.getInteger("runtimems", 2_000);

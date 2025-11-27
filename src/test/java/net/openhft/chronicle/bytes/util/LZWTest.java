@@ -16,6 +16,7 @@ import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static net.openhft.chronicle.bytes.util.Compressions.LZW;
 import static org.junit.Assert.*;
 
+@SuppressWarnings("deprecation")
 public class LZWTest extends BytesTestCommon {
 
     @Test

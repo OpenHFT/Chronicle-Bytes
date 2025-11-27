@@ -15,6 +15,7 @@ import java.util.Map;
 
 import static java.lang.System.setProperty;
 
+@SuppressWarnings("deprecation")
 public class BytesReadWriteJLBH implements JLBHTask {
 
     public static final int SHORT_LENGTH = 37;

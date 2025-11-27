@@ -11,6 +11,7 @@ import java.nio.ByteBuffer;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 
+@SuppressWarnings("deprecation")
 class Bytes4Test extends BytesTestCommon {
 
     @Disabled("https://github.com/OpenHFT/Chronicle-Bytes/issues/186")

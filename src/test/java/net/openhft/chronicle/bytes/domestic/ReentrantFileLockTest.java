@@ -34,6 +34,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@SuppressWarnings("deprecation")
 class ReentrantFileLockTest extends BytesTestCommon {
 
     private static final int NUM_THREADS = 4;

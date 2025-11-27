@@ -27,6 +27,7 @@ import static net.openhft.chronicle.core.Jvm.uncheckedCast;
 import static org.junit.Assume.assumeFalse;
 import static org.junit.jupiter.api.Assertions.*;
 
+@SuppressWarnings("deprecation")
 @RunWith(Parameterized.class)
 public class EmptyBytesStoreTest extends BytesTestCommon {
 

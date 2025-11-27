@@ -11,6 +11,7 @@ import java.io.IOException;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.*;
 
+@SuppressWarnings("deprecation")
 public class ByteableTest {
 
     private Byteable byteable;

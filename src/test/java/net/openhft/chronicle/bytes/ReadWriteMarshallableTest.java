@@ -11,7 +11,7 @@ import java.nio.BufferUnderflowException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assume.assumeFalse;
 
-@SuppressWarnings("rawtypes")
+@SuppressWarnings({"rawtypes", "deprecation"})
 public class ReadWriteMarshallableTest extends BytesTestCommon {
     @Test
     public void test()

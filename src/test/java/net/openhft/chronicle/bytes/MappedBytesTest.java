@@ -32,7 +32,7 @@ import static net.openhft.chronicle.core.Jvm.uncheckedCast;
 import static org.junit.Assert.*;
 import static org.junit.Assume.assumeFalse;
 
-@SuppressWarnings("rawtypes")
+@SuppressWarnings({"rawtypes", "deprecation"})
 public class MappedBytesTest extends BytesTestCommon {
 
     private static final String

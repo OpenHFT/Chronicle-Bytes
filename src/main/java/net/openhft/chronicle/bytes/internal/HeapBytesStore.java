@@ -30,7 +30,7 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
  *
  * @param <U> underlying type
  */
-@SuppressWarnings("restriction")
+@SuppressWarnings({"restriction", "deprecation"})
 public class HeapBytesStore<U>
         extends AbstractBytesStore<HeapBytesStore<U>, U> {
     /** Actual byte array backing this store when wrapping heap memory. */

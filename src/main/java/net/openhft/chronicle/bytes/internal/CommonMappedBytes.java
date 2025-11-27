@@ -28,6 +28,7 @@ import static net.openhft.chronicle.core.util.StringUtils.*;
  * {@link net.openhft.chronicle.bytes.MappedFile}. Instances are intended for use
  * by a single thread.
  */
+@SuppressWarnings("deprecation")
 public abstract class CommonMappedBytes extends MappedBytes {
     /** manages closed state and delegates to {@link #performClose()} */
     private final AbstractCloseable closeable = new AbstractCloseable() {

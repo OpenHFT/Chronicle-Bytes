@@ -31,7 +31,7 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
  *
  * @param <U> type of the object representation
  */
-@SuppressWarnings("rawtypes")
+@SuppressWarnings({"rawtypes", "deprecation"})
 public class VanillaBytes<U>
         extends AbstractBytes<U>
         implements Byteable, Comparable<CharSequence> {

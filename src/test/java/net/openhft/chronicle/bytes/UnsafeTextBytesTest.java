@@ -11,6 +11,7 @@ import java.util.Random;
 
 import static org.junit.Assert.assertEquals;
 
+@SuppressWarnings("deprecation")
 public class UnsafeTextBytesTest extends BytesTestCommon {
 
     private static void testAppendBase10(final Bytes<?> bytes, final long l) {

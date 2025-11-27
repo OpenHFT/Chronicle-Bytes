@@ -24,6 +24,7 @@ import static net.openhft.chronicle.bytes.internal.BytesInternalTest.Nested.LENG
 import static org.junit.Assert.*;
 import static org.junit.Assume.assumeFalse;
 
+@SuppressWarnings("deprecation")
 public class BytesInternalTest extends BytesTestCommon {
     @Test
     public void testParseUTF_SB1()

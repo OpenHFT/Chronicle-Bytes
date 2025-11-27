@@ -38,7 +38,7 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
  *
  * @param <U> the type this bytes can reference
  */
-@SuppressWarnings("rawtypes")
+@SuppressWarnings({"rawtypes", "deprecation"})
 public class UncheckedNativeBytes<U>
         extends AbstractReferenceCounted
         implements Bytes<U>, HasUncheckedRandomDataInput, DecimalAppender {

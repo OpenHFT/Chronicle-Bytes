@@ -43,7 +43,7 @@ import static net.openhft.chronicle.bytes.ref.BinaryLongReference.LONG_NOT_COMPL
  * @see BytesStore
  * @see BinaryLongReference
  */
-@SuppressWarnings("rawtypes")
+@SuppressWarnings({"rawtypes", "deprecation"})
 public class BinaryLongArrayReference extends AbstractReference implements ByteableLongArrayValues, BytesMarshallable {
     public static final int SHIFT = 3;
     private static final long CAPACITY = 0;

@@ -14,6 +14,7 @@ import java.util.Random;
 import static junit.framework.TestCase.assertEquals;
 import static org.junit.Assume.assumeFalse;
 
+@SuppressWarnings("deprecation")
 public class StopBitDecimalTest extends BytesTestCommon {
     @Test
     public void testDecimals() {

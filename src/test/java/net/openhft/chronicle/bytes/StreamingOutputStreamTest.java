@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
-@SuppressWarnings({"unchecked", "rawtypes"})
+@SuppressWarnings({"unchecked", "rawtypes", "deprecation"})
 class StreamingOutputStreamTest {
 
     private StreamingDataOutput<?> sdo;
