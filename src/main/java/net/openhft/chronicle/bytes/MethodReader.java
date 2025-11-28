@@ -30,7 +30,6 @@ public interface MethodReader extends Closeable {
      *
      * @return a MethodReaderInterceptorReturns instance
      */
-    @Deprecated(/* to be removed in 2027 */)
     MethodReaderInterceptorReturns methodReaderInterceptorReturns();
 
     /**
