@@ -37,7 +37,7 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
  * avoid leaks.
  *
  * <p>Thread safety is implementation specific; callers must obey any documented
- * single-writer or single-reader constraints when sharing instances.</p>
+ * single-writer or single-reader constraints when sharing instances.
  *
  * @param <B> concrete subtype
  * @param <U> backing buffer type

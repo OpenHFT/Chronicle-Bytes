@@ -8,6 +8,8 @@ import net.openhft.chronicle.bytes.BytesTestCommon;
 import net.openhft.chronicle.bytes.NativeBytes;
 import net.openhft.chronicle.bytes.internal.NativeBytesStore;
 import org.jetbrains.annotations.NotNull;
+import org.junit.Ignore;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -102,8 +104,8 @@ public class OptimisedBytesStoreHashTest extends BytesTestCommon {
         System.out.printf("Average time %.3f us%n", (double) time / (double) timeCount / 1e3);
     }
 
-    //@Test
-    //@Ignore("Long running, avg score = 5414, avg time 0.043 us")
+    @Test
+    @Ignore("Long running, avg score = 5414, avg time 0.043 us")
     public void testSmallRandomness() {
         long time = 0, timeCount = 0;
         long scoreSum = 0;
