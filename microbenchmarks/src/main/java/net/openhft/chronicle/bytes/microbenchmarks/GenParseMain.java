@@ -11,6 +11,14 @@ import net.openhft.chronicle.core.cooler.CpuCoolers;
 
 import java.util.concurrent.Callable;
 
+/**
+ * Experimental harness for comparing simple string based parsing with Chronicle Bytes based parsing.
+ *
+ * <p>The tool encodes and decodes a small {@link CodeNumber} structure using both
+ * {@link String}-based and {@link Bytes}-based representations, then uses {@link CoolerTester} and
+ * {@link CpuCoolers} to measure latency under different pause and busy-wait strategies. Results are
+ * printed for manual inspection and are not part of any public API or automated benchmark suite.
+ */
 /*
 conservative power, no affinity
 
