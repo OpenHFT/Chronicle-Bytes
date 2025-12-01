@@ -78,7 +78,7 @@ public abstract class AbstractBytes<U>
     /**
      * Whether the underlying store is open.
      */
-    @Deprecated(/* to be removed in 2026 */)
+    @Deprecated(/* to be removed in 2027 */)
     protected boolean isPresent;
     /**
      * Offset for the next byte to write.
