@@ -4,6 +4,7 @@
 package net.openhft.chronicle.bytes.internal;
 
 import net.openhft.chronicle.bytes.*;
+import net.openhft.chronicle.bytes.util.BufferUtil;
 import net.openhft.chronicle.core.*;
 import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.cleaner.CleanerServiceLocator;
@@ -285,7 +286,7 @@ public class NativeBytesStore<U>
         } else if (underlyingObject instanceof ByteBuffer) {
             ByteBuffer bb = ByteBuffer.allocateDirect(Maths.toInt32(capacity()));
             bb.put((ByteBuffer) underlyingObject);
-            bb.clear();
+            BufferUtil.clear(bb);
             return uncheckedCast(wrap(bb));
 
         } else {
@@ -805,7 +806,7 @@ public class NativeBytesStore<U>
         } catch (Exception e) {
             throw new AssertionError(e);
         }
-        bb.clear();
+        BufferUtil.clear(bb);
         return bb;
     }
 

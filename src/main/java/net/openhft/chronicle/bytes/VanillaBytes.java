@@ -5,6 +5,7 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.bytes.internal.BytesInternal;
 import net.openhft.chronicle.bytes.internal.NativeBytesStore;
+import net.openhft.chronicle.bytes.util.BufferUtil;
 import net.openhft.chronicle.core.*;
 import net.openhft.chronicle.core.annotation.Java9;
 import net.openhft.chronicle.core.annotation.NonNegative;
@@ -285,10 +286,10 @@ public class VanillaBytes<U>
             ByteBuffer bb = ByteBuffer.allocateDirect(Maths.toInt32(readRemaining()));
             @NotNull ByteBuffer bbu = (ByteBuffer) bytesStore.underlyingObject();
             ByteBuffer slice = bbu.slice();
-            net.openhft.chronicle.bytes.internal.BufferUtil.setPosition(slice, (int) readPosition());
-            net.openhft.chronicle.bytes.internal.BufferUtil.setLimit(slice, (int) readLimit());
+            BufferUtil.setPosition(slice, (int) readPosition());
+            BufferUtil.limit(slice, (int) readLimit());
             bb.put(slice);
-            net.openhft.chronicle.bytes.internal.BufferUtil.clear(bb);
+            BufferUtil.clear(bb);
             return uncheckedCast(BytesStore.wrap(bb));
         } else {
             return uncheckedCast(BytesUtil.copyOf(this));

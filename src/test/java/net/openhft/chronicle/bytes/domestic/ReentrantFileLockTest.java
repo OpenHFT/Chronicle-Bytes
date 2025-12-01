@@ -4,6 +4,7 @@
 package net.openhft.chronicle.bytes.domestic;
 
 import net.openhft.chronicle.bytes.BytesTestCommon;
+import net.openhft.chronicle.bytes.util.BufferUtil;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.Closeable;
 import net.openhft.chronicle.core.io.IOTools;
@@ -17,7 +18,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.channels.ClosedChannelException;
 import java.nio.channels.FileChannel;
@@ -244,9 +244,9 @@ class ReentrantFileLockTest extends BytesTestCommon {
 
         private int readIdentifier(FileChannel channel) {
             try {
-                ((Buffer) buffer).clear();
+                BufferUtil.clear(buffer);
                 channel.read(buffer, 0);
-                ((Buffer) buffer).flip();
+                BufferUtil.flip(buffer);
                 return buffer.getInt();
             } catch (IOException e) {
                 throw new RuntimeException("Couldn't read ID", e);
@@ -255,9 +255,9 @@ class ReentrantFileLockTest extends BytesTestCommon {
 
         private void writeIdentifier(FileChannel channel) {
             try {
-                ((Buffer) buffer).clear();
+                BufferUtil.clear(buffer);
                 buffer.putInt(identifier);
-                ((Buffer) buffer).flip();
+                BufferUtil.flip(buffer);
                 channel.write(buffer, 0);
             } catch (IOException e) {
                 throw new RuntimeException("Couldn't write ID", e);

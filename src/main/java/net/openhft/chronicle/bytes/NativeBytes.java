@@ -18,7 +18,7 @@ import org.jetbrains.annotations.Nullable;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
-import net.openhft.chronicle.bytes.internal.BufferUtil;
+import net.openhft.chronicle.bytes.util.BufferUtil;
 
 import static net.openhft.chronicle.bytes.BytesStore.nativeStoreWithFixedCapacity;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
@@ -318,7 +318,7 @@ public class NativeBytes<U>
         if (this.bytesStore.underlyingObject() instanceof ByteBuffer) {
             @Nullable final ByteBuffer byteBuffer = (ByteBuffer) this.bytesStore.underlyingObject();
             BufferUtil.setPosition(byteBuffer, 0);
-            BufferUtil.setLimit(byteBuffer, byteBuffer.capacity());
+            BufferUtil.limit(byteBuffer, byteBuffer.capacity());
             BufferUtil.setPosition(byteBuffer, position);
         }
     }

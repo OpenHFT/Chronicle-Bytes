@@ -22,7 +22,7 @@ import org.jetbrains.annotations.Nullable;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
-import net.openhft.chronicle.bytes.internal.BufferUtil;
+import net.openhft.chronicle.bytes.util.BufferUtil;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static net.openhft.chronicle.core.Jvm.uncheckedCast;

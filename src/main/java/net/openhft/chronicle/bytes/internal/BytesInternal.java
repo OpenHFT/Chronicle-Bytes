@@ -4,6 +4,7 @@
 package net.openhft.chronicle.bytes.internal;
 
 import net.openhft.chronicle.bytes.*;
+import net.openhft.chronicle.bytes.util.BufferUtil;
 import net.openhft.chronicle.bytes.util.DecoratedBufferOverflowException;
 import net.openhft.chronicle.bytes.util.DecoratedBufferUnderflowException;
 import net.openhft.chronicle.bytes.util.StringInternerBytes;
@@ -3546,7 +3547,7 @@ enum BytesInternal {
         long address = bytesStore.addressForRead(bytesStore.readPosition());
         long capacity = bytesStore.realReadRemaining();
         ByteBuffers.setAddressCapacity(byteBuffer, address, capacity);
-        byteBuffer.clear();
+        BufferUtil.clear(byteBuffer);
     }
 
     private static boolean canReadBytesAt(
