@@ -1,27 +1,61 @@
 = Chronicle Bytes Utility Helpers (`net.openhft.chronicle.bytes.util`)
-:doctype: book
 :toc:
-:toclevels: 2
 :lang: en-GB
+:toclevels: 2
+:doctype: book
+:source-highlighter: rouge
 
 This overview describes the collection of helper types that reside in the
 `net.openhft.chronicle.bytes.util` package.
 These utilities provide ancillary functionalities such as compression, string interning, and parsing aids.
 While some components are designed for internal use by higher layers like _Wire_ and _Queue_ and may evolve, others offer stable utility for general use.
-Every class is designed with Chronicle’s core goals in mind – aiming for **low-allocation, low-latency, and direct-memory-friendly** operations where appropriate.
+Every class is designed with Chronicle’s core goals in mind – aiming for *low-allocation, low-latency, and direct-memory-friendly* operations where appropriate.
 
 == At a glance
 
 |===
 |Domain | Main types | Typical use case
 
-|_Compression_ | `Compression` (Interface), `Compressions` (Enum) | On-the-fly LZW / GZIP stream processing or pass-through *Binary* (no-op) mode.
+|_Compression_ | `Compression` (Interface), `Compressions` (Enum) | On-the-fly LZW / GZIP stream processing or pass-through _Binary_ (no-op) mode.
 |_String interning_ | `AbstractInterner` (Base class), `StringInternerBytes`, `UTF8StringInterner`, `Bit8StringInterner` | Reduce GC churn and memory footprint by reusing `String` instances for frequently encountered byte sequences (e.g., field names, symbols).
 |_Length prefixes_ | `BinaryLengthLength` (Enum) | Encode variable-width byte-length headers for binary data segments, supporting 8-bit, 16-bit, or 32-bit length fields.
 |_Parsing helpers_ | `EscapingStopCharTester`, `EscapingStopCharsTester` | Decorators for `StopCharTester` and `StopCharsTester` to enable tokenisation of text while honouring backslash (`\`) as an escape character, so that escaped stop characters are not treated as terminators.
 |_Property expansion_ | `PropertyReplacer` (Enum) | Expand `${property}` placeholders within a template string, sourcing values from `System.getProperty` or a supplied `java.util.Properties` object.
 |_Customised exceptions_ | `DecoratedBufferOverflowException`, `DecoratedBufferUnderflowException` | Provide more informative buffer boundary error messages by allowing a pre-formatted string, potentially avoiding the cost of `String.format` at throw time.
 |===
+
+.Utility types and relationships (conceptual)
+[source,mermaid]
+----
+classDiagram
+    class Compression {
+        <<interface>>
+        +compress(byte[])
+        +uncompress(byte[])
+    }
+    class Compressions {
+        <<enum>>
+    }
+    Compression <|.. Compressions
+
+    class AbstractInterner {
+        <<abstract>>
+    }
+    AbstractInterner <|-- StringInternerBytes
+    AbstractInterner <|-- UTF8StringInterner
+    AbstractInterner <|-- Bit8StringInterner
+
+    class BinaryLengthLength {
+        <<enum>>
+    }
+
+    class PropertyReplacer {
+        <<enum>>
+    }
+
+    class DecoratedBufferOverflowException
+    class DecoratedBufferUnderflowException
+----
 
 [#compression]
 == Compression utilities
@@ -48,20 +82,49 @@ When using the stream wrappers, they are designed to close the _decorator_ strea
 It is good practice to manage the underlying stream's lifecycle separately, often using a `try-with-resources` block for it.
 ====
 
+.Example: compressing and decompressing with `Bytes`
+[source,java,opts=novalidate]
+----
+Bytes<?> source = Bytes.allocateElasticOnHeap();
+source.writeUtf8("Hello, compressed world!");
+
+Bytes<?> compressed = Bytes.allocateElasticOnHeap();
+Compression lzw = Compressions.LZW;
+
+// Compress from source to compressed
+lzw.compress(source, compressed);
+
+// Prepare a target buffer and decompress back
+Bytes<?> decompressed = Bytes.allocateElasticOnHeap();
+lzw.uncompress(compressed, decompressed);
+
+decompressed.readPosition(0);
+String roundTrip = decompressed.readUtf8();
+assert "Hello, compressed world!".equals(roundTrip);
+
+source.releaseLast();
+compressed.releaseLast();
+decompressed.releaseLast();
+----
+
 [#interning]
 == String interning utilities
 
 Interners are designed to reduce memory usage and garbage collection overhead by canonicalising `String` instances created from byte sequences.
 If a byte sequence has been seen before, a cached `String` instance is returned.
 
-* **`AbstractInterner<T>`**: An abstract base class for interners.
+`AbstractInterner<T>` ::
+An abstract base class for interners.
 It implements a lock-free cache with a power-of-two capacity using open-addressing and a simple toggle heuristic for collision resolution.
 Subclasses define how to convert bytes to an object of type `T`.
-* **`StringInternerBytes`**: A subclass of `net.openhft.chronicle.core.pool.StringInterner` specifically for `Bytes` instances.
+`StringInternerBytes` ::
+A subclass of `net.openhft.chronicle.core.pool.StringInterner` specifically for `Bytes` instances.
 It assumes an 8-bit (e.g., ISO-8859-1) encoding when converting bytes to `String`.
 It uses `BytesStoreHash` for potentially faster hashing of `BytesStore` content.
-* **`Bit8StringInterner`**: Extends `AbstractInterner` and treats each byte as an unsigned 8-bit character to form a `String`.
-* **`UTF8StringInterner`**: Extends `AbstractInterner` and decodes byte sequences as UTF-8 to produce `String` objects.
+`Bit8StringInterner` ::
+Extends `AbstractInterner` and treats each byte as an unsigned 8-bit character to form a `String`.
+`UTF8StringInterner` ::
+Extends `AbstractInterner` and decodes byte sequences as UTF-8 to produce `String` objects.
 It uses `AppendableUtil.parseUtf8` for validation and conversion.
 
 [NOTE]
@@ -122,14 +185,18 @@ Both include a `serialVersionUID`.
 
 == Thread-safety & Memory Model Notes
 
-* **Stateless Utilities**: Classes like `PropertyReplacer` and the static helper methods in `Compression` are intrinsically thread-safe as they operate only on their inputs.
+Stateless Utilities ::
+Classes like `PropertyReplacer` and the static helper methods in `Compression` are intrinsically thread-safe as they operate only on their inputs.
 The `Compressions` enum constants are also thread-safe singletons.
-* **Interners**: `AbstractInterner` and its subclasses use a lock-free approach for reads and a racy-update for writes to the cache.
+Interners ::
+`AbstractInterner` and its subclasses use a lock-free approach for reads and a racy-update for writes to the cache.
 This design relies on benign data races where eventual consistency is acceptable, and individual operations on cache entries are typically atomic or idempotent.
 They aim for correct behaviour under concurrency but may not guarantee that all threads always see the exact same `String` instance immediately after a new string is interned by one thread.
-* **Compression Streams**: The `InputStream` and `OutputStream` wrappers returned by `Compression` strategies (like `LZW` or `GZIP`) are typically stateful and **not** thread-safe.
+Compression Streams ::
+The `InputStream` and `OutputStream` wrappers returned by `Compression` strategies (like `LZW` or `GZIP`) are typically stateful and *not* thread-safe.
 Each thread should use its own stream instance or access a shared stream via external synchronisation.
-* **`EscapingStopCharTester` / `EscapingStopCharsTester`**: These are stateful and **not** thread-safe.
+`EscapingStopCharTester` / `EscapingStopCharsTester` ::
+These are stateful and *not* thread-safe.
 
 == Quick Reference
 
