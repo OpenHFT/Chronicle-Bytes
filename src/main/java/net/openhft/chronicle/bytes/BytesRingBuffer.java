@@ -14,11 +14,13 @@ import java.nio.BufferOverflowException;
 
 /**
  * Represents a ring buffer for {@link Bytes} data, intended for
- * high-throughput, low-latency messaging between threads or services. It
- * combines statistics ({@link BytesRingBufferStats}), byte consumption
- * ({@link BytesConsumer}) and resource management ({@link Closeable}). Direct
- * user implementation is discouraged and some functionality may require
- * commercial libraries.
+ * high-throughput, low-latency messaging between threads or services. Each
+ * instance couples statistics ({@link BytesRingBufferStats}), byte
+ * consumption ({@link BytesConsumer}) and lifecycle management
+ * ({@link Closeable}). Implementations may support multiple readers and apply
+ * backpressure by rejecting writes when capacity is exhausted. Direct user
+ * implementation is discouraged; the public factory delegates to the
+ * commercial implementation when present.
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
 public interface BytesRingBuffer extends BytesRingBufferStats, BytesConsumer, Closeable {
