@@ -1,7 +1,7 @@
 /*
  * Copyright 2013-2025 chronicle.software; SPDX-License-Identifier: Apache-2.0
  */
-package net.openhft.chronicle.bytes.internal;
+package net.openhft.chronicle.bytes.util;
 
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
@@ -33,7 +33,7 @@ public final class BufferUtil {
         ((Buffer) byteBuffer).flip();
     }
 
-    public static void setLimit(ByteBuffer byteBuffer, int newLimit) {
+    public static void limit(ByteBuffer byteBuffer, int newLimit) {
         ((Buffer) byteBuffer).limit(newLimit);
     }
 }

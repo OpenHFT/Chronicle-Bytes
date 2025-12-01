@@ -5,6 +5,7 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.bytes.internal.BytesInternal;
 import net.openhft.chronicle.bytes.internal.Chars;
+import net.openhft.chronicle.bytes.util.BufferUtil;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.UnsafeMemory;
 import net.openhft.chronicle.core.annotation.NonNegative;
@@ -657,7 +658,7 @@ public interface RandomDataInput extends RandomCommon {
         ByteBuffer bb = ByteBuffer.allocateDirect(len);
         bb.order(ByteOrder.nativeOrder());
         copyTo(bb);
-        net.openhft.chronicle.bytes.internal.BufferUtil.clear(bb);
+        BufferUtil.clear(bb);
         return bb;
     }
 
