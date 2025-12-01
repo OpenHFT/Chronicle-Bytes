@@ -17,6 +17,10 @@ import java.util.function.Consumer;
 
 import static org.junit.Assert.fail;
 
+/**
+ * Parameterised tests checking that write limits and elastic resizing behave
+ * correctly across different allocator strategies.
+ */
 @RunWith(Parameterized.class)
 public class WriteLimitTest extends BytesTestCommon {
     private static final Allocator[] ALLOCATORS = {Allocator.HEAP, Allocator.HEAP_EMBEDDED, Allocator.HEAP_UNCHECKED};

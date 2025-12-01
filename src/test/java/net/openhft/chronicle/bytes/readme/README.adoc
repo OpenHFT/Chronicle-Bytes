@@ -1,5 +1,7 @@
 = README examples for Chronicle Bytes
+:toc:
 :lang: en-GB
+:source-highlighter: rouge
 
 This package contains small JUnit tests that double as usage examples.
 They are referenced from the main documentation and can be executed like any other unit test.
