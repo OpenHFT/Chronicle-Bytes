@@ -22,7 +22,10 @@ import java.nio.BufferUnderflowException;
 /**
  * Extension of {@link StreamingDataOutput} and {@link Appendable} that exposes
  * convenience methods for writing text and numbers to a {@link Bytes} stream.
- * Each method returns {@code this} to allow fluent call chains.
+ * Implementations honour the underlying {@link Bytes} decimaliser so numeric
+ * rendering is consistent across writers. Each method returns {@code this} to
+ * allow fluent call chains and to minimise intermediate allocations when
+ * formatting to off-heap or on-heap buffers.
  *
  * @param <B> concrete type for fluent chaining
  */
@@ -209,7 +212,7 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      */
     @NotNull
     default B append(float f)
-            throws BufferOverflowException, IllegalStateException, ClosedIllegalStateException, ThreadingIllegalStateException {
+            throws BufferOverflowException, IllegalStateException {
         float f2 = Math.abs(f);
         if (f2 > 1e6 || f2 < 1e-3) {
             return append(Float.toString(f));
@@ -224,7 +227,7 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      */
     @NotNull
     default B append(double d)
-            throws BufferOverflowException, IllegalStateException, ClosedIllegalStateException, ThreadingIllegalStateException {
+            throws BufferOverflowException, IllegalStateException {
         try (ScopedResource<Bytes<?>> stlBytes = BytesInternal.acquireBytesScoped()) {
             Bytes<?> bytes = stlBytes.get();
             bytes.append(d);

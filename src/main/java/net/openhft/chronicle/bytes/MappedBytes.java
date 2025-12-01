@@ -90,7 +90,6 @@ public abstract class MappedBytes extends AbstractBytes<Void> implements Closeab
      * @return a new {@code MappedBytes}
      * @throws FileNotFoundException if the file does not exist
      */
-
     @NotNull
     public static MappedBytes singleMappedBytes(@NotNull File file, @NonNegative long capacity, boolean readOnly)
             throws FileNotFoundException {
