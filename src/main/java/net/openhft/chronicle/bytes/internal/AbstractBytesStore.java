@@ -21,7 +21,6 @@ import net.openhft.chronicle.core.io.AbstractReferenceCounted;
  * @param <B> the BytesStore type
  * @param <U> the underlying backing type
  */
-
 public abstract class AbstractBytesStore<B extends BytesStore<B, U>, U>
         extends AbstractReferenceCounted
         implements BytesStore<B, U> {

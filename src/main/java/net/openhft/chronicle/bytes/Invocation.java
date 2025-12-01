@@ -7,11 +7,10 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 /**
- * A functional interface representing the act of invoking a method.
+ * Functional callback representing a method invocation.
  * <p>
- * It is primarily used as a callback within interceptor patterns such as
- * {@link net.openhft.chronicle.bytes.MethodReaderInterceptorReturns} to
- * allow the interceptor to control or augment the actual method execution.
+ * Used by method reader interceptors to delegate the actual call while still allowing wrappers to
+ * log, short-circuit or alter arguments/return values.
  */
 @FunctionalInterface
 public interface Invocation {

@@ -11,10 +11,12 @@ import net.openhft.chronicle.core.io.ThreadingIllegalStateException;
 import java.nio.BufferUnderflowException;
 
 /**
- * This class implements the xxHash algorithm for hashing byte stores.
- * xxHash is a non-cryptographic hash function known for its speed.
- *
- * <p>Migrated from Zero-Allocation-Hashing.
+ * Implementation of the xxHash64 algorithm for hashing {@link BytesStore}
+ * instances. xxHash is a fast, non-cryptographic hash suitable for
+ * deduplication, caching and bucketing but not for security-sensitive uses.
+ * This version is migrated from Zero-Allocation-Hashing and keeps the
+ * allocation-free, little-endian design while exposing Chronicle
+ * {@link BytesStoreHash} contracts.
  *
  * @see BytesStoreHash
  * @see BytesStore
