@@ -62,9 +62,9 @@ public class ByteStringAppenderTest extends BytesTestCommon {
             throws IORuntimeException {
         for (int expected = 1; expected != 0; expected *= 2) {
             bytes.append(expected);
-            bytes.append(",");
+            bytes.append(',');
             bytes.append(-expected);
-            bytes.append(",");
+            bytes.append(',');
 
             assertEquals(expected, (int) bytes.parseLong());
             assertEquals(-expected, (int) bytes.parseLong());
@@ -77,9 +77,9 @@ public class ByteStringAppenderTest extends BytesTestCommon {
         for (long expected = 1; expected != 0; expected *= 2) {
             bytes.clear();
             bytes.append(expected);
-            bytes.append(",");
+            bytes.append(',');
             bytes.append(-expected);
-            bytes.append(",");
+            bytes.append(',');
 //            System.out.println(bytes);
             assertEquals(expected, bytes.parseLong());
             assertEquals(-expected, bytes.parseLong());

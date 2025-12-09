@@ -205,9 +205,8 @@ public enum BytesUtil {
     public static String findFile(@NotNull String name)
             throws FileNotFoundException {
         File file = new File(name);
-        URL url = null;
         if (!file.exists()) {
-            url = urlFor(Thread.currentThread().getContextClassLoader(), name);
+            URL url = urlFor(Thread.currentThread().getContextClassLoader(), name);
             String file2 = url.getFile().replace("%20", " ")
                     .replace("target/test-classes", "src/test/resources");
             file = new File(file2);
@@ -227,12 +226,11 @@ public enum BytesUtil {
             return Bytes.from(name.substring(1));
         }
         File file = new File(name);
-        URL url = null;
         if (!file.exists()) {
-            url = urlFor(Thread.currentThread().getContextClassLoader(), name);
-            file = new File(url.getFile());
+            URL url = urlFor(Thread.currentThread().getContextClassLoader(), name);
+            return Bytes.wrapForRead(readAsBytes(open(url)));
         }
-        return Bytes.wrapForRead(readAsBytes(url == null ? Files.newInputStream(file.toPath()) : open(url)));
+        return Bytes.wrapForRead(readAsBytes(Files.newInputStream(file.toPath())));
 
     }
 
@@ -696,9 +694,9 @@ public enum BytesUtil {
                     }
                 }
             }
-            return;
+            break;
             default:
-                return;
+                break;
         }
     }
 

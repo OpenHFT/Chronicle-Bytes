@@ -41,6 +41,7 @@ public class SimpleDecimaliser implements Decimaliser {
      * @return {@code true} if the value was represented within {@link #MANTISSA_LIMIT}
      *         and {@link #LARGEST_EXPONENT_IN_LONG}
      */
+    @Override
     public boolean toDecimal(double value, DecimalAppender decimalAppender) {
         // Determine if the input value is negative.
         boolean isNegative = Double.doubleToLongBits(value) < 0;
@@ -75,6 +76,7 @@ public class SimpleDecimaliser implements Decimaliser {
      * @param decimalAppender the appender that receives sign, mantissa and exponent
      * @return {@code true} if the value was represented within {@link #LARGEST_EXPONENT_IN_LONG}
      */
+    @Override
     public boolean toDecimal(float value, DecimalAppender decimalAppender) {
         // Determine if the input value is negative.
         boolean sign = Float.floatToRawIntBits(value) < 0;

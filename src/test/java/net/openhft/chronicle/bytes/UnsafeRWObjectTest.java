@@ -79,8 +79,7 @@ class UnsafeRWObjectTest extends BytesTestCommon {
         Bytes<?> bytes = Bytes.allocateDirect(8 * 8);
         BB bb = new BB(0x2000000000000001L, 0x4000000000000003L, 0x6000000000000005L, 0x8000000000000007L, 0xA000000000000009L, 0xC00000000000000BL, 0xE00000000000000DL, 0x100000000000000FL);
         bytes.unsafeWriteObject(bb, ints[0], ints[1] - ints[0]);
-        String expected = "" +
-                "00000000 01 00 00 00 00 00 00 20  03 00 00 00 00 00 00 40 ·······  ·······@\n" +
+        String expected = "00000000 01 00 00 00 00 00 00 20  03 00 00 00 00 00 00 40 ·······  ·······@\n" +
                 "00000010 05 00 00 00 00 00 00 60  07 00 00 00 00 00 00 80 ·······` ········\n" +
                 "00000020 09 00 00 00 00 00 00 a0  0b 00 00 00 00 00 00 c0 ········ ········\n" +
                 "00000030 0d 00 00 00 00 00 00 e0  0f 00 00 00 00 00 00 10 ········ ········\n";
@@ -105,8 +104,7 @@ class UnsafeRWObjectTest extends BytesTestCommon {
         Bytes<?> bytes = Bytes.allocateDirect(8 * 8);
         DD bb = new DD(1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8);
         bytes.unsafeWriteObject(bb, BytesUtil.triviallyCopyableRange(DD.class)[0], 8 * 8);
-        String expected = "" +
-                "00000000 9a 99 99 99 99 99 f1 3f  9a 99 99 99 99 99 01 40 ·······? ·······@\n" +
+        String expected = "00000000 9a 99 99 99 99 99 f1 3f  9a 99 99 99 99 99 01 40 ·······? ·······@\n" +
                 "00000010 66 66 66 66 66 66 0a 40  9a 99 99 99 99 99 11 40 ffffff·@ ·······@\n" +
                 "00000020 00 00 00 00 00 00 16 40  66 66 66 66 66 66 1a 40 ·······@ ffffff·@\n" +
                 "00000030 cd cc cc cc cc cc 1e 40  9a 99 99 99 99 99 21 40 ·······@ ······!@\n";
@@ -149,7 +147,7 @@ class UnsafeRWObjectTest extends BytesTestCommon {
                 Arrays.toString(
                         BytesUtil.triviallyCopyableRange(int[].class)));
         Bytes<?> bytes = Bytes.allocateDirect(32);
-        int[] array = new int[]{1, 2, 4, 3};
+        int[] array = {1, 2, 4, 3};
         int offset = BytesUtil.triviallyCopyableStart(((Object) array).getClass());
         bytes.unsafeWriteObject(array, offset, 4 * 4);
         assertEquals("00000000 01 00 00 00 02 00 00 00  04 00 00 00 03 00 00 00 ········ ········\n",

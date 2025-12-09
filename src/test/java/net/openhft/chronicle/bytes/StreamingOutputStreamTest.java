@@ -37,7 +37,7 @@ class StreamingOutputStreamTest {
 
     @Test
     void writeByteArray() throws IOException {
-        byte[] bytes = new byte[]{1, 2, 3, 4, 5};
+        byte[] bytes = {1, 2, 3, 4, 5};
         sos.write(bytes, 0, bytes.length);
         // Verify that write was called on the StreamingDataOutput with the correct arguments
         verify(sdo, times(1)).write(bytes, 0, bytes.length);
@@ -51,7 +51,7 @@ class StreamingOutputStreamTest {
 
     @Test
     void writeArrayThrowsIOExceptionOnIllegalArgument() {
-        byte[] bytes = new byte[]{1, 2, 3, 4, 5};
+        byte[] bytes = {1, 2, 3, 4, 5};
         doThrow(IllegalArgumentException.class).when(sdo).write(any(byte[].class), anyInt(), anyInt());
         assertThrows(IOException.class, () -> sos.write(bytes, 0, bytes.length));
     }

@@ -14,6 +14,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class BytesMarshallerTest {
 
+    @SuppressWarnings("PMD.TestClassWithoutTestCases")
     static class TestClass {
         @SuppressWarnings("WeakerAccess")
         @UsedViaReflection
@@ -28,6 +29,7 @@ class BytesMarshallerTest {
     private BytesIn<?> bytesIn;
     private TestClass testObject;
 
+    @SuppressWarnings("PMD.TestClassWithoutTestCases")
     static class TestObject implements ReadBytesMarshallable, WriteBytesMarshallable {
         int intValue;
         String stringValue;

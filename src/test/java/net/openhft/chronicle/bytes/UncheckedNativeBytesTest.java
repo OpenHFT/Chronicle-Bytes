@@ -212,7 +212,7 @@ class UncheckedNativeBytesTest {
     }
 
     @Test
-    public void uncheckedWrapEnsureCapacityAndAppend() {
+    void uncheckedWrapEnsureCapacityAndAppend() {
         Bytes<?> b = Bytes.allocateDirect(8);
         Bytes<?> u = b.unchecked(true);
         try {

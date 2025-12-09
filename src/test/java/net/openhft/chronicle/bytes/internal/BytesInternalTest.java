@@ -63,7 +63,6 @@ public class BytesInternalTest extends BytesTestCommon {
         BytesInternal.parseUtf8(bytes, sb, true, length);
         assertEquals(length, sb.length());
         String actual = sb.toString();
-        sb = null; // free some memory.
         assertEquals(new String(bytes2, US_ASCII), actual);
 
         bytes.releaseLast();

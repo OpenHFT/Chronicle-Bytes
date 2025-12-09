@@ -46,6 +46,7 @@ public class UsesBigDecimal implements Decimaliser {
      * @param decimalAppender The {@link DecimalAppender} used to store and append the converted decimal value.
      * @return {@code true} if the conversion and appending were successful, {@code false} otherwise.
      */
+    @Override
     public boolean toDecimal(double value, DecimalAppender decimalAppender) {
         // Check for non-finite values or negative zero
         if (!Double.isFinite(value) || Double.doubleToLongBits(value) == NEGATIVE_ZERO_BITS)
@@ -88,6 +89,7 @@ public class UsesBigDecimal implements Decimaliser {
      * @param decimalAppender The {@link DecimalAppender} used to store and append the converted decimal value.
      * @return {@code true} if the conversion and appending were successful, {@code false} otherwise.
      */
+    @Override
     public boolean toDecimal(float value, DecimalAppender decimalAppender) {
         // Check for non-finite values
         if (!Float.isFinite(value))

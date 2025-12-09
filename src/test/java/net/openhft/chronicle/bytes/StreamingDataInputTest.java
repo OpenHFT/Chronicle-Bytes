@@ -85,6 +85,7 @@ public class StreamingDataInputTest extends BytesTestCommon {
         }
     }
 
+    @SuppressWarnings("PMD.TestClassWithoutTestCases")
     static class TestObject {
         long l1;
         long i1;

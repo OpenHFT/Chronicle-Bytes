@@ -25,6 +25,7 @@ import java.util.stream.Collectors;
 import static net.openhft.chronicle.core.io.AbstractCloseable.waitForCloseablesToClose;
 import static net.openhft.chronicle.core.io.AbstractReferenceCounted.assertReferencesReleased;
 
+@SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate") // JUnit4 annotations require public class
 public class BytesTestCommon {
 
     private final Map<Predicate<ExceptionKey>, String> ignoredExceptions = new LinkedHashMap<>();

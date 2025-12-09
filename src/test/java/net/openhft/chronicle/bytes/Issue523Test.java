@@ -16,11 +16,13 @@ import java.util.stream.IntStream;
 
 import static org.junit.Assert.assertEquals;
 
+@SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate") // JUnit4 annotations require public class
 public class Issue523Test extends BytesTestCommon {
 
     @SuppressWarnings("EmptyMethod")
     @Before
     @BeforeEach
+    @Override
     public void threadDump() {
         super.threadDump();
     }

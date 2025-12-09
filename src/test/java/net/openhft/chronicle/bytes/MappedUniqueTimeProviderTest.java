@@ -20,11 +20,13 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeFalse;
 
+@SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate") // JUnit4 annotations require public class
 public class MappedUniqueTimeProviderTest extends BytesTestCommon {
 
     @SuppressWarnings("EmptyMethod")
     @Before
     @BeforeEach
+    @Override
     public void threadDump() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 

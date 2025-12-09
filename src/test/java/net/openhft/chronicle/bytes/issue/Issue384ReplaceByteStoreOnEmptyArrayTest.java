@@ -22,7 +22,7 @@ final class Issue384ReplaceByteStoreOnEmptyArrayTest extends BytesTestCommon {
     void reproduce(String classSimpleName, Bytes<?> bytes) {
 
         // throwing AssertionErrors in the code makes testing more complicated.
-        boolean replacedOrRefused = false;
+        boolean replacedOrRefused;
         try {
             // Write an empty array into the empty bytes. This should trigger a
             // resize since the empty bytes is using a shared backing EmptyByteStore.

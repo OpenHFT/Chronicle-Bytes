@@ -12,6 +12,7 @@ import net.openhft.chronicle.core.util.Time;
 import java.io.File;
 import java.io.IOException;
 
+@SuppressWarnings("PMD.UnusedAssignment") // writing flag is polled from another thread; local writes appear unused
 public class MemoryWriteJitterMain {
     private static final String PROFILE_OF_THE_THREAD = "profile of the thread";
 

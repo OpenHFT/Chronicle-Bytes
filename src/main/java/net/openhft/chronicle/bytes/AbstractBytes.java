@@ -880,6 +880,7 @@ public abstract class AbstractBytes<U>
         return this;
     }
 
+    @Override
     public Bytes<U> write(@NotNull BytesStore<?, ?> bytes)
             throws BufferOverflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
         assert bytes != this : "you should not write to yourself !";

@@ -21,6 +21,7 @@ import java.nio.BufferOverflowException;
  * to various types of input data.
  */
 public interface Compression {
+    byte[] EMPTY_BYTES = new byte[0];
 
     /**
      * Compresses {@code uncompressed} into {@code compressed} using the named algorithm.
@@ -119,9 +120,9 @@ public interface Compression {
                     return Compressions.GZIP.uncompress(bytes.apply(t));
                 break;
             default:
-                return null;
+                return EMPTY_BYTES;
         }
-        return null;
+        return EMPTY_BYTES;
     }
 
     /**

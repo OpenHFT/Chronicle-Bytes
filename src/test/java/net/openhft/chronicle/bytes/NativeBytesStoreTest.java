@@ -58,14 +58,14 @@ public class NativeBytesStoreTest extends BytesTestCommon {
 
         final NativeBytesStore<Void> bytesStore = NativeBytesStore.nativeStoreWithFixedCapacity(maxLen + 5);
 
-        StringBuilder expected = new StringBuilder();
+        StringBuilder expected = new StringBuilder(maxLen);
 
         for (int i = 0; i < maxLen; i += stepLength) {
             final Bytes<byte[]> bytes = Bytes.from(expected.toString());
 
             bytesStore.write8bit(0, bytes);
 
-            final StringBuilder sb = new StringBuilder();
+            final StringBuilder sb = new StringBuilder(maxLen);
             bytesStore.readUtf8(0, sb);
 
             Assert.assertEquals("failed at " + i, expected.toString(), sb.toString());

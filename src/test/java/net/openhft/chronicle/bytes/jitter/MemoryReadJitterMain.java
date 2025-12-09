@@ -47,15 +47,10 @@ public class MemoryReadJitterMain {
                 MappedBytes mf = MappedBytes.mappedBytes(file, 64 << 10);
                 mf.readLimit(mf.writeLimit());
                 MemoryMessager mm = new MemoryMessager(mf, padTo);
-                boolean found = false;
                 while (running) {
-                    if (found)
-                        Jvm.safepoint();
-                    else
-                        Jvm.safepoint();
+                    Jvm.safepoint();
                     int length = mm.length();
                     if (length == 0x0 || length == MemoryMessager.NOT_READY) {
-                        found = false;
                         Jvm.safepoint();
                         length = mm.length();
                         if (length == 0x0 || length == MemoryMessager.NOT_READY) {
@@ -67,11 +62,7 @@ public class MemoryReadJitterMain {
                     long now = System.nanoTime();
                     histoRead.sampleNanos(readDurationNs);
                     histoReadWrite.sampleNanos(now - mm.firstLong());
-                    if (found)
-                        Jvm.safepoint();
-                    else
-                        Jvm.safepoint();
-                    found = true;
+                    Jvm.safepoint();
                 }
                 mf.releaseLast();
             } catch (Throwable t) {

@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Assertions;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
+@SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate") // JUnit4 annotations require public class
 public class PointerBytesStoreTest extends BytesTestCommon {
 
     @Test

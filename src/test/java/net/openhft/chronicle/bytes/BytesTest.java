@@ -113,12 +113,7 @@ public class BytesTest extends BytesTestCommon {
         Bytes<?> bytes = alloc1.elasticBytes(16);
         ((AbstractReferenceCounted) bytes).throwExceptionIfReleased();
         postTest(bytes);
-        try {
-            ((AbstractReferenceCounted) bytes).throwExceptionIfReleased();
-            fail();
-        } catch (IllegalStateException ise) {
-            // expected.
-        }
+        assertThrows(IllegalStateException.class, ((AbstractReferenceCounted) bytes)::throwExceptionIfReleased);
     }
 
     @Test
@@ -540,10 +535,10 @@ public class BytesTest extends BytesTestCommon {
             throws BufferUnderflowException, ArithmeticException {
         for (double d : new double[]{1.0, 1000.0, 0.1}) {
             @NotNull Bytes<?> b = alloc1.elasticBytes(16);
-            b.writeBigDecimal(new BigDecimal(d));
+            b.writeBigDecimal(BigDecimal.valueOf(d));
 
             @NotNull BigDecimal bd = b.readBigDecimal();
-            assertEquals(new BigDecimal(d), bd);
+            assertEquals(BigDecimal.valueOf(d), bd);
             postTest(b);
         }
     }
@@ -553,10 +548,10 @@ public class BytesTest extends BytesTestCommon {
         assumeFalse(alloc1 == HEAP_EMBEDDED);
         for (double d : new double[]{1.0, 1000.0, 0.1}) {
             @NotNull Bytes<?> b = alloc1.elasticBytes(0xFFFF);
-            b.append(new BigDecimal(d));
+            b.append(BigDecimal.valueOf(d));
 
             @NotNull BigDecimal bd = b.parseBigDecimal();
-            assertEquals(new BigDecimal(d), bd);
+            assertEquals(BigDecimal.valueOf(d), bd);
             postTest(b);
         }
     }

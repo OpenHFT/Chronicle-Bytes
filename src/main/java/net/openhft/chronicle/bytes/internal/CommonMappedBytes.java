@@ -109,6 +109,7 @@ public abstract class CommonMappedBytes extends MappedBytes {
     }
 
     @NotNull
+    @Override
     public MappedFile mappedFile() {
         return mappedFile;
     }
@@ -264,7 +265,7 @@ public abstract class CommonMappedBytes extends MappedBytes {
         ensureCapacity(writePosition() + length);
         long address = addressForWritePosition();
         @SuppressWarnings({"unchecked", "rawtypes"})
-        MappedBytesStore mbs = (MappedBytesStore) (BytesStore) bytesStore();
+        MappedBytesStore mbs = (MappedBytesStore) bytesStore();
         Memory memory = mbs.memory;
         if (Jvm.isJava9Plus()) {
             byte[] bytes = extractBytes(s);
@@ -552,6 +553,7 @@ public abstract class CommonMappedBytes extends MappedBytes {
         return true;
     }
 
+    @Override
     public void singleThreadedCheckDisabled(boolean singleThreadedCheckDisabled) {
         super.singleThreadedCheckDisabled(singleThreadedCheckDisabled);
         closeable.singleThreadedCheckDisabled(singleThreadedCheckDisabled);

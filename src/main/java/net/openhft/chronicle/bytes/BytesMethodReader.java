@@ -116,6 +116,7 @@ public class BytesMethodReader extends SimpleCloseable implements MethodReader {
      * @throws ThreadingIllegalStateException   if accessed by multiple threads
      *                                          unsafely
      */
+    @Override
     public boolean readOne()
             throws InvocationTargetRuntimeException, IllegalStateException, BufferUnderflowException {
         throwExceptionIfClosed();

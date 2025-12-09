@@ -113,6 +113,7 @@ public class TextLongArrayReference extends AbstractReference implements Byteabl
         }
     }
 
+    @Override
     public void setUsed(long used)
             throws IllegalStateException {
         try {

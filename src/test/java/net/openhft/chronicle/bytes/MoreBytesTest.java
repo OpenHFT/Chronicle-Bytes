@@ -142,10 +142,7 @@ public class MoreBytesTest extends BytesTestCommon {
         final byte[] bytes = "000000".getBytes(ISO_8859_1);
         final Bytes<?> to = Bytes.wrapForWrite(bytes);
         try {
-            to.append(0, 3.14, 2, 8);
-            fail("Should throw Exception");
-        } catch (BufferOverflowException ignore) {
-            // Ignore
+            assertThrows(BufferOverflowException.class, () -> to.append(0, 3.14, 2, 8));
         } finally {
             to.releaseLast();
         }

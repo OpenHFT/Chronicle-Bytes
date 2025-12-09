@@ -136,6 +136,7 @@ public class BytesMethodReaderBuilder implements MethodReaderBuilder {
      * @param objects the target objects whose methods will be invoked
      * @return a new configured {@link BytesMethodReader}
      */
+    @Override
     public BytesMethodReader build(Object... objects) {
         return new BytesMethodReader(in, defaultParselet(), methodEncoderLookup, objects);
     }

@@ -13,6 +13,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Random;
+
+import static org.junit.Assert.assertThrows;
 import java.util.function.Consumer;
 
 import static org.junit.Assert.assertNotNull;
@@ -78,12 +80,7 @@ public class WriteLimitTest extends BytesTestCommon {
                 continue;
 
             bytes.clear().writePosition(position).writeLimit(position + length - 1);
-            try {
-                action.accept(bytes);
-                fail("position: " + position);
-            } catch (BufferOverflowException ignored) {
-                // expected
-            }
+            assertThrows(BufferOverflowException.class, () -> action.accept(bytes));
         }
         bytes.releaseLast();
     }

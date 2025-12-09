@@ -22,9 +22,6 @@ class UncheckedBytesTest {
 
     @BeforeEach
     void setUp() {
-        // Initialize with a specific size to test bounds bypass
-        underlyingBytes = Bytes.allocateElasticOnHeap(128);
-        uncheckedBytes = new UncheckedBytes<>(underlyingBytes);
         ClassAliasPool.CLASS_ALIASES.addAlias(UncheckedBytes.class);
         underlyingBytes = mock(Bytes.class);
         when(underlyingBytes.bytesStore()).thenReturn(mock(BytesStore.class));
@@ -83,7 +80,7 @@ class UncheckedBytesTest {
 
     @Test
     void appendUtf8() {
-        char[] chars = new char[]{'H', 'e', 'l', 'l', 'o'};
+        char[] chars = {'H', 'e', 'l', 'l', 'o'};
         assertDoesNotThrow(() -> uncheckedBytes.appendUtf8(chars, 0, chars.length));
         // Verify internal method calls or changes in `uncheckedBytes` state if necessary.
     }

@@ -166,7 +166,7 @@ public class ByteStringParserTest extends BytesTestCommon {
     }
 
     private void appendVariousNumbers() {
-        bytes.append("1").append(' ');
+        bytes.append('1').append(' ');
         bytes.append("1.").append(' ');
         bytes.append("0.0").append(' ');
         bytes.append("+0.1").append(' ');
@@ -233,10 +233,10 @@ public class ByteStringParserTest extends BytesTestCommon {
     @Test
     public void testFlexibleLong() {
         // Test regular longs
-        bytes.append("0").append(' ');
+        bytes.append('0').append(' ');
         assertEquals(0L, bytes.parseFlexibleLong());
 
-        bytes.append("1").append(' ');
+        bytes.append('1').append(' ');
         assertEquals(1L, bytes.parseFlexibleLong());
 
         bytes.append("-1").append(' ');
@@ -356,23 +356,23 @@ public class ByteStringParserTest extends BytesTestCommon {
 
         // Test values outside long range
         bytes.append("9E40").append(' ');
-        assertThrows(IORuntimeException.class, () -> bytes.parseFlexibleLong());
+        assertThrows(IORuntimeException.class, bytes::parseFlexibleLong);
 
         bytes.append("-8473289704324748391027491830").append(' ');
-        assertThrows(IORuntimeException.class, () -> bytes.parseFlexibleLong());
+        assertThrows(IORuntimeException.class, bytes::parseFlexibleLong);
 
-        bytes.append(Long.MAX_VALUE).append("0").append(' ');
-        assertThrows(IORuntimeException.class, () -> bytes.parseFlexibleLong());
+        bytes.append(Long.MAX_VALUE).append('0').append(' ');
+        assertThrows(IORuntimeException.class, bytes::parseFlexibleLong);
 
         // Test rounded fractional numbers
         bytes.append("0.1").append(' ');
-        assertThrows(IORuntimeException.class, () -> bytes.parseFlexibleLong());
+        assertThrows(IORuntimeException.class, bytes::parseFlexibleLong);
 
         bytes.append("1e-2").append(' ');
-        assertThrows(IORuntimeException.class, () -> bytes.parseFlexibleLong());
+        assertThrows(IORuntimeException.class, bytes::parseFlexibleLong);
 
         bytes.append("0.9").append(' ');
-        assertThrows(IORuntimeException.class, () -> bytes.parseFlexibleLong());
+        assertThrows(IORuntimeException.class, bytes::parseFlexibleLong);
 
     }
 
@@ -380,65 +380,65 @@ public class ByteStringParserTest extends BytesTestCommon {
     public void testFlexibleLong3() {
 
         bytes.append("0.9").append(' ');
-        assertThrows(IORuntimeException.class, () -> bytes.parseFlexibleLong());
+        assertThrows(IORuntimeException.class, bytes::parseFlexibleLong);
 
         bytes.append("56765e-2").append(' ');
-        assertThrows(IORuntimeException.class, () -> bytes.parseFlexibleLong());
+        assertThrows(IORuntimeException.class, bytes::parseFlexibleLong);
 
         bytes.append("-0.1").append(' ');
-        assertThrows(IORuntimeException.class, () -> bytes.parseFlexibleLong());
+        assertThrows(IORuntimeException.class, bytes::parseFlexibleLong);
 
         bytes.append("-0.9").append(' ');
-        assertThrows(IORuntimeException.class, () -> bytes.parseFlexibleLong());
+        assertThrows(IORuntimeException.class, bytes::parseFlexibleLong);
 
         bytes.append("4.4000000000000000000000000000001E1").append(' ');
-        assertThrows(IORuntimeException.class, () -> bytes.parseFlexibleLong());
+        assertThrows(IORuntimeException.class, bytes::parseFlexibleLong);
 
         bytes.append("4.3999999999999999999999999999991E1").append(' ');
-        assertThrows(IORuntimeException.class, () -> bytes.parseFlexibleLong());
+        assertThrows(IORuntimeException.class, bytes::parseFlexibleLong);
 
         bytes.append(String.valueOf(Long.MAX_VALUE)).append(".1").append(' ');
-        assertThrows(IORuntimeException.class, () -> bytes.parseFlexibleLong());
+        assertThrows(IORuntimeException.class, bytes::parseFlexibleLong);
 
         bytes.append(String.valueOf(Long.MAX_VALUE - 1)).append(".9").append(' ');
-        assertThrows(IORuntimeException.class, () -> bytes.parseFlexibleLong());
+        assertThrows(IORuntimeException.class, bytes::parseFlexibleLong);
 
         bytes.append(String.valueOf(Long.MAX_VALUE - 1)).append(".1").append(' ');
-        assertThrows(IORuntimeException.class, () -> bytes.parseFlexibleLong());
+        assertThrows(IORuntimeException.class, bytes::parseFlexibleLong);
 
         bytes.append(String.valueOf(Long.MIN_VALUE)).append(".1").append(' ');
-        assertThrows(IORuntimeException.class, () -> bytes.parseFlexibleLong());
+        assertThrows(IORuntimeException.class, bytes::parseFlexibleLong);
 
         bytes.append(String.valueOf(Long.MIN_VALUE + 1)).append(".9").append(' ');
-        assertThrows(IORuntimeException.class, () -> bytes.parseFlexibleLong());
+        assertThrows(IORuntimeException.class, bytes::parseFlexibleLong);
 
         bytes.append(String.valueOf(Long.MIN_VALUE + 1)).append(".1").append(' ');
-        assertThrows(IORuntimeException.class, () -> bytes.parseFlexibleLong());
+        assertThrows(IORuntimeException.class, bytes::parseFlexibleLong);
 
         bytes.append(String.valueOf(Long.MIN_VALUE + 5)).append(".1").append(' ');
-        assertThrows(IORuntimeException.class, () -> bytes.parseFlexibleLong());
+        assertThrows(IORuntimeException.class, bytes::parseFlexibleLong);
 
         bytes.append(String.valueOf(Long.MIN_VALUE + 5)).append(".9").append(' ');
-        assertThrows(IORuntimeException.class, () -> bytes.parseFlexibleLong());
+        assertThrows(IORuntimeException.class, bytes::parseFlexibleLong);
 
         // Test extreme double values
         bytes.append("Infinity").append(' ');
-        assertThrows(IORuntimeException.class, () -> bytes.parseFlexibleLong());
+        assertThrows(IORuntimeException.class, bytes::parseFlexibleLong);
 
         bytes.append("-Infinity").append(' ');
-        assertThrows(IORuntimeException.class, () -> bytes.parseFlexibleLong());
+        assertThrows(IORuntimeException.class, bytes::parseFlexibleLong);
 
         bytes.append("+Infinity").append(' ');
-        assertThrows(IORuntimeException.class, () -> bytes.parseFlexibleLong());
+        assertThrows(IORuntimeException.class, bytes::parseFlexibleLong);
 
         bytes.append("NaN").append(' ');
-        assertThrows(IORuntimeException.class, () -> bytes.parseFlexibleLong());
+        assertThrows(IORuntimeException.class, bytes::parseFlexibleLong);
 
         // Test regular longs again - to check that input is properly consumed
-        bytes.append("0").append(' ');
+        bytes.append('0').append(' ');
         assertEquals(0L, bytes.parseFlexibleLong());
 
-        bytes.append("1").append(' ');
+        bytes.append('1').append(' ');
         assertEquals(1L, bytes.parseFlexibleLong());
 
         bytes.append("-1").append(' ');

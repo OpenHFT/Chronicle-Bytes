@@ -140,6 +140,7 @@ public class SingleMappedFile extends MappedFile {
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     @NotNull
+    @Override
     public MappedBytesStore acquireByteStore(
             ReferenceOwner owner,
             @NonNegative final long position,
@@ -230,6 +231,7 @@ public class SingleMappedFile extends MappedFile {
      * @return A string representing the reference counts
      */
     @NotNull
+    @Override
     public String referenceCounts() {
         @NotNull final StringBuilder sb = new StringBuilder();
         sb.append("refCount: ").append(refCount());
@@ -247,6 +249,7 @@ public class SingleMappedFile extends MappedFile {
      *
      * @return The capacity of this mapped file
      */
+    @Override
     public long capacity() {
         return capacity;
     }
@@ -254,6 +257,7 @@ public class SingleMappedFile extends MappedFile {
     /**
      * @return capacity of the single mapping
      */
+    @Override
     public long chunkSize() {
         return capacity;
     }
@@ -261,6 +265,7 @@ public class SingleMappedFile extends MappedFile {
     /**
      * @return always {@code 0} as no overlap is used
      */
+    @Override
     public long overlapSize() {
         return 0;
     }
@@ -283,6 +288,7 @@ public class SingleMappedFile extends MappedFile {
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
+    @Override
     public long actualSize()
             throws IORuntimeException, IllegalStateException {
 
@@ -325,6 +331,7 @@ public class SingleMappedFile extends MappedFile {
      * @return The RandomAccessFile of this mapped file
      */
     @NotNull
+    @Override
     public RandomAccessFile raf() {
         return raf;
     }
@@ -354,6 +361,7 @@ public class SingleMappedFile extends MappedFile {
      * @return A lock object representing the locked region
      * @throws IOException If an I/O error occurs
      */
+    @Override
     public FileLock lock(@NonNegative long position, @NonNegative long size, boolean shared) throws IOException {
         return fileChannel.lock(position, size, shared);
     }
@@ -367,6 +375,7 @@ public class SingleMappedFile extends MappedFile {
      * @return A lock object representing the locked region, or null if the region cannot be locked
      * @throws IOException If an I/O error occurs
      */
+    @Override
     public FileLock tryLock(@NonNegative long position, @NonNegative long size, boolean shared) throws IOException {
         return fileChannel.tryLock(position, size, shared);
     }
@@ -376,6 +385,7 @@ public class SingleMappedFile extends MappedFile {
      *
      * @return The number of chunks in this mapped file
      */
+    @Override
     public long chunkCount() {
         return 1;
     }
@@ -385,6 +395,7 @@ public class SingleMappedFile extends MappedFile {
      *
      * @param chunkCount The array to fill
      */
+    @Override
     public void chunkCount(long[] chunkCount) {
         chunkCount[0] = 1;
     }

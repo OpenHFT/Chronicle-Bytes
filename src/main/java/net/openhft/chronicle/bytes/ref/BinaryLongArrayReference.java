@@ -44,16 +44,12 @@ import static net.openhft.chronicle.bytes.ref.BinaryLongReference.LONG_NOT_COMPL
  * @see BinaryLongReference
  */
 @SuppressWarnings({"rawtypes", "deprecation"})
-public class BinaryLongArrayReference extends AbstractReference implements ByteableLongArrayValues, BytesMarshallable {
+public class BinaryLongArrayReference extends AbstractBinaryArrayReference implements ByteableLongArrayValues, BytesMarshallable {
     public static final int SHIFT = 3;
-    private static final long CAPACITY = 0;
-    private static final long USED = CAPACITY + Long.BYTES;
-    private static final long VALUES = USED + Long.BYTES;
     public static final long MAX_CAPACITY = ((Long.MAX_VALUE - VALUES) >> SHIFT);
-    private static final int MAX_TO_STRING = 1024;
+
     @Nullable
     private static Set<WeakReference<BinaryLongArrayReference>> binaryLongArrayReferences = null;
-    private long length;
 
     /**
      * Constructs a BinaryLongArrayReference with a default capacity of 0.
@@ -69,6 +65,7 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
      */
     @SuppressWarnings("this-escape")
     public BinaryLongArrayReference(@NonNegative long defaultCapacity) {
+        super(SHIFT);
         this.length = (defaultCapacity << SHIFT) + VALUES;
         singleThreadedCheckDisabled(true);
     }
@@ -105,16 +102,6 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
             }
         }
         binaryLongArrayReferences = null;
-    }
-
-    @Override
-    protected void acceptNewBytesStore(@NotNull final BytesStore<?, ?> bytes)
-            throws IllegalStateException {
-        if (this.bytesStore != null) {
-            this.bytesStore.release(this);
-        }
-        this.bytesStore = bytes;
-        this.bytesStore.reserve(this);
     }
 
     /**
@@ -219,16 +206,6 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
     }
 
     @Override
-    public long getCapacity()
-            throws IllegalStateException {
-        throwExceptionIfClosed();
-
-        if (bytesStore == null)
-            return (length - VALUES) >>> SHIFT;
-        return bytesStore.readVolatileLong(offset + CAPACITY);
-    }
-
-    @Override
     public long getUsed()
             throws IllegalStateException, BufferUnderflowException {
         throwExceptionIfClosed();
@@ -318,96 +295,9 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
     }
 
     @Override
-    public void readMarshallable(BytesIn<?> bytes)
-            throws IORuntimeException, IllegalStateException, BufferUnderflowException {
-        throwExceptionIfClosedInSetter();
-
-        long position = bytes.readPosition();
-        long capacity = bytes.readLong();
-        long used = bytes.readLong();
-        if (capacity < 0 || capacity > bytes.readRemaining() >> SHIFT)
-            throw new IORuntimeException("Corrupt used capacity");
-
-        if (used < 0 || used > capacity)
-            throw new IORuntimeException("Corrupt used value");
-
-        checkCapacity(capacity);
-
-        long sizeToSkip = capacity << SHIFT;
-        bytes.readSkip(sizeToSkip);
-        long len = bytes.readPosition() - position;
-        bytesStore((Bytes) bytes, position, len);
-    }
-
-    @Override
-    public void writeMarshallable(BytesOut<?> bytes)
-            throws IllegalStateException, BufferOverflowException, BufferUnderflowException {
-        boolean retainsComments = bytes.retainedHexDumpDescription();
-        if (retainsComments)
-            bytes.writeHexDumpDescription("BinaryLongArrayReference");
-        BytesStore<?, ?> bytesStore = bytesStore();
-        if (bytesStore == null) {
-            long capacity = getCapacity();
-            if (retainsComments)
-                bytes.writeHexDumpDescription("capacity");
-            bytes.writeLong(capacity);
-            if (retainsComments)
-                bytes.writeHexDumpDescription("used");
-            bytes.writeLong(0);
-            if (retainsComments)
-                bytes.writeHexDumpDescription("values");
-            bytes.writeSkip(capacity << SHIFT);
-        } else {
-            bytes.write(bytesStore, offset, length);
-        }
-    }
-
-    @Override
-    public boolean isNull()
-            throws IllegalStateException {
-        throwExceptionIfClosed();
-
-        return bytesStore == null;
-    }
-
-    @Override
-    public void reset()
-            throws IllegalStateException {
-        throwExceptionIfClosedInSetter();
-
-        bytesStore = null;
-        offset = 0;
-        length = 0;
-    }
-
-    @Nullable
-    @Override
-    public BytesStore<?, ?> bytesStore() {
-        return bytesStore;
-    }
-
-    @Override
-    public long offset() {
-        return offset;
-    }
-
-    @Override
-    public long maxSize() {
-        return length;
-    }
-
-    @NotNull
-    @Override
-    public String toString() {
-        if (bytesStore == null)
-            return "not set";
-        @NotNull StringBuilder sb = new StringBuilder();
-        sb.append("used: ");
+    protected void appendContents(@NotNull StringBuilder sb, long used) {
+        String sep = "";
         try {
-            long used = getUsed();
-            sb.append(used);
-            sb.append(", value: ");
-            @NotNull String sep = "";
             int i;
             int max = (int) Math.min(used, Math.min(getCapacity(), MAX_TO_STRING));
             for (i = 0; i < max; i++) {
@@ -419,9 +309,8 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
                 sb.append(" ...");
 
         } catch (Throwable e) {
-            sb.append(" ").append(e);
+            sb.append(' ').append(e);
         }
-        return sb.toString();
     }
 
     @Override

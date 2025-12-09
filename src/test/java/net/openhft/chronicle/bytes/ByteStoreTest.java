@@ -170,7 +170,7 @@ public class ByteStoreTest extends BytesTestCommon {
     public void testWriteReadUtf8()
             throws IORuntimeException {
         bytes.writeUtf8(null);
-        final String[] words = new String[]{"Hello", "World!", "Bye£€!", ""};
+        final String[] words = {"Hello", "World!", "Bye£€!", ""};
         for (String word : words) {
             bytes.writeUtf8(word);
         }
@@ -599,10 +599,7 @@ public class ByteStoreTest extends BytesTestCommon {
         final BytesStore<?, ?> bs = BytesStore.nativeStore(32);
         BytesInternal.writeStopBit(bs, 10, 30);
         try {
-            bs.readUtf8(10, new StringBuilder());
-            fail("should throw BufferUnderflowException");
-        } catch (BufferUnderflowException e) {
-            // expected
+            assertThrows(BufferUnderflowException.class, () -> bs.readUtf8(10, new StringBuilder()));
         } finally {
             bs.releaseLast();
         }

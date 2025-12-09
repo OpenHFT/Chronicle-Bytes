@@ -39,18 +39,13 @@ import static net.openhft.chronicle.bytes.ref.BinaryIntReference.INT_NOT_COMPLET
  * required if instances are shared between threads.
  */
 @SuppressWarnings({"rawtypes", "deprecation"})
-public class BinaryIntArrayReference extends AbstractReference implements ByteableIntArrayValues, BytesMarshallable {
+public class BinaryIntArrayReference extends AbstractBinaryArrayReference implements ByteableIntArrayValues, BytesMarshallable {
 
     public static final int SHIFT = 2;
-    private static final long CAPACITY = 0;
-    private static final long USED = CAPACITY + Long.BYTES;
-    private static final long VALUES = USED + Long.BYTES;
     public static final long MAX_CAPACITY = (Long.MAX_VALUE - VALUES) >> SHIFT;
-    private static final int MAX_TO_STRING = 1024;
 
     @Nullable
     private static Set<WeakReference<BinaryIntArrayReference>> binaryIntArrayReferences = null;
-    private long length;
 
     /**
      * Default constructor initializes the BinaryIntArrayReference with a default capacity of 0.
@@ -65,6 +60,7 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
      * @param defaultCapacity the default capacity of the array.
      */
     public BinaryIntArrayReference(long defaultCapacity) {
+        super(SHIFT);
         this.length = (defaultCapacity << SHIFT) + VALUES;
     }
 
@@ -167,38 +163,6 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
         assert capacity > 0 : "capacity too small " + capacity;
         checkCapacity(capacity);
         return (capacity << SHIFT) + VALUES;
-    }
-
-    /**
-     * Assigns a new BytesStore to this BinaryIntArrayReference.
-     *
-     * @param bytes the new BytesStore to be assigned.
-     * @throws ClosedIllegalStateException    If the resource has been released or closed.
-     * @throws ThreadingIllegalStateException if this resource was accessed by multiple threads in an unsafe way
-     */
-    @Override
-    protected void acceptNewBytesStore(@NotNull final BytesStore<?, ?> bytes)
-            throws IllegalStateException {
-        if (this.bytesStore != null) {
-            this.bytesStore.release(this);
-        }
-        this.bytesStore = bytes;
-        this.bytesStore.reserve(this);
-    }
-
-    /**
-     * Gets the capacity of the array.
-     *
-     * @return the capacity.
-     * @throws ClosedIllegalStateException    If the resource has been released or closed.
-     * @throws ThreadingIllegalStateException if this resource was accessed by multiple threads in an unsafe way
-     */
-    @Override
-    public long getCapacity()
-            throws IllegalStateException {
-        throwExceptionIfClosed();
-
-        return (length - VALUES) >>> SHIFT;
     }
 
     /**
@@ -350,161 +314,8 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
         this.length = length;
     }
 
-    /**
-     * Reads and deserializes data from the input stream.
-     *
-     * @param bytes the input stream.
-     * @throws IORuntimeException       If an IO exception occurs.
-     * @throws BufferUnderflowException If buffer underflow occurs.
-     * @throws ClosedIllegalStateException    If the resource has been released or closed.
-     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
-     */
     @Override
-    public void readMarshallable(BytesIn<?> bytes)
-            throws IORuntimeException, IllegalStateException, BufferUnderflowException {
-        throwExceptionIfClosedInSetter();
-
-        long position = bytes.readPosition();
-        long capacity = bytes.readLong();
-        long used = bytes.readLong();
-        if (capacity < 0 || capacity > bytes.readRemaining() >> SHIFT)
-            throw new IORuntimeException("Corrupt used capacity");
-
-        if (used < 0 || used > capacity)
-            throw new IORuntimeException("Corrupt used value");
-
-        checkCapacity(capacity);
-
-        long sizeToSkip = capacity << SHIFT;
-        bytes.readSkip(sizeToSkip);
-        long len = bytes.readPosition() - position;
-        bytesStore((Bytes) bytes, position, len);
-    }
-
-    /**
-     * Serializes and writes data to the output stream.
-     *
-     * @param bytes the output stream.
-     * @throws BufferOverflowException If buffer overflow occurs.
-     * @throws ClosedIllegalStateException    If the resource has been released or closed.
-     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
-     */
-    @Override
-    public void writeMarshallable(BytesOut<?> bytes)
-            throws IllegalStateException, BufferOverflowException {
-        final boolean retainsComments = bytes.retainedHexDumpDescription();
-        if (retainsComments)
-            bytes.writeHexDumpDescription("BinaryIntArrayReference");
-        BytesStore<?, ?> bytesStore = bytesStore();
-        if (bytesStore == null) {
-            long capacity = getCapacity();
-            if (retainsComments)
-                bytes.writeHexDumpDescription("capacity");
-            bytes.writeLong(capacity);
-            if (retainsComments)
-                bytes.writeHexDumpDescription("used");
-            bytes.writeLong(0);
-            if (retainsComments)
-                bytes.writeHexDumpDescription("values");
-            bytes.writeSkip(capacity << SHIFT);
-        } else {
-            bytes.write(bytesStore, offset, length);
-        }
-    }
-
-    /**
-     * Checks if the instance is null.
-     *
-     * @return true if the instance is null, false otherwise.
-     * @throws ClosedIllegalStateException    If the resource has been released or closed.
-     * @throws ThreadingIllegalStateException if this resource was accessed by multiple threads in an unsafe way
-     */
-    @Override
-    public boolean isNull()
-            throws IllegalStateException {
-        throwExceptionIfClosed();
-
-        return bytesStore == null;
-    }
-
-    /**
-     * Resets the instance to its initial state.
-     *
-     * @throws ClosedIllegalStateException    If the resource has been released or closed.
-     * @throws ThreadingIllegalStateException if this resource was accessed by multiple threads in an unsafe way
-     */
-    @Override
-    public void reset()
-            throws IllegalStateException {
-        throwExceptionIfClosedInSetter();
-
-        bytesStore = null;
-        offset = 0;
-        length = 0;
-    }
-
-    /**
-     * Retrieves the BytesStore.
-     *
-     * @return the BytesStore, or null if not set.
-     */
-    @Nullable
-    @Override
-    public BytesStore<?, ?> bytesStore() {
-        return bytesStore;
-    }
-
-    /**
-     * Retrieves the offset position.
-     *
-     * @return the offset position.
-     */
-    @Override
-    public long offset() {
-        return offset;
-    }
-
-    /**
-     * Retrieves the maximum size.
-     *
-     * @return the maximum size.
-     */
-    @Override
-    public long maxSize() {
-        return length;
-    }
-
-    /**
-     * Returns a string representation of the BinaryIntArrayReference.
-     *
-     * @return a string representation.
-     */
-    @NotNull
-    @Override
-    public String toString() {
-        if (bytesStore == null) {
-            return "not set";
-        }
-        StringBuilder sb = new StringBuilder();
-        sb.append("used: ");
-        try {
-            long used = getUsed();
-            sb.append(used);
-            sb.append(", value: ");
-            appendContents(sb, used);
-            return sb.toString();
-        } catch (Exception e) {
-            return e.toString();
-        }
-    }
-
-    /**
-     * Appends the contents to the provided StringBuilder.
-     *
-     * @param sb   the StringBuilder to append to.
-     * @param used the number of used elements.
-     */
-    private void appendContents(@NotNull StringBuilder sb, long used) {
+    protected void appendContents(@NotNull StringBuilder sb, long used) {
         String sep = "";
         try {
             int i;
@@ -518,7 +329,7 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
                 sb.append(" ...");
 
         } catch (BufferUnderflowException e) {
-            sb.append(" ").append(e);
+            sb.append(' ').append(e);
         }
     }
 

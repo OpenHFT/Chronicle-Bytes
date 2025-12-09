@@ -263,6 +263,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      * @throws BufferUnderflowException    If the offset is out of bounds
      * @throws ClosedIllegalStateException If the resource has been released or closed.
      */
+    @Override
     @SuppressWarnings("deprecation")
     default int addAndGetInt(@NonNegative long offset, int adding)
             throws BufferUnderflowException, ClosedIllegalStateException {
@@ -272,6 +273,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
     /**
      * Similar to {@link #addAndGetInt(long, int)} but operates on a long value.
      */
+    @Override
     @SuppressWarnings("deprecation")
     default long addAndGetLong(@NonNegative long offset, long adding)
             throws BufferUnderflowException, ClosedIllegalStateException {
@@ -281,6 +283,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
     /**
      * Similar to {@link #addAndGetInt(long, int)} but operates on a float value.
      */
+    @Override
     @SuppressWarnings("deprecation")
     default float addAndGetFloat(@NonNegative long offset, float adding)
             throws BufferUnderflowException, ClosedIllegalStateException {
@@ -290,6 +293,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
     /**
      * Similar to {@link #addAndGetInt(long, int)} but operates on a double value.
      */
+    @Override
     @SuppressWarnings("deprecation")
     default double addAndGetDouble(@NonNegative long offset, double adding)
             throws BufferUnderflowException, ClosedIllegalStateException {

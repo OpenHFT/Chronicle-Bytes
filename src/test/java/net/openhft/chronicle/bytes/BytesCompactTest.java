@@ -17,6 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
  * Tests for the compact behavior of Bytes.
  */
 @RunWith(Parameterized.class)
+@SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate") // JUnit4 annotations require public class
 public class BytesCompactTest {
 
     private final String name;

@@ -61,6 +61,7 @@ public class MappedBytesTest extends BytesTestCommon {
     @SuppressWarnings("EmptyMethod")
     @Before
     @BeforeEach
+    @Override
     public void threadDump() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
@@ -609,12 +610,7 @@ public class MappedBytesTest extends BytesTestCommon {
             });
             t.start();
             try (MappedBytes bytes = tq.take()) {
-                try {
-                    bytes.writeLong(1234);
-                    fail();
-                } catch (IllegalStateException expected) {
-//                expected.printStackTrace();
-                }
+                assertThrows(IllegalStateException.class, () -> bytes.writeLong(1234));
                 bytes.singleThreadedCheckDisabled(true);
                 bytes.writeLong(-1);
             }

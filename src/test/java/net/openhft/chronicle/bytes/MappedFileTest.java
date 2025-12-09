@@ -22,7 +22,7 @@ import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static org.junit.Assert.*;
 import static org.junit.Assume.assumeFalse;
 
-@SuppressWarnings("deprecation")
+@SuppressWarnings({"deprecation", "PMD.JUnit5TestShouldBePackagePrivate"}) // JUnit4 lifecycle requires public test class
 public class MappedFileTest extends BytesTestCommon {
 
     @Rule
@@ -116,39 +116,30 @@ public class MappedFileTest extends BytesTestCommon {
         }
         chunkSize = chunkSize / 4 * PageUtil.getPageSize(tmp.getAbsolutePath());
 
-        try (MappedFile mf = MappedFile.mappedFile(tmp, chunkSize, 0)) {
+        final int cs = chunkSize;
+        try (MappedFile mf = MappedFile.mappedFile(tmp, cs, 0)) {
             assertEquals("refCount: 1", mf.referenceCounts());
 
             final ReferenceOwner test = ReferenceOwner.temporary("test");
-            final MappedBytesStore bs = mf.acquireByteStore(test, chunkSize + (1 << 10));
+            final MappedBytesStore bs = mf.acquireByteStore(test, cs + (1 << 10));
 
             try {
-                assertEquals(chunkSize, bs.start());
-                assertEquals(chunkSize * 2, bs.capacity());
+                assertEquals(cs, bs.start());
+                assertEquals(cs * 2, bs.capacity());
                 final Bytes<?> bytes = bs.bytesForRead();
 
                 assertNotNull(bytes.toString()); // show it doesn't blow up.
                 assertNotNull(bs.toString()); // show it doesn't blow up.
-                assertEquals(chunkSize, bytes.start());
-                assertEquals(0L, bs.readLong(chunkSize + (1 << 10)));
-                assertEquals(0L, bytes.readLong(chunkSize + (1 << 10)));
-                Assert.assertFalse(bs.inside(chunkSize - (1 << 10)));
-                Assert.assertFalse(bs.inside(chunkSize - 1));
-                Assert.assertTrue(bs.inside(chunkSize));
-                Assert.assertTrue(bs.inside(chunkSize * 2L - 1));
-                Assert.assertFalse(bs.inside(chunkSize * 2L));
-                try {
-                    bytes.readLong(chunkSize - (1 << 10));
-                    Assert.fail();
-                } catch (BufferUnderflowException e) {
-                    // expected
-                }
-                try {
-                    bytes.readLong(chunkSize * 2L + (1 << 10));
-                    Assert.fail();
-                } catch (BufferUnderflowException e) {
-                    // expected
-                }
+                assertEquals(cs, bytes.start());
+                assertEquals(0L, bs.readLong(cs + (1 << 10)));
+                assertEquals(0L, bytes.readLong(cs + (1 << 10)));
+                Assert.assertFalse(bs.inside(cs - (1 << 10)));
+                Assert.assertFalse(bs.inside(cs - 1));
+                Assert.assertTrue(bs.inside(cs));
+                Assert.assertTrue(bs.inside(cs * 2L - 1));
+                Assert.assertFalse(bs.inside(cs * 2L));
+                assertThrows(BufferUnderflowException.class, () -> bytes.readLong(cs - (1 << 10)));
+                assertThrows(BufferUnderflowException.class, () -> bytes.readLong(cs * 2L + (1 << 10)));
                 assertEquals(1, mf.refCount());
                 final int expected = MappedFile.RETAIN ? 2 : 1;
                 assertEquals(expected + 1, bs.refCount());

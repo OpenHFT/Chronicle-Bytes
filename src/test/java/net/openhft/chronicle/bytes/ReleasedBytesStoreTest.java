@@ -18,11 +18,6 @@ public class ReleasedBytesStoreTest extends BytesTestCommon {
         assertEquals(NativeBytesStore.class, bytes.bytesStore().getClass());
         bytes.releaseLast();
         assertEquals(0, bytes.bytesStore().refCount());
-        try {
-            bytes.writeLong(0, 0);
-            fail();
-        } catch (NullPointerException e) {
-            // expected.
-        }
+        assertThrows(NullPointerException.class, () -> bytes.writeLong(0, 0));
     }
 }

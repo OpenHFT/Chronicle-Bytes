@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 @SuppressWarnings("deprecation")
 class AbstractInternerTest {
 
+    @SuppressWarnings("PMD.TestClassWithoutTestCases")
     private static final class TestInterner extends AbstractInterner<String> {
         TestInterner(int capacity) {
             super(capacity);

@@ -127,7 +127,7 @@ public class BytesTextMethodTester<T> {
 
         Bytes<?> text = BytesUtil.readFile(input);
         for (String text2 : text.toString().split("###[^\n]*\n")) {
-            if (text2.trim().length() <= 0)
+            if (text2.trim().isEmpty())
                 continue;
             Bytes<?> bytes = HexDumpBytes.fromText(text2);
 

@@ -159,6 +159,7 @@ public class ChunkedMappedFile extends MappedFile {
     }
 
     @NotNull
+    @Override
     public MappedBytesStore acquireByteStore(
             ReferenceOwner owner,
             @NonNegative final long position,
@@ -289,6 +290,7 @@ public class ChunkedMappedFile extends MappedFile {
         }
     }
 
+    @Override
     protected void performRelease() {
         try {
             synchronized (stores) {
@@ -314,6 +316,7 @@ public class ChunkedMappedFile extends MappedFile {
     }
 
     @NotNull
+    @Override
     public String referenceCounts() {
         @NotNull final StringBuilder sb = new StringBuilder();
         sb.append("refCount: ").append(refCount());
@@ -326,14 +329,17 @@ public class ChunkedMappedFile extends MappedFile {
         return sb.toString();
     }
 
+    @Override
     public long capacity() {
         return capacity;
     }
 
+    @Override
     public long chunkSize() {
         return chunkSize;
     }
 
+    @Override
     public long overlapSize() {
         return overlapSize;
     }
@@ -348,6 +354,7 @@ public class ChunkedMappedFile extends MappedFile {
         this.newChunkListener = listener;
     }
 
+    @Override
     public long actualSize()
             throws IORuntimeException, IllegalStateException {
 
@@ -385,6 +392,7 @@ public class ChunkedMappedFile extends MappedFile {
     }
 
     @NotNull
+    @Override
     public RandomAccessFile raf() {
         return raf;
     }
@@ -408,6 +416,7 @@ public class ChunkedMappedFile extends MappedFile {
     /**
      * Calls lock on the underlying file channel
      */
+    @Override
     public FileLock lock(long position, @NonNegative long size, boolean shared) throws IOException {
         return fileChannel.lock(position, size, shared);
     }
@@ -415,14 +424,17 @@ public class ChunkedMappedFile extends MappedFile {
     /**
      * Calls tryLock on the underlying file channel
      */
+    @Override
     public FileLock tryLock(@NonNegative long position, @NonNegative long size, boolean shared) throws IOException {
         return fileChannel.tryLock(position, size, shared);
     }
 
+    @Override
     public long chunkCount() {
         return chunkCount[0];
     }
 
+    @Override
     public void chunkCount(long[] chunkCount) {
         this.chunkCount = chunkCount;
     }

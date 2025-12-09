@@ -144,12 +144,10 @@ public class AppendableUtilTest extends BytesTestCommon {
 
         StringBuffer sb2 = new StringBuffer();
         try {
-            AppendableUtil.setLength(sb2, 0);
-            fail();
-        } catch (IllegalArgumentException iae) {
-            // expected.
+            assertThrows(IllegalArgumentException.class, () -> AppendableUtil.setLength(sb2, 0));
+        } finally {
+            b.releaseLast();
         }
-        b.releaseLast();
     }
 
     @Test
