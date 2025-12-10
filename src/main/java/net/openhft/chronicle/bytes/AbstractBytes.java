@@ -1377,7 +1377,7 @@ public abstract class AbstractBytes<U>
         ensureCapacity(writePosition() + length);
         bytesStore.write(writePosition(), buffer, buffer.position(), length);
         uncheckedWritePosition(writePosition() + length);
-        BufferUtil.setPosition(buffer, buffer.position() + length);
+        BufferUtil.position(buffer, buffer.position() + length);
         return this;
     }
 

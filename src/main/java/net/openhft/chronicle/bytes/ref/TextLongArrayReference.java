@@ -26,6 +26,7 @@ import static java.nio.charset.StandardCharsets.ISO_8859_1;
  * <p> For debugging only, not tuned for throughput.
  */
 @SuppressWarnings({"rawtypes", "deprecation"})
+// CPD-OFF
 public class TextLongArrayReference extends AbstractReference implements ByteableLongArrayValues {
     private static final byte[] SECTION1 = "{ locked: false, capacity: ".getBytes(ISO_8859_1);
     private static final byte[] SECTION2 = ", used: ".getBytes(ISO_8859_1);
@@ -304,3 +305,4 @@ public class TextLongArrayReference extends AbstractReference implements Byteabl
         return (capacity * VALUE_SIZE) + VALUES + SECTION3.length - SEP.length;
     }
 }
+// CPD-ON

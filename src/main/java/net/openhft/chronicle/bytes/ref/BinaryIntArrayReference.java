@@ -108,21 +108,7 @@ public class BinaryIntArrayReference extends AbstractBinaryArrayReference implem
     @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public static void write(@NotNull Bytes<?> bytes, @NonNegative long capacity)
             throws BufferOverflowException, IllegalArgumentException, IllegalStateException {
-        assert (bytes.writePosition() & 0x7) == 0;
-
-        checkCapacity(capacity);
-
-        bytes.writeLong(capacity);
-        bytes.writeLong(0L); // used
-        long start = bytes.writePosition();
-        long sizeToSkip = capacity << SHIFT;
-        bytes.zeroOut(start, start + sizeToSkip);
-        bytes.writeSkip(sizeToSkip);
-    }
-
-    private static void checkCapacity(long capacity) {
-        if (capacity > MAX_CAPACITY)
-            throw new IllegalArgumentException("Capacity " + capacity + " is too large > " + MAX_CAPACITY);
+        writeArray(bytes, capacity, SHIFT, MAX_CAPACITY);
     }
 
     /**
@@ -137,14 +123,7 @@ public class BinaryIntArrayReference extends AbstractBinaryArrayReference implem
     @Deprecated(/* to be removed in 2027 */)
     public static void lazyWrite(@NotNull Bytes<?> bytes, @NonNegative long capacity)
             throws BufferOverflowException, IllegalStateException {
-        assert (bytes.writePosition() & 0x7) == 0;
-
-        checkCapacity(capacity);
-
-        bytes.writeLong(capacity);
-        bytes.writeLong(0L); // used
-        long sizeToSkip = capacity << SHIFT;
-        bytes.writeSkip(sizeToSkip);
+        lazyWriteArray(bytes, capacity, SHIFT, MAX_CAPACITY);
     }
 
     /**
@@ -159,10 +138,7 @@ public class BinaryIntArrayReference extends AbstractBinaryArrayReference implem
      */
     public static long peakLength(@NotNull BytesStore<?, ?> bytes, @NonNegative long offset)
             throws BufferUnderflowException, IllegalStateException {
-        final long capacity = bytes.readLong(offset + CAPACITY);
-        assert capacity > 0 : "capacity too small " + capacity;
-        checkCapacity(capacity);
-        return (capacity << SHIFT) + VALUES;
+        return peakLength(bytes, offset, SHIFT, MAX_CAPACITY);
     }
 
     /**
@@ -314,23 +290,17 @@ public class BinaryIntArrayReference extends AbstractBinaryArrayReference implem
         this.length = length;
     }
 
+    /**
+     * Appends a preview of the stored integers to the supplied builder for debugging.
+     * The output is limited to the current {@code used} count (capped by capacity)
+     * and relies on {@link #getValueAt(long)} to read individual elements.
+     *
+     * @param sb   destination for the formatted values (comma-separated, truncated with {@code ...} when large)
+     * @param used number of elements considered in the preview
+     */
     @Override
     protected void appendContents(@NotNull StringBuilder sb, long used) {
-        String sep = "";
-        try {
-            int i;
-            int max = (int) Math.min(used, Math.min(getCapacity(), MAX_TO_STRING));
-            for (i = 0; i < max; i++) {
-                long valueAt = getValueAt(i);
-                sb.append(sep).append(valueAt);
-                sep = ", ";
-            }
-            if (i < getCapacity())
-                sb.append(" ...");
-
-        } catch (BufferUnderflowException e) {
-            sb.append(' ').append(e);
-        }
+        appendContents(sb, used, getCapacity(), this::getValueAt);
     }
 
     /**
@@ -346,7 +316,7 @@ public class BinaryIntArrayReference extends AbstractBinaryArrayReference implem
             throws IllegalStateException {
         throwExceptionIfClosed();
 
-        checkCapacity(capacity);
+        checkCapacity(capacity, MAX_CAPACITY);
         return (capacity << SHIFT) + VALUES;
     }
 

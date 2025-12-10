@@ -23,6 +23,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.function.LongSupplier;
 import java.util.stream.IntStream;
 
 import static org.junit.Assert.*;
@@ -103,7 +104,7 @@ public class DistributedUniqueTimeProviderTest extends BytesTestCommon {
         int count = 0;
         long runTime = Jvm.isArm() ? 3_000_000_000L : 500_000_000L;
         for (; ; ) {
-            long now = ((TimeProvider) timeProvider).currentTimeNanos();
+            long now = timeProvider.currentTimeNanos();
             assertEquals(LongTime.toNanos(now), now);
             if (now > start + runTime)
                 break;
@@ -149,7 +150,7 @@ public class DistributedUniqueTimeProviderTest extends BytesTestCommon {
     public void testMonotonicallyIncreasing() {
         long last = 0;
         for (int i = 0; i < 10_000; i++) {
-            long now = DistributedUniqueTimeProvider.timestampFor(((TimeProvider) timeProvider).currentTimeNanos());
+            long now = DistributedUniqueTimeProvider.timestampFor(timeProvider.currentTimeNanos());
             assertTrue(now > last);
             last = now;
         }
@@ -157,78 +158,12 @@ public class DistributedUniqueTimeProviderTest extends BytesTestCommon {
 
     @Test
     public void shouldProvideUniqueTimeAcrossThreadsMicros() throws InterruptedException {
-        final Set<Long> allGeneratedTimestamps = ConcurrentHashMap.newKeySet();
-        final int numberOfThreads = 50;
-        final int factor = 50;
-        final int iterationsPerThread = 500;
-        final ExecutorService executor = Executors.newFixedThreadPool(numberOfThreads);
-        final CountDownLatch latch = new CountDownLatch(numberOfThreads * factor);
-
-        for (int i = 0; i < numberOfThreads * factor; i++) {
-            executor.execute(() -> {
-                try {
-                    List<Long> threadTimeSet = new ArrayList<>(iterationsPerThread);
-                    long lastTimestamp = 0;
-                    for (int j = 0; j < iterationsPerThread; j++) {
-
-                        // there could be a race condition for the next two methods, but it shouldn't matter for this test
-                        setTimeProvider.advanceNanos(j);
-                        long currentTimeMicros = timeProvider.currentTimeMicros();
-
-                        threadTimeSet.add(currentTimeMicros);
-                        assertTrue("Timestamps should always increase", currentTimeMicros > lastTimestamp);
-                        lastTimestamp = currentTimeMicros;
-                    }
-                    allGeneratedTimestamps.addAll(threadTimeSet);
-                } finally {
-                    latch.countDown();
-                }
-            });
-        }
-
-        latch.await();
-        executor.shutdown();
-
-        assertEquals("All timestamps across all threads and iterations should be unique",
-                numberOfThreads * iterationsPerThread * factor, allGeneratedTimestamps.size());
+        assertUniqueTimeAcrossThreads(timeProvider::currentTimeMicros, "Timestamps should always increase");
     }
 
     @Test
     public void shouldProvideUniqueTimeAcrossThreadsNanos() throws InterruptedException {
-        final Set<Long> allGeneratedTimestamps = ConcurrentHashMap.newKeySet();
-        final int numberOfThreads = 50;
-        final int factor = 50;
-        final int iterationsPerThread = 500;
-        final ExecutorService executor = Executors.newFixedThreadPool(numberOfThreads);
-        final CountDownLatch latch = new CountDownLatch(numberOfThreads * factor);
-
-        for (int i = 0; i < numberOfThreads * factor; i++) {
-            executor.execute(() -> {
-                try {
-                    List<Long> threadTimeSet = new ArrayList<>(iterationsPerThread);
-                    long lastTimestamp = 0;
-                    for (int j = 0; j < iterationsPerThread; j++) {
-
-                        // there could be a race condition for the next two methods, but it shouldn't matter for this test
-                        setTimeProvider.advanceNanos(j);
-                        long currentTimeNanos = timeProvider.currentTimeNanos();
-
-                        threadTimeSet.add(currentTimeNanos);
-                        assertTrue("Timestamps should always be increasing", currentTimeNanos > lastTimestamp);
-                        lastTimestamp = currentTimeNanos;
-                    }
-                    allGeneratedTimestamps.addAll(threadTimeSet);
-                } finally {
-                    latch.countDown();
-                }
-            });
-        }
-
-        latch.await();
-        executor.shutdown();
-
-        assertEquals("All timestamps across all threads and iterations should be unique",
-                numberOfThreads * iterationsPerThread * factor, allGeneratedTimestamps.size());
+        assertUniqueTimeAcrossThreads(timeProvider::currentTimeNanos, "Timestamps should always be increasing");
     }
 
     @Test
@@ -294,5 +229,42 @@ public class DistributedUniqueTimeProviderTest extends BytesTestCommon {
             assertTrue("Nanosecond timestamps should increase", currentTimeNanos > lastTimeNanos);
             lastTimeNanos = currentTimeNanos / 1000;
         }
+    }
+
+    private void assertUniqueTimeAcrossThreads(LongSupplier timeSupplier, String increaseMessage) throws InterruptedException {
+        final Set<Long> allGeneratedTimestamps = ConcurrentHashMap.newKeySet();
+        final int numberOfThreads = 50;
+        final int factor = 50;
+        final int iterationsPerThread = 500;
+        final ExecutorService executor = Executors.newFixedThreadPool(numberOfThreads);
+        final CountDownLatch latch = new CountDownLatch(numberOfThreads * factor);
+
+        for (int i = 0; i < numberOfThreads * factor; i++) {
+            executor.execute(() -> {
+                try {
+                    List<Long> threadTimeSet = new ArrayList<>(iterationsPerThread);
+                    long lastTimestamp = 0;
+                    for (int j = 0; j < iterationsPerThread; j++) {
+
+                        // there could be a race condition for the next two methods, but it shouldn't matter for this test
+                        setTimeProvider.advanceNanos(j);
+                        long currentTime = timeSupplier.getAsLong();
+
+                        threadTimeSet.add(currentTime);
+                        assertTrue(increaseMessage, currentTime > lastTimestamp);
+                        lastTimestamp = currentTime;
+                    }
+                    allGeneratedTimestamps.addAll(threadTimeSet);
+                } finally {
+                    latch.countDown();
+                }
+            });
+        }
+
+        latch.await();
+        executor.shutdown();
+
+        assertEquals("All timestamps across all threads and iterations should be unique",
+                numberOfThreads * iterationsPerThread * factor, allGeneratedTimestamps.size());
     }
 }

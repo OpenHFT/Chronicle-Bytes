@@ -32,7 +32,7 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
  *
  * @param <U> type of the object representation
  */
-@SuppressWarnings({"rawtypes", "deprecation"})
+@SuppressWarnings({"rawtypes", "deprecation", "PMD.OverrideBothEqualsAndHashCodeOnComparable"})
 public class VanillaBytes<U>
         extends AbstractBytes<U>
         implements Byteable, Comparable<CharSequence> {
@@ -286,7 +286,7 @@ public class VanillaBytes<U>
             ByteBuffer bb = ByteBuffer.allocateDirect(Maths.toInt32(readRemaining()));
             @NotNull ByteBuffer bbu = (ByteBuffer) bytesStore.underlyingObject();
             ByteBuffer slice = bbu.slice();
-            BufferUtil.setPosition(slice, (int) readPosition());
+            BufferUtil.position(slice, (int) readPosition());
             BufferUtil.limit(slice, (int) readLimit());
             bb.put(slice);
             BufferUtil.clear(bb);

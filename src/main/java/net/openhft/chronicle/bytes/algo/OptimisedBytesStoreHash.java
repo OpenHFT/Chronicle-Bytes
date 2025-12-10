@@ -97,6 +97,7 @@ public enum OptimisedBytesStoreHash implements BytesStoreHash<BytesStore<?,?>> {
         return agitate(l * K0 + hi * K1);
     }
 
+    // CPD-OFF
     /**
      * Computes a 64-bit hash value for the given BytesStore for data sizes between 9 to 16 bytes.
      *

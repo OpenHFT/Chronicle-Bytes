@@ -518,15 +518,7 @@ public class BytesInternalTest extends BytesTestCommon {
 
     private static void simpleWriteFully4(@NotNull RandomDataInput bytes, @NonNegative long offset, long length, @NotNull StreamingDataOutput<?> sdo)
             throws BufferUnderflowException, BufferOverflowException, IllegalStateException {
-        int i = 0;
-        for (; i < length - 7; i += 8)
-            sdo.rawWriteLong(bytes.readLong(offset + i));
-        if (i < length - 3) {
-            sdo.rawWriteInt(bytes.readInt(offset + i));
-            i += 4;
-        }
-        for (; i < length; i++)
-            sdo.rawWriteByte(bytes.readByte(offset + i));
+        simpleWriteFully3(bytes, offset, length, sdo);
     }
 
     private static void oldWriteFully(@NotNull RandomDataInput bytes, @NonNegative long offset, long length, @NotNull StreamingDataOutput<?> sdo)

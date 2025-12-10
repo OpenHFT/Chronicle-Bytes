@@ -189,12 +189,11 @@ public class BytesFieldInfo {
      * @return a human readable dump of the discovered groups and their offsets
      */
     public String dump() {
-        String sb = "type: " + getClass().getSimpleName() + ", groups: { " +
+        return "type: " + getClass().getSimpleName() + ", groups: { " +
                 groups.entrySet().stream()
                         .map(e -> e.getKey() + ": " + e.getValue().start + " to " + e.getValue().end)
                         .collect(Collectors.joining(", ")) +
                 " }";
-        return sb;
     }
 
     /**

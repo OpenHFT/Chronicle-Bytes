@@ -48,14 +48,13 @@ public class MappedBytesTest extends BytesTestCommon {
 
     private final StringBuilder largeTextBuilder = new StringBuilder();
 
-    private final String text;
+    private final String text = buildLargeText();
 
-    {
+    private String buildLargeText() {
         for (int i = 0; i < 200; i++) {
             largeTextBuilder.append(SMALL_TEXT);
         }
-
-        text = largeTextBuilder.toString();
+        return largeTextBuilder.toString();
     }
 
     @SuppressWarnings("EmptyMethod")
@@ -255,20 +254,7 @@ public class MappedBytesTest extends BytesTestCommon {
         File tempFile1 = Files.createTempFile("mapped", "bytes").toFile();
         try (MappedBytes bytesW = MappedBytes.mappedBytes(tempFile1, 4, 4);
              MappedBytes bytesR = MappedBytes.mappedBytes(tempFile1, 200 << 10, 200 << 10)) {
-            int offset = 10;
-            int shift = 128;
-
-            //write
-            Bytes<?> from = Bytes.from(text);
-            bytesW.write(offset, from, shift, text.length() - shift);
-            Assert.assertEquals(0, bytesW.writePosition());
-
-            // read
-            bytesR.readLimit(offset + (text.length() - shift));
-            bytesR.readPosition(offset);
-            String actual = bytesR.toString();
-            Assert.assertEquals(text.substring(shift), actual);
-            from.releaseLast();
+            assertWriteBytesWithOffsetAndTextShift(bytesW, bytesR);
         }
     }
 
@@ -278,19 +264,24 @@ public class MappedBytesTest extends BytesTestCommon {
         File tempFile1 = Files.createTempFile("mapped", "bytes").toFile();
         try (MappedBytes bytesW = MappedBytes.mappedBytes(tempFile1, 64 << 10, 16 << 10);
              MappedBytes bytesR = MappedBytes.mappedBytes(tempFile1, 64 << 10, 16 << 10)) {
-            int offset = 10;
-            int shift = 128;
+            assertWriteBytesWithOffsetAndTextShift(bytesW, bytesR);
+        }
+    }
 
-            //write
-            Bytes<?> from = Bytes.from(text);
+    private void assertWriteBytesWithOffsetAndTextShift(MappedBytes bytesW, MappedBytes bytesR) {
+        int offset = 10;
+        int shift = 128;
+
+        Bytes<?> from = Bytes.from(text);
+        try {
             bytesW.write(offset, from, shift, text.length() - shift);
             Assert.assertEquals(0, bytesW.writePosition());
 
-            // read
             bytesR.readLimit(offset + (text.length() - shift));
             bytesR.readPosition(offset);
             String actual = bytesR.toString();
             Assert.assertEquals(text.substring(shift), actual);
+        } finally {
             from.releaseLast();
         }
     }

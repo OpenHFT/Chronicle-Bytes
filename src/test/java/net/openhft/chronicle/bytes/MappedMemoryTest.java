@@ -137,30 +137,7 @@ public class MappedMemoryTest extends BytesTestCommon {
         try {
             try (MappedBytes bytes = mappedBytes(tempFile, OS.pageSize())) {
                 bytes0 = bytes;
-                final ReferenceOwner test = ReferenceOwner.temporary("test");
-                try {
-                    assertEquals(1, bytes.refCount());
-                    bytes.reserve(test);
-                    assertEquals(2, bytes.refCount());
-
-                    // The page size is 0x4000 on Mac M1 (and not 0x1000) so we need to stay in reasonable bounds
-                    final char[] chars = new char[OS.pageSize() * 7];
-
-                    Arrays.fill(chars, '.');
-                    chars[chars.length - 1] = '*';
-                    bytes.writeUtf8(new String(chars));
-
-                    final int pos = Math.toIntExact(bytes.writePosition());
-
-                    final String text = "hello this is some very long text";
-                    bytes.writeUtf8(text);
-                    final String textValue = bytes.toString();
-                    assertEquals(text, textValue.substring(pos + 1));
-                    assertEquals(2, bytes.refCount());
-                } finally {
-                    bytes.release(test);
-                    assertEquals(1, bytes.refCount());
-                }
+                assertMappedMemoryContent(bytes);
             }
         } finally {
             deleteIfPossible(tempFile);
@@ -177,30 +154,7 @@ public class MappedMemoryTest extends BytesTestCommon {
         try {
             try (MappedBytes bytes = singleMappedBytes(tempFile, OS.pageSize() * 8L)) {
                 bytes0 = bytes;
-                final ReferenceOwner test = ReferenceOwner.temporary("test");
-                try {
-                    assertEquals(1, bytes.refCount());
-                    bytes.reserve(test);
-                    assertEquals(2, bytes.refCount());
-
-                    // The page size is 0x4000 on Mac M1 (and not 0x1000) so we need to stay in reasonable bounds
-                    final char[] chars = new char[OS.pageSize() * 7];
-
-                    Arrays.fill(chars, '.');
-                    chars[chars.length - 1] = '*';
-                    bytes.writeUtf8(new String(chars));
-
-                    final int pos = Math.toIntExact(bytes.writePosition());
-
-                    final String text = "hello this is some very long text";
-                    bytes.writeUtf8(text);
-                    final String textValue = bytes.toString();
-                    assertEquals(text, textValue.substring(pos + 1));
-                    assertEquals(2, bytes.refCount());
-                } finally {
-                    bytes.release(test);
-                    assertEquals(1, bytes.refCount());
-                }
+                assertMappedMemoryContent(bytes);
             }
         } finally {
             if (OS.isWindows())
@@ -208,5 +162,32 @@ public class MappedMemoryTest extends BytesTestCommon {
             deleteIfPossible(tempFile);
         }
         assertEquals(0, bytes0.refCount());
+    }
+
+    private void assertMappedMemoryContent(MappedBytes bytes) {
+        final ReferenceOwner test = ReferenceOwner.temporary("test");
+        try {
+            assertEquals("refCount before reserve", 1, bytes.refCount());
+            bytes.reserve(test);
+            assertEquals("refCount after reserve", 2, bytes.refCount());
+
+            // The page size is 0x4000 on Mac M1 (and not 0x1000) so we need to stay in reasonable bounds
+            final char[] chars = new char[OS.pageSize() * 7];
+
+            Arrays.fill(chars, '.');
+            chars[chars.length - 1] = '*';
+            bytes.writeUtf8(new String(chars));
+
+            final int pos = Math.toIntExact(bytes.writePosition());
+
+            final String text = "hello this is some very long text";
+            bytes.writeUtf8(text);
+            final String textValue = bytes.toString();
+            assertEquals("UTF-8 write/read content mismatch", text, textValue.substring(pos + 1));
+            assertEquals("refCount before release", 2, bytes.refCount());
+        } finally {
+            bytes.release(test);
+            assertEquals("refCount after release", 1, bytes.refCount());
+        }
     }
 }

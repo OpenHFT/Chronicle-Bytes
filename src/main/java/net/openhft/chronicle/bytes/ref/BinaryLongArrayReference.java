@@ -120,16 +120,7 @@ public class BinaryLongArrayReference extends AbstractBinaryArrayReference imple
     @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public static void write(@NotNull Bytes<?> bytes, @NonNegative long capacity)
             throws BufferOverflowException, IllegalArgumentException, IllegalStateException {
-        assert (bytes.writePosition() & 0x7) == 0;
-
-        checkCapacity(capacity);
-
-        bytes.writeLong(capacity);
-        bytes.writeLong(0L); // used
-        long start = bytes.writePosition();
-        long sizeToSkip = capacity << SHIFT;
-        bytes.zeroOut(start, start + sizeToSkip);
-        bytes.writeSkip(sizeToSkip);
+        writeArray(bytes, capacity, SHIFT, MAX_CAPACITY);
     }
 
     private static void checkCapacity(long capacity) {
@@ -152,14 +143,7 @@ public class BinaryLongArrayReference extends AbstractBinaryArrayReference imple
      */
     public static void lazyWrite(@NotNull Bytes<?> bytes, @NonNegative long capacity)
             throws BufferOverflowException, IllegalStateException {
-        assert (bytes.writePosition() & 0x7) == 0;
-
-        checkCapacity(capacity);
-
-        bytes.writeLong(capacity);
-        bytes.writeLong(0L); // used
-        long sizeToSkip = capacity << SHIFT;
-        bytes.writeSkip(sizeToSkip);
+        lazyWriteArray(bytes, capacity, SHIFT, MAX_CAPACITY);
     }
 
     /**
@@ -175,9 +159,7 @@ public class BinaryLongArrayReference extends AbstractBinaryArrayReference imple
      */
     public static long peakLength(@NotNull BytesStore<?, ?> bytes, @NonNegative long offset)
             throws BufferUnderflowException, IllegalStateException {
-        long capacity = bytes.readLong(offset + CAPACITY);
-        checkCapacity(capacity);
-        return (capacity << SHIFT) + VALUES;
+        return peakLength(bytes, offset, SHIFT, MAX_CAPACITY);
     }
 
     /**
@@ -294,23 +276,18 @@ public class BinaryLongArrayReference extends AbstractBinaryArrayReference imple
         this.length = length;
     }
 
+    /**
+     * Appends a truncated, comma-separated view of the stored long values into the provided
+     * builder for diagnostics. Values are read via {@link #getValueAt(long)} and limited to
+     * the lesser of {@code used} and the configured capacity; oversized arrays are suffixed
+     * with {@code ...}.
+     *
+     * @param sb   destination builder used by {@link #toString()} and tests
+     * @param used number of elements currently populated
+     */
     @Override
     protected void appendContents(@NotNull StringBuilder sb, long used) {
-        String sep = "";
-        try {
-            int i;
-            int max = (int) Math.min(used, Math.min(getCapacity(), MAX_TO_STRING));
-            for (i = 0; i < max; i++) {
-                long valueAt = getValueAt(i);
-                sb.append(sep).append(valueAt);
-                sep = ", ";
-            }
-            if (i < getCapacity())
-                sb.append(" ...");
-
-        } catch (Throwable e) {
-            sb.append(' ').append(e);
-        }
+        appendContents(sb, used, getCapacity(), this::getValueAt);
     }
 
     @Override

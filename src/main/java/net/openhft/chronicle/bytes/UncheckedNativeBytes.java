@@ -796,7 +796,7 @@ public class UncheckedNativeBytes<U>
             throws IllegalStateException {
         bytesStore.write(writePosition, buffer, buffer.position(), buffer.limit());
         writePosition += buffer.remaining();
-        BufferUtil.setPosition(buffer, buffer.limit());
+        BufferUtil.position(buffer, buffer.limit());
         assert writePosition <= writeLimit();
         return this;
     }

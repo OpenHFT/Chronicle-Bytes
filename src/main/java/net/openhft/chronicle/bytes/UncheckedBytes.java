@@ -304,14 +304,16 @@ public class UncheckedBytes<U>
         requireNonNull(chars);
         long wp = writePosition();
         int i;
-        ascii:
-        {
-            for (i = 0; i < length; i++) {
-                char c = chars[offset + i];
-                if (c > 0x007F)
-                    break ascii;
-                bytesStore.writeByte(wp++, (byte) c);
+        boolean allAscii = true;
+        for (i = 0; i < length; i++) {
+            char c = chars[offset + i];
+            if (c > 0x007F) {
+                allAscii = false;
+                break;
             }
+            bytesStore.writeByte(wp++, (byte) c);
+        }
+        if (allAscii) {
             uncheckedWritePosition(wp);
             return this;
         }

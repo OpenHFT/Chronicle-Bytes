@@ -175,16 +175,13 @@ public class BytesMarshallableTest extends BytesTestCommon {
         final Bytes<?> bytes = new HexDumpBytes();
         try {
 
-            final MyByteable mb1 = new MyByteable(false, (byte) 1, (short) 2, '3', 4, 5.5f, 6, 7.7);
-            final MyByteable mb2 = new MyByteable(true, (byte) 11, (short) 22, 'T', 44, 5.555f, 66, 77.77);
-            final ZonedDateTime zdt1 = ZonedDateTime.parse("2017-11-06T12:35:56.775Z[Europe/London]");
-            final ZonedDateTime zdt2 = ZonedDateTime.parse("2016-10-05T01:34:56.775Z[Europe/London]");
-            final UUID uuid1 = new UUID(0x123456789L, 0xABCDEF);
-            final UUID uuid2 = new UUID(0x1111111111111111L, 0x2222222222222222L);
-            final MyScalars ms1 = new MyScalars("Hello", BigInteger.ONE, BigDecimal.TEN, zdt1.toLocalDate(), zdt1.toLocalTime(), zdt1.toLocalDateTime(), zdt1, uuid1);
-            final MyScalars ms2 = new MyScalars("World", BigInteger.ZERO, BigDecimal.ZERO, zdt2.toLocalDate(), zdt2.toLocalTime(), zdt2.toLocalDateTime(), zdt2, uuid2);
-            final MyNested mn1 = new MyNested(mb1, ms1);
-            final MyNested mn2 = new MyNested(mb2, ms2);
+            final TestSampleValues.Samples samples = TestSampleValues.samples();
+            final MyByteable mb1 = samples.mb1();
+            final MyByteable mb2 = samples.mb2();
+            final MyScalars ms1 = samples.ms1();
+            final MyScalars ms2 = samples.ms2();
+            final MyNested mn1 = samples.mn1();
+            final MyNested mn2 = samples.mn2();
             bytes.writeHexDumpDescription("mn1").writeUnsignedByte(1);
             mn1.writeMarshallable(bytes);
             bytes.writeHexDumpDescription("mn2").writeUnsignedByte(2);

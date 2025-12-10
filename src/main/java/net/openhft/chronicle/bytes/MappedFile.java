@@ -7,6 +7,7 @@ import net.openhft.chronicle.bytes.internal.BytesInternal;
 import net.openhft.chronicle.bytes.internal.CanonicalPathUtil;
 import net.openhft.chronicle.bytes.internal.ChunkedMappedFile;
 import net.openhft.chronicle.bytes.internal.SingleMappedFile;
+import net.openhft.chronicle.bytes.domestic.ReentrantFileLock;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.annotation.NonNegative;
@@ -22,6 +23,8 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
+import java.nio.channels.ClosedByInterruptException;
+import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 
 import static net.openhft.chronicle.core.Jvm.uncheckedCast;
@@ -559,6 +562,88 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
     protected boolean threadSafetyCheck(boolean isUsed) {
         // component is thread safe
         return true;
+    }
+
+    /**
+     * Shared implementation of actualSize used by mapped file variants.
+     */
+    protected long computeActualSize(FileChannel fileChannel)
+            throws IORuntimeException, IllegalStateException {
+
+        boolean interrupted = Thread.interrupted();
+        try {
+            return fileChannel.size();
+
+            // this was seen once deep in the JVM.
+        } catch (ArrayIndexOutOfBoundsException aiooe) {
+            // try again.
+            return computeActualSize(fileChannel);
+
+        } catch (ClosedByInterruptException cbie) {
+            close();
+            interrupted = true;
+            throw new ClosedIllegalStateException("FileChannel closed", cbie);
+
+        } catch (IOException e) {
+            final boolean open = fileChannel.isOpen();
+            if (open) {
+                throw new IORuntimeException(e);
+            } else {
+                close();
+                throw new IllegalStateException(e);
+            }
+        } finally {
+            if (interrupted)
+                Thread.currentThread().interrupt();
+        }
+    }
+
+    /**
+     * Shared implementation of resizing logic used by mapped file variants.
+     */
+    @SuppressWarnings("try")
+    protected void ensureRafCapacity(@NotNull final RandomAccessFile raf,
+                                     @NotNull final FileChannel fileChannel,
+                                     final long minSize)
+            throws IOException {
+        Jvm.safepoint();
+
+        long size = fileChannel.size();
+        Jvm.safepoint();
+        if (size >= minSize || readOnly())
+            return;
+
+        // handle a possible race condition between processes.
+        try {
+            // A single JVM cannot lock a distinct canonical file more than once.
+
+            // We might have several MappedFile objects that maps to
+            // the same underlying file (possibly via hard or soft links)
+            // so we use the canonical path as a lock key
+
+            // Ensure exclusivity for any and all MappedFile objects handling
+            // the same canonical file.
+            synchronized (internalizedToken()) {
+                size = fileChannel.size();
+                if (size < minSize) {
+                    final long beginNs = System.nanoTime();
+                    try (FileLock ignore = ReentrantFileLock.lock(file(), fileChannel)) {
+                        size = fileChannel.size();
+                        if (size < minSize) {
+                            Jvm.safepoint();
+                            raf.setLength(minSize);
+                            Jvm.safepoint();
+                        }
+                    }
+                    final long elapsedNs = System.nanoTime() - beginNs;
+                    if (elapsedNs >= 1_000_000L) {
+                        Jvm.perf().on(getClass(), "Took " + elapsedNs / 1000L + " us to grow file " + file());
+                    }
+                }
+            }
+        } catch (IOException ioe) {
+            throw new IOException("Failed to resize to " + minSize, ioe);
+        }
     }
 
     /**

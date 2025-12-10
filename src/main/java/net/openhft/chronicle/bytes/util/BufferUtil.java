@@ -15,26 +15,39 @@ import java.nio.ByteBuffer;
  * instead so the required cast to {@link Buffer} is explicit and not removed as
  * a "redundant" cast.</p>
  */
-// TODO Check this has been used everywhere needed.
 public final class BufferUtil {
 
+    /**
+     * Utility holder; not instantiable.
+     */
     private BufferUtil() {
     }
 
-    public static void setPosition(ByteBuffer byteBuffer, int newPosition) {
-        ((Buffer) byteBuffer).position(newPosition);
+    /**
+     * Sets a {@link ByteBuffer}'s position using the Java 8 compatible {@link Buffer} API.
+     */
+    public static void position(ByteBuffer byteBuffer, int newPosition) {
+        byteBuffer.position(newPosition);
     }
 
+    /**
+     * Invokes {@link Buffer#clear()} on the provided buffer.
+     */
     public static void clear(ByteBuffer byteBuffer) {
-        ((Buffer) byteBuffer).clear();
+        byteBuffer.clear();
     }
 
+    /**
+     * Invokes {@link Buffer#flip()} on the provided buffer.
+     */
     public static void flip(ByteBuffer byteBuffer) {
-        ((Buffer) byteBuffer).flip();
+        byteBuffer.flip();
     }
 
+    /**
+     * Sets a {@link ByteBuffer}'s limit using the Java 8 compatible {@link Buffer} API.
+     */
     public static void limit(ByteBuffer byteBuffer, int newLimit) {
-        ((Buffer) byteBuffer).limit(newLimit);
+        byteBuffer.limit(newLimit);
     }
 }
-

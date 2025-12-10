@@ -32,6 +32,7 @@ import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.Callable;
+import java.util.function.Supplier;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static net.openhft.chronicle.bytes.Allocator.*;
@@ -917,43 +918,20 @@ public class BytesTest extends BytesTestCommon {
 
     @Test
     public void write8BitNativeBytes() {
-        assumeFalse(alloc1 == HEAP_EMBEDDED);
-
-        @NotNull Bytes<?> bytes = alloc1.elasticBytes(703);
-        Bytes<?> nbytes = Bytes.allocateDirect(36);
-        Bytes<?> nbytes2 = Bytes.allocateDirect(36);
-        StringBuilder sb = new StringBuilder();
-        try {
-            for (int i = 0; i <= 36; i++) {
-                nbytes.clear().append(sb);
-                long offset = nbytes.readPosition();
-                long readRemaining = Math.min(bytes.writeRemaining(), nbytes.readLimit() - offset);
-                bytes.writeStopBit(readRemaining);
-                try {
-                    bytes.write(nbytes, offset, readRemaining);
-                } catch (BufferUnderflowException | IllegalArgumentException e) {
-                    throw new AssertionError(e);
-                }
-                bytes.read8bit(nbytes2.clear());
-
-                final String s = sb.toString();
-                assertEquals(s, nbytes2.toString());
-                sb.append(Integer.toString(i, 36));
-            }
-        } finally {
-            postTest(bytes);
-            postTest(nbytes);
-            postTest(nbytes2);
-        }
+        write8BitBytes(() -> Bytes.allocateDirect(36));
     }
 
     @Test
     public void write8BitHeapBytes() {
+        write8BitBytes(() -> Bytes.allocateElasticOnHeap(36));
+    }
+
+    private void write8BitBytes(Supplier<Bytes<?>> bufferSupplier) {
         assumeFalse(alloc1 == HEAP_EMBEDDED);
 
         @NotNull Bytes<?> bytes = alloc1.elasticBytes(703);
-        Bytes<?> nbytes = Bytes.allocateElasticOnHeap(36);
-        Bytes<?> nbytes2 = Bytes.allocateElasticOnHeap(36);
+        Bytes<?> nbytes = bufferSupplier.get();
+        Bytes<?> nbytes2 = bufferSupplier.get();
         StringBuilder sb = new StringBuilder();
         try {
             for (int i = 0; i <= 36; i++) {
@@ -968,7 +946,7 @@ public class BytesTest extends BytesTestCommon {
                 }
                 bytes.read8bit(nbytes2.clear());
 
-                assertEquals(sb.toString(), nbytes2.toString());
+                assertEquals("8-bit round-trip mismatch at iteration " + i, sb.toString(), nbytes2.toString());
                 sb.append(Integer.toString(i, 36));
             }
         } finally {

@@ -20,16 +20,18 @@ import static org.junit.Assume.assumeFalse;
 public class Issue85Test extends BytesTestCommon {
     private int different = 0;
     private int different2 = 0;
-    private final DecimalFormat df = new DecimalFormat();
+    private final DecimalFormat df = createDecimalFormat();
     private static final SecureRandom SECURE_RANDOM = new SecureRandom();
 
-    {
+    private static DecimalFormat createDecimalFormat() {
+        DecimalFormat df = new DecimalFormat();
         df.setMaximumIntegerDigits(99);
         df.setMaximumFractionDigits(99);
         df.setMinimumFractionDigits(1);
         df.setGroupingUsed(false);
         df.setDecimalFormatSymbols(
                 DecimalFormatSymbols.getInstance(Locale.ENGLISH));
+        return df;
     }
 
     static double parseDouble(Bytes<?> bytes) {

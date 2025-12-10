@@ -1024,44 +1024,7 @@ public interface Bytes<U> extends
      */
     default long indexOf(@NotNull Bytes source)
             throws ClosedIllegalStateException {
-        // TODO use indexOf(Bytes, long);
-        throwExceptionIfReleased(this);
-        throwExceptionIfReleased(source);
-        long sourceCount = readRemaining();
-        long otherCount = source.readRemaining();
-
-        if (sourceCount <= 0) {
-            return Math.toIntExact(otherCount == 0 ? sourceCount : -1);
-        }
-        if (otherCount == 0) {
-            return 0;
-        }
-        long sourceOffset = readPosition();
-        long otherOffset = source.readPosition();
-        byte firstByte = source.readByte(otherOffset);
-        long max = sourceOffset + (sourceCount - otherCount);
-
-        for (long i = sourceOffset; i <= max; i++) {
-            /* Look for first character. */
-            if (readByte(i) != firstByte) {
-                while (++i <= max && readByte(i) != firstByte);
-            }
-
-            /* Found first character, now look at the rest of v2 */
-            if (i <= max) {
-                long j = i + 1;
-                long end = j + otherCount - 1;
-                for (long k = otherOffset + 1; j < end && readByte(j) == source.readByte(k); j++, k++) {
-                    // Do nothing
-                }
-
-                if (j == end) {
-                    /* Found whole string. */
-                    return Math.toIntExact(i - sourceOffset);
-                }
-            }
-        }
-        return -1;
+        return indexOf(source, 0);
     }
 
     /**

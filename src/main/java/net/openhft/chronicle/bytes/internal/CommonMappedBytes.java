@@ -331,16 +331,15 @@ public abstract class CommonMappedBytes extends MappedBytes {
             long address = addressForWrite(pos);
             Memory memory = OS.memory();
             int i = 0;
-            non_ascii:
-            {
-                for (; i < length; i++) {
-                    char c = str.charAt(i + start);
-                    if (c > 127) {
-                        writeSkip(i);
-                        break non_ascii;
-                    }
-                    memory.writeByte(address++, (byte) c);
+            for (; i < length; i++) {
+                char c = str.charAt(i + start);
+                if (c > 127) {
+                    writeSkip(i);
+                    break;
                 }
+                memory.writeByte(address++, (byte) c);
+            }
+            if (i == length) {
                 writeSkip(length);
                 return this;
             }
@@ -353,16 +352,15 @@ public abstract class CommonMappedBytes extends MappedBytes {
             long address = addressForWrite(pos);
             Memory memory = OS.memory();
             int i = 0;
-            non_ascii:
-            {
-                for (; i < length; i++) {
-                    char c = chars[i + start];
-                    if (c > 127) {
-                        writeSkip(i);
-                        break non_ascii;
-                    }
-                    memory.writeByte(address++, (byte) c);
+            for (; i < length; i++) {
+                char c = chars[i + start];
+                if (c > 127) {
+                    writeSkip(i);
+                    break;
                 }
+                memory.writeByte(address++, (byte) c);
+            }
+            if (i == length) {
                 writeSkip(length);
                 return this;
             }

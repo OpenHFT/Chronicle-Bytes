@@ -349,6 +349,12 @@ public interface ByteStringParser<B extends ByteStringParser<B>> extends Streami
         return new BigDecimal(parseUtf8(StopCharTesters.NUMBER_END));
     }
 
+    /**
+     * Appends text to the target, wrapping checked IO failures in {@link IORuntimeException}.
+     *
+     * @param appendable destination to receive the text
+     * @param text       content to append
+     */
     static void appendTo(Appendable appendable, CharSequence text) {
         try {
             appendable.append(text);

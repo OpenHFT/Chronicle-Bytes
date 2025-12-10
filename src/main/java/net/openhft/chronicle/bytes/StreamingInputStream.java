@@ -63,6 +63,9 @@ public class StreamingInputStream extends InputStream {
         }
     }
 
+    /**
+     * Returns the number of bytes still readable without blocking, capped at {@link Integer#MAX_VALUE}.
+     */
     @Override
     public int available() {
         return (int) Math.min(Integer.MAX_VALUE, in.readRemaining());

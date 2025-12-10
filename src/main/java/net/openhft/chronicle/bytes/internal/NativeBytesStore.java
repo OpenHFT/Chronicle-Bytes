@@ -728,30 +728,36 @@ public class NativeBytesStore<U>
         long addr = this.address + translate(0);
         @Nullable Memory mem = this.memory;
         if (mem == null) throw new NullPointerException();
-        int i;
-        ascii:
-        {
-            for (i = 0; i < length - 3; i += 4) {
-                final int i2 = offset + i;
-                char c0 = chars[i2];
-                char c1 = chars[i2 + 1];
-                char c2 = chars[i2 + 2];
-                char c3 = chars[i2 + 3];
-                if ((c0 | c1 | c2 | c3) > 0x007F)
-                    break ascii;
-                final int value = (c0) | (c1 << 8) | (c2 << 16) | (c3 << 24);
-                UnsafeMemory.unsafePutInt(addr + pos, value);
-                pos += 4;
+        int i = 0;
+        boolean allAscii = true;
+        for (; i < length - 3; i += 4) {
+            final int i2 = offset + i;
+            char c0 = chars[i2];
+            char c1 = chars[i2 + 1];
+            char c2 = chars[i2 + 2];
+            char c3 = chars[i2 + 3];
+            if ((c0 | c1 | c2 | c3) > 0x007F) {
+                allAscii = false;
+                break;
             }
+            final int value = (c0) | (c1 << 8) | (c2 << 16) | (c3 << 24);
+            UnsafeMemory.unsafePutInt(addr + pos, value);
+            pos += 4;
+        }
+        if (allAscii) {
             for (; i < length; i++) {
                 char c = chars[offset + i];
-                if (c > 0x007F)
-                    break ascii;
+                if (c > 0x007F) {
+                    allAscii = false;
+                    break;
+                }
                 UnsafeMemory.unsafePutByte(addr + pos++, (byte) c);
             }
-
-            return pos;
         }
+
+        if (allAscii)
+            return pos;
+
         return appendUtf8a(pos, chars, offset, length, i);
     }
 
@@ -995,8 +1001,11 @@ public class NativeBytesStore<U>
         @SuppressWarnings({"deprecation", "removal"})
         protected void finalize()
                 throws Throwable {
-            super.finalize();
-            warnAndReleaseIfNotReleased();
+            try {
+                warnAndReleaseIfNotReleased();
+            } finally {
+                super.finalize();
+            }
         }
     }
 

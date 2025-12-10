@@ -949,17 +949,16 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     default S appendUtf8(char[] chars, @NonNegative int offset, @NonNegative int length)
             throws BufferOverflowException, ClosedIllegalStateException, BufferUnderflowException, IllegalArgumentException, ThreadingIllegalStateException {
         int i;
-        ascii:
-        {
-            ensureCapacity(length);
-            for (i = 0; i < length; i++) {
-                char c = chars[offset + i];
-                if (c > 0x007F)
-                    break ascii;
-                rawWriteByte((byte) c);
+        ensureCapacity(length);
+        for (i = 0; i < length; i++) {
+            char c = chars[offset + i];
+            if (c > 0x007F) {
+                break;
             }
-            return (S) this;
+            rawWriteByte((byte) c);
         }
+        if (i == length)
+            return (S) this;
         for (; i < length; i++) {
             char c = chars[offset + i];
             BytesInternal.appendUtf8Char(this, c);

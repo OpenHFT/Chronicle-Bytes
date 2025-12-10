@@ -276,6 +276,7 @@ enum BytesInternal {
         }
     }
 
+    // CPD-OFF
     // a >= b here and we also know it is safe to read bLength
     static boolean contentEqualInt(@NotNull final BytesStore<?, ?> a,
                                    @NotNull final BytesStore<?, ?> b,

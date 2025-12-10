@@ -317,9 +317,9 @@ public class NativeBytes<U>
 
         if (this.bytesStore.underlyingObject() instanceof ByteBuffer) {
             @Nullable final ByteBuffer byteBuffer = (ByteBuffer) this.bytesStore.underlyingObject();
-            BufferUtil.setPosition(byteBuffer, 0);
+            BufferUtil.position(byteBuffer, 0);
             BufferUtil.limit(byteBuffer, byteBuffer.capacity());
-            BufferUtil.setPosition(byteBuffer, position);
+            BufferUtil.position(byteBuffer, position);
         }
     }
 
