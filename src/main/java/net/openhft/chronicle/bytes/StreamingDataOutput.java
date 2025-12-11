@@ -35,11 +35,17 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
  * stream or buffer. Methods typically advance the {@link #writePosition()} by
  * the number of bytes written. Implementations may throw
  * {@link BufferOverflowException} if insufficient space is available.
+ *
+ * @param <S> self type for fluent API
  */
 @SuppressWarnings("unchecked")
 @DontChain
 public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends StreamingCommon<S> {
+    /**
+     * String coder constant for Latin-1 encoded strings in JDK9+ compact strings.
+     */
     int JAVA9_STRING_CODER_LATIN = 0;
+    /** String coder constant for UTF-16 encoded strings in JDK9+ compact strings. */
     int JAVA9_STRING_CODER_UTF16 = 1;
 
     /**
@@ -888,6 +894,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     /**
      * Writes an enum value to this output stream by writing the enum's name.
      *
+     * @param <E> enum type
      * @param e The enum value to be written.
      * @return The current StreamingDataOutput instance.
      * @throws BufferOverflowException        If there is not enough space left in the output stream.

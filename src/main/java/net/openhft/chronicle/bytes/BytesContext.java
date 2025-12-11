@@ -13,11 +13,15 @@ public interface BytesContext extends Closeable {
 
     /**
      * Returns the buffer associated with this context.
+     *
+     * @return bytes backing this context
      */
     Bytes<?> bytes();
 
     /**
      * Provides a context-dependent key, such as a message type.
+     *
+     * @return numeric key associated with this context
      */
     @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     int key();
@@ -25,6 +29,8 @@ public interface BytesContext extends Closeable {
     /**
      * Indicates whether this context has been closed. The default implementation
      * throws {@link UnsupportedOperationException} and should be overridden.
+     *
+     * @return {@code true} if closed
      */
     @Override
     default boolean isClosed() {

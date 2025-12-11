@@ -18,6 +18,9 @@ import java.io.File;
  * between JVM processes by using a memory-mapped file.
  */
 public enum MappedUniqueTimeProvider implements TimeProvider, ReferenceOwner {
+    /**
+     * Singleton instance.
+     */
     INSTANCE;
 
     /** offset within the mapped file where the last timestamp is stored */
@@ -47,6 +50,9 @@ public enum MappedUniqueTimeProvider implements TimeProvider, ReferenceOwner {
     // Todo: Handle thread safety
     /**
      * Sets the underlying time source.
+     *
+     * @param provider time source to delegate to
+     * @return this provider for chaining
      */
     @Deprecated(/* to be removed in 2027 */)
     public MappedUniqueTimeProvider provider(TimeProvider provider) {
@@ -107,6 +113,6 @@ public enum MappedUniqueTimeProvider implements TimeProvider, ReferenceOwner {
     }
 
     private boolean casLastTimeStored(final long expected, final long value) {
-        return ((RandomDataOutput<?>) bytesStore).compareAndSwapLong(LAST_TIME, expected, value);
+        return bytesStore.compareAndSwapLong(LAST_TIME, expected, value);
     }
 }

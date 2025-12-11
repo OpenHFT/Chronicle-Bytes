@@ -18,12 +18,18 @@ import static net.openhft.chronicle.core.Jvm.uncheckedCast;
  * {@link VanillaBytes} backed by an on heap {@code byte[]}.
  */
 public class OnHeapBytes extends VanillaBytes<byte[]> {
+    /**
+     * Maximum heap-backed capacity permitted for this implementation.
+     */
     public static final int MAX_CAPACITY = Bytes.MAX_HEAP_CAPACITY;
     private final boolean elastic;
     private final long capacity;
 
     /**
      * Constructs an instance backed by {@code bytesStore}.
+     *
+     * @param bytesStore backing store to wrap
+     * @param elastic    whether the instance may grow beyond the initial capacity
      */
     @SuppressWarnings("this-escape")
     public OnHeapBytes(@NotNull BytesStore<?, ?> bytesStore, boolean elastic)

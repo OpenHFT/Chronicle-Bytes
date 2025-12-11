@@ -54,6 +54,12 @@ public interface ByteStringParser<B extends ByteStringParser<B>> extends Streami
     /**
      * Convenience wrapper for {@link #parseBoolean(StopCharTester)} using
      * {@link StopCharTesters#NON_ALPHA_DIGIT}.
+     *
+     * @return parsed value or {@code null} if no recognised token was found
+     * @throws BufferUnderflowException    if insufficient data
+     * @throws ArithmeticException         on overflow
+     * @throws ClosedIllegalStateException if closed
+     * @throws ThreadingIllegalStateException if wrong thread access
      */
     @Nullable
     @Deprecated(/* to be removed in 2027, as it is only used in tests */)
@@ -328,6 +334,9 @@ public interface ByteStringParser<B extends ByteStringParser<B>> extends Streami
     /**
      * Advances the read position until {@code tester.isStopChar()} returns {@code true} or end of input
      * is reached.  The terminating character itself remains unread.
+     *
+     * @param tester stop condition
+     * @return {@code true} if a stop character was found
      */
     default boolean skipTo(@NotNull StopCharTester tester)
             throws ClosedIllegalStateException, ThreadingIllegalStateException {

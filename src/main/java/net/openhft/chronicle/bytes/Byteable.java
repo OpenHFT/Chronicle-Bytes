@@ -36,17 +36,23 @@ public interface Byteable {
             throws ClosedIllegalStateException, IllegalArgumentException, BufferOverflowException, BufferUnderflowException, ThreadingIllegalStateException;
 
     /**
+     * Returns the currently mapped backing store, or {@code null} if unmapped.
+     *
      * @return current backing {@link BytesStore} or {@code null} if unmapped
      */
     @Nullable
     BytesStore<?, ?> bytesStore();
 
     /**
+     * Returns the starting offset within the current backing store.
+     *
      * @return offset within the current {@link BytesStore}
      */
     long offset();
 
     /**
+     * Returns the absolute address of the mapped data when available.
+     *
      * @return absolute address of the mapped data if supported
      * @throws UnsupportedOperationException if not backed by native memory
      */
@@ -55,6 +61,8 @@ public interface Byteable {
     }
 
     /**
+     * Returns the fixed byte length represented by this object.
+     *
      * @return fixed byte size represented by this object
      */
     long maxSize();

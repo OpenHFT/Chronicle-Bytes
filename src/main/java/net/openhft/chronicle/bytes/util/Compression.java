@@ -21,6 +21,9 @@ import java.nio.BufferOverflowException;
  * to various types of input data.
  */
 public interface Compression {
+    /**
+     * Shared empty byte array returned for no-op decompression.
+     */
     byte[] EMPTY_BYTES = new byte[0];
 
     /**
@@ -102,6 +105,7 @@ public interface Compression {
      * @param bytes A function to read bytes from the input data.
      * @return The uncompressed data as byte array.
      * @throws IORuntimeException If an I/O error occurs.
+     * @param <T>   type of the compressed source
      */
     static <T> byte[] uncompress(@NotNull CharSequence cs, T t, @NotNull ThrowingFunction<T, byte[], IORuntimeException> bytes)
             throws IORuntimeException {

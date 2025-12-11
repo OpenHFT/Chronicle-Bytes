@@ -212,6 +212,9 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
     /**
      * Appends {@code f} using the configured {@link Decimaliser}.  Very small or
      * large values may fall back to {@link Float#toString()}.
+     *
+     * @param f value to append
+     * @return this appender
      */
     @NotNull
     default B append(float f)
@@ -227,6 +230,9 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
 
     /**
      * Appends {@code d} using the current {@link Decimaliser} strategy.
+     *
+     * @param d value to append
+     * @return this appender
      */
     @NotNull
     default B append(double d)
@@ -241,6 +247,8 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
 
     /**
      * Returns the strategy used to convert floating point values to text.
+     *
+     * @return current decimaliser
      */
     @Deprecated(/* to be removed in 2027 */)
     Decimaliser decimaliser();
@@ -257,6 +265,7 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      * Whether a trailing {@code .0} is appended to whole floating point values.
      *
      * @deprecated to be removed in x.28.  Use {@link #decimaliser(Decimaliser)} to control formatting.
+     * @return {@code true} if trailing .0 is appended
      */
     @Deprecated(/* to remove in x.28 */)
     boolean fpAppend0();
@@ -265,6 +274,8 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      * Controls whether a trailing {@code .0} is appended to whole floating point values.
      *
      * @deprecated to be removed in x.28.  Use {@link #decimaliser(Decimaliser)} instead.
+     * @param append0 whether to append .0 for whole values
+     * @return this appender
      */
     @Deprecated(/* to remove in x.28 */)
     B fpAppend0(boolean append0);

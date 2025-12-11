@@ -29,6 +29,8 @@ import static net.openhft.chronicle.core.util.StringUtils.extractChars;
  * where the caller guarantees that all offsets are valid.
  * <p>
  * <strong>Warning:</strong> misuse can corrupt data or crash the JVM.
+ *
+ * @param <U> self type for fluent operations
  */
 @SuppressWarnings("rawtypes")
 public class UncheckedBytes<U>

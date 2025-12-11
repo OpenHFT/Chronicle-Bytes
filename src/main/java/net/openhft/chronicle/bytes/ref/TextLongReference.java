@@ -38,6 +38,13 @@ public class TextLongReference extends AbstractReference implements LongReferenc
     private static final long UNINITIALIZED = 0x0L;
     private static final long LONG_TRUE = 1L;
     private static final long LONG_FALSE = 0L;
+
+    /**
+     * Creates an empty reference; assign a backing store before reading or writing.
+     */
+    public TextLongReference() {
+        // default
+    }
     private static final int LOCKED = 20;
     private static final int DIGITS = 20;
 

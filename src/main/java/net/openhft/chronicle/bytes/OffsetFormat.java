@@ -13,6 +13,9 @@ public interface OffsetFormat {
 
     /**
      * Formats {@code offset} and appends it to {@code bytes}.
+     *
+     * @param offset offset to render
+     * @param bytes  destination buffer for the formatted value
      */
     void append(@NonNegative long offset, Bytes<?> bytes);
 }

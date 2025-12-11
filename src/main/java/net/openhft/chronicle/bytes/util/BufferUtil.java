@@ -25,6 +25,9 @@ public final class BufferUtil {
 
     /**
      * Sets a {@link ByteBuffer}'s position using the Java 8 compatible {@link Buffer} API.
+     *
+     * @param byteBuffer buffer to update
+     * @param newPosition new position
      */
     public static void position(ByteBuffer byteBuffer, int newPosition) {
         byteBuffer.position(newPosition);
@@ -32,6 +35,8 @@ public final class BufferUtil {
 
     /**
      * Invokes {@link Buffer#clear()} on the provided buffer.
+     *
+     * @param byteBuffer buffer to clear
      */
     public static void clear(ByteBuffer byteBuffer) {
         byteBuffer.clear();
@@ -39,6 +44,8 @@ public final class BufferUtil {
 
     /**
      * Invokes {@link Buffer#flip()} on the provided buffer.
+     *
+     * @param byteBuffer buffer to flip
      */
     public static void flip(ByteBuffer byteBuffer) {
         byteBuffer.flip();
@@ -46,6 +53,9 @@ public final class BufferUtil {
 
     /**
      * Sets a {@link ByteBuffer}'s limit using the Java 8 compatible {@link Buffer} API.
+     *
+     * @param byteBuffer buffer to update
+     * @param newLimit new limit
      */
     public static void limit(ByteBuffer byteBuffer, int newLimit) {
         byteBuffer.limit(newLimit);

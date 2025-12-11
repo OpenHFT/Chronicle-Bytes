@@ -140,6 +140,7 @@ public class NativeBytes<U>
     /**
      * Wraps the provided BytesStore with a new instance of NativeBytes with the specified capacity.
      *
+     * @param <T>      type of the underlying BytesStore
      * @param bs       The BytesStore to wrap.
      * @param capacity The capacity of the new NativeBytes instance.
      * @return A new instance of NativeBytes.
@@ -156,6 +157,13 @@ public class NativeBytes<U>
                 : new NativeBytes<>(bs, capacity);
     }
 
+    /**
+     * Determines the maximum capacity allowed for the given store based on its underlying object.
+     *
+     * @param bs  store to inspect
+     * @param <T> type marker for the store
+     * @return maximum capacity permitted
+     */
     @Deprecated(/* to be removed in 2027 */)
     protected static <T> long maxCapacityFor(@NotNull BytesStore<?, T> bs) {
         return bs.underlyingObject() instanceof ByteBuffer

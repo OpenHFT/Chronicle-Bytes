@@ -13,6 +13,10 @@ public interface NewChunkListener {
 
     /**
      * Invoked after mapping a new chunk.
+     *
+     * @param filename   path of the mapped file
+     * @param chunk      chunk index that was mapped
+     * @param delayMicros time taken to map in microseconds
      */
     void onNewChunk(String filename, @NonNegative int chunk, @NonNegative long delayMicros);
 }

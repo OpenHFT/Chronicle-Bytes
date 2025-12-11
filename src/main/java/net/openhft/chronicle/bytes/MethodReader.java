@@ -22,7 +22,11 @@ import java.nio.BufferUnderflowException;
  * This interface extends {@link java.io.Closeable}, so any class implementing this interface can also be safely closed.
  */
 public interface MethodReader extends Closeable {
+    /**
+     * Field name used for tracking call history metadata.
+     */
     String HISTORY = "history";
+    /** Synthetic method id reserved for history callbacks. */
     int MESSAGE_HISTORY_METHOD_ID = -1;
 
     /**

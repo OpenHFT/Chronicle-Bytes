@@ -40,6 +40,9 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 public class HexDumpBytes
         implements Bytes<Void>, DecimalAppender {
 
+    /**
+     * Mask used when aligning offsets while reading hex dumps.
+     */
     public static final long MASK = 0xFFFFFFFFL;
     private static final char[] HEXADECIMAL = "0123456789abcdef".toCharArray();
     private static final Pattern HEX_PATTERN = Pattern.compile("[0-9a-fA-F]{1,2}");
@@ -64,6 +67,8 @@ public class HexDumpBytes
     /**
      * Constructs a HexDumpBytes instance with the specified base bytes.
      * THis can be used with MappedBytes or NativeBytes.
+     *
+     * @param base backing bytes to wrap and record
      */
     @SuppressWarnings("unchecked")
     public HexDumpBytes(@NotNull Bytes<?> base) {
@@ -84,6 +89,10 @@ public class HexDumpBytes
 
     /**
      * Parses a textual hex dump and returns a populated instance.
+     *
+     * @param reader source of hex text
+     * @return populated HexDumpBytes reflecting the parsed dump
+     * @throws NumberFormatException if the input contains invalid hex tokens
      */
     public static HexDumpBytes fromText(@NotNull Reader reader) throws NumberFormatException {
         HexDumpBytes tb = new HexDumpBytes();
@@ -99,6 +108,10 @@ public class HexDumpBytes
 
     /**
      * Convenience overload of {@link #fromText(Reader)}.
+     *
+     * @param text characters containing a hex dump
+     * @return populated HexDumpBytes reflecting the parsed dump
+     * @throws NumberFormatException if the input contains invalid hex tokens
      */
     public static HexDumpBytes fromText(@NotNull CharSequence text) throws NumberFormatException {
         return fromText(new StringReader(text.toString()));

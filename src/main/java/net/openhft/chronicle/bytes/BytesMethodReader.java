@@ -32,12 +32,12 @@ public class BytesMethodReader extends SimpleCloseable implements MethodReader {
     private final Map<Long, Consumer<BytesIn>> methodEncoderMap = new LinkedHashMap<>();
 
     /**
-     * @param in              the {@link BytesIn} stream from which messages are
-     *                        read
-     * @param defaultParselet handler for messages with unrecognised IDs
-     * @param methodEncoderLookup strategy for obtaining {@link MethodEncoder}
-     *                            instances
-     * @param objects         target objects whose methods may be invoked
+     * Builds a reader wired to decode method calls from {@code in} and dispatch them to {@code objects}.
+     *
+     * @param in                   the {@link BytesIn} stream from which messages are read
+     * @param defaultParselet      handler for messages with unrecognised IDs
+     * @param methodEncoderLookup  strategy for obtaining {@link MethodEncoder} instances
+     * @param objects              target objects whose methods may be invoked
      */
     public BytesMethodReader(BytesIn<?> in,
                              BytesParselet defaultParselet,

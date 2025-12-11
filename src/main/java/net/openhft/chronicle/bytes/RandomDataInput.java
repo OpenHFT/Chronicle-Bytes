@@ -615,6 +615,12 @@ public interface RandomDataInput extends RandomCommon {
         return BytesInternal.compareUtf8(this, offset, other);
     }
 
+    /**
+     * Copies the readable bytes from this input into a newly allocated byte array.
+     *
+     * @return array containing the readable bytes
+     * @throws ClosedIllegalStateException if this input has been released
+     */
     default byte[] toByteArray()
             throws ClosedIllegalStateException {
         return BytesInternal.toByteArray(this);

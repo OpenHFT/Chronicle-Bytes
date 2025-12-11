@@ -63,8 +63,9 @@ public interface BytesRingBuffer extends BytesRingBufferStats, BytesConsumer, Cl
     }
 
     /**
-     * @return the {@link Class} for the commercial implementation of
-     *         {@link MultiReaderBytesRingBuffer}
+     * Resolves the {@link Class} for the commercial implementation of {@link MultiReaderBytesRingBuffer}.
+     *
+     * @return the enterprise implementation class
      * @throws ClassNotFoundException if the implementation class is not present
      */
     @NotNull
@@ -75,8 +76,10 @@ public interface BytesRingBuffer extends BytesRingBufferStats, BytesConsumer, Cl
     }
 
     /**
-     * Calculates the total byte size required for a ring buffer of the given
-     * capacity.
+     * Calculates the total byte size required for a ring buffer of the given capacity.
+     *
+     * @param capacity desired capacity in bytes
+     * @return backing store size required to host the buffer
      */
     static long sizeFor(@NonNegative long capacity) {
         return sizeFor(capacity, 1);
@@ -85,6 +88,10 @@ public interface BytesRingBuffer extends BytesRingBufferStats, BytesConsumer, Cl
     /**
      * Calculates the total byte size required for a ring buffer with the given
      * {@code capacity} and number of readers.
+     *
+     * @param capacity   desired capacity in bytes
+     * @param numReaders number of readers that will consume the buffer
+     * @return backing store size required to host the buffer
      */
     static long sizeFor(@NonNegative long capacity, @NonNegative int numReaders) {
         try {
@@ -129,13 +136,16 @@ public interface BytesRingBuffer extends BytesRingBufferStats, BytesConsumer, Cl
     /**
      * Number of bytes currently available for reading from the default reader
      * perspective.
+     *
+     * @return readable byte count for the default reader
      */
     @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     long readRemaining();
 
     /**
-     * @return {@code true} if no readable messages are present for the default
-     *         reader
+     * Checks whether the buffer currently has no readable messages for the default reader.
+     *
+     * @return {@code true} if no readable messages are present for the default reader
      */
     boolean isEmpty();
 

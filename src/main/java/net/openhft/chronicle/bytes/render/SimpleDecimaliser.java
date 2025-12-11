@@ -31,6 +31,13 @@ public class SimpleDecimaliser implements Decimaliser {
     public static final Decimaliser SIMPLE = new SimpleDecimaliser();
 
     /**
+     * Creates a lightweight decimaliser optimised for speed.
+     */
+    public SimpleDecimaliser() {
+        // default
+    }
+
+    /**
      * Convert {@code value} using a simple rounding approach and append the result.
      * <p>
      * This method iteratively scales the input value by powers of 10, and performs rounding to attempt finding a precise

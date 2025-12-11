@@ -34,6 +34,12 @@ public class BinaryBooleanReference extends AbstractReference implements Boolean
     private static final byte TRUE = (byte) 0xB1;
 
     /**
+     * Creates an uninitialised boolean reference.
+     */
+    public BinaryBooleanReference() {
+    }
+
+    /**
      * Sets the underlying BytesStore to work with, along with the offset and length.
      *
      * @param bytes  the BytesStore to set

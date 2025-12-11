@@ -25,6 +25,13 @@ public class UsesBigDecimal implements Decimaliser {
     public static final Decimaliser USES_BIG_DECIMAL = new UsesBigDecimal();
 
     /**
+     * Creates a decimaliser that leverages {@link BigDecimal} for precision.
+     */
+    public UsesBigDecimal() {
+        // default
+    }
+
+    /**
      * Reference to the private {@code intCompact} field of {@link BigDecimal}.
      * Access may fail on some JVMs, in which case a slower fallback is used.
      */

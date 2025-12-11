@@ -20,6 +20,8 @@ import java.nio.ByteOrder;
  */
 public interface RandomCommon extends ReferenceCounted {
     /**
+     * Returns the smallest position allowed in this buffer.
+     *
      * @return The smallest position allowed in this buffer.
      */
     @NonNegative
@@ -28,6 +30,8 @@ public interface RandomCommon extends ReferenceCounted {
     }
 
     /**
+     * Returns the maximum addressable capacity.
+     *
      * @return the maximum addressable capacity.
      * May be as large as {@link Bytes#MAX_CAPACITY} for virtual mappings.
      */
@@ -37,6 +41,8 @@ public interface RandomCommon extends ReferenceCounted {
     }
 
     /**
+     * Returns the current allocated capacity of the underlying storage.
+     *
      * @return the current allocated capacity of the underlying storage.
      * For elastic buffers this may be less than {@link #capacity()} and can grow on demand.
      */
@@ -57,6 +63,8 @@ public interface RandomCommon extends ReferenceCounted {
     }
 
     /**
+     * Returns the current write position.
+     *
      * @return the current write position.
      * Typically {@code readPosition() <= writePosition() <= writeLimit()}.
      */
@@ -208,8 +216,12 @@ public interface RandomCommon extends ReferenceCounted {
     }
 
     /**
-     * @return a {@link Bytes} view for reading from this buffer.
+     * Returns a {@link Bytes} view for reading from this buffer.
      * The returned view reflects the current positions and limits.
+     *
+     * @return a {@link Bytes} view for reading
+     * @throws ClosedIllegalStateException    if released
+     * @throws ThreadingIllegalStateException if accessed from the wrong thread
      */
     @NotNull
     Bytes<?> bytesForRead()

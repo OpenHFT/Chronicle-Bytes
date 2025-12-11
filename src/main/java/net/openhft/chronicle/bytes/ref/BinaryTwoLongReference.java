@@ -31,6 +31,13 @@ import org.jetbrains.annotations.NotNull;
 public class BinaryTwoLongReference extends BinaryLongReference implements TwoLongReference {
 
     /**
+     * Creates an empty reference for two longs; attach a store before reading or writing.
+     */
+    public BinaryTwoLongReference() {
+        super();
+    }
+
+    /**
      * Returns the maximum size of this reference in bytes (16 bytes for two 64-bit longs).
      *
      * @return the maximum size in bytes

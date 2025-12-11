@@ -61,6 +61,9 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
 
     /**
      * Creates a mapped file wrapper.
+     *
+     * @param file     file to map
+     * @param readOnly whether the mapping is read-only
      */
     protected MappedFile(@NotNull final File file,
                          final boolean readOnly)
@@ -95,7 +98,14 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
     }
 
     /**
-     * @see #of(File, long, long, int, boolean)
+     * Creates a chunked mapping using the given file and overlap settings.
+     *
+     * @param file        file to map
+     * @param chunkSize   size of each chunk in bytes
+     * @param overlapSize overlap between chunks
+     * @param readOnly    whether the mapping is read-only
+     * @return chunked mapped file
+     * @throws FileNotFoundException if the file does not exist
      */
     @NotNull
     public static MappedFile of(@NotNull final File file,
@@ -113,7 +123,7 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
      * @param file        The file to be memory-mapped.
      * @param chunkSize   The size of each chunk in bytes.
      * @param overlapSize The size of the overlapping regions between chunks in bytes.
-     * @param pageSize The custom page size in bytes.
+     * @param pageSize    The custom page size in bytes.
      * @param readOnly    If true, the file is opened in read-only mode; if false, it is opened for read-write.
      * @return A new MappedFile instance.
      * @throws FileNotFoundException If the specified file does not exist.
@@ -151,6 +161,11 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
 
     /**
      * Opens a chunked mapping using the default overlap size.
+     *
+     * @param file      target file to map
+     * @param chunkSize size of each chunk in bytes
+     * @return a mapped file with OS page-sized overlap
+     * @throws FileNotFoundException if the file cannot be opened
      */
     @NotNull
     public static MappedFile mappedFile(@NotNull final File file, @NonNegative final long chunkSize)
@@ -566,6 +581,12 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
 
     /**
      * Shared implementation of actualSize used by mapped file variants.
+     *
+     * @param fileChannel open channel for the mapped file
+     * @return current size of the file
+     * @throws IORuntimeException        if the size cannot be read due to I/O error
+     * @throws IllegalStateException     if the channel is closed unexpectedly
+     * @throws ClosedIllegalStateException if the channel was closed by interrupt
      */
     protected long computeActualSize(FileChannel fileChannel)
             throws IORuntimeException, IllegalStateException {
@@ -600,6 +621,11 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
 
     /**
      * Shared implementation of resizing logic used by mapped file variants.
+     *
+     * @param raf         random access file backing the mapping
+     * @param fileChannel channel for the mapping
+     * @param minSize     minimum required size in bytes
+     * @throws IOException if expanding the file fails
      */
     @SuppressWarnings("try")
     protected void ensureRafCapacity(@NotNull final RandomAccessFile raf,

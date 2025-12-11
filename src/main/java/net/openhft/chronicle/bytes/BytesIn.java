@@ -57,6 +57,7 @@ public interface BytesIn<U> extends
     /**
      * Reads a {@link ReadBytesMarshallable} prefixed with a 16-bit length.
      *
+     * @param <T>    object type
      * @param tClass type of object to create when {@code using} is {@code null}
      * @param using  optional instance to reuse
      * @return the populated instance
@@ -69,6 +70,7 @@ public interface BytesIn<U> extends
      * Reads a simple object such as {@code String}, {@code Long} or an
      * implementation of {@link BytesMarshallable}.
      *
+     * @param <T>           expected result type
      * @param componentType0 expected result type
      * @return the deserialised object
      * @throws UnsupportedOperationException if {@code componentType0} is not supported

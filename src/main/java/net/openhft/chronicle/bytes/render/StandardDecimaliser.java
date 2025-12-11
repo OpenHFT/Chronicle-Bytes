@@ -16,6 +16,13 @@ public class StandardDecimaliser implements Decimaliser {
     public static final StandardDecimaliser STANDARD = new StandardDecimaliser();
 
     /**
+     * Creates the default decimaliser combining maximum precision and BigDecimal fallback.
+     */
+    public StandardDecimaliser() {
+        // default
+    }
+
+    /**
      * Initial strategy rounding to eighteen decimal places.
      */
     static final MaximumPrecision PRECISION_18 = new MaximumPrecision(18);

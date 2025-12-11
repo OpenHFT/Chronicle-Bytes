@@ -45,7 +45,11 @@ import static net.openhft.chronicle.bytes.ref.BinaryLongReference.LONG_NOT_COMPL
  */
 @SuppressWarnings({"rawtypes", "deprecation"})
 public class BinaryLongArrayReference extends AbstractBinaryArrayReference implements ByteableLongArrayValues, BytesMarshallable {
+    /**
+     * Number of bits to shift element indexes to obtain byte offsets (8-byte longs).
+     */
     public static final int SHIFT = 3;
+    /** Maximum number of long elements storable given the header layout. */
     public static final long MAX_CAPACITY = ((Long.MAX_VALUE - VALUES) >> SHIFT);
 
     @Nullable

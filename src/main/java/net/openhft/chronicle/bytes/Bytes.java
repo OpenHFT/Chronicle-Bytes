@@ -482,6 +482,8 @@ public interface Bytes<U> extends
      * Returns an elastic Bytes, preferring direct when available. The underlying store type depends
      * on the runtime (direct or heap), so the return uses a wildcard. Prefer calling
      * {@link #allocateElasticDirect()} or {@link #allocateElasticOnHeap()} for a concrete type.
+     *
+     * @return elastic bytes, direct if available otherwise heap
      */
     @SuppressWarnings("java:S1452")
     // TODO Make sure used as intended
@@ -516,6 +518,9 @@ public interface Bytes<U> extends
      * Returns an elastic Bytes with an initial capacity. The underlying store type depends on the
      * runtime (direct or heap), so the return uses a wildcard. Prefer calling
      * {@link #allocateElasticDirect(long)} or {@link #allocateElasticOnHeap(int)} for a concrete type.
+     *
+     * @param initialCapacity initial capacity to reserve
+     * @return elastic bytes, direct if available otherwise heap
      */
     @SuppressWarnings("java:S1452")
     // TODO Make sure used as intended
@@ -900,6 +905,9 @@ public interface Bytes<U> extends
 
     /**
      * Compares the readable bytes with {@code other} using ISO-8959-1 encoding.
+     *
+     * @param other string to compare against
+     * @return {@code true} if the contents match the provided string
      */
     default boolean isEqual(@Nullable String other)
             throws IllegalStateException {

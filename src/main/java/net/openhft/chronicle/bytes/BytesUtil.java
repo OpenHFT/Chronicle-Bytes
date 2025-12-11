@@ -78,6 +78,8 @@ public enum BytesUtil {
 
     /**
      * Returns the configured maximum array length.
+     *
+     * @return maximum array length allowed when reading
      */
     @Deprecated(/* to be removed in 2027 */)
     public static int maxArrayLength() {
@@ -101,6 +103,9 @@ public enum BytesUtil {
     /**
      * Returns {@code true} if all primitive fields of {@code clazz} occupy a contiguous range allowing
      * direct memory copies.
+     *
+     * @param clazz type to inspect
+     * @return {@code true} when a trivially copyable range is present
      */
     @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public static boolean isTriviallyCopyable(@NotNull Class<?> clazz) {
@@ -167,6 +172,9 @@ public enum BytesUtil {
 
     /**
      * Returns {@code [start, end]} offsets for the contiguous primitive block of {@code clazz}.
+     *
+     * @param clazz type to inspect
+     * @return offsets describing the trivially copyable range, or empty when not available
      */
     public static int[] triviallyCopyableRange(Class<?> clazz) {
         return TRIVIALLY_COPYABLE.get(clazz);
@@ -174,6 +182,9 @@ public enum BytesUtil {
 
     /**
      * Offset of the first trivially copyable byte within {@code clazz}.
+     *
+     * @param clazz type to inspect
+     * @return starting offset of the trivially copyable region
      */
     public static int triviallyCopyableStart(Class<?> clazz) {
         return triviallyCopyableRange(clazz)[0];
@@ -181,6 +192,9 @@ public enum BytesUtil {
 
     /**
      * Length in bytes of the trivially copyable region of {@code clazz}.
+     *
+     * @param clazz type to inspect
+     * @return length of the trivially copyable region
      */
     public static int triviallyCopyableLength(Class<?> clazz) {
         final int[] startEnd = triviallyCopyableRange(clazz);
@@ -201,6 +215,10 @@ public enum BytesUtil {
      * Resolves {@code name} to an absolute file path.  If the file is not present the current
      * working directory, the classpath is searched.  The returned path always points to a regular
      * file and an exception is thrown if it cannot be located.
+     *
+     * @param name file to locate on disk or classpath
+     * @return absolute path to the resolved file
+     * @throws FileNotFoundException if the file cannot be found
      */
     public static String findFile(@NotNull String name)
             throws FileNotFoundException {
@@ -219,6 +237,10 @@ public enum BytesUtil {
     /**
      * Reads the named file into a {@link Bytes} instance.  If {@code name} starts with {@code '='}
      * the remainder is treated as the literal text content.
+     *
+     * @param name path or inline literal (when prefixed with {@code =})
+     * @return readable bytes containing the file contents or literal text
+     * @throws IOException if the file cannot be read
      */
     public static Bytes<?> readFile(@NotNull String name)
             throws IOException {
@@ -236,6 +258,10 @@ public enum BytesUtil {
 
     /**
      * Writes the readable bytes to {@code file}, overwriting any existing content.
+     *
+     * @param file  path to write
+     * @param bytes data to write
+     * @throws IOException if the file cannot be written
      */
     @Deprecated(/* to be removed in 2027 */)
     public static void writeFile(String file, Bytes<byte[]> bytes)
@@ -716,6 +742,11 @@ public enum BytesUtil {
     /**
      * Creates a new direct {@link Bytes} containing a copy of the readable region of {@code bytes}.
      * The source must not have been released.
+     *
+     * @param bytes source bytes to copy
+     * @return direct bytes containing a copy of the readable content
+     * @throws ClosedIllegalStateException    if the source has been released
+     * @throws ThreadingIllegalStateException if the source was used from the wrong thread
      */
     public static Bytes<Void> copyOf(@NotNull final Bytes<?> bytes)
             throws ClosedIllegalStateException, ThreadingIllegalStateException {

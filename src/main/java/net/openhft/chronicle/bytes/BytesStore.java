@@ -68,6 +68,8 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
     /**
      * Returns a BytesStore using the bytes in another specified BytesStore.
      *
+     * @param <A> concrete store type
+     * @param <B> backing buffer type
      * @param cs the source BytesStore
      * @return a new BytesStore that is a copy of the source
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
@@ -91,6 +93,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
     /**
      * Provides a BytesStore that allows access to a group of fields in a given object.
      *
+     * @param <T>       type of the returned store's backing representation
      * @param o         the object that contains the fields
      * @param groupName the group name of the fields
      * @param padding   the padding to be used
@@ -114,6 +117,9 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      * Takes ownership of {@code bb} and returns a store backed by it. The wildcard is used for the
      * store type parameter; for strict typing use {@link NativeBytesStore#wrap(ByteBuffer)} directly
      * for direct buffers, or {@link HeapBytesStore#wrap(ByteBuffer)} for heap buffers.
+     *
+     * @param bb byte buffer to wrap (must not be used elsewhere after wrapping)
+     * @return store backed directly by the supplied buffer
      */
     @SuppressWarnings("java:S1452")
     @NotNull
@@ -127,6 +133,9 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      * Returns a store that references {@code bb} without assuming ownership. The wildcard is used for the
      * store type parameter; use {@link NativeBytesStore#follow(ByteBuffer)} or
      * {@link HeapBytesStore#wrap(ByteBuffer)} for strict typing.
+     *
+     * @param bb byte buffer to follow without taking ownership
+     * @return store that references the supplied buffer
      */
     @SuppressWarnings("java:S1452")
     @NotNull
@@ -219,6 +228,8 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
     /**
      * Provides an empty, fixed-sized and immutable BytesStore.
      *
+     * @param <B> store type
+     * @param <T> backing buffer type
      * @return an instance of an empty BytesStore
      */
     @SuppressWarnings("unchecked")
@@ -396,20 +407,20 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
     long capacity();
 
     /**
-     * @return the underlying object being wrapped, if there is one, or null if not.
+     * Returns the underlying object being wrapped, if any.
+     *
+     * @return underlying object or {@code null} when none
      */
     @Nullable
     U underlyingObject();
 
     /**
-     * Returns if a specified offset is inside this BytesStore limits.
-     * <p>
-     * Use this test to determine if an offset is considered safe for reading from. Note that it checks we are
-     * inside the BytesStore limits *without* including the overlap
+     * Tests whether {@code offset} lies within this store's bounds (exclusive of {@link #safeLimit()}).
+     * Useful for verifying read safety.
      *
-    * @param offset byte index to check
-    * @return {@code true} if the offset is within {@link #start()} and {@link #safeLimit()}
-    */
+     * @param offset byte index to check
+     * @return {@code true} if the offset is within {@link #start()} and {@link #safeLimit()}
+     */
     default boolean inside(@NonNegative long offset) {
         return start() <= offset && offset < safeLimit();
     }
@@ -417,13 +428,19 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
     /**
      * Returns {@code true} if {@code bufferSize} bytes from {@code offset} fall
      * entirely within the valid range.
+     *
+     * @param offset     starting byte index
+     * @param bufferSize number of bytes required
+     * @return {@code true} when the full range is inside the store
      */
     default boolean inside(@NonNegative long offset, @NonNegative long bufferSize) {
         return start() <= offset && offset + bufferSize <= safeLimit();
     }
 
     /**
-     * @return how many bytes can be safely read, i.e. what is the real capacity of the underlying data.
+     * Returns how many bytes can be safely read, i.e. the real capacity of the underlying data.
+     *
+     * @return safe readable limit
      */
     default long safeLimit() {
         return capacity();
@@ -465,6 +482,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      * @param out the specified OutputStream that this BytesStore is copied to
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
+     * @throws IOException                    if the destination stream fails
      * @see java.io.OutputStream
      */
     default void copyTo(@NotNull OutputStream out)
@@ -581,6 +599,8 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
     }
 
     /**
+     * Returns the underlying BytesStore (this).
+     *
      * @return the underlying BytesStore
      */
     @Nullable

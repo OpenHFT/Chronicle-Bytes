@@ -35,6 +35,13 @@ public class UncheckedLongReference extends UnsafeCloseable implements LongRefer
     private BytesStore<?, ?> bytes;
 
     /**
+     * Creates an unchecked reference; provide a backing store before access.
+     */
+    public UncheckedLongReference() {
+        // default
+    }
+
+    /**
      * Factory method to create a {@code UncheckedLongReference} or {@code BinaryLongReference} based on the JVM's debug status.
      * This method initializes the reference with a specific {@code BytesStore}, offset, and size.
      *

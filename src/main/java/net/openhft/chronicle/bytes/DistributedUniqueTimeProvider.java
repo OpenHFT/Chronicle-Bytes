@@ -115,6 +115,9 @@ public class DistributedUniqueTimeProvider extends SimpleCloseable implements Ti
 
     /**
      * Configures the host identifier used in generated timestamps.
+     *
+     * @param hostId host identifier to encode into timestamps
+     * @return this provider for chaining
      */
     public DistributedUniqueTimeProvider hostId(@NonNegative int hostId) {
         // Check if the provided hostId is negative and throw an exception if it is
@@ -131,6 +134,9 @@ public class DistributedUniqueTimeProvider extends SimpleCloseable implements Ti
 
     /**
      * Replaces the underlying time source used for wall-clock time.
+     *
+     * @param provider time source to delegate to
+     * @return this provider for chaining
      */
     @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public DistributedUniqueTimeProvider provider(TimeProvider provider) {

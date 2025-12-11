@@ -38,6 +38,13 @@ public class TextIntReference extends AbstractReference implements IntValue {
     private static final int DIGITS = 10;
 
     /**
+     * Creates an empty reference; assign a backing store before use.
+     */
+    public TextIntReference() {
+        // default
+    }
+
+    /**
      * Writes the provided 32-bit integer value into the given Bytes instance in Text wire format.
      *
      * @param bytes the Bytes instance to write to.

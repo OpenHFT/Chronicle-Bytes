@@ -24,6 +24,7 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
  * variants support concurrent writers when the underlying store allows. Caller is responsible for
  * respecting capacity and thread-safety guarantees of the backing store.
  *
+ * @param <R> self type for fluent chaining
  * @see RandomDataInput
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
@@ -743,6 +744,16 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
     @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     double addAndGetDouble(@NonNegative long offset, double adding) throws ClosedIllegalStateException;
 
+    /**
+     * Appends a formatted floating-point representation and returns the new length.
+     *
+     * @param writePosition target offset
+     * @param negative      whether the number is negative
+     * @param mantissa      mantissa to append
+     * @param exponent      exponent to append
+     * @param append0       whether to append trailing zero
+     * @return resulting length
+     */
     default long appendAndReturnLength(long writePosition, boolean negative, long mantissa, int exponent, boolean append0) {
         throw new UnsupportedOperationException();
     }

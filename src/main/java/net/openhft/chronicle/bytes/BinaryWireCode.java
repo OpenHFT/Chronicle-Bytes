@@ -168,6 +168,9 @@ public interface BinaryWireCode {
 
     /**
      * Builds {@link #STRING_FOR_CODE} by reflecting over constant fields.
+     *
+     * @param clazz type containing the wire code constants
+     * @return array mapping code values (0-255) to human readable names
      */
     static String[] _stringForCode(Class<?> clazz) {
         String[] stringForCode = new String[256];

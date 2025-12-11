@@ -26,6 +26,9 @@ import static net.openhft.chronicle.bytes.algo.VanillaBytesStoreHash.*;
  */
 @SuppressWarnings("rawtypes")
 public enum OptimisedBytesStoreHash implements BytesStoreHash<BytesStore<?,?>> {
+    /**
+     * Default hash implementation using optimised native access where available.
+     */
     INSTANCE;
 
     /**

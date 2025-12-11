@@ -40,6 +40,8 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
  * {@link CleanerServiceLocator} to unmap or free native resources and exposes
  * ordered/atomic primitives for concurrent access patterns, but overall thread
  * safety still depends on how the instance is shared.
+ *
+ * @param <U> marker type for the associated {@link Bytes} view
  */
 @SuppressWarnings({"restriction", "rawtypes", "deprecation"})
 public class NativeBytesStore<U>
@@ -569,6 +571,17 @@ public class NativeBytesStore<U>
         return this;
     }
 
+    /**
+     * Copies {@code length} bytes from {@code bytes} at {@code offset} into this store at {@code offsetInRDO}.
+     * Performs no bounds checking on the destination.
+     *
+     * @param offsetInRDO destination offset in this store
+     * @param bytes       source to copy from
+     * @param offset      start offset in the source
+     * @param length      number of bytes to copy
+     * @throws BufferUnderflowException    if the source does not have enough data
+     * @throws ClosedIllegalStateException if this store has been released
+     */
     public void write0(@NonNegative long offsetInRDO, @NotNull RandomDataInput bytes, @NonNegative long offset, @NonNegative long length)
             throws BufferUnderflowException, ClosedIllegalStateException {
         long i = 0;
@@ -719,6 +732,18 @@ public class NativeBytesStore<U>
         this.address = address;
     }
 
+    /**
+     * Writes UTF-8 encoded characters into the underlying memory at {@code pos}.
+     *
+     * @param pos    destination offset
+     * @param chars  source characters
+     * @param offset starting offset within {@code chars}
+     * @param length number of characters to write
+     * @return number of bytes written
+     * @throws BufferOverflowException        if the destination cannot hold the encoded data
+     * @throws ClosedIllegalStateException    if the store has been released
+     * @throws ThreadingIllegalStateException if accessed from the wrong thread
+     */
     public long appendUtf8(@NonNegative long pos, char[] chars, @NonNegative int offset, @NonNegative int length)
             throws BufferOverflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
         requireNonNull(chars);

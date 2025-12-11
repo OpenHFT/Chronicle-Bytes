@@ -477,6 +477,8 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
     }
 
     /**
+     * Reads as many remaining bytes as possible to form a little-endian long value.
+     *
      * @return a long using the bytes remaining
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
@@ -554,6 +556,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
      * Reads a UTF-8 encoded string from the input stream and appends it to the provided appendable.
      * This method is similar to {@code readUtf8()}, except it populates a provided appendable instead of creating a new string.
      *
+     * @param <C> appendable type
      * @param sb the appendable to which the read string will be appended
      * @return {@code true} if there was a String, or {@code false} if it was {@code null}
      * @throws IORuntimeException          If an IO error occurs
@@ -895,6 +898,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
     /**
      * Reads an Enum value from the input stream.
      *
+     * @param <E>   enum type
      * @param eClass the class of the Enum
      * @return the read Enum value
      * @throws IORuntimeException          If an I/O error occurs
@@ -1020,6 +1024,11 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
      */
     void lenient(boolean lenient);
 
+    /**
+     * Indicates whether lenient parsing is enabled.
+     *
+     * @return {@code true} if lenient parsing is enabled
+     */
     boolean lenient();
 
     /**

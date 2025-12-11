@@ -41,7 +41,11 @@ import static net.openhft.chronicle.bytes.ref.BinaryIntReference.INT_NOT_COMPLET
 @SuppressWarnings({"rawtypes", "deprecation"})
 public class BinaryIntArrayReference extends AbstractBinaryArrayReference implements ByteableIntArrayValues, BytesMarshallable {
 
+    /**
+     * Number of bits to shift element indexes to obtain byte offsets (4-byte integers).
+     */
     public static final int SHIFT = 2;
+    /** Maximum number of int elements storable given the header layout. */
     public static final long MAX_CAPACITY = (Long.MAX_VALUE - VALUES) >> SHIFT;
 
     @Nullable

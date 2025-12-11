@@ -39,6 +39,13 @@ public class TextLongArrayReference extends AbstractReference implements Byteabl
     private static final int CAPACITY = SECTION1.length;
     private static final int USED = CAPACITY + DIGITS + SECTION2.length;
     private static final int VALUES = USED + DIGITS + SECTION3.length;
+
+    /**
+     * Creates an empty reference; set a backing store before use.
+     */
+    public TextLongArrayReference() {
+        // default
+    }
     private static final int VALUE_SIZE = DIGITS + SEP.length;
     private static final int LOCK_OFFSET = 10;
     private static final int FALS = 'f' | ('a' << 8) | ('l' << 16) | ('s' << 24);

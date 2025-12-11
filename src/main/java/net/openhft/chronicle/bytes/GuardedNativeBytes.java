@@ -17,6 +17,8 @@ import static net.openhft.chronicle.bytes.BinaryWireCode.*;
  * Debugging wrapper that prefixes each primitive written with a type code and checks it on reads.
  * Useful for catching mismatched read/write pairs but adds considerable overhead and should not be
  * used in production.
+ *
+ * @param <U> self type for fluent API
  */
 public class GuardedNativeBytes<U> extends NativeBytes<U> {
     /** type marker for a single byte */

@@ -46,21 +46,23 @@ public class UncheckedNativeBytes<U>
     @Deprecated(/* to remove in x.28 */)
     private static final boolean APPEND_0 = Jvm.getBoolean("bytes.append.0", true);
 
-    // The real capacity of the BytesStore this UncheckedNativeBytes operates on
+    /**
+     * The real capacity of the BytesStore this UncheckedNativeBytes operates on.
+     */
     protected final long capacity;
     // An instance of UncheckedRandomDataInput for accessing data without bounds checking
     private final UncheckedRandomDataInput uncheckedRandomDataInput = new UncheckedRandomDataInputHolder();
     // The Bytes instance this UncheckedNativeBytes operates on
     @NotNull
     private final Bytes<U> underlyingBytes;
-    // The BytesStore that the underlying Bytes operates on
+    /** The BytesStore that the underlying Bytes operates on. */
     @NotNull
     protected BytesStore<?, U> bytesStore;
-    // The position of the next byte to be read
+    /** The position of the next byte to be read. */
     protected long readPosition;
-    // The position of the next byte to be written
+    /** The position of the next byte to be written. */
     protected long writePosition;
-    // The limit of the write buffer
+    /** The limit of the write buffer. */
     protected long writeLimit;
     // Tracks the number of decimal places in the last number read
     private int lastDecimalPlaces = 0;
@@ -258,6 +260,12 @@ public class UncheckedNativeBytes<U>
         return false;
     }
 
+    /**
+     * Returns the current read offset and advances by {@code adding} bytes without checks.
+     *
+     * @param adding bytes to move forward
+     * @return starting offset before the move
+     */
     protected long readOffsetPositionMoved(@NonNegative long adding) {
         long offset = readPosition;
         readPosition += adding;
@@ -266,10 +274,23 @@ public class UncheckedNativeBytes<U>
         return offset;
     }
 
+    /**
+     * Returns the current write offset and advances by {@code adding} bytes without bounds checks.
+     *
+     * @param adding bytes to reserve
+     * @return offset before advancing
+     */
     protected long writeOffsetPositionMoved(@NonNegative long adding) {
         return writeOffsetPositionMoved(adding, adding);
     }
 
+    /**
+     * Returns the current write offset and advances by {@code advance}, assuming {@code adding} bytes will be written.
+     *
+     * @param adding  bytes required
+     * @param advance amount to move the write position
+     * @return offset prior to the move
+     */
     protected long writeOffsetPositionMoved(@NonNegative long adding, @NonNegative long advance) {
         long oldPosition = writePosition;
         long writeEnd = oldPosition + adding;
@@ -279,6 +300,12 @@ public class UncheckedNativeBytes<U>
         return oldPosition;
     }
 
+    /**
+     * Moves the read position backwards by {@code subtracting} bytes for prewrite operations.
+     *
+     * @param substracting bytes to move backward
+     * @return new read position after moving
+     */
     protected long prewriteOffsetPositionMoved(@NonNegative long substracting) {
         readPosition -= substracting;
         return readPosition;
@@ -1001,6 +1028,11 @@ public class UncheckedNativeBytes<U>
         return lastDecimalPlaces;
     }
 
+    /**
+     * Records the number of decimal places written by the last append.
+     *
+     * @param lastDecimalPlaces trailing decimal places
+     */
     @Override
     public void lastDecimalPlaces(int lastDecimalPlaces) {
         this.lastDecimalPlaces = Math.max(0, lastDecimalPlaces);
@@ -1026,6 +1058,15 @@ public class UncheckedNativeBytes<U>
         return bytesStore.write8bit(position, s, start, length);
     }
 
+    /**
+     * Writes the stop-bit length and contents of {@code bs}, or -1 if {@code bs} is {@code null}.
+     *
+     * @param bs optional source store
+     * @return this for chaining
+     * @throws BufferOverflowException  if there is insufficient space to write
+     * @throws IllegalStateException    if closed
+     * @throws BufferUnderflowException if the source does not contain enough data
+     */
     @Deprecated(/* to be removed in 2027 */)
     public Bytes<U> write8bit(@Nullable BytesStore<?, ?> bs) throws BufferOverflowException, IllegalStateException, BufferUnderflowException {
         if (bs == null) {
