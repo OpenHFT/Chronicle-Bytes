@@ -5,10 +5,10 @@ package net.openhft.chronicle.bytes.internal;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesTestCommon;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class BytesInternalContentEqualTest extends BytesTestCommon {
 
@@ -22,8 +22,8 @@ public class BytesInternalContentEqualTest extends BytesTestCommon {
             heap.readPosition(0);
             direct.readPosition(0);
 
-            assertTrue("Expected equal content across heap and direct stores",
-                    BytesInternal.contentEqual(heap.bytesStore(), direct.bytesStore()));
+            assertTrue(BytesInternal.contentEqual(heap.bytesStore(), direct.bytesStore()),
+                    "Expected equal content across heap and direct stores");
         } finally {
             heap.releaseLast();
             direct.releaseLast();
@@ -35,7 +35,7 @@ public class BytesInternalContentEqualTest extends BytesTestCommon {
         Bytes<?> left = Bytes.from("abc");
         Bytes<?> right = Bytes.from("abcd");
         try {
-            assertFalse(BytesInternal.contentEqual(left.bytesStore(), right.bytesStore()));
+            assertFalse(BytesInternal.contentEqual(left.bytesStore(), right.bytesStore()), "BytesInternal.contentEqual");
         } finally {
             left.releaseLast();
             right.releaseLast();
@@ -47,7 +47,7 @@ public class BytesInternalContentEqualTest extends BytesTestCommon {
         Bytes<?> left = Bytes.from("abcde");
         Bytes<?> right = Bytes.from("abXde");
         try {
-            assertFalse(BytesInternal.contentEqual(left.bytesStore(), right.bytesStore()));
+            assertFalse(BytesInternal.contentEqual(left.bytesStore(), right.bytesStore()), "BytesInternal.contentEqual");
         } finally {
             left.releaseLast();
             right.releaseLast();

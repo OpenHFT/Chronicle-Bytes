@@ -8,15 +8,15 @@ import net.openhft.chronicle.bytes.BytesTestCommon;
 import net.openhft.chronicle.bytes.NativeBytes;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.Random;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static net.openhft.chronicle.bytes.util.Compressions.GZIP;
-import static org.junit.Assert.*;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 @SuppressWarnings("deprecation")
 public class GzipTest extends BytesTestCommon {
@@ -47,12 +47,12 @@ public class GzipTest extends BytesTestCommon {
         @NotNull byte[] bytes4 = bytes3.toByteArray();
         byte[] bytes5 = GZIP.uncompress(bytes4);
 
-        assertNotNull(bytes5);
+        assertNotNull(bytes5, "GZIP.uncompress should return non-null byte array");
 //        assertEquals(Arrays.toString(bytes).replace(", ", "\n"),
 //                Arrays.toString(bytes5).replace(", ", "\n"));
 //        assertEquals(Arrays.toString(compress).replace(", ", "\n"),
 //                Arrays.toString(bytes4).replace(", ", "\n"));
-        assertEquals(compress.length, bytes4.length);
+        assertEquals(compress.length, bytes4.length, "GZIP compression via Bytes should match byte array compression length");
         assertArrayEquals(compress, bytes4);
 
         @NotNull Bytes<?> bytes6 = Bytes.allocateElasticDirect();

@@ -3,8 +3,8 @@
  */
 package net.openhft.chronicle.bytes;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SuppressWarnings("deprecation")
 public final class PrimitiveTestSupport {
@@ -43,23 +43,23 @@ public final class PrimitiveTestSupport {
         final float f32 = bytes.readFloat();
         final double f64 = bytes.readDouble();
 
-        assertTrue("flag from binary payload", flag);
-        assertEquals("s8 from payload", 1, s8);
-        assertEquals("u8 from payload", 2, u8);
-        assertEquals("s16 from payload", 3, s16);
-        assertEquals("u16 from payload", 4, u16);
-        assertEquals("char from payload", '5', ch);
-        assertEquals("s24 from payload", -6_666_666, s24);
-        assertEquals("u24 from payload", 16_666_666, u24);
-        assertEquals("s32 from payload", 6, s32);
-        assertEquals("u32 from payload", 7, u32);
-        assertEquals("s64 from payload", 8, s64);
-        assertEquals("f32 from payload", 9, f32, 0.0);
-        assertEquals("f64 from payload", 10, f64, 0.0);
+        assertTrue(flag, "flag from binary payload");
+        assertEquals(1, s8, "s8 from payload");
+        assertEquals(2, u8, "u8 from payload");
+        assertEquals(3, s16, "s16 from payload");
+        assertEquals(4, u16, "u16 from payload");
+        assertEquals('5', ch, "char from payload");
+        assertEquals(-6_666_666, s24, "s24 from payload");
+        assertEquals(16_666_666, u24, "u24 from payload");
+        assertEquals(6, s32, "s32 from payload");
+        assertEquals(7, u32, "u32 from payload");
+        assertEquals(8, s64, "s64 from payload");
+        assertEquals(9, f32, 0.0, "f32 from payload");
+        assertEquals(10, f64, 0.0, "f64 from payload");
 
         if (expectText) {
             final String text = bytes.readUtf8();
-            assertEquals("UTF-8 trailer text mismatch", expectedText, text);
+            assertEquals(expectedText, text, "read UTF-8 trailer text should match expected value");
         }
     }
 }

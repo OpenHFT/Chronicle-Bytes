@@ -3,9 +3,9 @@
  */
 package net.openhft.chronicle.bytes;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Tests that BytesInternal.to8BitString handles ISO-8859-1 characters gracefully
@@ -35,6 +35,6 @@ public class ISO88591CharsTest {
     @Test
     public void testBytesToStringConversion() {
         Bytes<?> isoBytes = Bytes.wrapForRead(ISO_BYTES);
-        assertEquals(ISO_TEXT, isoBytes.to8bitString());
+        assertEquals(ISO_TEXT, isoBytes.to8bitString(), "isoBytes.to8bitString");
     }
 }

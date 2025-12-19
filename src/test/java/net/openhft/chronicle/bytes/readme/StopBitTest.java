@@ -5,9 +5,9 @@ package net.openhft.chronicle.bytes.readme;
 
 import net.openhft.chronicle.bytes.BytesTestCommon;
 import net.openhft.chronicle.bytes.HexDumpBytes;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class StopBitTest extends BytesTestCommon {
 
@@ -68,7 +68,7 @@ public class StopBitTest extends BytesTestCommon {
                             "bf 7e                                           # NaN\n" +
                             "bf 7c                                           # Infinity\n";
 
-            assertEquals(expected, actual);
+            assertEquals(expected, actual, "stop-bit encoding for various long/double values should match expected hex format with descriptions");
 
             // System.out.println(actual);
 

@@ -3,10 +3,10 @@
  */
 package net.openhft.chronicle.bytes;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class HexDumpBytesAdvancedTest extends BytesTestCommon {
 
@@ -22,9 +22,9 @@ public class HexDumpBytesAdvancedTest extends BytesTestCommon {
             hdb.write("zz".getBytes(ISO_8859_1));
 
             final String s = hdb.toHexString();
-            assertTrue(s.contains("hdr"));
-            assertTrue(s.contains("nest"));
-            assertTrue(s.contains("00"));
+            assertTrue(s.contains("hdr"), "s.contains");
+            assertTrue(s.contains("nest"), "s.contains");
+            assertTrue(s.contains("00"), "s.contains");
         } finally {
             hdb.releaseLast();
         }

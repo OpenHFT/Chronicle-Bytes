@@ -18,13 +18,16 @@ import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static net.openhft.chronicle.bytes.BytesFactoryUtil.*;
 import static net.openhft.chronicle.core.io.ReferenceOwner.INIT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
@@ -47,8 +50,8 @@ final class BytesReleaseInvariantNonPerformantMethodsTest extends BytesTestCommo
                 NamedConsumer.of(b -> b.parseUtf8(l -> true), "parseUtf8(StopCharTester)"),
                 NamedConsumer.of(b -> b.parse8bit(l -> true), "parse8bit(StopCharTester)"),
                 NamedConsumer.of(b -> b.parse8bit(bytes, l -> true), "parse8bit(bytes, StopCharTester)"),
-                NamedConsumer.of(b -> b.parse8bit(new StringBuilder(), (StopCharTester) l -> true), "parse8bit(sb, StopCharTester)"),
-                NamedConsumer.of(b -> b.parse8bit(new StringBuilder(), (StopCharsTester) (l, m) -> true), "parse8bit(sb, StopCharsTester)"),
+                NamedConsumer.of(b -> b.parse8bit(new StringBuilder(), l -> true), "parse8bit(sb, StopCharTester)"),
+                NamedConsumer.of(b -> b.parse8bit(new StringBuilder(), (l, m) -> true), "parse8bit(sb, StopCharsTester)"),
                 NamedConsumer.of(b -> b.parse8bit(new StringBuilder(), l -> true), "parse8bit(sb, p)"),
                 NamedConsumer.of(ByteStringParser::parseBigDecimal, "parseBigDecimal()"),
                 NamedConsumer.of(ByteStringParser::parseBoolean, "parseBoolean()"),
@@ -102,9 +105,11 @@ final class BytesReleaseInvariantNonPerformantMethodsTest extends BytesTestCommo
      */
     @TestFactory
     Stream<DynamicTest> nonPerformanceCriticalOperators() {
+        final List<NamedConsumer<Bytes<Object>>> operations = provideNonPerformantOperations().collect(Collectors.toList());
+        assertFalse(operations.isEmpty(), "operations list should not be empty when testing non-performance critical operators");
         final AtomicReference<BytesInitialInfo> initialInfo = new AtomicReference<>();
         return cartesianProductTest(BytesFactoryUtil::provideBytesObjects,
-                BytesReleaseInvariantNonPerformantMethodsTest::provideNonPerformantOperations,
+                operations::stream,
                 (args, bytes, nc) -> {
                     if (bytes.refCount() > 0) {
                         if (isReadWrite(args)) {
@@ -132,7 +137,7 @@ final class BytesReleaseInvariantNonPerformantMethodsTest extends BytesTestCommo
     @ParameterizedTest
     @MethodSource("net.openhft.chronicle.bytes.BytesFactoryUtil#provideBytesObjects")
     void toDebugString(final Bytes<?> bytes, final boolean readWrite) {
-        toDebug(bytes, readWrite, Bytes::toDebugString);
+        assertEquals("<released>", toDebug(bytes, readWrite, Bytes::toDebugString), "toDebugString should return '<released>' for released Bytes");
     }
 
     /**
@@ -141,16 +146,15 @@ final class BytesReleaseInvariantNonPerformantMethodsTest extends BytesTestCommo
     @ParameterizedTest
     @MethodSource("net.openhft.chronicle.bytes.BytesFactoryUtil#provideBytesObjects")
     void toDebugString10(final Bytes<?> bytes, final boolean readWrite) {
-        toDebug(bytes, readWrite, b -> b.toDebugString(10));
+        assertEquals("<released>", toDebug(bytes, readWrite, b -> b.toDebugString(10)), "toDebugString(10) should return '<released>' for released Bytes");
     }
 
     // Rather than throwing an exception, toDebug provides a String instead
-    private void toDebug(final Bytes<?> bytes, final boolean readWrite, Function<? super Bytes<?>, String> operation) {
+    private String toDebug(final Bytes<?> bytes, final boolean readWrite, Function<? super Bytes<?>, String> operation) {
         if (readWrite) {
             bytes.append(SILLY_NAME);
         }
         releaseAndAssertReleased(bytes);
-        final String actual = operation.apply(bytes);
-        assertEquals("<released>", actual);
+        return operation.apply(bytes);
     }
 }

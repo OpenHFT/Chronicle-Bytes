@@ -18,7 +18,10 @@ class ReferenceCountedUtilTest extends BytesTestCommon {
 
     @Test
     void throwExceptionIfReleased() {
-        test(o -> ReferenceCountedUtil.throwExceptionIfReleased((ReferenceCounted) o));
+        final Bytes<?> bytes = Bytes.from("A");
+        assertDoesNotThrow(() -> ReferenceCountedUtil.throwExceptionIfReleased(bytes), "throwExceptionIfReleased: before release");
+        bytes.releaseLast();
+        assertThrows(ClosedIllegalStateException.class, () -> ReferenceCountedUtil.throwExceptionIfReleased(bytes), "throwExceptionIfReleased: after release");
     }
 
     @Test

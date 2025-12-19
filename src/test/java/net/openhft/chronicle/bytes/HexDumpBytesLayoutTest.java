@@ -3,9 +3,9 @@
  */
 package net.openhft.chronicle.bytes;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Consolidated layout tests for HexDumpBytes covering wrap widths,
@@ -22,7 +22,7 @@ public class HexDumpBytesLayoutTest extends BytesTestCommon {
             // write a single byte so the description line is emitted
             hdb.write(new byte[1]);
             String s = hdb.toHexString();
-            assertTrue(s.contains("empty"));
+            assertTrue(s.contains("empty"), "s.contains");
         } finally {
             hdb.releaseLast();
         }
@@ -39,9 +39,9 @@ public class HexDumpBytesLayoutTest extends BytesTestCommon {
             hdb.writeHexDumpDescription("nested");
             hdb.write(new byte[4]);
             String s = hdb.toHexString();
-            assertTrue(s.contains("hdr"));
-            assertTrue(s.contains("nested"));
-            assertTrue(s.contains("00"));
+            assertTrue(s.contains("hdr"), "s.contains");
+            assertTrue(s.contains("nested"), "s.contains");
+            assertTrue(s.contains("00"), "s.contains");
         } finally {
             hdb.releaseLast();
         }
@@ -57,8 +57,8 @@ public class HexDumpBytesLayoutTest extends BytesTestCommon {
             String s = hdb.toHexString();
             String[] lines = s.split("\\R");
             // 1 header + 5 data lines (wrapping every byte) + possibly a trailing empty line
-            assertTrue("Expected multiple wrapped lines", lines.length >= 5);
-            assertTrue(s.contains("wrap1"));
+            assertTrue(lines.length >= 5, "Expected multiple wrapped lines");
+            assertTrue(s.contains("wrap1"), "s.contains");
         } finally {
             hdb.releaseLast();
         }

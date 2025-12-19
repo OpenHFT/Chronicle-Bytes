@@ -3,10 +3,9 @@
  */
 package net.openhft.chronicle.bytes;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * This class contains JUnit test methods for testing the behavior
@@ -52,7 +51,7 @@ public class GuardedNativeBytesTest {
 
             final String actual = bytes.toHexString();
 
-            assertEquals(expected, actual);
+            assertEquals(expected, actual, "GuardedNativeBytes should generate expected hex dump format with descriptions for binary primitives");
 
             PrimitiveTestSupport.assertBinaryPrimitiveValues(bytes, true, "Hello");
         } finally {

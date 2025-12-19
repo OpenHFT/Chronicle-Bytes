@@ -7,8 +7,8 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.ReferenceOwner;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,9 +18,9 @@ import java.util.Arrays;
 import static net.openhft.chronicle.bytes.MappedBytes.mappedBytes;
 import static net.openhft.chronicle.bytes.MappedBytes.singleMappedBytes;
 import static net.openhft.chronicle.bytes.MappedFile.mappedFile;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 @SuppressWarnings("deprecation")
 public class MappedMemoryTest extends BytesTestCommon {
@@ -28,7 +28,7 @@ public class MappedMemoryTest extends BytesTestCommon {
     private static final long SHIFT = 27L;
     private static final long BLOCK_SIZE = 1L << SHIFT;
 
-    @Before
+    @BeforeEach
     public void directEnabled() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
     }
@@ -58,7 +58,7 @@ public class MappedMemoryTest extends BytesTestCommon {
                     }
                     bytesStore.release(test);
                 }
-                assertEquals(file0.referenceCounts(), 0, file0.refCount());
+                assertEquals(0, file0.refCount(), file0.referenceCounts());
                 double avgNanos = 80.0 * (System.nanoTime() - startTime) / (double) BLOCK_SIZE / 10.0;
                 Jvm.perf().on(getClass(), "With RawMemory,\t\t time= " + avgNanos + " ns, number of longs written=" + BLOCK_SIZE / 8);
             } finally {
@@ -83,7 +83,7 @@ public class MappedMemoryTest extends BytesTestCommon {
                     bytes.writeLong(i);
                 }
                 bytes.releaseLast();
-                assertEquals(0, bytes.refCount());
+                assertEquals(0, bytes.refCount(), "MappedBytes should have ref count 0 after releaseLast in write loop");
                 double avgNanos = 80.0 * (System.nanoTime() - startTime) / (double) BLOCK_SIZE / 10.0;
                 Jvm.perf().on(getClass(), "With MappedNativeBytes, avg time= " + avgNanos + " ns, number of longs written=" + BLOCK_SIZE / 8);
             } finally {
@@ -142,7 +142,7 @@ public class MappedMemoryTest extends BytesTestCommon {
         } finally {
             deleteIfPossible(tempFile);
         }
-        assertEquals(0, bytes0.refCount());
+        assertEquals(0, bytes0.refCount(), "MappedBytes should have ref count 0 after close in mappedMemoryTest");
     }
 
     @Test
@@ -161,15 +161,15 @@ public class MappedMemoryTest extends BytesTestCommon {
                 ignoreException("Unable to delete");
             deleteIfPossible(tempFile);
         }
-        assertEquals(0, bytes0.refCount());
+        assertEquals(0, bytes0.refCount(), "SingleMappedBytes should have ref count 0 after close in mappedMemoryTestSingle");
     }
 
     private void assertMappedMemoryContent(MappedBytes bytes) {
         final ReferenceOwner test = ReferenceOwner.temporary("test");
         try {
-            assertEquals("refCount before reserve", 1, bytes.refCount());
+            assertEquals(1, bytes.refCount(), "refCount before reserve");
             bytes.reserve(test);
-            assertEquals("refCount after reserve", 2, bytes.refCount());
+            assertEquals(2, bytes.refCount(), "refCount after reserve");
 
             // The page size is 0x4000 on Mac M1 (and not 0x1000) so we need to stay in reasonable bounds
             final char[] chars = new char[OS.pageSize() * 7];
@@ -183,11 +183,11 @@ public class MappedMemoryTest extends BytesTestCommon {
             final String text = "hello this is some very long text";
             bytes.writeUtf8(text);
             final String textValue = bytes.toString();
-            assertEquals("UTF-8 write/read content mismatch", text, textValue.substring(pos + 1));
-            assertEquals("refCount before release", 2, bytes.refCount());
+            assertEquals(text, textValue.substring(pos + 1), "read UTF-8 text should match written text after position offset");
+            assertEquals(2, bytes.refCount(), "refCount before release");
         } finally {
             bytes.release(test);
-            assertEquals("refCount after release", 1, bytes.refCount());
+            assertEquals(1, bytes.refCount(), "refCount after release");
         }
     }
 }

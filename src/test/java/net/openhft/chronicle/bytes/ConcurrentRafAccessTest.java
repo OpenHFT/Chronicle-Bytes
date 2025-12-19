@@ -4,8 +4,10 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.io.IOTools;
-import org.junit.*;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.io.TempDir;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,8 +24,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /*
     Averages from TeamCity logs:
@@ -34,7 +36,7 @@ import static org.junit.Assert.fail;
     Parallel      3.5         15              51
 */
 
-@Ignore("This is a performance test and should not be run as a part of the normal build")
+@Disabled("This is a performance test and should not be run as a part of the normal build")
 public class ConcurrentRafAccessTest extends BytesTestCommon {
 
     private static final String MODE = "rw";
@@ -45,8 +47,8 @@ public class ConcurrentRafAccessTest extends BytesTestCommon {
 
     private List<Worker> workers;
 
-    @Rule
-    public final TemporaryFolder tmpDir = new TemporaryFolder();
+    @TempDir
+    public File tmpDir;
 
     private static void bumpSize(File file, final RandomAccessFile raf, final FileChannel fc)
             throws IOException {
@@ -54,7 +56,7 @@ public class ConcurrentRafAccessTest extends BytesTestCommon {
         raf.setLength(currentSize * 2);
     }
 
-    @Before
+    @BeforeEach
     public void setup()
             throws IOException {
         Files.createDirectories(Paths.get(BASE_DIR));
@@ -76,49 +78,49 @@ public class ConcurrentRafAccessTest extends BytesTestCommon {
                 .collect(Collectors.toList());
     }
 
-    @After
+    @AfterEach
     public void cleanup() {
         IOTools.deleteDirWithFiles(BASE_DIR);
     }
 
-    @Test
+    @org.junit.jupiter.api.Test
     public void testParallel2() {
         final LongSummaryStatistics summaryStatistics = IntStream.range(0, RUNS)
                 .mapToLong(i -> test("testParallel2 " + i, ForkJoinPool.commonPool()))
                 .skip(4)
                 .summaryStatistics();
 
-        assertTrue(summaryStatistics.getCount() > 0);
+        assertTrue(summaryStatistics.getCount() > 0, "summaryStatistics.getCount");
     }
 
-    @Test
+    @org.junit.jupiter.api.Test
     public void testSequential() {
         final LongSummaryStatistics summaryStatistics = IntStream.range(0, RUNS)
                 .mapToLong(i -> test("testSequential " + i, Executors.newSingleThreadExecutor()))
                 .skip(4)
                 .summaryStatistics();
 
-        assertTrue(summaryStatistics.getCount() > 0);
+        assertTrue(summaryStatistics.getCount() > 0, "summaryStatistics.getCount");
     }
 
-    @Test
+    @org.junit.jupiter.api.Test
     public void testParallel() {
         final LongSummaryStatistics summaryStatistics = IntStream.range(0, RUNS)
                 .mapToLong(i -> test("testParallel " + i, ForkJoinPool.commonPool()))
                 .skip(4)
                 .summaryStatistics();
 
-        assertTrue(summaryStatistics.getCount() > 0);
+        assertTrue(summaryStatistics.getCount() > 0, "summaryStatistics.getCount");
     }
 
-    @Test
+    @org.junit.jupiter.api.Test
     public void testSequential2() {
         final LongSummaryStatistics summaryStatistics = IntStream.range(0, RUNS)
                 .mapToLong(i -> test("testSequential2 " + i, Executors.newSingleThreadExecutor()))
                 .skip(4)
                 .summaryStatistics();
 
-        assertTrue(summaryStatistics.getCount() > 0);
+        assertTrue(summaryStatistics.getCount() > 0, "summaryStatistics.getCount");
     }
 
     private long test(final String name, final ExecutorService executor) {
@@ -138,7 +140,7 @@ public class ConcurrentRafAccessTest extends BytesTestCommon {
 
     private File fileFromInt(int i)
             throws IOException {
-        return tmpDir.newFile(Integer.toString(i));
+        return newFile(tmpDir, Integer.toString(i));
     }
 
     private static final class Worker implements Runnable {
@@ -165,7 +167,13 @@ public class ConcurrentRafAccessTest extends BytesTestCommon {
                 }
             }
             final long elapsedNs = System.nanoTime() - beginNs;
-            assertTrue(elapsedNs >= 0);
+            assertTrue(elapsedNs >= 0, "elapsed time measurement should be non-negative");
         }
+    }
+
+    private static File newFile(File parent, String child) throws IOException {
+        File result = new File(parent, child);
+        result.createNewFile();
+        return result;
     }
 }

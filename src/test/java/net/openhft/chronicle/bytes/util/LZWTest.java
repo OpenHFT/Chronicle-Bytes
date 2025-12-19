@@ -7,14 +7,14 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesTestCommon;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.Random;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static net.openhft.chronicle.bytes.util.Compressions.LZW;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SuppressWarnings("deprecation")
 public class LZWTest extends BytesTestCommon {
@@ -42,9 +42,9 @@ public class LZWTest extends BytesTestCommon {
         LZW.compress(bytes2, bytes3);
         @NotNull byte[] bytes4 = bytes3.toByteArray();
         byte[] bytes5 = LZW.uncompress(bytes4);
-        assertNotNull(bytes5);
+        assertNotNull(bytes5, "LZW.uncompress should return non-null byte array");
 
-        assertEquals(compress.length, bytes4.length);
+        assertEquals(compress.length, bytes4.length, "LZW compression via Bytes should match byte array compression length");
         assertArrayEquals(compress, bytes4);
 
         @NotNull Bytes<?> bytes6 = Bytes.allocateElasticDirect();

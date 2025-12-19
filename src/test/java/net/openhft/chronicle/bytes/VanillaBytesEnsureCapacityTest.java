@@ -3,9 +3,9 @@
  */
 package net.openhft.chronicle.bytes;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class VanillaBytesEnsureCapacityTest extends BytesTestCommon {
 
@@ -16,7 +16,7 @@ public class VanillaBytesEnsureCapacityTest extends BytesTestCommon {
             long rc = b.realCapacity();
             byte[] chunk = new byte[1024];
             b.write(chunk);
-            assertTrue(b.realCapacity() > rc);
+            assertTrue(b.realCapacity() > rc, "real capacity should be true");
         } finally {
             b.releaseLast();
         }

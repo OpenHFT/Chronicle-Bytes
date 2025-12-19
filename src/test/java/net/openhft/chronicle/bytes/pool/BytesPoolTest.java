@@ -28,11 +28,11 @@ class BytesPoolTest {
             Bytes<?> bytes = resource.get();
 
             bytes.writeUtf8("Hello, World!");
-            assertEquals("Hello, World!", bytes.readUtf8());
+            assertEquals("Hello, World!", bytes.readUtf8(), "Pooled bytes should return UTF-8 string that was written");
 
             bytes.clear();
 
-            assertEquals(0, bytes.readRemaining());
+            assertEquals(0, bytes.readRemaining(), "Bytes should have zero readRemaining after clear");
 
             bytes.releaseLast();
         }

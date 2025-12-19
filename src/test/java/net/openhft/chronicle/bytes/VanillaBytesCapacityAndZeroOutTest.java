@@ -3,9 +3,9 @@
  */
 package net.openhft.chronicle.bytes;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class VanillaBytesCapacityAndZeroOutTest extends BytesTestCommon {
 
@@ -18,7 +18,7 @@ public class VanillaBytesCapacityAndZeroOutTest extends BytesTestCommon {
                 b.append('X');
             }
             long capAfter = b.capacity();
-            assertTrue("Expected capacity to grow beyond initial", capAfter >= 10);
+            assertTrue(capAfter >= 10, "Expected capacity to grow beyond initial");
 
             // zeroOut a large range including unwritten tail
             long start = 2;
@@ -28,9 +28,9 @@ public class VanillaBytesCapacityAndZeroOutTest extends BytesTestCommon {
             // Verify visible zeroing only on written region
             b.readPosition(0);
             byte first = b.readByte();
-            assertEquals('X', first);
+            assertEquals('X', first, "first byte should remain 'X' (before zeroed range)");
             byte third = b.readByte(2);
-            assertEquals(0, third);
+            assertEquals(0, third, "third byte should be zeroed after zeroOut()");
         } finally {
             b.releaseLast();
         }

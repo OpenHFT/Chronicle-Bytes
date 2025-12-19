@@ -5,14 +5,12 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.util.Mocker;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.StringWriter;
 
-import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertTrue;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 @SuppressWarnings("deprecation")
 public class BytesMethodWriterBuilderTest extends BytesTestCommon {
@@ -97,15 +95,15 @@ public class BytesMethodWriterBuilderTest extends BytesTestCommon {
                     "      2b 30 31 3a 30 30 5b 45 75 72 6f 70 65 2f 4c 6f\n" +
                     "      6e 64 6f 6e 5d 24 31 31 31 31 31 31 31 31 2d 31 # uuid\n" +
                     "      31 31 31 2d 31 31 31 31 2d 32 32 32 32 2d 32 32\n" +
-                    "      32 32 32 32 32 32 32 32 32 32\n", bytes.toHexString());
+                    "      32 32 32 32 32 32 32 32 32 32\n", bytes.toHexString(), "toHexString value");
 
             final StringWriter out = new StringWriter();
             final MethodReader reader = bytes.bytesMethodReader(Mocker.logging(IBytesMethod.class, "* ", out));
 
             for (int i = 0; i < 4; i++) {
-                assertTrue(reader.readOne());
+                assertTrue(reader.readOne(), "reader.readOne");
             }
-            assertFalse(reader.readOne());
+            assertFalse(reader.readOne(), "reader.readOne");
 
             final String expected =
                     Jvm.isJava9Plus() ?
@@ -118,8 +116,8 @@ public class BytesMethodWriterBuilderTest extends BytesTestCommon {
                                     "* myScalars[MyScalars{s='Hello', bi=1, bd=10, date=2017-11-06, time=12:35:56.775, dateTime=2017-11-06T12:35:56.775, zonedDateTime=2017-11-06T12:35:56.775Z[Europe/London], uuid=00000001-2345-6789-0000-000000abcdef}]\n" +
                                     "* myNested[MyNested{byteable=MyByteable{flag=true, b=11, s=22, c=T, i=44, f=5.555, l=66, d=77.77}, scalars=MyScalars{s='World', bi=0, bd=0, date=2016-10-05, time=01:34:56.775, dateTime=2016-10-05T01:34:56.775, zonedDateTime=2016-10-05T01:34:56.775+01:00[Europe/London], uuid=11111111-1111-1111-2222-222222222222}}]\n";
 
-            assertEquals(expected,
-                    out.toString().replaceAll("\r", ""));
+            assertEquals(expected, out.toString().replaceAll("\r", ""),
+                    "testPrimitives: assertEquals");
         } finally {
             bytes.releaseLast();
         }

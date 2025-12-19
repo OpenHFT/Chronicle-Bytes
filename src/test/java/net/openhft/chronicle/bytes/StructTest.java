@@ -8,7 +8,7 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.UnsafeMemory;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.IOTools;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
@@ -18,7 +18,7 @@ import java.util.stream.Stream;
 
 import static net.openhft.chronicle.core.Jvm.uncheckedCast;
 import static net.openhft.chronicle.core.UnsafeMemory.MEMORY;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SuppressWarnings("deprecation")
 public class StructTest extends BytesTestCommon {
@@ -249,7 +249,7 @@ public class StructTest extends BytesTestCommon {
                     "00000040 00 00 00 00 00 00 00 00  96 07 01 01 33 33 73 3f ········ ····33s?\n" +
                     "00000050 00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00 ········ ········\n" +
                     "........\n" +
-                    "00000070 00 00 00 00 00 00 00 00  00 00 00 00             ········ ····    \n", sb0.toString());
+                    "00000070 00 00 00 00 00 00 00 00  00 00 00 00             ········ ····    \n", sb0.toString(), "hex dump of three Student structs on 64-bit JVM should match expected layout");
         } else {
             assertEquals("00000000 00 00 00 00 00 00 00 00  54 68 65 20 50 68 61 6e ········ The Phan\n" +
                     "00000010 74 6f 6d 00 00 00 00 00  00 00 00 00 00 00 00 00 tom····· ········\n" +
@@ -273,7 +273,7 @@ public class StructTest extends BytesTestCommon {
                     "00000040 00 00 00 00 00 00 00 00  96 07 01 01 33 33 73 3f ········ ····33s?\n" +
                     "00000050 00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00 ········ ········\n" +
                     "........\n" +
-                    "00000070 00 00 00 00 00 00 00 00                          ········         \n", sb0.toString());
+                    "00000070 00 00 00 00 00 00 00 00                          ········         \n", sb0.toString(), "hex dump of three Student structs on 32-bit JVM should match expected layout");
         }
 
         // add links here (need the previous null addresses for the above output to be constant between runs)
@@ -290,8 +290,8 @@ public class StructTest extends BytesTestCommon {
         System.out.print(sb);
         assertEquals("The Phantom MALE, born 1936-2-17\n" +
                         "Superman MALE, born 1938-4-18\n" +
-                        "Wonder Woman FEMALE, born 1942-1-1\n",
-                sb.toString());
+                        "Wonder Woman FEMALE, born 1942-1-1\n", sb.toString(),
+                "linked list traversal should produce all three students in order");
     }
     /*
      *enum Gender{MALE, FEMALE};
@@ -583,32 +583,32 @@ public class StructTest extends BytesTestCommon {
         Date d2 = d1.copy();
         Date d3 = d1.share();
 
-        assertEquals("1970-1-1", d1.toString());
+        assertEquals("1970-1-1", d1.toString(), "original date d1 should be 1970-1-1");
 
         d2.month((byte) 2); // d2 only
         d3.month((byte) 3); // d1 and d3
 
-        assertEquals("1970-3-1", d1.toString());
-        assertEquals("1970-3-1", d3.toString());
+        assertEquals("1970-3-1", d1.toString(), "d1 should reflect d3 change since d3 shares memory with d1");
+        assertEquals("1970-3-1", d3.toString(), "d3 should show month 3 after modification");
 
-        assertEquals("1970-2-1", d2.toString());
+        assertEquals("1970-2-1", d2.toString(), "d2 should remain independent with month 2");
 
         // point d3 to d2 (from d1)
         d3.share(d2);
-        assertEquals("1970-2-1", d3.toString());
+        assertEquals("1970-2-1", d3.toString(), "d3 should now show d2 value after sharing with d2");
 
         // change d2 (and so also d3)
         d2.month((byte) 4);
-        assertEquals("1970-4-1", d2.toString());
-        assertEquals("1970-4-1", d3.toString());
+        assertEquals("1970-4-1", d2.toString(), "d2 should show month 4 after modification");
+        assertEquals("1970-4-1", d3.toString(), "d3 should reflect d2 change since they share memory");
 
         // copy d2 into d3
         d3.copy(d2);
 
         // change d2; d3 stays the same
         d2.month((byte) 5);
-        assertEquals("1970-5-1", d2.toString());
-        assertEquals("1970-4-1", d3.toString());
+        assertEquals("1970-5-1", d2.toString(), "d2 should show month 5 after modification");
+        assertEquals("1970-4-1", d3.toString(), "d3 should remain at month 4 since it now has independent copy");
 
     }
 }

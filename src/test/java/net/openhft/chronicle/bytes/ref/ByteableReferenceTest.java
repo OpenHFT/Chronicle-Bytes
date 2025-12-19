@@ -8,27 +8,24 @@ import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.bytes.BytesTestCommon;
 import net.openhft.chronicle.core.io.AbstractCloseable;
 import net.openhft.chronicle.core.io.AbstractReferenceCounted;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Supplier;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SuppressWarnings("rawtypes")
-@RunWith(Parameterized.class)
 public class ByteableReferenceTest extends BytesTestCommon {
 
-    private final Supplier<AbstractReference> byteableCtor;
+    private Supplier<AbstractReference> byteableCtor;
 
-    public ByteableReferenceTest(final String className, final Supplier<AbstractReference> byteableCtor) {
+    public void initByteableReferenceTest(final String className, final Supplier<AbstractReference> byteableCtor) {
         this.byteableCtor = byteableCtor;
     }
 
-    @Parameterized.Parameters(name = "{0}")
     public static List<Object[]> testData() {
         List<Object[]> objects = Arrays.asList(
                 datum(BinaryLongReference::new),
@@ -48,8 +45,10 @@ public class ByteableReferenceTest extends BytesTestCommon {
         return new Object[]{reference.getClass().getSimpleName(), reference};
     }
 
-    @Test
-    public void shouldMakeReservationOnCurrentStore() {
+    @MethodSource("testData")
+    @ParameterizedTest(name = "{0}")
+    public void shouldMakeReservationOnCurrentStore(final String className, final Supplier<AbstractReference> byteableCtor) {
+        initByteableReferenceTest(className, byteableCtor);
         final BytesStore<?, ?> firstStore = BytesStore.nativeStore(64);
         try {
             firstStore.writeLong(0, 17);
@@ -59,11 +58,11 @@ public class ByteableReferenceTest extends BytesTestCommon {
                 final long startCount = firstStore.refCount();
                 byteable.bytesStore(firstStore, 0, byteable.maxSize());
 
-                assertEquals(startCount + 1, firstStore.refCount());
+                assertEquals(startCount + 1, firstStore.refCount(), "Byteable should reserve first store when attached");
 
                 byteable.bytesStore(secondStore, 0, byteable.maxSize());
 
-                assertEquals(startCount, firstStore.refCount());
+                assertEquals(startCount, firstStore.refCount(), "Byteable should release first store when attaching to second store");
             } finally {
                 secondStore.releaseLast();
             }

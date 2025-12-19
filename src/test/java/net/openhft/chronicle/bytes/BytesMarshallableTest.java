@@ -5,11 +5,10 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Jvm;
 import org.jetbrains.annotations.NotNull;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.IOException;
 import java.lang.annotation.RetentionPolicy;
@@ -24,22 +23,20 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListSet;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
-import static org.junit.Assert.*;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 @SuppressWarnings("deprecation")
-@RunWith(Parameterized.class)
 public class BytesMarshallableTest extends BytesTestCommon {
 
-    private final String name;
-    private final boolean guarded;
+    private String name;
+    private boolean guarded;
 
-    public BytesMarshallableTest(String name, boolean guarded) {
+    public void initBytesMarshallableTest(String name, boolean guarded) {
         this.name = name;
         this.guarded = guarded;
     }
 
-    @Parameterized.Parameters(name = "{0}")
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][]{
                 {"Unguarded", false},
@@ -47,19 +44,21 @@ public class BytesMarshallableTest extends BytesTestCommon {
         });
     }
 
-    @AfterClass
+    @AfterAll
     public static void resetGuarded() {
         NativeBytes.resetNewGuarded();
     }
 
-    @Before
+    @BeforeEach
     public void setGuarded() {
         NativeBytes.setNewGuarded(guarded);
     }
 
-    @Test
-    public void serializePrimitives() {
-        assertNotNull(name);
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void serializePrimitives(String name, boolean guarded) {
+        initBytesMarshallableTest(name, guarded);
+        assertNotNull(name, "test name parameter should not be null");
         assumeFalse(NativeBytes.areNewGuarded());
         final Bytes<?> bytes = new HexDumpBytes();
         try {
@@ -70,8 +69,7 @@ public class BytesMarshallableTest extends BytesTestCommon {
             bytes.writeHexDumpDescription("mb2").writeUnsignedByte(2);
             mb2.writeMarshallable(bytes);
 
-            assertEquals(
-                    "01                                              # mb1\n" +
+            assertEquals("01                                              # mb1\n" +
                             "   4e                                              # flag\n" +
                             "   01                                              # b\n" +
                             "   02 00                                           # s\n" +
@@ -88,24 +86,27 @@ public class BytesMarshallableTest extends BytesTestCommon {
                             "   2c 00 00 00                                     # i\n" +
                             "   8f c2 b1 40                                     # f\n" +
                             "   42 00 00 00 00 00 00 00                         # l\n" +
-                            "   e1 7a 14 ae 47 71 53 40                         # d\n", bytes.toHexString());
+                            "   e1 7a 14 ae 47 71 53 40                         # d\n",
+                    bytes.toHexString(), "toHexString value");
 
             final MyByteable mb3 = new MyByteable();
             final MyByteable mb4 = new MyByteable();
-            assertEquals(1, bytes.readUnsignedByte());
+            assertEquals(1, bytes.readUnsignedByte(), "readUnsignedByte value");
             mb3.readMarshallable(bytes);
-            assertEquals(2, bytes.readUnsignedByte());
+            assertEquals(2, bytes.readUnsignedByte(), "readUnsignedByte value");
             mb4.readMarshallable(bytes);
 
-            assertEquals(mb1.toString(), mb3.toString());
-            assertEquals(mb2.toString(), mb4.toString());
+            assertEquals(mb1.toString(), mb3.toString(), "deserialized MyByteable should match original serialized hex representation");
+            assertEquals(mb2.toString(), mb4.toString(), "deserialized MyByteable should match original serialized hex representation");
         } finally {
             bytes.releaseLast();
         }
     }
 
-    @Test
-    public void serializeScalars() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void serializeScalars(String name, boolean guarded) {
+        initBytesMarshallableTest(name, guarded);
         final Bytes<?> bytes = new HexDumpBytes();
         try {
             final MyScalars mb1 = new MyScalars("Hello", BigInteger.ONE, BigDecimal.TEN, LocalDate.now(), LocalTime.now(), LocalDateTime.now(), ZonedDateTime.now(), UUID.randomUUID());
@@ -144,10 +145,13 @@ public class BytesMarshallableTest extends BytesTestCommon {
                         "   35 66 30 2d 62 66 62 64 2d 63 33 30 37 34 34 33\n" +
                         "   65 32 38 61 34\n", bytes.toHexString());
 */
-            final Bytes<?> bytes2 = HexDumpBytes.fromText(bytes.toHexString());
+            final String hex = bytes.toHexString();
+            final Bytes<?> bytes2 = HexDumpBytes.fromText(hex);
             try {
                 doSerializeScalars(bytes, mb1, mb2);
+                assertEquals(0L, bytes.readRemaining(), "serializeScalars: bytes consumed");
                 doSerializeScalars(bytes2, mb1, mb2);
+                assertEquals(0L, bytes2.readRemaining(), "serializeScalars: bytes2 consumed");
             } finally {
                 bytes2.releaseLast();
             }
@@ -161,17 +165,19 @@ public class BytesMarshallableTest extends BytesTestCommon {
                                     @NotNull final MyScalars mb2) {
         final MyScalars mb3 = new MyScalars();
         final MyScalars mb4 = new MyScalars();
-        assertEquals(1, bytes.readUnsignedByte());
+        assertEquals(1, bytes.readUnsignedByte(), "readUnsignedByte value");
         mb3.readMarshallable(bytes);
-        assertEquals(2, bytes.readUnsignedByte());
+        assertEquals(2, bytes.readUnsignedByte(), "readUnsignedByte value");
         mb4.readMarshallable(bytes);
 
-        assertEquals(mb1.toString(), mb3.toString());
-        assertEquals(mb2.toString(), mb4.toString());
+        assertEquals(mb1.toString(), mb3.toString(), "deserialized MyScalars should match original serialized hex representation");
+        assertEquals(mb2.toString(), mb4.toString(), "deserialized MyScalars should match original serialized hex representation");
     }
 
-    @Test
-    public void serializeNested() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void serializeNested(String name, boolean guarded) {
+        initBytesMarshallableTest(name, guarded);
         final Bytes<?> bytes = new HexDumpBytes();
         try {
 
@@ -296,26 +302,28 @@ public class BytesMarshallableTest extends BytesTestCommon {
 
             //System.out.println(bytes.toHexString());
 
-            assertEquals(
-                    expected, bytes.toHexString());
+            assertEquals(expected,
+                    bytes.toHexString(), "toHexString value");
 
             final MyNested mn3 = new MyNested();
             final MyNested mn4 = new MyNested();
-            assertEquals(1, bytes.readUnsignedByte());
+            assertEquals(1, bytes.readUnsignedByte(), "readUnsignedByte value");
             mn3.readMarshallable(bytes);
-            assertEquals(2, bytes.readUnsignedByte());
+            assertEquals(2, bytes.readUnsignedByte(), "readUnsignedByte value");
             mn4.readMarshallable(bytes);
 
-            assertEquals(mn1.toString(), mn3.toString());
-            assertEquals(mn2.toString(), mn4.toString());
+            assertEquals(mn1.toString(), mn3.toString(), "deserialized MyNested should match original serialized hex representation with nested byteable and scalar fields");
+            assertEquals(mn2.toString(), mn4.toString(), "deserialized MyNested should match original serialized hex representation with nested byteable and scalar fields");
         } finally {
             bytes.releaseLast();
         }
     }
 
-    @Test
-    public void serializeBytes()
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void serializeBytes(String name, boolean guarded)
             throws IOException {
+        initBytesMarshallableTest(name, guarded);
         Bytes<?> bytes = new HexDumpBytes();
         final Bytes<?> hello = Bytes.from("hello");
         final Bytes<?> byeee = Bytes.from("byeee");
@@ -330,13 +338,13 @@ public class BytesMarshallableTest extends BytesTestCommon {
             for (int i = 0; i < 2; i++) {
                 try (MyBytes mb3 = new MyBytes();
                      MyBytes mb4 = new MyBytes(Bytes.from("already"), Bytes.allocateElasticDirect().append("value"))) {
-                    assertEquals(1, bytes.readUnsignedByte());
+                    assertEquals(1, bytes.readUnsignedByte(), "readUnsignedByte value");
                     mb3.readMarshallable(bytes);
-                    assertEquals(2, bytes.readUnsignedByte());
+                    assertEquals(2, bytes.readUnsignedByte(), "readUnsignedByte value");
                     mb4.readMarshallable(bytes);
 
-                    assertEquals(mb1.toString(), mb3.toString());
-                    assertEquals(mb2.toString(), mb4.toString());
+                    assertEquals(mb1.toString(), mb3.toString(), "deserialized MyBytes should match original serialized hex representation with Bytes fields");
+                    assertEquals(mb2.toString(), mb4.toString(), "deserialized MyBytes should match original serialized hex representation with Bytes fields");
 
                     bytes.releaseLast();
 
@@ -346,8 +354,10 @@ public class BytesMarshallableTest extends BytesTestCommon {
         }
     }
 
-    @Test
-    public void serializeCollections() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void serializeCollections(String name, boolean guarded) {
+        initBytesMarshallableTest(name, guarded);
 //        assumeTrue(name.equals("Unguarded"));
         final Bytes<?> bytes = new HexDumpBytes();
         try {
@@ -365,10 +375,10 @@ public class BytesMarshallableTest extends BytesTestCommon {
 
             final MyCollections mc2 = new MyCollections();
             mc2.readMarshallable(bytes);
-            assertEquals(mc.words, mc2.words);
-            assertEquals(mc.scoreCountMap, mc2.scoreCountMap);
-            assertEquals(mc.policies, mc2.policies);
-            assertEquals(mc.numbers, mc2.numbers);
+            assertEquals(mc.words, mc2.words, "readMarshallable should restore words list");
+            assertEquals(mc.scoreCountMap, mc2.scoreCountMap, "readMarshallable should restore scoreCountMap");
+            assertEquals(mc.policies, mc2.policies, "readMarshallable should restore policies set");
+            assertEquals(mc.numbers, mc2.numbers, "readMarshallable should restore numbers list");
 
             final String expected = "   02 05 48 65 6c 6c 6f 05 57 6f 72 6c 64          # words\n" +
                     "   02 cd cc cc cc cc cc f4 3f 0b 00 00 00 00 00 00 # scoreCountMap\n" +
@@ -381,14 +391,16 @@ public class BytesMarshallableTest extends BytesTestCommon {
                     "   00 00 00 00 00 00 ae 02 07 52 55 4e 54 49 4d 45 # policies\n" +
                     "   05 43 4c 41 53 53 ae 03 a6 01 00 00 00 a6 0c 00 # numbers\n" +
                     "   00 00 a6 7b 00 00 00\n";
-            assertEquals(NativeBytes.areNewGuarded() ? expectedG : expected, bytes.toHexString());
+            assertEquals(NativeBytes.areNewGuarded() ? expectedG : expected, bytes.toHexString(), "NativeBytes.areNewGuarded");
         } finally {
             bytes.releaseLast();
         }
     }
 
-    @Test
-    public void collectionsNotInitializedInConstructor() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void collectionsNotInitializedInConstructor(String name, boolean guarded) {
+        initBytesMarshallableTest(name, guarded);
         final Bytes<?> bytes = new HexDumpBytes();
 
         try {
@@ -438,7 +450,7 @@ public class BytesMarshallableTest extends BytesTestCommon {
             UninitializedCollections uc2 = new UninitializedCollections();
             uc2.readMarshallable(bytes);
 
-            assertEquals(uc, uc2);
+            assertEquals(uc, uc2, "read Marshallable should restore uninitialized collections correctly");
 
             // Exercise nullCollection/nullMap so they are not considered write-only-null fields
             uc2.nullCollection = Collections.emptyList();
@@ -476,14 +488,16 @@ public class BytesMarshallableTest extends BytesTestCommon {
                     "   ae 02 a6 11 00 00 00 ae 01 6e a6 12 00 00 00 ae # justSortedMap\n" +
                     "   01 6f a5 80 00                                  # nullMap\n";
 
-            assertEquals(NativeBytes.areNewGuarded() ? expectedG : expected, bytes.toHexString());
+            assertEquals(NativeBytes.areNewGuarded() ? expectedG : expected, bytes.toHexString(), "NativeBytes.areNewGuarded");
         } finally {
             bytes.releaseLast();
         }
     }
 
-    @Test
-    public void testSpecificCollections() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void testSpecificCollections(String name, boolean guarded) {
+        initBytesMarshallableTest(name, guarded);
         final Bytes<?> bytes = new HexDumpBytes();
 
         try {
@@ -503,7 +517,7 @@ public class BytesMarshallableTest extends BytesTestCommon {
             SpecificUninitializedCollections suc2 = new SpecificUninitializedCollections();
             suc2.readMarshallable(bytes);
 
-            assertEquals(suc, suc2);
+            assertEquals(suc, suc2, "readMarshallable should restore specific collection types (ConcurrentHashSet/Map)");
 
             final String expected = "   03 01 61 01 62 01 63                            # specificSet\n" +
                     "   02 01 00 00 00 00 00 00 00 0a 00 00 00 00 00 00 # specificMap\n" +
@@ -515,14 +529,16 @@ public class BytesMarshallableTest extends BytesTestCommon {
                     "   00 00 00 00 a7 02 00 00 00 00 00 00 00 a7 14 00\n" +
                     "   00 00 00 00 00 00\n";
 
-            assertEquals(NativeBytes.areNewGuarded() ? expectedG : expected, bytes.toHexString());
+            assertEquals(NativeBytes.areNewGuarded() ? expectedG : expected, bytes.toHexString(), "NativeBytes.areNewGuarded");
         } finally {
             bytes.releaseLast();
         }
     }
 
-    @Test
-    public void nested() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void nested(String name, boolean guarded) {
+        initBytesMarshallableTest(name, guarded);
         final Bytes<?> bytes = new HexDumpBytes();
         try {
             final BM1 bm1 = new BM1();
@@ -534,9 +550,9 @@ public class BytesMarshallableTest extends BytesTestCommon {
 
             final BM1 bm1b = new BM1();
             bm1b.readMarshallable(bytes);
-            assertEquals(bm1.num, bm1b.num);
-            assertEquals(bm1b.bm2.text, bm1.bm2.text);
-            assertEquals(bm1b.bm3.value, bm1.bm3.value);
+            assertEquals(bm1.num, bm1b.num, "readMarshallable should restore BM1.num field");
+            assertEquals(bm1b.bm2.text, bm1.bm2.text, "readMarshallable should restore nested BM2.text field");
+            assertEquals(bm1b.bm3.value, bm1.bm3.value, "readMarshallable should restore nested BM3.value field");
 
             final String expected = "   05 00 00 00                                     # num\n" +
                     "                                                # bm2\n" +
@@ -548,7 +564,7 @@ public class BytesMarshallableTest extends BytesTestCommon {
                     "      ae 05 68 65 6c 6c 6f                            # text\n" +
                     "                                                # bm3\n" +
                     "      a7 d2 02 96 49 00 00 00 00                      # value\n";
-            assertEquals(NativeBytes.areNewGuarded() ? expected2 : expected, bytes.toHexString());
+            assertEquals(NativeBytes.areNewGuarded() ? expected2 : expected, bytes.toHexString(), "NativeBytes.areNewGuarded");
             final String expectedB = "# net.openhft.chronicle.bytes.BytesMarshallableTest$BM1\n" +
                     "   05 00 00 00                                     # num\n" +
                     "                                                # bm2\n" +
@@ -561,14 +577,16 @@ public class BytesMarshallableTest extends BytesTestCommon {
                     "      ae 05 68 65 6c 6c 6f                            # text\n" +
                     "                                                # bm3\n" +
                     "      a7 d2 02 96 49 00 00 00 00                      # value\n";
-            assertEquals(NativeBytes.areNewGuarded() ? expectedBG : expectedB, bm1.toString());
+            assertEquals(NativeBytes.areNewGuarded() ? expectedBG : expectedB, bm1.toString(), "BM1 toString should produce expected hex dump with class header and nested fields");
         } finally {
             bytes.releaseLast();
         }
     }
 
-    @Test
-    public void nullArrays() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void nullArrays(String name, boolean guarded) {
+        initBytesMarshallableTest(name, guarded);
         final Bytes<?> bytes = new HexDumpBytes();
         try {
             final BMA bma = new BMA();
@@ -584,7 +602,7 @@ public class BytesMarshallableTest extends BytesTestCommon {
                             "   ff ff ff ff                                     # floats\n" +
                             "   ff ff ff ff                                     # longs\n" +
                             "   ff ff ff ff                                     # doubles\n";
-            assertEquals(expected, bytes.toHexString());
+            assertEquals(expected, bytes.toHexString(), "toHexString value");
             final BMA bma2 = new BMA();
             bma2.bytes = new byte[0];
             bma2.ints = new int[0];
@@ -592,15 +610,17 @@ public class BytesMarshallableTest extends BytesTestCommon {
             bma2.longs = new long[0];
             bma2.doubles = new double[0];
             bma2.readMarshallable(bytes);
-            assertNull(bma2.longs);
-            assertNull(bma2.doubles);
+            assertNull(bma2.longs, "readMarshallable should deserialize null long array as null");
+            assertNull(bma2.doubles, "readMarshallable should deserialize null double array as null");
         } finally {
             bytes.releaseLast();
         }
     }
 
-    @Test
-    public void arrays() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void arrays(String name, boolean guarded) {
+        initBytesMarshallableTest(name, guarded);
         final Bytes<?> bytes = new HexDumpBytes();
         try {
             final BMA bma = new BMA();
@@ -621,18 +641,18 @@ public class BytesMarshallableTest extends BytesTestCommon {
                             "   01 00 00 00 b4 a2 91 3f                         # floats\n" +
                             "   01 00 00 00 ef cd ab 89 67 45 23 01             # longs\n" +
                             "   01 00 00 00 de bc 9a 78 56 34 f2 3f             # doubles\n";
-            assertEquals(expected, bytes.toHexString());
+            assertEquals(expected, bytes.toHexString(), "toHexString value");
             final BMA bma2 = new BMA();
             bma2.longs = new long[0];
             bma2.doubles = new double[0];
             bma2.readMarshallable(bytes);
-            assertEquals("[72, 101, 108, 108, 111]", Arrays.toString(bma2.bytes));
-            assertEquals("[305419896]", Arrays.toString(bma2.ints));
-            assertEquals("[1.1377778]", Arrays.toString(bma2.floats));
-            assertEquals("[81985529216486895]", Arrays.toString(bma2.longs));
-            assertEquals("[1.1377777777777776]", Arrays.toString(bma2.doubles));
-            assertEquals(0x123456789ABCDEFL, bma2.longs[0]);
-            assertEquals(0x1.23456789ABCDEp0, bma2.doubles[0], 0);
+            assertEquals("[72, 101, 108, 108, 111]", Arrays.toString(bma2.bytes), "Arrays.toString");
+            assertEquals("[305419896]", Arrays.toString(bma2.ints), "Arrays.toString");
+            assertEquals("[1.1377778]", Arrays.toString(bma2.floats), "Arrays.toString");
+            assertEquals("[81985529216486895]", Arrays.toString(bma2.longs), "Arrays.toString");
+            assertEquals("[1.1377777777777776]", Arrays.toString(bma2.doubles), "Arrays.toString");
+            assertEquals(0x123456789ABCDEFL, bma2.longs[0], "readMarshallable should deserialize long array value correctly");
+            assertEquals(0x1.23456789ABCDEp0, bma2.doubles[0], 0, "readMarshallable should deserialize double array value correctly");
         } finally {
             bytes.releaseLast();
         }
@@ -712,7 +732,7 @@ public class BytesMarshallableTest extends BytesTestCommon {
         SortedMap<Integer, String> justSortedMap;
         Map<Integer, Integer> nullMap;
 
-        UninitializedCollections() {
+        void initBytesMarshallableTest() {
             nullCollection = null;
             nullMap = null;
         }

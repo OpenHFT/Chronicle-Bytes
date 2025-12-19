@@ -3,10 +3,10 @@
  */
 package net.openhft.chronicle.bytes;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class PrewriteTest extends BytesTestCommon {
     @Test
@@ -21,7 +21,7 @@ public class PrewriteTest extends BytesTestCommon {
         bytes.prewriteInt(0x34333231);
         bytes.prewriteLong(0x3837363534333231L);
         bytes.prewriteShort((short) 0x3130);
-        assertEquals("01123456781234,words,hi,1234", bytes.toString());
+        assertEquals("01123456781234,words,hi,1234", bytes.toString(), "Prewrite operations should build content backwards from end");
 
         bytes.releaseLast();
         words.releaseLast();

@@ -4,12 +4,12 @@
 package net.openhft.chronicle.bytes.util;
 
 import net.openhft.chronicle.bytes.BytesTestCommon;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.Properties;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class PropertyReplacerTest extends BytesTestCommon {
     @Test
@@ -18,7 +18,7 @@ public class PropertyReplacerTest extends BytesTestCommon {
             PropertyReplacer.replaceTokensWithProperties("plainText ${missingPropertyToReplace}");
         } catch (IllegalArgumentException e) {
             assertEquals("System property is missing: [property=missingPropertyToReplace, " +
-                    "expression=plainText ${missingPropertyToReplace}]", e.getMessage());
+                    "expression=plainText ${missingPropertyToReplace}]", e.getMessage(), "e.getMessage");
 
             return;
         }
@@ -35,8 +35,8 @@ public class PropertyReplacerTest extends BytesTestCommon {
             PropertyReplacer.replaceTokensWithProperties("plainText ${missingPropertyToReplace}", properties);
         } catch (IllegalArgumentException e) {
             assertEquals("Property is missing: [property=missingPropertyToReplace, " +
-                            "expression=plainText ${missingPropertyToReplace}, properties={wrongProperty=wrongValue}]",
-                    e.getMessage());
+                            "expression=plainText ${missingPropertyToReplace}, properties={wrongProperty=wrongValue}]", e.getMessage(),
+                    "testPropertyMissing: assertEquals");
 
             return;
         }
@@ -50,21 +50,21 @@ public class PropertyReplacerTest extends BytesTestCommon {
         props.setProperty("myFancyProperty", "myFancyValue");
 
         String res = PropertyReplacer.replaceTokensWithProperties("plainKey: ${ myFancyProperty }", props);
-        assertEquals("plainKey: myFancyValue", res);
+        assertEquals("plainKey: myFancyValue", res, "property replacement should ignore single leading/trailing spaces");
 
         res = PropertyReplacer.replaceTokensWithProperties("plainKey: ${myFancyProperty}", props);
-        assertEquals("plainKey: myFancyValue", res);
+        assertEquals("plainKey: myFancyValue", res, "property replacement should work without whitespace");
 
         res = PropertyReplacer.replaceTokensWithProperties("plainKey: ${  myFancyProperty  }", props);
-        assertEquals("plainKey: myFancyValue", res);
+        assertEquals("plainKey: myFancyValue", res, "property replacement should ignore multiple leading/trailing spaces");
 
         res = PropertyReplacer.replaceTokensWithProperties("plainKey: ${    myFancyProperty }", props);
-        assertEquals("plainKey: myFancyValue", res);
+        assertEquals("plainKey: myFancyValue", res, "property replacement should ignore multiple leading spaces");
 
         res = PropertyReplacer.replaceTokensWithProperties("plainKey: ${\tmyFancyProperty\t}", props);
-        assertEquals("plainKey: myFancyValue", res);
+        assertEquals("plainKey: myFancyValue", res, "property replacement should ignore leading/trailing tabs");
 
         res = PropertyReplacer.replaceTokensWithProperties("plainKey: ${ \t\t\nmyFancyProperty \r\f}", props);
-        assertEquals("plainKey: myFancyValue", res);
+        assertEquals("plainKey: myFancyValue", res, "property replacement should ignore all whitespace types (space, tab, newline, CR, FF)");
     }
 }

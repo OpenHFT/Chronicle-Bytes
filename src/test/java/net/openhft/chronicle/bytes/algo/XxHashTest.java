@@ -4,13 +4,12 @@
 package net.openhft.chronicle.bytes.algo;
 
 import net.openhft.chronicle.bytes.BytesStore;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.nio.BufferUnderflowException;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Validates xxHash implementations for Chronicle Bytes, including empty inputs,
@@ -23,7 +22,7 @@ public class XxHashTest {
         BytesStore<?, ?> emptyBytesStore = BytesStore.empty();
         long hash = XxHash.INSTANCE.applyAsLong(emptyBytesStore);
         // Assert not throwing an exception and returns a deterministic value
-        Assert.assertNotNull(hash);
+        assertNotNull(hash, "xxHash should compute hash for empty BytesStore without throwing exception");
     }
 
     @Test
@@ -36,7 +35,7 @@ public class XxHashTest {
         long hash2 = XxHash.INSTANCE.applyAsLong(bytesStore2);
 
         // Assert that hashes for identical data are equal
-        assertEquals(hash1, hash2);
+        assertEquals(hash1, hash2, "xxHash should produce consistent hashes for identical data");
     }
 
     @Test
@@ -46,13 +45,15 @@ public class XxHashTest {
         long partialHash = XxHash.INSTANCE.applyAsLong(bytesStore, bytesStore.readRemaining() - 1);
 
         // Assert that changing the length results in different hashes
-        Assert.assertNotEquals(fullHash, partialHash);
+        assertNotEquals(fullHash, partialHash);
     }
 
-    @Test(expected = BufferUnderflowException.class)
+    @Test
     public void testHashBeyondLengthThrowsException() {
-        BytesStore<?, ?> bytesStore = BytesStore.from("short");
-        // Attempt to hash beyond the available length
-        XxHash.INSTANCE.applyAsLong(bytesStore, bytesStore.readRemaining() + 1);
+        assertThrows(BufferUnderflowException.class, () -> {
+            BytesStore<?, ?> bytesStore = BytesStore.from("short");
+            // Attempt to hash beyond the available length
+            XxHash.INSTANCE.applyAsLong(bytesStore, bytesStore.readRemaining() + 1);
+        });
     }
 }

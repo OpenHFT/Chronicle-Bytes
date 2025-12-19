@@ -4,9 +4,8 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Jvm;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.nio.BufferOverflowException;
 import java.util.ArrayList;
@@ -14,33 +13,30 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 
-import static org.junit.Assert.assertThrows;
-import java.util.function.Consumer;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
+import java.util.function.Consumer;
 
 /**
  * Parameterised tests checking that write limits and elastic resizing behave
  * correctly across different allocator strategies.
  */
-@RunWith(Parameterized.class)
 public class WriteLimitTest extends BytesTestCommon {
     private static final Allocator[] ALLOCATORS = {Allocator.HEAP, Allocator.HEAP_EMBEDDED, Allocator.HEAP_UNCHECKED};
     static final Random random = new Random(1L);
-    private final String name;
-    private final Allocator allocator;
-    private final Consumer<Bytes<?>> action;
-    private final int length;
+    private String name;
+    private Allocator allocator;
+    private Consumer<Bytes<?>> action;
+    private int length;
 
-    public WriteLimitTest(String name, Allocator allocator, Consumer<Bytes<?>> action, int length) {
+    public void initWriteLimitTest(String name, Allocator allocator, Consumer<Bytes<?>> action, int length) {
         this.name = name;
         this.allocator = allocator;
         this.action = action;
         this.length = length;
     }
 
-    @Parameterized.Parameters(name = "{0}")
     public static Collection<Object[]> data() {
         List<Object[]> tests = new ArrayList<>();
         addTest(tests, "boolean", b -> b.writeBoolean(true), 1);
@@ -65,12 +61,14 @@ public class WriteLimitTest extends BytesTestCommon {
             tests.add(new Object[]{a + " " + name, a, action, length});
     }
 
+    @MethodSource("data")
     @SuppressWarnings("RedundantCast")
-    @Test
-    public void writeLimit() {
+    @ParameterizedTest(name = "{0}")
+    public void writeLimit(String name, Allocator allocator, Consumer<Bytes<?>> action, int length) {
+        initWriteLimitTest(name, allocator, action, length);
         Bytes<?> bytes = allocator.elasticBytes(64);
         // exercise name and random so SpotBugs treats them as used
-        assertNotNull("Test case name should be initialised", name);
+        assertNotNull(name, "Test case name should be initialised");
         random.nextInt(1);
         for (int i = 0; i < 16; i++) {
             int position = (int) (bytes.realCapacity() - length - i);

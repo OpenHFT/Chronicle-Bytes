@@ -3,9 +3,9 @@
  */
 package net.openhft.chronicle.bytes;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class VanillaBytesOpsTest extends BytesTestCommon {
 
@@ -17,13 +17,13 @@ public class VanillaBytesOpsTest extends BytesTestCommon {
             b.writeLong(0x0102030405060708L);
 
             b.readPosition(0);
-            assertEquals(0x11223344, b.readInt());
-            assertEquals(0x0102030405060708L, b.readLong());
+            assertEquals(0x11223344, b.readInt(), "Bytes should return int value written at current position");
+            assertEquals(0x0102030405060708L, b.readLong(), "Bytes should return long value written after int");
 
             // zero out the int we wrote and check
             b.zeroOut(0, 4);
-            assertEquals(0, b.peekUnsignedByte(0));
-            assertEquals(0, b.peekUnsignedByte(1));
+            assertEquals(0, b.peekUnsignedByte(0), "First byte should be zero after zeroOut");
+            assertEquals(0, b.peekUnsignedByte(1), "Second byte should be zero after zeroOut");
         } finally {
             b.releaseLast();
         }

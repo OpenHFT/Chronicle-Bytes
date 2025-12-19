@@ -6,8 +6,8 @@ package net.openhft.chronicle.bytes;
 import net.openhft.chronicle.bytes.internal.CommonMappedBytes;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.IOException;
@@ -17,11 +17,11 @@ import java.nio.ReadOnlyBufferException;
 import java.nio.file.Files;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
-import static org.junit.Assert.*;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 public class MappedBytesBoundaryTest extends BytesTestCommon {
-    @Before
+    @BeforeEach
     public void setUp() {
         if (OS.isWindows())
             ignoreException("Unable to delete");
@@ -48,7 +48,7 @@ public class MappedBytesBoundaryTest extends BytesTestCommon {
             mb.readPosition(0);
             byte[] actual = new byte[expected.length];
             mb.read(actual);
-            assertArrayEquals(expected, actual);
+            assertArrayEquals(expected, actual, "write/read across chunk boundary should preserve all bytes");
         }
         deleteIfPossible(file);
     }
@@ -65,18 +65,18 @@ public class MappedBytesBoundaryTest extends BytesTestCommon {
 
         try (MappedBytes writable = MappedBytes.singleMappedBytes(file, OS.pageSize())) {
             writable.writeSkip(32);
-            assertEquals(32, writable.writePosition());
+            assertEquals(32, writable.writePosition(), "writeSkip(32) should advance write position to 32 in writable mapping");
         }
 
         try (MappedBytes readOnly = MappedBytes.singleMappedBytes(file, OS.pageSize(), true)) {
-            assertTrue(((CommonMappedBytes) readOnly).isBackingFileReadOnly());
+            assertTrue(readOnly.isBackingFileReadOnly(), "singleMappedBytes with readOnly=true should report backing file as read-only");
             boolean writeFailed = false;
             try {
                 readOnly.writeByte((byte) 0x7F);
             } catch (ReadOnlyBufferException | BufferOverflowException | IllegalStateException expected) {
                 writeFailed = true;
             }
-            assertTrue("Expected write to read-only mapping to fail", writeFailed);
+            assertTrue(writeFailed, "Expected write to read-only mapping to fail");
         }
 
         deleteIfPossible(file);
@@ -90,11 +90,11 @@ public class MappedBytesBoundaryTest extends BytesTestCommon {
         Files.createDirectories(file.getParentFile().toPath());
         try (MappedBytes bytes = MappedBytes.mappedBytes(file, OS.pageSize())) {
             bytes.writeSkip(1024);
-            assertEquals(1024, bytes.writePosition());
+            assertEquals(1024, bytes.writePosition(), "writeSkip(1024) should advance write position to 1024 for space reservation");
 
             bytes.writeByte((byte) 0x5A);
             bytes.readPosition(1024);
-            assertEquals((byte) 0x5A, bytes.readByte());
+            assertEquals((byte) 0x5A, bytes.readByte(), "byte at position 1024 should be 0x5A after writeSkip and writeByte");
         } finally {
             deleteIfPossible(file);
         }
@@ -113,8 +113,8 @@ public class MappedBytesBoundaryTest extends BytesTestCommon {
                 bytes.write8bit(message);
 
                 bytes.readPosition(0);
-                assertEquals(message, bytes.read8bit());
-                assertTrue("Expected bytes to advance past written payload", bytes.writePosition() > message.length());
+                assertEquals(message, bytes.read8bit(), "read8bit should return 'OrderAccepted' after write8bit in mapped bytes");
+                assertTrue(bytes.writePosition() > message.length(), "Expected bytes to advance past written payload");
             }
         } finally {
             deleteIfPossible(file);

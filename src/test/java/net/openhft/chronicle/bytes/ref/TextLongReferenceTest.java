@@ -8,10 +8,9 @@ import net.openhft.chronicle.bytes.BytesTestCommon;
 import net.openhft.chronicle.bytes.StopCharTesters;
 import net.openhft.chronicle.bytes.internal.NativeBytesStore;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class TextLongReferenceTest extends BytesTestCommon {
 
@@ -27,17 +26,17 @@ public class TextLongReferenceTest extends BytesTestCommon {
 
             long l = bytesStore.parseLong(TextLongReference.VALUE);
 
-            Assert.assertEquals(expected, value.getValue());
-            Assert.assertEquals(expected, l);
+            assertEquals(expected, value.getValue(), "value.getValue");
+            assertEquals(expected, l, "parseLong should read value stored by TextLongReference.setValue()");
 
-            assertFalse(value.compareAndSwapValue(0, 1));
-            assertTrue(value.compareAndSwapValue(10, 2));
-            assertEquals(56, value.maxSize());
-            assertEquals(0, value.offset());
+            assertFalse(value.compareAndSwapValue(0, 1), "value.compareAndSwapValue");
+            assertTrue(value.compareAndSwapValue(10, 2), "value.compareAndSwapValue");
+            assertEquals(56, value.maxSize(), "value.maxSize");
+            assertEquals(0, value.offset(), "value.offset");
 
             Bytes<Void> bytes = bytesStore.bytesForRead();
             bytes.readPosition(0);
-            assertEquals("!!atomic {  locked: false, value: 00000000000000000002 }", bytes.parseUtf8(StopCharTesters.CONTROL_STOP));
+            assertEquals("!!atomic {  locked: false, value: 00000000000000000002 }", bytes.parseUtf8(StopCharTesters.CONTROL_STOP), "parseUtf8 value");
             bytes.releaseLast();
         }
         bytesStore.releaseLast();

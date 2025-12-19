@@ -4,11 +4,12 @@
 package net.openhft.chronicle.bytes;
 
 import org.jetbrains.annotations.NotNull;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.nio.ByteBuffer;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * User: peter.lawrey Date: 24/12/13 Time: 19:43
@@ -31,9 +32,13 @@ public class AllocationRatesTest extends BytesTestCommon {
             long timeHBB = timeHeapByteBufferAllocations();
             long timeDBB = timeDirectByteBufferAllocations();
             long timeDS = timeDirectStoreAllocations();
-            if (i == 0)
+            if (i == 0) {
+                assertTrue(timeHBB > 0, "compareAllocationRates: heap ByteBuffer allocations timed");
+                assertTrue(timeDBB > 0, "compareAllocationRates: direct ByteBuffer allocations timed");
+                assertTrue(timeDS > 0, "compareAllocationRates: direct store allocations timed");
                 System.out.printf("buffers %d KB took an average of %,d ns for heap ByteBuffer, %,d ns for direct ByteBuffer and %,d for DirectStore%n",
                         BUFFER_SIZE / 1024, timeHBB / ALLOCATIONS, timeDBB / ALLOCATIONS, timeDS / ALLOCATIONS);
+            }
         }
     }
 
@@ -70,7 +75,7 @@ public class AllocationRatesTest extends BytesTestCommon {
                 ds[j] = BytesStore.lazyNativeBytesStoreWithFixedCapacity(BUFFER_SIZE);
             for (int j = 0; j < BATCH; j++) {
                 ds[j].releaseLast();
-                assertEquals(0, ds[j].refCount());
+                assertEquals(0, ds[j].refCount(), "BytesStore ref count should be zero after releaseLast");
             }
         }
         return System.nanoTime() - start;

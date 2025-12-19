@@ -8,11 +8,9 @@ import net.openhft.chronicle.bytes.util.DecoratedBufferUnderflowException;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.IOTools;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -29,8 +27,8 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.IntStream;
 
 import static net.openhft.chronicle.core.Jvm.uncheckedCast;
-import static org.junit.Assert.*;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 @SuppressWarnings({"rawtypes", "deprecation"})
 public class MappedBytesTest extends BytesTestCommon {
@@ -58,7 +56,6 @@ public class MappedBytesTest extends BytesTestCommon {
     }
 
     @SuppressWarnings("EmptyMethod")
-    @Before
     @BeforeEach
     @Override
     public void threadDump() {
@@ -103,15 +100,15 @@ public class MappedBytesTest extends BytesTestCommon {
             for (int i = 0; i < chunkSize / 4; i++)
                 bytesW.writeLong(ThreadLocalRandom.current().nextLong());
 
-            Assert.assertEquals(chunkSize * 2, bytesW.writePosition());
+            assertEquals(chunkSize * 2, bytesW.writePosition(), "After writing longs across chunk boundary, expected write position at 2x chunk size");
 
             bytesW.writeInt(7);
-            Assert.assertEquals(chunkSize * 2 + 4, bytesW.writePosition());
+            assertEquals(chunkSize * 2 + 4, bytesW.writePosition(), "After writing additional int, expected write position advanced by 4 bytes");
 
             bytesW.writeInt(chunkSize * 2 - 2, 9);
 
             bytesW.readPosition(chunkSize * 2 - 2);
-            Assert.assertEquals(9, bytesW.readInt());
+            assertEquals(9, bytesW.readInt(), "Reading int at position written with writeInt(offset, 9) should return value 9");
         }
     }
 
@@ -153,13 +150,13 @@ public class MappedBytesTest extends BytesTestCommon {
             long rp = from.readPosition();
             bytesW.write(from);
             long wp = bytesW.writePosition();
-            Assert.assertEquals(text.length(), bytesW.writePosition());
-            Assert.assertEquals(rp, from.readPosition());
+            assertEquals(text.length(), bytesW.writePosition(), "After writing text content, write position should equal text length");
+            assertEquals(rp, from.readPosition(), "Source bytes read position should remain unchanged after write operation");
 
             // read
             bytesR.readLimit(wp);
 
-            Assert.assertEquals(text, bytesR.toString());
+            assertEquals(text, bytesR.toString(), "Reading back written content should return original text unchanged");
             from.releaseLast();
         }
     }
@@ -175,12 +172,12 @@ public class MappedBytesTest extends BytesTestCommon {
             Bytes<?> from = Bytes.from(text);
             bytesW.write(from);
             long wp = bytesW.writePosition();
-            Assert.assertEquals(text.length(), bytesW.writePosition());
+            assertEquals(text.length(), bytesW.writePosition(), "After writing large text, write position should match text length");
 
             // read
             bytesR.readLimit(wp);
 
-            Assert.assertEquals(text, bytesR.toString());
+            assertEquals(text, bytesR.toString(), "Separate reader should successfully read back complete written text");
             from.releaseLast();
         }
     }
@@ -195,7 +192,7 @@ public class MappedBytesTest extends BytesTestCommon {
             Bytes<?> from = Bytes.from(hello);
             bytesW.write(from);
             bytesW.writeSkip(-hello.length());
-            Assert.assertEquals(0, bytesW.writePosition());
+            assertEquals(0, bytesW.writePosition(), "After skipping backwards by text length, write position should return to zero");
             assertThrows(BufferOverflowException.class, () -> bytesW.writeSkip(-1));
 
             from.releaseLast();
@@ -215,12 +212,12 @@ public class MappedBytesTest extends BytesTestCommon {
             Bytes<?> from = Bytes.from(text);
             bytesW.write(offset, from);
             long wp = text.length() + offset;
-            Assert.assertEquals(0, bytesW.writePosition());
+            assertEquals(0, bytesW.writePosition(), "Writing with explicit offset should not modify write position");
 
             // read
             bytesR.readLimit(wp);
             bytesR.readPosition(offset);
-            Assert.assertEquals(text, bytesR.toString());
+            assertEquals(text, bytesR.toString(), "Reading from offset should retrieve complete text written at that position");
             from.releaseLast();
         }
     }
@@ -238,12 +235,12 @@ public class MappedBytesTest extends BytesTestCommon {
             Bytes<?> from = Bytes.from(text);
             bytesW.write(offset, from);
             long wp = text.length() + offset;
-            Assert.assertEquals(0, bytesW.writePosition());
+            assertEquals(0, bytesW.writePosition(), "Position-based write with offset should leave write position at zero");
 
             // read
             bytesR.readLimit(wp);
             bytesR.readPosition(offset);
-            Assert.assertEquals(text, bytesR.toString());
+            assertEquals(text, bytesR.toString(), "Reading from offset with separate reader should return written text");
             from.releaseLast();
         }
     }
@@ -275,12 +272,12 @@ public class MappedBytesTest extends BytesTestCommon {
         Bytes<?> from = Bytes.from(text);
         try {
             bytesW.write(offset, from, shift, text.length() - shift);
-            Assert.assertEquals(0, bytesW.writePosition());
+            assertEquals(0, bytesW.writePosition(), "Writing substring with explicit offset should not affect write position");
 
             bytesR.readLimit(offset + (text.length() - shift));
             bytesR.readPosition(offset);
             String actual = bytesR.toString();
-            Assert.assertEquals(text.substring(shift), actual);
+            assertEquals(text.substring(shift), actual, "Reading written substring should match expected text portion after shift");
         } finally {
             from.releaseLast();
         }
@@ -290,76 +287,84 @@ public class MappedBytesTest extends BytesTestCommon {
     public void testWriteLarge8Bit() throws IOException {
         File tempFile1 = Files.createTempFile("mapped", "bytes").toFile();
         try (MappedBytes bytes = MappedBytes.mappedBytes(tempFile1, 64 << 10)) {
-            testWrite8Bit(bytes);
+            String message = write8BitUnderflowMessage(bytes);
+            assertTrue(message.startsWith("Acquired the next BytesStore"), "Writing large 8-bit content across chunk boundary should trigger BytesStore acquisition");
         }
     }
 
-    private void testWrite8Bit(final MappedBytes bytes) {
+    private String write8BitUnderflowMessage(final MappedBytes bytes) {
         final Bytes<?> bytes2 = Bytes.from(text + text);
         try {
-            bytes.write8bit(bytes2);
-            fail();
-        } catch (DecoratedBufferUnderflowException ex) {
-            assertTrue(ex.getMessage().startsWith("Acquired the next BytesStore"));
+            try {
+                bytes.write8bit(bytes2);
+                throw new AssertionError("Expected DecoratedBufferUnderflowException");
+            } catch (DecoratedBufferUnderflowException ex) {
+                return ex.getMessage();
+            }
+        } finally {
+            bytes2.releaseLast();
         }
     }
 
     @Test
     public void testLargeWrites() throws IOException {
-        testLargeWrites(128 << 10, 64 << 10, 500 << 10);
+        assertTrue(testLargeWrites(128 << 10, 64 << 10, 500 << 10), "MappedBytes with 128k chunks and 64k overlap should close cleanly after writing 500k arrays");
     }
 
     @Test
     public void testLargeWrites3() throws IOException {
-        testLargeWrites(47 << 10, 21 << 10, 513 << 10);
+        assertTrue(testLargeWrites(47 << 10, 21 << 10, 513 << 10), "MappedBytes with 47k chunks and 21k overlap should close cleanly after writing 513k arrays");
     }
 
     @Test
     public void testLargeWrites2() throws IOException {
-        testLargeWrites(128 << 10, 128 << 10, 128 << 10);
+        assertTrue(testLargeWrites(128 << 10, 128 << 10, 128 << 10), "MappedBytes with equal 128k chunk and overlap sizes should close cleanly after writing 128k arrays");
     }
 
-    private void testLargeWrites(final long chunkSize,
-                                 final long overlapSize,
-                                 final int arraySize)
+    private boolean testLargeWrites(final long chunkSize,
+                                    final long overlapSize,
+                                    final int arraySize)
             throws IOException {
         final MappedBytes bytes = MappedBytes
                 .mappedBytes(File.createTempFile("mapped", "bytes"), chunkSize, overlapSize);
 
-        final byte[] largeBytes = new byte[arraySize];
-        bytes.writePosition(0);
-        bytes.write(largeBytes);
-        bytes.writePosition(0);
-        bytes.write(64, largeBytes);
-        bytes.writePosition(0);
-        bytes.write(largeBytes, 64, largeBytes.length - 64);
-        bytes.writePosition(0);
-        bytes.write(64, largeBytes, 64, largeBytes.length - 64);
+        Bytes<?> bytes2 = null;
+        try {
+            final byte[] largeBytes = new byte[arraySize];
+            bytes.writePosition(0);
+            bytes.write(largeBytes);
+            bytes.writePosition(0);
+            bytes.write(64, largeBytes);
+            bytes.writePosition(0);
+            bytes.write(largeBytes, 64, largeBytes.length - 64);
+            bytes.writePosition(0);
+            bytes.write(64, largeBytes, 64, largeBytes.length - 64);
 
-        bytes.writePosition(0);
-        bytes.write(Bytes.wrapForRead(largeBytes));
-        bytes.writePosition(0);
-        Bytes<byte[]> bytes1 = Bytes.wrapForRead(largeBytes);
-        bytes.write(64, bytes1);
-        bytes.writePosition(0);
-        bytes.write(Bytes.wrapForRead(largeBytes), 64L, largeBytes.length - 64L);
-        bytes.writePosition(0);
-        bytes.write(64, Bytes.wrapForRead(largeBytes), 64L, largeBytes.length - 64L);
+            bytes.writePosition(0);
+            bytes.write(Bytes.wrapForRead(largeBytes));
+            bytes.writePosition(0);
+            Bytes<byte[]> bytes1 = Bytes.wrapForRead(largeBytes);
+            bytes.write(64, bytes1);
+            bytes.writePosition(0);
+            bytes.write(Bytes.wrapForRead(largeBytes), 64L, largeBytes.length - 64L);
+            bytes.writePosition(0);
+            bytes.write(64, Bytes.wrapForRead(largeBytes), 64L, largeBytes.length - 64L);
 
-        Bytes<?> bytes2 = Bytes.allocateDirect(largeBytes);
-        bytes.writePosition(0);
-        bytes.write(bytes2);
-        bytes.writePosition(0);
-        bytes.write(64, bytes2);
-        bytes.writePosition(0);
-        bytes.write(bytes2, 64L, largeBytes.length - 64L);
-        bytes.writePosition(0);
-        bytes.write(64, bytes2, 64L, largeBytes.length - 64L);
-
-        bytes2.releaseLast();
-        bytes.releaseLast();
-
-        assertTrue(bytes.isClosed());
+            bytes2 = Bytes.allocateDirect(largeBytes);
+            bytes.writePosition(0);
+            bytes.write(bytes2);
+            bytes.writePosition(0);
+            bytes.write(64, bytes2);
+            bytes.writePosition(0);
+            bytes.write(bytes2, 64L, largeBytes.length - 64L);
+            bytes.writePosition(0);
+            bytes.write(64, bytes2, 64L, largeBytes.length - 64L);
+        } finally {
+            if (bytes2 != null)
+                bytes2.releaseLast();
+            bytes.releaseLast();
+        }
+        return bytes.isClosed();
     }
 
     @Test
@@ -376,9 +381,9 @@ public class MappedBytesTest extends BytesTestCommon {
 
     private void checkShouldNotBeReadOnly(MappedBytes mappedBytes) {
         try {
-            assertFalse(mappedBytes.isBackingFileReadOnly());
+            assertFalse(mappedBytes.isBackingFileReadOnly(), "MappedBytes created without read-only flag should allow write operations");
             mappedBytes.writeUtf8(null); // used to blow up.
-            assertNull(mappedBytes.readUtf8());
+            assertNull(mappedBytes.readUtf8(), "Reading after writing null UTF-8 should return null value");
         } finally {
             mappedBytes.close();
         }
@@ -403,16 +408,16 @@ public class MappedBytesTest extends BytesTestCommon {
         final File tempFile = Files.createTempFile("mapped", "bytes").toFile();
         try (final RandomAccessFile raf = new RandomAccessFile(tempFile, "rw")) {
             raf.setLength(PageUtil.getPageSize(tempFile.getAbsolutePath()));
-            assertTrue(tempFile.setWritable(false));
+            assertTrue(tempFile.setWritable(false), "Setting file to non-writable should succeed for read-only test");
             checkShouldBeReadOnly(MappedBytes.readOnly(tempFile));
         }
     }
 
     private void checkShouldBeReadOnly(MappedBytes mappedBytes) {
         try {
-            assertTrue(mappedBytes.isBackingFileReadOnly());
+            assertTrue(mappedBytes.isBackingFileReadOnly(), "MappedBytes opened with read-only flag should report backing file as read-only");
             mappedBytes.releaseLast();
-            assertEquals(0, mappedBytes.refCount());
+            assertEquals(0, mappedBytes.refCount(), "After releasing last reference, reference count should be zero");
         } finally {
             mappedBytes.close();
         }
@@ -424,7 +429,7 @@ public class MappedBytesTest extends BytesTestCommon {
         final File tempFile = Files.createTempFile("mapped", "bytes").toFile();
         try (final RandomAccessFile raf = new RandomAccessFile(tempFile, "rw")) {
             raf.setLength(4096);
-            assertTrue(tempFile.setWritable(false));
+            assertTrue(tempFile.setWritable(false), "Setting file to read-only should succeed before attempting read-write open");
             assertThrows(FileNotFoundException.class, () -> MappedBytes.singleMappedBytes(tempFile, 64 << 10));
         }
     }
@@ -436,7 +441,7 @@ public class MappedBytesTest extends BytesTestCommon {
         file.deleteOnExit();
         try (MappedBytes mb = MappedBytes.mappedBytes(file, 64 << 10)) {
             mb.realCapacity();
-            assertTrue(Thread.currentThread().isInterrupted());
+            assertTrue(Thread.currentThread().isInterrupted(), "Interrupted status should be preserved after MappedBytes operations");
         }
     }
 
@@ -446,11 +451,11 @@ public class MappedBytesTest extends BytesTestCommon {
         File file = IOTools.createTempFile("interrupted");
         try (MappedBytes mb = MappedBytes.singleMappedBytes(file, 64 << 10)) {
             mb.realCapacity();
-            assertTrue(Thread.currentThread().isInterrupted());
+            assertTrue(Thread.currentThread().isInterrupted(), "Interrupted status should persist through singleMappedBytes operations");
         }
     }
 
-    @After
+    @AfterEach
     public void clearInterrupt() {
         Thread.interrupted();
     }
@@ -477,8 +482,8 @@ public class MappedBytesTest extends BytesTestCommon {
             int pbsInt = pbs.readInt(4);
             int originalInt = original.readInt(50);
 
-            assertEquals(12345678, pbsInt);
-            assertEquals(4321, originalInt);
+            assertEquals(12345678, pbsInt, "PointerBytesStore reading at offset 4 should reflect value written to original at offset 54");
+            assertEquals(4321, originalInt, "Original bytes reading at offset 50 should reflect value written to PointerBytesStore at offset 0");
         }
     }
 
@@ -501,8 +506,8 @@ public class MappedBytesTest extends BytesTestCommon {
             pbs.writeInt(0, 4321);
             original.writeInt(54, 12345678);
 
-            assertEquals(12345678, original.readInt(54));
-            assertEquals(4321, original.readInt(50));
+            assertEquals(12345678, original.readInt(54), "Original bytes should read back value 12345678 written at offset 54");
+            assertEquals(4321, original.readInt(50), "Original bytes at offset 50 should contain value 4321 written via PointerBytesStore");
 
         }
     }
@@ -524,10 +529,10 @@ public class MappedBytesTest extends BytesTestCommon {
             bytes.zeroOut(0, range);
 
             for (long offset = 0; offset < range; offset++) {
-                assertEquals("offset " + offset + " should be cleared", 0, bytes.readUnsignedByte(offset));
+                assertEquals(0, bytes.readUnsignedByte(offset), "After zeroOut operation, byte at offset " + offset + " should be cleared to zero");
             }
         } finally {
-            assertTrue("Failed to delete " + file, file.delete());
+            assertTrue(file.delete(), "Temporary test file " + file + " should be deleted successfully");
         }
     }
 
@@ -544,16 +549,16 @@ public class MappedBytesTest extends BytesTestCommon {
                 mb.writePosition(offset);
                 mb.appendUtf8(longString);
                 mb.readPosition(offset);
-                assertEquals(offset < chunkSize ? 0 : chunkSize, mb.bytesStore().start());
+                assertEquals(offset < chunkSize ? 0 : chunkSize, mb.bytesStore().start(), "BytesStore start should be 0 for first chunk, chunkSize for second chunk");
 
                 mb.equalBytes(csb, csb.length());
-                assertEquals(chunkSize, mb.bytesStore().start());
+                assertEquals(chunkSize, mb.bytesStore().start(), "After first equalBytes across boundary, BytesStore should advance to start of chunk 2");
 
                 mb.equalBytes(csb, csb.length());
-                assertEquals(chunkSize, mb.bytesStore().start());
+                assertEquals(chunkSize, mb.bytesStore().start(), "After second equalBytes, BytesStore should remain at start of chunk 2");
 
                 mb.parseUtf8(sb, csb.length());
-                assertEquals(chunkSize, mb.bytesStore().start());
+                assertEquals(chunkSize, mb.bytesStore().start(), "After parseUtf8, BytesStore should still be positioned at start of chunk 2");
             }
         } finally {
             csb.releaseLast();
@@ -576,7 +581,7 @@ public class MappedBytesTest extends BytesTestCommon {
                     }
                 });
         try (MappedBytes mb = MappedBytes.mappedBytes(tmpfile, 256 << 10)) {
-            assertEquals(count, mb.readVolatileLong(0));
+            assertEquals(count, mb.readVolatileLong(0), "After 4000 parallel increments, volatile long at position 0 should equal 4000");
         }
         IOTools.deleteDirWithFiles(tmpfile, 2);
     }
@@ -620,20 +625,22 @@ public class MappedBytesTest extends BytesTestCommon {
         try (MappedBytes mb = MappedBytes.mappedBytes(file, chunkSize, chunkSize / 4)) {
             final int chunks3 = chunkSize * 3;
             mb.writePosition(chunks3).writeByte((byte) 0);
-            assertEquals(chunks3, mb.bytesStore().start());
+            assertEquals(chunks3, mb.bytesStore().start(), "After writing at 3x chunk size, BytesStore should start at that position");
             mb.ensureCapacity(chunks3);
-            assertEquals("ensureCapacity used to add writePosition", chunks3, mb.bytesStore().start());
+            assertEquals(chunks3, mb.bytesStore().start(), "ensureCapacity should not change BytesStore start position when capacity already sufficient");
         }
     }
 
-    @Test(expected = DecoratedBufferOverflowException.class)
+    @Test
     public void testIncreaseCapacityOverMax() throws Exception {
-        File file = IOTools.createTempFile("ensure2");
-        final int chunkSize = 256 << 10;
-        try (MappedBytes mb = MappedBytes.mappedBytes(file, chunkSize, chunkSize / 4)) {
-            final long capacity = mb.capacity();
-            mb.ensureCapacity(capacity + 1);
-        }
+        assertThrows(DecoratedBufferOverflowException.class, () -> {
+            File file = IOTools.createTempFile("ensure2");
+            final int chunkSize = 256 << 10;
+            try (MappedBytes mb = MappedBytes.mappedBytes(file, chunkSize, chunkSize / 4)) {
+                final long capacity = mb.capacity();
+                mb.ensureCapacity(capacity + 1);
+            }
+        });
     }
 
     @Test
@@ -671,7 +678,7 @@ public class MappedBytesTest extends BytesTestCommon {
                 slice.releaseLast();
             }
         }
-        assertTrue(true); // if we reach here, the test passes
+        assertTrue(true, "Writing 320000 variable-length messages across chunk boundaries should complete without BufferUnderflowException"); // if we reach here, the test passes
     }
 
     private static File newTempBinary(String prefix) throws IOException {

@@ -5,9 +5,8 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IORuntimeException;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
@@ -15,22 +14,20 @@ import java.util.Collection;
 
 import static net.openhft.chronicle.bytes.Allocator.HEAP;
 import static net.openhft.chronicle.bytes.Allocator.NATIVE;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
-@RunWith(Parameterized.class)
 public class Bytes2Test extends BytesTestCommon {
 
-    private final Allocator alloc1;
-    private final Allocator alloc2;
+    private Allocator alloc1;
+    private Allocator alloc2;
 
-    public Bytes2Test(Allocator alloc1, Allocator alloc2) {
+    public void initBytes2Test(Allocator alloc1, Allocator alloc2) {
         this.alloc1 = alloc1;
         this.alloc2 = alloc2;
     }
 
-    @Parameterized.Parameters
     public static Collection<Object[]> data() {
         if (Jvm.maxDirectMemory() == 0)
             return Arrays.asList(new Object[][]{{HEAP, HEAP}});
@@ -39,8 +36,10 @@ public class Bytes2Test extends BytesTestCommon {
         });
     }
 
-    @Test
-    public void testPartialWrite() {
+    @MethodSource("data")
+    @ParameterizedTest
+    public void testPartialWrite(Allocator alloc1, Allocator alloc2) {
+        initBytes2Test(alloc1, alloc2);
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         Bytes<?> from = alloc1.elasticBytes(1);
@@ -51,16 +50,18 @@ public class Bytes2Test extends BytesTestCommon {
 
             ByteBuffer buffer = from.toTemporaryDirectByteBuffer();
             to.writeSome(buffer);
-            assertEquals("Hello ", to.toString());
-            assertEquals("Hello World", from.toString());
+            assertEquals("Hello ", to.toString(), "toString should return 'Hello ' after partial write to 6-byte capacity bytes");
+            assertEquals("Hello World", from.toString(), "toString should return 'Hello World' after writing to source bytes");
         } finally {
             from.releaseLast();
             to.releaseLast();
         }
     }
 
-    @Test
-    public void testPartialWrite64plus() {
+    @MethodSource("data")
+    @ParameterizedTest
+    public void testPartialWrite64plus(Allocator alloc1, Allocator alloc2) {
+        initBytes2Test(alloc1, alloc2);
         assumeFalse(Jvm.maxDirectMemory() == 0);
         Bytes<?> from = alloc1.elasticBytes(1);
         Bytes<?> to = alloc2.fixedBytes(6);
@@ -69,15 +70,17 @@ public class Bytes2Test extends BytesTestCommon {
 
         try {
             to.writeSome(from.toTemporaryDirectByteBuffer());
-            assertTrue("from: " + from, from.toString().startsWith("Hello World "));
+            assertTrue(from.toString().startsWith("Hello World "), "from: " + from);
         } finally {
             from.releaseLast();
             to.releaseLast();
         }
     }
 
-    @Test
-    public void testWrite64plus() {
+    @MethodSource("data")
+    @ParameterizedTest
+    public void testWrite64plus(Allocator alloc1, Allocator alloc2) {
+        initBytes2Test(alloc1, alloc2);
         Bytes<?> from = alloc1.fixedBytes(128);
         Bytes<?> to = alloc2.fixedBytes(128);
 
@@ -85,16 +88,18 @@ public class Bytes2Test extends BytesTestCommon {
 
         try {
             to.write(from);
-            assertEquals(from.toString(), to.toString());
+            assertEquals(from.toString(), to.toString(), "toString should match between source and destination bytes after complete write");
         } finally {
             from.releaseLast();
             to.releaseLast();
         }
     }
 
-    @Test
-    public void testParseToBytes()
+    @MethodSource("data")
+    @ParameterizedTest
+    public void testParseToBytes(Allocator alloc1, Allocator alloc2)
             throws IORuntimeException {
+        initBytes2Test(alloc1, alloc2);
         Bytes<?> from = alloc1.fixedBytes(64);
         Bytes<?> to = alloc2.fixedBytes(32);
         try {
@@ -102,9 +107,9 @@ public class Bytes2Test extends BytesTestCommon {
 
             for (int i = 0; i < 4; i++) {
                 from.parse8bit(to, StopCharTesters.SPACE_STOP);
-                assertEquals(10, to.readRemaining());
+                assertEquals(10, to.readRemaining(), "to.readRemaining");
             }
-            assertEquals(0, from.readRemaining());
+            assertEquals(0, from.readRemaining(), "from.readRemaining");
         } finally {
             from.releaseLast();
             to.releaseLast();

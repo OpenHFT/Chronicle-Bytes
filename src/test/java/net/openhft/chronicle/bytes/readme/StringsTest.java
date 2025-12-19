@@ -7,10 +7,10 @@ import net.openhft.chronicle.bytes.BytesTestCommon;
 import net.openhft.chronicle.bytes.HexDumpBytes;
 import net.openhft.chronicle.bytes.NativeBytes;
 import net.openhft.chronicle.bytes.StopCharTesters;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.*;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 /**
  * Examples showing how to read and write {@code String} values with Chronicle Bytes.
@@ -43,10 +43,10 @@ public class StringsTest extends BytesTestCommon {
             final String b = bytes.readUtf8();
             final String c = bytes.parse8bit(StopCharTesters.CONTROL_STOP);
             final String d = bytes.parseUtf8(StopCharTesters.CONTROL_STOP);
-            assertEquals("£ 1", a);
-            assertEquals("£ 1", b);
-            assertEquals("£ 1", c);
-            assertEquals("£ 1", d);
+            assertEquals("£ 1", a, "read8bit should decode 8-bit encoded string");
+            assertEquals("£ 1", b, "readUtf8 should decode UTF-8 encoded string");
+            assertEquals("£ 1", c, "parse8bit should decode appended 8-bit string");
+            assertEquals("£ 1", d, "parseUtf8 should decode appended UTF-8 string");
 
             // System.out.println(System.identityHashCode(a));
             // System.out.println(System.identityHashCode(b));
@@ -55,8 +55,8 @@ public class StringsTest extends BytesTestCommon {
 
             // uses the pool but a different hash.
             // assertSame(a, c); // uses a string pool
-            assertSame(b, c); // uses a string pool
-            assertSame(b, d); // uses a string pool
+            assertSame(b, c, "readUtf8 and parse8bit should return same pooled instance"); // uses a string pool
+            assertSame(b, d, "readUtf8 and parseUtf8 should return same pooled instance"); // uses a string pool
         } finally {
             bytes.releaseLast();
         }
@@ -70,15 +70,15 @@ public class StringsTest extends BytesTestCommon {
     public void testNull() {
         final HexDumpBytes bytes = new HexDumpBytes();
         try {
-            bytes.writeHexDumpDescription("write8bit").write8bit((String) null);
+            bytes.writeHexDumpDescription("write8bit").write8bit(null);
             bytes.writeHexDumpDescription("writeUtf8").writeUtf8(null);
 
             //System.out.println(bytes.toHexString());
 
             final String a = bytes.read8bit();
             final String b = bytes.readUtf8();
-            assertNull(a);
-            assertNull(b);
+            assertNull(a, "read8bit should return null when null was written");
+            assertNull(b, "readUtf8 should return null when null was written");
         } finally {
             bytes.releaseLast();
         }

@@ -4,16 +4,20 @@
 package net.openhft.chronicle.bytes.readme;
 
 import net.openhft.chronicle.bytes.*;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.nio.ByteBuffer;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 @SuppressWarnings("deprecation")
 public class PrimitiveTest extends BytesTestCommon {
+
+    private static final String TEXT_PRIMITIVE_EXPECTED_HEX = "00000000 54 0a 31 0a 32 0a 33 0a  34 2e 31 0a 35 2e 32 0a T·1·2·3· 4.1·5.2·\n" +
+            "00000010 2d 49 6e 66 69 6e 69 74  79 0a 36 2e 33 30 30 0a -Infinit y·6.300·\n" +
+            "00000020 4e 61 4e 0a                                      NaN·             \n";
 
     @Test
     public void testBinaryNestedDTO() {
@@ -36,7 +40,7 @@ public class PrimitiveTest extends BytesTestCommon {
 
             final String actual = bytes.toHexString();
 
-            assertEquals(expected, actual);
+            assertEquals(expected, actual, "nested DTO binary serialization should match expected hex format");
 
             final Outer outer2 = new Outer();
             outer2.readMarshallable(bytes);
@@ -74,7 +78,7 @@ public class PrimitiveTest extends BytesTestCommon {
 
             final String actual = bytes.toHexString();
 
-            assertEquals(expected, actual);
+            assertEquals(expected, actual, "primitive DTO binary serialization should match expected hex format");
 
             PrimitiveDTO dto2 = new PrimitiveDTO();
             dto2.readMarshallable(bytes);
@@ -107,7 +111,7 @@ public class PrimitiveTest extends BytesTestCommon {
 
             final String actual = bytes.toHexString();
 
-            assertEquals(expected, actual);
+            assertEquals(expected, actual, "binary primitive values should match expected hex format");
 
             // System.out.println(bytes.toHexString());
 
@@ -141,7 +145,7 @@ public class PrimitiveTest extends BytesTestCommon {
 
             final String actual = bytes.toHexString();
 
-            assertEquals(expected, actual);
+            assertEquals(expected, actual, "primitives written at explicit offsets should match expected hex format");
 
             final boolean flag = bytes.readBoolean(0);
             final byte s8 = bytes.readByte(1);
@@ -154,16 +158,16 @@ public class PrimitiveTest extends BytesTestCommon {
             final float f32 = bytes.readFloat(23);
             final double f64 = bytes.readDouble(27);
 
-            assertTrue(flag);
-            assertEquals(1, s8);
-            assertEquals(2, u8);
-            assertEquals(3, s16);
-            assertEquals(4, u16);
-            assertEquals(6, s32);
-            assertEquals(7, u32);
-            assertEquals(8, s64);
-            assertEquals(9, f32, 0.0);
-            assertEquals(10, f64, 0.0);
+            assertTrue(flag, "readBoolean(0) should return true");
+            assertEquals(1, s8, "readByte(1) should return written value");
+            assertEquals(2, u8, "readUnsignedByte(2) should return written value");
+            assertEquals(3, s16, "readShort(3) should return written value");
+            assertEquals(4, u16, "readUnsignedShort(5) should return written value");
+            assertEquals(6, s32, "readInt(7) should return written value");
+            assertEquals(7, u32, "readUnsignedInt(11) should return written value");
+            assertEquals(8, s64, "readLong(15) should return written value");
+            assertEquals(9, f32, 0.0, "readFloat(23) should return written value");
+            assertEquals(10, f64, 0.0, "readDouble(27) should return written value");
         } finally {
             bytes.releaseLast();
         }
@@ -171,20 +175,20 @@ public class PrimitiveTest extends BytesTestCommon {
 
     @Test
     public void testTextPrimitiveByteBuffer() {
-        doTestTextPrimitive(Bytes.elasticHeapByteBuffer(64));
+        assertEquals(TEXT_PRIMITIVE_EXPECTED_HEX, doTestTextPrimitive(Bytes.elasticHeapByteBuffer(64)), "text primitive serialization with ByteBuffer should match expected hex");
     }
 
     @Test
     public void testTextPrimitiveDirect() {
-        doTestTextPrimitive(Bytes.allocateDirect(64));
+        assertEquals(TEXT_PRIMITIVE_EXPECTED_HEX, doTestTextPrimitive(Bytes.allocateDirect(64)), "text primitive serialization with direct bytes should match expected hex");
     }
 
     @Test
     public void testTextPrimitiveHeap() {
-        doTestTextPrimitive(Bytes.allocateElasticOnHeap(64));
+        assertEquals(TEXT_PRIMITIVE_EXPECTED_HEX, doTestTextPrimitive(Bytes.allocateElasticOnHeap(64)), "text primitive serialization with heap bytes should match expected hex");
     }
 
-    private void doTestTextPrimitive(Bytes<?> bytes) {
+    private String doTestTextPrimitive(Bytes<?> bytes) {
         assumeFalse(NativeBytes.areNewGuarded());
         try {
             bytes.append(true).append('\n');
@@ -197,13 +201,7 @@ public class PrimitiveTest extends BytesTestCommon {
             bytes.append(6.2999999, 3).append('\n');
             bytes.append(Double.NaN).append('\n');
 
-            final String expected = "00000000 54 0a 31 0a 32 0a 33 0a  34 2e 31 0a 35 2e 32 0a T·1·2·3· 4.1·5.2·\n" +
-                    "00000010 2d 49 6e 66 69 6e 69 74  79 0a 36 2e 33 30 30 0a -Infinit y·6.300·\n" +
-                    "00000020 4e 61 4e 0a                                      NaN·             \n";
-
             final String actual = bytes.toHexString();
-
-            assertEquals(expected, actual);
 
             final boolean flag = bytes.parseBoolean();
             final int s32 = bytes.parseInt();
@@ -215,15 +213,16 @@ public class PrimitiveTest extends BytesTestCommon {
             final double f64b = bytes.parseDouble();
             final double f64n = bytes.parseDouble();
 
-            assertTrue(flag);
-            assertEquals(1, s32);
-            assertEquals(2, s64);
-            assertEquals("3", ch);
-            assertEquals(4.1, f32, 1e-6);
-            assertEquals(5.2, f64, 0.0);
-            assertEquals(Double.NEGATIVE_INFINITY, f64i, 0.5e-4);
-            assertEquals(6.2999999, f64b, 0.5e-4);
-            assertEquals(Double.NaN, f64n, 0.5e-4);
+            assertTrue(flag, "parseBoolean should return true");
+            assertEquals(1, s32, "parseInt should return written value");
+            assertEquals(2, s64, "parseLong should return written value");
+            assertEquals("3", ch, "parseUtf8 should return character as string");
+            assertEquals(4.1, f32, 1e-6, "parseFloat should return written value");
+            assertEquals(5.2, f64, 0.0, "parseDouble should return written value");
+            assertEquals(Double.NEGATIVE_INFINITY, f64i, 0.5e-4, "parseDouble should handle negative infinity");
+            assertEquals(6.2999999, f64b, 0.5e-4, "parseDouble should handle rounded decimal value");
+            assertEquals(Double.NaN, f64n, 0.5e-4, "parseDouble should handle NaN");
+            return actual;
         } finally {
             bytes.releaseLast();
         }

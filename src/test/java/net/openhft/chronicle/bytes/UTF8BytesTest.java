@@ -4,14 +4,14 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Jvm;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 public class UTF8BytesTest extends BytesTestCommon {
 
@@ -29,7 +29,7 @@ public class UTF8BytesTest extends BytesTestCommon {
 
         StringBuilder sb = new StringBuilder();
         bytes.parseUtf8(sb, true, len);
-        assertEquals(MESSAGE, sb.toString());
+        assertEquals(MESSAGE, sb.toString(), "UTF-8 round-trip via appendUtf8/parseUtf8 should preserve string with non-ASCII characters");
         bytes.releaseLast();
     }
 }

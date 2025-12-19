@@ -4,9 +4,9 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.bytes.internal.NativeBytesStore;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SuppressWarnings("deprecation")
 public class VanillaBytesUsageTest extends BytesTestCommon {
@@ -21,7 +21,7 @@ public class VanillaBytesUsageTest extends BytesTestCommon {
             try {
                 bytes.readLimit(store.capacity());
                 bytes.readPosition(0);
-                assertEquals(0x1122334455667788L, bytes.readLong());
+                assertEquals(0x1122334455667788L, bytes.readLong(), "VanillaBytes wrapper should preserve long value written to underlying store");
             } finally {
                 bytes.releaseLast();
             }
@@ -42,11 +42,11 @@ public class VanillaBytesUsageTest extends BytesTestCommon {
             try {
                 reusable.bytesStore(storeA, 0, storeA.capacity());
                 reusable.readPosition(0);
-                assertEquals("alpha", reusable.readUtf8());
+                assertEquals("alpha", reusable.readUtf8(), "VanillaBytes should read UTF-8 string from first swapped-in store");
 
                 reusable.bytesStore(storeB, 0, storeB.capacity());
                 reusable.readPosition(0);
-                assertEquals("beta", reusable.readUtf8());
+                assertEquals("beta", reusable.readUtf8(), "VanillaBytes should read UTF-8 string from second swapped-in store");
             } finally {
                 reusable.releaseLast();
             }

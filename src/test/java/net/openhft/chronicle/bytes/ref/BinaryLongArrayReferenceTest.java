@@ -5,10 +5,10 @@ package net.openhft.chronicle.bytes.ref;
 
 import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.core.Jvm;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 @SuppressWarnings("deprecation")
 public class BinaryLongArrayReferenceTest extends BytesTestCommon {
@@ -22,12 +22,12 @@ public class BinaryLongArrayReferenceTest extends BytesTestCommon {
             try (BinaryLongArrayReference array = new BinaryLongArrayReference()) {
                 array.bytesStore(bytes, 0, length);
 
-                assertEquals(128, array.getCapacity());
+                assertEquals(128, array.getCapacity(), "array.getCapacity");
                 for (int i = 0; i < 128; i++)
                     array.setValueAt(i, i + 1);
 
                 for (int i = 0; i < 128; i++)
-                    assertEquals(i + 1, array.getValueAt(i));
+                    assertEquals(i + 1, array.getValueAt(i), "array.getValueAt");
             }
         } finally {
             bytes.releaseLast();
@@ -61,14 +61,14 @@ public class BinaryLongArrayReferenceTest extends BytesTestCommon {
 
             final String actual = bytes.toHexString();
 
-            assertEquals(expected, actual);
+            assertEquals(expected, actual, "BinaryLongArrayReference should serialize to expected hex format with comments");
 
             //System.out.println(bytes.toHexString());
 
             final LongArrays la2 = new LongArrays(0, 0);
             la2.readMarshallable(bytes);
-            assertEquals(4, la2.first.getCapacity());
-            assertEquals(8, la2.second.getCapacity());
+            assertEquals(4, la2.first.getCapacity(), "first.getCapacity");
+            assertEquals(8, la2.second.getCapacity(), "second.getCapacity");
             la.closeAll();
             la2.closeAll();
         } finally {

@@ -7,11 +7,10 @@ import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.IOException;
 import java.nio.BufferUnderflowException;
@@ -19,20 +18,18 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Collection;
 
-import static org.junit.Assert.*;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 @SuppressWarnings({"rawtypes", "deprecation"})
-@RunWith(Parameterized.class)
 public class BytesInternalGuardedTest extends BytesTestCommon {
 
-    private final boolean guarded;
+    private boolean guarded;
 
-    public BytesInternalGuardedTest(String name, boolean guarded) {
+    public void initBytesInternalGuardedTest(String name, boolean guarded) {
         this.guarded = guarded;
     }
 
-    @Parameterized.Parameters(name = "{0}")
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][]{
                 {"Unguarded", false},
@@ -40,19 +37,21 @@ public class BytesInternalGuardedTest extends BytesTestCommon {
         });
     }
 
-    @AfterClass
+    @AfterAll
     public static void resetGuarded() {
         NativeBytes.resetNewGuarded();
     }
 
-    @Before
+    @BeforeEach
     public void setGuarded() {
         NativeBytes.setNewGuarded(guarded);
     }
 
-    @Test
-    public void testParse8bitAndStringBuilderWithUtf16Coder()
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void testParse8bitAndStringBuilderWithUtf16Coder(String name, boolean guarded)
             throws BufferUnderflowException, IOException {
+        initBytesInternalGuardedTest(name, guarded);
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         @NotNull BytesStore<?, ?> bs = BytesStore.nativeStore(32);
@@ -64,35 +63,39 @@ public class BytesInternalGuardedTest extends BytesTestCommon {
         BytesInternal.parse8bit(0, bs, sb, 5);
         String actual = sb.toString();
 
-        assertEquals("value", actual);
-        assertEquals(5, actual.length());
+        assertEquals("value", actual, "parse8bit should correctly append to StringBuilder with UTF-16 coder");
+        assertEquals(5, actual.length(), "parsed string length should be 5 characters after appending 'value' to UTF-16 StringBuilder");
         bs.releaseLast();
     }
 
-    @Test
-    public void testCompareUTF()
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void testCompareUTF(String name, boolean guarded)
             throws IORuntimeException {
+        initBytesInternalGuardedTest(name, guarded);
         @NotNull BytesStore<?, ?> bs = BytesStore.nativeStore(32);
         bs.writeUtf8(0, "test");
-        assertTrue(BytesInternal.compareUtf8(bs, 0, "test"));
-        assertFalse(BytesInternal.compareUtf8(bs, 0, null));
+        assertTrue(BytesInternal.compareUtf8(bs, 0, "test"), "compareUtf8 should return true when stored and expected strings match");
+        assertFalse(BytesInternal.compareUtf8(bs, 0, null), "compareUtf8 should return false when comparing non-null stored value to null");
 
         bs.writeUtf8(0, null);
-        assertTrue(BytesInternal.compareUtf8(bs, 0, null));
-        assertFalse(BytesInternal.compareUtf8(bs, 0, "test"));
+        assertTrue(BytesInternal.compareUtf8(bs, 0, null), "compareUtf8 should return true when both stored and expected are null");
+        assertFalse(BytesInternal.compareUtf8(bs, 0, "test"), "compareUtf8 should return false when comparing null stored value to non-null");
 
         bs.writeUtf8(1, "£\u20ac");
         @NotNull StringBuilder sb = new StringBuilder();
         bs.readUtf8(1, sb);
-        assertEquals("£\u20ac", sb.toString());
-        assertTrue(BytesInternal.compareUtf8(bs, 1, "£\u20ac"));
-        assertFalse(BytesInternal.compareUtf8(bs, 1, "£"));
-        assertFalse(BytesInternal.compareUtf8(bs, 1, "£\u20ac$"));
+        assertEquals("£\u20ac", sb.toString(), "read UTF-8 content should match written unicode string with pound and euro symbols");
+        assertTrue(BytesInternal.compareUtf8(bs, 1, "£\u20ac"), "compareUtf8 should return true for matching unicode strings");
+        assertFalse(BytesInternal.compareUtf8(bs, 1, "£"), "compareUtf8 should return false when expected string is prefix of stored");
+        assertFalse(BytesInternal.compareUtf8(bs, 1, "£\u20ac$"), "compareUtf8 should return false when stored string is prefix of expected");
         bs.releaseLast();
     }
 
-    @Test
-    public void shouldHandleDifferentSizedStores() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void shouldHandleDifferentSizedStores(String name, boolean guarded) {
+        initBytesInternalGuardedTest(name, guarded);
         Bytes<ByteBuffer> bytes = Bytes.elasticHeapByteBuffer(32);
         final BytesStore<?, ?> storeOfThirtyTwoBytes = bytes.bytesStore();
         storeOfThirtyTwoBytes.writeUtf8(0, "thirty_two_bytes_of_utf8_chars_");
@@ -101,28 +104,32 @@ public class BytesInternalGuardedTest extends BytesTestCommon {
         final BytesStore<?, ?> longerBuffer = bytes2.bytesStore();
         longerBuffer.writeUtf8(0, "thirty_two_bytes_of_utf8_chars_");
 
-        assertTrue(BytesInternal.equalBytesAny(storeOfThirtyTwoBytes, longerBuffer, 32));
+        assertTrue(BytesInternal.equalBytesAny(storeOfThirtyTwoBytes, longerBuffer, 32), "BytesInternal.equalBytesAny");
         bytes2.releaseLast();
         bytes.releaseLast();
     }
 
-    @Test
-    public void testWritingDecimalVsJava() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void testWritingDecimalVsJava(String name, boolean guarded) {
+        initBytesInternalGuardedTest(name, guarded);
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(32);
         bytes.clear();
         double d = 0.04595828484241039; //Math.pow(1e9, rand.nextDouble()) / 1e3;
         bytes.append(d);
         String s = Double.toString(d);
         if (s.length() != bytes.readRemaining()) {
-            assertEquals(d, Double.parseDouble(s), 0.0);
+            assertEquals(d, Double.parseDouble(s), 0.0, "Double.parseDouble");
             String s2 = bytes.toString();
 //            System.out.println(s + " != " + s2);
         }
         bytes.releaseLast();
     }
 
-    @Test
-    public void contentsEqual() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void contentsEqual(String name, boolean guarded) {
+        initBytesInternalGuardedTest(name, guarded);
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         Bytes<?> a = Bytes.elasticByteBuffer(9, 20)
@@ -135,21 +142,23 @@ public class BytesInternalGuardedTest extends BytesTestCommon {
                 .append(Bytes.from("Hello"))
                 .readLimit(16);
         String actual1 = a.toString();
-        assertEquals("Hello\0\0\0\0", actual1);
+        assertEquals("Hello\0\0\0\0", actual1, "9-byte buffer should show Hello with 4 trailing nulls");
         String actual2 = b.toString();
-        assertEquals("Hello", actual2);
+        assertEquals("Hello", actual2, "5-byte buffer should show Hello with no trailing nulls");
         String actual3 = c.toString();
-        assertEquals("Hello\0\0\0\0\0\0\0\0\0\0", actual3);
-        assertTrue(a.contentEquals(b));
-        assertTrue(b.contentEquals(c));
-        assertTrue(c.contentEquals(a));
+        assertEquals("Hello\0\0\0\0\0\0\0\0\0\0", actual3, "15-byte buffer should show Hello with 10 trailing nulls");
+        assertTrue(a.contentEquals(b), "a.contentEquals");
+        assertTrue(b.contentEquals(c), "b.contentEquals");
+        assertTrue(c.contentEquals(a), "c.contentEquals");
         a.releaseLast();
         b.releaseLast();
         c.releaseLast();
     }
 
-    @Test
-    public void testStopBits() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void testStopBits(String name, boolean guarded) {
+        initBytesInternalGuardedTest(name, guarded);
         final VanillaBytes<Void> bytes = Bytes.allocateDirect(10);
 
         for (int i = 0; i < (1L << (2 * 7)) + 1; i++) {
@@ -163,7 +172,7 @@ public class BytesInternalGuardedTest extends BytesTestCommon {
 
             // System.out.printf("0x%04x : %02x %02x %02x%n", i, bytes.readByte(0), bytes.readByte(1), bytes.readByte(3));
 
-            assertEquals(i, l);
+            assertEquals(i, l, "stop-bit encoding round-trip should preserve value");
         }
 
         bytes.releaseLast();

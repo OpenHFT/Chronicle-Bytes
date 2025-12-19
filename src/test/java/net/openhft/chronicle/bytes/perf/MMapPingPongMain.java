@@ -11,7 +11,7 @@ import net.openhft.chronicle.core.OS;
 import java.io.File;
 import java.io.FileNotFoundException;
 
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /*
 on the same Ryzen 9 5950X
@@ -62,7 +62,7 @@ public class MMapPingPongMain {
                 long rate = count * 1_000_000_000L / time;
                 System.out.printf("Ping pong rate: %,d ping-pong/second%n", rate);
             }
-            assertNotNull(ignored); // keep compiler happy.
+            assertNotNull(ignored, "AffinityLock resource should be non-null (prevents unused variable warning)"); // keep compiler happy.
         }
     }
 }

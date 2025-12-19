@@ -5,21 +5,25 @@ package net.openhft.chronicle.bytes.internal;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesTestCommon;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.nio.BufferUnderflowException;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 public class BytesInternalSubBytesErrorsTest extends BytesTestCommon {
 
-    @Test(expected = BufferUnderflowException.class)
+    @Test
     public void subBytesThrowsWhenLengthTooLarge() {
-        Bytes<?> src = Bytes.from("abc");
-        try {
-            // request a sub view longer than remaining
-            BytesInternal.subBytes(src, 0, 10);
-        } finally {
-            src.releaseLast();
-        }
+        assertThrows(BufferUnderflowException.class, () -> {
+            Bytes<?> src = Bytes.from("abc");
+            try {
+                // request a sub view longer than remaining
+                BytesInternal.subBytes(src, 0, 10);
+            } finally {
+                src.releaseLast();
+            }
+        });
     }
 }
 

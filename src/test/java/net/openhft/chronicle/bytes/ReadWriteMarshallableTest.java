@@ -4,12 +4,12 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.io.IORuntimeException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.nio.BufferUnderflowException;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 @SuppressWarnings({"rawtypes", "deprecation"})
 public class ReadWriteMarshallableTest extends BytesTestCommon {
@@ -29,8 +29,8 @@ public class ReadWriteMarshallableTest extends BytesTestCommon {
         bytes.writeMarshallableLength16(o);
 
         RWOuter o2 = bytes.readMarshallableLength16(RWOuter.class, null);
-        assertEquals("Hello World", o2.i1.data.toString());
-        assertEquals("Bye", o2.i2.data.toString());
+        assertEquals("Hello World", o2.i1.data.toString(), "deserialized RWInner.i1.data should match original 'Hello World' after readMarshallableLength16");
+        assertEquals("Bye", o2.i2.data.toString(), "deserialized RWInner.i2.data should match original 'Bye' after readMarshallableLength16");
         helloWorld.releaseLast();
         bye.releaseLast();
     }
@@ -46,8 +46,8 @@ public class ReadWriteMarshallableTest extends BytesTestCommon {
         @Override
         public void readMarshallable(BytesIn<?> bytes)
                 throws IORuntimeException, BufferUnderflowException {
-            i1 = ((BytesIn<?>) bytes).readMarshallableLength16(RWInner.class, i1);
-            i2 = ((BytesIn<?>) bytes).readMarshallableLength16(RWInner.class, i2);
+            i1 = bytes.readMarshallableLength16(RWInner.class, i1);
+            i2 = bytes.readMarshallableLength16(RWInner.class, i2);
         }
 
         @Override

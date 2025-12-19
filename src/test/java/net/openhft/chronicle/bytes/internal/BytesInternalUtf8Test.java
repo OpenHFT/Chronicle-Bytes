@@ -7,9 +7,9 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesTestCommon;
 import net.openhft.chronicle.bytes.StopCharTesters;
 import net.openhft.chronicle.bytes.StreamingDataOutput;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class BytesInternalUtf8Test extends BytesTestCommon {
 
@@ -18,20 +18,20 @@ public class BytesInternalUtf8Test extends BytesTestCommon {
         Bytes<?> out = Bytes.allocateElasticOnHeap(32);
         try {
             CharSequence cs = "hello-world";
-            BytesInternal.appendUtf8((StreamingDataOutput) out, cs, 0, cs.length());
-            assertEquals("hello-world", out.toString());
+            BytesInternal.appendUtf8(out, cs, 0, cs.length());
+            assertEquals("hello-world", out.toString(), "appendUtf8 should correctly append CharSequence as UTF-8");
 
             out.clear();
             char[] chars = "abcdef".toCharArray();
             // use end index exclusive one less to avoid inclusive access
-            BytesInternal.appendUtf8(out, (CharSequence) new String(chars), 1, chars.length - 1);
-            assertEquals("bcdef", out.toString());
+            BytesInternal.appendUtf8(out, new String(chars), 1, chars.length - 1);
+            assertEquals("bcdef", out.toString(), "appendUtf8 should append substring 'bcdef' from 'abcdef' with indices 1 to 5");
 
             // long string across internal buffers
             out.clear();
             String longStr = new String(new char[1024]).replace('\0', 'x');
             BytesInternal.appendUtf8(out, longStr, 0, longStr.length());
-            assertEquals(longStr.length(), out.length());
+            assertEquals(longStr.length(), out.length(), "appendUtf8 should write complete 1024 char string length");
         } finally {
             out.releaseLast();
         }
@@ -44,11 +44,11 @@ public class BytesInternalUtf8Test extends BytesTestCommon {
         try {
             StringBuilder sb = new StringBuilder();
             BytesInternal.parseUtf8(a, sb, StopCharTesters.NON_ALPHA_DIGIT);
-            assertEquals("alpha", sb.toString());
+            assertEquals("alpha", sb.toString(), "parseUtf8 should parse 'alpha' with alphanumeric stop tester");
 
             sb.setLength(0);
             BytesInternal.parseUtf8(b, sb, StopCharTesters.NON_ALPHA_DIGIT);
-            assertEquals("beta", sb.toString());
+            assertEquals("beta", sb.toString(), "parseUtf8 should parse 'beta' with alphanumeric stop tester");
         } finally {
             a.releaseLast();
             b.releaseLast();

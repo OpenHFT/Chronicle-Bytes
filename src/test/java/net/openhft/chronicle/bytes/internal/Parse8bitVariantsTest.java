@@ -6,9 +6,9 @@ package net.openhft.chronicle.bytes.internal;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesTestCommon;
 import net.openhft.chronicle.bytes.StopCharTesters;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class Parse8bitVariantsTest extends BytesTestCommon {
 
@@ -19,11 +19,11 @@ public class Parse8bitVariantsTest extends BytesTestCommon {
         try {
             StringBuilder sb = new StringBuilder();
             BytesInternal.parse8bit(alpha, sb, StopCharTesters.NON_ALPHA_DIGIT);
-            assertEquals("alpha", sb.toString());
+            assertEquals("alpha", sb.toString(), "parsed 8-bit content into StringBuilder should match source 'alpha'");
             Bytes<?> out = Bytes.allocateElasticOnHeap(8);
             try {
                 BytesInternal.parse8bit(beta, out, StopCharTesters.NON_ALPHA_DIGIT);
-                assertEquals("beta", out.toString());
+                assertEquals("beta", out.toString(), "parsed 8-bit content into Bytes should match source 'beta'");
             } finally {
                 out.releaseLast();
             }

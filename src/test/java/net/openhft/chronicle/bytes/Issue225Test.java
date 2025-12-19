@@ -3,10 +3,10 @@
  */
 package net.openhft.chronicle.bytes;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class Issue225Test extends BytesTestCommon {
     @Test
@@ -21,16 +21,16 @@ public class Issue225Test extends BytesTestCommon {
             Bytes<?> bytes = Bytes.allocateElastic(32);
             final byte[] rbytes = new byte[24];
             bytes.append(value);
-            assertEquals(value, bytes.parseDouble(), 0.0);
+            assertEquals(value, bytes.parseDouble(), 0.0, "parseDouble value");
             if ((long) value == value)
-                assertEquals(0, bytes.lastDecimalPlaces());
+                assertEquals(0, bytes.lastDecimalPlaces(), "lastDecimalPlaces value");
             else
-                assertEquals(valueStr.length() - 2, bytes.lastDecimalPlaces());
+                assertEquals(valueStr.length() - 2, bytes.lastDecimalPlaces(), "lastDecimalPlaces should return number of decimal digits excluding the integer part and decimal point");
             bytes.readPosition(0);
             int length = bytes.read(rbytes);
-            assertEquals(valueStr.length(), length);
+            assertEquals(valueStr.length(), length, "read length should match the string representation length of the appended double value");
             final String substring = new String(rbytes, ISO_8859_1).substring(0, (int) bytes.writePosition());
-            assertEquals(valueStr, substring);
+            assertEquals(valueStr, substring, "append(double) and read as string should preserve correct decimal representation");
             bytes.releaseLast();
         }
     }

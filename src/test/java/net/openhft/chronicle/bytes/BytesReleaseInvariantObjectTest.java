@@ -60,11 +60,11 @@ final class BytesReleaseInvariantObjectTest extends BytesTestCommon {
             expected = "";
         }
         final String toString = bytes.toString();
-        assertEquals(expected, toString);
+        assertEquals(expected, toString, "toString() should return written content before release");
         releaseAndAssertReleased(bytes);
         String hexString = bytes.toHexString();
         if (!hexString.startsWith("net.openhft.chronicle.core.io.ClosedIllegalStateException")) {
-            assertEquals("net.openhft.chronicle.core.io.ClosedIllegalStateException: net.openhft.chronicle.bytes.NativeBytes already released INIT location ", hexString);
+            assertEquals("net.openhft.chronicle.core.io.ClosedIllegalStateException: net.openhft.chronicle.bytes.NativeBytes already released INIT location ", hexString, "toHexString() after release should show ClosedIllegalStateException");
         }
     }
 }

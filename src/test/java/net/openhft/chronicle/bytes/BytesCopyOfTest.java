@@ -3,9 +3,9 @@
  */
 package net.openhft.chronicle.bytes;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class BytesCopyOfTest extends BytesTestCommon {
 
@@ -17,7 +17,7 @@ public class BytesCopyOfTest extends BytesTestCommon {
             src.readSkip(6); // point to "ipsum"
             Bytes<Void> copy = BytesUtil.copyOf(src);
             try {
-                assertEquals("ipsum", copy.toString());
+                assertEquals("ipsum", copy.toString(), "copyOf should copy readable content 'ipsum' from position-adjusted source");
                 // copy is direct; avoid growing it to keep within fixed capacity
             } finally {
                 copy.releaseLast();

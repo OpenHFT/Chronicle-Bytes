@@ -14,23 +14,21 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class BytesMarshallerTest {
 
-    @SuppressWarnings("PMD.TestClassWithoutTestCases")
-    static class TestClass {
+    static class SampleClass {
         @SuppressWarnings("WeakerAccess")
         @UsedViaReflection
         public String[] stringArray;
     }
 
-    private BytesMarshaller<TestObject> marshaller;
+    private BytesMarshaller<SampleObject> marshaller;
     private Bytes<?> bytes;
 
     private BytesMarshaller.ObjectArrayFieldAccess fieldAccess;
     private BytesOut<?> bytesOut;
     private BytesIn<?> bytesIn;
-    private TestClass testObject;
+    private SampleClass testObject;
 
-    @SuppressWarnings("PMD.TestClassWithoutTestCases")
-    static class TestObject implements ReadBytesMarshallable, WriteBytesMarshallable {
+    static class SampleObject implements ReadBytesMarshallable, WriteBytesMarshallable {
         int intValue;
         String stringValue;
         double doubleValue;
@@ -54,9 +52,9 @@ class BytesMarshallerTest {
 
     @BeforeEach
     void setup() throws NoSuchFieldException {
-        marshaller = new BytesMarshaller<>(TestObject.class);
+        marshaller = new BytesMarshaller<>(SampleObject.class);
         bytes = Bytes.allocateDirect(64);
-        Field field = TestClass.class.getField("stringArray");
+        Field field = SampleClass.class.getField("stringArray");
         fieldAccess = new BytesMarshaller.ObjectArrayFieldAccess(field);
         bytesOut = mock(BytesOut.class);
         bytesIn = mock(BytesIn.class);
@@ -65,9 +63,9 @@ class BytesMarshallerTest {
     @BeforeEach
     void setUp() throws Exception {
         // Initialize your test object
-        testObject = new TestClass();
-        // Assuming TestClass has a field named "stringArray" you want to test
-        Field field = TestClass.class.getDeclaredField("stringArray");
+        testObject = new SampleClass();
+        // Assuming SampleClass has a field named "stringArray" you want to test
+        Field field = SampleClass.class.getDeclaredField("stringArray");
         field.setAccessible(true);
         // Initialize the ObjectArrayFieldAccess with the field
         fieldAccess = new BytesMarshaller.ObjectArrayFieldAccess(field);
@@ -94,7 +92,7 @@ class BytesMarshallerTest {
         // Simulate reading -1 for null array
         when(bytesIn.readStopBit()).thenReturn(-1L);
         fieldAccess.setValue(testObject, bytesIn);
-        assertNull(testObject.stringArray);
+        assertNull(testObject.stringArray, "reading stop-bit -1 should deserialize to null array");
     }
 
     @Test
@@ -102,7 +100,7 @@ class BytesMarshallerTest {
         // Simulate reading 0 for empty array
         when(bytesIn.readStopBit()).thenReturn(0L);
         fieldAccess.setValue(testObject, bytesIn);
-        assertEquals(0, testObject.stringArray.length);
+        assertEquals(0, testObject.stringArray.length, "reading stop-bit 0 should deserialize to empty array");
     }
 
     @Test
@@ -112,12 +110,12 @@ class BytesMarshallerTest {
         when(bytesIn.readRemaining()).thenReturn(12L);
         when(bytesIn.readObject(String.class)).thenReturn("hello", "world");
         fieldAccess.setValue(testObject, bytesIn);
-        assertArrayEquals(new String[]{"hello", "world"}, testObject.stringArray);
+        assertArrayEquals(new String[]{"hello", "world"}, testObject.stringArray, "reading stop-bit 2 should deserialize to array with 2 elements");
     }
 
     @Test
     void testWriteAndReadMarshallable() {
-        TestObject original = new TestObject();
+        SampleObject original = new SampleObject();
         original.intValue = 42;
         original.stringValue = "Hello";
         original.doubleValue = 3.14;
@@ -125,11 +123,11 @@ class BytesMarshallerTest {
         marshaller.writeMarshallable(original, bytes);
         bytes.readPosition(0); // Reset the read position to the start
 
-        TestObject result = new TestObject();
+        SampleObject result = new SampleObject();
         marshaller.readMarshallable(result, bytes);
 
-        assertEquals(original.intValue, result.intValue);
-        assertEquals(original.stringValue, result.stringValue);
-        assertEquals(original.doubleValue, result.doubleValue, 0.001);
+        assertEquals(original.intValue, result.intValue, "marshalling should preserve int value");
+        assertEquals(original.stringValue, result.stringValue, "marshalling should preserve string value");
+        assertEquals(original.doubleValue, result.doubleValue, 0.001, "marshalling should preserve double value");
     }
 }

@@ -3,15 +3,16 @@
  */
 package net.openhft.chronicle.bytes;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
 import static org.mockito.Mockito.*;
 
 public class RingBufferReaderTest {
 
     private RingBufferReader reader;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         reader = mock(RingBufferReader.class);
     }

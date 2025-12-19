@@ -3,12 +3,12 @@
  */
 package net.openhft.chronicle.bytes;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.text.DecimalFormat;
 
 import static net.openhft.chronicle.bytes.UnsafeTextBytesTest.testAppendDouble;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class Issue128Test extends BytesTestCommon {
     private static final DecimalFormat DF;
@@ -24,6 +24,8 @@ public class Issue128Test extends BytesTestCommon {
     public void testCorrect() {
         Bytes<?> bytes = Bytes.allocateDirect(32);
         try {
+            double sample = 1.0 / 1_000_000;
+            assertEquals(DF.format(sample), testAppendDouble(bytes, sample), "testCorrect: baseline format");
             // odd ones are trouble.
             for (int i = 1; i < 1_000_000; i += 2) {
                 double v6 = (double) i / 1_000_000;
@@ -47,9 +49,9 @@ public class Issue128Test extends BytesTestCommon {
         if (Double.parseDouble(output) != v || format.length() != output.length()) {
             // Don't compare strings if we've added an exponent
             if (!output.contains("E")) {
-                assertEquals(DF.format(v), output);
+                assertEquals(DF.format(v), output, "DF.format");
             } else {
-                assertEquals(v, Double.parseDouble(output), 0.0);
+                assertEquals(v, Double.parseDouble(output), 0.0, "Double.parseDouble");
             }
         }
     }

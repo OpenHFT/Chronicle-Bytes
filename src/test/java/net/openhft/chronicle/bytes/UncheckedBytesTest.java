@@ -12,7 +12,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @SuppressWarnings({"unchecked", "rawtypes"})
 class UncheckedBytesTest {
@@ -40,10 +41,10 @@ class UncheckedBytesTest {
     @Test
     void testSkipMethods() {
         uncheckedBytes.writeSkip(8);
-        assertEquals(8, uncheckedBytes.writePosition());
+        assertEquals(8, uncheckedBytes.writePosition(), "writeSkip(8) should advance write position to 8");
 
         uncheckedBytes.readSkip(4);
-        assertEquals(4, uncheckedBytes.readPosition());
+        assertEquals(4, uncheckedBytes.readPosition(), "readSkip(4) should advance read position to 4");
     }
 
     @Test
@@ -51,12 +52,12 @@ class UncheckedBytesTest {
         long desiredCapacity = 256;
         uncheckedBytes.ensureCapacity(desiredCapacity);
 
-        assertFalse(underlyingBytes.capacity() >= desiredCapacity);
+        assertFalse(underlyingBytes.capacity() >= desiredCapacity, "Mock underlying bytes capacity should remain below desired capacity (mock setup)");
     }
 
     @Test
     void testUncheckedFlag() {
-        assertTrue(uncheckedBytes.unchecked());
+        assertTrue(uncheckedBytes.unchecked(), "uncheckedBytes.unchecked");
     }
 
     @Test

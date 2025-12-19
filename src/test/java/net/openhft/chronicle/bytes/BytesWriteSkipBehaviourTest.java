@@ -3,11 +3,11 @@
  */
 package net.openhft.chronicle.bytes;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.nio.BufferOverflowException;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class BytesWriteSkipBehaviourTest extends BytesTestCommon {
 
@@ -25,9 +25,9 @@ public class BytesWriteSkipBehaviourTest extends BytesTestCommon {
             bytes.writeInt(start, (int) payloadLen);
 
             bytes.readPosition(start);
-            assertEquals(payloadLen, bytes.readInt());
-            assertEquals(0x11223344, bytes.readInt());
-            assertEquals((short) 0x55AA, bytes.readShort());
+            assertEquals(payloadLen, bytes.readInt(), "backfilled header should contain payload length 6 after writeSkip reservation");
+            assertEquals(0x11223344, bytes.readInt(), "first payload int should be 0x11223344 after header backfill");
+            assertEquals((short) 0x55AA, bytes.readShort(), "second payload short should be 0x55AA after header backfill");
         } finally {
             bytes.releaseLast();
         }
@@ -43,21 +43,23 @@ public class BytesWriteSkipBehaviourTest extends BytesTestCommon {
             bytes.writeSkip(-1); // drop comma
             bytes.writeByte((byte) 'd');
             bytes.readPosition(0);
-            assertEquals("abcd", bytes.readUtf8());
+            assertEquals("abcd", bytes.readUtf8(), "readUtf8 should return 'abcd' after negative writeSkip overwrites trailing comma");
         } finally {
             bytes.releaseLast();
         }
     }
 
-    @Test(expected = BufferOverflowException.class)
+    @Test
     public void excessiveNegativeSkipThrows() {
-        Bytes<?> bytes = Bytes.allocateElasticOnHeap(16);
-        try {
-            bytes.append("xx");
-            // attempt to backtrack beyond start
-            bytes.writeSkip(- (bytes.writePosition() + 2));
-        } finally {
-            bytes.releaseLast();
-        }
+        assertThrows(BufferOverflowException.class, () -> {
+            Bytes<?> bytes = Bytes.allocateElasticOnHeap(16);
+            try {
+                bytes.append("xx");
+                // attempt to backtrack beyond start
+                bytes.writeSkip(-(bytes.writePosition() + 2));
+            } finally {
+                bytes.releaseLast();
+            }
+        });
     }
 }

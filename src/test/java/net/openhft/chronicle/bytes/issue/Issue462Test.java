@@ -36,13 +36,13 @@ class Issue462Test {
         final long value = 0x0102030405060708L;
         bytes.writeLong(value);
         final ByteBuffer byteBuffer = bytes.underlyingObject();
-        assertEquals(ByteOrder.nativeOrder(), byteBuffer.order());
+        assertEquals(ByteOrder.nativeOrder(), byteBuffer.order(), "ByteOrder.nativeOrder");
         final long aLong = byteBuffer.getLong();
-        assertEquals(Long.toHexString(value), Long.toHexString(aLong));
-        assertEquals(value, aLong);
+        assertEquals(Long.toHexString(value), Long.toHexString(aLong), "Long.toHexString");
+        assertEquals(value, aLong, "ByteBuffer.getLong() should return same value as Bytes.writeLong()");
         byteBuffer.putDouble(0, 0.1);
         final double actual = bytes.readDouble();
-        assertEquals(Long.toHexString(Double.doubleToLongBits(0.1)), Long.toHexString(Double.doubleToLongBits(actual)));
-        assertEquals(0.1, actual, 0.0);
+        assertEquals(Long.toHexString(Double.doubleToLongBits(0.1)), Long.toHexString(Double.doubleToLongBits(actual)), "Long.toHexString");
+        assertEquals(0.1, actual, 0.0, "Bytes.readDouble() should return same value as ByteBuffer.putDouble()");
     }
 }

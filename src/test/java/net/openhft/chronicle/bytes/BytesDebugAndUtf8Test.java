@@ -3,9 +3,9 @@
  */
 package net.openhft.chronicle.bytes;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class BytesDebugAndUtf8Test extends BytesTestCommon {
 
@@ -17,11 +17,11 @@ public class BytesDebugAndUtf8Test extends BytesTestCommon {
             long rp = b.readPosition();
             StringBuilder sb = new StringBuilder();
             BytesUtil.parseUtf8(b, sb, 5);
-            assertEquals("hello", sb.toString());
+            assertEquals("hello", sb.toString(), "BytesUtil.parseUtf8 should extract UTF-8 string into StringBuilder");
 
             // debug string contains representation
             String dbg = BytesUtil.toDebugString(b, rp, 5);
-            assertFalse(dbg.isEmpty());
+            assertFalse(dbg.isEmpty(), "BytesUtil.toDebugString should return non-empty debug representation");
         } finally {
             b.releaseLast();
         }

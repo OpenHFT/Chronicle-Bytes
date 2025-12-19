@@ -4,7 +4,8 @@
 package net.openhft.chronicle.bytes.util;
 
 import net.openhft.chronicle.bytes.Bytes;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+
 import static org.mockito.Mockito.*;
 
 public class CompressionTest {

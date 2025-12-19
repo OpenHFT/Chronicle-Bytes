@@ -6,11 +6,11 @@ package net.openhft.chronicle.bytes.readme;
 import net.openhft.chronicle.bytes.BytesTestCommon;
 import net.openhft.chronicle.bytes.HexDumpBytes;
 import net.openhft.chronicle.bytes.NativeBytes;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 @SuppressWarnings("deprecation")
 public class CASTest extends BytesTestCommon {
@@ -37,12 +37,12 @@ public class CASTest extends BytesTestCommon {
 
             final String actual1 = bytes.toHexString();
 
-            assertEquals(expected1, actual1);
+            assertEquals(expected1, actual1, "initial hex dump should show zeros before CAS operations");
 
             //System.out.println(bytes.toHexString());
 
-            assertTrue(bytes.compareAndSwapInt(s32, 0, Integer.MAX_VALUE));
-            assertTrue(bytes.compareAndSwapLong(s64, 0, Long.MAX_VALUE));
+            assertTrue(bytes.compareAndSwapInt(s32, 0, Integer.MAX_VALUE), "compareAndSwapInt value");
+            assertTrue(bytes.compareAndSwapLong(s64, 0, Long.MAX_VALUE), "compareAndSwapLong value");
 
             // System.out.println(bytes.toHexString());
 
@@ -50,7 +50,7 @@ public class CASTest extends BytesTestCommon {
                     "0008 03 73 36 34 00 00 00 00 ff ff ff ff ff ff ff 7f # s64\n";
             final String actual2 = bytes.toHexString();
 
-            assertEquals(expected2, actual2);
+            assertEquals(expected2, actual2, "hex dump after CAS should show MAX_VALUE in both positions");
 
         } finally {
             bytes.releaseLast();

@@ -43,14 +43,14 @@ class UncheckedNativeBytesTest {
     void writeByteMovesWritePosition() {
         bytes.writeByte(0, (byte) 1);
         // Verify the write position has moved by 1 byte
-        assertEquals(0, bytes.writePosition());
+        assertEquals(0, bytes.writePosition(), "writePosition should remain at 0 after writeByte with explicit offset (random access does not move position)");
     }
 
     @Test
     void readIntFromOffset() {
         int expected = 123456;
         bytes.writeInt(0, expected);
-        assertEquals(expected, bytes.readInt(0));
+        assertEquals(expected, bytes.readInt(0), "readInt should return written value 123456 from offset 0");
     }
 
     @Test
@@ -82,7 +82,7 @@ class UncheckedNativeBytesTest {
         when(requireNonNull(underlyingBytes.bytesStore()).compareAndSwapInt(offset, expected, value)).thenReturn(true);
 
         boolean result = uncheckedBytes.compareAndSwapInt(offset, expected, value);
-        assertTrue(result);
+        assertTrue(result, "compareAndSwapInt should return true when swap succeeds");
         requireNonNull(verify(underlyingBytes.bytesStore())).compareAndSwapInt(eq(offset), eq(expected), eq(value));
     }
 
@@ -93,17 +93,17 @@ class UncheckedNativeBytesTest {
         long initialCapacity = uncheckedBytes.capacity();
         long desiredCapacity = initialCapacity + 1024;
         uncheckedBytes.ensureCapacity(desiredCapacity);
-        assertFalse(uncheckedBytes.capacity() >= desiredCapacity);
+        assertFalse(uncheckedBytes.capacity() >= desiredCapacity, "capacity should be false");
     }
 
     @Test
     void uncheckedShouldAlwaysReturnTrue() {
-        assertTrue(uncheckedBytes.unchecked());
+        assertTrue(uncheckedBytes.unchecked(), "unchecked should return true indicating bounds checking is disabled");
     }
 
     @Test
     void isDirectMemoryShouldReturnTrue() {
-        assertTrue(uncheckedBytes.isDirectMemory());
+        assertTrue(uncheckedBytes.isDirectMemory(), "direct memory should be true");
     }
 
     @Test
@@ -112,7 +112,7 @@ class UncheckedNativeBytesTest {
         byte value = 123;
         bytes.writeByte(offset, value);
         byte readValue = bytes.readByte(offset);
-        assertEquals(value, readValue, "Written and read values should match.");
+        assertEquals(value, readValue, "byte value read should match byte value written");
     }
 
     @Test
@@ -121,7 +121,7 @@ class UncheckedNativeBytesTest {
         short value = 32000;
         bytes.writeShort(offset, value);
         short readValue = bytes.readShort(offset);
-        assertEquals(value, readValue, "Written and read values should match.");
+        assertEquals(value, readValue, "short value read should match short value written");
     }
 
     @Test
@@ -130,7 +130,7 @@ class UncheckedNativeBytesTest {
         int value = 123456789;
         bytes.writeInt(offset, value);
         int readValue = bytes.readInt(offset);
-        assertEquals(value, readValue, "Written and read values should match.");
+        assertEquals(value, readValue, "int value read should match int value written");
     }
 
     @Test
@@ -139,7 +139,7 @@ class UncheckedNativeBytesTest {
         long value = 1234567890123456789L;
         bytes.writeLong(offset, value);
         long readValue = bytes.readLong(offset);
-        assertEquals(value, readValue, "Written and read values should match.");
+        assertEquals(value, readValue, "long value read should match long value written");
     }
 
     @Test
@@ -148,7 +148,7 @@ class UncheckedNativeBytesTest {
         double value = 12345.6789;
         bytes.writeDouble(offset, value);
         double readValue = bytes.readDouble(offset);
-        assertEquals(value, readValue, "Written and read values should match.");
+        assertEquals(value, readValue, "double value read should match double value written");
     }
 
     @Test
@@ -159,29 +159,29 @@ class UncheckedNativeBytesTest {
 
     @Test
     void peekUnsignedByteAtOffset_outOfBounds() {
-        assertEquals(-1, uncheckedBytes.peekUnsignedByte(-1));
-        assertEquals(-1, uncheckedBytes.peekUnsignedByte(uncheckedBytes.capacity() + 1));
+        assertEquals(-1, uncheckedBytes.peekUnsignedByte(-1), "peekUnsignedByte should return -1 for negative offset (out of bounds)");
+        assertEquals(-1, uncheckedBytes.peekUnsignedByte(uncheckedBytes.capacity() + 1), "peekUnsignedByte should return -1 for offset beyond capacity (out of bounds)");
     }
 
     @Test
     void writeByteShouldUpdatePosition() {
         UncheckedNativeBytes<?> uncheckedBytes = createUncheckedNativeBytes();
         uncheckedBytes.writeByte(0, (byte) 1);
-        assertEquals(0, uncheckedBytes.writePosition());
+        assertEquals(0, uncheckedBytes.writePosition(), "writePosition should remain at 0 after writeByte with explicit offset (random access does not move position)");
     }
 
     @Test
     void writeIntShouldUpdatePosition() {
         UncheckedNativeBytes<?> uncheckedBytes = createUncheckedNativeBytes();
         uncheckedBytes.writeInt(0, 123);
-        assertEquals(0, uncheckedBytes.writePosition());
+        assertEquals(0, uncheckedBytes.writePosition(), "writePosition should remain at 0 after writeInt with explicit offset (random access does not move position)");
     }
 
     @Test
     void writeLongShouldUpdatePosition() {
         UncheckedNativeBytes<?> uncheckedBytes = createUncheckedNativeBytes();
         uncheckedBytes.writeLong(0, 1234567890123456789L);
-        assertEquals(0, uncheckedBytes.writePosition());
+        assertEquals(0, uncheckedBytes.writePosition(), "writePosition should remain at 0 after writeLong with explicit offset (random access does not move position)");
     }
 
     @Test
@@ -190,7 +190,7 @@ class UncheckedNativeBytesTest {
         uncheckedBytes.writeByte(0, (byte) 1);
         uncheckedBytes.readPosition(0);
         uncheckedBytes.readByte();
-        assertEquals(1, uncheckedBytes.readPosition());
+        assertEquals(1, uncheckedBytes.readPosition(), "readPosition should advance to 1 after reading one byte from position 0");
     }
 
     @Test
@@ -199,7 +199,7 @@ class UncheckedNativeBytesTest {
         uncheckedBytes.writeInt(0, 123);
         uncheckedBytes.readPosition(0);
         uncheckedBytes.readInt();
-        assertEquals(4, uncheckedBytes.readPosition());
+        assertEquals(4, uncheckedBytes.readPosition(), "readPosition should advance to 4 after reading 4-byte int from position 0");
     }
 
     @Test
@@ -208,7 +208,7 @@ class UncheckedNativeBytesTest {
         uncheckedBytes.writeLong(0, 1234567890123456789L);
         uncheckedBytes.readPosition(0);
         uncheckedBytes.readLong();
-        assertEquals(8, uncheckedBytes.readPosition());
+        assertEquals(8, uncheckedBytes.readPosition(), "readPosition should advance to 8 after reading 8-byte long from position 0");
     }
 
     @Test
@@ -217,7 +217,7 @@ class UncheckedNativeBytesTest {
         Bytes<?> u = b.unchecked(true);
         try {
             u.append("abc");
-            assertEquals("abc", u.toString());
+            assertEquals("abc", u.toString(), "toString should return 'abc' content written to unchecked bytes");
         } finally {
             u.releaseLast();
         }

@@ -35,7 +35,7 @@ final class Issue384ReplaceByteStoreOnEmptyArrayTest extends BytesTestCommon {
         } finally {
             bytes.releaseLast();
         }
-        assertTrue(replacedOrRefused);
+        assertTrue(replacedOrRefused, "ensureCapacity(1) should replace EmptyByteStore or throw BufferOverflowException for fixed Bytes");
     }
 
     private static Stream<Arguments> bytesToTest() {

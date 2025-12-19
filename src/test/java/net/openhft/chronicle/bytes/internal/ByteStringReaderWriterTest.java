@@ -5,14 +5,14 @@ package net.openhft.chronicle.bytes.internal;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesTestCommon;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ByteStringReaderWriterTest extends BytesTestCommon {
 
@@ -25,15 +25,15 @@ public class ByteStringReaderWriterTest extends BytesTestCommon {
             try (Reader reader = new ByteStringReader(bytes)) {
                 // skip a few, then read remaining
                 long skipped = reader.skip(3);
-                assertEquals(3L, skipped);
+                assertEquals(3L, skipped, "skip(3) should skip 3 characters");
 
                 char[] buf = new char[16];
                 int n = reader.read(buf, 0, buf.length);
                 String s = new String(buf, 0, n);
-                assertEquals("123XYZ", s);
+                assertEquals("123XYZ", s, "read() after skip(3) should return remaining characters");
 
                 // EOF returns -1
-                assertEquals(-1, reader.read());
+                assertEquals(-1, reader.read(), "reader.read");
             }
         } finally {
             bytes.releaseLast();
@@ -55,8 +55,8 @@ public class ByteStringReaderWriterTest extends BytesTestCommon {
             }
 
             final String out = bytes.toString();
-            assertTrue(out, out.contains("ABC123XYZHELLO"));
-            assertEquals("ABC123XYZHELLO", out);
+            assertTrue(out.contains("ABC123XYZHELLO"), out);
+            assertEquals("ABC123XYZHELLO", out, "writer should append all write operations correctly");
 
         } finally {
             bytes.releaseLast();

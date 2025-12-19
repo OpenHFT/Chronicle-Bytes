@@ -3,9 +3,9 @@
  */
 package net.openhft.chronicle.bytes;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class BytesUtilEqualityTest extends BytesTestCommon {
 
@@ -16,8 +16,8 @@ public class BytesUtilEqualityTest extends BytesTestCommon {
         Bytes<?> b = Bytes.from("ABCDEFGHIJKLMNO");
         Bytes<?> c = Bytes.from("ABCDEFGH1JKLMNO");
         try {
-            assertTrue(BytesUtil.bytesEqual(a, 0, b, 0, 15));
-            assertFalse(BytesUtil.bytesEqual(a, 0, c, 0, 15));
+            assertTrue(BytesUtil.bytesEqual(a, 0, b, 0, 15), "BytesUtil.bytesEqual");
+            assertFalse(BytesUtil.bytesEqual(a, 0, c, 0, 15), "BytesUtil.bytesEqual");
         } finally {
             a.releaseLast();
             b.releaseLast();

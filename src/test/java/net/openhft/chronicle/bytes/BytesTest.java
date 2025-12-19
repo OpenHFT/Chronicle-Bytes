@@ -18,9 +18,8 @@ import net.openhft.chronicle.core.io.BackgroundResourceReleaser;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.util.Histogram;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -36,22 +35,20 @@ import java.util.function.Supplier;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static net.openhft.chronicle.bytes.Allocator.*;
-import static org.junit.Assert.*;
-import static org.junit.Assume.assumeFalse;
-import static org.junit.Assume.assumeTrue;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 @SuppressWarnings({"rawtypes", "deprecation"})
-@RunWith(Parameterized.class)
 public class BytesTest extends BytesTestCommon {
 
-    private final Allocator alloc1;
+    private Allocator alloc1;
     private boolean parseDouble;
 
-    public BytesTest(String ignored, Allocator alloc1) {
+    public void initBytesTest(String ignored, Allocator alloc1) {
         this.alloc1 = alloc1;
     }
 
-    @Parameterized.Parameters(name = "{0}")
     public static Collection<Object[]> data() {
         List<Object[]> tests = new ArrayList<>(Arrays.asList(new Object[][]{
                 {"Heap", HEAP},
@@ -69,47 +66,55 @@ public class BytesTest extends BytesTestCommon {
         return tests;
     }
 
-    @Test
-    public void readWriteLimit() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void readWriteLimit(String ignored, Allocator alloc1) {
+        initBytesTest(ignored, alloc1);
         final Bytes<?> data = alloc1.elasticBytes(120);
         data.write8bit("Test me again");
         data.writeLimit(data.readLimit()); // this breaks the check
-        assertEquals("Test me again", data.read8bit());
+        assertEquals("Test me again", data.read8bit(), "read8bit should return string written by write8bit");
         data.releaseLast();
     }
 
-    @Test
-    public void emptyHash() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void emptyHash(String ignored, Allocator alloc1) {
+        initBytesTest(ignored, alloc1);
         Bytes<?> bytes = alloc1.elasticBytes(2);
         try {
             final long actual1 = OptimisedBytesStoreHash.INSTANCE.applyAsLong(bytes);
-            assertEquals(0, actual1);
+            assertEquals(0, actual1, "OptimisedBytesStoreHash of empty bytes should be zero");
             final long actual2 = VanillaBytesStoreHash.INSTANCE.applyAsLong(bytes);
-            assertEquals(0, actual2);
+            assertEquals(0, actual2, "VanillaBytesStoreHash of empty bytes should be zero");
         } finally {
             bytes.releaseLast();
         }
     }
 
-    @Test
-    public void testElastic2() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void testElastic2(String ignored, Allocator alloc1) {
+        initBytesTest(ignored, alloc1);
         assumeFalse(alloc1 == HEX_DUMP);
         Bytes<?> bytes = alloc1.elasticBytes(2);
         try {
             assumeTrue(bytes.isElastic());
 
-            assertFalse(bytes.realCapacity() >= 1000);
+            assertFalse(bytes.realCapacity() >= 1000, "realCapacity should be less than 1000 for elastic bytes initialized with size 2");
 
             bytes.writePosition(1000);
-            assertTrue(bytes.realCapacity() >= 1000);
-            assertEquals(0L, bytes.readLong());
+            assertTrue(bytes.realCapacity() >= 1000, "realCapacity should grow to at least 1000 after writePosition(1000)");
+            assertEquals(0L, bytes.readLong(), "readLong should return 0 from unwritten elastic buffer at position 1000");
         } finally {
             bytes.releaseLast();
         }
     }
 
-    @Test
-    public void throwExceptionIfReleased() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void throwExceptionIfReleased(String ignored, Allocator alloc1) {
+        initBytesTest(ignored, alloc1);
         assumeFalse(alloc1 == HEX_DUMP);
         Bytes<?> bytes = alloc1.elasticBytes(16);
         ((AbstractReferenceCounted) bytes).throwExceptionIfReleased();
@@ -117,28 +122,34 @@ public class BytesTest extends BytesTestCommon {
         assertThrows(IllegalStateException.class, ((AbstractReferenceCounted) bytes)::throwExceptionIfReleased);
     }
 
-    @Test
-    public void writeAdv() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void writeAdv(String ignored, Allocator alloc1) {
+        initBytesTest(ignored, alloc1);
         Bytes<?> bytes = alloc1.fixedBytes(32);
         for (int i = 0; i < 4; i++)
             bytes.writeIntAdv('1', 1);
-        assertEquals("1111", Bytes.toString(bytes));
-        assertEquals("1111", Bytes.toString(bytes));
+        assertEquals("1111", Bytes.toString(bytes), "Bytes.toString should return '1111' after four writeIntAdv('1', 1) calls");
+        assertEquals("1111", Bytes.toString(bytes), "Bytes.toString should remain consistent on subsequent calls");
         postTest(bytes);
     }
 
-    @Test
-    public void writeLongAdv() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void writeLongAdv(String ignored, Allocator alloc1) {
+        initBytesTest(ignored, alloc1);
         Bytes<?> bytes = alloc1.fixedBytes(32);
         for (int i = 0; i < 4; i++)
             bytes.writeLongAdv('1', 1);
-        assertEquals("1111", bytes.toString());
+        assertEquals("1111", bytes.toString(), "toString should return '1111' after four writeLongAdv('1', 1) calls");
         postTest(bytes);
     }
 
-    @Test
-    public void testName()
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void testName(String ignored, Allocator alloc1)
             throws IORuntimeException {
+        initBytesTest(ignored, alloc1);
         Bytes<?> bytes = alloc1.fixedBytes(30);
         try {
             long expected = 12345L;
@@ -146,33 +157,37 @@ public class BytesTest extends BytesTestCommon {
 
             bytes.writeLong(offset, expected);
             bytes.writePosition(offset + 8);
-            assertEquals(expected, bytes.readLong(offset));
+            assertEquals(expected, bytes.readLong(offset), "readLong should return 12345L after writeLong at offset 5");
         } finally {
             postTest(bytes);
         }
     }
 
-    @Test
-    public void readUnsignedByte() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void readUnsignedByte(String ignored, Allocator alloc1) {
+        initBytesTest(ignored, alloc1);
         Bytes<?> bytes = alloc1.fixedBytes(30);
         try {
             bytes.writeInt(0x11111111);
             bytes.readLimit(1);
 
-            assertEquals(0x11, bytes.readUnsignedByte(0));
-            assertEquals(-1, bytes.peekUnsignedByte(-1));
-            assertEquals(-1, bytes.peekUnsignedByte(1));
+            assertEquals(0x11, bytes.readUnsignedByte(0), "readUnsignedByte should return 0x11 from first byte of written int 0x11111111");
+            assertEquals(-1, bytes.peekUnsignedByte(-1), "peekUnsignedByte should return -1 for invalid negative offset");
+            assertEquals(-1, bytes.peekUnsignedByte(1), "peekUnsignedByte should return -1 for offset beyond readLimit");
 
             // as the offset is given it only needs to be under the writeLimit.
-            assertEquals(0x11, bytes.readUnsignedByte(1));
+            assertEquals(0x11, bytes.readUnsignedByte(1), "readUnsignedByte should return 0x11 from second byte when offset given");
 
         } finally {
             postTest(bytes);
         }
     }
 
-    @Test
-    public void writeHistogram() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void writeHistogram(String ignored, Allocator alloc1) {
+        initBytesTest(ignored, alloc1);
         assumeFalse(alloc1 == HEAP_EMBEDDED);
 
         @NotNull Bytes<?> bytes = alloc1.elasticBytes(0xFFFFF);
@@ -190,13 +205,15 @@ public class BytesTest extends BytesTestCommon {
         bytes.readHistogram(histB);
         bytes.readHistogram(histC);
 
-        assertEquals(hist, histB);
-        assertEquals(hist2, histC);
+        assertEquals(hist, histB, "readHistogram should restore first histogram");
+        assertEquals(hist2, histC, "readHistogram should restore second histogram");
         postTest(bytes);
     }
 
-    @Test
-    public void testCopy() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void testCopy(String ignored, Allocator alloc1) {
+        initBytesTest(ignored, alloc1);
         assumeFalse(alloc1 == HEAP_EMBEDDED);
 
         Bytes<?> bbb = alloc1.fixedBytes(1024);
@@ -206,40 +223,44 @@ public class BytesTest extends BytesTestCommon {
             bbb.readPositionRemaining(4, 12);
             BytesStore<? extends Bytes<?>, ?> copy = bbb.copy();
             bbb.writeUnsignedByte(10, '0');
-            assertEquals("[pos: 0, rlim: 12, wlim: 12, cap: 12 ] efghijklmnop", copy.toDebugString());
+            assertEquals("[pos: 0, rlim: 12, wlim: 12, cap: 12 ] efghijklmnop", copy.toDebugString(), "copy should contain substring 'efghijklmnop' from original position 4-16");
             copy.releaseLast();
         } finally {
             postTest(bbb);
         }
     }
 
-    @Test
-    public void toHexString() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void toHexString(String ignored, Allocator alloc1) {
+        initBytesTest(ignored, alloc1);
         assumeFalse(alloc1 == HEAP_EMBEDDED);
         assumeFalse(alloc1 == HEX_DUMP);
 
         Bytes<?> bytes = alloc1.elasticBytes(1020);
         try {
             bytes.append("Hello World");
-            assertEquals("00000000 48 65 6c 6c 6f 20 57 6f  72 6c 64                Hello Wo rld     \n", bytes.toHexString());
+            assertEquals("00000000 48 65 6c 6c 6f 20 57 6f  72 6c 64                Hello Wo rld     \n", bytes.toHexString(), "toHexString should display 'Hello World' with hex and ASCII representation");
             bytes.readLimit(bytes.realCapacity());
             assertEquals("00000000 48 65 6c 6c 6f 20 57 6f  72 6c 64 00 00 00 00 00 Hello Wo rld·····\n" +
                     "00000010 00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00 ········ ········\n" +
                     "........\n" +
-                    "000003f0 00 00 00 00 00 00 00 00  00 00 00 00             ········ ····    \n", bytes.toHexString());
+                    "000003f0 00 00 00 00 00 00 00 00  00 00 00 00             ········ ····    \n", bytes.toHexString(), "toHexString should display full buffer contents up to realCapacity with zero bytes");
 
             assertEquals("00000000 48 65 6c 6c 6f 20 57 6f  72 6c 64 00 00 00 00 00 Hello Wo rld·····\n" +
                     "00000010 00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00 ········ ········\n" +
                     "........\n" +
                     "000000f0 00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00 ········ ········\n" +
-                    "... truncated", bytes.toHexString(256));
+                    "... truncated", bytes.toHexString(256), "toHexString should truncate output when maxLength of 256 is exceeded");
         } finally {
             postTest(bytes);
         }
     }
 
-    @Test
-    public void fromHexString() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void fromHexString(String ignored, Allocator alloc1) {
+        initBytesTest(ignored, alloc1);
         assumeFalse(NativeBytes.areNewGuarded());
         assumeFalse(alloc1 == HEAP_EMBEDDED);
         assumeFalse(alloc1 == HEX_DUMP);
@@ -250,38 +271,43 @@ public class BytesTest extends BytesTestCommon {
                 bytes.writeByte((byte) i);
             @NotNull String s = bytes.toHexString();
             Bytes<?> bytes2 = Bytes.fromHexString(s);
-            assertEquals(s, bytes2.toHexString());
+            assertEquals(s, bytes2.toHexString(), "bytes2 should produce identical hex string after fromHexString round-trip");
             postTest(bytes2);
         } finally {
             postTest(bytes);
         }
     }
 
-    @Test
-    public void internRegressionTest()
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void internRegressionTest(String ignored, Allocator alloc1)
             throws IORuntimeException {
+        initBytesTest(ignored, alloc1);
         UTF8StringInterner utf8StringInterner = new UTF8StringInterner(4096);
 
         Bytes<?> bytes1 = alloc1.elasticBytes(64).append("TW-TRSY-20181217-NY572677_3256N1");
         Bytes<?> bytes2 = alloc1.elasticBytes(64).append("TW-TRSY-20181217-NY572677_3256N15");
         utf8StringInterner.intern(bytes1);
         String intern = utf8StringInterner.intern(bytes2);
-        assertEquals(bytes2.toString(), intern);
+        assertEquals(bytes2.toString(), intern, "intern should return string matching bytes2 content");
         String intern2 = utf8StringInterner.intern(bytes1);
-        assertEquals(bytes1.toString(), intern2);
+        assertEquals(bytes1.toString(), intern2, "intern should return string matching bytes1 content");
         postTest(bytes1);
         postTest(bytes2);
     }
 
-    @Test
-    public void testEqualBytesWithSecondStoreBeingLonger()
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void testEqualBytesWithSecondStoreBeingLonger(String ignored, Allocator alloc1)
             throws IORuntimeException {
+
+        initBytesTest(ignored, alloc1);
 
         BytesStore<?, ?> store1 = null, store2 = null;
         try {
             store1 = alloc1.elasticBytes(64).append("TW-TRSY-20181217-NY572677_3256N1");
             store2 = alloc1.elasticBytes(64).append("TW-TRSY-20181217-NY572677_3256N15");
-            assertFalse(store1.equalBytes(store2, store2.length()));
+            assertFalse(store1.equalBytes(store2, store2.length()), "equalBytes should return false when comparing strings of different lengths");
         } finally {
             if (store1 != null) {
                 store1.releaseLast();
@@ -292,76 +318,88 @@ public class BytesTest extends BytesTestCommon {
         }
     }
 
-    @Test
-    public void testStopBitDouble()
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void testStopBitDouble(String ignored, Allocator alloc1)
             throws IORuntimeException {
+        initBytesTest(ignored, alloc1);
         assumeFalse(alloc1 == HEX_DUMP);
         Bytes<?> b = alloc1.elasticBytes(1);
         try {
-            testSBD(b, -0.0, "00000000 40                                               @         " +
-                    "       \n");
-            testSBD(b, -1.0, "00000000 DF 7C                                            ·|               \n");
-            testSBD(b, -12345678, "00000000 E0 D9 F1 C2 4E                                   ····N            \n");
-            testSBD(b, 0.0, "00000000 00                                               ·                \n");
-            testSBD(b, 1.0, "00000000 9F 7C                                            ·|               \n");
-            testSBD(b, 1024, "00000000 A0 24                                            ·$               \n");
-            testSBD(b, 1000000, "00000000 A0 CB D0 48                                      ···H             \n");
-            testSBD(b, 0.1, "00000000 9F EE B3 99 CC E6 B3 99  4D                      ········ M       \n");
-            testSBD(b, Double.NaN, "00000000 BF 7E                                            ·~               \n");
+            assertEquals("00000000 40                                               @         " +
+                    "       \n", testSBD(b, -0.0), "writeStopBit should encode -0.0 as single byte '40'");
+            assertEquals("00000000 DF 7C                                            ·|               \n", testSBD(b, -1.0), "writeStopBit should encode -1.0 as two bytes 'DF 7C'");
+            assertEquals("00000000 E0 D9 F1 C2 4E                                   ····N            \n", testSBD(b, -12345678), "writeStopBit should encode -12345678.0 as five bytes");
+            assertEquals("00000000 00                                               ·                \n", testSBD(b, 0.0), "writeStopBit should encode 0.0 as single byte '00'");
+            assertEquals("00000000 9F 7C                                            ·|               \n", testSBD(b, 1.0), "writeStopBit should encode 1.0 as two bytes '9F 7C'");
+            assertEquals("00000000 A0 24                                            ·$               \n", testSBD(b, 1024), "writeStopBit should encode 1024.0 as two bytes 'A0 24'");
+            assertEquals("00000000 A0 CB D0 48                                      ···H             \n", testSBD(b, 1000000), "writeStopBit should encode 1000000.0 as four bytes");
+            assertEquals("00000000 9F EE B3 99 CC E6 B3 99  4D                      ········ M       \n", testSBD(b, 0.1), "writeStopBit should encode 0.1 as nine bytes representing fractional value");
+            assertEquals("00000000 BF 7E                                            ·~               \n", testSBD(b, Double.NaN), "writeStopBit should encode Double.NaN as two bytes 'BF 7E'");
         } finally {
             postTest(b);
         }
     }
 
-    private void testSBD(@NotNull Bytes<?> b, double v, String s)
+    private String testSBD(@NotNull Bytes<?> b, double v)
             throws IORuntimeException {
         b.clear();
         b.writeStopBit(v);
-        assertEquals(s, b.toHexString().toUpperCase());
+        return b.toHexString().toUpperCase();
     }
 
-    @Test
-    public void testParseUtf8() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void testParseUtf8(String ignored, Allocator alloc1) {
+        initBytesTest(ignored, alloc1);
         Bytes<?> bytes = alloc1.elasticBytes(1);
         try {
-            assertEquals(1, bytes.refCount());
+            assertEquals(1, bytes.refCount(), "refCount should be 1 after elastic bytes allocation");
             bytes.appendUtf8("starting Hello World");
             @NotNull String s0 = bytes.parseUtf8(StopCharTesters.SPACE_STOP);
-            assertEquals("starting", s0);
+            assertEquals("starting", s0, "parseUtf8 with SPACE_STOP should read first word");
             @NotNull String s = bytes.parseUtf8(StopCharTesters.ALL);
-            assertEquals("Hello World", s);
-            assertEquals(1, bytes.refCount());
+            assertEquals("Hello World", s, "parseUtf8 with ALL should read remaining text");
+            assertEquals(1, bytes.refCount(), "refCount should remain 1 after parsing operations");
         } finally {
             postTest(bytes);
-            assertEquals(0, bytes.refCount());
+            assertEquals(0, bytes.refCount(), "refCount should be 0 after releaseLast in postTest");
         }
     }
 
-    @Test(expected = BufferOverflowException.class)
-    public void testPartialWriteArray() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void testPartialWriteArray(String ignored, Allocator alloc1) {
+        initBytesTest(ignored, alloc1);
         assumeFalse(alloc1 == HEX_DUMP);
-        @NotNull byte[] array = "Hello World".getBytes(ISO_8859_1);
-        Bytes<?> to = alloc1.fixedBytes(6);
-        try {
-            to.write(array);
-        } finally {
-            postTest(to);
-        }
+        assertThrows(BufferOverflowException.class, () -> {
+            @NotNull byte[] array = "Hello World".getBytes(ISO_8859_1);
+            Bytes<?> to = alloc1.fixedBytes(6);
+            try {
+                to.write(array);
+            } finally {
+                postTest(to);
+            }
+        });
     }
 
-    @Test
-    public void testPartialWriteBB() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void testPartialWriteBB(String ignored, Allocator alloc1) {
+        initBytesTest(ignored, alloc1);
         assumeFalse(alloc1 == HEX_DUMP);
         ByteBuffer bb = ByteBuffer.wrap("Hello World".getBytes(ISO_8859_1));
         Bytes<?> to = alloc1.fixedBytes(6);
 
         to.writeSome(bb);
-        assertEquals("World", Bytes.wrapForRead(bb).toString());
+        assertEquals("World", Bytes.wrapForRead(bb).toString(), "ByteBuffer should contain remaining 'World' after writeSome consumed 'Hello '");
         postTest(to);
     }
 
-    @Test
-    public void testCompact() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void testCompact(String ignored, Allocator alloc1) {
+        initBytesTest(ignored, alloc1);
         assumeFalse(alloc1 == HEX_DUMP);
         assumeFalse(NativeBytes.areNewGuarded());
         Bytes<?> from = alloc1.elasticBytes(1);
@@ -369,43 +407,47 @@ public class BytesTest extends BytesTestCommon {
             from.write("Hello World");
             from.readLong();
             from.compact();
-            assertEquals("rld", from.toString());
-            assertEquals(0, from.readPosition());
+            assertEquals("rld", from.toString(), "toString should return 'rld' after compact removed first 8 bytes");
+            assertEquals(0, from.readPosition(), "readPosition should be 0 after compact");
 
             from.readSkip(from.readRemaining());
-            assertEquals(3, from.readPosition());
+            assertEquals(3, from.readPosition(), "readPosition should be 3 after skipping remaining 'rld'");
             from.compact();
-            assertEquals(0, from.readPosition());
+            assertEquals(0, from.readPosition(), "readPosition should be 0 after second compact");
         } finally {
             postTest(from);
         }
     }
 
-    @Test
-    public void testReadIncompleteLong()
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void testReadIncompleteLong(String ignored, Allocator alloc1)
             throws IllegalStateException, BufferOverflowException, BufferUnderflowException {
+        initBytesTest(ignored, alloc1);
         assumeFalse(NativeBytes.areNewGuarded());
         Bytes<?> bytes = alloc1.elasticBytes(16);
         bytes.writeLong(0x0706050403020100L);
         bytes.writeLong(0x0F0E0D0C0B0A0908L);
         try {
-            assertEquals(0x0706050403020100L, bytes.readIncompleteLong());
-            assertEquals(0x0F0E0D0C0B0A0908L, bytes.readIncompleteLong());
+            assertEquals(0x0706050403020100L, bytes.readIncompleteLong(), "readIncompleteLong should read first complete long 0x0706050403020100L");
+            assertEquals(0x0F0E0D0C0B0A0908L, bytes.readIncompleteLong(), "readIncompleteLong should read second complete long 0x0F0E0D0C0B0A0908L");
             for (int i = 0; i <= 7; i++) {
-                assertEquals("i: " + i, Long.toHexString(0x0B0A090807060504L >>> (i * 8)),
-                        Long.toHexString(bytes.readPositionRemaining(4 + i, 8 - i)
-                                .readIncompleteLong()));
+                assertEquals(Long.toHexString(0x0B0A090807060504L >>> (i * 8)), Long.toHexString(bytes.readPositionRemaining(4 + i, 8 - i)
+                                .readIncompleteLong()),
+                        "readIncompleteLong should read partial long with " + (8 - i) + " remaining bytes at iteration " + i);
             }
-            assertEquals(0, bytes.readPositionRemaining(4, 0).readIncompleteLong());
+            assertEquals(0, bytes.readPositionRemaining(4, 0).readIncompleteLong(), "readIncompleteLong should return 0 when readRemaining is 0");
 
         } finally {
             postTest(bytes);
         }
     }
 
-    @Test
-    public void testUnwrite()
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void testUnwrite(String ignored, Allocator alloc1)
             throws IllegalArgumentException, BufferOverflowException, IllegalStateException, BufferUnderflowException {
+        initBytesTest(ignored, alloc1);
         assumeFalse(alloc1 == HEX_DUMP);
         assumeFalse(NativeBytes.areNewGuarded());
         Bytes<?> bytes = alloc1.elasticBytes(1);
@@ -413,70 +455,80 @@ public class BytesTest extends BytesTestCommon {
             for (int i = 0; i < 26; i++) {
                 bytes.writeUnsignedByte('A' + i);
             }
-            assertEquals(26, (int) bytes.writePosition());
-            assertEquals("ABCDEFGHIJKLMNOPQRSTUVWXYZ", bytes.toString());
+            assertEquals(26, (int) bytes.writePosition(), "writePosition should be 26 after writing 26 characters");
+            assertEquals("ABCDEFGHIJKLMNOPQRSTUVWXYZ", bytes.toString(), "toString should return full alphabet");
             bytes.unwrite(1, 1);
-            assertEquals(25, (int) bytes.writePosition());
-            assertEquals("ACDEFGHIJKLMNOPQRSTUVWXYZ", bytes.toString());
+            assertEquals(25, (int) bytes.writePosition(), "writePosition should be 25 after unwrite(1,1) removed 'B'");
+            assertEquals("ACDEFGHIJKLMNOPQRSTUVWXYZ", bytes.toString(), "toString should return alphabet with 'B' removed");
         } finally {
             postTest(bytes);
         }
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void testExpectNegativeOffsetAbsoluteWriteOnElasticBytesThrowsIllegalArgumentException()
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void testExpectNegativeOffsetAbsoluteWriteOnElasticBytesThrowsIllegalArgumentException(String ignored, Allocator alloc1)
             throws BufferOverflowException, IllegalStateException {
+        initBytesTest(ignored, alloc1);
         assumeFalse(alloc1 == HEX_DUMP);
         Bytes<?> bytes = alloc1.elasticBytes(4);
 
         try {
             assumeFalse(bytes.unchecked());
 
-            bytes.writeInt(-1, 1);
+            assertThrows(IllegalArgumentException.class, () -> bytes.writeInt(-1, 1));
         } finally {
             postTest(bytes);
         }
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void testExpectNegativeOffsetAbsoluteWriteOnElasticBytesOfInsufficientCapacityThrowsIllegalArgumentException()
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void testExpectNegativeOffsetAbsoluteWriteOnElasticBytesOfInsufficientCapacityThrowsIllegalArgumentException(String ignored, Allocator alloc1)
             throws IllegalStateException, BufferOverflowException {
+        initBytesTest(ignored, alloc1);
         assumeFalse(alloc1 == HEX_DUMP);
         Bytes<?> bytes = alloc1.elasticBytes(1);
 
         try {
             assumeFalse(bytes.unchecked());
-            bytes.writeInt(-1, 1);
+            assertThrows(IllegalArgumentException.class, () -> bytes.writeInt(-1, 1));
         } finally {
             postTest(bytes);
         }
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void testExpectNegativeOffsetAbsoluteWriteOnFixedBytesThrowsIllegalArgumentException() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void testExpectNegativeOffsetAbsoluteWriteOnFixedBytesThrowsIllegalArgumentException(String ignored, Allocator alloc1) {
+        initBytesTest(ignored, alloc1);
         assumeFalse(alloc1 == HEX_DUMP);
         Bytes<?> bytes = alloc1.fixedBytes(4);
         try {
-            bytes.writeInt(-1, 1);
+            assertThrows(IllegalArgumentException.class, () -> bytes.writeInt(-1, 1));
         } finally {
             postTest(bytes);
         }
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void testExpectNegativeOffsetAbsoluteWriteOnFixedBytesOfInsufficientCapacityThrowsIllegalArgumentException() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void testExpectNegativeOffsetAbsoluteWriteOnFixedBytesOfInsufficientCapacityThrowsIllegalArgumentException(String ignored, Allocator alloc1) {
+        initBytesTest(ignored, alloc1);
         assumeFalse(alloc1 == HEX_DUMP);
         Bytes<?> bytes = alloc1.fixedBytes(1);
         try {
-            bytes.writeInt(-1, 1);
+            assertThrows(IllegalArgumentException.class, () -> bytes.writeInt(-1, 1));
         } finally {
             postTest(bytes);
         }
     }
 
-    @Test
-    public void testWriter()
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void testWriter(String ignored, Allocator alloc1)
             throws IllegalStateException {
+        initBytesTest(ignored, alloc1);
         assumeFalse(NativeBytes.areNewGuarded());
         Bytes<?> bytes = alloc1.elasticBytes(1);
         try (PrintWriter writer = new PrintWriter(bytes.writer())) {
@@ -492,25 +544,28 @@ public class BytesTest extends BytesTestCommon {
                 "12.34\n" +
                 "a\n" +
                 "bye\n" +
-                "for now\n", bytes.toString().replaceAll("\r\n", "\n"));
+                "for now\n", bytes.toString().replaceAll("\r\n", "\n"), "toString should return all PrintWriter output with normalized line endings");
         try (@NotNull Scanner scan = new Scanner(bytes.reader())) {
             scan.useLocale(Locale.ENGLISH);
-            assertEquals(1, scan.nextInt());
-            assertEquals("", scan.nextLine());
-            assertEquals("Hello", scan.nextLine());
-            assertEquals(12.34, scan.nextDouble(), 0.0);
-            assertEquals("", scan.nextLine());
-            assertEquals("a", scan.nextLine());
-            assertEquals("bye", scan.nextLine());
-            assertEquals("for now", scan.nextLine());
-            assertFalse(scan.hasNext());
+            assertEquals(1, scan.nextInt(), "Scanner should read first integer value 1");
+            assertEquals("", scan.nextLine(), "Scanner should read empty remainder of first line");
+            assertEquals("Hello", scan.nextLine(), "Scanner should read second line 'Hello'");
+            assertEquals(12.34, scan.nextDouble(), 0.0, "Scanner should read double value 12.34");
+            assertEquals("", scan.nextLine(), "Scanner should read empty remainder after double");
+            assertEquals("a", scan.nextLine(), "Scanner should read single character line 'a'");
+            assertEquals("bye", scan.nextLine(), "Scanner should read line 'bye'");
+            assertEquals("for now", scan.nextLine(), "Scanner should read final line 'for now'");
+            assertFalse(scan.hasNext(), "Scanner should have no more tokens after reading all lines");
             postTest(bytes);
         }
     }
 
-    @Test
-    public void testParseUtf8High()
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void testParseUtf8High(String ignored, Allocator alloc1)
             throws BufferUnderflowException, BufferOverflowException, IllegalStateException {
+
+        initBytesTest(ignored, alloc1);
 
         @NotNull Bytes<?> b = alloc1.elasticBytes(4);
         for (int i = ' '; i <= Character.MAX_VALUE; i++) {
@@ -522,56 +577,62 @@ public class BytesTest extends BytesTestCommon {
             b.appendUtf8("\r\n");
             @NotNull StringBuilder sb = new StringBuilder();
             b.parseUtf8(sb, StopCharTesters.CONTROL_STOP);
-            assertEquals(Character.toString((char) i), sb.toString());
+            assertEquals(Character.toString((char) i), sb.toString(), "parseUtf8 should restore character " + i + " with CONTROL_STOP tester");
             sb.setLength(0);
             b.readPosition(0);
             b.parseUtf8(sb, (ch, nextCh) -> ch < ' ' && nextCh < ' ');
-            assertEquals(Character.toString((char) i), sb.toString());
+            assertEquals(Character.toString((char) i), sb.toString(), "parseUtf8 should restore character " + i + " with custom stop tester");
         }
         postTest(b);
     }
 
-    @Test
-    public void testBigDecimalBinary()
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void testBigDecimalBinary(String ignored, Allocator alloc1)
             throws BufferUnderflowException, ArithmeticException {
+        initBytesTest(ignored, alloc1);
         for (double d : new double[]{1.0, 1000.0, 0.1}) {
             @NotNull Bytes<?> b = alloc1.elasticBytes(16);
             b.writeBigDecimal(BigDecimal.valueOf(d));
 
             @NotNull BigDecimal bd = b.readBigDecimal();
-            assertEquals(BigDecimal.valueOf(d), bd);
+            assertEquals(BigDecimal.valueOf(d), bd, "readBigDecimal should restore value written by writeBigDecimal for " + d);
             postTest(b);
         }
     }
 
-    @Test
-    public void testBigDecimalText() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void testBigDecimalText(String ignored, Allocator alloc1) {
+        initBytesTest(ignored, alloc1);
         assumeFalse(alloc1 == HEAP_EMBEDDED);
         for (double d : new double[]{1.0, 1000.0, 0.1}) {
             @NotNull Bytes<?> b = alloc1.elasticBytes(0xFFFF);
             b.append(BigDecimal.valueOf(d));
 
             @NotNull BigDecimal bd = b.parseBigDecimal();
-            assertEquals(BigDecimal.valueOf(d), bd);
+            assertEquals(BigDecimal.valueOf(d), bd, "parseBigDecimal should parse text representation back to original value for " + d);
             postTest(b);
         }
     }
 
-    @Test
-    public void testWithLength() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void testWithLength(String ignored, Allocator alloc1) {
+        initBytesTest(ignored, alloc1);
         assumeFalse(NativeBytes.areNewGuarded());
         Bytes<?> hello = Bytes.from("hello");
         Bytes<?> world = Bytes.from("world");
         @NotNull Bytes<?> b = alloc1.elasticBytes(16);
         b.writeWithLength(hello);
         b.writeWithLength(world);
-        assertEquals("hello", hello.toString());
+        assertEquals("hello", hello.toString(), "hello Bytes should remain unchanged after writeWithLength");
 
         @NotNull Bytes<?> b2 = alloc1.elasticBytes(16);
         b.readWithLength(b2);
-        assertEquals("hello", b2.toString());
+        assertEquals("hello", b2.toString(), "readWithLength should restore first written string 'hello'");
         b.readWithLength(b2);
-        assertEquals("world", b2.toString());
+        assertEquals("world", b2.toString(), "readWithLength should restore second written string 'world'");
 
         postTest(b);
         postTest(b2);
@@ -579,172 +640,198 @@ public class BytesTest extends BytesTestCommon {
         postTest(world);
     }
 
-    @Test
-    public void testAppendBase() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void testAppendBase(String ignored, Allocator alloc1) {
+        initBytesTest(ignored, alloc1);
         assumeFalse(alloc1 == HEX_DUMP);
         @NotNull Bytes<?> b = alloc1.elasticBytes(16);
         for (long value : new long[]{Long.MIN_VALUE, Integer.MIN_VALUE, ~4, ~2, ~1, ~0, 0, 1, 2, 4, 8, 16, 32, 64, 128, 256, Integer.MAX_VALUE, Long.MAX_VALUE}) {
             for (int base : new int[]{10, 16}) {
                 String s = Long.toString(value, base);
                 b.clear().appendBase(value, base);
-                assertEquals(s, b.toString());
+                assertEquals(s, b.toString(), "appendBase should format " + value + " in base " + base + " matching Long.toString");
             }
         }
         postTest(b);
     }
 
-    @Test
-    public void testAppendBase16() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void testAppendBase16(String ignored, Allocator alloc1) {
+        initBytesTest(ignored, alloc1);
         assumeFalse(alloc1 == HEX_DUMP);
         @NotNull Bytes<?> b = alloc1.elasticBytes(16);
         for (long value : new long[]{Long.MIN_VALUE, Integer.MIN_VALUE, -1, 0, 1, Integer.MAX_VALUE, Long.MAX_VALUE}) {
             String s = Long.toHexString(value).toLowerCase();
             b.clear().appendBase16(value);
-            assertEquals(s, b.toString());
+            assertEquals(s, b.toString(), "appendBase16 should format " + value + " matching Long.toHexString");
         }
         postTest(b);
     }
 
-    @Test
-    public void testMove() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void testMove(String ignored, Allocator alloc1) {
+        initBytesTest(ignored, alloc1);
         assumeFalse(alloc1 == HEX_DUMP);
         @NotNull Bytes<?> b = alloc1.elasticBytes(16);
         try {
             b.append("Hello World");
             b.move(3, 1, 3);
-            assertEquals("Hlo o World", b.toString());
+            assertEquals("Hlo o World", b.toString(), "toString should return 'Hlo o World' after move(3,1,3) shifted 'lo ' left");
             b.move(3, 5, 3);
-            assertEquals("Hlo o o rld", b.toString());
+            assertEquals("Hlo o o rld", b.toString(), "toString should return 'Hlo o o rld' after move(3,5,3) shifted 'o W' right");
         } finally {
             postTest(b);
         }
     }
 
-    @Test
-    public void testMove2() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void testMove2(String ignored, Allocator alloc1) {
+        initBytesTest(ignored, alloc1);
         assumeFalse(alloc1 == HEX_DUMP);
         @NotNull Bytes<?> b = alloc1.elasticBytes(16);
 
         b.append("0123456789");
         b.move(3, 1, 3);
-        assertEquals("0345456789", b.toString());
+        assertEquals("0345456789", b.toString(), "toString should return '0345456789' after move(3,1,3) overwrote '12' with '345'");
         postTest(b);
         assertThrows(IllegalStateException.class, () ->
                 b.move(3, 5, 3)
         );
     }
 
-    @Test
-    public void testMoveForward() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void testMoveForward(String ignored, Allocator alloc1) {
+        initBytesTest(ignored, alloc1);
         assumeFalse(alloc1 == HEX_DUMP);
         @NotNull Bytes<?> b = alloc1.elasticBytes(16);
 
         b.append("0123456789abcdefg");
         b.move(1, 3, 10);
-        assertEquals("012123456789adefg", b.toString());
+        assertEquals("012123456789adefg", b.toString(), "toString should return '012123456789adefg' after move(1,3,10) shifted 10 bytes forward");
         postTest(b);
     }
 
-    @Test
-    public void testMoveBackward() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void testMoveBackward(String ignored, Allocator alloc1) {
+        initBytesTest(ignored, alloc1);
         assumeFalse(alloc1 == HEX_DUMP);
         @NotNull Bytes<?> b = alloc1.elasticBytes(16);
 
         b.append("0123456789abcdefg");
         b.move(3, 1, 10);
-        assertEquals("03456789abcbcdefg", b.toString());
+        assertEquals("03456789abcbcdefg", b.toString(), "toString should return '03456789abcbcdefg' after move(3,1,10) shifted 10 bytes backward");
         postTest(b);
     }
 
-    @Test
-    public void testMove2B() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void testMove2B(String ignored, Allocator alloc1) {
+        initBytesTest(ignored, alloc1);
         @NotNull Bytes<?> b = alloc1.elasticBytes(16);
 
         b.append("Hello World");
         b.bytesStore().move(3, 1, 3);
-        assertEquals("Hlo o World", b.toString());
+        assertEquals("Hlo o World", b.toString(), "toString should return 'Hlo o World' after BytesStore.move(3,1,3)");
         postTest(b);
         BackgroundResourceReleaser.releasePendingResources();
         final BytesStore<?, ?> bs = b.bytesStore();
-        assertNotNull(bs);
+        assertNotNull(bs, "BytesStore should not be null after background release");
         assertThrows(IllegalStateException.class, () ->
                 bs.move(3, 5, 3)
         );
     }
 
-    @Test
-    public void testReadPosition() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void testReadPosition(String ignored, Allocator alloc1) {
+        initBytesTest(ignored, alloc1);
         @NotNull Bytes<?> b = alloc1.elasticBytes(16);
         try {
             b.readPosition(17);
-            assertTrue(b.unchecked());
+            assertTrue(b.unchecked(), "Bytes should be unchecked mode when readPosition beyond limit succeeds");
         } catch (DecoratedBufferUnderflowException ex) {
-            assertFalse(b.unchecked());
+            assertFalse(b.unchecked(), "Bytes should be checked mode when readPosition beyond limit throws exception");
         } finally {
             postTest(b);
         }
     }
 
-    @Test
-    public void testReadPositionTooSmall() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void testReadPositionTooSmall(String ignored, Allocator alloc1) {
+        initBytesTest(ignored, alloc1);
         @NotNull Bytes<?> b = alloc1.elasticBytes(16);
         try {
             b.readPosition(-1);
-            assertTrue(b.unchecked());
+            assertTrue(b.unchecked(), "Bytes should be unchecked mode when negative readPosition succeeds");
         } catch (DecoratedBufferUnderflowException ex) {
-            assertFalse(b.unchecked());
+            assertFalse(b.unchecked(), "Bytes should be checked mode when negative readPosition throws exception");
         } finally {
             postTest(b);
         }
     }
 
-    @Test
-    public void testReadLimit() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void testReadLimit(String ignored, Allocator alloc1) {
+        initBytesTest(ignored, alloc1);
         @NotNull Bytes<?> b = alloc1.elasticBytes(16);
         try {
             b.readPosition(b.writeLimit() + 1);
-            assertTrue(b.unchecked());
+            assertTrue(b.unchecked(), "Bytes should be unchecked mode when readPosition beyond writeLimit succeeds");
         } catch (DecoratedBufferUnderflowException ex) {
-            assertFalse(b.unchecked());
+            assertFalse(b.unchecked(), "Bytes should be checked mode when readPosition beyond writeLimit throws exception");
         } finally {
             postTest(b);
         }
     }
 
-    @Test
-    public void testReadLimitTooSmall() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void testReadLimitTooSmall(String ignored, Allocator alloc1) {
+        initBytesTest(ignored, alloc1);
         @NotNull Bytes<?> b = alloc1.elasticBytes(16);
         try {
             b.readPosition(b.start() - 1);
-            assertTrue(b.unchecked());
+            assertTrue(b.unchecked(), "Bytes should be unchecked mode when readPosition before start succeeds");
         } catch (DecoratedBufferUnderflowException ex) {
-            assertFalse(b.unchecked());
+            assertFalse(b.unchecked(), "Bytes should be checked mode when readPosition before start throws exception");
         } finally {
             postTest(b);
         }
     }
 
-    @Test
-    public void uncheckedSkip() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void uncheckedSkip(String ignored, Allocator alloc1) {
+        initBytesTest(ignored, alloc1);
         assumeFalse(NativeBytes.areNewGuarded());
 
         @NotNull Bytes<?> b = alloc1.elasticBytes(16);
         try {
             b.uncheckedReadSkipOne();
-            assertEquals(1, b.readPosition());
+            assertEquals(1, b.readPosition(), "readPosition should be 1 after uncheckedReadSkipOne");
             b.uncheckedReadSkipBackOne();
-            assertEquals(0, b.readPosition());
+            assertEquals(0, b.readPosition(), "readPosition should be 0 after uncheckedReadSkipBackOne");
             b.writeUnsignedByte('H');
             b.writeUnsignedByte(0xFF);
-            assertEquals('H', b.uncheckedReadUnsignedByte());
-            assertEquals(0xFF, b.uncheckedReadUnsignedByte());
+            assertEquals('H', b.uncheckedReadUnsignedByte(), "uncheckedReadUnsignedByte should read first byte as 'H'");
+            assertEquals(0xFF, b.uncheckedReadUnsignedByte(), "uncheckedReadUnsignedByte should read second byte as 0xFF");
         } finally {
             postTest(b);
         }
     }
 
-    @Test
-    public void readVolatile() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void readVolatile(String ignored, Allocator alloc1) {
+        initBytesTest(ignored, alloc1);
         assumeFalse(alloc1 == HEX_DUMP);
         @NotNull Bytes<?> b = alloc1.elasticBytes(16);
         try {
@@ -752,83 +839,94 @@ public class BytesTest extends BytesTestCommon {
             b.writeVolatileShort(1, (short) 2);
             b.writeVolatileInt(3, 3);
             b.writeVolatileLong(7, 4);
-            assertEquals(1, b.readVolatileByte(0));
-            assertEquals(2, b.readVolatileShort(1));
-            assertEquals(3, b.readVolatileInt(3));
-            assertEquals(4, b.readVolatileLong(7));
+            assertEquals(1, b.readVolatileByte(0), "readVolatileByte should return byte value 1 written at offset 0");
+            assertEquals(2, b.readVolatileShort(1), "readVolatileShort should return short value 2 written at offset 1");
+            assertEquals(3, b.readVolatileInt(3), "readVolatileInt should return int value 3 written at offset 3");
+            assertEquals(4, b.readVolatileLong(7), "readVolatileLong should return long value 4 written at offset 7");
 
         } finally {
             postTest(b);
         }
     }
 
-    @Test
-    public void testHashCode() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void testHashCode(String ignored, Allocator alloc1) {
+        initBytesTest(ignored, alloc1);
         assumeFalse(NativeBytes.areNewGuarded());
 
         @NotNull Bytes<?> b = alloc1.elasticBytes(16);
         try {
             b.writeLong(0);
-            assertEquals(0, b.hashCode());
+            assertEquals(0, b.hashCode(), "hashCode should be 0 for bytes containing long value 0");
             b.clear();
             b.writeLong(1);
-            assertEquals(0x152ad77e, b.hashCode());
+            assertEquals(0x152ad77e, b.hashCode(), "hashCode should be 0x152ad77e for bytes containing long value 1");
             b.clear();
             b.writeLong(2);
-            assertEquals(0x2a55aefc, b.hashCode());
+            assertEquals(0x2a55aefc, b.hashCode(), "hashCode should be 0x2a55aefc for bytes containing long value 2");
             b.clear();
             b.writeLong(3);
-            assertEquals(0x7f448df2, b.hashCode());
+            assertEquals(0x7f448df2, b.hashCode(), "hashCode should be 0x7f448df2 for bytes containing long value 3");
             b.clear();
             b.writeLong(4);
-            assertEquals(0x54ab5df8, b.hashCode());
+            assertEquals(0x54ab5df8, b.hashCode(), "hashCode should be 0x54ab5df8 for bytes containing long value 4");
 
         } finally {
             postTest(b);
         }
     }
 
-    @Test
-    public void testEnum() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void testEnum(String ignored, Allocator alloc1) {
+
+        initBytesTest(ignored, alloc1);
 
         @NotNull Bytes<?> b = alloc1.elasticBytes(16);
         try {
             b.writeEnum(HEAP);
             b.writeEnum(NATIVE);
-            assertEquals(HEAP, b.readEnum(Allocator.class));
-            assertEquals(NATIVE, b.readEnum(Allocator.class));
+            assertEquals(HEAP, b.readEnum(Allocator.class), "readEnum should return HEAP enum value written first");
+            assertEquals(NATIVE, b.readEnum(Allocator.class), "readEnum should return NATIVE enum value written second");
 
         } finally {
             postTest(b);
         }
     }
 
-    @Test
-    public void testTimeMillis() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void testTimeMillis(String ignored, Allocator alloc1) {
+        initBytesTest(ignored, alloc1);
         @NotNull Bytes<?> b = alloc1.elasticBytes(16);
         try {
             b.appendTimeMillis(12345678L);
-            assertEquals("03:25:45.678", b.toString());
+            assertEquals("03:25:45.678", b.toString(), "appendTimeMillis should format 12345678ms as '03:25:45.678'");
 
         } finally {
             postTest(b);
         }
     }
 
-    @Test
-    public void testDateTimeMillis() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void testDateTimeMillis(String ignored, Allocator alloc1) {
+        initBytesTest(ignored, alloc1);
         @NotNull Bytes<?> b = alloc1.elasticBytes(16);
         try {
             b.appendDateMillis(12345 * 86400_000L);
-            assertEquals("20031020", b.toString());
+            assertEquals("20031020", b.toString(), "appendDateMillis should format day 12345 as '20031020'");
 
         } finally {
             postTest(b);
         }
     }
 
-    @Test
-    public void testWriteOffset() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void testWriteOffset(String ignored, Allocator alloc1) {
+        initBytesTest(ignored, alloc1);
         int length = 127;
         Bytes<?> from = NativeBytes.nativeBytes(length).unchecked(true);
         Bytes<?> to = alloc1.elasticBytes(length);
@@ -841,15 +939,17 @@ public class BytesTest extends BytesTestCommon {
 
         try {
             to.write(from, 0L, length);
-            assertEquals(from.readLong(0), to.readLong(0));
+            assertEquals(from.readLong(0), to.readLong(0), "readLong should return same first 8 bytes after write copied from 'from' to 'to'");
         } finally {
             postTest(from);
             postTest(to);
         }
     }
 
-    @Test
-    public void testToStringDoesNotChange() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void testToStringDoesNotChange(String ignored, Allocator alloc1) {
+        initBytesTest(ignored, alloc1);
         @NotNull Bytes<?> a = alloc1.elasticBytes(16);
         @NotNull Bytes<?> b = alloc1.elasticBytes(16);
         try {
@@ -857,48 +957,54 @@ public class BytesTest extends BytesTestCommon {
             a.append(hello);
             b.append(hello);
 
-            assertTrue(a.contentEquals(b));
-            assertEquals(a.bytesStore(), b.bytesStore());
+            assertTrue(a.contentEquals(b), "Bytes a and b should have equal content when both contain 'hello'");
+            assertEquals(a.bytesStore(), b.bytesStore(), "Bytes a and b should share same BytesStore due to interning");
 
-            assertEquals(hello, b.toString());
+            assertEquals(hello, b.toString(), "toString should return 'hello' without altering bytes content");
 
-            assertTrue(a.contentEquals(b));
-            assertEquals(a.bytesStore(), b.bytesStore());
+            assertTrue(a.contentEquals(b), "Bytes a and b should remain equal after calling toString on b");
+            assertEquals(a.bytesStore(), b.bytesStore(), "Bytes a and b should still share same BytesStore after toString");
         } finally {
             postTest(a);
             postTest(b);
         }
     }
 
-    @Test
-    public void to8BitString() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void to8BitString(String ignored, Allocator alloc1) {
+        initBytesTest(ignored, alloc1);
         @NotNull Bytes<?> a = alloc1.elasticBytes(16);
         try {
-            assertEquals(a.toString(), a.to8bitString());
+            assertEquals(a.toString(), a.to8bitString(), "to8bitString should match toString for empty bytes");
             String hello = "hello";
             a.append(hello);
-            assertEquals(a.toString(), a.to8bitString());
+            assertEquals(a.toString(), a.to8bitString(), "to8bitString should match toString for 'hello' content");
         } finally {
             postTest(a);
         }
     }
 
-    @Test
-    public void testParseDoubleReadLimit() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void testParseDoubleReadLimit(String ignored, Allocator alloc1) {
+        initBytesTest(ignored, alloc1);
         Bytes<?> bytes = alloc1.fixedBytes(52);
         try {
             final String spaces = "   ";
             bytes.append(spaces).append(1.23);
             bytes.readLimit(spaces.length());
             // only fails when assertions are off
-            assertEquals(0, BytesInternal.parseDouble(bytes), 0);
+            assertEquals(0, BytesInternal.parseDouble(bytes), 0, "BytesInternal.parseDouble should return 0 when readLimit prevents reading the number");
         } finally {
             postTest(bytes);
         }
     }
 
-    @Test
-    public void write8BitString() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void write8BitString(String ignored, Allocator alloc1) {
+        initBytesTest(ignored, alloc1);
         assumeFalse(alloc1 == HEAP_EMBEDDED);
 
         @NotNull Bytes<?> bytes = alloc1.elasticBytes(703);
@@ -908,7 +1014,7 @@ public class BytesTest extends BytesTestCommon {
                 final String s = sb.toString();
                 bytes.write8bit(s);
                 String s2 = bytes.read8bit();
-                assertEquals(s, s2);
+                assertEquals(s, s2, "read8bit should restore string written by write8bit");
                 sb.append(Integer.toString(i, 36));
             }
         } finally {
@@ -916,17 +1022,28 @@ public class BytesTest extends BytesTestCommon {
         }
     }
 
-    @Test
-    public void write8BitNativeBytes() {
-        write8BitBytes(() -> Bytes.allocateDirect(36));
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void write8BitNativeBytes(String ignored, Allocator alloc1) {
+        initBytesTest(ignored, alloc1);
+        assertEquals(expectedWrite8BitString(), write8BitBytes(() -> Bytes.allocateDirect(36)), "write8BitNativeBytes: final string");
     }
 
-    @Test
-    public void write8BitHeapBytes() {
-        write8BitBytes(() -> Bytes.allocateElasticOnHeap(36));
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void write8BitHeapBytes(String ignored, Allocator alloc1) {
+        initBytesTest(ignored, alloc1);
+        assertEquals(expectedWrite8BitString(), write8BitBytes(() -> Bytes.allocateElasticOnHeap(36)), "write8BitHeapBytes: final string");
     }
 
-    private void write8BitBytes(Supplier<Bytes<?>> bufferSupplier) {
+    private static String expectedWrite8BitString() {
+        StringBuilder expected = new StringBuilder();
+        for (int i = 0; i <= 36; i++)
+            expected.append(Integer.toString(i, 36));
+        return expected.toString();
+    }
+
+    private String write8BitBytes(Supplier<Bytes<?>> bufferSupplier) {
         assumeFalse(alloc1 == HEAP_EMBEDDED);
 
         @NotNull Bytes<?> bytes = alloc1.elasticBytes(703);
@@ -946,9 +1063,10 @@ public class BytesTest extends BytesTestCommon {
                 }
                 bytes.read8bit(nbytes2.clear());
 
-                assertEquals("8-bit round-trip mismatch at iteration " + i, sb.toString(), nbytes2.toString());
+                assertEquals(sb.toString(), nbytes2.toString(), "read8bit should restore string written by write8bit at iteration " + i);
                 sb.append(Integer.toString(i, 36));
             }
+            return sb.toString();
         } finally {
             postTest(bytes);
             postTest(nbytes);
@@ -956,8 +1074,10 @@ public class BytesTest extends BytesTestCommon {
         }
     }
 
-    @Test
-    public void write8BitCharSequence() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void write8BitCharSequence(String ignored, Allocator alloc1) {
+        initBytesTest(ignored, alloc1);
         assumeFalse(alloc1 == HEAP_EMBEDDED);
 
         @NotNull Bytes<?> bytes = alloc1.elasticBytes(703);
@@ -968,7 +1088,7 @@ public class BytesTest extends BytesTestCommon {
                 bytes.write8bit(sb);
                 bytes.read8bit(sb2);
 
-                assertEquals(sb.toString(), sb2.toString());
+                assertEquals(sb.toString(), sb2.toString(), "read8bit should restore StringBuilder written by write8bit");
                 sb.append(Integer.toString(i, 36));
             }
         } finally {
@@ -976,8 +1096,10 @@ public class BytesTest extends BytesTestCommon {
         }
     }
 
-    @Test
-    public void stopBitChar() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void stopBitChar(String ignored, Allocator alloc1) {
+        initBytesTest(ignored, alloc1);
         final Bytes<?> bytes = alloc1.fixedBytes(64);
         for (int i = Character.MIN_VALUE; i <= Character.MAX_VALUE; i++) {
             bytes.clear();
@@ -985,18 +1107,23 @@ public class BytesTest extends BytesTestCommon {
             bytes.writeStopBit(ch);
             bytes.writeUnsignedByte(0x80);
             char c2 = bytes.readStopBitChar();
-            assertEquals(ch, c2);
-            assertEquals(0x80, bytes.readUnsignedByte());
+            assertEquals(ch, c2, "readStopBitChar should restore character written by writeStopBit");
+            assertEquals(0x80, bytes.readUnsignedByte(), "readUnsignedByte should return guard byte 0x80 after readStopBitChar");
         }
         postTest(bytes);
     }
 
-    @Test
-    public void stopBitLong() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void stopBitLong(String ignored, Allocator alloc1) {
+        initBytesTest(ignored, alloc1);
         final Bytes<?> bytes = alloc1.fixedBytes(64);
         for (int i = 0; i <= 63; i++) {
             long l = 1L << i;
-            stopBitLong0(bytes, l);
+            if (i == 0)
+                assertEquals(l, stopBitLong0(bytes, l), "stopBitLong should encode and decode value 1 (l=" + l + ")");
+            else
+                stopBitLong0(bytes, l);
             stopBitLong0(bytes, l - 1);
             stopBitLong0(bytes, -l);
             stopBitLong0(bytes, ~l);
@@ -1004,56 +1131,66 @@ public class BytesTest extends BytesTestCommon {
         postTest(bytes);
     }
 
-    @Test
-    public void stopBitNeg1() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void stopBitNeg1(String ignored, Allocator alloc1) {
+        initBytesTest(ignored, alloc1);
         final Bytes<?> bytes = alloc1.fixedBytes(64);
         BytesInternal.writeStopBitNeg1(bytes);
         BytesInternal.writeStopBitNeg1(bytes);
-        assertEquals(-1, bytes.readStopBit());
-        assertEquals(0xFFFF, bytes.readStopBitChar());
+        assertEquals(-1, bytes.readStopBit(), "readStopBit should return -1 after writeStopBitNeg1");
+        assertEquals(0xFFFF, bytes.readStopBitChar(), "readStopBitChar should return 0xFFFF when reading -1 as char");
         postTest(bytes);
     }
 
     private void postTest(Bytes<?> bytes) {
         bytes.clear();
-        assertTrue(bytes.isClear());
-        assertEquals(0, bytes.readRemaining());
+        assertTrue(bytes.isClear(), "Bytes should be in clear state after clear() call");
+        assertEquals(0, bytes.readRemaining(), "readRemaining should be 0 for cleared bytes");
         bytes.releaseLast();
     }
 
-    private void stopBitLong0(Bytes<?> bytes, long l) {
+    private long stopBitLong0(Bytes<?> bytes, long l) {
         bytes.clear();
         bytes.writeStopBit(l);
         bytes.writeUnsignedByte(0x80);
         long l2 = bytes.readStopBit();
-        assertEquals(l, l2);
-        assertEquals(0x80, bytes.readUnsignedByte());
+        assertEquals(l, l2, "readStopBit should restore long written by writeStopBit");
+        assertEquals(0x80, bytes.readUnsignedByte(), "readUnsignedByte should return guard byte 0x80 after readStopBit");
+        return l2;
     }
 
-    @Test
-    public void capacityVsWriteLimitInvariant() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void capacityVsWriteLimitInvariant(String ignored, Allocator alloc1) {
+        initBytesTest(ignored, alloc1);
         final Bytes<?> bytes = alloc1.elasticBytes(20);
         try {
             assumeTrue(bytes.isElastic());
-            assertEquals(bytes.capacity(), bytes.writeLimit());
+            assertEquals(bytes.capacity(), bytes.writeLimit(), "writeLimit should equal capacity for elastic bytes");
         } finally {
             bytes.releaseLast();
         }
     }
 
-    @Test
-    public void isClear() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void isClear(String ignored, Allocator alloc1) {
+        initBytesTest(ignored, alloc1);
         final Bytes<?> bytes = alloc1.elasticBytes(20);
-        assertTrue(bytes.isClear());
+        assertTrue(bytes.isClear(), "Newly allocated elastic bytes should be in clear state");
         bytes.releaseLast();
     }
 
-    @Test
-    public void testAppendDoubleWithoutParseDouble() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void testAppendDoubleWithoutParseDouble(String ignored, Allocator alloc1) {
+
+        initBytesTest(ignored, alloc1);
 
         parseDouble = false;
         // TODO FIX parseDouble()
-        testAppendDoubleOnce(1e-11 + Math.ulp(1e-11), "0.00000000001", "0.00000000001", "0.000000000010000000000000001", "0");
+        assertEquals("0.00000000001", testAppendDoubleOnce(1e-11 + Math.ulp(1e-11), "0.00000000001", "0.00000000001", "0.000000000010000000000000001", "0"), "StandardDecimaliser should format 1e-11+ulp as '0.00000000001'");
         testAppendDoubleOnce(1.0626477603237785E-10, "0.000000000106264776", "0.000000000106264775", "0.00000000010626477603237785", "0");
         testAppendDoubleOnce(1e-18 - Math.ulp(1e-18), "0.000000000000000001", "0.000000000000000001", "0.0000000000000000009999999999999999", "0");
         testAppendDoubleOnce(1e45, "1000000000000000000000000000000000000000000000", "Infinity", "1.0E45", "");
@@ -1062,13 +1199,16 @@ public class BytesTest extends BytesTestCommon {
         testAppendDoubleOnce(-Double.MIN_NORMAL, "-0", "-0", "-2.2250738585072014E-308", "-0");
     }
 
-    @Test
-    public void testAppendDoubleRandom() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void testAppendDoubleRandom(String ignored, Allocator alloc1) {
+
+        initBytesTest(ignored, alloc1);
 
         parseDouble = true;
 
         // ok
-        testAppendDoubleOnce(-145344868913.80002, "-145344868913.80002", "-145344872448", "-145344868913.80002", "-145344868913.80002");
+        assertEquals("-145344868913.80002", testAppendDoubleOnce(-145344868913.80002, "-145344868913.80002", "-145344872448", "-145344868913.80002", "-145344868913.80002"), "StandardDecimaliser should format -145344868913.80002 with full precision");
 
         testAppendDoubleOnce(-1.4778838950354771E-9, "-0.000000001477883895", "-0.0000000014778839", "-0.0000000014778838950354771", "-0.000000001");
         testAppendDoubleOnce(1.4753448053710411E-8, "0.000000014753448054", "0.000000014753448", "0.000000014753448053710411", "0.000000015");
@@ -1101,11 +1241,13 @@ public class BytesTest extends BytesTestCommon {
         testAppendDoubleOnce(-8.299137873077923E-5, "-0.000082991378730779", "-0.00008299138", "-0.00008299137873077923", "-0.000082991");
     }
 
-    @Test
-    public void testAppendDoublePowersOfTen() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void testAppendDoublePowersOfTen(String ignored, Allocator alloc1) {
+        initBytesTest(ignored, alloc1);
         parseDouble = true;
         // OK
-        testAppendDoubleOnce(0.0, "0", "0", "0", "0");
+        assertEquals("0", testAppendDoubleOnce(0.0, "0", "0", "0", "0"), "StandardDecimaliser should format 0.0 as '0'");
         testAppendDoubleOnce(0.001, "0.001", "0.001", "0.001", "0.001");
         testAppendDoubleOnce(1.0E-4, "0.0001", "0.0001", "0.0001", "0.0001");
         testAppendDoubleOnce(1.0E-6, "0.000001", "0.000001", "0.000001", "0.000001");
@@ -1121,10 +1263,12 @@ public class BytesTest extends BytesTestCommon {
         testAppendDoubleOnce(9.0E-9, "0.000000009", "0.000000009", "0.000000009", "0.000000009");
     }
 
-    @Test
-    public void testAppendDoubleEdgeCases() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void testAppendDoubleEdgeCases(String ignored, Allocator alloc1) {
+        initBytesTest(ignored, alloc1);
         parseDouble = true;
-        testAppendDoubleOnce(Double.NaN, "NaN", "NaN", "NaN", "");
+        assertEquals("NaN", testAppendDoubleOnce(Double.NaN, "NaN", "NaN", "NaN", ""), "StandardDecimaliser should format Double.NaN as 'NaN'");
         testAppendDoubleOnce(Double.POSITIVE_INFINITY, "Infinity", "Infinity", "Infinity", "");
         testAppendDoubleOnce(Double.NEGATIVE_INFINITY, "-Infinity", "-Infinity", "-Infinity", "");
         testAppendDoubleOnce(0.1, "0.1", "0.1", "0.1", "0.1");
@@ -1141,10 +1285,12 @@ public class BytesTest extends BytesTestCommon {
         testAppendDoubleOnce(1.0626477603237786E-11, "0.000000000010626478", "0.000000000010626478", "0.000000000010626477603237786", "0");
     }
 
-    @Test
-    public void testAppendDoubleLimits() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void testAppendDoubleLimits(String ignored, Allocator alloc1) {
+        initBytesTest(ignored, alloc1);
         // limits
-        testAppendDoubleOnce(1.0E-18, "0.000000000000000001", "0.000000000000000001", "0.000000000000000001", "0");
+        assertEquals("0.000000000000000001", testAppendDoubleOnce(1.0E-18, "0.000000000000000001", "0.000000000000000001", "0.000000000000000001", "0"), "StandardDecimaliser should format 1.0E-18 as '0.000000000000000001'");
         testAppendDoubleOnce(1.0E-29, "0", "0", "0.000000000000000000000000000010", "0");
         testAppendDoubleOnce(1e-29 - Math.ulp(1e-29), "0", "0", "9.999999999999998E-30", "0");
         testAppendDoubleOnce(1e45 - Math.ulp(1e45), "999999999999999800000000000000000000000000000", "Infinity", "999999999999999800000000000000000000000000000", "");
@@ -1162,8 +1308,10 @@ public class BytesTest extends BytesTestCommon {
         testAppendDoubleOnce(-Double.MAX_VALUE, "-179769313486231570000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000", "-Infinity", "-1.7976931348623157E308", "");
     }
 
-    @Test
-    public void testAppendReallySmallDouble() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void testAppendReallySmallDouble(String ignored, Allocator alloc1) {
+        initBytesTest(ignored, alloc1);
         assumeFalse(alloc1 == HEAP_UNCHECKED);
         int size = 48;
         Bytes<?> bytes = alloc1.elasticBytes(size + 8);
@@ -1173,19 +1321,21 @@ public class BytesTest extends BytesTestCommon {
             bytes.writeLong(size, 0);
             bytes.clear();
             bytes.append(d);
-            assertEquals("d: " + d, 0, bytes.readLong(size));
+            assertEquals(0, bytes.readLong(size), "Guard bytes at offset " + size + " should remain zero after append operation for d=" + d);
             // Determine expected precision error based on magnitude of value
             // ok for not easily decimalised
             double err = d > 2.3e-10 ? 0
                     : d > 2.0e-13 && !Jvm.isArm() ? Math.ulp(d)
                     : 2 * Math.ulp(d);
-            assertEquals(d, bytes.parseDouble(), err);
+            assertEquals(d, bytes.parseDouble(), err, "parseDouble should restore appended small double value within precision for d=" + d);
         }
         bytes.releaseLast();
     }
 
-    @Test
-    public void testAppendReallyBigDouble() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void testAppendReallyBigDouble(String ignored, Allocator alloc1) {
+        initBytesTest(ignored, alloc1);
         assumeFalse(alloc1 == HEAP_UNCHECKED);
         int size = 48;
         Bytes<?> bytes = alloc1.elasticBytes(size + 8);
@@ -1195,20 +1345,22 @@ public class BytesTest extends BytesTestCommon {
             bytes.writeLong(size, 0);
             bytes.clear();
             bytes.append(d);
-            assertEquals("d: " + d, 0, bytes.readLong(size));
+            assertEquals(0, bytes.readLong(size), "Guard bytes at offset " + size + " should remain zero after append operation for d=" + d);
             // Determine expected precision error based on magnitude of value
             // ok for not easily decimalised
             double err = d > -1.3e12 ? 0
                     : d > -1e39 ? Math.ulp(d)
                     : 2 * Math.ulp(d);
             double actual = bytes.parseDouble();
-            assertEquals(d, actual, err);
+            assertEquals(d, actual, err, "parseDouble should restore appended large negative double value within precision for d=" + d);
         }
         bytes.releaseLast();
     }
 
-    @Test
-    public void testAppendReallySmallFloat() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void testAppendReallySmallFloat(String ignored, Allocator alloc1) {
+        initBytesTest(ignored, alloc1);
         assumeFalse(alloc1 == HEAP_UNCHECKED);
         int size = 48;
         Bytes<?> bytes = alloc1.elasticBytes(size + 8);
@@ -1218,17 +1370,19 @@ public class BytesTest extends BytesTestCommon {
             bytes.writeLong(size, 0);
             bytes.clear();
             bytes.append(f);
-            assertEquals("f: " + f, 0, bytes.readLong(size));
+            assertEquals(0, bytes.readLong(size), "Guard bytes at offset " + size + " should remain zero after append operation for f=" + f);
             // Determine expected precision error based on magnitude of value
             // ok for not easily decimalised
             float err = f > 1.2e-4 ? 0 : Math.ulp(f);
-            assertEquals(f, bytes.parseFloat(), err);
+            assertEquals(f, bytes.parseFloat(), err, "parseFloat should restore appended small float value within precision for f=" + f);
         }
         bytes.releaseLast();
     }
 
-    @Test
-    public void testAppendReallyBigFloat() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void testAppendReallyBigFloat(String ignored, Allocator alloc1) {
+        initBytesTest(ignored, alloc1);
         int size = 48;
         Bytes<?> bytes = alloc1.elasticBytes(size + 8);
 
@@ -1236,14 +1390,16 @@ public class BytesTest extends BytesTestCommon {
             bytes.writeLong(size, 0);
             bytes.clear();
             bytes.append(f);
-            assertEquals("f: " + f, 0, bytes.readLong(size));
-            assertEquals(f, bytes.parseFloat(), 0.0f);
+            assertEquals(0, bytes.readLong(size), "Guard bytes at offset " + size + " should remain zero after append operation for f=" + f);
+            assertEquals(f, bytes.parseFloat(), 0.0f, "parseFloat should restore appended large float value exactly for f=" + f);
         }
         bytes.releaseLast();
     }
 
-    @Test
-    public void testReadWithOffset() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void testReadWithOffset(String ignored, Allocator alloc1) {
+        initBytesTest(ignored, alloc1);
         Bytes<?> bytes = alloc1.elasticBytes(32);
         bytes.append("Hello");
         int offset = 2;
@@ -1252,19 +1408,21 @@ public class BytesTest extends BytesTestCommon {
         ba[0] = '0';
         ba[1] = '1';
         bytes.read(offsetInRDI, ba, offset, bytes.length() - offsetInRDI);
-        assertEquals("01ello", new String(ba, ISO_8859_1));
+        assertEquals("01ello", new String(ba, ISO_8859_1), "Byte array should contain '01ello' after read with offset copied 'ello' from bytes");
         bytes.releaseLast();
     }
 
-    @Test
-    public void writeSkipNegative() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void writeSkipNegative(String ignored, Allocator alloc1) {
+        initBytesTest(ignored, alloc1);
         @NotNull Bytes<?> a = alloc1.elasticBytes(16);
         try {
             String hello = "hello";
             a.append(hello);
-            assertEquals(hello, a.toString());
+            assertEquals(hello, a.toString(), "toString should return 'hello' after append");
             a.writeSkip(-hello.length());
-            assertEquals("", a.toString());
+            assertEquals("", a.toString(), "toString should return empty string after writeSkip reversed position");
             if (!a.unchecked())
                 assertThrows(BufferOverflowException.class, () -> a.writeSkip(-1));
         } finally {
@@ -1272,8 +1430,10 @@ public class BytesTest extends BytesTestCommon {
         }
     }
 
-    @Test
-    public void testCopyToStream() throws IOException {
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void testCopyToStream(String ignored, Allocator alloc1) throws IOException {
+        initBytesTest(ignored, alloc1);
         @NotNull Bytes<?> a = alloc1.elasticBytes(16);
         String text = "Hello World";
 
@@ -1283,32 +1443,32 @@ public class BytesTest extends BytesTestCommon {
                 a.copyTo(os);
 
                 byte[] array = os.toByteArray();
-                assertEquals(text.length(), array.length);
-                assertArrayEquals(text.getBytes(StandardCharsets.UTF_8), array);
+                assertEquals(text.length(), array.length, "copied array length should match original 'Hello World' text length");
+                assertArrayEquals(text.getBytes(StandardCharsets.UTF_8), array, "Byte array copied to stream should match original 'Hello World' UTF-8 bytes");
             }
         } finally {
             postTest(a);
         }
     }
 
-    private void testAppendDoubleOnce(double value, String standard, String standardFloat, String general, String expectedDecimal9) {
-        testAppendDoubleOnce(value, standard, standardFloat, general, expectedDecimal9, false);
+    private String testAppendDoubleOnce(double value, String standard, String standardFloat, String general, String expectedDecimal9) {
+        return testAppendDoubleOnce(value, standard, standardFloat, general, expectedDecimal9, false);
     }
 
     @SuppressWarnings("deprecation")
-    private void testAppendDoubleOnce(double value, String standard, String standardFloat, String general, String expectedDecimal9, boolean append0) {
+    private String testAppendDoubleOnce(double value, String standard, String standardFloat, String general, String expectedDecimal9, boolean append0) {
         @NotNull Bytes<?> a = alloc1.elasticBytes(255)
                 .fpAppend0(append0)
                 .decimaliser(StandardDecimaliser.STANDARD);
         try {
             a.append(value);
             String actual = a.toString();
-            assertEquals(standard, actual);
+            assertEquals(standard, actual, "StandardDecimaliser should format double as expected");
 
             a.clear();
             a.append((float) value);
             String actual2 = a.toString();
-            assertEquals(standardFloat, actual2);
+            assertEquals(standardFloat, actual2, "StandardDecimaliser should format float as expected");
 
             a.decimaliser(GeneralDecimaliser.GENERAL);
             a.clear();
@@ -1316,35 +1476,39 @@ public class BytesTest extends BytesTestCommon {
             String actualg = a.toString();
             double actualParsed = a.parseDouble();
             if (parseDouble)
-                assertEquals("parseDouble", value, actualParsed, 0.0);
-            assertEquals(general, actualg);
+                assertEquals(value, actualParsed, 0.0, "parseDouble should restore original value from appended double");
+            assertEquals(general, actualg, "GeneralDecimaliser should format double as expected");
 
             a.clear();
             // if empty don't expect it to be translated
             boolean decimal = new MaximumPrecision(9).toDecimal(value, (DecimalAppender) a);
-            assertEquals(!expectedDecimal9.isEmpty(), decimal);
+            assertEquals(!expectedDecimal9.isEmpty(), decimal, "toDecimal should return true when precision allows conversion");
             String actual3 = a.toString();
-            assertEquals(expectedDecimal9, actual3);
+            assertEquals(expectedDecimal9, actual3, "MaximumPrecision(9) should format double as expected");
 //            System.out.println("testAppendDoubleOnce(" + value + ", \"" + actual + "\", \"" + actual2 + "\", \"" + actualg + "\", \"" + actual3 + "\");");
-
+            return actual;
         } finally {
             a.releaseLast();
         }
     }
 
-    @Test
-    public void testWriteOnHeap() throws Exception {
-        doTestWrite(() -> ByteBuffer.allocate(128));
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void testWriteOnHeap(String ignored, Allocator alloc1) throws Exception {
+        initBytesTest(ignored, alloc1);
+        assertEquals((byte) ' ', doTestWrite(() -> ByteBuffer.allocate(128)), "First byte should be space character after write operations with heap ByteBuffer");
     }
 
-    @Test
-    public void testWriteDirect() throws Exception {
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void testWriteDirect(String ignored, Allocator alloc1) throws Exception {
+        initBytesTest(ignored, alloc1);
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
-        doTestWrite(() -> ByteBuffer.allocateDirect(128));
+        assertEquals((byte) ' ', doTestWrite(() -> ByteBuffer.allocateDirect(128)), "First byte should be space character after write operations with direct ByteBuffer");
     }
 
-    private void doTestWrite(Callable<ByteBuffer> generator) throws Exception {
+    private byte doTestWrite(Callable<ByteBuffer> generator) throws Exception {
         final Bytes<?> data = alloc1.elasticBytes(128);
         try {
             ByteBuffer buffer = generator.call();
@@ -1357,13 +1521,15 @@ public class BytesTest extends BytesTestCommon {
             BytesStore<?, ?> heapBytesStore = data.bytesStore();
             heapBytesStore.write(16, buffer, 32, 8);
             for (int i = 0; i < 16; i++)
-                assertEquals(i + ' ', heapBytesStore.readByte(i));
+                assertEquals(i + ' ', heapBytesStore.readByte(i), "readByte should return original sequential values at position " + i);
 
             for (int i = 16; i < 24; i++)
-                assertEquals(i + '0', heapBytesStore.readByte(i));
+                assertEquals(i + '0', heapBytesStore.readByte(i), "readByte should return ByteBuffer values written at offset 16-23 from buffer position 32-39");
 
             for (int i = 24; i < 32; i++)
-                assertEquals(i + ' ', heapBytesStore.readByte(i));
+                assertEquals(i + ' ', heapBytesStore.readByte(i), "readByte should return original sequential values at position " + i);
+
+            return heapBytesStore.readByte(0);
         } finally {
             data.releaseLast();
         }

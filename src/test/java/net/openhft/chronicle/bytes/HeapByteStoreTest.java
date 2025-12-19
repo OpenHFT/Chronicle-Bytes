@@ -5,10 +5,10 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.bytes.internal.HeapBytesStore;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class HeapByteStoreTest extends BytesTestCommon {
     @SuppressWarnings("rawtypes")
@@ -17,8 +17,8 @@ public class HeapByteStoreTest extends BytesTestCommon {
         @NotNull HeapBytesStore hbs = HeapBytesStore.wrap("Hello".getBytes(ISO_8859_1));
         @NotNull HeapBytesStore hbs2 = HeapBytesStore.wrap("Hello".getBytes(ISO_8859_1));
         @NotNull HeapBytesStore hbs3 = HeapBytesStore.wrap("He!!o".getBytes(ISO_8859_1));
-        assertEquals(hbs, hbs2);
-        assertEquals(hbs2, hbs);
+        assertEquals(hbs, hbs2, "HeapBytesStores with same content should be equal");
+        assertEquals(hbs2, hbs, "equality should be symmetric for HeapBytesStores");
         assertNotEquals(hbs, hbs3);
         assertNotEquals(hbs3, hbs);
         @NotNull HeapBytesStore hbs4 = HeapBytesStore.wrap("Hi".getBytes(ISO_8859_1));
@@ -33,6 +33,6 @@ public class HeapByteStoreTest extends BytesTestCommon {
         bytes.clearAndPad(bytes.realCapacity() + 128);
         // ensure this succeeds even though we are above the real capacity - this should trigger resize
         bytes.prewriteInt(1);
-        assertTrue(bytes.realCapacity() > initialCapacity);
+        assertTrue(bytes.realCapacity() > initialCapacity, "real capacity should be true");
     }
 }

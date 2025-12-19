@@ -7,15 +7,15 @@ import net.openhft.chronicle.bytes.BytesTestCommon;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.cooler.CoolerTester;
 import net.openhft.chronicle.core.cooler.CpuCoolers;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.Random;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class UnsafeTextTest extends BytesTestCommon {
 
@@ -23,7 +23,7 @@ public class UnsafeTextTest extends BytesTestCommon {
 
     @SuppressWarnings("EmptyMethod")
     @Override
-    @Before
+    @BeforeEach
     public void threadDump() {
         super.threadDump();
     }
@@ -50,7 +50,7 @@ public class UnsafeTextTest extends BytesTestCommon {
                     .reduce(new StringBuilder(), StringBuilder::append, StringBuilder::append)
                     .toString();
 
-            assertEquals(Long.toString(-Integer.MAX_VALUE), memVal);
+            assertEquals(Long.toString(-Integer.MAX_VALUE), memVal, "Long.toString");
         } finally {
             OS.memory().freeMemory(address, 32);
         }
@@ -60,7 +60,7 @@ public class UnsafeTextTest extends BytesTestCommon {
     public void testAppendDouble() {
         // TODO FIX
         // Examples for https://github.com/OpenHFT/Chronicle-Core/issues/493
-        testAppendDoubleOnce(5.959231521092378E-8, "5.959231521092378E-8");
+        assertEquals("5.959231521092378E-8", testAppendDoubleOnce(5.959231521092378E-8, "5.959231521092378E-8"), "testAppendDouble: value=5.959231521092378E-8");
         testAppendDoubleOnce(5.954710747053357E-8, "5.954710747053357E-8");
         testAppendDoubleOnce(-4.3723721608241563E-8, "-4.3723721608241563E-8");
         testAppendDoubleOnce(3.5645738448792343E-8, "3.5645738448792343E-8");
@@ -140,12 +140,13 @@ public class UnsafeTextTest extends BytesTestCommon {
 
     }
 
-    private void testAppendDoubleOnce(double value, String expectedValue) {
+    private String testAppendDoubleOnce(double value, String expectedValue) {
         int size = max + 8;
         long address = OS.memory().allocate(size);
         try {
             final String memVal = appendDoubleToString(value, address);
-            assertEquals("value; " + value, expectedValue, memVal);
+            assertEquals(expectedValue, memVal, "value; " + value);
+            return memVal;
         } finally {
             OS.memory().freeMemory(address, size);
         }
@@ -155,6 +156,16 @@ public class UnsafeTextTest extends BytesTestCommon {
 
     @Test
     public void testRandom() {
+        int baselineSize = max + 8;
+        long baselineAddress = OS.memory().allocate(baselineSize);
+        try {
+            double baseline = 1.2345;
+            String s = appendDoubleToString(baseline, baselineAddress);
+            assertEquals(baseline, Double.parseDouble(s), 0.0, "testRandom: baseline");
+        } finally {
+            OS.memory().freeMemory(baselineAddress, baselineSize);
+        }
+
         int runLength = 10_000;
         IntStream.range(0, runLength).parallel().forEach(t -> {
             Random r = new Random(1L + t);
@@ -172,7 +183,7 @@ public class UnsafeTextTest extends BytesTestCommon {
                 double d2 = Double.parseDouble(s);
                 if (d != d2) {
                     String message = "" + (d - d2);
-                    assertEquals(message, d, d2, 0);
+                    assertEquals(d, d2, 0, message);
                 }
             }
             // this is called unless the test is about to die
@@ -182,6 +193,16 @@ public class UnsafeTextTest extends BytesTestCommon {
 
     @Test
     public void testSequential() {
+        int baselineSize = max + 8;
+        long baselineAddress = OS.memory().allocate(baselineSize);
+        try {
+            double baseline = 123.456;
+            String s = appendDoubleToString(baseline, baselineAddress);
+            assertEquals(baseline, Double.parseDouble(s), 0.0, "testSequential: baseline");
+        } finally {
+            OS.memory().freeMemory(baselineAddress, baselineSize);
+        }
+
         IntStream.range(0, 300).parallel().forEach(t -> {
             // odd numbers have the most precision error
             int size = max + 8;
@@ -195,7 +216,7 @@ public class UnsafeTextTest extends BytesTestCommon {
                 String s = appendDoubleToString(d, address);
                 double d2 = Double.parseDouble(s);
                 if (d != d2)
-                    assertEquals("" + (d - d2), d, d2, 0);
+                    assertEquals(d, d2, 0, "" + (d - d2));
             }
             // this is called unless the test is about to die
             OS.memory().freeMemory(address, size);

@@ -17,6 +17,7 @@ import java.util.stream.Stream;
 
 import static net.openhft.chronicle.bytes.BytesFactoryUtil.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 /**
@@ -33,10 +34,11 @@ final class BytesPrimitiveParameterTest { // too hard to ensure resources are re
     @TestFactory
     Stream<DynamicTest> negativeParameters() {
         final AtomicReference<BytesInitialInfo> initialInfo = new AtomicReference<>();
+        assertTrue(provideNegativeNonNegativeOperations().findAny().isPresent(), "negativeParameters: operations");
         return cartesianProductTest(BytesFactoryUtil::provideBytesObjects,
                 BytesPrimitiveParameterTest::provideNegativeNonNegativeOperations,
                 (args, bytes, nc) -> {
-                    if (UncheckedBytes.class.isInstance(bytes))
+                    if (bytes instanceof UncheckedBytes)
                         // UncheckedBytes is... Well, unchecked
                         return;
                     final String name = createCommand(args) + "->" + bytes(args).getClass().getSimpleName() + "." + nc.name();

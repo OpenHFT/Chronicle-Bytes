@@ -4,10 +4,9 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.bytes.internal.BytesInternal;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Consolidates UTF-8 parsing boundary tests (explicit length, stop-char parsing,
@@ -27,12 +26,12 @@ public class Utf8ParsingBoundaryTest extends BytesTestCommon {
             StringBuilder sb = new StringBuilder();
             // parse up to the first byte (1 char)
             BytesInternal.parseUtf8(b, sb, true, 1);
-            assertEquals(ascii, sb.toString());
+            assertEquals(ascii, sb.toString(), "parseUtf8 should extract 'A' when parsing 1 byte at ASCII boundary");
 
             sb.setLength(0);
             // parse remaining (multi-byte sequence)
             BytesInternal.parseUtf8(b, sb, true, (int) b.readRemaining());
-            assertEquals(multi, sb.toString());
+            assertEquals(multi, sb.toString(), "parseUtf8 should extract '£€' when parsing remaining multi-byte UTF-8 sequence");
         } finally {
             b.releaseLast();
         }
@@ -44,7 +43,7 @@ public class Utf8ParsingBoundaryTest extends BytesTestCommon {
         try {
             StringBuilder sb = new StringBuilder();
             BytesInternal.parseUtf8(b, sb, StopCharTesters.COMMA_STOP);
-            assertEquals("alpha", sb.toString());
+            assertEquals("alpha", sb.toString(), "parseUtf8 should extract 'alpha' when parsing with COMMA_STOP tester");
         } finally {
             b.releaseLast();
         }
@@ -56,23 +55,25 @@ public class Utf8ParsingBoundaryTest extends BytesTestCommon {
         try {
             b.writeStopBit(-1);
             long res = b.readUtf8Limited(0, new StringBuilder(), 10);
-            assertTrue("Expected negative return value signalling null", res < 0);
+            assertTrue(res < 0, "Expected negative return value signalling null");
         } finally {
             b.releaseLast();
         }
     }
 
-    @Test(expected = net.openhft.chronicle.core.io.ClosedIllegalStateException.class)
+    @Test
     public void throwsWhenUtf8LengthExceedsMax() {
-        Bytes<?> b = Bytes.allocateElasticOnHeap(32);
-        try {
-            String payload = "WXYZ";
-            b.writeStopBit(AppendableUtil.findUtf8Length(payload));
-            b.append(payload);
-            StringBuilder sb = new StringBuilder();
-            b.readUtf8Limited(0, sb, 3);
-        } finally {
-            b.releaseLast();
-        }
+        assertThrows(net.openhft.chronicle.core.io.ClosedIllegalStateException.class, () -> {
+            Bytes<?> b = Bytes.allocateElasticOnHeap(32);
+            try {
+                String payload = "WXYZ";
+                b.writeStopBit(AppendableUtil.findUtf8Length(payload));
+                b.append(payload);
+                StringBuilder sb = new StringBuilder();
+                b.readUtf8Limited(0, sb, 3);
+            } finally {
+                b.releaseLast();
+            }
+        });
     }
 }

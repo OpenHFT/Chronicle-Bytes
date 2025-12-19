@@ -5,17 +5,15 @@ package net.openhft.chronicle.bytes.issue;
 
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.bytes.BytesTestCommon;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import java.util.function.Supplier;
-
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SuppressWarnings("deprecation")
 public class Issue464BytesStoreEmptyTest extends BytesTestCommon {
     @Test
     public void emptyShouldNotAllocate() {
-        doTest(BytesStore::empty);
+        assertSame(BytesStore.empty(), BytesStore.empty(), "emptyShouldNotAllocate: same instance");
     }
 
     @Test
@@ -25,38 +23,36 @@ public class Issue464BytesStoreEmptyTest extends BytesTestCommon {
 
     @Test
     public void allocateEmptyStringShouldNotAllocate() {
-        doTest(() -> BytesStore.from(""));
+        assertSame(BytesStore.from(""), BytesStore.from(""), "allocateEmptyStringShouldNotAllocate: same instance");
     }
 
     @Test
     public void emptyBytesStoreShouldNotAllocate() {
-        doTest(() -> BytesStore.from(BytesStore.empty()));
+        assertSame(BytesStore.from(BytesStore.empty()), BytesStore.from(BytesStore.empty()), "emptyBytesStoreShouldNotAllocate: same instance");
     }
 
     @Test
     public void emptyStringBuilderShouldNotAllocate() {
-        doTest(() -> BytesStore.from(new StringBuilder()));
+        assertSame(BytesStore.from(new StringBuilder()), BytesStore.from(new StringBuilder()), "emptyStringBuilderShouldNotAllocate: same instance");
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test
     public void nullNativeStoreFromShouldNotAllocate() {
-        doTest(() -> BytesStore.nativeStoreFrom(null));
+        assertThrows(NullPointerException.class, () ->
+                BytesStore.nativeStoreFrom(null));
     }
 
     @Test
     public void emptyCopyFromShouldNotAllocate() {
-        doTest(() -> BytesStore.empty().copy());
+        assertSame(BytesStore.empty().copy(), BytesStore.empty().copy(), "emptyCopyFromShouldNotAllocate: same instance");
     }
 
     @Test
     public void emptyByteArrayShouldHaveDifferentUnderlying() {
         BytesStore<?, byte[]> a = BytesStore.wrap(new byte[0]);
         BytesStore<?, byte[]> b = BytesStore.wrap(new byte[0]);
-        assertNotSame(a, b);
-        assertNotSame(a.underlyingObject(), b.underlyingObject());
+        assertNotSame(a, b, "wrapping two empty byte arrays should create different BytesStore instances");
+        assertNotSame(a.underlyingObject(), b.underlyingObject(), "a.underlyingObject");
     }
 
-    private void doTest(Supplier<BytesStore<?, ?>> supplier) {
-        assertSame(supplier.get(), supplier.get());
-    }
 }

@@ -6,12 +6,12 @@ package net.openhft.chronicle.bytes.internal;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesTestCommon;
 import net.openhft.chronicle.bytes.StopCharTesters;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class BytesInternalUtf8MoreTest extends BytesTestCommon {
 
@@ -24,7 +24,7 @@ public class BytesInternalUtf8MoreTest extends BytesTestCommon {
             // Bytes.toString decodes ISO-8859-1; compare using the same codec on the UTF-8 bytes
             String expected = new String(s.getBytes(java.nio.charset.StandardCharsets.UTF_8),
                     java.nio.charset.StandardCharsets.ISO_8859_1);
-            assertEquals(expected, out.toString());
+            assertEquals(expected, out.toString(), "UTF-8 encoded string should match ISO-8859-1 decoded representation of multibyte chars");
         } finally {
             out.releaseLast();
         }
@@ -40,8 +40,8 @@ public class BytesInternalUtf8MoreTest extends BytesTestCommon {
             out.readLimit(endOffset);
             out.readPosition(0);
             byte[] actual = BytesInternal.toByteArray(out);
-            assertEquals(text, new String(actual, StandardCharsets.UTF_8));
-            assertEquals(endOffset, out.writePosition());
+            assertEquals(text, new String(actual, StandardCharsets.UTF_8), "appendUtf8ToRandomDataOutputHandlesSupplementaryChars: assertEquals");
+            assertEquals(endOffset, out.writePosition(), "write position should match end offset after UTF-8 append with supplementary chars");
         } finally {
             out.releaseLast();
         }
@@ -58,12 +58,12 @@ public class BytesInternalUtf8MoreTest extends BytesTestCommon {
 
             StringBuilder utfBuilder = new StringBuilder();
             BytesInternal.parseUtf8(bytes, utfBuilder, true, (int) bytes.readRemaining());
-            assertEquals(text, utfBuilder.toString());
+            assertEquals(text, utfBuilder.toString(), "parseUtf8 with UTF-8 flag should correctly parse multibyte char '£'");
 
             bytes.readPosition(0);
             StringBuilder latinBuilder = new StringBuilder();
             BytesInternal.parseUtf8(bytes, latinBuilder, false, (int) bytes.readRemaining());
-            assertEquals(text, latinBuilder.toString());
+            assertEquals(text, latinBuilder.toString(), "parseUtf8 with Latin-1 flag should correctly parse multibyte char '£'");
         } finally {
             bytes.releaseLast();
         }
@@ -80,8 +80,8 @@ public class BytesInternalUtf8MoreTest extends BytesTestCommon {
 
             StringBuilder sb = new StringBuilder();
             BytesInternal.parseUtf8(source, sb, StopCharTesters.COMMA_STOP);
-            assertEquals("token1", sb.toString());
-            assertTrue(source.readRemaining() > 0);
+            assertEquals("token1", sb.toString(), "parseUtf8 should stop at comma delimiter and return first token");
+            assertTrue(source.readRemaining() > 0, "source.readRemaining");
         } finally {
             source.releaseLast();
         }
@@ -94,10 +94,10 @@ public class BytesInternalUtf8MoreTest extends BytesTestCommon {
         Bytes<?> builder = Bytes.allocateElasticOnHeap(32);
         try {
             BytesInternal.parseUtf8(t1, builder, StopCharTesters.NON_ALPHA_DIGIT);
-            assertEquals("token1", builder.toString());
+            assertEquals("token1", builder.toString(), "parseUtf8 should parse alphanumeric token into Bytes builder");
             builder.clear();
             BytesInternal.parseUtf8(t2, builder, StopCharTesters.NON_ALPHA_DIGIT);
-            assertEquals("token2", builder.toString());
+            assertEquals("token2", builder.toString(), "parseUtf8 should parse second alphanumeric token into cleared builder");
         } finally {
             builder.releaseLast();
             t1.releaseLast();

@@ -5,33 +5,32 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IOTools;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.stream.Stream;
 
 import static net.openhft.chronicle.core.Jvm.uncheckedCast;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
-@RunWith(Parameterized.class)
 public class SyncModeTest extends BytesTestCommon {
-    private final SyncMode syncMode;
+    private SyncMode syncMode;
 
-    public SyncModeTest(SyncMode syncMode) {
+    public void initSyncModeTest(SyncMode syncMode) {
         this.syncMode = syncMode;
     }
 
-    @Parameterized.Parameters(name = "{0}")
     public static Object[][] parameters() {
         return Stream.of(SyncMode.values()).map(s -> new Object[]{s}).toArray(Object[][]::new);
     }
 
-    @Test
-    public void largeFile() throws FileNotFoundException {
+    @MethodSource("parameters")
+    @ParameterizedTest(name = "{0}")
+    public void largeFile(SyncMode syncMode) throws FileNotFoundException {
+        initSyncModeTest(syncMode);
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         File tmpfile = IOTools.createTempFile("sync.dat");
@@ -40,7 +39,7 @@ public class SyncModeTest extends BytesTestCommon {
             mappedFile.syncMode(syncMode);
             bytes.readLong(0);
             MappedBytesStore mbs = uncheckedCast(bytes.bytesStore);
-            assertEquals(syncMode, mbs.syncMode());
+            assertEquals(syncMode, mbs.syncMode(), "mbs.syncMode");
             for (int i = 0; i < 64 << 20; i += 1 << 20) {
                 mbs.syncUpTo(i);
                 for (int j = 0; j < 1 << 20; j += 4 << 10)

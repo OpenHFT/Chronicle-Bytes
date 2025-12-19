@@ -5,36 +5,38 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 public class HexDumpBytesTest extends BytesTestCommon {
 
+    private static final String EXPECTED_OFFSET_FORMAT_HEX = "0000 00 00 00 00 00 00 00 00 # hi\n" +
+            "0008 00 00 00 00 00 00 00 00\n" +
+            "0010 00 00\n" +
+            "0012    00 00 00 00 00 00 00 00 # nest\n" +
+            "001a    00 00 00 00 00 00 00 00\n" +
+            "0022    00 00\n";
+
     @Test
     public void offsetFormat() {
-        doTest(new HexDumpBytes());
+        assertEquals(EXPECTED_OFFSET_FORMAT_HEX, doTest(new HexDumpBytes()), "offsetFormat: hex");
     }
 
-    private static void doTest(HexDumpBytes bytes) {
+    private static String doTest(HexDumpBytes bytes) {
         bytes.numberWrap(8)
         .offsetFormat((o, b) -> b.appendBase16(o, 4));
         bytes.writeHexDumpDescription("hi").write(new byte[18]);
         bytes.adjustHexDumpIndentation(1);
         bytes.writeHexDumpDescription("nest").write(new byte[18]);
-        assertEquals("" +
-                "0000 00 00 00 00 00 00 00 00 # hi\n" +
-                "0008 00 00 00 00 00 00 00 00\n" +
-                "0010 00 00\n" +
-                "0012    00 00 00 00 00 00 00 00 # nest\n" +
-                "001a    00 00 00 00 00 00 00 00\n" +
-                "0022    00 00\n", bytes.toHexString());
+        String actual = bytes.toHexString();
         bytes.releaseLast();
+        return actual;
     }
 
     @Test
@@ -44,10 +46,10 @@ public class HexDumpBytesTest extends BytesTestCommon {
         File file = new File(OS.getTarget(), "HexDumpBytesTest-" + System.nanoTime() + ".dat");
         File parent = file.getParentFile();
         if (parent != null && !parent.exists()) {
-            assertTrue(parent.mkdirs() || parent.isDirectory());
+            assertTrue(parent.mkdirs() || parent.isDirectory(), "parent.mkdirs");
         }
         try (MappedBytes mappedBytes = MappedBytes.mappedBytes(file, 64 * 1024)) {
-            doTest(new HexDumpBytes(mappedBytes));
+            assertEquals(EXPECTED_OFFSET_FORMAT_HEX, doTest(new HexDumpBytes(mappedBytes)), "memoryMapped: hex");
         } finally {
             if (!file.delete()) {
                 file.deleteOnExit();

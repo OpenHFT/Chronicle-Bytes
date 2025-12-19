@@ -3,15 +3,15 @@
  */
 package net.openhft.chronicle.bytes;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class CommonMarshallableTest extends BytesTestCommon {
 
     @Test
     public void usesSelfDescribingMessage() {
         assertTrue(new CommonMarshallable() {
-        }.usesSelfDescribingMessage());
+        }.usesSelfDescribingMessage(), "usesSelfDescribingMessage: assertTrue");
     }
 }

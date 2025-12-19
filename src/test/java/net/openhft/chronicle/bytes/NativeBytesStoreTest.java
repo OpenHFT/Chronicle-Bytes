@@ -10,9 +10,8 @@ import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.util.Histogram;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import javax.crypto.Cipher;
 import javax.crypto.NoSuchPaddingException;
@@ -26,8 +25,8 @@ import java.util.Random;
 import java.util.stream.Stream;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
-import static org.junit.Assert.*;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 /**
  * Comprehensive tests for {@link NativeBytesStore}, including encryption
@@ -39,7 +38,7 @@ public class NativeBytesStoreTest extends BytesTestCommon {
 
     private volatile int bcs;
 
-    @Before
+    @BeforeEach
     public void hasDirectMemory() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
     }
@@ -68,7 +67,7 @@ public class NativeBytesStoreTest extends BytesTestCommon {
             final StringBuilder sb = new StringBuilder(maxLen);
             bytesStore.readUtf8(0, sb);
 
-            Assert.assertEquals("failed at " + i, expected.toString(), sb.toString());
+            assertEquals(expected.toString(), sb.toString(), "failed at " + i);
 
             bytes.releaseLast();
             expected.append("aaaaaaaaaaaaaaaaaaaaaaa"); // 23 characters
@@ -105,7 +104,7 @@ public class NativeBytesStoreTest extends BytesTestCommon {
                     final long time = System.nanoTime() - start;
                     hist.sampleNanos(time);
                 }
-                assertEquals(expected, dec.toString());
+                assertEquals(expected, dec.toString(), "decrypted bytes should match original plaintext after encrypt/decrypt cycle");
 //                System.out.println("Encrypt/Decrypt took " + hist.toMicrosFormat());
             }
         } finally {
@@ -137,7 +136,7 @@ public class NativeBytesStoreTest extends BytesTestCommon {
                 generate(bytes, t);
                 bytes.cipher(encCipher, enc);
                 final long len = enc.lengthWritten(pos) - 1;
-                assertEquals(0, len % 16);
+                assertEquals(0, len % 16, "encrypted length should be multiple of 16 (AES block size)");
                 enc.writeUnsignedByte(pos, Maths.toUInt8(len));
 //                System.out.println(len);
             }
@@ -145,13 +144,13 @@ public class NativeBytesStoreTest extends BytesTestCommon {
             for (int t = 0; t < 9; t++) {
                 final int len = enc.readUnsignedByte();
 //                System.out.println(len);
-                assertEquals(0, len % 16);
+                assertEquals(0, len % 16, "stored encrypted length should be multiple of 16 (AES block size)");
                 final long pos = enc.readPosition();
                 enc.readPositionRemaining(pos, len);
                 dec.clear();
                 enc.cipher(decCipher, dec);
                 generate(bytes, t);
-                assertEquals(bytes.toString(), dec.toString());
+                assertEquals(bytes.toString(), dec.toString(), "decrypted bytes should match original generated content for iteration " + t);
                 enc.readPositionRemaining(pos + len, 1);
             }
         } finally {
@@ -167,10 +166,10 @@ public class NativeBytesStoreTest extends BytesTestCommon {
 
         final Bytes<ByteBuffer> bbb = Bytes.elasticByteBuffer();
         try {
-            assertEquals(Bytes.MAX_HEAP_CAPACITY, bbb.capacity());
-            assertEquals(Bytes.DEFAULT_BYTE_BUFFER_CAPACITY, bbb.realCapacity());
+            assertEquals(Bytes.MAX_HEAP_CAPACITY, bbb.capacity(), "elastic ByteBuffer capacity should be max heap capacity before any writes");
+            assertEquals(Bytes.DEFAULT_BYTE_BUFFER_CAPACITY, bbb.realCapacity(), "elastic ByteBuffer real capacity should be default size before expansion");
             final @Nullable ByteBuffer bb = bbb.underlyingObject();
-            assertNotNull(bb);
+            assertNotNull(bb, "elastic ByteBuffer should have non-null underlying ByteBuffer");
 
             for (int i = 0; i < 20; i++) {
                 bbb.writeSkip(1000);
@@ -179,10 +178,10 @@ public class NativeBytesStoreTest extends BytesTestCommon {
 
             // page size on a Mac m1 is 0x4000 and not the usual 0x1000
             final long expectedRealCapacity = Jvm.isMacArm() ? 0x8000 : 0x7000;
-            assertEquals(expectedRealCapacity, bbb.realCapacity());
+            assertEquals(expectedRealCapacity, bbb.realCapacity(), "elastic ByteBuffer real capacity should expand to " + expectedRealCapacity + " after writing 20KB");
             final @Nullable ByteBuffer bb2 = bbb.underlyingObject();
-            assertNotNull(bb2);
-            assertNotSame(bb, bb2);
+            assertNotNull(bb2, "resized elastic ByteBuffer should have non-null underlying ByteBuffer");
+            assertNotSame(bb, bb2, "elastic ByteBuffer should allocate new underlying buffer after resize");
         } finally {
             bbb.releaseLast();
         }
@@ -195,7 +194,7 @@ public class NativeBytesStoreTest extends BytesTestCommon {
         final NativeBytesStore<Void> nbs = NativeBytesStore.nativeStore(chars.length);
         try {
             nbs.appendUtf8(0, chars, 0, chars.length);
-            assertEquals(hi, nbs.toString());
+            assertEquals(hi, nbs.toString(), "NativeBytesStore toString should match original string after appendUtf8");
         } finally {
             nbs.releaseLast();
         }
@@ -210,7 +209,7 @@ public class NativeBytesStoreTest extends BytesTestCommon {
             bs.appendUtf8(0, chars, 0, chars.length);
             final ByteBuffer bb = bs.toTemporaryDirectByteBuffer();
             for (int i = 0; i < chars.length; i++) {
-                assertEquals(bb.get(i), (byte) chars[i]);
+                assertEquals(bb.get(i), (byte) chars[i], "bb.get");
             }
         } finally {
             bs.releaseLast();
@@ -233,7 +232,7 @@ public class NativeBytesStoreTest extends BytesTestCommon {
                 final byte[] bytes = new byte[(int) nb.capacity()];
                 rand.nextBytes(bytes);
                 nb.write(0, bytes);
-                assertEquals(Bytes.wrapForRead(bytes).byteCheckSum(), nb.byteCheckSum());
+                assertEquals(Bytes.wrapForRead(bytes).byteCheckSum(), nb.byteCheckSum(), "NativeBytesStore byteCheckSum should match wrapped byte array checksum for capacity " + nb.capacity());
             }
             for (int t = 2; t >= 0; t--) {
                 int runs = 10000000;
@@ -261,7 +260,7 @@ public class NativeBytesStoreTest extends BytesTestCommon {
         final Bytes<ByteBuffer> dst = Bytes.elasticByteBuffer();
         try {
             dst.writePosition(src.copyTo(dst));
-            assertEquals(src.toString(), dst.toString());
+            assertEquals(src.toString(), dst.toString(), "destination bytes should match source after copyTo operation");
         } finally {
             src.releaseLast();
             dst.releaseLast();
@@ -275,8 +274,8 @@ public class NativeBytesStoreTest extends BytesTestCommon {
         @NotNull NativeBytesStore hbs2 = NativeBytesStore.from("Hello".getBytes(ISO_8859_1));
         @NotNull NativeBytesStore hbs3 = NativeBytesStore.from("He!!o".getBytes(ISO_8859_1));
         @NotNull final NativeBytesStore hbs4 = NativeBytesStore.from("Hi".getBytes(ISO_8859_1));
-        assertEquals(hbs, hbs2);
-        assertEquals(hbs2, hbs);
+        assertEquals(hbs, hbs2, "NativeBytesStores with same content should be equal");
+        assertEquals(hbs2, hbs, "equality should be symmetric for NativeBytesStores");
         assertNotEquals(hbs, hbs3);
         assertNotEquals(hbs3, hbs);
         assertNotEquals(hbs, hbs4);

@@ -7,9 +7,8 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.IOTools;
 import net.openhft.chronicle.core.io.ReferenceOwner;
-import org.junit.Before;
-import org.junit.Test;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -21,9 +20,9 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 @SuppressWarnings("deprecation")
 public class MappedFileMultiThreadTest extends BytesTestCommon {
@@ -32,7 +31,6 @@ public class MappedFileMultiThreadTest extends BytesTestCommon {
     private static final String TMP_FILE = System.getProperty("file", IOTools.createTempFile("testMultiThreadLock").getAbsolutePath());
 
     @SuppressWarnings("EmptyMethod")
-    @Before
     @BeforeEach
     @Override
     public void threadDump() {
@@ -46,7 +44,7 @@ public class MappedFileMultiThreadTest extends BytesTestCommon {
         final List<String> garbage = Collections.synchronizedList(new ArrayList<>());
         final long chunkSize = OS.isWindows() ? 64 << 10 : 4 << 10;
         try (MappedFile mf = MappedFile.mappedFile(TMP_FILE, chunkSize, 0)) {
-            assertEquals("refCount: 1", mf.referenceCounts());
+            assertEquals("refCount: 1", mf.referenceCounts(), "mf.referenceCounts");
 
             final List<Future<?>> futures = new ArrayList<>();
             final ExecutorService es = Executors.newFixedThreadPool(CORES);
@@ -63,8 +61,8 @@ public class MappedFileMultiThreadTest extends BytesTestCommon {
                         try {
                             bs = mf.acquireByteStore(test, chunkSize * offset);
                             bytes = bs.bytesForRead();
-                            assertNotNull(bytes.toString()); // show it doesn't blow up.
-                            assertNotNull(bs.toString()); // show it doesn't blow up.
+                            assertNotNull(bytes.toString(), "string representation should not be null"); // show it doesn't blow up.
+                            assertNotNull(bs.toString(), "string representation should not be null"); // show it doesn't blow up.
                             ++offset;
                         } catch (IOException e) {
                             throw Jvm.rethrow(e);

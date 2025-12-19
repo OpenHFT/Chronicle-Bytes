@@ -4,9 +4,9 @@
 package net.openhft.chronicle.bytes.util;
 
 import net.openhft.chronicle.bytes.Bytes;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class Bit8StringInternerTest {
 
@@ -19,6 +19,6 @@ public class Bit8StringInternerTest {
 
         String internedString = interner.getValue(bytesStore, length);
 
-        assertEquals("Hello World", internedString);
+        assertEquals("Hello World", internedString, "Bit8StringInterner.getValue should extract string from Bytes");
     }
 }

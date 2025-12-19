@@ -3,12 +3,13 @@
  */
 package net.openhft.chronicle.bytes;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.nio.BufferUnderflowException;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class StopBitTest extends BytesTestCommon {
 
@@ -33,7 +34,7 @@ public class StopBitTest extends BytesTestCommon {
                     throw new AssertionError(e);
                 }
 
-                Assert.assertEquals("failed at " + i, expected, b.read8bit());
+                assertEquals(expected, b.read8bit(), "failed at " + i);
 
             } finally {
                 b.releaseLast();
@@ -66,7 +67,7 @@ public class StopBitTest extends BytesTestCommon {
                 }
             }
 
-            Assert.assertEquals(s, b.read8bit());
+            assertEquals(s, b.read8bit(), "read8bit should return string written after stop-bit length");
         } finally {
             bytes.releaseLast();
             b.releaseLast();

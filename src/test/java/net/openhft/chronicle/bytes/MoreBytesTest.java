@@ -10,8 +10,7 @@ import net.openhft.chronicle.core.pool.StringInterner;
 import net.openhft.chronicle.core.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
@@ -22,15 +21,20 @@ import java.util.Arrays;
 import java.util.List;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SuppressWarnings("deprecation")
 public class MoreBytesTest extends BytesTestCommon {
 
-    private static void testIndexOf(@NotNull final String sourceStr, @NotNull final String subStr) {
+    private static long indexOfBytes(@NotNull final String sourceStr, @NotNull final String subStr) {
         final Bytes<?> source = Bytes.wrapForRead(sourceStr.getBytes(ISO_8859_1));
         final Bytes<?> subBytes = Bytes.wrapForRead(subStr.getBytes(ISO_8859_1));
-        Assert.assertEquals(sourceStr.indexOf(subStr), source.indexOf(subBytes));
+        try {
+            return source.indexOf(subBytes);
+        } finally {
+            source.releaseLast();
+            subBytes.releaseLast();
+        }
     }
 
     @SuppressWarnings("rawtypes")
@@ -55,12 +59,12 @@ public class MoreBytesTest extends BytesTestCommon {
         }
         for (Bytes<?> b : bytesArray) {
             try {
-                assertEquals(count + ": " + b.getClass().getSimpleName(), 1, b.refCount());
-                assertEquals(count + ": " + b.getClass().getSimpleName(), 1, b.bytesStore().refCount());
+                assertEquals(1, b.refCount(), count + ": " + b.getClass().getSimpleName());
+                assertEquals(1, b.bytesStore().refCount(), count + ": " + b.getClass().getSimpleName());
             } finally {
                 b.releaseLast();
-                assertEquals(count + ": " + b.getClass().getSimpleName(), 0, b.refCount());
-                assertEquals(count++ + ": " + b.getClass().getSimpleName(), 0, b.bytesStore().refCount());
+                assertEquals(0, b.refCount(), count + ": " + b.getClass().getSimpleName());
+                assertEquals(0, b.bytesStore().refCount(), count++ + ": " + b.getClass().getSimpleName());
             }
         }
     }
@@ -72,7 +76,7 @@ public class MoreBytesTest extends BytesTestCommon {
         final Bytes<?> to = Bytes.wrapForWrite(bb);
         try {
             to.append(0, 1, 5);
-            assertEquals("00001", Bytes.wrapForRead(bb).toString());
+            assertEquals("00001", Bytes.wrapForRead(bb).toString(), "append at random position should write long value '1' at specified offset");
         } finally {
             to.releaseLast();
         }
@@ -86,7 +90,7 @@ public class MoreBytesTest extends BytesTestCommon {
         try {
             to.append(5, 10, 5);
             final Bytes<ByteBuffer> bbb = Bytes.wrapForRead(bb);
-            assertEquals("WWWWW00010", bbb.toString());
+            assertEquals("WWWWW00010", bbb.toString(), "append at offset 5 should write long value '10' preserving prefix 'WWWWW'");
             bbb.releaseLast();
         } finally {
             to.releaseLast();
@@ -106,23 +110,25 @@ public class MoreBytesTest extends BytesTestCommon {
                 to.releaseLast();
             }
         } catch (Exception ex) {
-            assertTrue(ex instanceof BufferOverflowException);
+            assertInstanceOf(BufferOverflowException.class, ex, "appending long at invalid position should throw BufferOverflowException");
         }
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testAppendLongRandomPositionShouldThrowIllegalArgumentException() {
-        final byte[] bytes = "000".getBytes(ISO_8859_1);
-        final ByteBuffer bb = ByteBuffer.wrap(bytes);
-        final Bytes<?> to = Bytes.wrapForWrite(bb);
-        try {
-            to.append(0, 1000, 3);
-        } catch (BufferOverflowException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } finally {
-            to.releaseLast();
-        }
+        assertThrows(IllegalArgumentException.class, () -> {
+            final byte[] bytes = "000".getBytes(ISO_8859_1);
+            final ByteBuffer bb = ByteBuffer.wrap(bytes);
+            final Bytes<?> to = Bytes.wrapForWrite(bb);
+            try {
+                to.append(0, 1000, 3);
+            } catch (BufferOverflowException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } finally {
+                to.releaseLast();
+            }
+        });
     }
 
     @Test
@@ -134,7 +140,7 @@ public class MoreBytesTest extends BytesTestCommon {
         } finally {
             to.releaseLast();
         }
-        assertEquals("003.14", Bytes.wrapForRead(bytes).toString());
+        assertEquals("003.14", Bytes.wrapForRead(bytes).toString(), "append double at random position should write '3.14' with 2 decimals at offset 0");
     }
 
     @Test
@@ -148,16 +154,18 @@ public class MoreBytesTest extends BytesTestCommon {
         }
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testAppendDoubleRandomPositionShouldThrowIllegalArgumentException() {
+        assertThrows(IllegalArgumentException.class, () -> {
 
-        final byte[] bytes = "000000".getBytes(ISO_8859_1);
-        final Bytes<?> to = Bytes.wrapForWrite(bytes);
-        try {
-            to.append(0, 33333.14, 2, 6);
-        } finally {
-            to.releaseLast();
-        }
+            final byte[] bytes = "000000".getBytes(ISO_8859_1);
+            final Bytes<?> to = Bytes.wrapForWrite(bytes);
+            try {
+                to.append(0, 33333.14, 2, 6);
+            } finally {
+                to.releaseLast();
+            }
+        });
     }
 
     @Test
@@ -181,7 +189,7 @@ public class MoreBytesTest extends BytesTestCommon {
                         fail(Arrays.toString(b));
                 }
             }
-        assertEquals(14464, expected);
+        assertEquals(14464, expected, "parseUtf8 should detect exactly 14464 invalid UTF-8 sequences in 0x80-0xFF byte pair test data");
     }
 
     @Test
@@ -194,15 +202,15 @@ public class MoreBytesTest extends BytesTestCommon {
                 final @NotNull StringInterner si = new StringInterner(128);
                 final @Nullable String s = si.intern(b);
                 final @Nullable String s2 = si.intern(b);
-                assertEquals("World", s);
-                assertSame(s, s2);
+                assertEquals("World", s, "StringInterner should intern bytes as expected string");
+                assertSame(s, s2, "StringInterner should return same instance for identical bytes");
             }
             {
                 final @NotNull UTF8StringInterner si = new UTF8StringInterner(128);
                 final String s = si.intern(b);
                 final String s2 = si.intern(b);
-                assertEquals("World", s);
-                assertSame(s, s2);
+                assertEquals("World", s, "UTF8StringInterner should intern bytes as expected string");
+                assertSame(s, s2, "UTF8StringInterner should return same instance for identical bytes");
             }
         } finally {
             b.releaseLast();
@@ -216,7 +224,7 @@ public class MoreBytesTest extends BytesTestCommon {
         final Bytes<?> source = Bytes.wrapForRead(sourceStr.getBytes(ISO_8859_1));
         source.readSkip(1);
         final Bytes<?> subBytes = Bytes.wrapForRead(subStr.getBytes(ISO_8859_1));
-        Assert.assertEquals(0, source.indexOf(subBytes));
+        assertEquals(0, source.indexOf(subBytes), "source.indexOf");
     }
 
     @Test
@@ -227,49 +235,49 @@ public class MoreBytesTest extends BytesTestCommon {
         final Bytes<?> subBytes = Bytes.wrapForRead(subStr.getBytes(ISO_8859_1));
         subBytes.readSkip(1);
 
-        Assert.assertEquals(0, source.indexOf(subBytes));
-        assertEquals(1, subBytes.readPosition());
-        assertEquals(0, source.readPosition());
+        assertEquals(0, source.indexOf(subBytes), "source.indexOf");
+        assertEquals(1, subBytes.readPosition(), "subBytes read position should remain at 1 after indexOf call");
+        assertEquals(0, source.readPosition(), "source read position should remain at 0 after indexOf call");
     }
 
     @Test
     public void testIndexOfAtEnd() {
-        testIndexOf("A string of some data", "ta");
+        assertEquals("A string of some data".indexOf("ta"), indexOfBytes("A string of some data", "ta"), "testIndexOfAtEnd: bytes index");
     }
 
     @Test
     public void testIndexOfEmptySubStr() {
-        testIndexOf("A string of some data", "");
+        assertEquals("A string of some data".indexOf(""), indexOfBytes("A string of some data", ""), "testIndexOfEmptySubStr: bytes index");
     }
 
     @Test
     public void testIndexOfEmptySubStrAndSource() {
-        testIndexOf("", "");
+        assertEquals("".indexOf(""), indexOfBytes("", ""), "testIndexOfEmptySubStrAndSource: bytes index");
     }
 
     @Test
     public void testIndexOfEmptySource() {
-        testIndexOf("", "some");
+        assertEquals("".indexOf("some"), indexOfBytes("", "some"), "testIndexOfEmptySource: bytes index");
     }
 
     @Test
     public void testIndexOfExactMatch() {
-        testIndexOf("some", "some");
+        assertEquals("some".indexOf("some"), indexOfBytes("some", "some"), "testIndexOfExactMatch: bytes index");
     }
 
     @Test
     public void testIndexOfIncorrectExactMatch() {
-        testIndexOf("some", " some");
+        assertEquals("some".indexOf(" some"), indexOfBytes("some", " some"), "testIndexOfIncorrectExactMatch: bytes index");
     }
 
     @Test
     public void testIndexOfExactMatchAtChar1() {
-        testIndexOf(" some", "some");
+        assertEquals(" some".indexOf("some"), indexOfBytes(" some", "some"), "testIndexOfExactMatchAtChar1: bytes index");
     }
 
     @Test
     public void testIndexOfLastChar() {
-        testIndexOf(" some", "e");
+        assertEquals(" some".indexOf("e"), indexOfBytes(" some", "e"), "testIndexOfLastChar: bytes index");
     }
 
     @Test
@@ -277,7 +285,7 @@ public class MoreBytesTest extends BytesTestCommon {
         final Bytes<?> b = Bytes.from("Hello World");
         try {
             b.readSkip(6);
-            assertTrue(StringUtils.isEqual("World", b));
+            assertTrue(StringUtils.isEqual("World", b), "StringUtils.isEqual");
         } finally {
             b.releaseLast();
         }
@@ -291,7 +299,7 @@ public class MoreBytesTest extends BytesTestCommon {
         final Bytes<ByteBuffer> bytesOut = Bytes.elasticHeapByteBuffer();
         try {
             b.readWithLength(2, bytesOut);
-            assertEquals("He", bytesOut.toString());
+            assertEquals("He", bytesOut.toString(), "readWithLength should read exactly 2 bytes from 'Hello World'");
         } finally {
             b.releaseLast();
             bytesOut.releaseLast();
@@ -302,14 +310,14 @@ public class MoreBytesTest extends BytesTestCommon {
     public void testStartsWith() {
         final Bytes<?> aaa = Bytes.from("aaa");
         final Bytes<?> a = Bytes.from("a");
-        assertTrue(aaa.startsWith(a));
+        assertTrue(aaa.startsWith(a), "aaa.startsWith");
         final Bytes<?> aa = Bytes.from("aa");
-        assertTrue(aaa.startsWith(aa));
-        assertTrue(aaa.startsWith(aaa));
+        assertTrue(aaa.startsWith(aa), "aaa.startsWith");
+        assertTrue(aaa.startsWith(aaa), "aaa.startsWith");
         final Bytes<?> aaaa = Bytes.from("aaaa");
-        assertFalse(aaa.startsWith(aaaa));
+        assertFalse(aaa.startsWith(aaaa), "aaa.startsWith");
         final Bytes<?> b = Bytes.from("b");
-        assertFalse(aaa.startsWith(b));
+        assertFalse(aaa.startsWith(b), "aaa.startsWith");
         a.releaseLast();
         aa.releaseLast();
         aaa.releaseLast();
@@ -323,7 +331,7 @@ public class MoreBytesTest extends BytesTestCommon {
         final Bytes<?> symbol = Bytes.allocateDirect(symbolStr.length());
         symbol.clear();
         symbol.append(symbolStr);
-        assertTrue(symbol.realCapacity() < 3L * symbolStr.length());
+        assertTrue(symbol.realCapacity() < 3L * symbolStr.length(), "real capacity should be true");
         symbol.releaseLast();
     }
 }

@@ -8,9 +8,8 @@ import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Assert;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
@@ -21,8 +20,8 @@ import java.util.Random;
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static java.nio.charset.StandardCharsets.US_ASCII;
 import static net.openhft.chronicle.bytes.internal.BytesInternalTest.Nested.LENGTH;
-import static org.junit.Assert.*;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 @SuppressWarnings("deprecation")
 public class BytesInternalTest extends BytesTestCommon {
@@ -38,13 +37,13 @@ public class BytesInternalTest extends BytesTestCommon {
         @NotNull StringBuilder sb = new StringBuilder();
 
         BytesInternal.parseUtf8(bytes, sb, true, 128);
-        assertEquals(128, sb.length());
-        assertEquals(new String(bytes2, US_ASCII), sb.toString());
+        assertEquals(128, sb.length(), "parsed StringBuilder should contain 128 characters after UTF-8 parsing");
+        assertEquals(new String(bytes2, US_ASCII), sb.toString(), "parsed StringBuilder content should match original ASCII byte array");
         bytes.readPosition(0);
         sb.setLength(0);
         BytesInternal.parseUtf8(bytes, sb, false, 128);
-        assertEquals(128, sb.length());
-        assertEquals(new String(bytes2, US_ASCII), sb.toString());
+        assertEquals(128, sb.length(), "parsed StringBuilder should contain 128 characters after UTF-8 parsing with append-only mode");
+        assertEquals(new String(bytes2, US_ASCII), sb.toString(), "parsed StringBuilder content should match original ASCII byte array in append-only mode");
         bytes.releaseLast();
     }
 
@@ -61,9 +60,9 @@ public class BytesInternalTest extends BytesTestCommon {
         @NotNull StringBuilder sb = new StringBuilder();
 
         BytesInternal.parseUtf8(bytes, sb, true, length);
-        assertEquals(length, sb.length());
+        assertEquals(length, sb.length(), "parsed StringBuilder should contain " + length + " characters after parsing long UTF-8 string");
         String actual = sb.toString();
-        assertEquals(new String(bytes2, US_ASCII), actual);
+        assertEquals(new String(bytes2, US_ASCII), actual, "parsed long string should match original ASCII byte array");
 
         bytes.releaseLast();
     }
@@ -72,8 +71,8 @@ public class BytesInternalTest extends BytesTestCommon {
     public void parseLongEmpty() {
         for (String s : ", , .,-,x, .e".split(",")) {
             final Bytes<byte[]> from = Bytes.from(s);
-            assertEquals(s, 0, from.parseLong());
-            assertFalse(s, from.lastNumberHadDigits());
+            assertEquals(0, from.parseLong(), s);
+            assertFalse(from.lastNumberHadDigits(), s);
         }
     }
 
@@ -81,8 +80,8 @@ public class BytesInternalTest extends BytesTestCommon {
     public void parseLongNonEmpty() {
         for (String s : "0, 0, 0..,0-, 0e".split(",")) {
             final Bytes<byte[]> from = Bytes.from(s);
-            assertEquals(s, 0, from.parseLong());
-            assertTrue(s, from.lastNumberHadDigits());
+            assertEquals(0, from.parseLong(), s);
+            assertTrue(from.lastNumberHadDigits(), s);
         }
     }
 
@@ -90,8 +89,8 @@ public class BytesInternalTest extends BytesTestCommon {
     public void parseLongDecimalEmpty() {
         for (String s : ", , .,-,x, .e".split(",")) {
             final Bytes<byte[]> from = Bytes.from(s);
-            assertEquals(s, 0, from.parseLongDecimal());
-            assertFalse(s, from.lastNumberHadDigits());
+            assertEquals(0, from.parseLongDecimal(), s);
+            assertFalse(from.lastNumberHadDigits(), s);
         }
     }
 
@@ -99,8 +98,8 @@ public class BytesInternalTest extends BytesTestCommon {
     public void parseLongDecimalNonEmpty() {
         for (String s : "0, 0, .0,0-,0x, .0e".split(",")) {
             final Bytes<byte[]> from = Bytes.from(s);
-            assertEquals(s, 0, from.parseLongDecimal());
-            assertTrue(s, from.lastNumberHadDigits());
+            assertEquals(0, from.parseLongDecimal(), s);
+            assertTrue(from.lastNumberHadDigits(), s);
         }
     }
 
@@ -108,8 +107,8 @@ public class BytesInternalTest extends BytesTestCommon {
     public void parseDoubleEmpty() {
         for (String s : ", , .,-,x, .e".split(",")) {
             final Bytes<byte[]> from = Bytes.from(s);
-            assertEquals(s, 0, Double.compare(-0.0, from.parseDouble()));
-            assertFalse(s, from.lastNumberHadDigits());
+            assertEquals(0, Double.compare(-0.0, from.parseDouble()), s);
+            assertFalse(from.lastNumberHadDigits(), s);
         }
     }
 
@@ -117,33 +116,48 @@ public class BytesInternalTest extends BytesTestCommon {
     public void parseDoubleEmptyZero() {
         for (String s : "0, 0, .0,0-,0x, .0e".split(",")) {
             final Bytes<byte[]> from = Bytes.from(s);
-            assertEquals(s, 0, Double.compare(0.0, from.parseDouble()));
-            assertTrue(s, from.lastNumberHadDigits());
+            assertEquals(0, Double.compare(0.0, from.parseDouble()), s);
+            assertTrue(from.lastNumberHadDigits(), s);
         }
     }
 
     @Test
     public void parseDoubleScientificNegative() {
-        parseDoubleScientific("6.1E-4", 6.1E-4, 5  /*0.00061 needs dp 5*/);
+        ParseDoubleScientificResult result = parseDoubleScientific("6.1E-4");
+        assertEquals(6.1E-4, result.value, 0.0, "parseDoubleScientificNegative: value");
+        assertEquals(5, result.decimalPlaces, "parseDoubleScientificNegative: dp"); /*0.00061 needs dp 5*/
     }
 
     @Test
     public void parseDoubleScientificNegative1() {
-        parseDoubleScientific("6.123E-4", 6.123E-4, 7 /* 0.0006123 needs dp 7 */);
+        ParseDoubleScientificResult result = parseDoubleScientific("6.123E-4");
+        assertEquals(6.123E-4, result.value, 0.0, "parseDoubleScientificNegative1: value");
+        assertEquals(7, result.decimalPlaces, "parseDoubleScientificNegative1: dp"); /* 0.0006123 needs dp 7 */
     }
 
     @Test
     public void parseDoubleScientificPositive1() {
-        parseDoubleScientific("6.12345E4", 6.12345E4, 1 /* 6.12345 x 10^4 = 61234.5 needs 1 */);
+        ParseDoubleScientificResult result = parseDoubleScientific("6.12345E4");
+        assertEquals(6.12345E4, result.value, 0.0, "parseDoubleScientificPositive1: value");
+        assertEquals(1, result.decimalPlaces, "parseDoubleScientificPositive1: dp"); /* 6.12345 x 10^4 = 61234.5 needs 1 */
     }
 
-    private void parseDoubleScientific(final String strDouble,
-                                       final double expected,
-                                       final int expectedDp) {
+    private static final class ParseDoubleScientificResult {
+        private final double value;
+        private final int decimalPlaces;
+
+        private ParseDoubleScientificResult(double value, int decimalPlaces) {
+            this.value = value;
+            this.decimalPlaces = decimalPlaces;
+        }
+    }
+
+    private ParseDoubleScientificResult parseDoubleScientific(final String strDouble) {
         final Bytes<?> from = Bytes.from(strDouble);
         try {
-            assertEquals(expected, from.parseDouble(), 0.0);
-            assertEquals(expectedDp, from.lastDecimalPlaces());
+            double value = from.parseDouble();
+            int decimalPlaces = from.lastDecimalPlaces();
+            return new ParseDoubleScientificResult(value, decimalPlaces);
         } finally {
             from.releaseLast();
         }
@@ -162,15 +176,15 @@ public class BytesInternalTest extends BytesTestCommon {
         @NotNull StringBuilder sb = new StringBuilder();
 
         BytesInternal.parseUtf81(bytes, sb, true, length);
-        assertEquals(length, sb.length());
-        assertEquals(new String(bytes2, US_ASCII), sb.toString());
+        assertEquals(length, sb.length(), "parsed StringBuilder should contain " + length + " characters after parseUtf81 with clear mode");
+        assertEquals(new String(bytes2, US_ASCII), sb.toString(), "parsed content from parseUtf81 should match original ASCII byte array in clear mode");
 
         bytes.readPosition(0);
         sb.setLength(0);
 
         BytesInternal.parseUtf81(bytes, sb, false, length);
-        assertEquals(length, sb.length());
-        assertEquals(new String(bytes2, US_ASCII), sb.toString());
+        assertEquals(length, sb.length(), "parsed StringBuilder should contain " + length + " characters after parseUtf81 with append-only mode");
+        assertEquals(new String(bytes2, US_ASCII), sb.toString(), "parsed content from parseUtf81 should match original ASCII byte array in append-only mode");
 
         bytes.releaseLast();
     }
@@ -188,8 +202,8 @@ public class BytesInternalTest extends BytesTestCommon {
         @NotNull StringBuilder sb = new StringBuilder();
 
         BytesInternal.parseUtf8_SB1(bytes, sb, true, length);
-        assertEquals(length, sb.length());
-        assertEquals(new String(bytes2, US_ASCII), sb.toString());
+        assertEquals(length, sb.length(), "parsed StringBuilder should contain " + length + " characters after parseUtf8_SB1");
+        assertEquals(new String(bytes2, US_ASCII), sb.toString(), "parsed content from parseUtf8_SB1 should match original ASCII byte array");
 
         bytes.readPosition(0);
         sb.setLength(0);
@@ -216,8 +230,8 @@ public class BytesInternalTest extends BytesTestCommon {
         @NotNull StringBuilder sb = new StringBuilder();
 
         BytesInternal.parse8bit(0, bytes, sb, length);
-        assertEquals(length, sb.length());
-        assertEquals(new String(bytes2, US_ASCII), sb.toString());
+        assertEquals(length, sb.length(), "parsed StringBuilder should contain " + length + " characters after parse8bit");
+        assertEquals(new String(bytes2, US_ASCII), sb.toString(), "parsed 8-bit content should match original ASCII byte array");
 
         bytes.releaseLast();
     }
@@ -232,9 +246,9 @@ public class BytesInternalTest extends BytesTestCommon {
                 for (int i = 1; i < 10; i += 2) {
                     String si = s + i;
                     Bytes<?> from = Bytes.from(si);
-                    assertEquals(si,
-                            Double.parseDouble(si),
-                            from.parseDouble(), 0.0);
+                    assertEquals(Double.parseDouble(si),
+                            from.parseDouble(),
+                            0.0, si);
                     from.releaseLast();
                 }
             }
@@ -256,7 +270,7 @@ public class BytesInternalTest extends BytesTestCommon {
         BytesInternal.writeUtf8(bytes, test);
 
         sb.setLength(0);
-        assertTrue(BytesInternal.compareUtf8(bytes, 0, test));
+        assertTrue(BytesInternal.compareUtf8(bytes, 0, test), "BytesInternal.compareUtf8");
 
         bytes.releaseLast();
     }
@@ -278,7 +292,7 @@ public class BytesInternalTest extends BytesTestCommon {
         sb.setLength(0);
         BytesInternal.parse8bit(0, bytes, sb, length);
 
-        assertEquals(test, sb.toString());
+        assertEquals(test, sb.toString(), "parsed 8-bit content should match original UTF-8 appended string");
         bytes.releaseLast();
     }
 
@@ -299,7 +313,7 @@ public class BytesInternalTest extends BytesTestCommon {
         sb.setLength(0);
         BytesInternal.parse8bit(0, bytes, sb, length);
 
-        assertEquals(test, sb.toString());
+        assertEquals(test, sb.toString(), "parsed 8-bit content should match original append8bit string");
         bytes.releaseLast();
     }
 
@@ -321,8 +335,8 @@ public class BytesInternalTest extends BytesTestCommon {
             double expected = (Double) objects[1];
 
             Bytes<?> from = Bytes.from(text);
-            assertEquals(expected, from.parseDouble(), 0.0);
-            assertTrue(from.lastNumberHadDigits());
+            assertEquals(expected, from.parseDouble(), 0.0, "from.parseDouble");
+            assertTrue(from.lastNumberHadDigits(), "from.lastNumberHadDigits");
             from.releaseLast();
         }
     }
@@ -333,7 +347,7 @@ public class BytesInternalTest extends BytesTestCommon {
 
         src.readSkip(7);
         BytesStore<Bytes<byte[]>, byte[]> copy = src.copy();
-        assertEquals(copy.toString(), src.toString());
+        assertEquals(copy.toString(), src.toString(), "copied BytesStore content should match source after readSkip");
         // shouldn't need to do this
         copy.releaseLast();
     }
@@ -345,7 +359,7 @@ public class BytesInternalTest extends BytesTestCommon {
 
         final byte[] buffer = new byte[100];
         final int copiedLen = src.copyTo(buffer);
-        assertEquals(new String(buffer, 0, copiedLen, ISO_8859_1), src.toString());
+        assertEquals(new String(buffer, 0, copiedLen, ISO_8859_1), src.toString(), "copied array content should match source Bytes after readSkip");
     }
 
     private int checkParse(int different, String s) {
@@ -371,11 +385,11 @@ public class BytesInternalTest extends BytesTestCommon {
             String s = String.format(Locale.UK, "%.9f", num);
             different = checkParse(different, s);
         }
-        Assert.assertEquals("Different " + (100.0 * different) / max + "%", 0, different);
+        assertEquals(0, different, "Different " + (100.0 * different) / max + "%");
     }
 
     @Test
-    @Ignore(/* peformance test */)
+    @Disabled(/* peformance test */)
     public void testNoneDirectWritePerformance() {
         final int size = 64;
         Bytes<?> a = Bytes.allocateElasticOnHeap(size + 8);
@@ -459,12 +473,12 @@ public class BytesInternalTest extends BytesTestCommon {
             System.out.println("time4 " + time4 + ", time5 " + time5 + ", time6: " + time6);
 
             // This is a performance test so just assert it ran
-            assertTrue(time1 > 0);
-            assertTrue(time2 > 0);
-            assertTrue(time3 > 0);
-            assertTrue(time4 > 0);
-            assertTrue(time5 > 0);
-            assertTrue(time6 > 0);
+            assertTrue(time1 > 0, "BytesInternal.writeFully should record non-zero measurement time");
+            assertTrue(time2 > 0, "simpleWriteFully1 should record non-zero measurement time");
+            assertTrue(time3 > 0, "oldWriteFully should record non-zero measurement time");
+            assertTrue(time4 > 0, "simpleWriteFully2 should record non-zero measurement time");
+            assertTrue(time5 > 0, "simpleWriteFully3 should record non-zero measurement time");
+            assertTrue(time6 > 0, "simpleWriteFully4 should record non-zero measurement time");
             Thread.yield();
         }
     }

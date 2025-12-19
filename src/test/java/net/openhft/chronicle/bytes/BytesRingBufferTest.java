@@ -3,12 +3,12 @@
  */
 package net.openhft.chronicle.bytes;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @SuppressWarnings("deprecation")
@@ -20,7 +20,7 @@ public class BytesRingBufferTest {
     @Mock
     private BytesStore<?, Void> mockBytesStore;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         MockitoAnnotations.openMocks(this);
     }
@@ -35,29 +35,30 @@ public class BytesRingBufferTest {
     @Test
     public void testOffer() {
         when(bytesRingBuffer.offer(any())).thenReturn(true);
-        assertTrue(bytesRingBuffer.offer(mockBytesStore));
+        assertTrue(bytesRingBuffer.offer(mockBytesStore), "bytesRingBuffer.offer");
     }
 
     @Test
     public void testRead() {
         when(bytesRingBuffer.read(any())).thenReturn(true);
-        assertTrue(bytesRingBuffer.read(mock(BytesOut.class)));
+        assertTrue(bytesRingBuffer.read(mock(BytesOut.class)), "bytesRingBuffer.read");
     }
 
     @Test
     public void testReadRemaining() {
         when(bytesRingBuffer.readRemaining()).thenReturn(10L);
-        assertEquals(10L, bytesRingBuffer.readRemaining());
+        assertEquals(10L, bytesRingBuffer.readRemaining(), "bytesRingBuffer.readRemaining");
     }
 
     @Test
     public void testIsEmpty() {
         when(bytesRingBuffer.isEmpty()).thenReturn(true);
-        assertTrue(bytesRingBuffer.isEmpty());
+        assertTrue(bytesRingBuffer.isEmpty(), "emptiness should be true");
     }
 
-    @Test(expected = ClassNotFoundException.class)
+    @Test
     public void testNewInstanceThrowsException() {
-        BytesRingBuffer.newInstance(mockBytesStore);
+        assertThrows(ClassNotFoundException.class, () ->
+                BytesRingBuffer.newInstance(mockBytesStore));
     }
 }

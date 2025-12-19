@@ -3,16 +3,16 @@
  */
 package net.openhft.chronicle.bytes;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class MultiReaderBytesRingBufferTest {
     private MultiReaderBytesRingBuffer ringBuffer;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         // Mock the MultiReaderBytesRingBuffer
         ringBuffer = mock(MultiReaderBytesRingBuffer.class);
@@ -38,8 +38,8 @@ public class MultiReaderBytesRingBufferTest {
         boolean reader2HasData = reader2.read(bytes2);
 
         // Check both readers were able to read data independently
-        Assert.assertFalse("Reader 1 should have data", reader1HasData);
-        Assert.assertFalse("Reader 2 should have data", reader2HasData);
+        assertFalse(reader1HasData, "Reader 1 should have data");
+        assertFalse(reader2HasData, "Reader 2 should have data");
 
         // Further checks can include validating the data read by each reader, ensuring it matches expected values
 
@@ -59,7 +59,7 @@ public class MultiReaderBytesRingBufferTest {
         boolean hasData = reader.read(bytes);
 
         // Assuming no new data was written after calling toEnd, there should be nothing to read
-        Assert.assertFalse("Reader should not have data after moving to end", hasData);
+        assertFalse(hasData, "Reader should not have data after moving to end");
 
         bytes.releaseLast();
     }

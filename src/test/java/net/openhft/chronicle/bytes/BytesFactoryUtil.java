@@ -102,11 +102,11 @@ final class BytesFactoryUtil {
 
     static void releaseAndAssertReleased(ReferenceCounted referenceCounted) {
         referenceCounted.releaseLast();
-        assertEquals(0, referenceCounted.refCount());
+        assertEquals(0, referenceCounted.refCount(), "reference count should be 0 after releaseLast");
     }
 
     static void assertNeverWrittenTo(final Bytes<Object> bytes) {
-        assertTrue(bytes.isClear());
+        assertTrue(bytes.isClear(), "isClear value");
         for (int i = 0; i < SIZE; i++) {
             assertEquals(0, bytes.readByte(i), "at " + i);
         }

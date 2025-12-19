@@ -26,21 +26,21 @@ class PageUtilTest {
     void getDefaultPageSize() throws Exception {
         File file = Files.createTempFile("page-util", "file").toFile();
         file.deleteOnExit();
-        assertEquals(OS.defaultOsPageSize(), PageUtil.getPageSize(file.getAbsolutePath()));
+        assertEquals(OS.defaultOsPageSize(), PageUtil.getPageSize(file.getAbsolutePath()), "OS.defaultOsPageSize");
     }
 
     @Test
     void getPageSize() {
         assumeTrue(OS.isLinux());
         assumeTrue(Files.exists(Paths.get("/mnt/huge")));
-        assertEquals(DEFAULT_HUGE_PAGE_SIZE, PageUtil.getPageSize("/mnt/huge"));
+        assertEquals(DEFAULT_HUGE_PAGE_SIZE, PageUtil.getPageSize("/mnt/huge"), "PageUtil.getPageSize");
     }
 
     @Test
     void isHugePage() {
         assumeTrue(OS.isLinux());
         assumeTrue(Files.exists(Paths.get("/mnt/huge")));
-        assertTrue(PageUtil.isHugePage("/mnt/huge"));
+        assertTrue(PageUtil.isHugePage("/mnt/huge"), "PageUtil.isHugePage");
     }
 
     @Test
@@ -54,7 +54,7 @@ class PageUtilTest {
         Files.write(file.toPath(), lines);
 
         List<String> result = PageUtil.readMountInfo(file.getAbsolutePath());
-        assertEquals(lines, result);
+        assertEquals(lines, result, "readMountInfo should return all lines from mount info file");
     }
 
     @CsvSource(delimiter = '|',
@@ -69,7 +69,7 @@ class PageUtilTest {
     @ParameterizedTest
     void parseActualPageSize(String line, int expected) {
         int result = PageUtil.parsePageSize(line);
-        assertEquals(expected, result);
+        assertEquals(expected, result, "parsePageSize should extract page size from mount options");
     }
 
     @Test
@@ -77,7 +77,7 @@ class PageUtilTest {
         String line = "136 162 253:2 /local /mnt/local rw,relatime shared:74 - xfs /dev/mapper/rl-home rw,seclabel,attr2,inode64,logbufs=8,logbsize=32k,noquota";
 
         int result = PageUtil.parsePageSize(line);
-        assertEquals(DEFAULT_HUGE_PAGE_SIZE, result);
+        assertEquals(DEFAULT_HUGE_PAGE_SIZE, result, "parsePageSize should return default huge page size when pagesize option not present");
     }
 
     @Test
@@ -85,7 +85,7 @@ class PageUtilTest {
         String line = "1110 162 0:61 / /mnt/huge rw,relatime shared:591 - hugetlbfs nodev rw,seclabel,pagesize=4M,size=68719476";
 
         String result = PageUtil.parseMountPoint(line);
-        assertEquals("/mnt/huge", result);
+        assertEquals("/mnt/huge", result, "parseMountPoint should extract mount point from mount info line");
     }
 
     @Test
@@ -97,9 +97,9 @@ class PageUtilTest {
 
         PageUtil.insert("/mnt/huge", gigabyte);
 
-        assertNotNull(root);
-        assertNotNull(root.childs.get("mnt"));
-        assertNotNull(root.childs.get("mnt").childs.get("huge"));
-        assertEquals(gigabyte, root.childs.get("mnt").childs.get("huge").pageSize);
+        assertNotNull(root, "trie root should exist after insert");
+        assertNotNull(root.childs.get("mnt"), "childs.get");
+        assertNotNull(root.childs.get("mnt").childs.get("huge"), "childs.get");
+        assertEquals(gigabyte, root.childs.get("mnt").childs.get("huge").pageSize, "childs.get");
     }
 }

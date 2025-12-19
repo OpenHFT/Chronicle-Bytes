@@ -3,9 +3,10 @@
  */
 package net.openhft.chronicle.bytes;
 
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class StringRWPerfTest extends BytesTestCommon {
 
@@ -13,6 +14,7 @@ public class StringRWPerfTest extends BytesTestCommon {
     private static final String ASCII = "012345678901234567890123456789";
     private Bytes<?> bytes;
 
+    @AfterEach
     @Override
     public void afterChecks() {
         if (bytes != null)
@@ -26,7 +28,7 @@ public class StringRWPerfTest extends BytesTestCommon {
         final String s0 = ASCII;
         bytes.write8bit(s0);
         String s = bytes.read8bit();
-        assertEquals(s0, s);
+        assertEquals(s0, s, "write8bit/read8bit round-trip should preserve ASCII string");
         bytes.releaseLast();
     }
 
@@ -36,7 +38,7 @@ public class StringRWPerfTest extends BytesTestCommon {
         final String s0 = UTF8;
         bytes.writeUtf8(s0);
         String s = bytes.readUtf8();
-        assertEquals(s0, s);
+        assertEquals(s0, s, "writeUtf8/readUtf8 round-trip should preserve UTF-8 string");
         bytes.releaseLast();
     }
 
@@ -44,12 +46,14 @@ public class StringRWPerfTest extends BytesTestCommon {
     public void testOnHeapPerf() {
         bytes = Bytes.allocateElasticOnHeap(40);
         doTestPerf(bytes);
+        assertEquals(0, bytes.readRemaining(), "testOnHeapPerf: bytes consumed");
     }
 
     @Test
     public void testDirectPerf() {
         bytes = Bytes.allocateElasticDirect(40);
         doTestPerf(bytes);
+        assertEquals(0, bytes.readRemaining(), "testDirectPerf: bytes consumed");
     }
 
     private void doTestPerf(Bytes<?> bytes) {
@@ -62,14 +66,14 @@ public class StringRWPerfTest extends BytesTestCommon {
                 long start = System.nanoTime();
                 bytes.write8bit(ASCII);
                 String s = bytes.read8bit();
-                assertEquals(ASCII, s);
+                assertEquals(ASCII, s, "write8bit/read8bit performance test should preserve value");
                 long end = System.nanoTime();
                 timeAscii += end - start;
                 bytes.clear();
                 long start2 = System.nanoTime();
                 bytes.writeUtf8(ASCII);
                 String s2 = bytes.readUtf8();
-                assertEquals(ASCII, s2);
+                assertEquals(ASCII, s2, "writeUtf8/readUtf8 performance test should preserve value");
                 long end2 = System.nanoTime();
                 timeUtf += end2 - start2;
             }

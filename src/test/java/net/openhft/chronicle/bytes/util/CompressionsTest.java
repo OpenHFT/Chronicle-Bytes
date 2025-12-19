@@ -23,11 +23,11 @@ class CompressionsTest {
 
         byte[] compressed = Compressions.Binary.compress(original);
         byte[] decompressed = Compressions.Binary.uncompress(compressed);
-        assertEquals(new String(original, ISO_8859_1), new String(decompressed, ISO_8859_1));
+        assertEquals(new String(original, ISO_8859_1), new String(decompressed, ISO_8859_1), "testBinaryCompression: assertEquals");
 
         InputStream decompressingStream = Compressions.Binary.decompressingStream(new ByteArrayInputStream(compressed));
         OutputStream compressingStream = Compressions.Binary.compressingStream(new ByteArrayOutputStream());
-        assertNotNull(decompressingStream);
-        assertNotNull(compressingStream);
+        assertNotNull(decompressingStream, "decompressingStream should be created successfully");
+        assertNotNull(compressingStream, "compressingStream should be created successfully");
     }
 }

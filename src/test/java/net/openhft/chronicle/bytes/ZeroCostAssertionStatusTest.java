@@ -4,8 +4,9 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.assertions.AssertUtil;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 class ZeroCostAssertionStatusTest extends BytesTestCommon {
 
@@ -20,13 +21,13 @@ class ZeroCostAssertionStatusTest extends BytesTestCommon {
 
         boolean zcae = false;
         try {
-            assert AssertUtil.SKIP_ASSERTIONS || 0 != 0;
+            assert AssertUtil.SKIP_ASSERTIONS;
         } catch (AssertionError assertionError) {
             zcae = true;
         }
 
         System.out.println("Normal assertions are " + (ae ? "ON" : "OFF"));
         System.out.println("Zero-cost assertions are " + (zcae ? "ON" : "OFF"));
-        Assertions.assertTrue(true);
+        assertTrue(true, "assertion status display test should complete successfully");
     }
 }

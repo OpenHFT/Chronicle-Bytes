@@ -3,8 +3,9 @@
  */
 package net.openhft.chronicle.bytes;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ConnectionDroppedExceptionTest {
 
@@ -13,7 +14,7 @@ public class ConnectionDroppedExceptionTest {
         String expectedMessage = "Connection dropped unexpectedly.";
         ConnectionDroppedException exception = new ConnectionDroppedException(expectedMessage);
 
-        Assert.assertEquals(expectedMessage, exception.getMessage());
+        assertEquals(expectedMessage, exception.getMessage(), "exception.getMessage");
     }
 
     @Test
@@ -21,7 +22,7 @@ public class ConnectionDroppedExceptionTest {
         Throwable expectedCause = new RuntimeException("Underlying cause");
         ConnectionDroppedException exception = new ConnectionDroppedException(expectedCause);
 
-        Assert.assertEquals(expectedCause, exception.getCause());
+        assertEquals(expectedCause, exception.getCause(), "exception.getCause");
     }
 
     @Test
@@ -30,7 +31,7 @@ public class ConnectionDroppedExceptionTest {
         Throwable expectedCause = new RuntimeException("Specific cause");
         ConnectionDroppedException exception = new ConnectionDroppedException(expectedMessage, expectedCause);
 
-        Assert.assertEquals(expectedMessage, exception.getMessage());
-        Assert.assertEquals(expectedCause, exception.getCause());
+        assertEquals(expectedMessage, exception.getMessage(), "exception.getMessage");
+        assertEquals(expectedCause, exception.getCause(), "exception.getCause");
     }
 }

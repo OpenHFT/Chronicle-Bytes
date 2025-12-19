@@ -4,73 +4,70 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Jvm;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.Arrays;
 import java.util.Objects;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
-@RunWith(Parameterized.class)
 public class StreamingDataInputTest extends BytesTestCommon {
 
-    private final Allocator allocator;
-
-    public StreamingDataInputTest(Allocator allocator) {
-        this.allocator = allocator;
-    }
-
-    @Parameterized.Parameters(name = "allocator={0}")
     public static Object[] params() {
         return Arrays.stream(Allocator.values()).toArray();
     }
 
-    @Before
-    public void hasNativeMemory() {
+    private static void assumeHasNativeMemory(Allocator allocator) {
         assumeFalse(allocator.name().startsWith("NATIVE") && Jvm.maxDirectMemory() == 0);
     }
 
-    @Test
-    public void read() {
+    @MethodSource("params")
+    @ParameterizedTest(name = "allocator={0}")
+    public void read(Allocator allocator) {
+        assumeHasNativeMemory(allocator);
         Bytes<?> b = allocator.elasticBytes(32);
         b.append("0123456789");
         byte[] byteArr = "ABCDEFGHIJKLMNOP".getBytes(ISO_8859_1);
         b.readPosition(3);
         b.read(byteArr);
-        assertEquals("3456789HIJKLMNOP", new String(byteArr, ISO_8859_1));
+        assertEquals("3456789HIJKLMNOP", new String(byteArr, ISO_8859_1), "read() should start at readPosition(3) and fill entire byte array");
         b.releaseLast();
     }
 
-    @Test
-    public void readOffset() {
+    @MethodSource("params")
+    @ParameterizedTest(name = "allocator={0}")
+    public void readOffset(Allocator allocator) {
+        assumeHasNativeMemory(allocator);
         Bytes<?> b = allocator.elasticBytes(32);
         b.append("0123456789");
         byte[] byteArr = "ABCDEFGHIJKLMNOP".getBytes(ISO_8859_1);
         b.read(byteArr, 2, 6);
-        assertEquals("AB012345IJKLMNOP", new String(byteArr, ISO_8859_1));
-        assertEquals('6', b.readByte());
+        assertEquals("AB012345IJKLMNOP", new String(byteArr, ISO_8859_1), "read(array, 2, 6) should write 6 bytes starting at array offset 2");
+        assertEquals('6', b.readByte(), "Next readByte should return character '6' after reading 6 bytes");
         b.releaseLast();
     }
 
-    @Test
-    public void roundTripWorksOnHeap() {
+    @MethodSource("params")
+    @ParameterizedTest(name = "allocator={0}")
+    public void roundTripWorksOnHeap(Allocator allocator) {
+        assumeHasNativeMemory(allocator);
         Bytes<?> b = allocator.elasticBytes(32);
-        TestObject source = new TestObject(123L, 123, false);
+        SampleObject source = new SampleObject(123L, 123, false);
         int offset = BytesUtil.triviallyCopyableStart(source.getClass());
         b.unsafeWriteObject(source, offset, 13);
-        TestObject dest = new TestObject();
+        SampleObject dest = new SampleObject();
         b.unsafeReadObject(dest, offset, 13);
-        assertEquals(source, dest);
+        assertEquals(source, dest, "unsafeWriteObject/unsafeReadObject round-trip should preserve object field values");
         b.releaseLast();
     }
 
-    @Test
-    public void readWithLength() {
+    @MethodSource("params")
+    @ParameterizedTest(name = "allocator={0}")
+    public void readWithLength(Allocator allocator) {
+        assumeHasNativeMemory(allocator);
         int max = 130; // two bytes of length for a stop bit encoded length
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(max + 2);
         Bytes<?> from = Bytes.wrapForRead(new byte[max]);
@@ -79,22 +76,21 @@ public class StreamingDataInputTest extends BytesTestCommon {
             from.readPositionRemaining(0, len);
             bytes.clear();
             bytes.writeWithLength(from);
-            assertEquals(len + (len < 128 ? 1 : 2), bytes.readRemaining());
+            assertEquals(len + (len < 128 ? 1 : 2), bytes.readRemaining(), "readRemaining should include length encoding (1 or 2 bytes) plus data");
             bytes.readWithLength(to);
-            assertEquals(len, to.readRemaining());
+            assertEquals(len, to.readRemaining(), "Target bytes should contain exact data length after readWithLength");
         }
     }
 
-    @SuppressWarnings("PMD.TestClassWithoutTestCases")
-    static class TestObject {
+    static class SampleObject {
         long l1;
         long i1;
         boolean b1;
 
-        TestObject() {
+        SampleObject() {
         }
 
-        TestObject(long l1, int i1, boolean b1) {
+        SampleObject(long l1, int i1, boolean b1) {
             this.l1 = l1;
             this.i1 = i1;
             this.b1 = b1;
@@ -104,7 +100,7 @@ public class StreamingDataInputTest extends BytesTestCommon {
         public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
-            TestObject that = (TestObject) o;
+            SampleObject that = (SampleObject) o;
             return l1 == that.l1 && i1 == that.i1 && b1 == that.b1;
         }
 
@@ -115,7 +111,7 @@ public class StreamingDataInputTest extends BytesTestCommon {
 
         @Override
         public String toString() {
-            return "TestObject{" +
+            return "SampleObject{" +
                     "l1=" + l1 +
                     ", i1=" + i1 +
                     ", b1=" + b1 +

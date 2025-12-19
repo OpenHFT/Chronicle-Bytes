@@ -3,9 +3,8 @@
  */
 package net.openhft.chronicle.bytes;
 
-import org.junit.Before;
-import org.junit.Test;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.Objects;
 import java.util.Set;
@@ -14,13 +13,11 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate") // JUnit4 annotations require public class
-public class Issue523Test extends BytesTestCommon {
+class Issue523Test extends BytesTestCommon {
 
     @SuppressWarnings("EmptyMethod")
-    @Before
     @BeforeEach
     @Override
     public void threadDump() {
@@ -29,20 +26,23 @@ public class Issue523Test extends BytesTestCommon {
 
     @Test
     public void testAppendDoublesHeap() {
-        doTestAppendDoubles(Bytes::allocateElasticOnHeap);
+        Set<String> failures = doTestAppendDoubles(Bytes::allocateElasticOnHeap);
+        assertEquals(0, failures.size(), "testAppendDoublesHeap: failures=" + failures);
     }
 
     @Test
     public void testAppendDoublesHeapByteBuffer() {
-        doTestAppendDoubles(Bytes::elasticHeapByteBuffer);
+        Set<String> failures = doTestAppendDoubles(Bytes::elasticHeapByteBuffer);
+        assertEquals(0, failures.size(), "testAppendDoublesHeapByteBuffer: failures=" + failures);
     }
 
     @Test
     public void testAppendDoublesDirect() {
-        doTestAppendDoubles(Bytes::allocateElasticDirect);
+        Set<String> failures = doTestAppendDoubles(Bytes::allocateElasticDirect);
+        assertEquals(0, failures.size(), "testAppendDoublesDirect: failures=" + failures);
     }
 
-    private void doTestAppendDoubles(Supplier<Bytes<?>> bytesSupplier) {
+    private Set<String> doTestAppendDoubles(Supplier<Bytes<?>> bytesSupplier) {
         Set<String> collect = IntStream.range(0, 1000)
                 .parallel()
                 .mapToObj(i -> {
@@ -72,7 +72,8 @@ public class Issue523Test extends BytesTestCommon {
                 })
                 .filter(Objects::nonNull)
                 .collect(Collectors.toCollection(TreeSet::new));
-        System.out.println(collect);
-        assertEquals(0, collect.size());
+        if (!collect.isEmpty())
+            System.out.println(collect);
+        return collect;
     }
 }

@@ -8,32 +8,27 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesOut;
 import net.openhft.chronicle.bytes.BytesTestCommon;
 import net.openhft.chronicle.core.Jvm;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Collection;
 
-import static org.junit.Assume.assumeFalse;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
-@RunWith(Parameterized.class)
-@SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate") // JUnit4 annotations require public class
-public class BinaryLengthLengthTest extends BytesTestCommon {
+class BinaryLengthLengthTest extends BytesTestCommon {
 
-    private final BinaryLengthLength binaryLengthLength;
-    private final int binaryWireCode;
+    private BinaryLengthLength binaryLengthLength;
+    private int binaryWireCode;
 
-    public BinaryLengthLengthTest(BinaryLengthLength binaryLengthLength, int binaryWireCode) {
+    public void initBinaryLengthLengthTest(BinaryLengthLength binaryLengthLength, int binaryWireCode) {
         this.binaryLengthLength = binaryLengthLength;
         this.binaryWireCode = binaryWireCode;
     }
 
-    @Parameterized.Parameters(name = "binaryLengthLength {0} binaryWireCode {1}")
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][]{
                 {BinaryLengthLength.LENGTH_8BIT, BinaryWireCode.BYTES_LENGTH8},
@@ -42,40 +37,48 @@ public class BinaryLengthLengthTest extends BytesTestCommon {
         });
     }
 
-    @Before
+    @BeforeEach
     public void hasDirect() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
     }
 
-    @Test
-    public void testInvalidLengthFor8Bit() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "binaryLengthLength {0} binaryWireCode {1}")
+    public void testInvalidLengthFor8Bit(BinaryLengthLength binaryLengthLength, int binaryWireCode) {
+        initBinaryLengthLengthTest(binaryLengthLength, binaryWireCode);
         BytesOut<?> bytes = Bytes.allocateDirect(512);
         long pos = BinaryLengthLength.LENGTH_8BIT.initialise(bytes);
         bytes.writeSkip(256);
-        Assertions.assertThrows(IllegalStateException.class, () -> BinaryLengthLength.LENGTH_8BIT.writeLength((Bytes<?>) bytes, pos, bytes.writePosition()));
+        assertThrows(IllegalStateException.class, () -> BinaryLengthLength.LENGTH_8BIT.writeLength((Bytes<?>) bytes, pos, bytes.writePosition()));
         bytes.releaseLast();
     }
 
-    @Test
-    public void testInvalidLengthFor16Bit() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "binaryLengthLength {0} binaryWireCode {1}")
+    public void testInvalidLengthFor16Bit(BinaryLengthLength binaryLengthLength, int binaryWireCode) {
+        initBinaryLengthLengthTest(binaryLengthLength, binaryWireCode);
         BytesOut<?> bytes = Bytes.allocateDirect(65539);
         long pos = BinaryLengthLength.LENGTH_16BIT.initialise(bytes);
         bytes.writeSkip(65536);
-        Assertions.assertThrows(IllegalStateException.class, () -> BinaryLengthLength.LENGTH_16BIT.writeLength((Bytes<?>) bytes, pos, bytes.writePosition()));
+        assertThrows(IllegalStateException.class, () -> BinaryLengthLength.LENGTH_16BIT.writeLength((Bytes<?>) bytes, pos, bytes.writePosition()));
         bytes.releaseLast();
     }
 
-    @Test
-    public void checkCodeMatches() {
-        assertEquals(binaryWireCode, binaryLengthLength.code());
+    @MethodSource("data")
+    @ParameterizedTest(name = "binaryLengthLength {0} binaryWireCode {1}")
+    public void checkCodeMatches(BinaryLengthLength binaryLengthLength, int binaryWireCode) {
+        initBinaryLengthLengthTest(binaryLengthLength, binaryWireCode);
+        assertEquals(binaryWireCode, binaryLengthLength.code(), "binaryLengthLength.code");
     }
 
-    @Test
-    public void checkCodeIsWritten() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "binaryLengthLength {0} binaryWireCode {1}")
+    public void checkCodeIsWritten(BinaryLengthLength binaryLengthLength, int binaryWireCode) {
+        initBinaryLengthLengthTest(binaryLengthLength, binaryWireCode);
         Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer(128);
         binaryLengthLength.initialise(bytes);
         byte readCode = (byte) bytes.readUnsignedByte();
-        assertEquals((byte) binaryWireCode, readCode);
+        assertEquals((byte) binaryWireCode, readCode, "checkCodeIsWritten: assertEquals");
         bytes.releaseLast();
     }
 }

@@ -8,9 +8,9 @@ import net.openhft.chronicle.bytes.util.DecoratedBufferOverflowException;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,8 +26,8 @@ import java.util.zip.GZIPOutputStream;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static net.openhft.chronicle.core.io.ReferenceOwner.INIT;
-import static org.junit.Assert.*;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 @SuppressWarnings("deprecation")
 public class ByteStoreTest extends BytesTestCommon {
@@ -36,13 +36,14 @@ public class ByteStoreTest extends BytesTestCommon {
     private Bytes<?> bytes;
     private BytesStore<?, ?> bytesStore;
 
+    @AfterEach
     @Override
     public void afterChecks() {
         bytes.releaseLast();
         super.afterChecks();
     }
 
-    @Before
+    @BeforeEach
     public void beforeTest() {
         bytesStore = BytesStore.wrap(ByteBuffer.allocate(SIZE).order(ByteOrder.nativeOrder()));
         bytes = bytesStore.bytesForWrite();
@@ -53,23 +54,23 @@ public class ByteStoreTest extends BytesTestCommon {
     @Test
     public void testReadIncompleteLong() {
         bytes.writeLong(0x0102030405060708L);
-        assertEquals(0x0102030405060708L, bytes.readIncompleteLong(0));
+        assertEquals(0x0102030405060708L, bytes.readIncompleteLong(0), "readIncompleteLong should read full 8-byte long value from byte store");
         bytes.clear();
 
         long l = 0;
         for (int i = 1; i <= 8; i++) {
             bytes.writeUnsignedByte(i);
             l |= (long) i << (i * 8 - 8);
-            assertEquals(l, bytes.readIncompleteLong(0));
+            assertEquals(l, bytes.readIncompleteLong(0), "readIncompleteLong should correctly read partial long with " + i + " bytes available");
         }
     }
 
     @Test
     public void testCAS() {
-        assumeFalse("TODO FIX", Jvm.isArm());
+        assumeFalse(Jvm.isArm(), "TODO FIX");
         final BytesStore<?, ?> bytes = BytesStore.wrap(ByteBuffer.allocate(100));
         bytes.compareAndSwapLong(0, 0L, 1L);
-        assertEquals(1L, bytes.readLong(0));
+        assertEquals(1L, bytes.readLong(0), "byte store should contain updated value after successful compareAndSwapLong operation");
         bytes.releaseLast();
     }
 
@@ -79,9 +80,9 @@ public class ByteStoreTest extends BytesTestCommon {
             bytes.writeByte(i, i);
         bytes.writePosition(bytes.capacity());
         for (int i = 0; i < bytes.capacity(); i++)
-            assertEquals((byte) i, bytes.readByte());
+            assertEquals((byte) i, bytes.readByte(), "sequential byte read should return values in write order");
         for (int i = (int) (bytes.capacity() - 1); i >= 0; i--) {
-            assertEquals((byte) i, bytes.readByte(i));
+            assertEquals((byte) i, bytes.readByte(i), "random access byte read should return value written at offset " + i);
         }
     }
 
@@ -93,25 +94,25 @@ public class ByteStoreTest extends BytesTestCommon {
         @NotNull byte[] bytes = new byte[(int) this.bytes.capacity()];
         this.bytes.read(bytes);
         for (int i = 0; i < this.bytes.capacity(); i++)
-            Assert.assertEquals((byte) i, bytes[i]);
+            assertEquals((byte) i, bytes[i], "bulk read into byte array should transfer all written bytes in correct order");
     }
 
     @Test
     public void testCompareAndSetInt() {
-        Assert.assertTrue(bytes.compareAndSwapInt(0, 0, 1));
-        Assert.assertFalse(bytes.compareAndSwapInt(0, 0, 1));
-        Assert.assertTrue(bytes.compareAndSwapInt(8, 0, 1));
-        Assert.assertTrue(bytes.compareAndSwapInt(0, 1, 2));
+        assertTrue(bytes.compareAndSwapInt(0, 0, 1), "compareAndSwapInt should succeed when expected value matches current value at offset 0");
+        assertFalse(bytes.compareAndSwapInt(0, 0, 1), "compareAndSwapInt should fail when expected value does not match current value");
+        assertTrue(bytes.compareAndSwapInt(8, 0, 1), "compareAndSwapInt should succeed at different offset with matching expected value");
+        assertTrue(bytes.compareAndSwapInt(0, 1, 2), "compareAndSwapInt should succeed when updating from 1 to 2 at offset 0");
     }
 
     @Test
     public void testCompareAndSetLong() {
-        assumeFalse("TODO FIX", Jvm.isArm());
+        assumeFalse(Jvm.isArm(), "TODO FIX");
 
-        Assert.assertTrue(bytes.compareAndSwapLong(0L, 0L, 1L));
-        Assert.assertFalse(bytes.compareAndSwapLong(0L, 0L, 1L));
-        Assert.assertTrue(bytes.compareAndSwapLong(8L, 0L, 1L));
-        Assert.assertTrue(bytes.compareAndSwapLong(0L, 1L, 2L));
+        assertTrue(bytes.compareAndSwapLong(0L, 0L, 1L), "compareAndSwapLong should succeed when expected value matches current value at offset 0");
+        assertFalse(bytes.compareAndSwapLong(0L, 0L, 1L), "compareAndSwapLong should fail when expected value does not match current value");
+        assertTrue(bytes.compareAndSwapLong(8L, 0L, 1L), "compareAndSwapLong should succeed at different offset with matching expected value");
+        assertTrue(bytes.compareAndSwapLong(0L, 1L, 2L), "compareAndSwapLong should succeed when updating from 1 to 2 at offset 0");
     }
 
     @Test
@@ -120,16 +121,16 @@ public class ByteStoreTest extends BytesTestCommon {
             bytes.writeByte((byte) i);
         for (int i = (int) (bytes.capacity() - 1); i >= 0; i--) {
             bytes.readPosition(i);
-            assertEquals((byte) i, bytes.readByte());
+            assertEquals((byte) i, bytes.readByte(), "setting read position should allow sequential read from specified offset");
         }
     }
 
     @Test
     public void testCapacity() {
-        assertEquals(SIZE, bytes.capacity());
+        assertEquals(SIZE, bytes.capacity(), "byte store wrapped from fixed buffer should report correct capacity");
         final VanillaBytes<Void> bytes = Bytes.allocateDirect(10);
         try {
-            assertEquals(10, bytes.capacity());
+            assertEquals(10, bytes.capacity(), "directly allocated byte store should have requested capacity");
         } finally {
             bytes.releaseLast();
         }
@@ -137,16 +138,16 @@ public class ByteStoreTest extends BytesTestCommon {
 
     @Test
     public void testRemaining() {
-        assertEquals(0, bytes.readRemaining());
-        assertEquals(SIZE, bytes.writeRemaining());
+        assertEquals(0, bytes.readRemaining(), "read remaining should be zero when no data has been written");
+        assertEquals(SIZE, bytes.writeRemaining(), "write remaining should equal capacity when buffer is empty");
         bytes.writePosition(10);
-        assertEquals(10, bytes.readRemaining());
-        assertEquals(SIZE - 10, bytes.writeRemaining());
+        assertEquals(10, bytes.readRemaining(), "read remaining should equal write position after writing");
+        assertEquals(SIZE - 10, bytes.writeRemaining(), "write remaining should be capacity minus write position");
     }
 
     @Test
     public void testByteOrder() {
-        assertEquals(ByteOrder.nativeOrder(), bytes.byteOrder());
+        assertEquals(ByteOrder.nativeOrder(), bytes.byteOrder(), "byte store should use native byte order for multi-byte primitives");
     }
 
     /*    @Test
@@ -175,22 +176,22 @@ public class ByteStoreTest extends BytesTestCommon {
             bytes.writeUtf8(word);
         }
 
-        assertNull(bytes.readUtf8());
+        assertNull(bytes.readUtf8(), "readUtf8 should return null when null was written");
         for (String word : words) {
-            assertEquals(word, bytes.readUtf8());
+            assertEquals(word, bytes.readUtf8(), "readUtf8 should return exact string including UTF-8 multi-byte characters");
         }
-        assertEquals("", bytes.readUtf8());
-        assertEquals(26, bytes.readPosition()); // check the size
+        assertEquals("", bytes.readUtf8(), "readUtf8 should correctly handle empty string");
+        assertEquals(26, bytes.readPosition(), "read position should advance by total UTF-8 encoded bytes"); // check the size
 
         bytes.readPosition(0);
         final StringBuilder sb = new StringBuilder();
-        Assert.assertFalse(bytes.readUtf8(sb));
+        assertFalse(bytes.readUtf8(sb), "readUtf8 into StringBuilder should return false for null value");
         for (String word : words) {
-            Assert.assertTrue(bytes.readUtf8(sb));
-            Assert.assertEquals(word, sb.toString());
+            assertTrue(bytes.readUtf8(sb), "readUtf8 into StringBuilder should return true for non-null string");
+            assertEquals(word, sb.toString(), "StringBuilder should contain decoded UTF-8 string");
         }
-        assertTrue(bytes.readUtf8(sb));
-        Assert.assertEquals("", sb.toString());
+        assertTrue(bytes.readUtf8(sb), "readUtf8 into StringBuilder should return true for empty string");
+        assertEquals("", sb.toString(), "StringBuilder should be empty after reading empty string");
     }
 
     @Test
@@ -201,13 +202,13 @@ public class ByteStoreTest extends BytesTestCommon {
         }
         bytes.writeUtf8("");
         bytes.writeUtf8(null);
-        assertEquals(26, bytes.writePosition()); // check the size, more bytes for less strings than writeUtf8
+        assertEquals(26, bytes.writePosition(), "write position should reflect total bytes written for UTF-8 encoded strings"); // check the size, more bytes for less strings than writeUtf8
 
         for (String word : words) {
-            assertEquals(word, bytes.readUtf8());
+            assertEquals(word, bytes.readUtf8(), "readUtf8 should return each string in write order with correct UTF-8 decoding");
         }
-        assertEquals("", bytes.readUtf8());
-        assertNull(bytes.readUtf8());
+        assertEquals("", bytes.readUtf8(), "readUtf8 should correctly read empty string");
+        assertNull(bytes.readUtf8(), "readUtf8 should return null when null was written");
     }
 
     @Test
@@ -219,9 +220,9 @@ public class ByteStoreTest extends BytesTestCommon {
         final ByteBuffer bb2 = ByteBuffer.wrap(bytes2);
         this.bytes.read(bb2);
 
-        Assert.assertEquals(bytes.length, bb2.position());
+        assertEquals(bytes.length, bb2.position(), "ByteBuffer position should advance by number of bytes read from byte store");
         final byte[] bytes2b = Arrays.copyOf(bytes2, bytes.length);
-        Assert.assertArrayEquals(bytes, bytes2b);
+        assertArrayEquals(bytes, bytes2b, "bytes read from byte store into ByteBuffer should match original bytes written");
     }
 
     @Test
@@ -235,11 +236,11 @@ public class ByteStoreTest extends BytesTestCommon {
         }
 
         for (int i = 0; i < 32; i++)
-            assertEquals((i & 3) == 0, bytes.readBoolean());
+            assertEquals((i & 3) == 0, bytes.readBoolean(), "sequential boolean read should return values in write order");
         for (int i = 32; i < 64; i++) {
             final boolean actual = bytes.readBoolean(i);
             final boolean expected = (i & 5) == 0;
-            assertEquals(expected, actual);
+            assertEquals(expected, actual, "random access boolean read should match value written at offset");
         }
     }
 
@@ -252,9 +253,9 @@ public class ByteStoreTest extends BytesTestCommon {
             bytes.writeShort((short) i);
 
         for (int i = 0; i < 32; i += 2)
-            assertEquals(i, bytes.readShort());
+            assertEquals(i, bytes.readShort(), "sequential short read should return 2-byte values in write order");
         for (int i = 32; i < 64; i += 2)
-            assertEquals(i, bytes.readShort(i));
+            assertEquals(i, bytes.readShort(i), "random access short read should return value written at offset");
     }
 
     @Test
@@ -265,10 +266,10 @@ public class ByteStoreTest extends BytesTestCommon {
             bytes.writeStopBit(i);
 //            Jvm.debug().on(getClass(), i + " " + bytes.position());
         }
-        assertEquals(9 + 10, 5 + 6, bytes.writePosition());
+        assertEquals(30, bytes.writePosition(), "stop-bit encoding should use 30 bytes total for the four long values");
 
         for (long i : longs)
-            assertEquals(i, bytes.readStopBit());
+            assertEquals(i, bytes.readStopBit(), "readStopBit should correctly decode variable-length encoded long values");
     }
 
     @Test
@@ -280,9 +281,9 @@ public class ByteStoreTest extends BytesTestCommon {
             bytes.writeUnsignedShort(~i & 0xFFFF);
 
         for (int i = 0; i < 32; i += 2)
-            assertEquals(~i & 0xFFFF, bytes.readUnsignedShort());
+            assertEquals(~i & 0xFFFF, bytes.readUnsignedShort(), "sequential unsigned short read should return 16-bit values without sign extension");
         for (int i = 32; i < 64; i += 2)
-            assertEquals(~i & 0xFFFF, bytes.readUnsignedShort(i));
+            assertEquals(~i & 0xFFFF, bytes.readUnsignedShort(i), "random access unsigned short read should return value written at offset");
     }
 
     @Test
@@ -294,9 +295,9 @@ public class ByteStoreTest extends BytesTestCommon {
             bytes.writeInt(i);
 
         for (int i = 0; i < 32; i += 4)
-            assertEquals(i, bytes.readInt());
+            assertEquals(i, bytes.readInt(), "sequential int read should return 4-byte values in write order");
         for (int i = 32; i < 64; i += 4)
-            assertEquals(i, bytes.readInt(i));
+            assertEquals(i, bytes.readInt(i), "random access int read should return value written at offset");
     }
 
     @Test
@@ -308,9 +309,9 @@ public class ByteStoreTest extends BytesTestCommon {
             bytes.writeOrderedInt(i);
 
         for (int i = 0; i < 32; i += 4)
-            assertEquals(i, bytes.readVolatileInt());
+            assertEquals(i, bytes.readVolatileInt(), "volatile int read should return values written with ordered semantics");
         for (int i = 32; i < 64; i += 4)
-            assertEquals(i, bytes.readVolatileInt(i));
+            assertEquals(i, bytes.readVolatileInt(i), "random access volatile int read should return value written at offset");
     }
 
     @Test
@@ -322,9 +323,9 @@ public class ByteStoreTest extends BytesTestCommon {
             bytes.writeFloat(i);
 
         for (int i = 0; i < 32; i += 4)
-            assertEquals(i, bytes.readFloat(), 0);
+            assertEquals(i, bytes.readFloat(), 0, "sequential float read should return 4-byte floating point values in write order");
         for (int i = 32; i < 64; i += 4)
-            assertEquals(i, bytes.readFloat(i), 0);
+            assertEquals(i, bytes.readFloat(i), 0, "random access float read should return value written at offset");
     }
 
     @Test
@@ -337,9 +338,9 @@ public class ByteStoreTest extends BytesTestCommon {
             bytes.writeUnsignedInt(~i & 0xFFFF);
 
         for (int i = 0; i < 32; i += 4)
-            assertEquals(~i & 0xFFFFL, bytes.readUnsignedInt());
+            assertEquals(~i & 0xFFFFL, bytes.readUnsignedInt(), "sequential unsigned int read should return 32-bit values as long without sign extension");
         for (int i = 32; i < 64; i += 4)
-            assertEquals(~i & 0xFFFFL, bytes.readUnsignedInt(i));
+            assertEquals(~i & 0xFFFFL, bytes.readUnsignedInt(i), "random access unsigned int read should return value written at offset");
     }
 
     @Test
@@ -351,14 +352,14 @@ public class ByteStoreTest extends BytesTestCommon {
             bytes.writeLong(i);
 
         for (long i = 0; i < 32; i += 8)
-            assertEquals(i, bytes.readLong());
+            assertEquals(i, bytes.readLong(), "sequential long read should return 8-byte values in write order");
         for (long i = 32; i < 64; i += 8)
-            assertEquals(i, bytes.readLong(i));
+            assertEquals(i, bytes.readLong(i), "random access long read should return value written at offset");
     }
 
     @Test
     public void testReadWriteThreadSafeLong() {
-        assumeFalse("TODO FIX", Jvm.isArm());
+        assumeFalse(Jvm.isArm(), "TODO FIX");
         for (long i = 0; i < 32; i += 8)
             bytes.writeOrderedLong(i, i);
         bytes.writePosition(32);
@@ -367,9 +368,9 @@ public class ByteStoreTest extends BytesTestCommon {
 //        Jvm.debug().on(getClass(), bytes.bytes().toDebugString());
 
         for (long i = 0; i < 32; i += 8)
-            assertEquals(i, bytes.readVolatileLong());
+            assertEquals(i, bytes.readVolatileLong(), "volatile long read should return values written with ordered semantics");
         for (long i = 32; i < 64; i += 8)
-            assertEquals(i, bytes.readVolatileLong(i));
+            assertEquals(i, bytes.readVolatileLong(i), "random access volatile long read should return value written at offset");
     }
 
     @Test
@@ -381,9 +382,9 @@ public class ByteStoreTest extends BytesTestCommon {
             bytes.writeDouble(i);
 
         for (long i = 0; i < 32; i += 8)
-            assertEquals(i, bytes.readDouble(), 0);
+            assertEquals(i, bytes.readDouble(), 0, "sequential double read should return 8-byte floating point values in write order");
         for (long i = 32; i < 64; i += 8)
-            assertEquals(i, bytes.readDouble(i), 0);
+            assertEquals(i, bytes.readDouble(i), 0, "random access double read should return value written at offset");
     }
 
     @Test
@@ -392,8 +393,8 @@ public class ByteStoreTest extends BytesTestCommon {
             bytes.writeDoubleAndInt(i, (int) i);
 
         for (long i = 0; i < 48; i += 12) {
-            assertEquals(i, bytes.readDouble(), 0);
-            assertEquals(i, bytes.readInt());
+            assertEquals(i, bytes.readDouble(), 0, "writeDoubleAndInt should store double in first 8 bytes");
+            assertEquals(i, bytes.readInt(), "writeDoubleAndInt should store int in following 4 bytes");
         }
     }
 
@@ -411,7 +412,7 @@ public class ByteStoreTest extends BytesTestCommon {
         }
 
         for (double i : doubles)
-            assertEquals(i, bytes.readStopBitDouble(), 0.0);
+            assertEquals(i, bytes.readStopBitDouble(), 0.0, "readStopBitDouble should correctly decode variable-length encoded floating point values");
     }
 
     @Test
@@ -430,8 +431,8 @@ public class ByteStoreTest extends BytesTestCommon {
                 for (int i = 0; i < 12; i++) {
                     bytes[i] = (byte) in.read();
                 }
-                Assert.assertEquals(-1, in.read());
-                Assert.assertEquals("Hello world\n", new String(bytes, ISO_8859_1));
+                assertEquals(-1, in.read(), "input stream should return -1 at end of compressed data");
+                assertEquals("Hello world\n", new String(bytes, ISO_8859_1), "byte store should preserve data written through GZIP stream wrapper");
             }
         } finally {
             bytes2.releaseLast();
@@ -449,19 +450,19 @@ public class ByteStoreTest extends BytesTestCommon {
             out.write(55);
 
             try (InputStream in = bytes.inputStream()) {
-                assertFalse(in.markSupported());
-                assertEquals(11, in.read());
-                assertEquals(1, bytes.readPosition());
-                assertEquals(22, in.read());
-                assertEquals(2, bytes.readPosition());
-                assertEquals(33, in.read());
+                assertFalse(in.markSupported(), "byte store input stream should not support mark/reset operations");
+                assertEquals(11, in.read(), "input stream should read first byte written to byte store");
+                assertEquals(1, bytes.readPosition(), "input stream read should advance byte store read position");
+                assertEquals(22, in.read(), "input stream should read second byte in sequence");
+                assertEquals(2, bytes.readPosition(), "read position should be 2 after reading two bytes");
+                assertEquals(33, in.read(), "input stream should read third byte in sequence");
 
-                assertEquals(1, in.skip(1));
-                assertEquals(4, bytes.readPosition());
-                assertEquals(1, bytes.readRemaining());
-                assertEquals(55, in.read());
+                assertEquals(1, in.skip(1), "skip should advance position by requested number of bytes");
+                assertEquals(4, bytes.readPosition(), "read position should be 4 after skipping one byte");
+                assertEquals(1, bytes.readRemaining(), "one byte should remain after reading and skipping 4 of 5 bytes");
+                assertEquals(55, in.read(), "input stream should read final byte after skip");
 
-                assertEquals(-1, in.read());
+                assertEquals(-1, in.read(), "input stream should return -1 when all bytes have been read");
             }
         }
     }
@@ -472,13 +473,13 @@ public class ByteStoreTest extends BytesTestCommon {
         try {
             for (int i = 0; i < 10; i++)
                 bytesStore.addAndGetInt(0L, 10);
-            assertEquals(100, bytesStore.readInt(0L));
-            assertEquals(0, bytesStore.readInt(4L));
+            assertEquals(100, bytesStore.readInt(0L), "addAndGetInt should atomically accumulate values at offset 0");
+            assertEquals(0, bytesStore.readInt(4L), "unwritten offset should contain zero value");
 
             for (int i = 0; i < 11; i++)
                 bytesStore.addAndGetInt(4L, 11);
-            assertEquals(100, bytesStore.readInt(0L));
-            assertEquals(11 * 11, bytesStore.readInt(4L));
+            assertEquals(100, bytesStore.readInt(0L), "value at offset 0 should remain unchanged when modifying offset 4");
+            assertEquals(11 * 11, bytesStore.readInt(4L), "addAndGetInt should atomically accumulate 11 additions of 11 at offset 4");
         } finally {
             bytesStore2.releaseLast();
         }
@@ -486,7 +487,7 @@ public class ByteStoreTest extends BytesTestCommon {
 
     @Test
     public void testAddAndGetLongNative() {
-        assumeFalse("TODO FIX", Jvm.isArm());
+        assumeFalse(Jvm.isArm(), "TODO FIX");
         final BytesStore<?, ?> bytesStore2 = BytesStore.nativeStore(128);
         try {
             checkAddAndGetLong();
@@ -497,7 +498,7 @@ public class ByteStoreTest extends BytesTestCommon {
 
     @Test
     public void testAddAndGetLong() {
-        assumeFalse("TODO FIX", Jvm.isArm());
+        assumeFalse(Jvm.isArm(), "TODO FIX");
         final BytesStore<?, ?> bytesStore2 = BytesStore.wrap(new byte[128]);
         try {
             checkAddAndGetLong();
@@ -508,14 +509,14 @@ public class ByteStoreTest extends BytesTestCommon {
 
     private void checkAddAndGetLong() {
         for (int i = 0; i < 10; i++)
-            assertEquals((i + 1L) * 10L, bytesStore.addAndGetLong(0L, 10));
-        assertEquals(100, bytesStore.readLong(0L));
-        assertEquals(0, bytesStore.readLong(8L));
+            assertEquals((i + 1L) * 10L, bytesStore.addAndGetLong(0L, 10), "addAndGetLong should return accumulated value after each addition");
+        assertEquals(100, bytesStore.readLong(0L), "addAndGetLong should atomically accumulate 10 additions of 10 at offset 0");
+        assertEquals(0, bytesStore.readLong(8L), "unwritten offset should contain zero value");
 
         for (int i = 0; i < 11; i++)
             bytesStore.addAndGetLong(8L, 11);
-        assertEquals(100, bytesStore.readLong(0L));
-        assertEquals(11 * 11, bytesStore.readLong(8L));
+        assertEquals(100, bytesStore.readLong(0L), "value at offset 0 should remain unchanged when modifying offset 8");
+        assertEquals(11 * 11, bytesStore.readLong(8L), "addAndGetLong should atomically accumulate 11 additions of 11 at offset 8");
     }
 
     @Test
@@ -525,13 +526,13 @@ public class ByteStoreTest extends BytesTestCommon {
 
             for (int i = 0; i < 10; i++)
                 bytesStore2.addAndGetFloat(0L, 10);
-            assertEquals(100, bytesStore2.readFloat(0L), 0f);
-            assertEquals(0, bytesStore2.readVolatileFloat(4L), 0f);
+            assertEquals(100, bytesStore2.readFloat(0L), 0f, "addAndGetFloat should atomically accumulate floating point values at offset 0");
+            assertEquals(0, bytesStore2.readVolatileFloat(4L), 0f, "unwritten offset should contain zero float value");
 
             for (int i = 0; i < 11; i++)
                 bytesStore2.addAndGetFloat(4L, 11);
-            assertEquals(100, bytesStore2.readVolatileFloat(0L), 0f);
-            assertEquals(11 * 11, bytesStore2.readFloat(4L), 0f);
+            assertEquals(100, bytesStore2.readVolatileFloat(0L), 0f, "value at offset 0 should remain unchanged when modifying offset 4");
+            assertEquals(11 * 11, bytesStore2.readFloat(4L), 0f, "addAndGetFloat should atomically accumulate 11 additions of 11 at offset 4");
         } finally {
             bytesStore2.releaseLast();
         }
@@ -544,13 +545,13 @@ public class ByteStoreTest extends BytesTestCommon {
 
             for (int i = 0; i < 10; i++)
                 bytesStore2.addAndGetDouble(0L, 10);
-            assertEquals(100, bytesStore2.readDouble(0L), 0.0);
-            assertEquals(0, bytesStore2.readVolatileDouble(8L), 0.0);
+            assertEquals(100, bytesStore2.readDouble(0L), 0.0, "addAndGetDouble should atomically accumulate double precision values at offset 0");
+            assertEquals(0, bytesStore2.readVolatileDouble(8L), 0.0, "unwritten offset should contain zero double value");
 
             for (int i = 0; i < 11; i++)
                 bytesStore2.addAndGetDouble(8L, 11);
-            assertEquals(100, bytesStore2.readVolatileDouble(0L), 0.0);
-            assertEquals(11 * 11, bytesStore2.readDouble(8L), 0.0);
+            assertEquals(100, bytesStore2.readVolatileDouble(0L), 0.0, "value at offset 0 should remain unchanged when modifying offset 8");
+            assertEquals(11 * 11, bytesStore2.readDouble(8L), 0.0, "addAndGetDouble should atomically accumulate 11 additions of 11 at offset 8");
         } finally {
             bytesStore2.releaseLast();
         }
@@ -563,33 +564,33 @@ public class ByteStoreTest extends BytesTestCommon {
         final Bytes<?> bytes = bytes0.bytesForWrite();
         bytes0.release(INIT);
         try {
-            assertEquals("[pos: 0, rlim: 0, wlim: 8EiB, cap: 8EiB ] ǁ‡٠٠٠٠٠٠٠٠", bytes.toDebugString());
+            assertEquals("[pos: 0, rlim: 0, wlim: 8EiB, cap: 8EiB ] ǁ‡٠٠٠٠٠٠٠٠", bytes.toDebugString(), "debug string should show empty byte store with position markers");
             bytes.writeUnsignedByte(1);
             System.gc();
-            assertEquals(1, bytes.refCount());
-            assertEquals("[pos: 0, rlim: 1, wlim: 8EiB, cap: 8EiB ] ǁ⒈‡٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠", bytes.toDebugString());
+            assertEquals(1, bytes.refCount(), "reference count should be 1 after initial allocation and GC");
+            assertEquals("[pos: 0, rlim: 1, wlim: 8EiB, cap: 8EiB ] ǁ⒈‡٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠", bytes.toDebugString(), "debug string should show written byte with read limit at position 1");
             bytes.writeUnsignedByte(2);
             bytes.readByte();
-            assertEquals("[pos: 1, rlim: 2, wlim: 8EiB, cap: 8EiB ] ⒈ǁ⒉‡٠٠٠٠٠٠٠٠٠٠٠٠٠٠", bytes.toDebugString());
+            assertEquals("[pos: 1, rlim: 2, wlim: 8EiB, cap: 8EiB ] ⒈ǁ⒉‡٠٠٠٠٠٠٠٠٠٠٠٠٠٠", bytes.toDebugString(), "debug string should show read position advanced after reading one byte");
             bytes.writeUnsignedByte(3);
-            assertEquals("[pos: 1, rlim: 3, wlim: 8EiB, cap: 8EiB ] ⒈ǁ⒉⒊‡٠٠٠٠٠٠٠٠٠٠٠٠٠", bytes.toDebugString());
+            assertEquals("[pos: 1, rlim: 3, wlim: 8EiB, cap: 8EiB ] ⒈ǁ⒉⒊‡٠٠٠٠٠٠٠٠٠٠٠٠٠", bytes.toDebugString(), "debug string should show three bytes written with read position at 1");
             bytes.writeUnsignedByte(4);
             bytes.readByte();
-            assertEquals("[pos: 2, rlim: 4, wlim: 8EiB, cap: 8EiB ] ⒈⒉ǁ⒊⒋‡٠٠٠٠٠٠٠٠٠٠٠٠", bytes.toDebugString());
+            assertEquals("[pos: 2, rlim: 4, wlim: 8EiB, cap: 8EiB ] ⒈⒉ǁ⒊⒋‡٠٠٠٠٠٠٠٠٠٠٠٠", bytes.toDebugString(), "debug string should show read position advanced to 2");
             bytes.writeUnsignedByte(5);
-            assertEquals("[pos: 2, rlim: 5, wlim: 8EiB, cap: 8EiB ] ⒈⒉ǁ⒊⒋⒌‡٠٠٠٠٠٠٠٠٠٠٠", bytes.toDebugString());
+            assertEquals("[pos: 2, rlim: 5, wlim: 8EiB, cap: 8EiB ] ⒈⒉ǁ⒊⒋⒌‡٠٠٠٠٠٠٠٠٠٠٠", bytes.toDebugString(), "debug string should show five bytes written with read position at 2");
             bytes.writeUnsignedByte(6);
             bytes.readByte();
             System.gc();
-            assertEquals(1, bytes.refCount());
-            assertEquals("[pos: 3, rlim: 6, wlim: 8EiB, cap: 8EiB ] ⒈⒉⒊ǁ⒋⒌⒍‡٠٠٠٠٠٠٠٠٠٠", bytes.toDebugString());
+            assertEquals(1, bytes.refCount(), "reference count should remain 1 after GC with active reference");
+            assertEquals("[pos: 3, rlim: 6, wlim: 8EiB, cap: 8EiB ] ⒈⒉⒊ǁ⒋⒌⒍‡٠٠٠٠٠٠٠٠٠٠", bytes.toDebugString(), "debug string should show read position advanced to 3");
             bytes.writeUnsignedByte(7);
-            assertEquals("[pos: 3, rlim: 7, wlim: 8EiB, cap: 8EiB ] ⒈⒉⒊ǁ⒋⒌⒍⒎‡٠٠٠٠٠٠٠٠٠", bytes.toDebugString());
+            assertEquals("[pos: 3, rlim: 7, wlim: 8EiB, cap: 8EiB ] ⒈⒉⒊ǁ⒋⒌⒍⒎‡٠٠٠٠٠٠٠٠٠", bytes.toDebugString(), "debug string should show seven bytes written");
             bytes.writeUnsignedByte(8);
-            assertEquals("[pos: 3, rlim: 8, wlim: 8EiB, cap: 8EiB ] ⒈⒉⒊ǁ⒋⒌⒍⒎⒏‡٠٠٠٠٠٠٠٠", bytes.toDebugString());
+            assertEquals("[pos: 3, rlim: 8, wlim: 8EiB, cap: 8EiB ] ⒈⒉⒊ǁ⒋⒌⒍⒎⒏‡٠٠٠٠٠٠٠٠", bytes.toDebugString(), "debug string should show eight bytes written with read position at 3");
         } finally {
             bytes.releaseLast();
-            assertEquals(0, bytes.refCount());
+            assertEquals(0, bytes.refCount(), "reference count should be zero after releasing last reference");
         }
     }
 
@@ -617,7 +618,7 @@ public class ByteStoreTest extends BytesTestCommon {
             try {
                 bytesStoreOriginal.copyTo(bytesStoreCopy);
                 for (int i = 0; i < SIZE; i++)
-                    assertEquals(bytesStoreOriginal.readByte(i), bytesStoreCopy.readByte(i));
+                    assertEquals(bytesStoreOriginal.readByte(i), bytesStoreCopy.readByte(i), "copyTo should transfer all bytes from source to destination byte store");
             } finally {
                 bytesStoreCopy.releaseLast();
             }
@@ -639,9 +640,9 @@ public class ByteStoreTest extends BytesTestCommon {
             bytesStoreCopy.writePosition(destOffset);
             try {
                 long bytesCopied = bytesStoreOriginal.copyTo(bytesStoreCopy);
-                assertEquals("Unexpected number of bytes copied", SIZE - destOffset, bytesCopied);
+                assertEquals(SIZE - destOffset, bytesCopied, "copyTo should copy only bytes that fit in destination from write position");
                 for (int i = 0; i < bytesCopied; i++)
-                    assertEquals(bytesStoreOriginal.readByte(i), bytesStoreCopy.readByte(i + destOffset));
+                    assertEquals(bytesStoreOriginal.readByte(i), bytesStoreCopy.readByte(i + destOffset), "copied bytes should match source data at destination offset");
             } finally {
                 bytesStoreCopy.releaseLast();
             }
@@ -652,17 +653,19 @@ public class ByteStoreTest extends BytesTestCommon {
 
     @Test
     public void testEmpty() {
-        assertEquals(0, BytesStore.empty().realCapacity());
+        assertEquals(0, BytesStore.empty().realCapacity(), "empty byte store singleton should have zero capacity");
     }
 
-    @Test(expected = DecoratedBufferOverflowException.class)
+    @Test
     public void testClearAndPadTooMuch() {
-        final Bytes<?> b = bytesStore.bytesForWrite();
-        try {
-            b.clearAndPad(SIZE + 1);
-        } finally {
-            b.releaseLast();
-        }
+        assertThrows(DecoratedBufferOverflowException.class, () -> {
+            final Bytes<?> b = bytesStore.bytesForWrite();
+            try {
+                b.clearAndPad(SIZE + 1);
+            } finally {
+                b.releaseLast();
+            }
+        });
     }
 
     @Test
@@ -676,7 +679,7 @@ public class ByteStoreTest extends BytesTestCommon {
         }
 
         for (int i = 0; i < 128; i++) {
-            assertEquals(i, (int) direct.get(i));
+            assertEquals(i, direct.get(i), "BytesStore.follow should create wrapper that writes directly to underlying ByteBuffer");
         }
     }
 }

@@ -5,17 +5,17 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.InvalidMarshallableException;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 
-import static junit.framework.TestCase.assertEquals;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 @SuppressWarnings("deprecation")
 public class BytesTextMethodTesterTest extends BytesTestCommon {
-    @Before
+    @BeforeEach
     public void directEnabled() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
     }
@@ -24,7 +24,8 @@ public class BytesTextMethodTesterTest extends BytesTestCommon {
     public void run()
             throws IOException {
         assumeFalse(NativeBytes.areNewGuarded());
-        btmttTest("btmtt/prim-input.txt", "btmtt/prim-output.txt");
+        BytesTextMethodTester<IBytesMethod> tester = btmttTest("btmtt/prim-input.txt", "btmtt/prim-output.txt");
+        assertEquals(tester.expected(), tester.actual(), "run: expected output matches actual");
     }
 
     @Test
@@ -36,10 +37,11 @@ public class BytesTextMethodTesterTest extends BytesTestCommon {
         expectException("Exception calling public void net.openhft.chronicle.bytes.BytesTextMethodTesterTest$IBMImpl.myByteable");
         assumeFalse(NativeBytes.areNewGuarded());
 
-        btmttTest("btmtt-invalid/prim-input.txt", "btmtt-invalid/prim-output.txt");
+        BytesTextMethodTester<IBytesMethod> tester = btmttTest("btmtt-invalid/prim-input.txt", "btmtt-invalid/prim-output.txt");
+        assertEquals(tester.expected(), tester.actual(), "runInvalid: expected output matches actual");
     }
 
-    private void btmttTest(String input, String output)
+    private BytesTextMethodTester<IBytesMethod> btmttTest(String input, String output)
             throws IOException {
         BytesTextMethodTester<IBytesMethod> tester = new BytesTextMethodTester<>(
                 input,
@@ -47,7 +49,7 @@ public class BytesTextMethodTesterTest extends BytesTestCommon {
                 IBytesMethod.class,
                 output);
         tester.run();
-        assertEquals(tester.expected(), tester.actual());
+        return tester;
     }
 
     static class IBMImpl implements IBytesMethod {

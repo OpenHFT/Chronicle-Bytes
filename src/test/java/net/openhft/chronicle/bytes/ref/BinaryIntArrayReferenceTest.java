@@ -8,10 +8,10 @@ import net.openhft.chronicle.bytes.BytesMarshallable;
 import net.openhft.chronicle.bytes.BytesTestCommon;
 import net.openhft.chronicle.bytes.NativeBytes;
 import net.openhft.chronicle.core.Jvm;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 @SuppressWarnings("deprecation")
 public class BinaryIntArrayReferenceTest extends BytesTestCommon {
@@ -25,12 +25,12 @@ public class BinaryIntArrayReferenceTest extends BytesTestCommon {
             try (BinaryIntArrayReference array = new BinaryIntArrayReference()) {
                 array.bytesStore(bytes, 0, length);
 
-                assertEquals(128, array.getCapacity());
+                assertEquals(128, array.getCapacity(), "array.getCapacity");
                 for (int i = 0; i < 128; i++)
                     array.setValueAt(i, i + 1);
 
                 for (int i = 0; i < 128; i++)
-                    assertEquals(i + 1, array.getValueAt(i));
+                    assertEquals(i + 1, array.getValueAt(i), "array.getValueAt");
             }
         } finally {
             bytes.releaseLast();
@@ -55,14 +55,14 @@ public class BinaryIntArrayReferenceTest extends BytesTestCommon {
 
             final String actual = bytes.toHexString();
 
-            assertEquals(expected, actual);
+            assertEquals(expected, actual, "BinaryIntArrayReference should serialize to expected hex format");
 
             //System.out.println(bytes.toHexString());
 
             final IntArrays la2 = new IntArrays(0, 0);
             la2.readMarshallable(bytes);
-            assertEquals(4, la2.first.getCapacity());
-            assertEquals(8, la2.second.getCapacity());
+            assertEquals(4, la2.first.getCapacity(), "first.getCapacity");
+            assertEquals(8, la2.second.getCapacity(), "second.getCapacity");
             la.closeAll();
             la2.closeAll();
         } finally {

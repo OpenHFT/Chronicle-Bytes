@@ -3,10 +3,10 @@
  */
 package net.openhft.chronicle.bytes;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
 
 public class UncheckedBytesBehaviourTest extends BytesTestCommon {
 
@@ -16,7 +16,7 @@ public class UncheckedBytesBehaviourTest extends BytesTestCommon {
         Bytes<?> u = d.unchecked(true);
         try {
             u.append("zz");
-            assertEquals("zz", u.toString());
+            assertEquals("zz", u.toString(), "UncheckedBytes should contain appended string content");
         } finally {
             u.releaseLast();
         }
@@ -24,7 +24,7 @@ public class UncheckedBytesBehaviourTest extends BytesTestCommon {
         Bytes<?> h = Bytes.allocateElasticOnHeap(8);
         try {
             Bytes<?> same = h.unchecked(false);
-            assertSame(h, same);
+            assertSame(h, same, "unchecked(false) on heap bytes should return same instance (no-op)");
         } finally {
             h.releaseLast();
         }
@@ -37,8 +37,8 @@ public class UncheckedBytesBehaviourTest extends BytesTestCommon {
         try {
             unchecked.writeLimit(4);
             unchecked.writeLong(0x0102030405060708L);
-            assertEquals("Unchecked write should advance writePosition", 8, unchecked.writePosition());
-            assertEquals("Checked view remains at start", 0, checked.readPosition());
+            assertEquals(8, unchecked.writePosition(), "Unchecked write should advance writePosition");
+            assertEquals(0, checked.readPosition(), "Checked view remains at start");
         } finally {
             unchecked.releaseLast();
         }

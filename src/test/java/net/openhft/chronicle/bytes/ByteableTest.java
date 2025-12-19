@@ -3,12 +3,13 @@
  */
 package net.openhft.chronicle.bytes;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 @SuppressWarnings("deprecation")
@@ -17,7 +18,7 @@ public class ByteableTest {
     private Byteable byteable;
 
     @SuppressWarnings("unchecked")
-    @Before
+    @BeforeEach
     public void setUp() throws IOException {
         byteable = mock(Byteable.class);
         doThrow(UnsupportedOperationException.class).when(byteable).address();
@@ -30,13 +31,15 @@ public class ByteableTest {
         long expectedOffset = 5L;
         when(byteable.offset()).thenReturn(expectedOffset);
 
-        assertEquals(expectedOffset, byteable.offset());
+        assertEquals(expectedOffset, byteable.offset(), "byteable.offset");
     }
 
-    @Test(expected = UnsupportedOperationException.class)
+    @Test
     public void testAddressThrowsUnsupportedOperationException() {
-        when(byteable.address()).thenCallRealMethod();
-        byteable.address();
+        assertThrows(UnsupportedOperationException.class, () -> {
+            when(byteable.address()).thenCallRealMethod();
+            byteable.address();
+        });
     }
 
     @Test
@@ -44,16 +47,18 @@ public class ByteableTest {
         long expectedSize = 1024L;
         when(byteable.maxSize()).thenReturn(expectedSize);
 
-        assertEquals(expectedSize, byteable.maxSize());
+        assertEquals(expectedSize, byteable.maxSize(), "byteable.maxSize");
     }
 
-    @Test(expected = UnsupportedOperationException.class)
+    @Test
     public void testLockThrowsUnsupportedOperationException() throws IOException {
-        byteable.lock(true);
+        assertThrows(UnsupportedOperationException.class, () ->
+                byteable.lock(true));
     }
 
-    @Test(expected = UnsupportedOperationException.class)
+    @Test
     public void testTryLockThrowsUnsupportedOperationException() throws IOException {
-        byteable.tryLock(true);
+        assertThrows(UnsupportedOperationException.class, () ->
+                byteable.tryLock(true));
     }
 }

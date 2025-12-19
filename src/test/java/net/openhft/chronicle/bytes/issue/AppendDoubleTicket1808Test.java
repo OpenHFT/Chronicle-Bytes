@@ -5,9 +5,9 @@ package net.openhft.chronicle.bytes.issue;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesTestCommon;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class AppendDoubleTicket1808Test extends BytesTestCommon {
     @Test
@@ -16,7 +16,7 @@ public class AppendDoubleTicket1808Test extends BytesTestCommon {
         for (double d : new double[]{2.01, 16777216.1, 67108864}) {
             bytes.append(d, 8);
             String s = String.format("%.8f", d);
-            assertEquals(s, bytes.toString());
+            assertEquals(s, bytes.toString(), "append double " + d + " to 8 decimal places should match String.format");
             bytes.clear();
         }
         bytes.releaseLast();
@@ -28,7 +28,7 @@ public class AppendDoubleTicket1808Test extends BytesTestCommon {
         for (double d : new double[]{2.01, 2097152.2, 8388608}) {
             bytes.append(d, 9);
             String s = String.format("%.9f", d);
-            assertEquals(s, bytes.toString());
+            assertEquals(s, bytes.toString(), "append double " + d + " to 9 decimal places should match String.format");
             bytes.clear();
         }
         bytes.releaseLast();
@@ -40,7 +40,7 @@ public class AppendDoubleTicket1808Test extends BytesTestCommon {
         for (double d : new double[]{0.41, 131072.14, 524288}) {
             bytes.append(d, 10);
             String s = String.format("%.10f", d);
-            assertEquals(s, bytes.toString());
+            assertEquals(s, bytes.toString(), "append double " + d + " to 10 decimal places should match String.format");
             bytes.clear();
         }
         bytes.releaseLast();
@@ -52,7 +52,7 @@ public class AppendDoubleTicket1808Test extends BytesTestCommon {
         for (double d : new double[]{0.29, 16384.06, 327638.3}) {
             bytes.append(d, 11);
             String s = String.format("%.11f", d);
-            assertEquals(s, bytes.toString());
+            assertEquals(s, bytes.toString(), "append double " + d + " to 11 decimal places should match String.format");
             bytes.clear();
         }
         bytes.releaseLast();
@@ -64,7 +64,7 @@ public class AppendDoubleTicket1808Test extends BytesTestCommon {
         for (double d : new double[]{2.01, 2048.01, 4096.1}) {
             bytes.append(d, 12);
             String s = String.format("%.12f", d);
-            assertEquals(s, bytes.toString());
+            assertEquals(s, bytes.toString(), "append double " + d + " to 12 decimal places should match String.format");
             bytes.clear();
         }
         bytes.releaseLast();
@@ -76,7 +76,7 @@ public class AppendDoubleTicket1808Test extends BytesTestCommon {
         for (double d : new double[]{0.41, 128.08, 512.0}) {
             bytes.append(d, 13);
             String s = String.format("%.13f", d);
-            assertEquals(s, bytes.toString());
+            assertEquals(s, bytes.toString(), "append double " + d + " to 13 decimal places should match String.format");
             bytes.clear();
         }
         bytes.releaseLast();
@@ -88,7 +88,7 @@ public class AppendDoubleTicket1808Test extends BytesTestCommon {
         for (double d : new double[]{0.29, 16.01, 32.2}) {
             bytes.append(d, 14);
             String s = String.format("%.14f", d);
-            assertEquals(s, bytes.toString());
+            assertEquals(s, bytes.toString(), "append double " + d + " to 14 decimal places should match String.format");
             bytes.clear();
         }
         bytes.releaseLast();
@@ -100,7 +100,7 @@ public class AppendDoubleTicket1808Test extends BytesTestCommon {
         for (double d : new double[]{2.16, 4.4}) {
             bytes.append(d, 15);
             String s = String.format("%.15f", d);
-            assertEquals(s, bytes.toString());
+            assertEquals(s, bytes.toString(), "append double " + d + " to 15 decimal places should match String.format");
             bytes.clear();
         }
         bytes.releaseLast();
@@ -112,7 +112,7 @@ public class AppendDoubleTicket1808Test extends BytesTestCommon {
         for (double d : new double[]{0.00014, 0.14, 0.5}) {
             bytes.append(d, 16);
             String s = String.format("%.16f", d);
-            assertEquals(s, bytes.toString());
+            assertEquals(s, bytes.toString(), "append double " + d + " to 16 decimal places should match String.format");
             bytes.clear();
         }
         bytes.releaseLast();
@@ -124,7 +124,7 @@ public class AppendDoubleTicket1808Test extends BytesTestCommon {
         for (double d : new double[]{0.00014, 0.5, 2.16, 4.4, 32.2}) {
             bytes.append(d, 17);
             String s = String.format("%.17f", d);
-            assertEquals(s, bytes.toString());
+            assertEquals(s, bytes.toString(), "append double " + d + " to 17 decimal places should match String.format");
             bytes.clear();
         }
         bytes.releaseLast();
@@ -136,7 +136,7 @@ public class AppendDoubleTicket1808Test extends BytesTestCommon {
         for (double d : new double[]{0.000014, 0.5, 2.16, 4.4, 32.2}) {
             bytes.append(d, 18);
             String s = String.format("%.18f", d);
-            assertEquals(s, bytes.toString());
+            assertEquals(s, bytes.toString(), "append double " + d + " to 18 decimal places should match String.format");
             bytes.clear();
         }
         bytes.releaseLast();
@@ -148,7 +148,7 @@ public class AppendDoubleTicket1808Test extends BytesTestCommon {
         for (double d : new double[]{0.14, 0.5, 2.16, 4.4, 32.2}) {
             bytes.append(d, 19);
             String s = Double.toString(d);
-            assertEquals(s, bytes.toString());
+            assertEquals(s, bytes.toString(), "append double " + d + " to 19+ decimal places should match Double.toString");
             bytes.clear();
         }
         bytes.releaseLast();

@@ -47,7 +47,7 @@ final class BytesJavaDocComplianceTest extends BytesTestCommon {
                         Jvm.pause(100);
                     });
             // Make sure we have unique keys
-            assertEquals(count.get(), INITIAL_INFO_MAP.size());
+            assertEquals(count.get(), INITIAL_INFO_MAP.size(), "INITIAL_INFO_MAP should contain unique entries for all " + count.get() + " Bytes variants");
         }
     }
 
@@ -57,7 +57,8 @@ final class BytesJavaDocComplianceTest extends BytesTestCommon {
     @ParameterizedTest
     @MethodSource("net.openhft.chronicle.bytes.BytesFactoryUtil#provideBytesObjects")
     void unchecked(final Bytes<?> bytes) {
-        assertEquals(bytes.getClass().getSimpleName().contains("Unchecked"), bytes.unchecked());
+        assertEquals(bytes.getClass().getSimpleName().contains("Unchecked"), bytes.unchecked(),
+                "unchecked() should return true for " + bytes.getClass().getSimpleName() + " classes containing 'Unchecked' in their name");
         releaseAndAssertReleased(bytes);
     }
 
@@ -77,11 +78,12 @@ final class BytesJavaDocComplianceTest extends BytesTestCommon {
             // We cannot write
         }
         // Checks if the actual writing ability corresponds to the reality
-        assertEquals(readWrite, writeable);
+        assertEquals(readWrite, writeable, "reported readWrite capability should match actual write ability");
 
         // Checks that bytes reflects this
         if (writeable != bytes.readWrite())
-            assertEquals(writeable, bytes.readWrite());
+            assertEquals(writeable, bytes.readWrite(),
+                    bytes.getClass().getSimpleName() + ".readWrite() should return " + writeable + " to match actual write capability");
         releaseAndAssertReleased(bytes);
     }
 
@@ -115,6 +117,9 @@ final class BytesJavaDocComplianceTest extends BytesTestCommon {
      */
     @TestFactory
     Stream<DynamicTest> nonNullableOperators() {
+        assertFalse(INITIAL_INFO_MAP.isEmpty(), "INITIAL_INFO_MAP must be populated with Bytes variants before testing @NotNull compliance");
+        assertTrue(provideThrowsMullPointerExceptionOperations().findAny().isPresent(),
+                "provideThrowsMullPointerExceptionOperations() must provide at least one operation to test @NotNull compliance");
         return cartesianProductTest(BytesFactoryUtil::provideBytesObjects,
                 BytesJavaDocComplianceTest::provideThrowsMullPointerExceptionOperations,
                 (args, bytes, nc) -> {
@@ -153,6 +158,9 @@ final class BytesJavaDocComplianceTest extends BytesTestCommon {
      */
     @TestFactory
     Stream<DynamicTest> nullableOperators() {
+        assertFalse(INITIAL_INFO_MAP.isEmpty(), "INITIAL_INFO_MAP must be populated with Bytes variants before testing @Nullable compliance");
+        assertTrue(provideNullableOperations().findAny().isPresent(),
+                "provideNullableOperations() must provide at least one operation to test @Nullable compliance");
         return cartesianProductTest(BytesFactoryUtil::provideBytesObjects,
                 BytesJavaDocComplianceTest::provideNullableOperations,
                 (args, bytes, nc) -> {
@@ -161,9 +169,11 @@ final class BytesJavaDocComplianceTest extends BytesTestCommon {
                     // System.out.println(bytes.getClass().getSimpleName() + " " + isReadWrite(args)+", writePosition()="+bytes.writePosition());
 
                     if (isReadWrite(args)) {
-                        assertDoesNotThrow(() -> nc.accept(bytes));
+                        assertDoesNotThrow(() -> nc.accept(bytes),
+                                bytes.getClass().getSimpleName() + "." + nc.name() + " with @Nullable parameter should accept null without throwing");
                         // Make sure something was written
-                        assertNotEquals(0, bytes.readShort(0));
+                        assertNotEquals(0, bytes.readShort(0),
+                                "Writing null via @Nullable " + nc.name() + " should produce non-zero bytes at position 0 (e.g., null marker)");
                     } else {
                         assertPropertiesNotChanged(createCommand(args), bytes);
                     }
@@ -242,6 +252,7 @@ final class BytesJavaDocComplianceTest extends BytesTestCommon {
         // Make sure that there was no change to the target bytes
         final BytesInitialInfo expectedInfo = INITIAL_INFO_MAP.get(createCommand);
         final BytesInitialInfo actualInfo = new BytesInitialInfo(bytes);
-        assertEquals(expectedInfo, actualInfo, createCommand);
+        assertEquals(expectedInfo, actualInfo,
+                "Bytes properties should remain unchanged after invalid operation on " + createCommand);
     }
 }

@@ -4,12 +4,13 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Maths;
+import org.junit.jupiter.api.Test;
 import net.openhft.chronicle.bytes.internal.UnsafeText;
-import org.junit.Test;
 
 import java.util.Random;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SuppressWarnings("deprecation")
 public class UnsafeTextBytesTest extends BytesTestCommon {
@@ -19,7 +20,7 @@ public class UnsafeTextBytesTest extends BytesTestCommon {
         final long end = UnsafeText.appendFixed(address, l);
         bytes.readLimit(end - address);
         String message = bytes.toString();
-        assertEquals(message, l, bytes.parseLong());
+        assertEquals(l, bytes.parseLong(), message);
     }
 
     static String testAppendDouble(final Bytes<?> bytes, final double l) {
@@ -27,7 +28,14 @@ public class UnsafeTextBytesTest extends BytesTestCommon {
         final long end = UnsafeText.appendDouble(address, l);
         bytes.readLimit(end - address);
         final String message = bytes.toString();
-        assertEquals(message, l, bytes.parseDouble(), Math.ulp(l));
+        final double actual = bytes.parseDouble();
+        if (Double.isNaN(l)) {
+            assertTrue(Double.isNaN(actual), message);
+        } else if (Double.isInfinite(l)) {
+            assertEquals(l, actual, message);
+        } else {
+            assertEquals(l, actual, Math.ulp(l), message);
+        }
         return message;
     }
 
@@ -40,7 +48,7 @@ public class UnsafeTextBytesTest extends BytesTestCommon {
         final String message = bytes.toString();
         final double expected = Maths.round4(l);
         final double actual = bytes.parseDouble();
-        assertEquals(message, expected, actual, 0.0);
+        assertEquals(expected, actual, 0.0, message);
     }
 
     @Test
@@ -51,6 +59,7 @@ public class UnsafeTextBytesTest extends BytesTestCommon {
                 testAppendBase10(bytes, l);
                 testAppendBase10(bytes, 1 - l);
             }
+            assertEquals(0, bytes.readRemaining(), "appendBase10: bytes consumed");
         } finally {
             bytes.releaseLast();
         }
@@ -72,6 +81,7 @@ public class UnsafeTextBytesTest extends BytesTestCommon {
                 testAppendDouble(bytes, d);
                 testAppendFixed(bytes, d, 4);
             }
+            assertEquals(0, bytes.readRemaining(), "appendDouble: bytes consumed");
         } finally {
             bytes.releaseLast();
         }
@@ -85,6 +95,7 @@ public class UnsafeTextBytesTest extends BytesTestCommon {
                     741138311171.555,
                     0.0, -0.0, 0.1, 0.012, 0.00123, 1.0, Double.NaN, 1 / 0.0, -1 / 0.0})
                 testAppendDouble(bytes, d);
+            assertEquals(0, bytes.readRemaining(), "appendDouble2: bytes consumed");
         } finally {
             bytes.releaseLast();
         }
@@ -96,7 +107,7 @@ public class UnsafeTextBytesTest extends BytesTestCommon {
         try {
             final double d = -0.00002;
             final String output = testAppendDouble(bytes, d);
-            assertEquals("-0.00002", output);
+            assertEquals("-0.00002", output, "UnsafeText.appendDouble should preserve trailing zeros for small negative numbers");
         } finally {
             bytes.releaseLast();
         }

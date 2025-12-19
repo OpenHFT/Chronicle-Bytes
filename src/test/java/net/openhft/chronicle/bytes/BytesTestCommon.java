@@ -11,8 +11,6 @@ import net.openhft.chronicle.core.onoes.Slf4jExceptionHandler;
 import net.openhft.chronicle.core.threads.CleaningThread;
 import net.openhft.chronicle.core.threads.ThreadDump;
 import org.jetbrains.annotations.NotNull;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 
@@ -25,7 +23,7 @@ import java.util.stream.Collectors;
 import static net.openhft.chronicle.core.io.AbstractCloseable.waitForCloseablesToClose;
 import static net.openhft.chronicle.core.io.AbstractReferenceCounted.assertReferencesReleased;
 
-@SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate") // JUnit4 annotations require public class
+@SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate") // Base class is used by tests in subpackages.
 public class BytesTestCommon {
 
     private final Map<Predicate<ExceptionKey>, String> ignoredExceptions = new LinkedHashMap<>();
@@ -44,7 +42,6 @@ public class BytesTestCommon {
         return text != null && text.contains(message);
     }
 
-    @Before
     @BeforeEach
     public void enableReferenceTracing() {
         AbstractReferenceCounted.enableReferenceTracing();
@@ -59,13 +56,12 @@ public class BytesTestCommon {
             threadDump.assertNoNewThreads();
     }
 
-    @Before
     @BeforeEach
     public void recordExceptions() {
         exceptions = Jvm.recordExceptions();
     }
 
-    @Before
+    @BeforeEach
     public void assumeFinishedNormally() {
         finishedNormally = true;
     }
@@ -107,7 +103,6 @@ public class BytesTestCommon {
         }
     }
 
-    @After
     @AfterEach
     public void afterChecks() {
         cleanResources();

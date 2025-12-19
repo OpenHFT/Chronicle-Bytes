@@ -3,7 +3,6 @@
  */
 package net.openhft.chronicle.bytes;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -14,6 +13,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import java.util.stream.Stream;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
+import static org.junit.jupiter.api.Assertions.*;
 
 class BytesEqualityTests {
 
@@ -24,7 +24,7 @@ class BytesEqualityTests {
         @ParameterizedTest
         @MethodSource("bufferArguments")
         void zeroLength(Bytes<?> left, Bytes<?> right) {
-            Assertions.assertEquals(left, right);
+            assertEquals(left, right, "empty Bytes instances should be equal");
         }
 
         @ParameterizedTest
@@ -32,7 +32,7 @@ class BytesEqualityTests {
         void differentLength(Bytes<?> left, Bytes<?> right) {
             left.write("tex".getBytes(ISO_8859_1));
             right.write("text".getBytes(ISO_8859_1));
-            Assertions.assertNotEquals(left, right);
+            assertNotEquals(left, right);
         }
 
         @ParameterizedTest
@@ -40,7 +40,7 @@ class BytesEqualityTests {
         void shortEqual(Bytes<?> left, Bytes<?> right) {
             left.write("abc".getBytes(ISO_8859_1));
             right.write("abc".getBytes(ISO_8859_1));
-            Assertions.assertEquals(left, right);
+            assertEquals(left, right, "Bytes with same short content should be equal");
         }
 
         @ParameterizedTest
@@ -48,7 +48,7 @@ class BytesEqualityTests {
         void longEquals(Bytes<?> left, Bytes<?> right) {
             left.write("abcdefghijklmnopqrstuvwxyz".getBytes(ISO_8859_1));
             right.write("abcdefghijklmnopqrstuvwxyz".getBytes(ISO_8859_1));
-            Assertions.assertEquals(left, right);
+            assertEquals(left, right, "Bytes with same long content should be equal");
         }
 
         @ParameterizedTest
@@ -56,7 +56,7 @@ class BytesEqualityTests {
         void longNotEquals(Bytes<?> left, Bytes<?> right) {
             left.write("abcdefghijklmnopqrstuvwxyz".getBytes(ISO_8859_1));
             right.write("abcdefghijklmnopqrst_vwxyz".getBytes(ISO_8859_1));
-            Assertions.assertNotEquals(left, right);
+            assertNotEquals(left, right);
         }
 
         @ParameterizedTest
@@ -66,7 +66,7 @@ class BytesEqualityTests {
             left.readSkip(8);
             right.write("_bcdefghijklmnopqrstuvwxyz".getBytes(ISO_8859_1));
             right.readPosition(8);
-            Assertions.assertEquals(left, right);
+            assertEquals(left, right, "Bytes should be equal when readable content matches after skip");
         }
 
         @ParameterizedTest
@@ -76,7 +76,7 @@ class BytesEqualityTests {
             left.readSkip(8);
             right.write("abcdefghijklmnopqrstuvwxy_".getBytes(ISO_8859_1));
             right.readPosition(8);
-            Assertions.assertNotEquals(left, right);
+            assertNotEquals(left, right);
         }
 
         @ParameterizedTest
@@ -86,7 +86,7 @@ class BytesEqualityTests {
             left.readSkip(8);
             right.write("abcdefghijklmnopqrstuvwxyz".getBytes(ISO_8859_1));
             right.readSkip(8);
-            Assertions.assertEquals(left, right);
+            assertEquals(left, right, "Bytes should be equal when both skip same amount of identical content");
         }
 
         Stream<Arguments> bufferArguments() {
@@ -115,7 +115,7 @@ class BytesEqualityTests {
             direct.readSkip(8);
             heap.write(source);
             heap.readSkip(8);
-            Assertions.assertEquals(direct, heap);
+            assertEquals(direct, heap, "direct and heap Bytes with same content and skip should be equal");
         }
 
         @Test
@@ -127,7 +127,7 @@ class BytesEqualityTests {
             direct.readSkip(8);
             heap.write(source);
             heap.readSkip(8);
-            Assertions.assertEquals(heap, direct);
+            assertEquals(heap, direct, "heap and direct Bytes with same content and skip should be equal (reversed)");
         }
 
         @Test
@@ -139,7 +139,7 @@ class BytesEqualityTests {
             direct.readSkip(8);
             heap.write(source);
             heap.readSkip(8);
-            Assertions.assertEquals(direct, heap);
+            assertEquals(direct, heap, "fixed-size direct and elastic heap Bytes with same content should be equal");
         }
 
         @Test
@@ -151,7 +151,7 @@ class BytesEqualityTests {
             direct.readSkip(1);
             heap.write(source);
             heap.readSkip(1);
-            Assertions.assertEquals(direct, heap);
+            assertEquals(direct, heap, "direct and heap Bytes with same content after readSkip(1) should be equal");
         }
 
         @Test
@@ -161,7 +161,7 @@ class BytesEqualityTests {
             Bytes<?> heap = Bytes.allocateElasticOnHeap();
             direct.write(source);
             heap.write(source);
-            Assertions.assertEquals(direct, heap);
+            assertEquals(direct, heap, "direct and heap Bytes with same content and no skip should be equal");
         }
 
         @Test
@@ -173,7 +173,7 @@ class BytesEqualityTests {
             direct1.readSkip(8);
             direct2.write(source);
             direct2.readSkip(8);
-            Assertions.assertEquals(direct1, direct2);
+            assertEquals(direct1, direct2, "two direct Bytes with same content and skip should be equal");
         }
 
         @Test
@@ -183,7 +183,7 @@ class BytesEqualityTests {
             Bytes<?> direct2 = Bytes.allocateElasticDirect();
             direct1.write(source);
             direct2.write(source);
-            Assertions.assertEquals(direct1, direct2);
+            assertEquals(direct1, direct2, "two direct Bytes with same content and no skip should be equal");
         }
 
         @Test
@@ -195,7 +195,7 @@ class BytesEqualityTests {
             heap1.readSkip(8);
             heap2.write(source);
             heap2.readSkip(8);
-            Assertions.assertEquals(heap1, heap2);
+            assertEquals(heap1, heap2, "two heap Bytes with same content and skip should be equal");
         }
 
         @Test
@@ -205,7 +205,7 @@ class BytesEqualityTests {
             Bytes<?> heap2 = Bytes.allocateElasticOnHeap();
             heap1.write(source);
             heap2.write(source);
-            Assertions.assertEquals(heap1, heap2);
+            assertEquals(heap1, heap2, "two heap Bytes with same content and no skip should be equal");
         }
 
         @Test
@@ -220,7 +220,7 @@ class BytesEqualityTests {
             heap.write(source);
             heap.readSkip(1);
 
-            Assertions.assertEquals(direct, heap);
+            assertEquals(direct, heap, "direct and heap Bytes with short string and readSkip(1) should be equal");
         }
     }
 }
