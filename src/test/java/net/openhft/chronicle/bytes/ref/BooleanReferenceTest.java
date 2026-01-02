@@ -124,4 +124,18 @@ public class BooleanReferenceTest extends BytesTestCommon {
         }
         nbs.releaseLast();
     }
+
+    @Test
+    @DisplayName("text boolean reference toString reports current value")
+    public void textReferenceToStringReportsValue() {
+        BytesStore<?, Void> nbs = BytesStore.nativeStoreWithFixedCapacity(5);
+        try (@NotNull TextBooleanReference ref = new TextBooleanReference()) {
+            TextBooleanReference.write(true, nbs, 0);
+            ref.bytesStore(nbs, 0, ref.maxSize());
+            assertEquals("value: true",
+                    ref.toString(),
+                    "toString should reflect the current boolean value");
+        }
+        nbs.releaseLast();
+    }
 }

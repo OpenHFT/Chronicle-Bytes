@@ -4,6 +4,8 @@
 package net.openhft.chronicle.bytes.util;
 
 import net.openhft.chronicle.bytes.BytesTestCommon;
+import net.openhft.chronicle.core.OS;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -11,8 +13,15 @@ import java.util.Properties;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 public class PropertyReplacerTest extends BytesTestCommon {
+
+    @BeforeEach
+    void skipOnWindowsAndWsl() {
+        // Skip on Windows/WSL due to JVM native crash (STATUS_HEAP_CORRUPTION) with Java 8
+        assumeFalse(OS.isWindows() || isWsl(), "Skipped on Windows/WSL due to JVM crash");
+    }
     @Test
     @DisplayName("missing system property fails with a detailed message")
     public void testSystemPropertyMissing() {
