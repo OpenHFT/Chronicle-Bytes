@@ -36,23 +36,23 @@ import static net.openhft.chronicle.core.io.Closeable.closeQuietly;
 @SuppressWarnings({"rawtypes", "restriction"})
 public class SingleMappedFile extends MappedFile {
     /**
-     * The RandomAccessFile for this mapped file
+     * RandomAccessFile instance backing this mapped file.
      */
     @NotNull
     private final RandomAccessFile raf;
 
     /**
-     * The FileChannel for this mapped file
+     * FileChannel used to map and resize this mapped file.
      */
     private final FileChannel fileChannel;
 
     /**
-     * The MappedBytesStore for this mapped file
+     * MappedBytesStore representing the single contiguous mapping.
      */
     private final MappedBytesStore store;
 
     /**
-     * The capacity of this mapped file
+     * Capacity of this mapped file in bytes.
      */
     private final long capacity;
 
@@ -102,7 +102,7 @@ public class SingleMappedFile extends MappedFile {
             ok = true;
 
         } catch (IOException ioe) {
-            throw new IORuntimeException(ioe);
+            throw new IORuntimeException("Failed to map file " + file, ioe);
 
         } finally {
             if (!ok)
@@ -148,7 +148,7 @@ public class SingleMappedFile extends MappedFile {
             throws IllegalArgumentException, ClosedIllegalStateException, ThreadingIllegalStateException {
 
         if (position != 0)
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("SingleMappedFile only supports position 0");
         store.reserve(owner);
         return store;
     }
@@ -243,9 +243,9 @@ public class SingleMappedFile extends MappedFile {
     }
 
     /**
-     * Returns the capacity of this mapped file
+     * Returns the capacity of this mapped file in bytes.
      *
-     * @return The capacity of this mapped file
+     * @return The capacity of this mapped file in bytes
      */
     public long capacity() {
         return capacity;
@@ -276,9 +276,9 @@ public class SingleMappedFile extends MappedFile {
     }
 
     /**
-     * Returns the actual size of this mapped file
+     * Returns the actual size of this mapped file in bytes.
      *
-     * @return The actual size of this mapped file
+     * @return The actual size of this mapped file in bytes
      * @throws IORuntimeException             If an I/O error occurs
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
@@ -303,10 +303,10 @@ public class SingleMappedFile extends MappedFile {
         } catch (IOException e) {
             final boolean open = fileChannel.isOpen();
             if (open) {
-                throw new IORuntimeException(e);
+                throw new IORuntimeException("FileChannel size query failed", e);
             } else {
                 close();
-                throw new IllegalStateException(e);
+                throw new IllegalStateException("FileChannel closed while reading size", e);
             }
         } finally {
             if (interrupted)
@@ -320,9 +320,9 @@ public class SingleMappedFile extends MappedFile {
     }
 
     /**
-     * Returns the RandomAccessFile of this mapped file
+     * Returns the RandomAccessFile used by this mapped file.
      *
-     * @return The RandomAccessFile of this mapped file
+     * @return The RandomAccessFile used by this mapped file
      */
     @NotNull
     public RandomAccessFile raf() {

@@ -38,7 +38,7 @@ public class HeapBytesStore<U>
     private final Object realUnderlyingObject;
     /** Unsafe offset of the first data byte. */
     private final int dataOffset;
-    /** Usable capacity of this store. */
+    /** Usable capacity of this store in bytes. */
     private final long capacity;
     /** Original object passed to the constructor, array or ByteBuffer. */
     @Nullable
@@ -81,7 +81,8 @@ public class HeapBytesStore<U>
     // Used by Chronicle-Map.
     @NotNull
     public static HeapBytesStore<byte[]> wrap(byte[] byteArray) {
-        if (byteArray == null) throw new NullPointerException();
+        if (byteArray == null)
+            throw new NullPointerException("byteArray must not be null");
         return new HeapBytesStore<>(byteArray);
     }
 
@@ -107,8 +108,10 @@ public class HeapBytesStore<U>
     @Override
     public void move(@NonNegative long from, @NonNegative long to, @NonNegative long length)
             throws BufferUnderflowException, ArithmeticException {
-        if (from < 0 || to < 0) throw new IllegalArgumentException();
-        if (length < 0 || (int) length != length) throw new IllegalArgumentException();
+        if (from < 0 || to < 0)
+            throw new IllegalArgumentException("Move offsets must be non-negative");
+        if (length < 0 || (int) length != length)
+            throw new IllegalArgumentException("Move length must fit into an int");
         throwExceptionIfReleased();
         try {
             memory.copyMemory(realUnderlyingObject, dataOffset + from, realUnderlyingObject, dataOffset + to, (int) length);
@@ -602,9 +605,9 @@ public class HeapBytesStore<U>
     public long addressForRead(@NonNegative long offset)
             throws UnsupportedOperationException {
         if (offset < start())
-            throw new BufferUnderflowException();
+            throw new BufferUnderflowException(/* addressForRead offset before start */);
         if (offset >= capacity)
-            throw new BufferOverflowException();
+            throw new BufferOverflowException(/* addressForRead offset beyond capacity */);
         throw new UnsupportedOperationException();
     }
 
@@ -612,9 +615,9 @@ public class HeapBytesStore<U>
     public long addressForWrite(@NonNegative long offset)
             throws UnsupportedOperationException {
         if (offset < start())
-            throw new BufferUnderflowException();
+            throw new BufferUnderflowException(/* addressForWrite offset before start */);
         if (offset >= capacity)
-            throw new BufferOverflowException();
+            throw new BufferOverflowException(/* addressForWrite offset beyond capacity */);
         throw new UnsupportedOperationException();
     }
 
@@ -627,11 +630,11 @@ public class HeapBytesStore<U>
     @Override
     public void nativeRead(@NonNegative long position, @NonNegative long address, @NonNegative long size) {
         if (position < start())
-            throw new BufferUnderflowException();
+            throw new BufferUnderflowException(/* nativeRead position before start */);
         if (size + position > readLimit())
-            throw new BufferOverflowException();
+            throw new BufferOverflowException(/* nativeRead exceeds readLimit */);
         if (size < 0)
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("nativeRead size must be non-negative");
         if (size > 0)
             throw new UnsupportedOperationException("todo");
     }
@@ -639,11 +642,11 @@ public class HeapBytesStore<U>
     @Override
     public void nativeWrite(@NonNegative long address, @NonNegative long position, @NonNegative long size) {
         if (position < start())
-            throw new BufferUnderflowException();
+            throw new BufferUnderflowException(/* nativeWrite position before start */);
         if (size + position > writeLimit())
-            throw new BufferOverflowException();
+            throw new BufferOverflowException(/* nativeWrite exceeds writeLimit */);
         if (size < 0)
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("nativeWrite size must be non-negative");
         if (size > 0)
             throw new UnsupportedOperationException("todo");
     }

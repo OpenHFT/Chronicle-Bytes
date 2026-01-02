@@ -28,7 +28,7 @@ import static net.openhft.chronicle.core.util.Longs.requireNonNegative;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
 /**
- * Bytes to wrap memory mapped data.
+ * Bytes wrapper for memory mapped data that manages chunk boundaries and mapped file growth.
  * <p>
  * NOTE These Bytes are single Threaded as are all Bytes.
  */
@@ -114,7 +114,7 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
 
         if (length > writeRemaining())
             throw new DecoratedBufferOverflowException(
-                    String.format("write failed. Length: %d > writeRemaining: %d", length, writeRemaining()));
+                    String.format("write failed for source Bytes. Length: %d > writeRemaining: %d", length, writeRemaining()));
 
         long remaining = length;
 
@@ -371,14 +371,13 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
         if (DEBUG_CHUNKED_MAPPED_BYTES && LOG.isDebugEnabled())
             Jvm.debug().on(LOG, Integer.toHexString(System.identityHashCode(this)) + ", file: " + mappedFile.file().getName() + ", offset: 0x" + Long.toHexString(offset) + ", read: " + set);
 
-        @Nullable final BytesStore<?, ?> oldBS = this.bytesStore;
+        final BytesStore<?, ?> oldBS = this.bytesStore;
         @NotNull final MappedBytesStore newBS;
         try {
             newBS = mappedFile.acquireByteStore(this, offset, oldBS);
             if (newBS != oldBS) {
                 this.bytesStore(uncheckedCast(newBS));
-                if (oldBS != null)
-                    oldBS.release(this);
+                oldBS.release(this);
                 if (lastActualSize < newBS.maximumLimit)
                     lastActualSize = newBS.maximumLimit;
             }
@@ -403,7 +402,8 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
         if (bytesToSkip == 0)
             return this;
 
-        if (readPosition + bytesToSkip > readLimit()) throw new BufferUnderflowException();
+        if (readPosition + bytesToSkip > readLimit())
+            throw new BufferUnderflowException(/* readSkip exceeds readLimit */);
         long check = bytesToSkip >= 0 ? this.readPosition : this.readPosition + bytesToSkip;
         BytesStore<?, ?> bytesStore = this.bytesStore;
         if (bytesToSkip != (int) bytesToSkip || !bytesStore.inside(readPosition, (int) bytesToSkip)) {
@@ -421,7 +421,7 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
         uncheckedWritePosition(0L);
         writeLimit = mappedFile.capacity();
         if (writeLimit == 16843020)
-            throw new AssertionError();
+            throw new AssertionError("Unexpected sentinel writeLimit during clear");
         return this;
     }
 

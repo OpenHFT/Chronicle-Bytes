@@ -66,13 +66,13 @@ public abstract class AbstractBytes<U>
     @Deprecated(/* to remove in x.28 */)
     private static final boolean APPEND_0 = Jvm.getBoolean("bytes.append.0", true);
 
-    /** Optional name for debugging only. */
+    /** Optional name used only for debugging and diagnostic output. */
     @UsedViaReflection
     private final String name;
 
     private final UncheckedRandomDataInput uncheckedRandomDataInput = new UncheckedRandomDataInputHolder();
     @NotNull
-    protected BytesStore<?, U> bytesStore;
+    protected BytesStore<?, U> bytesStore = BytesStore.empty();
     /** Offset, from {@link #start()}, of the next byte to read. */
     protected long readPosition;
     /** Highest byte index that may be written. */
@@ -117,7 +117,7 @@ public abstract class AbstractBytes<U>
                   String name)
             throws ClosedIllegalStateException, ThreadingIllegalStateException {
         super(bytesStore.isDirectMemory());
-        this.bytesStore(bytesStore);
+        this.bytesStore = BytesInternal.failIfBytesOnBytes(bytesStore);
         bytesStore.reserve(this);
         readPosition = bytesStore.readPosition();
         this.uncheckedWritePosition(writePosition);
@@ -141,7 +141,8 @@ public abstract class AbstractBytes<U>
     @Override
     public void move(@NonNegative long from, @NonNegative long to, @NonNegative long length)
             throws BufferUnderflowException, ClosedIllegalStateException, ArithmeticException, ThreadingIllegalStateException {
-        if (from < 0 || to < 0) throw new IllegalArgumentException();
+        if (from < 0 || to < 0)
+            throw new IllegalArgumentException("move offsets must be non-negative");
         if (length == 0) return;
         assert DISABLE_SINGLE_THREADED_CHECK || threadSafetyCheck(true);
         long start = start();
@@ -872,7 +873,7 @@ public abstract class AbstractBytes<U>
         requireNonNull(bytes);
 
         if (bytes.readRemaining() > writeRemaining())
-            throw new BufferOverflowException();
+            throw new DecoratedBufferOverflowException("write(BytesStore) exceeds writeRemaining");
         return write(bytes, bytes.readPosition(), bytes.readRemaining());
     }
 
@@ -976,11 +977,11 @@ public abstract class AbstractBytes<U>
             throws ClosedIllegalStateException, ThreadingIllegalStateException {
         if (position < start()) {
             if (position < 0)
-                throw new IllegalArgumentException();
-            throw new BufferUnderflowException();
+                throw new IllegalArgumentException("write8bit(BytesStore) position must be non-negative");
+            throw new DecoratedBufferUnderflowException("write8bit(BytesStore) position is before the start");
         }
         if (position + bs.readRemaining() > writeLimit)
-            throw new BufferOverflowException();
+            throw new DecoratedBufferOverflowException("write8bit(BytesStore) would exceed the write limit");
         ensureCapacity(position + bs.readRemaining());
         return bytesStore.write8bit(position, bs);
     }
@@ -990,11 +991,11 @@ public abstract class AbstractBytes<U>
             throws ClosedIllegalStateException, ThreadingIllegalStateException {
         if (position < start()) {
             if (position < 0)
-                throw new IllegalArgumentException();
-            throw new BufferUnderflowException();
+                throw new IllegalArgumentException("write8bit(String) position must be non-negative");
+            throw new DecoratedBufferUnderflowException("write8bit(String) position is before the start");
         }
         if (position + length > writeLimit)
-            throw new BufferOverflowException();
+            throw new DecoratedBufferOverflowException("write8bit(String) would exceed the write limit");
         ensureCapacity(position + length);
         return bytesStore.write8bit(position, s, start, length);
     }
@@ -1026,7 +1027,7 @@ public abstract class AbstractBytes<U>
     @NotNull
     private DecoratedBufferOverflowException newBOELower(@NonNegative long offset) {
         if (offset < 0)
-            throw new IllegalArgumentException("offset: " + offset);
+            throw new IllegalArgumentException("read upper-bound check requires non-negative offset: " + offset);
         return new DecoratedBufferOverflowException(String.format("writeCheckOffset failed. Offset: %d < start: %d", offset, start()));
     }
 
@@ -1099,7 +1100,7 @@ public abstract class AbstractBytes<U>
     @NotNull
     private DecoratedBufferUnderflowException newBOEReadUpper(@NonNegative long offset, long adding, boolean given) {
         if (offset < 0)
-            throw new IllegalArgumentException("offset: " + offset);
+            throw new IllegalArgumentException("read lower-bound check requires non-negative offset: " + offset);
         long limit2 = given ? writeLimit() : readLimit();
         return new DecoratedBufferUnderflowException(String
                 .format("readCheckOffset0 failed. Offset: %d + adding: %d > limit: %d (given: %s)", offset, adding, limit2, given));
@@ -1241,7 +1242,8 @@ public abstract class AbstractBytes<U>
     @Override
     public Bytes<U> writeIntAdv(int i, @NonNegative int advance)
             throws BufferOverflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
-        if (advance < 0) throw new IllegalArgumentException();
+        if (advance < 0)
+            throw new IllegalArgumentException("writeIntAdv advance must be non-negative");
         long offset = writeOffsetPositionMoved(Integer.BYTES, advance);
         bytesStore.writeInt(offset, i);
         return this;
@@ -1260,7 +1262,8 @@ public abstract class AbstractBytes<U>
     @Override
     public Bytes<U> writeLongAdv(long i64, @NonNegative int advance)
             throws BufferOverflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
-        if (advance < 0) throw new IllegalArgumentException();
+        if (advance < 0)
+            throw new IllegalArgumentException("writeLongAdv advance must be non-negative");
         long offset = writeOffsetPositionMoved(Long.BYTES, advance);
         bytesStore.writeLong(offset, i64);
         return this;

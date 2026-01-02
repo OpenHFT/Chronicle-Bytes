@@ -43,7 +43,7 @@ public interface MethodWriterBuilder<T> extends Supplier<T> {
     MethodWriterBuilder<T> onClose(Closeable closeable);
 
     /**
-     * Specifies an UpdateInterceptor for the MethodWriter.
+     * Specifies an UpdateInterceptor for the MethodWriter to control update callbacks.
      *
      * @param updateInterceptor the UpdateInterceptor to use
      * @return this builder, so invocations can be chained
@@ -66,7 +66,7 @@ public interface MethodWriterBuilder<T> extends Supplier<T> {
     }
 
     /**
-     * Builds the MethodWriter instance.
+     * Builds the MethodWriter instance from the current builder configuration.
      *
      * @return the built MethodWriter instance
      */

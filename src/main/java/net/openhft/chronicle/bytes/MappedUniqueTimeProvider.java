@@ -22,7 +22,7 @@ public enum MappedUniqueTimeProvider implements TimeProvider, ReferenceOwner {
 
     /** offset within the mapped file where the last timestamp is stored */
     private static final int LAST_TIME = 128;
-    /** conversion constant */
+    /** conversion constant from nanoseconds to microseconds */
     private static final int NANOS_PER_MICRO = 1000;
 
     private final BytesStore<?, ?> bytesStore;
@@ -40,15 +40,15 @@ public enum MappedUniqueTimeProvider implements TimeProvider, ReferenceOwner {
             Monitorable.unmonitor(file);
             Monitorable.unmonitor(bytes);
         } catch (Exception ioe) {
-            throw new IORuntimeException(ioe);
+            throw new IORuntimeException("Failed to initialise mapped unique time provider", ioe);
         }
     }
 
     // Todo: Handle thread safety
     /**
-     * Sets the underlying time source.
+     * Sets the underlying time source used for wall-clock timestamps.
      */
-    public MappedUniqueTimeProvider provider(TimeProvider provider) {
+    MappedUniqueTimeProvider provider(TimeProvider provider) {
         this.provider = provider;
         return this;
     }

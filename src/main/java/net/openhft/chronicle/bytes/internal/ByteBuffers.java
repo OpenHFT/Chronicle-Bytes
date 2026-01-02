@@ -17,9 +17,9 @@ public final class ByteBuffers {
     private ByteBuffers() {
     }
 
-    /** reflected field for ByteBuffer.address */
+    /** Reflected field holding ByteBuffer.address for direct buffer manipulation. */
     private static final Field ADDRESS;
-    /** reflected field for ByteBuffer.capacity */
+    /** Reflected field holding ByteBuffer.capacity for direct buffer manipulation. */
     private static final Field CAPACITY;
 
     static {
@@ -57,7 +57,7 @@ public final class ByteBuffers {
             ADDRESS.setLong(buffer, address);
             CAPACITY.setInt(buffer, cap);
         } catch (IllegalAccessException | IllegalArgumentException e) {
-            throw new AssertionError(e);
+            throw new AssertionError("Failed to set direct ByteBuffer address/capacity", e);
         }
     }
 }

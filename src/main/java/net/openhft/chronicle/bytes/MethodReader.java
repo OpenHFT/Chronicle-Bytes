@@ -11,7 +11,7 @@ import net.openhft.chronicle.core.util.InvocationTargetRuntimeException;
 import java.nio.BufferUnderflowException;
 
 /**
- * Interface defining the required operations for a method reader.
+ * Interface defining the required operations for a method reader implementation contract and lifecycle.
  * <p>
  * A method reader is responsible for reading serialized method calls, typically from a queue or a stream,
  * and then dispatching those method calls to their intended target.

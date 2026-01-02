@@ -11,7 +11,7 @@ import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 
 /**
- * Interface defining the required operations for a method encoder.
+ * Interface defining the required operations for a method encoder implementation contract and lifecycle.
  * <p>
  * A method encoder is responsible for encoding a method call into a {@link BytesOut} object and decoding the method call from a {@link BytesIn} object.
  * This encoding/decoding is often necessary for serializing method calls or for sending method calls over a network for remote procedure calls (RPC).

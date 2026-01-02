@@ -41,7 +41,7 @@ public interface ByteStringParser<B extends ByteStringParser<B>> extends Streami
      * tokens are case-insensitive variants of {@code true/t/yes/y/1} and {@code false/f/no/n/0}.
      *
      * @param tester stop condition for the parse
-     * @return parsed value or {@code null} if no recognised token was found
+     * @return parsed value, returning {@code null} when no recognised token was found
      */
     @Nullable
     default Boolean parseBoolean(@NotNull StopCharTester tester)
@@ -60,8 +60,7 @@ public interface ByteStringParser<B extends ByteStringParser<B>> extends Streami
     }
 
     /**
-     * Parses a UTF-8 encoded string from the byte string until the provided {@code stopCharTester}
-     * detects an end condition.
+     * Parses and returns a UTF-8 string until {@code stopCharTester} signals the end.
      *
      * @param stopCharTester a {@code StopCharTester} used to detect the end of the string.
      * @return the parsed text as a {@code String}.
@@ -76,8 +75,7 @@ public interface ByteStringParser<B extends ByteStringParser<B>> extends Streami
     }
 
     /**
-     * Parses a UTF-8 encoded string from the byte string until the provided {@code stopCharTester}
-     * detects an end condition. The parsed string is appended to the provided {@code buffer}.
+     * Parses UTF-8 data into {@code buffer} until a single-character stop tester signals the end.
      *
      * @param buffer         the {@code Appendable} to append the parsed string to.
      * @param stopCharTester a {@code StopCharTester} used to detect the end of the string.
@@ -92,8 +90,7 @@ public interface ByteStringParser<B extends ByteStringParser<B>> extends Streami
     }
 
     /**
-     * Parses a UTF-8 encoded string from the byte string until the provided {@code stopCharsTester}
-     * detects an end condition. The parsed string is appended to the provided {@code buffer}.
+     * Parses UTF-8 data into {@code buffer} using a multi-character stop tester sequence.
      *
      * @param buffer          the {@code Appendable} to append the parsed string to.
      * @param stopCharsTester a {@code StopCharsTester} used to detect the end of the string.
@@ -108,8 +105,7 @@ public interface ByteStringParser<B extends ByteStringParser<B>> extends Streami
     }
 
     /**
-     * Parses an ISO-8859-1 encoded string from the byte string until the provided {@code stopCharTester}
-     * detects an end condition. The parsed string is appended to the provided {@code buffer}.
+     * Parses ISO-8859-1 data into {@code buffer} until {@code stopCharTester} signals the end.
      *
      * @param buffer         the {@code Appendable} to append the parsed string to.
      * @param stopCharTester a {@code StopCharTester} used to detect the end of the string.
@@ -121,10 +117,13 @@ public interface ByteStringParser<B extends ByteStringParser<B>> extends Streami
      */
     default void parse8bit(Appendable buffer, @NotNull StopCharTester stopCharTester)
             throws BufferUnderflowException, BufferOverflowException, ArithmeticException, ClosedIllegalStateException, ThreadingIllegalStateException {
-        if (buffer instanceof StringBuilder)
+        if (buffer instanceof StringBuilder) {
             BytesInternal.parse8bit(this, (StringBuilder) buffer, stopCharTester);
-        else
+        } else if (buffer instanceof Bytes) {
             BytesInternal.parse8bit(this, (Bytes<?>) buffer, stopCharTester);
+        } else {
+            throw new IllegalArgumentException("buffer must be a StringBuilder or Bytes for StopCharsTester");
+        }
     }
 
     /**
@@ -143,8 +142,7 @@ public interface ByteStringParser<B extends ByteStringParser<B>> extends Streami
     }
 
     /**
-     * Parses an ISO-8859-1 encoded string from the byte string until the provided {@code stopCharsTester}
-     * detects an end condition. The parsed string is appended to the provided {@code buffer}.
+     * Parses ISO-8859-1 data into an {@code Appendable} using a multi-character stop tester sequence.
      *
      * @param buffer          the {@code Appendable} to append the parsed string to.
      * @param stopCharsTester a {@code StopCharsTester} used to detect the end of the string.
@@ -156,15 +154,17 @@ public interface ByteStringParser<B extends ByteStringParser<B>> extends Streami
      */
     default void parse8bit(Appendable buffer, @NotNull StopCharsTester stopCharsTester)
             throws BufferUnderflowException, BufferOverflowException, ArithmeticException, ClosedIllegalStateException, ThreadingIllegalStateException {
-        if (buffer instanceof StringBuilder)
+        if (buffer instanceof StringBuilder) {
             BytesInternal.parse8bit(this, (StringBuilder) buffer, stopCharsTester);
-        else
+        } else if (buffer instanceof Bytes) {
             BytesInternal.parse8bit(this, (Bytes<?>) buffer, stopCharsTester);
+        } else {
+            throw new IllegalArgumentException("buffer must be a StringBuilder or Bytes");
+        }
     }
 
     /**
-     * Parses an ISO-8859-1 encoded string from the byte string until the provided {@code stopCharsTester}
-     * detects an end condition. The parsed string is appended to the provided {@code buffer}.
+     * Parses ISO-8859-1 data into a Bytes buffer using a multi-character stop tester sequence.
      *
      * @param buffer          the {@code Bytes} object to append the parsed string to.
      * @param stopCharsTester a {@code StopCharsTester} used to detect the end of the string.
@@ -180,8 +180,7 @@ public interface ByteStringParser<B extends ByteStringParser<B>> extends Streami
     }
 
     /**
-     * Parses an ISO-8859-1 encoded string from the byte string until the provided {@code stopCharsTester}
-     * detects an end condition. The parsed string is appended to the provided {@code buffer}.
+     * Parses ISO-8859-1 data into a StringBuilder using a multi-character stop tester sequence.
      *
      * @param buffer          the {@code StringBuilder} to append the parsed string to.
      * @param stopCharsTester a {@code StopCharsTester} used to detect the end of the string.

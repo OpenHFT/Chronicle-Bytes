@@ -44,7 +44,7 @@ public interface BytesIn<U> extends
     }
 
     /**
-     * Creates a builder for the MethodReader.
+     * Creates a builder for MethodReader instances backed by this input.
      *
      * @return a BytesMethodReaderBuilder for this BytesIn.
      */

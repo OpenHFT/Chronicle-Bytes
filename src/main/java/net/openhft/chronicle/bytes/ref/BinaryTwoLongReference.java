@@ -41,7 +41,7 @@ public class BinaryTwoLongReference extends BinaryLongReference implements TwoLo
     }
 
     /**
-     * Returns a string representation of this BinaryTwoLongReference.
+     * Returns a string representation of this BinaryTwoLongReference with both long values for debugging.
      *
      * @return a string representation
      */
@@ -56,7 +56,7 @@ public class BinaryTwoLongReference extends BinaryLongReference implements TwoLo
     }
 
     /**
-     * Gets the second long value from the BinaryTwoLongReference.
+     * Gets the second long value stored after the first long in this contiguous reference.
      *
      * @return the second long value.
      * @throws ClosedIllegalStateException    If the resource has been released or closed.

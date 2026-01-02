@@ -60,7 +60,7 @@ public interface Byteable {
     long maxSize();
 
     /**
-     * Locks the underlying file.
+     * Locks the underlying file backing this mapped region.
      *
      * @param shared true if the lock is shared, false if it's exclusive
      * @return the FileLock object representing the lock

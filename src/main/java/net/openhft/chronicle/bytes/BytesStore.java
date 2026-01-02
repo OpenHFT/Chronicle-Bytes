@@ -242,7 +242,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
     }
 
     /**
-     * Similar to {@link #compareAndSwapFloat(long, float, float)} but operates on a double value.
+     * Compares and swaps a double value using raw long bits.
      */
     @Override
     default boolean compareAndSwapDouble(@NonNegative long offset, double expected, double value)
@@ -266,7 +266,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
     }
 
     /**
-     * Similar to {@link #addAndGetInt(long, int)} but operates on a long value.
+     * Adds a long value at {@code offset} and returns the updated value.
      */
     @SuppressWarnings("deprecation")
     default long addAndGetLong(@NonNegative long offset, long adding)
@@ -275,7 +275,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
     }
 
     /**
-     * Similar to {@link #addAndGetInt(long, int)} but operates on a float value.
+     * Adds a float value at {@code offset} and returns the updated value.
      */
     @SuppressWarnings("deprecation")
     default float addAndGetFloat(@NonNegative long offset, float adding)
@@ -284,7 +284,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
     }
 
     /**
-     * Similar to {@link #addAndGetInt(long, int)} but operates on a double value.
+     * Adds a double value at {@code offset} and returns the updated value.
      */
     @SuppressWarnings("deprecation")
     default double addAndGetDouble(@NonNegative long offset, double adding)
@@ -301,7 +301,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
     boolean isDirectMemory();
 
     /**
-     * Creates and returns a copy of this BytesStore.
+     * Creates and returns a copy of this BytesStore content for independent read operations.
      *
      * @return a new instance of BytesStore that is a copy of this BytesStore
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
@@ -311,9 +311,9 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
             throws ClosedIllegalStateException, ThreadingIllegalStateException;
 
     /**
-     * Returns a Bytes that wraps this ByteStore from the {@code start} to the {@code realCapacity}.
+     * Returns a Bytes view that wraps this BytesStore for reading.
      * <p>
-     * The returned Bytes is not elastic and can be both read and written using cursors.
+     * The returned Bytes is not elastic and uses read/write cursors over the store range.
      *
      * @return a Bytes that wraps this ByteStore
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
@@ -330,14 +330,14 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
             ret.readPosition(start());
             return ret;
         } catch (BufferUnderflowException | BufferOverflowException e) {
-            throw new IllegalStateException(e);
+            throw new IllegalStateException("bytesForRead failed to create a view", e);
         }
     }
 
     /**
-     * Returns a Bytes that wraps this ByteStore from the {@code start} to the {@code realCapacity}.
+     * Returns a Bytes view that wraps this BytesStore for writing.
      * <p>
-     * The returned Bytes is not elastic and can be both read and written using cursors.
+     * The returned Bytes is not elastic and uses write limits from this store.
      *
      * @return a Bytes that wraps this BytesStore
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
@@ -350,7 +350,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
         try {
             return new VanillaBytes<>(this, writePosition(), writeLimit());
         } catch (IllegalArgumentException e) {
-            throw new IllegalStateException(e);
+            throw new IllegalStateException("bytesForWrite failed to create a view", e);
         }
     }
 
@@ -445,7 +445,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
             for (; i < copy; i++)
                 store.writeByte(writePos + i, readByte(readPos + i));
         } catch (BufferOverflowException | BufferUnderflowException e) {
-            throw new IllegalStateException(e);
+            throw new IllegalStateException("copyTo(BytesStore) failed while copying bytes", e);
         }
         return copy;
     }
@@ -464,7 +464,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
     }
 
     /**
-     * Fills the BytesStore with zeros.
+     * Fills the specified range of this BytesStore with zero bytes.
      *
      * @param start first byte inclusive
      * @param end   last byte exclusive
@@ -489,15 +489,14 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
             for (; i < end; i++)
                 writeByte(i, 0);
         } catch (BufferOverflowException | IllegalArgumentException | ArithmeticException e) {
-            throw new IllegalStateException(e);
+            throw new IllegalStateException("zeroOut failed while writing zeros", e);
         }
         return (B) this;
     }
 
     /**
-     * This method is inherited from CharSequence so result should be the length of the contained
-     * chars sequence although it actually returns the number of underlying bytes. These 2 numbers are only the same
-     * if the encoding we are using is single char for single byte.
+     * Returns the length in bytes rather than characters for this store.
+     * The byte length only matches the character count for single-byte encodings.
      *
      * @return length in bytes to read or Integer.MAX_VALUE if longer.
      */
@@ -609,7 +608,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
         try {
             return byteCheckSum(readPosition(), readLimit());
         } catch (BufferUnderflowException e) {
-            throw new IllegalStateException(e);
+            throw new IllegalStateException("byteCheckSum failed while reading bytes", e);
         }
     }
 
@@ -645,7 +644,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
         try {
             return readRemaining() > 0 && readUnsignedByte(readLimit() - 1) == c;
         } catch (BufferUnderflowException e) {
-            throw new IllegalStateException(e);
+            throw new IllegalStateException("endsWith failed while reading last byte", e);
         }
     }
 
@@ -662,7 +661,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
         try {
             return readRemaining() > 0 && readUnsignedByte(readPosition()) == c;
         } catch (BufferUnderflowException e) {
-            throw new IllegalStateException(e);
+            throw new IllegalStateException("startsWith failed while reading first byte", e);
         }
     }
 
@@ -736,7 +735,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
             writeByte(offset, (byte) r);
             return r;
         } catch (BufferOverflowException e) {
-            throw new IllegalStateException(e);
+            throw new IllegalStateException("addAndGetUnsignedByteNotAtomic failed to write result", e);
         }
     }
 
@@ -757,7 +756,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
             writeByte(offset, r);
             return r;
         } catch (BufferOverflowException | IllegalArgumentException | ArithmeticException e) {
-            throw new IllegalStateException(e);
+            throw new IllegalStateException("addAndGetShortNotAtomic failed to write result", e);
         }
     }
 
@@ -778,12 +777,12 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
             writeInt(offset, r);
             return r;
         } catch (BufferOverflowException e) {
-            throw new IllegalStateException(e);
+            throw new IllegalStateException("addAndGetIntNotAtomic failed to write result", e);
         }
     }
 
     /**
-     * Perform a <i>not</i> atomic add and get operation for a float value.
+     * Perform a <i>not</i> atomic add and get operation for a double value at the supplied offset.
      *
      * @param offset to add and get
      * @param adding value to add, can be 1
@@ -799,12 +798,12 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
             writeDouble(offset, r);
             return r;
         } catch (BufferOverflowException e) {
-            throw new IllegalStateException(e);
+            throw new IllegalStateException("addAndGetDoubleNotAtomic failed to write result", e);
         }
     }
 
     /**
-     * Perform a <i>not</i> atomic add and get operation for a float value.
+     * Perform a <i>not</i> atomic add and get operation for a float value at the supplied offset.
      *
      * @param offset to add and get
      * @param adding value to add, can be 1
@@ -820,7 +819,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
             writeFloat(offset, r);
             return r;
         } catch (BufferOverflowException e) {
-            throw new IllegalStateException(e);
+            throw new IllegalStateException("addAndGetFloatNotAtomic failed to write result", e);
         }
     }
 
@@ -859,7 +858,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
                 Jvm.nanoPause();
             }
         } catch (BufferOverflowException e) {
-            throw new IllegalStateException(e);
+            throw new IllegalStateException("writeMaxLong failed during CAS update", e);
         }
     }
 
@@ -884,7 +883,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
                 Jvm.nanoPause();
             }
         } catch (BufferOverflowException e) {
-            throw new IllegalStateException(e);
+            throw new IllegalStateException("writeMaxInt failed during CAS update", e);
         }
     }
 
@@ -932,7 +931,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
         } catch (IllegalStateException e) {
             throw e;
         } catch (@NotNull Exception e) {
-            throw new IllegalStateException(e);
+            throw new IllegalStateException("cipher operation failed for BytesStore", e);
         } finally {
             // This would never fail as readPos is final and was valid from the beginning.
             outBytes.readPosition(readPos);

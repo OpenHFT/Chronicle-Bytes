@@ -15,7 +15,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 
 /**
- * A specialised {@link Bytes} implementation backed by a memory-mapped file.
+ * A specialised {@link Bytes} implementation backed by a memory-mapped file for large file-backed buffers.
  * <p>
  * The underlying file is accessed in chunks (64&nbsp;MiB by default) so very
  * large files can be treated as if they were in memory. Only the most recently

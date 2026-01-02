@@ -32,7 +32,7 @@ public class BytesFieldInfo {
         try {
             $END$ = BytesFieldInfo.class.getDeclaredField("$END$");
         } catch (NoSuchFieldException e) {
-            throw new AssertionError(e);
+            throw new AssertionError("BytesFieldInfo missing $END$ sentinel field", e);
         }
     }
 
@@ -170,7 +170,8 @@ public class BytesFieldInfo {
     public long startOf(String groupName) {
         final BFIEntry bfiEntry = groups.get(groupName);
         if (bfiEntry == null)
-            throw new IllegalArgumentException("No groupName " + groupName + " found in " + aClass);
+            throw new IllegalArgumentException("No groupName " + groupName + " found in " + aClass
+                    + " while resolving start offset");
         return bfiEntry.start;
     }
 
@@ -180,7 +181,8 @@ public class BytesFieldInfo {
     public long lengthOf(String groupName) {
         final BFIEntry bfiEntry = groups.get(groupName);
         if (bfiEntry == null)
-            throw new IllegalArgumentException("No groupName " + groupName + " found in " + aClass);
+            throw new IllegalArgumentException("No groupName " + groupName + " found in " + aClass
+                    + " while resolving group length");
         return bfiEntry.end - bfiEntry.start;
     }
 

@@ -5,7 +5,7 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.annotation.NonNegative;
 /**
- * Strategy for formatting offsets when dumping bytes.
+ * Strategy for formatting offsets when dumping bytes into readable aligned output.
  */
 @FunctionalInterface
 public interface OffsetFormat {

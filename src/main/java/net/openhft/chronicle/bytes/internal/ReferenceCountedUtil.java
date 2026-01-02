@@ -9,8 +9,8 @@ import net.openhft.chronicle.core.io.ReferenceCounted;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
 /**
- * Helpers for checking the state of {@link ReferenceCounted} objects. The class
- * is not instantiable.
+ * Helpers for checking the state of {@link ReferenceCounted} objects and enforcing non-null usage.
+ * The class is not instantiable.
  */
 public final class ReferenceCountedUtil {
 

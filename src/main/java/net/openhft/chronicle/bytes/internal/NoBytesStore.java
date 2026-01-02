@@ -23,11 +23,11 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
 public final class NoBytesStore implements BytesStore<NoBytesStore, Void> {
-    /** singleton instance */
+    /** Singleton instance representing an immutable empty BytesStore. */
     public static final BytesStore<?, ?> NO_BYTES_STORE = new NoBytesStore();
-    /** shared zeroed page */
+    /** Shared zeroed page used for placeholder native storage. */
     public static final long NO_PAGE;
-    /** empty Bytes backed by {@link #NO_BYTES_STORE} */
+    /** Empty Bytes instance backed by {@link #NO_BYTES_STORE} placeholder store. */
     @NotNull
     public static final Bytes<?> NO_BYTES;
     private static final ByteBuffer BYTE_BUFFER = ByteBuffer.allocate(4 << 10);
@@ -48,7 +48,7 @@ public final class NoBytesStore implements BytesStore<NoBytesStore, Void> {
 
     private static BufferUnderflowException throwBUE(long offset) {
         requireNonNegative(offset);
-        return new BufferUnderflowException();
+        return new BufferUnderflowException(/* read beyond empty store */);
     }
 
     @Override
@@ -306,21 +306,22 @@ public final class NoBytesStore implements BytesStore<NoBytesStore, Void> {
     @Override
     public void nativeWrite(long address, @NonNegative long position, @NonNegative long size) {
         requireNonNegative((size | position));
-        if ((size | position) > 0) throw new BufferOverflowException();
+        if ((size | position) > 0)
+            throw new BufferOverflowException(/* no capacity for nativeWrite */);
     }
 
     @Override
     public long write8bit(@NonNegative long position, @NotNull BytesStore<?, ?> bs) {
         requireNonNull(bs);
         requireNonNegative(position);
-        throw new BufferOverflowException();
+        throw new BufferOverflowException(/* no capacity for write8bit(BytesStore) */);
     }
 
     @Override
     public long write8bit(@NonNegative long position, @NotNull String s, @NonNegative int start, @NonNegative int length) {
         requireNonNull(s);
         requireNonNegative((long) (start | length));
-        throw new BufferOverflowException();
+        throw new BufferOverflowException(/* no capacity for write8bit(String) */);
     }
 
     @Override
@@ -359,14 +360,14 @@ public final class NoBytesStore implements BytesStore<NoBytesStore, Void> {
     public long addressForRead(@NonNegative long offset)
             throws BufferUnderflowException {
         requireNonNegative(offset);
-        throw new BufferOverflowException();
+        throw new BufferOverflowException(/* empty store has no readable address */);
     }
 
     @Override
     public long addressForWrite(@NonNegative long offset)
             throws BufferOverflowException {
         requireNonNegative(offset);
-        throw new BufferOverflowException();
+        throw new BufferOverflowException(/* empty store has no writable address */);
     }
 
     @Override

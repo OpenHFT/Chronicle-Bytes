@@ -7,6 +7,7 @@ import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.io.ClosedIllegalStateException;
 import net.openhft.chronicle.core.io.ThreadingIllegalStateException;
+import net.openhft.chronicle.bytes.util.DecoratedBufferUnderflowException;
 
 import java.nio.BufferUnderflowException;
 
@@ -25,15 +26,15 @@ import java.nio.BufferUnderflowException;
 @SuppressWarnings("rawtypes")
 public class XxHash implements BytesStoreHash<BytesStore<?, ?>> {
     // Primes if treated as unsigned
-    /** Prime constant used in xxHash. */
+    /** Prime constant P1 used in xxHash mixing. */
     private static final long P1 = -7046029288634856825L;
-    /** Prime constant used in xxHash. */
+    /** Prime constant P2 used in xxHash mixing. */
     private static final long P2 = -4417276706812531889L;
-    /** Prime constant used in xxHash. */
+    /** Prime constant P3 used in xxHash mixing. */
     private static final long P3 = 1609587929392839161L;
-    /** Prime constant used in xxHash. */
+    /** Prime constant P4 used in xxHash mixing. */
     private static final long P4 = -8796714831421723037L;
-    /** Prime constant used in xxHash. */
+    /** Prime constant P5 used in xxHash mixing. */
     private static final long P5 = 2870177450012600261L;
 
     /**
@@ -137,7 +138,7 @@ public class XxHash implements BytesStoreHash<BytesStore<?, ?>> {
         long hash;
         long remaining = length;
         if (remaining < 0 || length > bytes.readRemaining())
-            throw new BufferUnderflowException();
+            throw new DecoratedBufferUnderflowException("requested length exceeds readable bytes");
         long off = bytes.readPosition();
 
         if (remaining >= 32) {

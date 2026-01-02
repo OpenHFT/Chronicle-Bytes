@@ -25,7 +25,7 @@ public class BinaryBytesMethodWriterInvocationHandler extends AbstractInvocation
     private final Map<Method, MethodEncoder> methodToIdMap = new LinkedHashMap<>();
 
     /**
-     * Creates an instance for the supplied interface.
+     * Creates a handler instance for the supplied interface type.
      *
      * @param tClass     interface being proxied
      * @param methodToId lookup supplying a {@link MethodEncoder} per method

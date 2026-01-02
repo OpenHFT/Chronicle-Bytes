@@ -6,7 +6,7 @@ package net.openhft.chronicle.bytes;
 import net.openhft.chronicle.core.annotation.NonNegative;
 
 /**
- * Statistics view for a {@link RingBufferReader}: successful reads, missed reads and lag.
+ * Statistics view for a {@link RingBufferReader} showing per-reader monitoring counters: successful reads, missed reads and lag.
  * <p>
  * Implementations typically reset counters when queried so metrics can be sampled periodically
  * without manual zeroing.

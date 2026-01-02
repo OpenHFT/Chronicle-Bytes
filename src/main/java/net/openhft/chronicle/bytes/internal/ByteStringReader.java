@@ -62,7 +62,7 @@ public class ByteStringReader extends Reader {
             in.readSkip(len);
 
         } catch (BufferUnderflowException | IllegalStateException e) {
-            throw new IOException(e);
+            throw new IOException("Failed to skip bytes from ByteStringParser", e);
         }
         return len;
     }
@@ -83,7 +83,7 @@ public class ByteStringReader extends Reader {
             return in.read(cbuf, off, len);
 
         } catch (IllegalStateException e) {
-            throw new IOException(e);
+            throw new IOException("Failed to read chars from ByteStringParser", e);
         }
     }
 

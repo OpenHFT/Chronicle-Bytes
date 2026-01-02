@@ -14,7 +14,7 @@ import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 
 /**
- * Reference to a fixed-width text boolean.
+ * Reference to a fixed-width text boolean stored as ASCII bytes for debugging.
  * <p>The format is four ASCII bytes containing either {@code " tru"}
  * or {@code "fals"} and includes a simple spin-lock.</p>
  *
@@ -72,7 +72,7 @@ public class TextBooleanReference extends AbstractReference implements BooleanVa
     }
 
     /**
-     * Get the current value of this reference.
+     * Reads the current boolean value encoded in the fixed-width text slot.
      *
      * @return the current value.
      * @throws BufferUnderflowException If the underlying bytes store cannot provide enough data.
@@ -88,7 +88,7 @@ public class TextBooleanReference extends AbstractReference implements BooleanVa
     }
 
     /**
-     * Set the value of this reference.
+     * Updates the fixed-width text slot with the supplied boolean value.
      *
      * @param value the new value.
      * @throws ClosedIllegalStateException    If the resource has been released or closed.

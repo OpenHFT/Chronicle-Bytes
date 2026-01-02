@@ -19,7 +19,7 @@ import java.util.function.BiFunction;
 public interface MethodWriterInterceptorReturns {
 
     /**
-     * Intercepts a method invocation.
+     * Intercepts a method invocation and can influence chaining behaviour.
      *
      * @param method  the method that is being invoked
      * @param args    the arguments used for the method call

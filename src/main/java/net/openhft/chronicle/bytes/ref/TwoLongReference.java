@@ -7,7 +7,7 @@ import net.openhft.chronicle.bytes.Byteable;
 import net.openhft.chronicle.core.values.TwoLongValue;
 
 /**
- * Reference to two contiguous 64-bit values.
+ * Reference to two contiguous 64-bit values stored in a bytes reference for binary layouts.
  *
  * <p>The interface itself does not prescribe thread-safety; the
  * implementation decides.</p>

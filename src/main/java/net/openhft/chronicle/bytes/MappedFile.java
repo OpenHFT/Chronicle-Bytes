@@ -34,30 +34,30 @@ import static net.openhft.chronicle.core.Jvm.uncheckedCast;
 @SuppressWarnings({"rawtypes", "restriction"})
 public abstract class MappedFile extends AbstractCloseableReferenceCounted {
 
-    /** default {@link SyncMode} for new mappings */
+    /** default {@link SyncMode} for new mappings when none is specified */
     public static final SyncMode DEFAULT_SYNC_MODE = SyncMode.valueOf(System.getProperty("mappedFile.defaultSyncMode", "ASYNC"));
 
-    /** system flag {@code mappedFile.retain} controlling reference retention */
+    /** system flag {@code mappedFile.retain} controlling reference retention for mapped stores */
     protected static final boolean RETAIN = Jvm.getBoolean("mappedFile.retain");
 
     /** default capacity used for chunked files */
     private static final long DEFAULT_CAPACITY = 128L << 40;
 
-    /** token derived from the canonical path for synchronisation */
+    /** token derived from the canonical path for cross-thread synchronisation */
     private final String internalizedToken;
 
-    /** the file being mapped */
+    /** the file being mapped into memory */
     @NotNull
     private final File file;
 
-    /** read only mapping flag */
+    /** read-only mapping state flag for this file */
     private final boolean readOnly;
 
-    /** invoked when a new chunk is allocated */
+    /** listener invoked when a new chunk is allocated */
     protected NewChunkListener newChunkListener = MappedFile::logNewChunk;
 
     /**
-     * Creates a mapped file wrapper.
+     * Creates a mapped file wrapper for the supplied file and access mode.
      */
     protected MappedFile(@NotNull final File file,
                          final boolean readOnly)
@@ -195,7 +195,7 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
     }
 
     /**
-     * Creates and returns a MappedFile instance for the specified file with the given chunk size and overlap size.
+     * Creates a MappedFile for an existing {@link File} with the supplied chunk and overlap sizes.
      *
      * @param file        The file to be memory-mapped.
      * @param chunkSize   The size of each chunk in bytes.
@@ -284,7 +284,7 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
      * Warms up the memory-mapped file by accessing its contents.
      */
     public static void warmup() {
-        ChunkedMappedFile.warmup();
+        ChunkedMappedFile.warmupChunked();
     }
 
     /**
@@ -298,7 +298,7 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
     }
 
     /**
-     * Checks if this MappedFile is read-only.
+     * Checks whether this MappedFile is configured for read-only access.
      *
      * @return True if this MappedFile is read-only, false otherwise.
      */

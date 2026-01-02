@@ -191,7 +191,7 @@ public class TextIntReference extends AbstractReference implements IntValue {
     }
 
     /**
-     * Returns the string representation of the TextIntReference.
+     * Returns a string representation of the current integer value in this TextIntReference.
      *
      * @return a string representing the value contained in the TextIntReference.
      */

@@ -106,7 +106,7 @@ public class TextLongReference extends AbstractReference implements LongReferenc
     public void bytesStore(final @NotNull BytesStore bytes, @NonNegative long offset, @NonNegative long length)
             throws IllegalArgumentException, IllegalStateException, BufferOverflowException {
         if (length != template.length)
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("length must match template length");
 
         // align for ARM
         long newOffset = roundUpTo8ByteAlign(offset);

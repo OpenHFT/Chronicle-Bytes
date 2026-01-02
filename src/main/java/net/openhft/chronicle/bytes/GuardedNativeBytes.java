@@ -19,22 +19,22 @@ import static net.openhft.chronicle.bytes.BinaryWireCode.*;
  * used in production.
  */
 public class GuardedNativeBytes<U> extends NativeBytes<U> {
-    /** type marker for a single byte */
+    /** Type marker used when guarding a single byte write operation. */
     static final byte BYTE_T = (byte) INT8;
-    /** type marker for a short */
+    /** Type marker used when guarding a short write operation. */
     static final byte SHORT_T = (byte) INT16;
-    /** type marker for an int */
+    /** Type marker used when guarding an int write operation. */
     static final byte INT_T = (byte) INT32;
-    /** type marker for a long */
+    /** Type marker used when guarding a long write operation. */
     static final byte LONG_T = (byte) INT64;
-    /** type marker for stop-bit encoded value */
+    /** Type marker used when guarding a stop-bit encoded value. */
     static final byte STOP_T = (byte) STOP_BIT;
-    /** type marker for a float */
+    /** Type marker used when guarding a float write operation. */
     static final byte FLOAT_T = (byte) FLOAT32;
-    /** type marker for a double */
+    /** Type marker used when guarding a double write operation. */
     static final byte DOUBLE_T = (byte) FLOAT64;
 
-    private static final String[] STRING_FOR_CODE = _stringForCode(GuardedNativeBytes.class);
+    private static final String[] STRING_FOR_CODE = stringForCode(GuardedNativeBytes.class);
 
     /**
      * Constructs a new GuardedNativeBytes instance backed by the specified BytesStore and with the specified capacity.
@@ -217,7 +217,7 @@ public class GuardedNativeBytes<U> extends NativeBytes<U> {
     private void expectByte(byte expected) throws IllegalStateException {
         byte type = super.readByte();
         if (type != expected)
-            throw new IllegalStateException("Expected " + STRING_FOR_CODE[expected & 0xFF]
+            throw new IllegalStateException("Expected type " + STRING_FOR_CODE[expected & 0xFF]
                     + " but was " + STRING_FOR_CODE[type & 0xFF]);
     }
 
@@ -227,7 +227,8 @@ public class GuardedNativeBytes<U> extends NativeBytes<U> {
     private void expectByte(byte expected, byte expected2) throws IllegalStateException {
         byte type = super.readByte();
         if (type != expected && type != expected2)
-            throw new IllegalStateException("Expected " + STRING_FOR_CODE[expected & 0xFF]
+            throw new IllegalStateException("Expected type " + STRING_FOR_CODE[expected & 0xFF]
+                    + " or " + STRING_FOR_CODE[expected2 & 0xFF]
                     + " but was " + STRING_FOR_CODE[type & 0xFF]);
     }
 

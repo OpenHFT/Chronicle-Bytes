@@ -17,7 +17,7 @@ import java.nio.BufferUnderflowException;
 import static net.openhft.chronicle.bytes.HexDumpBytes.MASK;
 
 /**
- * Stores a boolean as a single byte.
+ * Stores a boolean value as a single byte for compact binary storage in a BytesStore reference.
  * <p>The encoding uses {@code 0xB0} for {@code false} and {@code 0xB1} for
  * {@code true} to avoid confusion with ASCII digits.</p>
  *
@@ -51,7 +51,7 @@ public class BinaryBooleanReference extends AbstractReference implements Boolean
         throwExceptionIfClosedInSetter();
 
         if (length != maxSize())
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("length must match boolean size");
         if (bytes instanceof HexDumpBytes) {
             offset &= MASK;
         }

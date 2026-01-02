@@ -37,7 +37,7 @@ public class PointerBytesStore extends NativeBytesStore<Void> {
     }
 
     /**
-     * Returns a new VanillaBytes for writing to this PointerBytesStore.
+     * Creates a new VanillaBytes wrapper that writes to this PointerBytesStore memory region.
      *
      * @return a new VanillaBytes
      * @throws ClosedIllegalStateException    If the resource has been released or closed.

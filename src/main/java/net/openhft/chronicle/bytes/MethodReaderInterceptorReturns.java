@@ -15,7 +15,7 @@ import java.lang.reflect.Method;
 @FunctionalInterface
 public interface MethodReaderInterceptorReturns {
     /**
-     * Intercepts a method invocation.
+     * Intercepts a method invocation and optionally alters the returned value.
      *
      * @param m          the method that is being invoked
      * @param o          the object the underlying method is invoked from

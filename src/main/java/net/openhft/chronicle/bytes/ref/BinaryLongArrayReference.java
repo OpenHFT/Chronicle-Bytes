@@ -51,8 +51,9 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
     private static final long VALUES = USED + Long.BYTES;
     public static final long MAX_CAPACITY = ((Long.MAX_VALUE - VALUES) >> SHIFT);
     private static final int MAX_TO_STRING = 1024;
+    private static final Object REFERENCES_LOCK = new Object();
     @Nullable
-    private static Set<WeakReference<BinaryLongArrayReference>> binaryLongArrayReferences = null;
+    private static volatile Set<WeakReference<BinaryLongArrayReference>> binaryLongArrayReferences = null;
     private long length;
 
     /**
@@ -74,12 +75,14 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
     }
 
     /**
-     * Enables collection of BinaryLongArrayReference instances.
+     * Enables collection of BinaryLongArrayReference instances for debug tracking and monitoring.
      * <p>
      * This method is used for debugging and monitoring. It should not be used in production environments.
      */
     public static void startCollecting() {
-        binaryLongArrayReferences = Collections.newSetFromMap(new IdentityHashMap<>());
+        synchronized (REFERENCES_LOCK) {
+            binaryLongArrayReferences = Collections.newSetFromMap(new IdentityHashMap<>());
+        }
     }
 
     /**
@@ -93,16 +96,20 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
      */
     public static void forceAllToNotCompleteState()
             throws IllegalStateException, BufferOverflowException {
-        if (binaryLongArrayReferences == null)
+        final Set<WeakReference<BinaryLongArrayReference>> references;
+        synchronized (REFERENCES_LOCK) {
+            references = binaryLongArrayReferences;
+            binaryLongArrayReferences = null;
+        }
+        if (references == null)
             return;
 
-        for (WeakReference<BinaryLongArrayReference> x : binaryLongArrayReferences) {
+        for (WeakReference<BinaryLongArrayReference> x : references) {
             @Nullable BinaryLongArrayReference binaryLongReference = x.get();
             if (binaryLongReference != null) {
                 binaryLongReference.setValueAt(0, LONG_NOT_COMPLETE);
             }
         }
-        binaryLongArrayReferences = null;
     }
 
     @Override
@@ -277,6 +284,10 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
             throws IllegalStateException, BufferOverflowException {
         throwExceptionIfClosed();
 
+        if (!(value instanceof BinaryLongReference)) {
+            throw new IllegalArgumentException("Expected BinaryLongReference for index " + index
+                    + " but was " + String.valueOf(value));
+        }
         ((BinaryLongReference) value).bytesStore(bytesStore, VALUES + offset + (index << SHIFT), 8);
     }
 
@@ -305,7 +316,7 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
         if (bytes instanceof HexDumpBytes) {
             offset &= MASK;
         }
-        assert (offset & 7) == 0 : "offset=" + offset;
+        assert (offset & 7) == 0 : "offset alignment mismatch: " + offset;
         super.bytesStore(bytesStore, (offset + 7) & ~7, length);
         this.length = length;
     }
@@ -447,8 +458,14 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
             throws BufferOverflowException, IllegalStateException {
         throwExceptionIfClosed();
 
-        if (value == LONG_NOT_COMPLETE && binaryLongArrayReferences != null)
-            binaryLongArrayReferences.add(new WeakReference<>(this));
+        if (value == LONG_NOT_COMPLETE && binaryLongArrayReferences != null) {
+            synchronized (REFERENCES_LOCK) {
+                Set<WeakReference<BinaryLongArrayReference>> references = binaryLongArrayReferences;
+                if (references != null) {
+                    references.add(new WeakReference<>(this));
+                }
+            }
+        }
         return bytesStore.compareAndSwapLong(VALUES + offset + (index << SHIFT), expected, value);
     }
 }

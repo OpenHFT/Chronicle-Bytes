@@ -473,7 +473,7 @@ public interface RandomDataInput extends RandomCommon {
         requireNonNegative(offset);
         long remaining = requireNonNegative(readLimit() - offset);
         if (remaining < 1)
-            throw new BufferUnderflowException();
+            throw new BufferUnderflowException(/* no bytes left to read length */);
 
         long utfLen;
         if ((utfLen = readByte(offset++)) < 0) {
@@ -487,12 +487,12 @@ public interface RandomDataInput extends RandomCommon {
             if (b != 0) {
                 if (count > 56)
                     throw new IORuntimeException(
-                            "Cannot read more than 9 stop bits of positive value");
+                            "Cannot read more than 9 stop bits of positive UTF-8 length");
                 utfLen |= (b << count);
             } else {
                 if (count > 63)
                     throw new IORuntimeException(
-                            "Cannot read more than 10 stop bits of negative value");
+                            "Cannot read more than 10 stop bits of negative UTF-8 length");
                 utfLen = ~utfLen;
             }
         }
@@ -500,7 +500,7 @@ public interface RandomDataInput extends RandomCommon {
             return ~offset;
         int len = Maths.toUInt31(utfLen);
         if (requireNonNegative(readLimit() - offset) < len)
-            throw new BufferUnderflowException();
+            throw new BufferUnderflowException(/* declared length exceeds read limit */);
         BytesInternal.parseUtf8(this, offset, sb, true, len);
         return offset + utfLen;
     }
@@ -536,7 +536,7 @@ public interface RandomDataInput extends RandomCommon {
         requireNonNegative(maxUtf8Len);
         long remaining = requireNonNegative(readLimit() - offset);
         if (remaining < 1)
-            throw new BufferUnderflowException();
+            throw new BufferUnderflowException(/* no bytes left to read length */);
 
         long utfLen;
         if ((utfLen = readByte(offset++)) < 0) {
@@ -550,12 +550,12 @@ public interface RandomDataInput extends RandomCommon {
             if (b != 0) {
                 if (count > 56)
                     throw new IORuntimeException(
-                            "Cannot read more than 9 stop bits of positive value");
+                            "Cannot read more than 9 stop bits of positive value for limited UTF-8");
                 utfLen |= (b << count);
             } else {
                 if (count > 63)
                     throw new IORuntimeException(
-                            "Cannot read more than 10 stop bits of negative value");
+                            "Cannot read more than 10 stop bits of negative value for limited UTF-8");
                 utfLen = ~utfLen;
             }
         }
@@ -565,7 +565,7 @@ public interface RandomDataInput extends RandomCommon {
             throw new ClosedIllegalStateException("Attempted to read a char sequence of " +
                     "utf8 size " + utfLen + ", when only " + maxUtf8Len + " allowed");
         if (requireNonNegative(readLimit() - offset) < utfLen)
-            throw new BufferUnderflowException();
+            throw new BufferUnderflowException(/* encoded length exceeds read limit */);
         BytesInternal.parseUtf8(this, offset, sb, true, (int) utfLen);
         return offset + utfLen;
     }

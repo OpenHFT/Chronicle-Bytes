@@ -43,7 +43,7 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 public interface StreamingDataInput<S extends StreamingDataInput<S>> extends StreamingCommon<S> {
 
     /**
-     * Sets the read position of this StreamingDataInput.
+     * Sets the read position of this StreamingDataInput cursor for subsequent reads.
      *
      * @param position the new read position, must be non-negative
      * @return this StreamingDataInput instance, for chaining
@@ -90,7 +90,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
     }
 
     /**
-     * Sets the read limit of this StreamingDataInput.
+     * Sets the read limit of this StreamingDataInput cursor for bounds checking.
      *
      * @param limit the new read limit, must be non-negative
      * @return this StreamingDataInput instance, for chaining
@@ -177,7 +177,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
             throws BufferUnderflowException, IORuntimeException, ClosedIllegalStateException, ThreadingIllegalStateException {
         requireNonNull(bytesConsumer);
         if (length > readRemaining())
-            throw new BufferUnderflowException();
+            throw new BufferUnderflowException(/* length exceeds remaining bytes */);
         long limit0 = readLimit();
         long limit = readPosition() + length;
         try {
@@ -205,7 +205,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
             throws BufferUnderflowException, IORuntimeException, ClosedIllegalStateException, ThreadingIllegalStateException {
         requireNonNull(bytesConsumer);
         if (length > readRemaining())
-            throw new BufferUnderflowException();
+            throw new BufferUnderflowException(/* length exceeds remaining bytes */);
         long limit0 = readLimit();
         long limit = readPosition() + length;
         try {
@@ -303,7 +303,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
     }
 
     /**
-     * Reads a byte value from the input stream.
+     * Reads a byte value from the input stream cursor and advances the position.
      *
      * @return the byte value
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
@@ -682,7 +682,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
         try {
             AppendableUtil.parse8bit(this, sb, len);
         } catch (IOException e) {
-            throw new IORuntimeException(e);
+            throw new IORuntimeException("Failed to parse 8-bit string from stream", e);
         }
         return true;
     }
@@ -767,9 +767,9 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
      * Transfers as many bytes as possible from the input stream into the provided Bytes object.
      *
      * @param bytes the Bytes object to fill with the read data
-     * @see StreamingDataOutput#write(BytesStore)
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
+     * @see StreamingDataOutput#write(BytesStore)
      */
     default void read(@NotNull final Bytes<?> bytes) throws ClosedIllegalStateException, ThreadingIllegalStateException {
         int length = Math.toIntExact(Math.min(readRemaining(), bytes.writeRemaining()));
@@ -813,7 +813,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
         requireNonNull(o);
         assert BytesUtil.isTriviallyCopyable(o.getClass(), offset, length);
         if (readRemaining() < length)
-            throw new BufferUnderflowException();
+            throw new BufferUnderflowException(/* not enough bytes for unsafe object copy */);
         if (isDirectMemory()) {
             final long src = addressForRead(readPosition());
             readSkip(length); // blow up here first
@@ -889,7 +889,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
             throws ClosedIllegalStateException, ThreadingIllegalStateException;
 
     /**
-     * Reads an Enum value from the input stream.
+     * Reads an Enum value from the input stream using its encoded form.
      *
      * @param eClass the class of the Enum
      * @return the read Enum value
@@ -906,7 +906,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
     }
 
     /**
-     * Parses a UTF-8 string from the input stream into the provided Appendable.
+     * Parses a UTF-8 string from the input stream into the provided Appendable using the length mode.
      *
      * @param sb            the Appendable to fill with the parsed string
      * @param encodedLength the length of the UTF-8 encoded data in bytes
@@ -1054,7 +1054,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
             if (lenient()) {
                 return BigInteger.ZERO;
             } else {
-                throw new BufferUnderflowException();
+                throw new BufferUnderflowException(/* lenient mode off and no bytes available */);
             }
         }
         byte[] bytes = new byte[length];

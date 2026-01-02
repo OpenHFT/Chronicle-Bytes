@@ -116,7 +116,7 @@ public class TextLongArrayReference extends AbstractReference implements Byteabl
     public void setUsed(long used)
             throws IllegalStateException {
         try {
-            bytesStore.append(VALUES + offset, used, DIGITS);
+            bytesStore.append(USED + offset, used, DIGITS);
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
             throw e;

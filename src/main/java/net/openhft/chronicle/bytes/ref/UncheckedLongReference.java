@@ -16,7 +16,7 @@ import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 
 /**
- * Unsafe view of a long value with no bounds checking.
+ * Unsafe view of a long value with no bounds checking, used on performance-critical paths.
  * <p>The {@link #create(BytesStore, long, int)} factory chooses
  * {@link BinaryLongReference} when {@link Jvm#isDebug()} is true and otherwise
  * returns an {@code UncheckedLongReference}.</p>
@@ -73,7 +73,8 @@ public class UncheckedLongReference extends UnsafeCloseable implements LongRefer
             throws IllegalStateException, IllegalArgumentException, BufferUnderflowException {
         throwExceptionIfClosedInSetter();
 
-        if (length != maxSize()) throw new IllegalArgumentException();
+        if (length != maxSize())
+            throw new IllegalArgumentException("length must match long size");
         if (this.bytes != bytes) {
             if (this.bytes != null)
                 this.bytes.release(this);

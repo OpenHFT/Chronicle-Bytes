@@ -46,7 +46,7 @@ public interface RandomCommon extends ReferenceCounted {
     }
 
     /**
-     * Returns the current read position.
+     * Returns the current read position within this buffer for the next read operation.
      *
      * @return the current read position.
      * Typically {@code start() <= readPosition() <= writePosition()} and {@code readPosition() <= readLimit()}.
@@ -148,7 +148,7 @@ public interface RandomCommon extends ReferenceCounted {
     }
 
     /**
-     * Retrieves the underlying memory address for reading. This is for expert users only.
+     * Retrieves the underlying memory address for reading with a buffer index hint for multi-buffer stores.
      *
      * @param offset within this buffer. addressForRead(start()) is the actual addressForRead of the first byte.
      * @return the underlying addressForRead of the buffer
@@ -157,7 +157,7 @@ public interface RandomCommon extends ReferenceCounted {
             throws UnsupportedOperationException, BufferUnderflowException, ClosedIllegalStateException, ThreadingIllegalStateException;
 
     /**
-     * Retrieves the underlying memory address for reading. This is for expert users only.
+     * Retrieves the underlying memory address for reading at the specified offset and buffer index.
      *
      * @param offset the logical offset within this buffer relative to {@link #start()}.
      * @param buffer the buffer index if this store is backed by multiple buffers.

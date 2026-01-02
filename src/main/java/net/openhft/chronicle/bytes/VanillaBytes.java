@@ -575,7 +575,7 @@ public class VanillaBytes<U>
             throws BufferUnderflowException, ClosedIllegalStateException {
         requireNonNull(bytesStore);
         ReportUnoptimised.reportOnce();
-        if (length < 0) throw new IllegalArgumentException();
+        if (length < 0) throw new IllegalArgumentException("length must be non-negative");
 
         if (isDirectMemory() &&
                 bytesStore instanceof VanillaBytes &&

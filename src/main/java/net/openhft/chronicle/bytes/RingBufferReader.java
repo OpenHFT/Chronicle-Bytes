@@ -7,7 +7,7 @@ import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.io.Closeable;
 
 /**
- * Reader facade for a Chronicle ring buffer with read-once semantics.
+ * Reader facade for a Chronicle ring buffer with read-once semantics for streaming consumers.
  * <p>
  * Supports concurrent producers and consumers without blocking writers; consumers call
  * {@link #beforeRead(Bytes)} / {@link #afterRead(long)} to advance safely and can gather stats via
@@ -22,7 +22,7 @@ public interface RingBufferReader extends RingBufferReaderStats, Closeable {
     long UNKNOWN_INDEX = -1;
 
     /**
-     * Checks if the Ring Buffer is empty.
+     * Checks if the Ring Buffer is currently empty for this reader with no pending entries.
      *
      * @return true if the Ring Buffer is empty, false otherwise.
      */

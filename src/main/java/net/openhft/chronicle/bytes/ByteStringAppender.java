@@ -33,7 +33,7 @@ import java.nio.BufferUnderflowException;
 public interface ByteStringAppender<B extends ByteStringAppender<B>> extends StreamingDataOutput<B>, Appendable {
 
     /**
-     * Returns the current ByteStringAppender instance as a Writer.
+     * Returns a Writer view over this ByteStringAppender instance.
      *
      * @return Writer object representing the ByteStringAppender
      */
@@ -93,7 +93,7 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
     }
 
     /**
-     * Appends an int in decimal to this.
+     * Appends an int value in decimal form to this appender.
      *
      * @param value the integer value to append
      * @return this
@@ -110,7 +110,7 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
     }
 
     /**
-     * Appends a long value in decimal.
+     * Appends a long value in decimal form to this appender.
      *
      * @param value the long number to append
      * @return this
@@ -368,7 +368,7 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      */
     default B append8bit(@NotNull CharSequence cs, @NonNegative int start, @NonNegative int end)
             throws IllegalArgumentException, BufferOverflowException, BufferUnderflowException, IndexOutOfBoundsException, ClosedIllegalStateException, ThreadingIllegalStateException {
-        assert end >= start : "end=" + end + ",start=" + start;
+        assert end >= start : "append8bit(CharSequence) requires end>=start: end=" + end + ", start=" + start;
         if (cs instanceof BytesStore) {
             return write((BytesStore) cs, (long) start, end - start);
         }
@@ -396,7 +396,7 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      */
     default B append8bit(@NotNull BytesStore<?, ?> bs, @NonNegative long start, @NonNegative long end)
             throws IllegalArgumentException, BufferOverflowException, BufferUnderflowException, IndexOutOfBoundsException, ClosedIllegalStateException, ThreadingIllegalStateException {
-        assert end > start : "end=" + end + ",start=" + start;
+        assert end > start : "append8bit(BytesStore) requires end>start: end=" + end + ", start=" + start;
         return write(bs, start, end - start);
     }
 

@@ -23,25 +23,25 @@ import java.nio.ByteOrder;
 @SuppressWarnings("rawtypes")
 public enum VanillaBytesStoreHash implements BytesStoreHash<BytesStore<?,?>> {
     /**
-     * Singleton instance of VanillaBytesStoreHash.
+     * Singleton instance providing the vanilla hash implementation.
      */
     INSTANCE;
 
-    /** Mixing constant used in the hashing algorithm. */
+    /** Primary mixing constant used in hash stage 0. */
     static final int K0 = 0x6d0f27bd;
-    /** Mixing constant used in the hashing algorithm. */
+    /** Primary mixing constant used in hash stage 1. */
     static final int K1 = 0xc1f3bfc9;
-    /** Mixing constant used in the hashing algorithm. */
+    /** Primary mixing constant used in hash stage 2. */
     static final int K2 = 0x6b192397;
-    /** Mixing constant used in the hashing algorithm. */
+    /** Primary mixing constant used in hash stage 3. */
     static final int K3 = 0x6b915657;
-    /** Multiplicative constant used in the hashing algorithm. */
+    /** Multiplicative constant used in mixing step 0. */
     static final int M0 = 0x5bc80bad;
-    /** Multiplicative constant used in the hashing algorithm. */
+    /** Multiplicative constant used in mixing step 1. */
     static final int M1 = 0xea7585d7;
-    /** Multiplicative constant used in the hashing algorithm. */
+    /** Multiplicative constant used in mixing step 2. */
     static final int M2 = 0x7a646e19;
-    /** Multiplicative constant used in the hashing algorithm. */
+    /** Multiplicative constant used in mixing step 3. */
     static final int M3 = 0x855dd4db;
 
     /**
@@ -62,7 +62,7 @@ public enum VanillaBytesStoreHash implements BytesStoreHash<BytesStore<?,?>> {
     }
 
     /**
-     * Computes a 64-bit hash value for the given BytesStore.
+     * Computes a 64-bit hash value for the readable content of a BytesStore.
      *
      * @param store The {@link BytesStore} to compute the hash for.
      * @return A 64-bit hash value.
@@ -81,7 +81,7 @@ public enum VanillaBytesStoreHash implements BytesStoreHash<BytesStore<?,?>> {
     }
 
     /**
-     * Computes a 64-bit hash value for the given BytesStore.
+     * Computes a 64-bit hash value for a BytesStore over the supplied length.
      *
      * @param bytes  The {@link BytesStore} to compute the hash for.
      * @param length The number of bytes to process.

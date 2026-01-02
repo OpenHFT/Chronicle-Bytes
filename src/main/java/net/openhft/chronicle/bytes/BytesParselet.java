@@ -4,8 +4,8 @@
 package net.openhft.chronicle.bytes;
 
 /**
- * Parses messages read from a {@link BytesIn} when no specific method handler
- * is available.
+ * Parses fallback messages read from a {@link BytesIn} when no specific handler
+ * method is available for routing during message decoding.
  */
 @FunctionalInterface
 public interface BytesParselet {

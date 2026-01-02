@@ -227,7 +227,7 @@ public abstract class AbstractInterner<T> {
     }
 
     /**
-     * Represents an entry in the interner.
+     * Represents an entry in the interner table storing cached bytes and values.
      *
      * @param <T> the type of the object being interned
      */
@@ -237,12 +237,12 @@ public abstract class AbstractInterner<T> {
          */
         final BytesStore<?, ?> bytes;
         /**
-         * The cached object instance.
+         * The cached object instance derived from the bytes for reuse.
          */
         final T t;
 
         /**
-         * Constructs an {@code InternerEntry}.
+         * Constructs an {@code InternerEntry} holding cached bytes and the resolved value.
          *
          * @param bytes a heap-based copy of the byte sequence
          * @param t     the cached value

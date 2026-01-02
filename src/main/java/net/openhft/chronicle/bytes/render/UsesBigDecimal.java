@@ -9,7 +9,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 
 /**
- * Decimaliser based on {@link BigDecimal} for high precision conversions.
+ * Decimaliser based on {@link BigDecimal} for high precision floating-point conversions and fallback accuracy.
  *
  * <p>Using {@code BigDecimal} allocates objects and may be slower than the
  * lightweight strategies. Reflection is used to access the internal

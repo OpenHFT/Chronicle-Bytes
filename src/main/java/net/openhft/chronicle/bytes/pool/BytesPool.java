@@ -24,7 +24,7 @@ public final class BytesPool {
             Jvm.getInteger("chronicle.bytesPool.instancesPerThread", 4);
 
     /**
-     * Create a scoped-thread-local pool of bytes resources
+     * Create a scoped-thread-local pool of bytes resources using the default per-thread size.
      *
      * @return The pool
      */
@@ -33,7 +33,7 @@ public final class BytesPool {
     }
 
     /**
-     * Create a scoped-thread-local pool of bytes resources
+     * Create a scoped-thread-local pool of bytes resources with a caller-defined per-thread capacity.
      *
      * @param instancesPerThread The maximum number of instances to retain per thread
      * @return The pool

@@ -54,7 +54,7 @@ public class BinaryLongReference extends AbstractReference implements LongRefere
         throwExceptionIfClosed();
 
         if (length != maxSize())
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("length must match long size");
 
         if (bytes instanceof HexDumpBytes)
             offset &= MASK; // align with HexDump masking
@@ -73,7 +73,7 @@ public class BinaryLongReference extends AbstractReference implements LongRefere
     }
 
     /**
-     * Returns a string representation of this BinaryLongReference.
+     * Returns a string representation of this BinaryLongReference value for debugging.
      *
      * @return a string representation
      */

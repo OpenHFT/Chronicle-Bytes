@@ -25,10 +25,10 @@ public interface BinaryWireCode {
     /** Code referencing a previously written field. */
     int FIELD_ANCHOR = 0x87;
 
-    /** Anchor for cyclic references. */
+    /** Code marking an anchor used for cyclic references. */
     int ANCHOR = 0x88;
 
-    /** Indicates an alias update. */
+    /** Code indicating a field alias update in the stream. */
     int UPDATED_ALIAS = 0x89;
 
     /** Code for an array of unsigned bytes. */
@@ -36,16 +36,16 @@ public interface BinaryWireCode {
     /** Code for an array of signed 64-bit integers. */
     int I64_ARRAY = 0x8D;
 
-    /** 32-bit padding marker. */
+    /** Code marking 32-bit padding inserted into the stream. */
     int PADDING32 = 0x8E;
 
-    /** Generic padding marker. */
+    /** Code marking generic padding inserted into the stream. */
     int PADDING = 0x8F;
 
-    /** 32-bit float value. */
+    /** Code indicating a 32-bit float value follows. */
     int FLOAT32 = 0x90;
 
-    /** 64-bit float value. */
+    /** Code indicating a 64-bit float value follows. */
     int FLOAT64 = 0x91;
     /** Float encoded with 2 decimal places using stop bits. */
     int FLOAT_STOP_2 = 0x92;
@@ -56,7 +56,7 @@ public interface BinaryWireCode {
     /** Float encoded with 6 decimal places. */
     int FLOAT_STOP_6 = 0x96;
 
-    /** Float value scaled by 1. */
+    /** Code for a float value scaled by 10^0. */
     int FLOAT_SET_LOW_0 = 0x9A;
 
     /** Float value scaled by 10^2. */
@@ -66,28 +66,28 @@ public interface BinaryWireCode {
     int FLOAT_SET_LOW_4 = 0x9C;
     // 0x98 - 0x9F
 
-    /** Universally unique identifier. */
+    /** Code indicating a UUID value follows in the stream. */
     int UUID = 0xA0;
 
-    /** Unsigned 8-bit integer value. */
+    /** Code indicating an unsigned 8-bit integer follows. */
     int UINT8 = 0xA1;
 
-    /** Unsigned 16-bit integer value. */
+    /** Code indicating an unsigned 16-bit integer follows. */
     int UINT16 = 0xA2;
 
-    /** Unsigned 32-bit integer value. */
+    /** Code indicating an unsigned 32-bit integer follows. */
     int UINT32 = 0xA3;
 
-    /** Signed 8-bit integer value. */
+    /** Code indicating a signed 8-bit integer follows. */
     int INT8 = 0xA4;
 
-    /** Signed 16-bit integer value. */
+    /** Code indicating a signed 16-bit integer follows. */
     int INT16 = 0xA5;
 
-    /** Signed 32-bit integer value. */
+    /** Code indicating a signed 32-bit integer follows. */
     int INT32 = 0xA6;
 
-    /** Signed 64-bit integer value. */
+    /** Code indicating a signed 64-bit integer follows. */
     int INT64 = 0xA7;
 
     /** Set low 8-bit integer value. */
@@ -96,80 +96,80 @@ public interface BinaryWireCode {
     /** Set low 16-bit integer value. */
     int SET_LOW_INT16 = 0xA9;
 
-    /** Stop bit encoded integer. */
+    /** Code indicating a stop-bit encoded integer follows. */
     int STOP_BIT = 0xAE;
 
     /** 64-bit integer formatted as hexadecimal. */
     int INT64_0x = 0xAF;
 
-    /** Boolean false value. */
+    /** Code indicating a boolean false value follows. */
     int FALSE = 0xB0;
 
-    /** Boolean true value. */
+    /** Code indicating a boolean true value follows. */
     int TRUE = 0xB1;
 
-    /** Millisecond time of day. */
+    /** Code indicating a millisecond time-of-day value follows. */
     int TIME = 0xB2;
 
-    /** Date (days since epoch). */
+    /** Code indicating a date value as days since epoch. */
     int DATE = 0xB3;
 
-    /** Date and time without zone. */
+    /** Code indicating a local date-time value without zone. */
     int DATE_TIME = 0xB4;
 
-    /** Zoned date and time. */
+    /** Code indicating a zoned date-time value follows. */
     int ZONED_DATE_TIME = 0xB5;
 
-    /** Type prefix marker. */
+    /** Code marking a type prefix in the binary stream. */
     int TYPE_PREFIX = 0xB6;
 
-    /** Field name encoded as text. */
+    /** Code indicating a field name encoded as text follows. */
     int FIELD_NAME_ANY = 0xB7;
 
-    /** Arbitrary string value. */
+    /** Code indicating an arbitrary string value follows. */
     int STRING_ANY = 0xB8;
 
-    /** Event name string. */
+    /** Code indicating an event name string follows. */
     int EVENT_NAME = 0xB9;
 
     /** Field number encoded as stop bit. */
     int FIELD_NUMBER = 0xBA;
 
-    /** Null marker. */
+    /** Code marking a null literal value in the stream. */
     int NULL = 0xBB;
 
-    /** Type literal string. */
+    /** Code indicating a type literal string follows. */
     int TYPE_LITERAL = 0xBC;
 
-    /** Event object encoded in binary. */
+    /** Code indicating an event object encoded in binary follows. */
     int EVENT_OBJECT = 0xBD;
 
-    /** Comment text. */
+    /** Code indicating comment text follows in the stream. */
     int COMMENT = 0xBE;
 
-    /** Hint for optimisation. */
+    /** Code providing a hint for optimisation in parsing. */
     int HINT = 0xBF;
 
-    /** Field name with zero length. */
+    /** Code indicating a field name with zero length. */
     int FIELD_NAME0 = 0xC0;
     // ...
 
     /** Field name exactly 31 bytes long. */
     int FIELD_NAME31 = 0xDF;
 
-    /** String of length zero. */
+    /** Code indicating a string with zero length. */
     int STRING_0 = 0xE0;
     // ...
-    /** String exactly 31 bytes long. */
+    /** Code indicating a string of exactly 31 bytes. */
     int STRING_31 = 0xFF;
 
     /** Lookup table mapping codes to their textual name, useful for debugging. */
-    String[] STRING_FOR_CODE = _stringForCode(BinaryWireCode.class);
+    String[] STRING_FOR_CODE = stringForCode(BinaryWireCode.class);
 
     /**
      * Builds {@link #STRING_FOR_CODE} by reflecting over constant fields.
      */
-    static String[] _stringForCode(Class<?> clazz) {
+    static String[] stringForCode(Class<?> clazz) {
         String[] stringForCode = new String[256];
         try {
             for (@NotNull Field field : clazz.getDeclaredFields()) {
@@ -192,7 +192,7 @@ public interface BinaryWireCode {
                 }
             }
         } catch (IllegalAccessException | IllegalArgumentException e) {
-            throw new AssertionError(e);
+            throw new AssertionError("Failed to resolve binary wire codes", e);
         }
         return stringForCode;
     }

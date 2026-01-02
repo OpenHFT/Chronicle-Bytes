@@ -258,7 +258,7 @@ public class UncheckedNativeBytes<U>
         long offset = readPosition;
         readPosition += adding;
         // TODO FIX MoldUdpHandlerTest
-//        assert readPosition <= readLimit();
+        //        assert readPosition <= readLimit();
         return offset;
     }
 
@@ -293,7 +293,7 @@ public class UncheckedNativeBytes<U>
     public Bytes<U> clearAndPad(@NonNegative long length)
             throws BufferOverflowException {
         if (start() + length > capacity())
-            throw new BufferOverflowException();
+            throw new BufferOverflowException(/* clear length exceeds capacity */);
         readPosition = writePosition = start() + length;
         writeLimit = capacity();
         return this;
@@ -761,7 +761,7 @@ public class UncheckedNativeBytes<U>
             throw new ArrayIndexOutOfBoundsException("bytes.length=" + byteArray.length + ", " +
                     "length=" + length + ", offset=" + offset);
         if (length > writeRemaining())
-            throw new BufferOverflowException();
+            throw new BufferOverflowException(/* write length exceeds remaining capacity */);
         long offsetInRDO = writeOffsetPositionMoved(length);
         bytesStore.write(offsetInRDO, byteArray, offset, length);
         return this;

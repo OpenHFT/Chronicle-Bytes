@@ -11,7 +11,7 @@ import net.openhft.chronicle.core.io.ThreadingIllegalStateException;
 import net.openhft.chronicle.core.values.LongArrayValues;
 
 /**
- * Off-heap, contiguous array of signed 64-bit values.
+ * Off-heap, contiguous array of signed 64-bit values for byteable long references.
  * <p>
  * Implementations must store each value contiguously according to
  * {@link BinaryLongArrayReference#SHIFT} and are expected to use

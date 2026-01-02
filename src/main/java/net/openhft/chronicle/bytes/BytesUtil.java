@@ -48,7 +48,7 @@ public enum BytesUtil {
     private static final int[] NO_INTS = {};
 
     /**
-     * Cache for results of {@link #isTriviallyCopyable0(Class)}.
+     * Cache of results from {@link #isTriviallyCopyable0(Class)} lookups.
      */
     private static final ClassLocal<int[]> TRIVIALLY_COPYABLE = ClassLocal.withInitial(BytesUtil::isTriviallyCopyable0);
 
@@ -75,7 +75,7 @@ public enum BytesUtil {
     private static final int MAX_ARRAY_LEN = Jvm.getInteger("bytes.max-array-len", 16 << 20);
 
     /**
-     * Returns the configured maximum array length.
+     * Returns the configured maximum array length limit.
      */
     public static int maxArrayLength() {
         return MAX_ARRAY_LEN;
@@ -110,7 +110,7 @@ public enum BytesUtil {
      */
     static int[] isTriviallyCopyable0(@NotNull Class<?> clazz) {
         if (clazz.isArray()) {
-            Class<?>componentType = clazz.getComponentType();
+            Class<?> componentType = clazz.getComponentType();
             if (componentType.isPrimitive())
                 return new int[]{MEMORY.arrayBaseOffset(clazz)};
             return NO_INTS;
@@ -129,7 +129,6 @@ public enum BytesUtil {
         int min = 0;
         int max = 0;
         for (Field field : fields) {
-            final FieldGroup fieldGroup = Jvm.findAnnotation(field, FieldGroup.class);
             int start = (int) MEMORY.objectFieldOffset(field);
             int size = sizeOf(field.getType());
             int end = start + size;
@@ -155,7 +154,7 @@ public enum BytesUtil {
      * @param length Length of the field area.
      * @return true if all fields in the range are trivially copyable, false otherwise.
      */
-    public static boolean isTriviallyCopyable(Class<?>clazz, @NonNegative int offset, @NonNegative int length) {
+    public static boolean isTriviallyCopyable(Class<?> clazz, @NonNegative int offset, @NonNegative int length) {
         int[] ints = TRIVIALLY_COPYABLE.get(clazz);
         if (ints.length == 0)
             return false;
@@ -165,27 +164,27 @@ public enum BytesUtil {
     /**
      * Returns {@code [start, end]} offsets for the contiguous primitive block of {@code clazz}.
      */
-    public static int[] triviallyCopyableRange(Class<?>clazz) {
+    public static int[] triviallyCopyableRange(Class<?> clazz) {
         return TRIVIALLY_COPYABLE.get(clazz);
     }
 
     /**
      * Offset of the first trivially copyable byte within {@code clazz}.
      */
-    public static int triviallyCopyableStart(Class<?>clazz) {
+    public static int triviallyCopyableStart(Class<?> clazz) {
         return triviallyCopyableRange(clazz)[0];
     }
 
     /**
      * Length in bytes of the trivially copyable region of {@code clazz}.
      */
-    public static int triviallyCopyableLength(Class<?>clazz) {
+    public static int triviallyCopyableLength(Class<?> clazz) {
         final int[] startEnd = triviallyCopyableRange(clazz);
         return startEnd[1] - startEnd[0];
     }
 
     /**
-     * Returns the size of a given type.
+     * Returns the byte size of a given type descriptor.
      *
      * @param type The type to calculate the size of.
      * @return The size of the type in bytes.
@@ -685,7 +684,11 @@ public enum BytesUtil {
                         bytes.writePosition(wp - 1);
                     }
                 }
+                return;
             }
+
+            default:
+                return;
         }
     }
 

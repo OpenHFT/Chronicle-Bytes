@@ -58,7 +58,7 @@ public enum BinaryLengthLength {
         }
 
         /**
-         * Calculates the data length and writes it at the supplied position.
+         * Calculates the data length and writes it at the supplied position for the 32-bit prefix.
          * A store fence is performed to ensure visibility between threads.
          *
          * @param bytes                          the bytes to update
@@ -105,7 +105,7 @@ public enum BinaryLengthLength {
         }
 
         /**
-         * Calculates the data length and writes it at the supplied position.
+         * Calculates the 32-bit data length and writes it at the supplied position.
          *
          * @param bytes                          the bytes to update
          * @param positionReturnedFromInitialise the offset returned by {@link #initialise(BytesOut)}

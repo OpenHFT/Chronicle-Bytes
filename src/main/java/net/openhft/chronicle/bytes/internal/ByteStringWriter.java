@@ -14,7 +14,7 @@ import java.io.Writer;
 import static net.openhft.chronicle.bytes.internal.ReferenceCountedUtil.throwExceptionIfReleased;
 
 /**
- * A Writer for an underlying Bytes. This moves the writePosition() up to the writeLimit().
+ * Writer adapter for an underlying Bytes that forwards characters and advances the writePosition up to the writeLimit.
  */
 @SuppressWarnings("rawtypes")
 public class ByteStringWriter extends Writer {
@@ -32,7 +32,7 @@ public class ByteStringWriter extends Writer {
     }
 
     /**
-     * Writes a single character.
+     * Writes a single character to the underlying Bytes via the appender.
      *
      * @param c int specifying a character to be written.
      * @throws IOException if an I/O error occurs.
@@ -44,12 +44,12 @@ public class ByteStringWriter extends Writer {
             out.append((char) c);
 
         } catch (IllegalStateException e) {
-            throw new IOException(e);
+            throw new IOException("Failed to write single character to Bytes appender", e);
         }
     }
 
     /**
-     * Writes a string.
+     * Writes the full string to the underlying Bytes appender.
      *
      * @param str String to be written.
      */
@@ -59,7 +59,7 @@ public class ByteStringWriter extends Writer {
     }
 
     /**
-     * Writes a portion of a string.
+     * Writes a substring region to the underlying Bytes appender.
      *
      * @param str String to be written.
      * @param off Offset from which to start reading characters.
@@ -71,7 +71,7 @@ public class ByteStringWriter extends Writer {
     }
 
     /**
-     * Appends a character sequence.
+     * Appends a character sequence to the underlying Bytes appender.
      *
      * @param csq The character sequence to append.
      * @return This writer
@@ -100,7 +100,7 @@ public class ByteStringWriter extends Writer {
     }
 
     /**
-     * Appends a single character.
+     * Appends a single character to the underlying Bytes appender.
      *
      * @param c The character to append.
      * @return This writer

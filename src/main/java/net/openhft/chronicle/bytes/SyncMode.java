@@ -11,7 +11,7 @@ import net.openhft.posix.MSyncFlag;
  */
 public enum SyncMode {
     /**
-     * No synchronisation is requested.
+     * No synchronisation is requested for mapped updates; changes may remain in memory.
      */
     NONE(null),
     /**

@@ -18,7 +18,7 @@ import java.nio.BufferUnderflowException;
 import java.nio.channels.FileLock;
 
 /**
- * Base class for references backed by a {@link BytesStore}.
+ * Base class for references backed by a {@link BytesStore} memory region with explicit reserve and release.
  * <p>{@link #acceptNewBytesStore(BytesStore)} reserves the store and
  * {@link #performClose()} releases it. Subclasses must call
  * {@code throwExceptionIfClosed...()} before mutating state.</p>
@@ -33,13 +33,13 @@ import java.nio.channels.FileLock;
 public abstract class AbstractReference extends AbstractCloseable implements Byteable, Closeable {
 
     /**
-     * BytesStore associated with this reference
+     * BytesStore associated with this reference for backing memory and reservation lifecycle.
      */
     @Nullable
     protected BytesStore bytesStore;
 
     /**
-     * Offset within the BytesStore for this reference
+     * Offset within the BytesStore for this reference region in bytes.
      */
     protected long offset;
 
@@ -122,7 +122,7 @@ public abstract class AbstractReference extends AbstractCloseable implements Byt
         try {
             bytes0.release(this);
         } catch (ClosedIllegalStateException e) {
-            Jvm.debug().on(AbstractReference.class, "release after close", e);
+            Jvm.debug().on(AbstractReference.class, "release after close attempted for reference instance", e);
         }
     }
 

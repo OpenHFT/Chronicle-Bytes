@@ -138,7 +138,7 @@ public interface Compression {
             output.write(bytes);
 
         } catch (IOException e) {
-            throw new AssertionError(e); // compressing in memory
+            throw new AssertionError("Failed to compress in-memory bytes", e);
         }
         return baos.toByteArray();
     }
@@ -160,7 +160,7 @@ public interface Compression {
             from.copyTo(output);
 
         } catch (IOException e) {
-            throw new AssertionError(e); // compressing in memory
+            throw new AssertionError("Failed to compress in-memory stream", e);
         }
     }
 
@@ -181,7 +181,7 @@ public interface Compression {
                 baos.write(buf, 0, len);
 
         } catch (IOException e) {
-            throw new IORuntimeException(e);
+            throw new IORuntimeException("Failed to uncompress bytes", e);
         }
         return baos.toByteArray();
     }
@@ -202,7 +202,7 @@ public interface Compression {
             to.copyFrom(input);
 
         } catch (IOException e) {
-            throw new IORuntimeException(e);
+            throw new IORuntimeException("Failed to uncompress stream", e);
         }
     }
 

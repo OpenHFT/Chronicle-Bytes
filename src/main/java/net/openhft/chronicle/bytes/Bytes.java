@@ -6,6 +6,7 @@ package net.openhft.chronicle.bytes;
 import net.openhft.chronicle.bytes.internal.BytesInternal;
 import net.openhft.chronicle.bytes.internal.EmbeddedBytes;
 import net.openhft.chronicle.bytes.util.DecoratedBufferOverflowException;
+import net.openhft.chronicle.bytes.util.DecoratedBufferUnderflowException;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.annotation.SingleThreaded;
@@ -349,8 +350,8 @@ public interface Bytes<U> extends
     }
 
     /**
-     * Constructs and returns a new Bytes instance which contains the provided {@code text} encoded in ISO-8859-1.
-     * The returned Bytes instance is ready for reading and is allocated using native memory.
+     * Creates a direct Bytes view backed by a BytesStore created from {@code text}.
+     * The returned Bytes instance is ready for reading and uses native memory.
      *
      * @param text The non-null text to be converted and wrapped in a Bytes instance.
      * @return A new Bytes instance containing the provided text encoded in ISO-8859-1.
@@ -861,7 +862,7 @@ public interface Bytes<U> extends
         throwExceptionIfReleased(this);
 
         BytesStore<?, U> bytesStore = bytesStore();
-        assert bytesStore != null : "bytesStore is null";
+        assert bytesStore != null : "bytesStore must be available for bytesForRead";
         return isClear()
                 ? bytesStore.bytesForRead()
                 : new SubBytes<>(bytesStore, readPosition(), readLimit() + start());
@@ -878,7 +879,7 @@ public interface Bytes<U> extends
         throwExceptionIfReleased(this);
 
         BytesStore<?, U> bytesStore = bytesStore();
-        assert bytesStore != null : "bytesStore is null";
+        assert bytesStore != null : "bytesStore must be available for bytesForWrite";
         return new VanillaBytes<>(bytesStore, writePosition(), writeLimit());
     }
 
@@ -1048,7 +1049,8 @@ public interface Bytes<U> extends
                 long j = i + 1;
                 long end = j + otherCount - 1;
                 for (long k = otherOffset + 1; j < end && readByte(j) == source.readByte(k); j++, k++) {
-                    // Do nothing
+                    // No-op: advance until mismatch or end.
+                    continue;
                 }
 
                 if (j == end) {
@@ -1113,7 +1115,8 @@ public interface Bytes<U> extends
                 long j = i + 1;
                 long end = j + otherCount - 1;
                 for (long k = otherOffset + 1; j < end && readByte(j) == source.readByte(k); j++, k++) {
-                    // Do nothing
+                    // No-op: advance until mismatch or end.
+                    continue;
                 }
 
                 if (j == end) {
@@ -1166,7 +1169,7 @@ public interface Bytes<U> extends
             throws BufferUnderflowException, IORuntimeException, BufferOverflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
         requireNonNegative(length);
         if (length > readRemaining())
-            throw new BufferUnderflowException();
+            throw new DecoratedBufferUnderflowException("readWithLength exceeds readable bytes");
         long limit0 = readLimit();
         long limit = readPosition() + length;
         boolean lenient = lenient();

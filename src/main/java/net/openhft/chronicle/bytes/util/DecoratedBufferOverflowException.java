@@ -39,7 +39,7 @@ public final class DecoratedBufferOverflowException extends BufferOverflowExcept
     }
 
     /**
-     * Returns the detail message of this exception.
+     * Returns the detail message describing this buffer overflow exception for diagnostics.
      *
      * @return the detail message string of this exception
      */

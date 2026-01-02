@@ -60,10 +60,9 @@ public final class PageUtil {
         if (matcher.find())
             try {
                 return Integer.parseInt(matcher.group(1)) * mult(matcher.group(2));
+            } catch (Exception e) {
+                Jvm.warn().on(PageUtil.class, format("Error parsing pageSize={0}: {1}", matcher.group(1), e.getMessage()));
             }
-        catch (Exception e) {
-            Jvm.warn().on(PageUtil.class, format("Error parsing pageSize={0}: {1}", matcher.group(1), e.getMessage()));
-        }
         return DEFAULT_HUGE_PAGE_SIZE;
     }
 

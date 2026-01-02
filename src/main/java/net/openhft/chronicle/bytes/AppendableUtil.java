@@ -6,6 +6,7 @@ package net.openhft.chronicle.bytes;
 import net.openhft.chronicle.bytes.internal.BytesInternal;
 import net.openhft.chronicle.bytes.internal.NativeBytesStore;
 import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.bytes.util.DecoratedBufferUnderflowException;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.annotation.Java9;
 import net.openhft.chronicle.core.annotation.NonNegative;
@@ -117,7 +118,7 @@ public enum AppendableUtil {
         try {
             sb.append(str);
         } catch (IOException e) {
-            throw new AssertionError(e);
+            throw new AssertionError("Failed to append string to " + sb.getClass().getName(), e);
         }
     }
 
@@ -150,7 +151,7 @@ public enum AppendableUtil {
         try {
             readUtf8AndAppend(bytes, appendable, tester);
         } catch (IOException e) {
-            throw new AssertionError(e);
+            throw new AssertionError("Failed to append UTF-8 characters to " + appendable.getClass().getName(), e);
         }
     }
 
@@ -263,7 +264,7 @@ public enum AppendableUtil {
     public static void parse8bit_SB1(@NotNull Bytes<?> bytes, @NotNull StringBuilder sb, @NonNegative int length)
             throws BufferUnderflowException, ClosedIllegalStateException {
         if (length > bytes.readRemaining())
-            throw new BufferUnderflowException();
+            throw new DecoratedBufferUnderflowException("parse8bit_SB1 length exceeds remaining bytes");
         @Nullable NativeBytesStore nbs = (NativeBytesStore) bytes.bytesStore();
         long offset = bytes.readPosition();
         int count = BytesInternal.parse8bit_SB1(offset, nbs, sb, length);

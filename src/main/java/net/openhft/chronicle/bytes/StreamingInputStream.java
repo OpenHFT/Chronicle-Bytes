@@ -57,7 +57,7 @@ public class StreamingInputStream extends InputStream {
             in.readSkip(len);
             return len;
         } catch (BufferUnderflowException | IllegalStateException e) {
-            throw new IOException(e);
+            throw new IOException("Failed to skip bytes from streaming input", e);
         }
     }
 
@@ -77,7 +77,7 @@ public class StreamingInputStream extends InputStream {
             int len2 = in.read(b, off, len);
             return len2 == 0 ? -1 : len2;
         } catch (BufferUnderflowException | IllegalStateException e) {
-            throw new IOException(e);
+            throw new IOException("Failed to read bytes from streaming input", e);
         }
     }
 
@@ -87,7 +87,7 @@ public class StreamingInputStream extends InputStream {
         try {
             return in.readRemaining() > 0 ? in.readUnsignedByte() : -1;
         } catch (IllegalStateException e) {
-            throw new IOException(e);
+            throw new IOException("Failed to read single byte from streaming input", e);
         }
     }
 }

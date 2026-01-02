@@ -54,8 +54,8 @@ public interface BytesRingBuffer extends BytesRingBufferStats, BytesConsumer, Cl
 
         } catch (Exception e) {
             Jvm.error().on(BytesRingBuffer.class,
-                    "This is a a commercial feature, please contact " +
-                            "sales@chronicle.software to unlock this feature.");
+                    "Multi-reader ring buffer support is a commercial feature; " +
+                            "contact sales@chronicle.software to unlock it.");
 
             throw Jvm.rethrow(e);
         }
@@ -93,8 +93,8 @@ public interface BytesRingBuffer extends BytesRingBufferStats, BytesConsumer, Cl
 
         } catch (Exception e) {
             Jvm.error().on(BytesRingBuffer.class,
-                    "This is a a commercial feature, please contact " +
-                            "sales@chronicle.software to unlock this feature.");
+                    "Ring buffer sizing for enterprise implementation is a commercial feature; " +
+                            "contact sales@chronicle.software to unlock it.");
 
             throw Jvm.rethrow(e);
         }

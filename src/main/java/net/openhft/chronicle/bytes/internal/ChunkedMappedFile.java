@@ -91,9 +91,9 @@ public class ChunkedMappedFile extends MappedFile {
     }
 
     /**
-     * Not compatible with hugetlbfs
+     * Not compatible with hugetlbfs filesystems due to fixed huge-page mapping constraints.
      */
-    public static void warmup() {
+    public static void warmupChunked() {
         final List<Exception> errorsDuringWarmup = new ArrayList<>();
         ExceptionHandler error = Jvm.error().defaultHandler();
         ExceptionHandler warn = Jvm.warn().defaultHandler();
@@ -117,7 +117,7 @@ public class ChunkedMappedFile extends MappedFile {
             IOTools.deleteDirWithFiles(path.toFile());
         } catch (IOException e) {
             Jvm.setExceptionHandlers(error, warn, debug, perf);
-            Jvm.warn().on(ChunkedMappedFile.class, "Error during warmup", e);
+            Jvm.warn().on(ChunkedMappedFile.class, "Error during mapped file warmup", e);
         } finally {
             Jvm.setExceptionHandlers(error, warn, debug, perf);
             if (!errorsDuringWarmup.isEmpty())
@@ -154,7 +154,7 @@ public class ChunkedMappedFile extends MappedFile {
             }
         } catch (BufferUnderflowException | IllegalArgumentException | IOException | IllegalStateException |
                  BufferOverflowException e) {
-            throw new AssertionError(e);
+            throw new AssertionError("Warmup failed while acquiring mapped bytes", e);
         }
     }
 
@@ -368,10 +368,10 @@ public class ChunkedMappedFile extends MappedFile {
         } catch (IOException e) {
             final boolean open = fileChannel.isOpen();
             if (open) {
-                throw new IORuntimeException(e);
+                throw new IORuntimeException("FileChannel size query failed", e);
             } else {
                 close();
-                throw new IllegalStateException(e);
+                throw new IllegalStateException("FileChannel closed while querying size", e);
             }
         } finally {
             if (interrupted)

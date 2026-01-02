@@ -39,9 +39,9 @@ public abstract class CommonMappedBytes extends MappedBytes {
 
     /** underlying file that owns the mapping */
     protected final MappedFile mappedFile;
-    /** whether the file is read only */
+    /** flag indicating whether the backing file is read only for this mapping */
     private final boolean backingFileIsReadOnly;
-    /** capacity of the mapped region */
+    /** capacity of the mapped region in bytes */
     private final long capacity;
 
     protected long lastActualSize = 0;
@@ -187,9 +187,9 @@ public abstract class CommonMappedBytes extends MappedBytes {
             throws BufferOverflowException {
         //  throwExceptionIfClosed
         if (position > writeLimit)
-            throw new BufferOverflowException();
+            throw new BufferOverflowException(/* writePosition exceeds writeLimit */);
         if (position < 0L)
-            throw new BufferOverflowException();
+            throw new BufferOverflowException(/* writePosition is negative */);
         if (position < readPosition)
             this.readPosition = position;
         uncheckedWritePosition(position);

@@ -23,7 +23,7 @@ public class OnHeapBytes extends VanillaBytes<byte[]> {
     private final long capacity;
 
     /**
-     * Constructs an instance backed by {@code bytesStore}.
+     * Constructs an on-heap bytes view backed by the supplied {@code bytesStore} and elastic policy.
      */
     @SuppressWarnings("this-escape")
     public OnHeapBytes(@NotNull BytesStore<?, ?> bytesStore, boolean elastic)
@@ -67,8 +67,9 @@ public class OnHeapBytes extends VanillaBytes<byte[]> {
             }
             checkResize(writeEnd);
         } else {
-            if (offset < 0) throw new IllegalArgumentException();
-            throw new BufferOverflowException();
+            if (offset < 0)
+                throw new IllegalArgumentException("offset must be non-negative");
+            throw new BufferOverflowException(/* write before start or overflowed */);
         }
     }
 
@@ -82,16 +83,16 @@ public class OnHeapBytes extends VanillaBytes<byte[]> {
         if (isElastic())
             resize(endOfBuffer);
         else
-            throw new BufferOverflowException();
+            throw new BufferOverflowException(/* non-elastic buffer cannot grow */);
     }
 
     // the endOfBuffer is the minimum capacity and one byte more than the last addressable byte.
     private void resize(@NonNegative long endOfBuffer)
             throws BufferOverflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
         if (endOfBuffer < 0)
-            throw new BufferOverflowException();
+            throw new BufferOverflowException(/* endOfBuffer underflow */);
         if (endOfBuffer > capacity())
-            throw new BufferOverflowException();
+            throw new BufferOverflowException(/* endOfBuffer exceeds capacity */);
         final long realCapacity = realCapacity();
         if (endOfBuffer <= realCapacity) {
             // No resize

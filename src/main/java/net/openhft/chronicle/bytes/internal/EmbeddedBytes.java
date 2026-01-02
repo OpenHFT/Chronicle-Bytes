@@ -61,7 +61,7 @@ public class EmbeddedBytes<U> extends VanillaBytes<U> {
         try {
             return bytesStore.readUnsignedByte(lengthOffset());
         } catch (ClosedIllegalStateException e) {
-            Jvm.debug().on(EmbeddedBytes.class, "bytesStore is closed", e);
+            Jvm.debug().on(EmbeddedBytes.class, "EmbeddedBytes read failed because bytesStore is closed", e);
             return 0;
         }
     }

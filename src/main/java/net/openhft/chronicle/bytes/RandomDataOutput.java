@@ -18,7 +18,7 @@ import java.nio.ByteBuffer;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
 /**
- * Random-access write API for {@link BytesStore}-backed buffers.
+ * Random-access write API for {@link BytesStore}-backed buffers used for low-level encoding and binary updates.
  * <p>
  * Writes primitives and arrays at arbitrary offsets without advancing a cursor; ordered/atomic
  * variants support concurrent writers when the underlying store allows. Caller is responsible for

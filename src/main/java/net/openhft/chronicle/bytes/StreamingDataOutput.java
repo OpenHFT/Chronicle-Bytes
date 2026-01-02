@@ -838,7 +838,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
             throws BufferOverflowException, ClosedIllegalStateException, BufferUnderflowException, ThreadingIllegalStateException;
 
     /**
-     * Writes a boolean value to this output stream.
+     * Writes a boolean value to this output stream as a single byte flag.
      *
      * @param flag The boolean value to be written.
      * @return The current StreamingDataOutput instance.
@@ -928,7 +928,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     }
 
     /**
-     * Appends a UTF-8 encoded CharSequence to this output stream from a specific offset and length.
+     * Appends a UTF-8 encoded char array to this output stream from a specific offset and length.
      *
      * @param chars  The CharSequence to be appended.
      * @param offset The offset from which to start writing the CharSequence.
@@ -963,7 +963,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     }
 
     /**
-     * Appends a UTF-8 encoded CharSequence to this output stream from a specific offset and length.
+     * Appends a UTF-8 encoded CharSequence to this output stream from a specific offset and length in characters.
      *
      * @param cs     The CharSequence to be appended.
      * @param offset The offset from which to start writing the CharSequence.
@@ -1141,7 +1141,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     }
 
     /**
-     * Writes data from the provided RandomDataInput into this Bytes object with prefixed length.
+     * Writes data from the provided BytesStore into this Bytes object with prefixed length.
      *
      * @param bytes The RandomDataInput source of data to be written.
      * @throws BufferOverflowException        If there is not enough space in this Bytes object to store the incoming data.
@@ -1155,7 +1155,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     }
 
     /**
-     * Writes data from the provided RandomDataInput into this Bytes object with prefixed length.
+     * Writes data from the provided RandomDataInput into this Bytes object with prefixed length (deprecated overload).
      *
      * @param bytes The RandomDataInput source of data to be written.
      * @throws BufferOverflowException        If there is not enough space in this Bytes object to store the incoming data.

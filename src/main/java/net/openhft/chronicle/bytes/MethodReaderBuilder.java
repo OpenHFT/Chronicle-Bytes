@@ -9,7 +9,7 @@ import net.openhft.chronicle.core.onoes.ExceptionHandler;
 import java.util.function.Predicate;
 
 /**
- * Interface for a builder that constructs instances of MethodReader.
+ * Interface for a builder that constructs configured MethodReader instances for runtime use.
  * <p>
  * The builder provides various options to customize the creation of a MethodReader,
  * including setting interceptors, handling unknown methods, handling metadata,

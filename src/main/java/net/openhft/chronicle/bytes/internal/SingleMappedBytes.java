@@ -49,7 +49,7 @@ public class SingleMappedBytes extends CommonMappedBytes {
             bytesStore(uncheckedCast(mappedFile.acquireByteStore(this, 0)));
 
         } catch (@NotNull IOException e) {
-            throw new IORuntimeException(e);
+            throw new IORuntimeException("Failed to acquire single mapped bytes store", e);
         }
     }
 

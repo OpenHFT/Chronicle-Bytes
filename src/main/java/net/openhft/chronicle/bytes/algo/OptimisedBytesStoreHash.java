@@ -18,7 +18,7 @@ import java.nio.ByteOrder;
 import static net.openhft.chronicle.bytes.algo.VanillaBytesStoreHash.*;
 
 /**
- * Optimised hashing algorithm for BytesStore.
+ * Optimised hashing algorithm for BytesStore values and their content across sizes.
  * <p>
  * This enumeration implements BytesStoreHash for optimised hashing of BytesStore
  * depending on the data size and whether the {@code BytesStore} resides in direct memory,

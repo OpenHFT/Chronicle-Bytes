@@ -31,7 +31,7 @@ public class SimpleDecimaliser implements Decimaliser {
     public static final Decimaliser SIMPLE = new SimpleDecimaliser();
 
     /**
-     * Convert {@code value} using a simple rounding approach and append the result.
+     * Convert the double {@code value} using a simple rounding approach and append the result.
      * <p>
      * This method iteratively scales the input value by powers of 10, and performs rounding to attempt finding a precise
      * representation. If such representation is found, it is appended using the provided {@link DecimalAppender}.
@@ -69,7 +69,7 @@ public class SimpleDecimaliser implements Decimaliser {
     }
 
     /**
-     * Convert {@code value} using a simple rounding approach and append the result.
+     * Convert the float {@code value} using a simple rounding approach optimised for single precision and append the result.
      *
      * @param value           the float value to convert; must be finite
      * @param decimalAppender the appender that receives sign, mantissa and exponent

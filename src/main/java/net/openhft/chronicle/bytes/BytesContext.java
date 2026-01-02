@@ -12,7 +12,7 @@ import net.openhft.chronicle.core.io.Closeable;
 public interface BytesContext extends Closeable {
 
     /**
-     * Returns the buffer associated with this context.
+     * Returns the Bytes buffer associated with this context instance.
      */
     Bytes<?> bytes();
 

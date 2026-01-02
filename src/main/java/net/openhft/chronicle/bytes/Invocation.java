@@ -7,7 +7,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 /**
- * Functional callback representing a method invocation.
+ * Functional callback representing a method invocation execution with interceptor-friendly control.
  * <p>
  * Used by method reader interceptors to delegate the actual call while still allowing wrappers to
  * log, short-circuit or alter arguments/return values.
@@ -15,7 +15,7 @@ import java.lang.reflect.Method;
 @FunctionalInterface
 public interface Invocation {
     /**
-     * Invokes the supplied method.
+     * Invokes the supplied method on the target object with the provided arguments.
      *
      * @param m    the {@link Method} to invoke, must not be {@code null}
      * @param o    the instance on which the method should be invoked, {@code null} for static methods

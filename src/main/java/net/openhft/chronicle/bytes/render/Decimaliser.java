@@ -16,7 +16,7 @@ package net.openhft.chronicle.bytes.render;
 public interface Decimaliser {
 
     /**
-     * Convert {@code value} to a decimal representation and append it.
+     * Convert the double {@code value} to a decimal representation and append it.
      *
      * @param value           the double value to serialise; must be finite and not negative zero
      * @param decimalAppender the target receiving sign, mantissa and exponent
@@ -25,7 +25,7 @@ public interface Decimaliser {
     boolean toDecimal(double value, DecimalAppender decimalAppender);
 
     /**
-     * Convert {@code value} to a decimal representation and append it.
+     * Convert the float {@code value} to a decimal representation using single-precision rules and append it.
      *
      * @param value           the float value to serialise; must be finite and not negative zero
      * @param decimalAppender the target receiving sign, mantissa and exponent

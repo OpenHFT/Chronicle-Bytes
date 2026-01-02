@@ -55,12 +55,12 @@ public final class ReentrantFileLock extends FileLock {
     private final long owningThreadId;
 
     /**
-     * Counter for re-entrance.
+     * Counter tracking re-entrant acquisitions of this lock by the owning thread.
      */
     private int counter;
 
     /**
-     * Constructs a ReentrantFileLock.
+     * Creates a re-entrant file lock wrapper that tracks ownership and delegate state.
      *
      * @param canonicalPath The canonical path of the file to be locked.
      * @param fileLock      The delegate FileLock.
@@ -98,10 +98,7 @@ public final class ReentrantFileLock extends FileLock {
     }
 
     /**
-     * Releases the lock.
-     * <p>
-     * Decrements the re-entrance counter and only releases the underlying file lock
-     * when the counter reaches zero.
+     * Releases the lock held by the current thread and the delegate when the counter reaches zero.
      *
      * @throws IOException If an I/O error occurs.
      */

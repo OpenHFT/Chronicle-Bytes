@@ -32,19 +32,19 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
  * corrupt memory.
  */
 public class MappedBytesStore extends NativeBytesStore<Void> {
-    /** run before each write, throws if read only */
+    /** run before each write; throws when the mapping is read only */
     protected final Runnable writeCheck;
-    /** owning mapped file */
+    /** owning mapped file that created this mapping */
     private final MappedFile mappedFile;
     /** logical start offset within the file */
     private final long start;
     /** region end up to which accesses are always safe */
     private final long safeLimit;
-    /** filesystem page size */
+    /** filesystem page size value in bytes */
     private final int pageSize;
     /** mode used when syncing to disk */
     private SyncMode syncMode = MappedFile.DEFAULT_SYNC_MODE;
-    /** length already synced */
+    /** length already synced in bytes for this store */
     private long syncLength = 0;
 
     /**
@@ -82,7 +82,7 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
     }
 
     static void throwReadOnly() {
-        throw new IllegalStateException("Read Only");
+        throw new IllegalStateException("Read-only mapped file does not permit writes");
     }
 
     @SuppressWarnings("EmptyMethod")
@@ -106,7 +106,7 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
                     .readLimit(writeLimit())
                     .readPosition(start());
         } catch (BufferUnderflowException | IllegalArgumentException e) {
-            throw new IllegalStateException(e);
+            throw new IllegalStateException("bytesForRead failed to create mapped bytes view", e);
         }
     }
 
@@ -189,6 +189,20 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
     public FileLock lock(@NonNegative long position, @NonNegative long size, boolean shared) throws IOException {
 
         return mappedFile.lock(position, size, shared);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null || getClass() != obj.getClass())
+            return false;
+        return super.equals(obj);
+    }
+
+    @Override
+    public int hashCode() {
+        return super.hashCode();
     }
 
     /**
@@ -424,7 +438,7 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
     }
 
     /**
-     * Set the sync mode for this ByteStore
+     * Set the sync mode for this ByteStore to control flush behaviour.
      *
      * @param syncMode to use
      */
@@ -433,7 +447,7 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
     }
 
     /**
-     * Synchronise from the last complete page up to this position.
+     * Synchronise from the last complete page up to this position using the current mode.
      *
      * @param position to sync with the syncMode()
      */
@@ -442,7 +456,7 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
     }
 
     /**
-     * Synchronise from the last complete page up to this position.
+     * Synchronise from the last complete page up to this position using the provided mode.
      *
      * @param position to sync with the syncMode()
      * @param syncMode to use

@@ -61,7 +61,7 @@ public class StreamingOutputStream extends OutputStream {
             sdo.write(b, off, len);
 
         } catch (BufferOverflowException | IllegalArgumentException | IllegalStateException e) {
-            throw new IOException(e);
+            throw new IOException("Failed to write bytes to streaming output", e);
         }
     }
 
@@ -76,7 +76,7 @@ public class StreamingOutputStream extends OutputStream {
             sdo.writeUnsignedByte(0xff & b);
 
         } catch (BufferOverflowException | ArithmeticException | IllegalStateException e) {
-            throw new IOException(e);
+            throw new IOException("Failed to write single byte to streaming output", e);
         }
     }
 }

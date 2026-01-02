@@ -99,7 +99,7 @@ public class HexDumpBytes
     }
 
     /**
-     * Convenience overload of {@link #fromText(Reader)}.
+     * Convenience overload of {@link #fromText(Reader)} that accepts in-memory text input.
      */
     public static HexDumpBytes fromText(@NotNull CharSequence text) throws NumberFormatException {
         return fromText(new StringReader(text.toString()));
@@ -906,7 +906,7 @@ public class HexDumpBytes
             }
             copyToText0(pos);
         } catch (BufferUnderflowException e) {
-            throw new AssertionError(e);
+            throw new AssertionError("HexDump copy failed while reading base bytes", e);
         }
     }
 

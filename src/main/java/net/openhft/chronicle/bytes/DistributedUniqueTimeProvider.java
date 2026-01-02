@@ -22,7 +22,7 @@ import java.io.File;
  */
 public class DistributedUniqueTimeProvider extends SimpleCloseable implements TimeProvider, Monitorable {
 
-    /** maximum supported host identifiers */
+    /** Maximum supported host identifiers used to partition timestamp space across JVMs. */
     static final int HOST_IDS = 100;
     /** offset in the file for the last issued timestamp */
     private static final int LAST_TIME = 128;
@@ -34,7 +34,6 @@ public class DistributedUniqueTimeProvider extends SimpleCloseable implements Ti
     private final Bytes<?> bytes;
     private final MappedFile file;
     private final BinaryLongArrayReference values;
-    private final VanillaDistributedUniqueTimeDeduplicator deduplicator;
     private TimeProvider provider = SystemTimeProvider.INSTANCE;
     private int hostId;
 
@@ -53,10 +52,9 @@ public class DistributedUniqueTimeProvider extends SimpleCloseable implements Ti
             bytes.append8bit("&TSF\nTime stamp file used for sharing a unique id\n");
             values = new BinaryLongArrayReference(HOST_IDS);
             values.bytesStore(bytes, DEDUPLICATOR, HOST_IDS * 8L + 16L);
-            deduplicator = new VanillaDistributedUniqueTimeDeduplicator(values);
 
         } catch (Exception ioe) {
-            throw new IORuntimeException(ioe);
+            throw new IORuntimeException("Failed to initialise timestamp file backing store", ioe);
         } finally {
             if (unmonitor)
                 unmonitor();
@@ -85,20 +83,20 @@ public class DistributedUniqueTimeProvider extends SimpleCloseable implements Ti
     }
 
     /**
-     * Extract the timestamp in nanoseconds from the timestampWithHostId
+     * Extracts the timestamp component from a {@code timestampWithHostId} value for monotonic ordering.
      *
      * @param timestampWithHostId to extract from
-     * @return the timestamp
+     * @return the timestamp portion
      */
     public static long timestampFor(long timestampWithHostId) {
         return timestampWithHostId - timestampWithHostId % HOST_IDS;
     }
 
     /**
-     * Extract the hostId from the timestampWithHostId
+     * Extracts the host identifier from a {@code timestampWithHostId} value for traceability.
      *
      * @param timestampWithHostId to extract from
-     * @return the hostId
+     * @return the hostId portion
      */
     public static long hostIdFor(long timestampWithHostId) {
         return timestampWithHostId % HOST_IDS;
@@ -283,6 +281,10 @@ public class DistributedUniqueTimeProvider extends SimpleCloseable implements Ti
         // Private constructor to prevent instantiation of this holder class
         private DistributedUniqueTimeProviderHolder() {
         }
+    }
+
+    static DistributedUniqueTimeDeduplicator newVanillaDeduplicator(LongArrayValues values) {
+        return new VanillaDistributedUniqueTimeDeduplicator(values);
     }
 
     static class VanillaDistributedUniqueTimeDeduplicator implements ReferenceOwner, DistributedUniqueTimeDeduplicator {

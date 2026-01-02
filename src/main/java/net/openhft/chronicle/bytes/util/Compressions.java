@@ -97,7 +97,7 @@ public enum Compressions implements Compression {
         }
 
         /**
-         * Returns the input stream without any changes.
+         * Returns the input stream unchanged because no compression is applied.
          *
          * @param input the input stream
          * @return the same input stream
@@ -108,7 +108,7 @@ public enum Compressions implements Compression {
         }
 
         /**
-         * Returns the output stream without any changes.
+         * Returns the output stream unchanged because no compression is applied.
          *
          * @param output the output stream
          * @return the same output stream
@@ -174,7 +174,7 @@ public enum Compressions implements Compression {
             try {
                 return new GZIPInputStream(input);
             } catch (IOException e) {
-                throw new AssertionError(e);
+                throw new AssertionError("Failed to create GZIP input stream", e);
             }
         }
 
@@ -190,7 +190,7 @@ public enum Compressions implements Compression {
             try {
                 return new GZIPOutputStream(output);
             } catch (IOException e) {
-                throw new AssertionError(e);
+                throw new AssertionError("Failed to create GZIP output stream", e);
             }
         }
     }

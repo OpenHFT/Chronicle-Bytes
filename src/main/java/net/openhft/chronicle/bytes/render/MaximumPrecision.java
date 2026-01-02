@@ -14,7 +14,7 @@ public class MaximumPrecision implements Decimaliser {
     private final int precision;
 
     /**
-     * Create an instance with the given precision.
+     * Create an instance that rounds values to the given precision setting.
      *
      * @param precision number of decimal places, 0-18 inclusive
      * @throws IllegalArgumentException if {@code precision} is outside that range
@@ -27,7 +27,7 @@ public class MaximumPrecision implements Decimaliser {
     }
 
     /**
-     * Convert {@code value} rounding to at most {@code precision} decimal places.
+     * Convert the double {@code value} rounding to at most {@code precision} decimal places using double precision.
      *
      * @param value           the double to convert; must be finite
      * @param decimalAppender the appender receiving the components
@@ -75,7 +75,7 @@ public class MaximumPrecision implements Decimaliser {
     }
 
     /**
-     * Convert {@code value} rounding to at most {@code precision} decimal places.
+     * Convert the float {@code value} rounding to at most {@code precision} decimal places using float precision rules.
      *
      * @param value           the float to convert; must be finite
      * @param decimalAppender the appender receiving the components

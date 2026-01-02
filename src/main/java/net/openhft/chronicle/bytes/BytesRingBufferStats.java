@@ -8,7 +8,8 @@ import net.openhft.chronicle.core.annotation.NonNegative;
 import java.util.List;
 
 /**
- * This interface provides statistics about a {@link BytesRingBuffer}.
+ * This interface provides operational statistics and metrics about a {@link BytesRingBuffer} instance while readers
+ * and writers are active.
  */
 public interface BytesRingBufferStats {
     /**
@@ -26,7 +27,7 @@ public interface BytesRingBufferStats {
     long capacity();
 
     /**
-     * Calling this method resets the number.
+     * Returns and resets the number of write operations since the last call.
      *
      * @return the number of write operations performed since the last call to this method.
      */
@@ -34,7 +35,7 @@ public interface BytesRingBufferStats {
     long getAndClearWriteCount();
 
     /**
-     * Calling this method resets the number.
+     * Returns and resets the number of missed write operations since the last call.
      *
      * @return the number of missed write operations since the last call to this method.
      */
@@ -42,7 +43,7 @@ public interface BytesRingBufferStats {
     long getAndClearMissedWriteCount();
 
     /**
-     * Calling this method resets the number.
+     * Returns and resets the number of contentions since the last call.
      *
      * @return the number of contentions since the last call to this method.
      */

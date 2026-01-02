@@ -32,11 +32,11 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 @SuppressWarnings("rawtypes")
 public class NativeBytes<U>
         extends VanillaBytes<U> {
-    /** system property {@code bytes.guarded} */
+    /** system property {@code bytes.guarded} controlling GuardedNativeBytes wrapping */
     private static final boolean BYTES_GUARDED = Jvm.getBoolean("bytes.guarded");
     /** whether new instances are wrapped by {@link GuardedNativeBytes} */
     private static boolean newGuarded = BYTES_GUARDED;
-    /** virtual capacity */
+    /** virtual capacity limit for this bytes instance */
     protected long capacity;
 
     /**
@@ -179,8 +179,8 @@ public class NativeBytes<U>
             checkResize(writeEnd);
         } else {
             if (offset < 0)
-                throw new IllegalArgumentException();
-            throw new BufferOverflowException();
+                throw new IllegalArgumentException("writeCheckOffset offset must be non-negative");
+            throw new BufferOverflowException(/* writeCheckOffset outside capacity */);
         }
     }
 
@@ -200,7 +200,7 @@ public class NativeBytes<U>
                 throw new BufferOverflowException(/*"Write exceeds capacity"*/);
             checkResize(offset);
         } else {
-            throw new BufferOverflowException();
+            throw new BufferOverflowException(/* prewriteCheckOffset outside capacity */);
         }
     }
 
@@ -208,7 +208,8 @@ public class NativeBytes<U>
     public void ensureCapacity(final @NonNegative long desiredCapacity)
             throws IllegalArgumentException, ClosedIllegalStateException, ThreadingIllegalStateException {
 
-        if (desiredCapacity < 0) throw new IllegalArgumentException();
+        if (desiredCapacity < 0)
+            throw new IllegalArgumentException("desiredCapacity must be non-negative");
         assert DISABLE_SINGLE_THREADED_CHECK || threadSafetyCheck(true);
         writeCheckOffset(desiredCapacity, 0);
     }
@@ -218,7 +219,7 @@ public class NativeBytes<U>
         if (isElastic())
             resize(endOfBuffer);
         else
-            throw new BufferOverflowException();
+            throw new BufferOverflowException(/* resize requested for non-elastic bytes */);
     }
 
     @Override
@@ -294,7 +295,7 @@ public class NativeBytes<U>
             }
             store.reserveTransfer(INIT, this);
         } catch (IllegalArgumentException e) {
-            BufferOverflowException boe = new BufferOverflowException();
+            BufferOverflowException boe = new BufferOverflowException(/* elastic bytes exceeded capacity */);
             boe.initCause(e);
             throw boe;
         }
@@ -357,7 +358,7 @@ public class NativeBytes<U>
             throws BufferOverflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
         final long oldPosition = writePosition();
         if (writePosition() < bytesStore.start())
-            throw new BufferOverflowException();
+            throw new BufferOverflowException(/* write beyond buffer limit */);
         final long writeEnd = writePosition() + adding;
         if (writeEnd > writeLimit)
             throwBeyondWriteLimit(advance, writeEnd);

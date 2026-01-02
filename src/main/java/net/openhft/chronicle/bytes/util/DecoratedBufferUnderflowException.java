@@ -39,7 +39,7 @@ public final class DecoratedBufferUnderflowException extends BufferUnderflowExce
     }
 
     /**
-     * Returns the detail message of this exception.
+     * Returns the detail message describing this buffer underflow exception for diagnostics.
      *
      * @return the detail message string of this exception
      */

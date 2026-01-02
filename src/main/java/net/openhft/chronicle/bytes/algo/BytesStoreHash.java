@@ -30,7 +30,7 @@ import java.util.function.ToLongFunction;
 public interface BytesStoreHash<B extends BytesStore> extends ToLongFunction<B> {
 
     /**
-     * Computes a 64-bit hash value of the given {@link BytesStore}.
+     * Computes a 64-bit hash value for the readable content of a {@link BytesStore}.
      *
      * @param b the {@link BytesStore} to compute the hash for.
      * @return the 64-bit hash value.
@@ -44,7 +44,7 @@ public interface BytesStoreHash<B extends BytesStore> extends ToLongFunction<B> 
     }
 
     /**
-     * Computes a 64-bit hash value of the given {@link BytesStore} with a specified length.
+     * Computes a 64-bit hash value over a specified length of readable bytes.
      *
      * @param b      the {@link BytesStore} to compute the hash for.
      * @param length the number of bytes to include in the hash computation.

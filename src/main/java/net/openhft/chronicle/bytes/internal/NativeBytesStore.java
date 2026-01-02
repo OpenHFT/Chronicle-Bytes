@@ -162,7 +162,7 @@ public class NativeBytesStore<U>
     }
 
     /**
-     * this is an elastic native store
+     * Creates an elastic native store that can grow up to {@code maximumLimit}.
      *
      * @param capacity of the buffer.
      */
@@ -247,7 +247,8 @@ public class NativeBytesStore<U>
     @Override
     public void move(@NonNegative long from, @NonNegative long to, @NonNegative long length)
             throws BufferUnderflowException, ClosedIllegalStateException {
-        if (from < 0 || to < 0) throw new IllegalArgumentException();
+        if (from < 0 || to < 0)
+            throw new IllegalArgumentException("Move offsets must be non-negative");
         long addr = this.address;
         if (addr == 0) throwException(null);
         memoryCopyMemory(addr + from, addr + to, length);
@@ -255,7 +256,8 @@ public class NativeBytesStore<U>
 
     private void memoryCopyMemory(long fromAddress, long toAddress, @NonNegative long length)
             throws ClosedIllegalStateException {
-        if (length < 0) throw new IllegalArgumentException();
+        if (length < 0)
+            throw new IllegalArgumentException("Copy length must be non-negative");
         try {
             memory.copyMemory(fromAddress, toAddress, length);
         } catch (NullPointerException ifReleased) {
@@ -266,7 +268,7 @@ public class NativeBytesStore<U>
     private void throwException(Throwable ifReleased)
             throws ClosedIllegalStateException {
         throwExceptionIfReleased();
-        throw new ClosedIllegalStateException("Closed", ifReleased);
+        throw new ClosedIllegalStateException("NativeBytesStore is closed", ifReleased);
     }
 
     @NotNull
@@ -579,8 +581,9 @@ public class NativeBytesStore<U>
     public long addressForRead(@NonNegative long offset)
             throws BufferUnderflowException {
         if (offset < start() || offset > realCapacity()) {
-            if (offset < 0) throw new IllegalArgumentException();
-            throw new BufferUnderflowException();
+            if (offset < 0)
+                throw new IllegalArgumentException("Read offset must be non-negative");
+            throw new BufferUnderflowException(/* read offset beyond real capacity */);
         }
         return address + translate(offset);
     }
@@ -589,8 +592,9 @@ public class NativeBytesStore<U>
     public long addressForWrite(@NonNegative long offset)
             throws BufferOverflowException {
         if (offset < start() || offset > realCapacity()) {
-            if (offset < 0) throw new IllegalArgumentException();
-            throw new BufferOverflowException();
+            if (offset < 0)
+                throw new IllegalArgumentException("Write offset must be non-negative");
+            throw new BufferOverflowException(/* write offset beyond real capacity */);
         }
         return address + translate(offset);
     }
@@ -717,11 +721,12 @@ public class NativeBytesStore<U>
             throws BufferOverflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
         requireNonNull(chars);
         if (pos + length > realCapacity())
-            throw new BufferOverflowException();
+            throw new BufferOverflowException(/* append exceeds real capacity */);
 
         long addr = this.address + translate(0);
         @Nullable Memory mem = this.memory;
-        if (mem == null) throw new NullPointerException();
+        if (mem == null)
+            throw new NullPointerException("Native memory not available during appendUtf8");
         int i;
         ascii:
         {
@@ -798,7 +803,7 @@ public class NativeBytesStore<U>
             BB_CAPACITY.setInt(bb, Maths.toUInt31(readRemaining()));
             BB_ATT.set(bb, this);
         } catch (Exception e) {
-            throw new AssertionError(e);
+            throw new AssertionError("Failed to initialise temporary direct ByteBuffer view", e);
         }
         bb.clear();
         return bb;
@@ -914,7 +919,7 @@ public class NativeBytesStore<U>
     @Override
     public long appendAndReturnLength(long writePosition, boolean negative, long mantissa, int exponent, boolean append0) {
         if (writePosition + BytesInternal.digitsForExponent(exponent) > capacity())
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("Append would exceed native store capacity");
         throwExceptionIfReleased();
         try {
             long start = address + translate(writePosition);

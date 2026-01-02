@@ -31,14 +31,14 @@ import static net.openhft.chronicle.core.Jvm.uncheckedCast;
 public class BytesMarshaller<T> {
 
     /**
-     * Provides a ClassLocal instance for holding a unique BytesMarshaller for each class.
+     * Provides a ClassLocal instance holding a BytesMarshaller per class.
      */
     public static final ClassLocal<BytesMarshaller> BYTES_MARSHALLER_CL
             = ClassLocal.withInitial(BytesMarshaller::new);
     private final FieldAccess[] fields;
 
     /**
-     * Constructs a BytesMarshaller for the specified class.
+     * Constructs a BytesMarshaller for the specified class type.
      *
      * @param tClass the class for which the BytesMarshaller is to be created.
      */
@@ -88,7 +88,7 @@ public class BytesMarshaller<T> {
                 field.write(t, out);
             }
         } catch (IllegalAccessException e) {
-            throw new AssertionError(e);
+            throw new AssertionError("Unable to access field for marshalling", e);
         } finally {
             out.adjustHexDumpIndentation(-1);
         }
@@ -189,7 +189,7 @@ public class BytesMarshaller<T> {
             } catch (BufferUnderflowException | IllegalArgumentException | ArithmeticException |
                      ClosedIllegalStateException |
                      BufferOverflowException | IllegalAccessException iae) {
-                throw new IORuntimeException(iae);
+                throw new IORuntimeException("Failed to read field via reflection", iae);
             }
         }
 

@@ -100,7 +100,7 @@ enum BytesInternal {
             SI = new StringInternerBytes(Jvm.getInteger("wire.string-interner.size", 4096));
             ClassAliasPool.CLASS_ALIASES.addAlias(BytesStore.class, "!binary");
         } catch (Exception e) {
-            throw new AssertionError(e);
+            throw new AssertionError("Failed to initialise string interner and aliases", e);
         }
 
         MethodHandle vectorizedMismatchMethodHandle = null;
@@ -120,7 +120,7 @@ enum BytesInternal {
             }
         } catch (Exception e) {
             if (e.getClass().getName().equals("java.lang.reflect.InaccessibleObjectException"))
-                Jvm.debug().on(BytesInternal.class, "Cannot get access to vectorizedMismatch. The following command line args are required: " +
+                Jvm.debug().on(BytesInternal.class, "BytesInternal cannot access vectorizedMismatch. The following command line args are required: " +
                         "--illegal-access=permit --add-exports java.base/jdk.internal.ref=ALL-UNNAMED --add-exports java.base/jdk.internal.util=ALL-UNNAMED" +
                         ". exception: " + e);
             else
@@ -163,9 +163,9 @@ enum BytesInternal {
 
             // this will use AVX instructions, this is very fast; much faster than a handwritten loop.
             try {
-                Boolean vectorizedResult = java11ContentEqualUsingVectorizedMismatch(a, b);
-                if (vectorizedResult != null)
-                    return vectorizedResult;
+                int vectorizedResult = java11ContentEqualUsingVectorizedMismatch(a, b);
+                if (vectorizedResult >= 0)
+                    return vectorizedResult == 1;
             } catch (UnsupportedOperationException e) {
                 Jvm.warn().on(BytesInternal.class, e);
             }
@@ -188,8 +188,8 @@ enum BytesInternal {
      * The vectorizedMismatch implementation can be optimized efficiently by C2 to obtain an approximate 8x speed up when performing a mismatch on byte[] arrays (of a suitable size to overcome fixed costs).
      * The contract of vectorizedMismatch is simple enough that it can be made an intrinsic (see JDK-8044082) and leverage SIMDs instructions to perform operations up to a width of say 512 bits on supported architectures. Thus even further performance improvements may be possible.
      */
-    private static Boolean java11ContentEqualUsingVectorizedMismatch(@NotNull final BytesStore<?, ?> left,
-                                                                     @NotNull final BytesStore<?, ?> right) {
+    private static int java11ContentEqualUsingVectorizedMismatch(@NotNull final BytesStore<?, ?> left,
+                                                                  @NotNull final BytesStore<?, ?> right) {
         try {
             final Object leftObject;
             final long leftOffset;
@@ -200,7 +200,7 @@ enum BytesInternal {
             } else {
                 BytesStore<?, ?> bytesStore = left.bytesStore();
                 if (!(bytesStore instanceof HeapBytesStore))
-                    return null;
+                    return -1;
 
                 HeapBytesStore heapBytesStore = (HeapBytesStore) bytesStore;
                 leftObject = heapBytesStore.realUnderlyingObject();
@@ -216,7 +216,7 @@ enum BytesInternal {
             } else {
                 BytesStore<?, ?> bytesStore = right.bytesStore();
                 if (!(bytesStore instanceof HeapBytesStore))
-                    return null;
+                    return -1;
 
                 HeapBytesStore heapBytesStore = (HeapBytesStore) bytesStore;
                 rightObject = heapBytesStore.realUnderlyingObject();
@@ -232,21 +232,21 @@ enum BytesInternal {
                     0);
 
             if (invoke >= 0)
-                return Boolean.FALSE;
+                return 0;
 
             int remaining = length - ~invoke;
 
             for (; remaining < length; remaining++) {
                 if (left.readByte(left.readPosition() + remaining) !=
                         right.readByte(right.readPosition() + remaining)) {
-                    return Boolean.FALSE;
+                    return 0;
                 }
             }
 
-            return Boolean.TRUE;
+            return 1;
         } catch (Throwable e) {
             Jvm.warn().on(BytesInternal.class, e);
-            return null;
+            return -1;
         }
     }
 
@@ -596,12 +596,12 @@ enum BytesInternal {
             if (b != 0) {
                 if (count > 56)
                     throw new IORuntimeException(
-                            "Cannot read more than 9 stop bits of positive value");
+                            "Cannot read more than 9 stop bits of positive UTF-8 length");
                 utfLen |= (b << count);
             } else {
                 if (count > 63)
                     throw new IORuntimeException(
-                            "Cannot read more than 10 stop bits of negative value");
+                            "Cannot read more than 10 stop bits of negative UTF-8 length");
                 utfLen = ~utfLen;
             }
         }
@@ -616,7 +616,7 @@ enum BytesInternal {
         throwExceptionIfReleased(input);
         throwExceptionIfReleased(other);
         if (offset + utfLen > input.realCapacity())
-            throw new BufferUnderflowException();
+            throw new BufferUnderflowException(/* offset + utfLen exceeds real capacity */);
         int i = 0;
         while (i < utfLen && i < other.length()) {
             int c = input.readByte(offset + i);
@@ -716,7 +716,7 @@ enum BytesInternal {
         throwExceptionIfReleased(bytes);
         throwExceptionIfReleased(appendable);
         if (bytes.readRemaining() < length)
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("Parse length exceeds available readable bytes");
         try {
             int count = 0;
             while (count < length) {
@@ -767,7 +767,7 @@ enum BytesInternal {
             throws ClosedIllegalStateException {
         throwExceptionIfReleased(bytes);
         if (bytes.readRemaining() < utflen)
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("Parse length exceeds remaining bytes for 8-bit parse");
         sb.ensureCapacity(utflen);
 
         if (Jvm.isJava9Plus() && Jvm.maxDirectMemory() > 0) {
@@ -874,7 +874,7 @@ enum BytesInternal {
         requireNonNull(sb);
         try {
             if (offset + utflen > bytes.realCapacity())
-                throw new BufferUnderflowException();
+                throw new BufferUnderflowException(/* offset + utflen exceeds real capacity */);
             long address = bytes.address + bytes.translate(offset);
             Memory memory = bytes.memory;
             sb.ensureCapacity(utflen);
@@ -1720,7 +1720,7 @@ enum BytesInternal {
             try {
                 sb.append(' ').append(e.toString());
             } catch (IOException e1) {
-                throw new AssertionError(e);
+            throw new AssertionError("Failed to append exception details to debug string", e);
             }
         }
     }
@@ -1803,13 +1803,13 @@ enum BytesInternal {
         if (b != 0) {
             if (count > 56)
                 throw new IORuntimeException(
-                        "Cannot read more than 9 stop bits of positive value");
+                        "Cannot read more than 9 stop bits of positive value in stop-bit long");
             return l | (b << count);
 
         } else {
             if (count > 63)
                 throw new IORuntimeException(
-                        "Cannot read more than 10 stop bits of negative value");
+                        "Cannot read more than 10 stop bits of negative value in stop-bit long");
             return ~l;
         }
     }
@@ -1991,7 +1991,7 @@ enum BytesInternal {
         if (decimalPlaces >= digits) {
             int numDigitsRequired = 2 + decimalPlaces;
             if (numDigitsRequired > width)
-                throw new IllegalArgumentException("Value do not fit in " + width + " digits");
+                throw new IllegalArgumentException("Value does not fit in " + width + " digits including decimals");
             out.writeUnsignedByte(offset++, '0');
             out.writeUnsignedByte(offset++, '.');
             while (decimalPlaces-- > digits)
@@ -2001,7 +2001,7 @@ enum BytesInternal {
         } else {
             int numDigitsRequired = digits + 1;
             if (numDigitsRequired > width)
-                throw new IllegalArgumentException("Value do not fit in " + width + " digits");
+                throw new IllegalArgumentException("Value does not fit in " + width + " digits before decimals");
         }
 
         while (width-- > (digits + 1)) {
@@ -2951,7 +2951,8 @@ enum BytesInternal {
                 consumeDecimals(in);
                 break;
             } else if (b == '_' || b == '+') {
-                // ignore
+                // Ignore separators.
+                continue;
             } else {
                 break;
             }
@@ -2978,7 +2979,8 @@ enum BytesInternal {
                 consumeDecimals(in);
                 break;
             } else if (b == '_') {
-                // ignore
+                // Ignore separators.
+                continue;
             } else {
                 break;
             }
@@ -3021,7 +3023,7 @@ enum BytesInternal {
                 in.readSkip(-1);
                 break;
             } else if (b == '_' || b == '+') {
-                // ignore
+                // Ignore separators.
                 first = false;
             } else if (!first || b > ' ') {
                 break;
@@ -3050,7 +3052,8 @@ enum BytesInternal {
                 in.readSkip(-1);
                 break;
             } else if (b == '_') {
-                // ignore
+                // Ignore separators.
+                continue;
             } else {
                 break;
             }
@@ -3410,20 +3413,20 @@ enum BytesInternal {
             switch (sb.charAt(0)) {
                 case 't':
                 case 'T':
-                    return sb.length() == 1 || StringUtils.equalsCaseIgnore(sb, "true") ? true : null;
+                    return sb.length() == 1 || StringUtils.equalsCaseIgnore(sb, "true") ? Boolean.TRUE : null;
                 case 'y':
                 case 'Y':
-                    return sb.length() == 1 || StringUtils.equalsCaseIgnore(sb, "yes") ? true : null;
+                    return sb.length() == 1 || StringUtils.equalsCaseIgnore(sb, "yes") ? Boolean.TRUE : null;
                 case '0':
-                    return sb.length() == 1 ? false : null;
+                    return sb.length() == 1 ? Boolean.FALSE : null;
                 case '1':
-                    return sb.length() == 1 ? true : null;
+                    return sb.length() == 1 ? Boolean.TRUE : null;
                 case 'f':
                 case 'F':
-                    return sb.length() == 1 || StringUtils.equalsCaseIgnore(sb, "false") ? false : null;
+                    return sb.length() == 1 || StringUtils.equalsCaseIgnore(sb, "false") ? Boolean.FALSE : null;
                 case 'n':
                 case 'N':
-                    return sb.length() == 1 || StringUtils.equalsCaseIgnore(sb, "no") ? false : null;
+                    return sb.length() == 1 || StringUtils.equalsCaseIgnore(sb, "no") ? Boolean.FALSE : null;
                 default:
                     return null;
             }

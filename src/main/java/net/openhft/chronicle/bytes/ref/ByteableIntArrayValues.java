@@ -11,7 +11,7 @@ import net.openhft.chronicle.core.io.ThreadingIllegalStateException;
 import net.openhft.chronicle.core.values.IntArrayValues;
 
 /**
- * Off-heap, contiguous array of signed 32-bit values.
+ * Off-heap, contiguous array of signed 32-bit values for byteable int references.
  * <p>
  * Values must be stored contiguously following
  * {@link BinaryIntArrayReference#SHIFT} in little-endian order.

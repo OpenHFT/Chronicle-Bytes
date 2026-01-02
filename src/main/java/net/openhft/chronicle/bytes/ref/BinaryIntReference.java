@@ -60,7 +60,7 @@ public class BinaryIntReference extends AbstractReference implements IntValue {
         throwExceptionIfClosedInSetter();
 
         if (length != maxSize())
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("length must match int size");
         if (bytes instanceof HexDumpBytes) {
             offset &= HexDumpBytes.MASK;
         }
@@ -78,7 +78,7 @@ public class BinaryIntReference extends AbstractReference implements IntValue {
     }
 
     /**
-     * Returns a string representation of this BinaryIntReference.
+     * Returns a string representation of this BinaryIntReference value for debugging.
      *
      * @return a string representation
      */

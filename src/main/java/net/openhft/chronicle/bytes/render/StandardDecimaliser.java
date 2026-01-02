@@ -10,7 +10,7 @@ package net.openhft.chronicle.bytes.render;
 public class StandardDecimaliser implements Decimaliser {
 
     /**
-     * Singleton instance of StandardDecimaliser.
+     * Singleton instance of StandardDecimaliser for shared, stateless reuse across threads.
      */
     public static final StandardDecimaliser STANDARD = new StandardDecimaliser();
 
@@ -20,7 +20,7 @@ public class StandardDecimaliser implements Decimaliser {
     static final MaximumPrecision PRECISION_18 = new MaximumPrecision(18);
 
     /**
-     * Convert {@code value} using {@link #PRECISION_18} then {@link UsesBigDecimal}.
+     * Convert the double {@code value} using {@link #PRECISION_18} then {@link UsesBigDecimal} for wide ranges.
      */
     @Override
     public boolean toDecimal(double value, DecimalAppender decimalAppender) {
@@ -30,7 +30,7 @@ public class StandardDecimaliser implements Decimaliser {
     }
 
     /**
-     * Convert {@code value} using {@link #PRECISION_18} then {@link UsesBigDecimal}.
+     * Convert the float {@code value} using {@link #PRECISION_18} then {@link UsesBigDecimal} for single precision.
      */
     @Override
     public boolean toDecimal(float value, DecimalAppender decimalAppender) {
