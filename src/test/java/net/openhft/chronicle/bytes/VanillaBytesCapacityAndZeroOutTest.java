@@ -3,13 +3,16 @@
  */
 package net.openhft.chronicle.bytes;
 
-import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class VanillaBytesCapacityAndZeroOutTest extends BytesTestCommon {
 
     @Test
+    @DisplayName("capacity grows and zeroOut clears the written range")
     public void ensureCapacityGrowsAndZeroOutsRange() {
         Bytes<?> b = Bytes.allocateElasticOnHeap(8);
         try {
@@ -18,7 +21,8 @@ public class VanillaBytesCapacityAndZeroOutTest extends BytesTestCommon {
                 b.append('X');
             }
             long capAfter = b.capacity();
-            assertTrue("Expected capacity to grow beyond initial", capAfter >= 10);
+            assertTrue(capAfter >= 10,
+                    "Capacity should be at least 10 after writes, but was " + capAfter);
 
             // zeroOut a large range including unwritten tail
             long start = 2;
@@ -28,9 +32,13 @@ public class VanillaBytesCapacityAndZeroOutTest extends BytesTestCommon {
             // Verify visible zeroing only on written region
             b.readPosition(0);
             byte first = b.readByte();
-            assertEquals('X', first);
+            assertEquals('X',
+                    first,
+                    "First byte should remain the written value after zeroOut");
             byte third = b.readByte(2);
-            assertEquals(0, third);
+            assertEquals(0,
+                    third,
+                    "Zeroed range should clear the third byte at index 2");
         } finally {
             b.releaseLast();
         }

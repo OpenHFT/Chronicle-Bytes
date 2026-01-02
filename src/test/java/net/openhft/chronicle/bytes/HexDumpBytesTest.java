@@ -5,17 +5,21 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
-import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
+@DisplayName("HexDumpBytes formatting for offsets and nesting")
 public class HexDumpBytesTest extends BytesTestCommon {
 
     @Test
+    @DisplayName("offset format writes nested hex dump output")
     public void offsetFormat() {
         doTest(new HexDumpBytes());
     }
@@ -32,18 +36,22 @@ public class HexDumpBytesTest extends BytesTestCommon {
                 "0010 00 00\n" +
                 "0012    00 00 00 00 00 00 00 00 # nest\n" +
                 "001a    00 00 00 00 00 00 00 00\n" +
-                "0022    00 00\n", bytes.toHexString());
+                "0022    00 00\n", bytes.toHexString(),
+                "Hex dump output matches expected nested format");
         bytes.releaseLast();
     }
 
     @Test
+    @DisplayName("memory mapped hex dump output matches format")
     public void memoryMapped() throws FileNotFoundException {
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+        assumeFalse(Jvm.maxDirectMemory() == 0,
+                "Direct memory must be available for mapped hex dump test");
 
         File file = new File(OS.getTarget(), "HexDumpBytesTest-" + System.nanoTime() + ".dat");
         File parent = file.getParentFile();
         if (parent != null && !parent.exists()) {
-            parent.mkdirs();
+            assertTrue(parent.mkdirs() || parent.exists(),
+                    "Parent directory exists for mapped hex dump test");
         }
         try (MappedBytes mappedBytes = MappedBytes.mappedBytes(file, 64 * 1024)) {
             doTest(new HexDumpBytes(mappedBytes));

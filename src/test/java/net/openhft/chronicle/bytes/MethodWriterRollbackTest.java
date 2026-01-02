@@ -4,7 +4,8 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.io.InvalidMarshallableException;
-import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
@@ -12,9 +13,10 @@ import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.util.function.Function;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
+@DisplayName("Method writer rollback restores write position")
 public class MethodWriterRollbackTest extends BytesTestCommon {
 
     interface Failer {
@@ -22,6 +24,7 @@ public class MethodWriterRollbackTest extends BytesTestCommon {
     }
 
     @Test
+    @DisplayName("write position is rolled back on throwable")
     public void writePositionIsRolledBackOnThrowable() {
         Bytes<?> out = Bytes.allocateElasticOnHeap(64);
         try {
@@ -50,8 +53,10 @@ public class MethodWriterRollbackTest extends BytesTestCommon {
                     Failer.class.getClassLoader(), new Class<?>[]{Failer.class}, h);
 
             long pos0 = out.writePosition();
-            assertThrows(Throwable.class, proxy::go);
-            assertEquals("write position must be restored on failure", pos0, out.writePosition());
+            assertThrows(Throwable.class, proxy::go,
+                    "Method writer should rethrow failing invocation");
+            assertEquals(pos0, out.writePosition(),
+                    "Write position must be restored on failure");
         } finally {
             out.releaseLast();
         }

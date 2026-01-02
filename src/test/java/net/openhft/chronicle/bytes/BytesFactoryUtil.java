@@ -102,13 +102,16 @@ final class BytesFactoryUtil {
 
     static void releaseAndAssertReleased(ReferenceCounted referenceCounted) {
         referenceCounted.releaseLast();
-        assertEquals(0, referenceCounted.refCount());
+        assertEquals(0, referenceCounted.refCount(),
+                "reference count should be zero after release");
     }
 
-    static void assertNeverWrittenTo(final Bytes<Object> bytes) {
-        assertTrue(bytes.isClear());
+    static void verifyNeverWrittenTo(final Bytes<Object> bytes) {
+        assertTrue(bytes.isClear(),
+                "bytes should remain clear before write verification");
         for (int i = 0; i < SIZE; i++) {
-            assertEquals(0, bytes.readByte(i), "at " + i);
+            assertEquals(0, bytes.readByte(i),
+                    "byte at index " + i + " should remain zero");
         }
     }
 
@@ -117,7 +120,7 @@ final class BytesFactoryUtil {
             fc.truncate(0);
             return file;
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Unable to truncate file: " + file.getAbsolutePath(), e);
         }
     }
 

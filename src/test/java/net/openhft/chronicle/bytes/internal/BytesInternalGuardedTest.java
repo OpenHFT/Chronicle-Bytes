@@ -7,53 +7,45 @@ import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.IOException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
-import java.util.Arrays;
-import java.util.Collection;
+import java.util.stream.Stream;
 
-import static org.junit.Assert.*;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 @SuppressWarnings("rawtypes")
-@RunWith(Parameterized.class)
+@DisplayName("BytesInternal guarded and unguarded mode checks")
 public class BytesInternalGuardedTest extends BytesTestCommon {
-
-    private final boolean guarded;
-
-    public BytesInternalGuardedTest(String name, boolean guarded) {
-        this.guarded = guarded;
+    static Stream<Arguments> guardedModes() {
+        return Stream.of(
+                Arguments.of("Unguarded", false),
+                Arguments.of("Guarded", true)
+        );
     }
 
-    @Parameterized.Parameters(name = "{0}")
-    public static Collection<Object[]> data() {
-        return Arrays.asList(new Object[][]{
-                {"Unguarded", false},
-                {"Guarded", true}
-        });
-    }
-
-    @AfterClass
-    public static void resetGuarded() {
+    @AfterAll
+    static void resetGuarded() {
         NativeBytes.resetNewGuarded();
     }
 
-    @Before
-    public void setGuarded() {
-        NativeBytes.setNewGuarded(guarded);
-    }
-
-    @Test
-    public void testParse8bitAndStringBuilderWithUtf16Coder()
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("guardedModes")
+    @DisplayName("parse 8bit into string builder with UTF16 coder")
+    public void testParse8bitAndStringBuilderWithUtf16Coder(String label, boolean guarded)
             throws BufferUnderflowException, IOException {
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+        NativeBytes.setNewGuarded(guarded);
+        assumeFalse(Jvm.maxDirectMemory() == 0,
+                "Direct memory must be available for guarded parse test");
 
         @NotNull BytesStore<?, ?> bs = BytesStore.nativeStore(32);
         bs.write(0, new byte[]{0x76, 0x61, 0x6c, 0x75, 0x65}); // "value" string
@@ -64,35 +56,51 @@ public class BytesInternalGuardedTest extends BytesTestCommon {
         BytesInternal.parse8bit(0, bs, sb, 5);
         String actual = sb.toString();
 
-        assertEquals("value", actual);
-        assertEquals(5, actual.length());
+        assertEquals("value", actual,
+                "Parsed string matches expected value");
+        assertEquals(5, actual.length(),
+                "Parsed string length matches expected");
         bs.releaseLast();
     }
 
-    @Test
-    public void testCompareUTF()
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("guardedModes")
+    @DisplayName("compare UTF8 values with null handling")
+    public void testCompareUTF(String label, boolean guarded)
             throws IORuntimeException {
+        NativeBytes.setNewGuarded(guarded);
         @NotNull BytesStore<?, ?> bs = BytesStore.nativeStore(32);
         bs.writeUtf8(0, "test");
-        assertTrue(BytesInternal.compareUtf8(bs, 0, "test"));
-        assertFalse(BytesInternal.compareUtf8(bs, 0, null));
+        assertTrue(BytesInternal.compareUtf8(bs, 0, "test"),
+                "UTF8 compare matches for test string");
+        assertFalse(BytesInternal.compareUtf8(bs, 0, null),
+                "UTF8 compare rejects null against test string");
 
         bs.writeUtf8(0, null);
-        assertTrue(BytesInternal.compareUtf8(bs, 0, null));
-        assertFalse(BytesInternal.compareUtf8(bs, 0, "test"));
+        assertTrue(BytesInternal.compareUtf8(bs, 0, null),
+                "UTF8 compare matches for null string");
+        assertFalse(BytesInternal.compareUtf8(bs, 0, "test"),
+                "UTF8 compare rejects test string against null");
 
         bs.writeUtf8(1, "£\u20ac");
         @NotNull StringBuilder sb = new StringBuilder();
         bs.readUtf8(1, sb);
-        assertEquals("£\u20ac", sb.toString());
-        assertTrue(BytesInternal.compareUtf8(bs, 1, "£\u20ac"));
-        assertFalse(BytesInternal.compareUtf8(bs, 1, "£"));
-        assertFalse(BytesInternal.compareUtf8(bs, 1, "£\u20ac$"));
+        assertEquals("£\u20ac", sb.toString(),
+                "UTF8 read returns expected multibyte string");
+        assertTrue(BytesInternal.compareUtf8(bs, 1, "£\u20ac"),
+                "UTF8 compare matches multibyte string");
+        assertFalse(BytesInternal.compareUtf8(bs, 1, "£"),
+                "UTF8 compare rejects shorter string");
+        assertFalse(BytesInternal.compareUtf8(bs, 1, "£\u20ac$"),
+                "UTF8 compare rejects longer string");
         bs.releaseLast();
     }
 
-    @Test
-    public void shouldHandleDifferentSizedStores() {
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("guardedModes")
+    @DisplayName("compare bytes across different sized stores")
+    public void shouldHandleDifferentSizedStores(String label, boolean guarded) {
+        NativeBytes.setNewGuarded(guarded);
         Bytes<ByteBuffer> bytes = Bytes.elasticHeapByteBuffer(32);
         final BytesStore<?, ?> storeOfThirtyTwoBytes = bytes.bytesStore();
         storeOfThirtyTwoBytes.writeUtf8(0, "thirty_two_bytes_of_utf8_chars_");
@@ -101,29 +109,37 @@ public class BytesInternalGuardedTest extends BytesTestCommon {
         final BytesStore<?, ?> longerBuffer = bytes2.bytesStore();
         longerBuffer.writeUtf8(0, "thirty_two_bytes_of_utf8_chars_");
 
-        assertTrue(BytesInternal.equalBytesAny(storeOfThirtyTwoBytes, longerBuffer, 32));
+        assertTrue(BytesInternal.equalBytesAny(storeOfThirtyTwoBytes, longerBuffer, 32),
+                "Equal bytes check succeeds across store sizes");
         bytes2.releaseLast();
         bytes.releaseLast();
     }
 
-    @Test
-    public void testWritingDecimalVsJava() {
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("guardedModes")
+    @DisplayName("append decimal matches Java parsing output")
+    public void testWritingDecimalVsJava(String label, boolean guarded) {
+        NativeBytes.setNewGuarded(guarded);
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(32);
         bytes.clear();
         double d = 0.04595828484241039; //Math.pow(1e9, rand.nextDouble()) / 1e3;
         bytes.append(d);
         String s = Double.toString(d);
         if (s.length() != bytes.readRemaining()) {
-            assertEquals(d, Double.parseDouble(s), 0.0);
+            assertEquals(d, Double.parseDouble(s), 0.0,
+                    "Java parsing matches appended decimal");
             String s2 = bytes.toString();
-//            System.out.println(s + " != " + s2);
         }
         bytes.releaseLast();
     }
 
-    @Test
-    public void contentsEqual() {
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("guardedModes")
+    @DisplayName("content equals across different capacity buffers")
+    public void contentsEqual(String label, boolean guarded) {
+        NativeBytes.setNewGuarded(guarded);
+        assumeFalse(Jvm.maxDirectMemory() == 0,
+                "Direct memory must be available for content equals test");
 
         Bytes<?> a = Bytes.elasticByteBuffer(9, 20)
                 .append(Bytes.from("Hello"))
@@ -135,21 +151,30 @@ public class BytesInternalGuardedTest extends BytesTestCommon {
                 .append(Bytes.from("Hello"))
                 .readLimit(16);
         String actual1 = a.toString();
-        assertEquals("Hello\0\0\0\0", actual1);
+        assertEquals("Hello\0\0\0\0", actual1,
+                "First buffer includes expected padding");
         String actual2 = b.toString();
-        assertEquals("Hello", actual2);
+        assertEquals("Hello", actual2,
+                "Second buffer contains only hello");
         String actual3 = c.toString();
-        assertEquals("Hello\0\0\0\0\0\0\0\0\0\0", actual3);
-        assertTrue(a.contentEquals(b));
-        assertTrue(b.contentEquals(c));
-        assertTrue(c.contentEquals(a));
+        assertEquals("Hello\0\0\0\0\0\0\0\0\0\0", actual3,
+                "Third buffer includes extended padding");
+        assertTrue(a.contentEquals(b),
+                "Buffer a content equals buffer b");
+        assertTrue(b.contentEquals(c),
+                "Buffer b content equals buffer c");
+        assertTrue(c.contentEquals(a),
+                "Buffer c content equals buffer a");
         a.releaseLast();
         b.releaseLast();
         c.releaseLast();
     }
 
-    @Test
-    public void testStopBits() {
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("guardedModes")
+    @DisplayName("write and read stop bits round trip")
+    public void testStopBits(String label, boolean guarded) {
+        NativeBytes.setNewGuarded(guarded);
         final VanillaBytes<Void> bytes = Bytes.allocateDirect(10);
 
         for (int i = 0; i < (1L << (2 * 7)) + 1; i++) {
@@ -163,7 +188,8 @@ public class BytesInternalGuardedTest extends BytesTestCommon {
 
             // System.out.printf("0x%04x : %02x %02x %02x%n", i, bytes.readByte(0), bytes.readByte(1), bytes.readByte(3));
 
-            assertEquals(i, l);
+            assertEquals(i, l,
+                    "Stop bit round trip matches for i " + i);
         }
 
         bytes.releaseLast();

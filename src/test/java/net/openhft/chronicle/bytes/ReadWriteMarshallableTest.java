@@ -4,34 +4,40 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.io.IORuntimeException;
-import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import java.nio.BufferUnderflowException;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 @SuppressWarnings("rawtypes")
+@DisplayName("Read write marshallable round trip examples")
 public class ReadWriteMarshallableTest extends BytesTestCommon {
     @Test
+    @DisplayName("length prefixed marshalling preserves nested data")
     public void test()
             throws BufferUnderflowException, IllegalStateException {
         // TODO Make guarded safe
-        assumeFalse(NativeBytes.areNewGuarded());
+        assumeFalse(NativeBytes.areNewGuarded(),
+                "Native bytes guards must be disabled for marshalling test");
 
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(128);
-        Bytes<?> hello_world = Bytes.from("Hello World");
+        Bytes<?> helloWorld = Bytes.from("Hello World");
         Bytes<?> bye = Bytes.from("Bye");
         RWOuter o = new RWOuter(
-                new RWInner(hello_world),
+                new RWInner(helloWorld),
                 new RWInner(bye));
 
         bytes.writeMarshallableLength16(o);
 
         RWOuter o2 = bytes.readMarshallableLength16(RWOuter.class, null);
-        assertEquals("Hello World", o2.i1.data.toString());
-        assertEquals("Bye", o2.i2.data.toString());
-        hello_world.releaseLast();
+        assertEquals("Hello World", o2.i1.data.toString(),
+                "First nested data string reads back correctly");
+        assertEquals("Bye", o2.i2.data.toString(),
+                "Second nested data string reads back correctly");
+        helloWorld.releaseLast();
         bye.releaseLast();
     }
 

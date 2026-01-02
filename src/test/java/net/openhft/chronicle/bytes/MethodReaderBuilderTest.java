@@ -4,21 +4,25 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Jvm;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 import static org.mockito.Mockito.*;
 
+@DisplayName("MethodReaderBuilder warns on missing method handler behaviour")
 public class MethodReaderBuilderTest {
 
-    @Before
+    @BeforeEach
     public void setup() {
-        assumeFalse(Jvm.isJava21Plus());
+        assumeFalse(Jvm.isJava21Plus(),
+                "Mockito real method calls fail on Java 21");
     }
 
     @Test
+    @DisplayName("warnMissing toggles exception handler configuration flag")
     public void testWarnMissing() {
         MethodReaderBuilder builder = mock(MethodReaderBuilder.class, Mockito.CALLS_REAL_METHODS);
 

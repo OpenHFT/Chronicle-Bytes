@@ -7,8 +7,9 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.ReferenceOwner;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,22 +19,25 @@ import java.util.Arrays;
 import static net.openhft.chronicle.bytes.MappedBytes.mappedBytes;
 import static net.openhft.chronicle.bytes.MappedBytes.singleMappedBytes;
 import static net.openhft.chronicle.bytes.MappedFile.mappedFile;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
+@DisplayName("Mapped memory performance and reference count tests")
 public class MappedMemoryTest extends BytesTestCommon {
 
     private static final long SHIFT = 27L;
     private static final long BLOCK_SIZE = 1L << SHIFT;
 
-    @Before
+    @BeforeEach
     public void directEnabled() {
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+        assumeFalse(Jvm.maxDirectMemory() == 0,
+                "Direct memory must be available for mapped memory tests");
     }
 
     // on i7-3970X ~ 3.3 ns
     @Test
+    @DisplayName("raw memory mapped writes update ref counts")
     public void testRawMemoryMapped()
             throws IOException {
 
@@ -57,8 +61,11 @@ public class MappedMemoryTest extends BytesTestCommon {
                     }
                     bytesStore.release(test);
                 }
-                assertEquals(file0.referenceCounts(), 0, file0.refCount());
-                Jvm.perf().on(getClass(), "With RawMemory,\t\t time= " + 80 * (System.nanoTime() - startTime) / BLOCK_SIZE / 10.0 + " ns, number of longs written=" + BLOCK_SIZE / 8);
+                assertEquals(0, file0.refCount(),
+                        "Mapped file ref count resets after store release on run " + t + " " + file0.referenceCounts());
+                double nanosPerLong = 8.0 * (System.nanoTime() - startTime) / BLOCK_SIZE;
+                Jvm.perf().on(getClass(), "With RawMemory,\t\t time= " + nanosPerLong
+                        + " ns, number of longs written=" + (BLOCK_SIZE / 8));
             } finally {
                 deleteIfPossible(tempFile);
             }
@@ -67,6 +74,7 @@ public class MappedMemoryTest extends BytesTestCommon {
 
     // on i7-3970X ~ 6.9 ns
     @Test
+    @DisplayName("mapped native bytes writes keep ref counts")
     public void withMappedNativeBytesTest()
             throws IOException {
 
@@ -76,13 +84,15 @@ public class MappedMemoryTest extends BytesTestCommon {
 
                 final long startTime = System.nanoTime();
                 final Bytes<?> bytes = mappedBytes(tempFile, BLOCK_SIZE / 2);
-//                bytes.writeLong(1, 1);
                 for (long i = 0; i < BLOCK_SIZE; i += 8) {
                     bytes.writeLong(i);
                 }
                 bytes.releaseLast();
-                assertEquals(0, bytes.refCount());
-                Jvm.perf().on(getClass(), "With MappedNativeBytes, avg time= " + 80 * (System.nanoTime() - startTime) / BLOCK_SIZE / 10.0 + " ns, number of longs written=" + BLOCK_SIZE / 8);
+                assertEquals(0, bytes.refCount(),
+                        "Mapped bytes ref count resets after release on run " + t);
+                double nanosPerLong = 8.0 * (System.nanoTime() - startTime) / BLOCK_SIZE;
+                Jvm.perf().on(getClass(), "With MappedNativeBytes, avg time= " + nanosPerLong
+                        + " ns, number of longs written=" + (BLOCK_SIZE / 8));
             } finally {
                 deleteIfPossible(tempFile);
             }
@@ -91,6 +101,7 @@ public class MappedMemoryTest extends BytesTestCommon {
 
     // on i7-3970X ~ 6.0 ns
     @Test
+    @DisplayName("raw native bytes writes run without errors")
     public void withRawNativeBytesTess()
             throws IOException {
         final ReferenceOwner test = ReferenceOwner.temporary("test");
@@ -113,10 +124,12 @@ public class MappedMemoryTest extends BytesTestCommon {
                     }
                     bytes.releaseLast(test);
 
-                    Jvm.perf().on(getClass(), "With NativeBytes,\t\t time= " + 80 * (System.nanoTime() - startTime) / BLOCK_SIZE / 10.0 + " ns, number of longs written=" + BLOCK_SIZE / 8);
+                    double nanosPerLong = 8.0 * (System.nanoTime() - startTime) / BLOCK_SIZE;
+                    Jvm.perf().on(getClass(), "With NativeBytes,\t\t time= " + nanosPerLong
+                            + " ns, number of longs written=" + (BLOCK_SIZE / 8));
                 } catch (Throwable throwable) {
                     // Performance test so just make sure the test ran
-                    fail(throwable.getMessage());
+                    fail("Mapped native bytes perf test threw exception on run " + t + " " + throwable.getMessage());
                 }
             } finally {
                 deleteIfPossible(tempFile);
@@ -125,6 +138,7 @@ public class MappedMemoryTest extends BytesTestCommon {
     }
 
     @Test
+    @DisplayName("mapped bytes reserve and release update ref counts")
     public void mappedMemoryTest()
             throws IOException, IORuntimeException {
 
@@ -135,9 +149,11 @@ public class MappedMemoryTest extends BytesTestCommon {
                 bytes0 = bytes;
                 final ReferenceOwner test = ReferenceOwner.temporary("test");
                 try {
-                    assertEquals(1, bytes.refCount());
+                    assertEquals(1, bytes.refCount(),
+                            "Mapped bytes start with ref count one");
                     bytes.reserve(test);
-                    assertEquals(2, bytes.refCount());
+                    assertEquals(2, bytes.refCount(),
+                            "Mapped bytes ref count increases after reserve");
 
                     // The page size is 0x4000 on Mac M1 (and not 0x1000) so we need to stay in reasonable bounds
                     final char[] chars = new char[OS.pageSize() * 7];
@@ -151,33 +167,40 @@ public class MappedMemoryTest extends BytesTestCommon {
                     final String text = "hello this is some very long text";
                     bytes.writeUtf8(text);
                     final String textValue = bytes.toString();
-                    assertEquals(text, textValue.substring(pos + 1));
-                    assertEquals(2, bytes.refCount());
+                    assertEquals(text, textValue.substring(pos + 1),
+                            "Mapped bytes text contains appended content");
+                    assertEquals(2, bytes.refCount(),
+                            "Mapped bytes ref count remains two after write");
                 } finally {
                     bytes.release(test);
-                    assertEquals(1, bytes.refCount());
+                    assertEquals(1, bytes.refCount(),
+                            "Mapped bytes ref count returns after release");
                 }
             }
         } finally {
             deleteIfPossible(tempFile);
         }
-        assertEquals(0, bytes0.refCount());
+        assertEquals(0, bytes0.refCount(),
+                "Mapped bytes ref count is zero after close");
     }
 
     @Test
+    @DisplayName("single mapped bytes reserve and release update ref counts")
     public void mappedMemoryTestSingle()
             throws IOException, IORuntimeException {
 
         final File tempFile = Files.createTempFile("chronicle", "q").toFile();
         Bytes<?> bytes0;
         try {
-            try (MappedBytes bytes = singleMappedBytes(tempFile, OS.pageSize() * 8)) {
+            try (MappedBytes bytes = singleMappedBytes(tempFile, OS.pageSize() * 8L)) {
                 bytes0 = bytes;
                 final ReferenceOwner test = ReferenceOwner.temporary("test");
                 try {
-                    assertEquals(1, bytes.refCount());
+                    assertEquals(1, bytes.refCount(),
+                            "Single mapped bytes start with ref count one");
                     bytes.reserve(test);
-                    assertEquals(2, bytes.refCount());
+                    assertEquals(2, bytes.refCount(),
+                            "Single mapped bytes ref count increases after reserve");
 
                     // The page size is 0x4000 on Mac M1 (and not 0x1000) so we need to stay in reasonable bounds
                     final char[] chars = new char[OS.pageSize() * 7];
@@ -191,11 +214,14 @@ public class MappedMemoryTest extends BytesTestCommon {
                     final String text = "hello this is some very long text";
                     bytes.writeUtf8(text);
                     final String textValue = bytes.toString();
-                    assertEquals(text, textValue.substring(pos + 1));
-                    assertEquals(2, bytes.refCount());
+                    assertEquals(text, textValue.substring(pos + 1),
+                            "Single mapped bytes text contains appended content");
+                    assertEquals(2, bytes.refCount(),
+                            "Single mapped bytes ref count remains two after write");
                 } finally {
                     bytes.release(test);
-                    assertEquals(1, bytes.refCount());
+                    assertEquals(1, bytes.refCount(),
+                            "Single mapped bytes ref count returns after release");
                 }
             }
         } finally {
@@ -203,6 +229,7 @@ public class MappedMemoryTest extends BytesTestCommon {
                 ignoreException("Unable to delete");
             deleteIfPossible(tempFile);
         }
-        assertEquals(0, bytes0.refCount());
+        assertEquals(0, bytes0.refCount(),
+                "Single mapped bytes ref count is zero after close");
     }
 }

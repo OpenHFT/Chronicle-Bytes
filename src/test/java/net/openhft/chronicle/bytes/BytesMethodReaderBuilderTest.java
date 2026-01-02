@@ -5,10 +5,12 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.onoes.ExceptionHandler;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.mock;
 
 class BytesMethodReaderBuilderTest {
 
@@ -20,29 +22,39 @@ class BytesMethodReaderBuilderTest {
     }
 
     @Test
+    @DisplayName("constructor accepts bytes input without throwing")
     void constructorWithBytesInShouldNotThrow() {
-        assertDoesNotThrow(() -> new BytesMethodReaderBuilder(mockBytesIn));
+        assertDoesNotThrow(() -> new BytesMethodReaderBuilder(mockBytesIn),
+                "Builder constructor should accept a BytesIn instance");
     }
 
     @Test
+    @DisplayName("exception handler for unknown methods can be configured")
     void settingExceptionHandlerOnUnknownMethod() {
         BytesMethodReaderBuilder builder = new BytesMethodReaderBuilder(mockBytesIn);
         ExceptionHandler mockHandler = mock(ExceptionHandler.class);
-        assertDoesNotThrow(() -> builder.exceptionHandlerOnUnknownMethod(mockHandler));
+        assertDoesNotThrow(() -> builder.exceptionHandlerOnUnknownMethod(mockHandler),
+                "Builder should accept an exception handler for unknown methods");
     }
 
     @Test
+    @DisplayName("method encoder lookup configuration supports chaining")
     void settingMethodEncoderLookup() {
         BytesMethodReaderBuilder builder = new BytesMethodReaderBuilder(mockBytesIn);
         MethodEncoderLookup lookup = MethodEncoderLookup.BY_ANNOTATION;
-        assertEquals(builder, builder.methodEncoderLookup(lookup), "Builder should support method chaining for methodEncoderLookup setting.");
+        assertEquals(builder,
+                builder.methodEncoderLookup(lookup),
+                "Builder should return itself after method encoder lookup configuration");
     }
 
     @Test
+    @DisplayName("default parselet is stored and returned")
     void settingAndInitializingDefaultParselet() {
         BytesMethodReaderBuilder builder = new BytesMethodReaderBuilder(mockBytesIn);
         BytesParselet mockParselet = mock(BytesParselet.class);
         builder.defaultParselet(mockParselet);
-        assertEquals(mockParselet, builder.defaultParselet(), "The set defaultParselet should be returned.");
+        assertEquals(mockParselet,
+                builder.defaultParselet(),
+                "Builder should return the configured default parselet");
     }
 }

@@ -9,6 +9,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.nio.ByteBuffer;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 /**
  * This enum represents different types of Allocators. Each Allocator provides a way to create elastic bytes and byte buffers.
  */
@@ -150,8 +152,10 @@ public enum Allocator {
         @Override
         Bytes<?> fixedBytes(int capacity) {
             if (capacity >= 256)
-                throw new IllegalArgumentException();
+                throw new IllegalArgumentException("Embedded heap bytes capacity must be below 256");
             Padding padding = new Padding();
+            padding.start = 0;
+            assertEquals(0, padding.start, "Parent start must default to zero");
             return Bytes.forFieldGroup(padding, "p").writeLimit(capacity);
         }
     },

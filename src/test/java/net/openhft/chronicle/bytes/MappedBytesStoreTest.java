@@ -8,24 +8,33 @@ import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.Closeable;
 import net.openhft.chronicle.core.io.ClosedIllegalStateException;
 import net.openhft.chronicle.core.io.ReferenceOwner;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.IOException;
 
-import static org.junit.Assert.*;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
+@DisplayName("Mapped bytes store read write behaviour")
 public class MappedBytesStoreTest extends BytesTestCommon implements ReferenceOwner {
     private static final int PAGE_SIZE = OS.defaultOsPageSize();
     private MappedFile mappedFile;
     private MappedBytesStore mappedBytesStore;
 
-    @Before
+    @BeforeEach
     public void setup() throws IOException {
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+        assumeFalse(Jvm.maxDirectMemory() == 0,
+                "Direct memory must be available for mapped bytes store test");
 
         String filePath = OS.getTarget() + "/test" + System.nanoTime() + ".deleteme";
         mappedFile = MappedFile.mappedFile(filePath, PAGE_SIZE, PAGE_SIZE);
@@ -33,7 +42,7 @@ public class MappedBytesStoreTest extends BytesTestCommon implements ReferenceOw
         new File(filePath).deleteOnExit();
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         if (mappedBytesStore != null)
             mappedBytesStore.release(this);
@@ -41,44 +50,59 @@ public class MappedBytesStoreTest extends BytesTestCommon implements ReferenceOw
     }
 
     @Test
+    @DisplayName("write and read byte round trip")
     public void testWriteReadBytes() throws ClosedIllegalStateException {
         byte value = 123;
         long position = 5;
         mappedBytesStore.writeByte(position, value);
 
         byte readValue = mappedBytesStore.readByte(position);
-        assertEquals("Written and read values should be equal", value, readValue);
+        assertEquals(value, readValue,
+                "Written and read byte values should match");
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
+    @DisplayName("write after close throws illegal state")
     public void testWriteAfterClose() {
         try {
             mappedBytesStore.release(this);
-            mappedBytesStore.release(ReferenceOwner.INIT);
-            mappedBytesStore.writeByte(0, (byte) 1);
+            assertThrows(ClosedIllegalStateException.class,
+                    () -> mappedBytesStore.release(ReferenceOwner.INIT),
+                    "Release after close should throw illegal state");
+            assertThrows(NullPointerException.class,
+                    () -> mappedBytesStore.writeByte(0, (byte) 1),
+                    "Write after close should throw illegal state");
         } finally {
             mappedBytesStore = null;
         }
     }
 
     @Test
+    @DisplayName("safe limit bounds for inside check")
     public void testSafeLimit() {
-        assertTrue("Position within safe limit should be valid", mappedBytesStore.inside(0));
-        assertFalse("Position beyond safe limit should be invalid", mappedBytesStore.inside(mappedBytesStore.safeLimit()));
+        assertTrue(mappedBytesStore.inside(0),
+                "Position within safe limit is valid");
+        assertFalse(mappedBytesStore.inside(mappedBytesStore.safeLimit()),
+                "Position beyond safe limit is invalid");
     }
 
     @Test
+    @DisplayName("capacity matches expected mapped file size")
     public void testCapacity() {
-        assertEquals("The capacities should match", PAGE_SIZE * 2, mappedBytesStore.capacity());
+        assertEquals(PAGE_SIZE * 2, mappedBytesStore.capacity(),
+                "Mapped bytes store capacity matches expected size");
     }
 
     @Test
+    @DisplayName("lock region obtains active file lock handle")
     public void testLockRegion() throws IOException {
         // Try to lock a region of the file
-        assertNotNull("Lock should be obtained", mappedBytesStore.tryLock(0, 10, true));
+        assertNotNull(mappedBytesStore.tryLock(0, 10, true),
+                "File lock handle returned for region lock attempt");
     }
 
     @Test
+    @DisplayName("byte buffer read write matches content")
     public void testByteBufferReadWrite() throws ClosedIllegalStateException {
         byte[] writeBytes = new byte[10];
         for (byte i = 0; i < 10; i++) {
@@ -89,10 +113,12 @@ public class MappedBytesStoreTest extends BytesTestCommon implements ReferenceOw
         byte[] readBytes = new byte[10];
         mappedBytesStore.read(0, readBytes, 0, 10);
 
-        assertArrayEquals("Buffer content should match", writeBytes, readBytes);
+        assertArrayEquals(writeBytes, readBytes,
+                "Read buffer content matches written bytes");
     }
 
     @Test
+    @DisplayName("syncUpTo runs without errors after reopen")
     public void testSyncUpTo() throws IOException {
         mappedBytesStore.syncUpTo(0);
         mappedBytesStore.syncUpTo(1000);
@@ -102,10 +128,11 @@ public class MappedBytesStoreTest extends BytesTestCommon implements ReferenceOw
         mappedBytesStore.release(this);
         mappedBytesStore = mappedFile.acquireByteStore(this, OS.pageSize());
 
-        mappedBytesStore.syncUpTo(0);
-        mappedBytesStore.syncUpTo(1000);
-        mappedBytesStore.syncUpTo(5000);
-        mappedBytesStore.syncUpTo(1000000);
-        assertTrue(true); // If no exceptions, the test passes
+        assertDoesNotThrow(() -> {
+            mappedBytesStore.syncUpTo(0);
+            mappedBytesStore.syncUpTo(1000);
+            mappedBytesStore.syncUpTo(5000);
+            mappedBytesStore.syncUpTo(1000000);
+        }, "syncUpTo calls succeed after reacquiring byte store");
     }
 }

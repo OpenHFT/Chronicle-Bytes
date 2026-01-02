@@ -4,15 +4,17 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Jvm;
-import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
+@DisplayName("Issue 281 byte buffer to bytes conversion")
 public class Issue281Test extends BytesTestCommon {
     private static void bufferToBytes(Bytes<?> bytes, ByteBuffer dataBuffer, int index) {
         int length = dataBuffer.get(index); // length prefix (offset)
@@ -21,8 +23,10 @@ public class Issue281Test extends BytesTestCommon {
     }
 
     @Test
+    @DisplayName("byte buffer copy respects byte order")
     public void testByteBufferToBytes() {
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+        assumeFalse(Jvm.maxDirectMemory() == 0,
+                "Direct memory must be available for byte buffer test");
 
         final Bytes<?> data = Bytes.allocateElasticDirect().append("1234567890ABCD");
         final Bytes<?> retVal = Bytes.allocateElasticDirect();
@@ -34,11 +38,13 @@ public class Issue281Test extends BytesTestCommon {
         }
         buffer.order(ByteOrder.LITTLE_ENDIAN);
         bufferToBytes(retVal, buffer, 0); // this calls bufferToBytes below
-        assertTrue(data.contentEquals(retVal));
+        assertTrue(data.contentEquals(retVal),
+                "Little endian copy preserves content equality");
 
         retVal.clear();
         buffer.order(ByteOrder.BIG_ENDIAN);
         bufferToBytes(retVal, buffer, 0); // this calls bufferToBytes below
-        assertTrue(data.contentEquals(retVal));
+        assertTrue(data.contentEquals(retVal),
+                "Big endian copy preserves content equality");
     }
 }

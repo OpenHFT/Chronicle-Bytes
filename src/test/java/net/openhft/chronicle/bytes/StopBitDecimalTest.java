@@ -4,20 +4,22 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Maths;
-import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.util.Random;
 
-import static junit.framework.TestCase.assertEquals;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 public class StopBitDecimalTest extends BytesTestCommon {
     @Test
+    @DisplayName("stop-bit decimal round trip preserves scale and value")
     public void testDecimals() {
-        assumeFalse(NativeBytes.areNewGuarded());
+        assumeFalse(NativeBytes.areNewGuarded(), "Stop-bit decimal test requires unguarded native bytes");
 
         Bytes<ByteBuffer> bytes = Bytes.elasticHeapByteBuffer(16);
         Random rand = new Random();
@@ -30,10 +32,16 @@ public class StopBitDecimalTest extends BytesTestCommon {
             BigDecimal bd = BigDecimal.valueOf(d);
             long v = bytes.readStopBit();
             BigDecimal ebd = new BigDecimal(BigInteger.valueOf(v / 10), (int) (Math.abs(v) % 10));
-            assertEquals("i: " + i + ", d: " + d + ", v: " + v, ebd.doubleValue(), bd.doubleValue(), 0.0);
+            assertEquals(bd.doubleValue(),
+                    ebd.doubleValue(),
+                    0.0,
+                    "Stop-bit raw value should match decimal at i=" + i + ", d=" + d + ", v=" + v);
             bytes.readPosition(0);
             double d2 = bytes.readStopBitDecimal();
-            assertEquals("i: " + i + ", d: " + d + ", v: " + v, d, d2, 0.0);
+            assertEquals(d,
+                    d2,
+                    0.0,
+                    "Stop-bit decimal round trip should match at i=" + i + ", d=" + d + ", v=" + v);
         }
     }
 }

@@ -3,22 +3,35 @@
  */
 package net.openhft.chronicle.bytes;
 
-import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class StopBitLengthTest extends BytesTestCommon {
 
     @Test
+    @DisplayName("stop-bit length boundaries match expected byte counts")
     public void boundaries() {
-        assertEquals(1, BytesUtil.stopBitLength(0));
-        assertEquals(1, BytesUtil.stopBitLength(0x7F));
-        assertEquals(2, BytesUtil.stopBitLength(0x80));
-        assertEquals(2, BytesUtil.stopBitLength(0x3FFF));
-        assertTrue(BytesUtil.stopBitLength(0x4000) >= 3);
-        assertTrue(BytesUtil.stopBitLength(Integer.MAX_VALUE) >= 3);
-        assertTrue(BytesUtil.stopBitLength(Long.MAX_VALUE) >= 9);
+        assertEquals(1,
+                BytesUtil.stopBitLength(0),
+                "Zero value should use one stop-bit byte");
+        assertEquals(1,
+                BytesUtil.stopBitLength(0x7F),
+                "Maximum one-byte value should use one stop-bit byte");
+        assertEquals(2,
+                BytesUtil.stopBitLength(0x80),
+                "First two-byte value should use two stop-bit bytes");
+        assertEquals(2,
+                BytesUtil.stopBitLength(0x3FFF),
+                "Maximum two-byte value should use two stop-bit bytes");
+        assertTrue(BytesUtil.stopBitLength(0x4000) >= 3,
+                "First three-byte value should use at least three stop-bit bytes");
+        assertTrue(BytesUtil.stopBitLength(Integer.MAX_VALUE) >= 3,
+                "Maximum int value should use at least three stop-bit bytes");
+        assertTrue(BytesUtil.stopBitLength(Long.MAX_VALUE) >= 9,
+                "Maximum long value should use at least nine stop-bit bytes");
     }
 }
 

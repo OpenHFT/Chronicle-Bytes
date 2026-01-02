@@ -4,6 +4,7 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.io.ClosedIllegalStateException;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.function.Executable;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -19,6 +20,7 @@ final class BytesReleaseInvariantObjectTest extends BytesTestCommon {
      * Checks a released Bytes handles "equals()" safely
      */
     @ParameterizedTest
+    @DisplayName("equals operation throws after bytes are released")
     @MethodSource("net.openhft.chronicle.bytes.BytesFactoryUtil#provideBytesObjects")
     void equalsContentAffects(final Bytes<?> bytes, final boolean readWrite, final String createCommand) {
         if (readWrite) {
@@ -28,7 +30,9 @@ final class BytesReleaseInvariantObjectTest extends BytesTestCommon {
         try {
             releaseAndAssertReleased(bytes);
             final Executable task = () -> bytes.equals(other);
-            assertThrows(ClosedIllegalStateException.class, task, createCommand);
+            assertThrows(ClosedIllegalStateException.class,
+                    task,
+                    "Released bytes should reject equals when created via " + createCommand);
         } finally {
             other.releaseLast();
         }
@@ -38,11 +42,14 @@ final class BytesReleaseInvariantObjectTest extends BytesTestCommon {
      * Checks a released Bytes handles "hashCode()" safely
      */
     @ParameterizedTest
+    @DisplayName("hashCode operation throws after bytes are released")
     @MethodSource("net.openhft.chronicle.bytes.BytesFactoryUtil#provideBytesObjects")
     void hashcodeContentAffect(final Bytes<?> bytes, final boolean readWrite, final String createCommand) {
         releaseAndAssertReleased(bytes);
         final Executable task = bytes::hashCode;
-        assertThrows(ClosedIllegalStateException.class, task, createCommand);
+        assertThrows(ClosedIllegalStateException.class,
+                task,
+                "Released bytes should reject hashCode when created via " + createCommand);
 
     }
 
@@ -50,6 +57,7 @@ final class BytesReleaseInvariantObjectTest extends BytesTestCommon {
      * Checks a released Bytes handles "toString()" safely
      */
     @ParameterizedTest
+    @DisplayName("toString shows content before bytes release")
     @MethodSource("net.openhft.chronicle.bytes.BytesFactoryUtil#provideBytesObjects")
     void toString(final Bytes<?> bytes, final boolean readWrite, final String createCommand) {
         final String expected;
@@ -61,11 +69,15 @@ final class BytesReleaseInvariantObjectTest extends BytesTestCommon {
             expected = "";
         }
         final String toString = bytes.toString();
-        assertEquals(expected, toString);
+        assertEquals(expected,
+                toString,
+                "toString should reflect content before release for " + createCommand);
         releaseAndAssertReleased(bytes);
         String hexString = bytes.toHexString();
         if (!hexString.startsWith("net.openhft.chronicle.core.io.ClosedIllegalStateException")) {
-            assertEquals("net.openhft.chronicle.core.io.ClosedIllegalStateException: net.openhft.chronicle.bytes.NativeBytes already released INIT location ", hexString);
+            assertEquals("net.openhft.chronicle.core.io.ClosedIllegalStateException: net.openhft.chronicle.bytes.NativeBytes already released INIT location ",
+                    hexString,
+                    "Released bytes should report the expected exception message for " + createCommand);
         }
     }
 }

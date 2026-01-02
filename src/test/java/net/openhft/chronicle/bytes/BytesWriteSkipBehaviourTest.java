@@ -3,15 +3,18 @@
  */
 package net.openhft.chronicle.bytes;
 
-import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import java.nio.BufferOverflowException;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class BytesWriteSkipBehaviourTest extends BytesTestCommon {
 
     @Test
+    @DisplayName("reserve header space then fill payload")
     public void reserveThenFillHeader() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(64);
         try {
@@ -25,15 +28,19 @@ public class BytesWriteSkipBehaviourTest extends BytesTestCommon {
             bytes.writeInt(start, (int) payloadLen);
 
             bytes.readPosition(start);
-            assertEquals(payloadLen, bytes.readInt());
-            assertEquals(0x11223344, bytes.readInt());
-            assertEquals((short) 0x55AA, bytes.readShort());
+            assertEquals(payloadLen, bytes.readInt(),
+                    "Backfilled header stores payload length");
+            assertEquals(0x11223344, bytes.readInt(),
+                    "Header payload value round trips");
+            assertEquals((short) 0x55AA, bytes.readShort(),
+                    "Trailing short payload round trips");
         } finally {
             bytes.releaseLast();
         }
     }
 
     @Test
+    @DisplayName("backtrack removes trailing separator character in payload")
     public void backtrackOneRemovesTrailingSeparator() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(32);
         try {
@@ -43,19 +50,23 @@ public class BytesWriteSkipBehaviourTest extends BytesTestCommon {
             bytes.writeSkip(-1); // drop comma
             bytes.writeByte((byte) 'd');
             bytes.readPosition(0);
-            assertEquals("abcd", bytes.readUtf8());
+            assertEquals("abcd", bytes.readUtf8(),
+                    "Backtracked separator removed from UTF-8 content");
         } finally {
             bytes.releaseLast();
         }
     }
 
-    @Test(expected = BufferOverflowException.class)
+    @Test
+    @DisplayName("negative skip beyond start throws overflow exception")
     public void excessiveNegativeSkipThrows() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(16);
         try {
             bytes.append("xx");
             // attempt to backtrack beyond start
-            bytes.writeSkip(- (bytes.writePosition() + 2));
+            assertThrows(BufferOverflowException.class,
+                    () -> bytes.writeSkip(-(bytes.writePosition() + 2)),
+                    "Negative skip beyond start triggers overflow exception");
         } finally {
             bytes.releaseLast();
         }

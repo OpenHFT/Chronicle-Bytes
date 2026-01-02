@@ -3,13 +3,15 @@
  */
 package net.openhft.chronicle.bytes;
 
-import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class VanillaBytesOpsTest extends BytesTestCommon {
 
     @Test
+    @DisplayName("write and read primitives then zero out the written int")
     public void writeReadPrimitivesAndZeroOut() {
         Bytes<?> b = Bytes.allocateElasticOnHeap(64);
         try {
@@ -17,13 +19,21 @@ public class VanillaBytesOpsTest extends BytesTestCommon {
             b.writeLong(0x0102030405060708L);
 
             b.readPosition(0);
-            assertEquals(0x11223344, b.readInt());
-            assertEquals(0x0102030405060708L, b.readLong());
+            assertEquals(0x11223344,
+                    b.readInt(),
+                    "Read int should match the written value");
+            assertEquals(0x0102030405060708L,
+                    b.readLong(),
+                    "Read long should match the written value");
 
             // zero out the int we wrote and check
             b.zeroOut(0, 4);
-            assertEquals(0, b.peekUnsignedByte(0));
-            assertEquals(0, b.peekUnsignedByte(1));
+            assertEquals(0,
+                    b.peekUnsignedByte(0),
+                    "First byte of zeroed int should be cleared");
+            assertEquals(0,
+                    b.peekUnsignedByte(1),
+                    "Second byte of zeroed int should be cleared");
         } finally {
             b.releaseLast();
         }

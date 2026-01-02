@@ -5,7 +5,8 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.util.Mocker;
-import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import java.io.StringWriter;
 import java.math.BigDecimal;
@@ -13,16 +14,17 @@ import java.math.BigInteger;
 import java.time.ZonedDateTime;
 import java.util.UUID;
 
-import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertTrue;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 public class BytesMethodWriterBuilderTest extends BytesTestCommon {
 
     @Test
+    @DisplayName("primitive and object method writes round trip through reader")
     public void testPrimitives() {
-        assumeFalse(NativeBytes.areNewGuarded());
+        assumeFalse(NativeBytes.areNewGuarded(), "Primitive writer test requires unguarded native bytes");
         final Bytes<?> bytes = new HexDumpBytes();
         try {
             final IBytesMethod m = bytes.bytesMethodWriter(IBytesMethod.class);
@@ -100,19 +102,22 @@ public class BytesMethodWriterBuilderTest extends BytesTestCommon {
                     "      34 3a 35 36 2e 37 37 35 2c 32 30 31 36 2d 31 30 # zonedDateTime\n" +
                     (Jvm.isJava9Plus() ?
                             "      2d 30 35 54 30 32 3a 33 34 3a 35 36 2e 37 37 35\n" :
-                            "      2d 30 35 54 30 31 3a 33 34 3a 35 36 2e 37 37 35\n") +
+                    "      2d 30 35 54 30 31 3a 33 34 3a 35 36 2e 37 37 35\n") +
                     "      2b 30 31 3a 30 30 5b 45 75 72 6f 70 65 2f 4c 6f\n" +
                     "      6e 64 6f 6e 5d 24 31 31 31 31 31 31 31 31 2d 31 # uuid\n" +
                     "      31 31 31 2d 31 31 31 31 2d 32 32 32 32 2d 32 32\n" +
-                    "      32 32 32 32 32 32 32 32 32 32\n", bytes.toHexString());
+                    "      32 32 32 32 32 32 32 32 32 32\n", bytes.toHexString(),
+                    "Hex dump should match the expected method writer output");
 
             final StringWriter out = new StringWriter();
             final MethodReader reader = bytes.bytesMethodReader(Mocker.logging(IBytesMethod.class, "* ", out));
 
             for (int i = 0; i < 4; i++) {
-                assertTrue(reader.readOne());
+                assertTrue(reader.readOne(),
+                        "Reader should return a method call at index " + i);
             }
-            assertFalse(reader.readOne());
+            assertFalse(reader.readOne(),
+                    "Reader should return false once all calls are consumed");
 
             final String expected =
                     Jvm.isJava9Plus() ?
@@ -126,7 +131,8 @@ public class BytesMethodWriterBuilderTest extends BytesTestCommon {
                                     "* myNested[MyNested{byteable=MyByteable{flag=true, b=11, s=22, c=T, i=44, f=5.555, l=66, d=77.77}, scalars=MyScalars{s='World', bi=0, bd=0, date=2016-10-05, time=01:34:56.775, dateTime=2016-10-05T01:34:56.775, zonedDateTime=2016-10-05T01:34:56.775+01:00[Europe/London], uuid=11111111-1111-1111-2222-222222222222}}]\n";
 
             assertEquals(expected,
-                    out.toString().replaceAll("\r", ""));
+                    out.toString().replaceAll("\r", ""),
+                    "Logged method output should match the expected sequence");
         } finally {
             bytes.releaseLast();
         }

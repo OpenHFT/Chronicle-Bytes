@@ -3,17 +3,21 @@
  */
 package net.openhft.chronicle.bytes;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 public class StopCharsTesterTest {
 
     @Test
+    @DisplayName("custom stop-char tester flags comma and semicolon")
     public void testCustomStopCharsTester() {
         StopCharsTester tester = (ch, peekNextCh) -> ch == ',' || ch == ';';
 
-        Assert.assertTrue(tester.isStopChar(',', 0));
-        Assert.assertTrue(tester.isStopChar(';', 0));
-        Assert.assertFalse(tester.isStopChar('a', 0));
+        org.junit.jupiter.api.Assertions.assertTrue(tester.isStopChar(',', 0),
+                "Comma should be treated as a stop character");
+        org.junit.jupiter.api.Assertions.assertTrue(tester.isStopChar(';', 0),
+                "Semicolon should be treated as a stop character");
+        org.junit.jupiter.api.Assertions.assertFalse(tester.isStopChar('a', 0),
+                "Letter characters should not be treated as stop characters");
     }
 }

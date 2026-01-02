@@ -4,25 +4,31 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.bytes.internal.NativeBytesStore;
-import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class ReleasedBytesStoreTest extends BytesTestCommon {
 
     @Test
+    @DisplayName("released bytes store rejects writes after release")
     public void release() {
         Bytes<?> bytes = Bytes.allocateElasticDirect();
-        assertNull(bytes.bytesStore().underlyingObject());
+        assertNull(bytes.bytesStore().underlyingObject(),
+                "Fresh bytes should not expose an underlying object yet");
         bytes.writeLong(0, 0);
-        assertEquals(NativeBytesStore.class, bytes.bytesStore().getClass());
+        assertEquals(NativeBytesStore.class,
+                bytes.bytesStore().getClass(),
+                "Writing should initialise the native bytes store");
         bytes.releaseLast();
-        assertEquals(0, bytes.bytesStore().refCount());
-        try {
-            bytes.writeLong(0, 0);
-            fail();
-        } catch (NullPointerException e) {
-            // expected.
-        }
+        assertEquals(0,
+                bytes.bytesStore().refCount(),
+                "Released bytes store should have a zero reference count");
+        assertThrows(NullPointerException.class,
+                () -> bytes.writeLong(0, 0),
+                "Released bytes should reject further writes");
     }
 }

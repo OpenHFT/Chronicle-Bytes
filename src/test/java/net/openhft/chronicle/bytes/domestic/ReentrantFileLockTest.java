@@ -8,9 +8,9 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.Closeable;
 import net.openhft.chronicle.core.io.IOTools;
 import net.openhft.chronicle.testframework.process.JavaProcessBuilder;
-import org.junit.Before;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -33,6 +33,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@DisplayName("Reentrant file lock acquisition and process coordination checks")
 class ReentrantFileLockTest extends BytesTestCommon {
 
     private static final int NUM_THREADS = 4;
@@ -45,7 +46,6 @@ class ReentrantFileLockTest extends BytesTestCommon {
     }
 
     @SuppressWarnings("EmptyMethod")
-    @Before
     @BeforeEach
     public void threadDump() {
         super.threadDump();
@@ -53,56 +53,76 @@ class ReentrantFileLockTest extends BytesTestCommon {
 
     @AfterEach
     void tearDown() {
-        fileToLock.delete();
+        if (!fileToLock.delete() && fileToLock.exists()) {
+            fileToLock.deleteOnExit();
+        }
     }
 
     @ParameterizedTest
+    @DisplayName("releases lock after final close for tryLock and lock")
     @ValueSource(booleans = {true, false})
     void willAcquireLockOnFileWhenAvailableAndReleaseOnLastRelease(boolean useTryLock) throws IOException {
         try (FileChannel channel = FileChannel.open(fileToLock.toPath(), StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE)) {
             final ReentrantFileLock lock = acquireLock(useTryLock, fileToLock, channel);
             final ReentrantFileLock secondLock = acquireLock(useTryLock, fileToLock, channel);
-            assertTrue(ReentrantFileLock.isHeldByCurrentThread(fileToLock));
+            assertTrue(ReentrantFileLock.isHeldByCurrentThread(fileToLock),
+                    "Lock is held after acquisition");
             Closeable.closeQuietly(lock);
-            assertTrue(ReentrantFileLock.isHeldByCurrentThread(fileToLock));
+            assertTrue(ReentrantFileLock.isHeldByCurrentThread(fileToLock),
+                    "Lock remains held until final release");
             Closeable.closeQuietly(secondLock);
-            assertFalse(ReentrantFileLock.isHeldByCurrentThread(fileToLock));
+            assertFalse(ReentrantFileLock.isHeldByCurrentThread(fileToLock),
+                    "Lock is released after final close");
         }
     }
 
     @ParameterizedTest
+    @DisplayName("overlapping lock held by channel throws on acquire")
     @ValueSource(booleans = {true, false})
     void willThrowOverlappingFileLockExceptionWhenAnOverlappingLockIsHeldDirectly(boolean useTryLock) throws IOException {
         try (FileChannel channel = FileChannel.open(fileToLock.toPath(), StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE)) {
-            final FileLock lock = channel.lock();
-            assertThrows(OverlappingFileLockException.class, () -> acquireLock(useTryLock, fileToLock, channel));
-            assertFalse(ReentrantFileLock.isHeldByCurrentThread(fileToLock));
+            try (FileLock lock = channel.lock()) {
+                assertNotNull(lock, "Direct file lock acquired for overlap test");
+                assertThrows(OverlappingFileLockException.class,
+                        () -> acquireLock(useTryLock, fileToLock, channel),
+                        "Overlapping lock triggers exception");
+                assertFalse(ReentrantFileLock.isHeldByCurrentThread(fileToLock),
+                        "Lock is not held after overlapping failure");
+            }
         }
     }
 
     @ParameterizedTest
+    @DisplayName("closed channel propagates exceptions on acquire")
     @ValueSource(booleans = {true, false})
     void willPropagateOtherExceptionsOnAcquire(boolean useTryLock) throws IOException {
         FileChannel closedChannel;
         try (FileChannel channel = FileChannel.open(fileToLock.toPath(), StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE)) {
             closedChannel = channel;
         }
-        assertThrows(ClosedChannelException.class, () -> acquireLock(useTryLock, fileToLock, closedChannel));
-        assertFalse(ReentrantFileLock.isHeldByCurrentThread(fileToLock));
+        assertThrows(ClosedChannelException.class,
+                () -> acquireLock(useTryLock, fileToLock, closedChannel),
+                "Closed channel propagates on acquire");
+        assertFalse(ReentrantFileLock.isHeldByCurrentThread(fileToLock),
+                "Lock is not held after channel close");
     }
 
     @ParameterizedTest
+    @DisplayName("closing lock after channel close reports closed channel")
     @ValueSource(booleans = {true, false})
     void unlockWillPropagateChannelClosedExceptionOnUnlock(boolean useTryLock) throws IOException {
         final ReentrantFileLock rtsfl;
         try (FileChannel channel = FileChannel.open(fileToLock.toPath(), StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE)) {
             rtsfl = acquireLock(useTryLock, fileToLock, channel);
         }
-        assertThrows(ClosedChannelException.class, rtsfl::close);
-        assertFalse(ReentrantFileLock.isHeldByCurrentThread(fileToLock));
+        assertThrows(ClosedChannelException.class, rtsfl::close,
+                "Closing lock after channel close throws");
+        assertFalse(ReentrantFileLock.isHeldByCurrentThread(fileToLock),
+                "Lock is not held after close failure");
     }
 
     @ParameterizedTest
+    @DisplayName("cross thread usage logs error for lock reuse")
     @ValueSource(booleans = {true, false})
     void errorIsLoggedWhenLocksArePassedBetweenThreads(boolean useTryLock) throws IOException, ExecutionException, InterruptedException {
         try (FileChannel channel = FileChannel.open(fileToLock.toPath(), StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE)) {
@@ -110,13 +130,15 @@ class ReentrantFileLockTest extends BytesTestCommon {
             final AtomicLong spawnedThreadId = new AtomicLong();
             Executors.newSingleThreadExecutor().submit(() -> {
                 spawnedThreadId.set(Jvm.currentThreadId());
-                assertTrue(lock.isValid());
+                assertTrue(lock.isValid(),
+                        "Lock remains valid when accessed from spawned thread");
             }).get();
             expectException("You're accessing a ReentrantFileLock created by thread " + Jvm.currentThreadId() + " on thread " + spawnedThreadId.get() + " this can have unexpected results, don't do it.");
         }
     }
 
     @ParameterizedTest
+    @DisplayName("process coordination provides mutual exclusion across lock holders")
     @ValueSource(booleans = {true, false})
     void providesMutualExclusionBetweenProcesses(boolean useTryLock) throws IOException {
         List<Process> processes = new ArrayList<>();
@@ -130,15 +152,16 @@ class ReentrantFileLockTest extends BytesTestCommon {
                 int exitValue = future.waitFor();
                 if (exitValue != 0) {
                     JavaProcessBuilder.printProcessOutput("locker", future);
-                    fail();
+                    fail("Locker process exited with code " + exitValue);
                 }
             } catch (Exception e) {
-                fail(e);
+                fail("Locker process execution failed", e);
             }
         });
     }
 
     @Test
+    @DisplayName("failed tryLock does not cache held lock")
     void noLockIsCachedOnFailedTryLock() throws IOException, InterruptedException {
         final Process processHoldingLock = JavaProcessBuilder.create(LockUntilInterruptedThread.class)
                 .withProgramArguments(fileToLock.getCanonicalPath())
@@ -151,10 +174,12 @@ class ReentrantFileLockTest extends BytesTestCommon {
                     }
                 }
             }
-            assertFalse(ReentrantFileLock.isHeldByCurrentThread(fileToLock));
+            assertFalse(ReentrantFileLock.isHeldByCurrentThread(fileToLock),
+                    "Lock is not cached after repeated tryLock");
         } finally {
             processHoldingLock.destroy();
-            assertTrue(processHoldingLock.waitFor(5, TimeUnit.SECONDS));
+            assertTrue(processHoldingLock.waitFor(5, TimeUnit.SECONDS),
+                    "Lock holder process terminates cleanly");
         }
     }
 
@@ -188,11 +213,12 @@ class ReentrantFileLockTest extends BytesTestCommon {
                         while (!Thread.currentThread().isInterrupted()) {
                             Jvm.pause(1);
                         }
-                        assertNotNull(lock); // avoid warning
+                        assertNotNull(lock,
+                                "Lock remains present while thread is running");
                     }
                 }
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                throw new RuntimeException("Lock holder failed while acquiring lock", e);
             }
         }
     }
@@ -226,14 +252,14 @@ class ReentrantFileLockTest extends BytesTestCommon {
                             Jvm.pause(ThreadLocalRandom.current().nextInt(5));
                             final int identifierInFile = readIdentifier(channel);
                             if (identifierInFile != identifier) {
-                                throw new RuntimeException("Expected " + identifier + " got " + identifierInFile);
+                                throw new RuntimeException("Expected identifier " + identifier + " but read " + identifierInFile);
                             }
                             acquiredCount++;
                         }
                     }
                 }
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                throw new RuntimeException("Locker thread failed while acquiring lock", e);
             }
         }
 
@@ -244,7 +270,7 @@ class ReentrantFileLockTest extends BytesTestCommon {
                 buffer.flip();
                 return buffer.getInt();
             } catch (IOException e) {
-                throw new RuntimeException("Couldn't read ID", e);
+                throw new RuntimeException("Couldn't read identifier from locked file", e);
             }
         }
 
@@ -255,7 +281,7 @@ class ReentrantFileLockTest extends BytesTestCommon {
                 buffer.flip();
                 channel.write(buffer, 0);
             } catch (IOException e) {
-                throw new RuntimeException("Couldn't write ID", e);
+                throw new RuntimeException("Couldn't write identifier to locked file", e);
             }
         }
     }

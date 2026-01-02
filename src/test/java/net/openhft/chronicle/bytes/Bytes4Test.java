@@ -4,6 +4,7 @@
 package net.openhft.chronicle.bytes;
 
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.nio.ByteBuffer;
@@ -13,8 +14,9 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 class Bytes4Test extends BytesTestCommon {
 
-    @Disabled("https://github.com/OpenHFT/Chronicle-Bytes/issues/186")
     @Test
+    @DisplayName("segmentation fault reproduction with bytes store append")
+    @Disabled("https://github.com/OpenHFT/Chronicle-Bytes/issues/186")
     void segFault() {
         {
             byte[] arr = new byte[4];
@@ -27,10 +29,13 @@ class Bytes4Test extends BytesTestCommon {
         bs.append(14, 16, 12);
         bs.isClear();
 
-        assertThrows(RuntimeException.class, () -> bs.writeUtf8(14, "this is a another text it should over write the other"));
+        assertThrows(RuntimeException.class,
+                () -> bs.writeUtf8(14, "this is a another text it should over write the other"),
+                "writeUtf8 should reject out of bounds text length");
     }
 
     @Test
+    @DisplayName("out of range writeInt triggers buffer overflow")
     @Disabled("https://github.com/OpenHFT/Chronicle-Bytes/issues/187")
     void bufferOverflow() {
         byte[] arr = new byte[4];
@@ -45,7 +50,7 @@ class Bytes4Test extends BytesTestCommon {
             // Ignore
         }
         if (fail)
-            fail("No address range check");
+            fail("No address range check for negative offset");
 
         fail = false;
         try {
@@ -56,7 +61,7 @@ class Bytes4Test extends BytesTestCommon {
         }
 
         if (fail)
-            fail("No address range check");
+            fail("No address range check for upper bound overflow");
     }
 
     static void main(String[] args) {

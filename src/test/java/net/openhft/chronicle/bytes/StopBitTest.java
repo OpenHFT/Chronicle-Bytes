@@ -3,16 +3,19 @@
  */
 package net.openhft.chronicle.bytes;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import java.nio.BufferUnderflowException;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 public class StopBitTest extends BytesTestCommon {
 
     @Test
+    @DisplayName("stop-bit encoding round trips with variable payload sizes")
     public void testStopBit() {
 
         for (int i = 0; i < (1 << 10) + 1; i++) {
@@ -24,22 +27,20 @@ public class StopBitTest extends BytesTestCommon {
 
             final Bytes<?> b = Bytes.allocateElastic();
             try {
-                if (expectedBytes == null) {
-                    b.writeStopBit(-1);
-                } else {
-                    long offset = expectedBytes.readPosition();
-                    long readRemaining = Math.min(b.writeRemaining(), expectedBytes.readLimit() - offset);
-                    b.writeStopBit(readRemaining);
-                    try {
-                        b.write(expectedBytes, offset, readRemaining);
-                    } catch (BufferUnderflowException | IllegalArgumentException e) {
-                        throw new AssertionError(e);
-                    }
+                long offset = expectedBytes.readPosition();
+                long readRemaining = Math.min(b.writeRemaining(), expectedBytes.readLimit() - offset);
+                b.writeStopBit(readRemaining);
+                try {
+                    b.write(expectedBytes, offset, readRemaining);
+                } catch (BufferUnderflowException | IllegalArgumentException e) {
+                    throw new AssertionError("Stop-bit payload write failed at i=" + i, e);
                 }
 
                 // System.out.printf("0x%04x : %02x %02x %02x%n", i, b.readByte(0), b.readByte(1), b.readByte(3));
 
-                Assert.assertEquals("failed at " + i, expected, b.read8bit());
+                assertEquals(expected,
+                        b.read8bit(),
+                        "Stop-bit decode should match expected string at i=" + i);
 
             } finally {
                 b.releaseLast();
@@ -49,6 +50,7 @@ public class StopBitTest extends BytesTestCommon {
     }
 
     @Test
+    @DisplayName("stop-bit encoding round trips with single element")
     public void testStopBitShort() {
 
         final String s = IntStream.range(0, 1)
@@ -59,20 +61,18 @@ public class StopBitTest extends BytesTestCommon {
 
         final Bytes<?> b = Bytes.allocateElastic();
         try {
-            if (bytes == null) {
-                b.writeStopBit(-1);
-            } else {
-                long offset = bytes.readPosition();
-                long readRemaining = Math.min(b.writeRemaining(), bytes.readLimit() - offset);
-                b.writeStopBit(readRemaining);
-                try {
-                    b.write(bytes, offset, readRemaining);
-                } catch (BufferUnderflowException | IllegalArgumentException e) {
-                    throw new AssertionError(e);
-                }
+            long offset = bytes.readPosition();
+            long readRemaining = Math.min(b.writeRemaining(), bytes.readLimit() - offset);
+            b.writeStopBit(readRemaining);
+            try {
+                b.write(bytes, offset, readRemaining);
+            } catch (BufferUnderflowException | IllegalArgumentException e) {
+                throw new AssertionError("Stop-bit short payload write failed", e);
             }
 
-            Assert.assertEquals(s, b.read8bit());
+            assertEquals(s,
+                    b.read8bit(),
+                    "Stop-bit decode should match the single-element string");
         } finally {
             bytes.releaseLast();
             b.releaseLast();

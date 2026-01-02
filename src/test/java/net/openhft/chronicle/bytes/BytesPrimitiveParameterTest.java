@@ -4,15 +4,13 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.io.IORuntimeException;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 
 import java.io.IOException;
-import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
-import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicReference;
@@ -23,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 /**
- * Tests if certain methods with constraints on primitive method parameters work as expected.
+ * Tests that primitive parameter constraints enforce argument validation behaviour consistently.
  */
 @SuppressWarnings("deprecation")
 final class BytesPrimitiveParameterTest { // too hard to ensure resources are released
@@ -34,6 +32,7 @@ final class BytesPrimitiveParameterTest { // too hard to ensure resources are re
      * Checks that methods throws IllegalArgumentException if negative parameters are provided for @NonNegative
      */
     @TestFactory
+    @DisplayName("negative parameters for non-negative inputs are rejected")
     Stream<DynamicTest> negativeParameters() {
         final AtomicReference<BytesInitialInfo> initialInfo = new AtomicReference<>();
         return cartesianProductTest(BytesFactoryUtil::provideBytesObjects,
@@ -83,15 +82,7 @@ final class BytesPrimitiveParameterTest { // too hard to ensure resources are re
     }
 
     private static Stream<NamedConsumer<Bytes<Object>>> provideNegativeNonNegativeOperations() {
-        final OutputStream os = new OutputStream() {
-            @Override
-            public void write(int b) throws IOException {
-                throw new UnsupportedEncodingException();
-            }
-        };
         final BytesStore<?, ?> bs = BytesStore.from(SILLY_NAME);
-        final Bytes<?> bytes = Bytes.from(SILLY_NAME);
-        final ByteBuffer bb = ByteBuffer.allocate(10);
         return Stream.of(
 
                 NamedConsumer.of(b -> b.write(-1, new byte[1]), "write(-1, new byte[1])"),
@@ -160,21 +151,4 @@ final class BytesPrimitiveParameterTest { // too hard to ensure resources are re
         );
     }
 
-    // The stream below represents operations that are not checked for reasons specified
-    private static Stream<NamedConsumer<Bytes<Object>>> provideNegativeNonNegativeOperationsOtherException() {
-        final OutputStream os = new OutputStream() {
-            @Override
-            public void write(int b) throws IOException {
-                throw new UnsupportedEncodingException();
-            }
-        };
-        final BytesStore<?, ?> bs = BytesStore.from(SILLY_NAME);
-        final Bytes<?> bytes = Bytes.from(SILLY_NAME);
-        final ByteBuffer bb = ByteBuffer.allocate(10);
-        return Stream.of(
-                // Acceptable: This will produce an Exception but not an IllegalArgumentException.
-                NamedConsumer.of(b -> b.writePosition(-1), "writePosition(-1)")
-
-        );
-    }
 }

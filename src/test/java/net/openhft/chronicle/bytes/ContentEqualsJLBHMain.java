@@ -18,8 +18,6 @@ public class ContentEqualsJLBHMain {
         System.setProperty("jvm.resource.tracing", "false");
     }
 
-    static boolean isDirect = true;
-
     private static int size = 1024;
 
     private final Bytes<?> left = Bytes.allocateElasticDirect();

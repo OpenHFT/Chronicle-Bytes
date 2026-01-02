@@ -4,17 +4,20 @@
 package net.openhft.chronicle.bytes.readme;
 
 import net.openhft.chronicle.bytes.*;
-import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import java.nio.ByteBuffer;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
+@DisplayName("Primitive readme examples for binary and text values")
 public class PrimitiveTest extends BytesTestCommon {
 
     @Test
+    @DisplayName("nested DTO hex dump matches example")
     public void testBinaryNestedDTO() {
         final Outer outer = new Outer("name", new Inner("key1", 1.1), new Inner("key2", 2.2));
 
@@ -35,7 +38,8 @@ public class PrimitiveTest extends BytesTestCommon {
 
             final String actual = bytes.toHexString();
 
-            assertEquals(expected, actual);
+            assertEquals(expected, actual,
+                    "Nested DTO hex dump matches expected output snapshot");
 
             final Outer outer2 = new Outer();
             outer2.readMarshallable(bytes);
@@ -46,6 +50,7 @@ public class PrimitiveTest extends BytesTestCommon {
     }
 
     @Test
+    @DisplayName("primitive DTO hex dump matches example")
     public void testBinaryPrimitiveDTO() {
         final PrimitiveDTO dto = new PrimitiveDTO(true,
                 (byte) 0x11,
@@ -73,7 +78,8 @@ public class PrimitiveTest extends BytesTestCommon {
 
             final String actual = bytes.toHexString();
 
-            assertEquals(expected, actual);
+            assertEquals(expected, actual,
+                    "Primitive DTO hex dump matches expected output snapshot");
 
             PrimitiveDTO dto2 = new PrimitiveDTO();
             dto2.readMarshallable(bytes);
@@ -84,6 +90,7 @@ public class PrimitiveTest extends BytesTestCommon {
     }
 
     @Test
+    @DisplayName("binary primitive writes and reads round trip")
     public void testBinaryPrimitive() {
         final HexDumpBytes bytes = new HexDumpBytes();
         try {
@@ -118,7 +125,8 @@ public class PrimitiveTest extends BytesTestCommon {
 
             final String actual = bytes.toHexString();
 
-            assertEquals(expected, actual);
+            assertEquals(expected, actual,
+                    "Primitive binary hex dump matches expected output snapshot");
 
             // System.out.println(bytes.toHexString());
 
@@ -136,25 +144,39 @@ public class PrimitiveTest extends BytesTestCommon {
             final float f32 = bytes.readFloat();
             final double f64 = bytes.readDouble();
 
-            assertTrue(flag);
-            assertEquals(1, s8);
-            assertEquals(2, u8);
-            assertEquals(3, s16);
-            assertEquals(4, u16);
-            assertEquals('5', ch);
-            assertEquals(-6_666_666, s24);
-            assertEquals(16_666_666, u24);
-            assertEquals(6, s32);
-            assertEquals(7, u32);
-            assertEquals(8, s64);
-            assertEquals(9, f32, 0.0);
-            assertEquals(10, f64, 0.0);
+            assertTrue(flag,
+                    "Binary boolean flag read returns true");
+            assertEquals(1, s8,
+                    "Signed byte read returns value one");
+            assertEquals(2, u8,
+                    "Unsigned byte read returns value two");
+            assertEquals(3, s16,
+                    "Signed short read returns value three");
+            assertEquals(4, u16,
+                    "Unsigned short read returns value four");
+            assertEquals('5', ch,
+                    "Stop bit char read returns digit five");
+            assertEquals(-6_666_666, s24,
+                    "Signed int24 read returns negative value");
+            assertEquals(16_666_666, u24,
+                    "Unsigned int24 read returns positive value");
+            assertEquals(6, s32,
+                    "Signed int read returns value six");
+            assertEquals(7, u32,
+                    "Unsigned int read returns value seven");
+            assertEquals(8, s64,
+                    "Signed long read returns value eight");
+            assertEquals(9, f32, 0.0,
+                    "Float read returns exact value nine");
+            assertEquals(10, f64, 0.0,
+                    "Double read returns exact value ten");
         } finally {
             bytes.releaseLast();
         }
     }
 
     @Test
+    @DisplayName("binary primitive offset reads round trip")
     public void testBinaryPrimitiveOffset() {
         final Bytes<ByteBuffer> bytes = Bytes.elasticHeapByteBuffer(64);
         try {
@@ -178,51 +200,65 @@ public class PrimitiveTest extends BytesTestCommon {
 
             final String actual = bytes.toHexString();
 
-            assertEquals(expected, actual);
+            assertEquals(expected, actual,
+                    "Offset binary hex dump matches expected output snapshot");
 
             boolean flag = bytes.readBoolean(0);
+            assertTrue(flag,
+                    "Offset boolean flag read returns true");
             byte s8 = bytes.readByte(1);
+            assertEquals(1, s8,
+                    "Offset signed byte read returns value one");
             int u8 = bytes.readUnsignedByte(2);
+            assertEquals(2, u8,
+                    "Offset unsigned byte read returns value two");
             short s16 = bytes.readShort(3);
+            assertEquals(3, s16,
+                    "Offset signed short read returns value three");
             int u16 = bytes.readUnsignedShort(5);
+            assertEquals(4, u16,
+                    "Offset unsigned short read returns value four");
             int s32 = bytes.readInt(7);
+            assertEquals(6, s32,
+                    "Offset signed int read returns value six");
             long u32 = bytes.readUnsignedInt(11);
+            assertEquals(7, u32,
+                    "Offset unsigned int read returns value seven");
             long s64 = bytes.readLong(15);
+            assertEquals(8, s64,
+                    "Offset signed long read returns value eight");
             float f32 = bytes.readFloat(23);
+            assertEquals(9, f32, 0.0,
+                    "Offset float read returns exact value nine");
             double f64 = bytes.readDouble(27);
-
-            assertTrue(flag);
-            assertEquals(1, s8);
-            assertEquals(2, u8);
-            assertEquals(3, s16);
-            assertEquals(4, u16);
-            assertEquals(6, s32);
-            assertEquals(7, u32);
-            assertEquals(8, s64);
-            assertEquals(9, f32, 0.0);
-            assertEquals(10, f64, 0.0);
+            assertEquals(10, f64, 0.0,
+                    "Offset double read returns exact value ten");
         } finally {
             bytes.releaseLast();
         }
     }
 
     @Test
+    @DisplayName("text primitive parsing from heap buffer")
     public void testTextPrimitiveByteBuffer() {
         doTestTextPrimitive(Bytes.elasticHeapByteBuffer(64));
     }
 
     @Test
+    @DisplayName("text primitive parsing from direct buffer")
     public void testTextPrimitiveDirect() {
         doTestTextPrimitive(Bytes.allocateDirect(64));
     }
 
     @Test
+    @DisplayName("text primitive parsing from heap bytes")
     public void testTextPrimitiveHeap() {
         doTestTextPrimitive(Bytes.allocateElasticOnHeap(64));
     }
 
     private void doTestTextPrimitive(Bytes<?> bytes) {
-        assumeFalse(NativeBytes.areNewGuarded());
+        assumeFalse(NativeBytes.areNewGuarded(),
+                "Native bytes guards must be disabled for text parse test");
         try {
             bytes.append(true).append('\n');
             bytes.append(1).append('\n');
@@ -240,7 +276,8 @@ public class PrimitiveTest extends BytesTestCommon {
 
             final String actual = bytes.toHexString();
 
-            assertEquals(expected, actual);
+            assertEquals(expected, actual,
+                    "Text primitive hex dump matches expected output snapshot");
 
             final boolean flag = bytes.parseBoolean();
             final int s32 = bytes.parseInt();
@@ -252,15 +289,24 @@ public class PrimitiveTest extends BytesTestCommon {
             final double f64b = bytes.parseDouble();
             final double f64n = bytes.parseDouble();
 
-            assertTrue(flag);
-            assertEquals(1, s32);
-            assertEquals(2, s64);
-            assertEquals("3", ch);
-            assertEquals(4.1, f32, 1e-6);
-            assertEquals(5.2, f64, 0.0);
-            assertEquals(Double.NEGATIVE_INFINITY, f64i, 0.5e-4);
-            assertEquals(6.2999999, f64b, 0.5e-4);
-            assertEquals(Double.NaN, f64n, 0.5e-4);
+            assertTrue(flag,
+                    "Parsed boolean flag returns true");
+            assertEquals(1, s32,
+                    "Parsed int value returns one");
+            assertEquals(2, s64,
+                    "Parsed long value returns two");
+            assertEquals("3", ch,
+                    "Parsed char string returns digit three");
+            assertEquals(4.1, f32, 1e-6,
+                    "Parsed float value returns four point one");
+            assertEquals(5.2, f64, 0.0,
+                    "Parsed double value returns five point two");
+            assertEquals(Double.NEGATIVE_INFINITY, f64i, 0.5e-4,
+                    "Parsed double returns negative infinity marker");
+            assertEquals(6.2999999, f64b, 0.5e-4,
+                    "Parsed double returns rounded value six point three");
+            assertEquals(Double.NaN, f64n, 0.5e-4,
+                    "Parsed double returns NaN marker value");
         } finally {
             bytes.releaseLast();
         }

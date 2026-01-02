@@ -6,7 +6,8 @@ package net.openhft.chronicle.bytes;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.BackgroundResourceReleaser;
-import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.IOException;
@@ -14,14 +15,17 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystemException;
 import java.nio.file.Files;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
+@DisplayName("Write8bit crosses mapped chunk boundary correctly")
 public class MappedBytesWrite8bitBoundaryTest extends BytesTestCommon {
 
     @Test
+    @DisplayName("write8bit reads across chunk boundary correctly")
     public void write8bitAcrossChunkBoundary() throws IOException {
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+        assumeFalse(Jvm.maxDirectMemory() == 0,
+                "Direct memory must be available for chunk boundary test");
         // Use page size as chunk to make boundary deterministic
         final int chunk = OS.pageSize();
         File file = new File(OS.getTarget(), "mapped-write8bit-boundary-" + System.nanoTime() + ".dat");
@@ -34,7 +38,8 @@ public class MappedBytesWrite8bitBoundaryTest extends BytesTestCommon {
                 mb.write8bit(msg);
                 mb.readPosition(chunk - 2);
                 String got = mb.read8bit();
-                assertEquals(msg, got);
+                assertEquals(msg, got,
+                        "write8bit round trips across chunk boundary");
             }
         } finally {
             BackgroundResourceReleaser.releasePendingResources();

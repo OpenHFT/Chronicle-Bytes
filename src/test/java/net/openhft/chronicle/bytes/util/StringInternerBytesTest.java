@@ -6,13 +6,15 @@ package net.openhft.chronicle.bytes.util;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesTestCommon;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class StringInternerBytesTest extends BytesTestCommon {
 
     @Test
+    @DisplayName("interner tracks expected unique value count")
     public void testIntern() {
         @NotNull StringInternerBytes si = new StringInternerBytes(128);
         for (int i = 0; i < 100; i++) {
@@ -20,6 +22,8 @@ public class StringInternerBytesTest extends BytesTestCommon {
             si.intern(b, (int) b.readRemaining());
             b.releaseLast();
         }
-        assertEquals(89, si.valueCount());
+        assertEquals(89,
+                si.valueCount(),
+                "Interner should retain the expected number of unique values");
     }
 }

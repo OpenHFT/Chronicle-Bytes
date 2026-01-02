@@ -7,6 +7,7 @@ import net.openhft.chronicle.bytes.internal.EmbeddedBytes;
 import net.openhft.chronicle.core.io.ClosedIllegalStateException;
 import net.openhft.chronicle.core.io.ReferenceCounted;
 import net.openhft.chronicle.core.util.Histogram;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -35,12 +36,6 @@ final class BytesReleaseInvariantNonPerformantMethodsTest extends BytesTestCommo
     private static final String SILLY_NAME = "Tryggve";
 
     private static Stream<NamedConsumer<Bytes<Object>>> provideNonPerformantOperations() {
-        final OutputStream os = new OutputStream() {
-            @Override
-            public void write(int b) throws IOException {
-                throw new UnsupportedEncodingException();
-            }
-        };
         final BytesStore<?, ?> bs = BytesStore.from(SILLY_NAME);
         final Bytes<?> bytes = Bytes.from(SILLY_NAME);
         return Stream.of(
@@ -71,7 +66,16 @@ final class BytesReleaseInvariantNonPerformantMethodsTest extends BytesTestCommo
                 NamedConsumer.of(b -> b.unchecked(false), "unchecked(false)"),
                 // Copy operations
                 NamedConsumer.of(Bytes::copy, "copy()"),
-                NamedConsumer.ofThrowing(b -> b.copyTo(os), "copyTo(OutputStream)"),
+                NamedConsumer.ofThrowing(b -> {
+                    try (OutputStream os = new OutputStream() {
+                        @Override
+                        public void write(int b) throws IOException {
+                            throw new UnsupportedEncodingException("stream does not support this encoding");
+                        }
+                    }) {
+                        b.copyTo(os);
+                    }
+                }, "copyTo(OutputStream)"),
                 NamedConsumer.of(b -> b.copyTo(bs), "copyTo(ByteStore)"),
                 NamedConsumer.of(bs::copyTo, "Bytes.copyTo(b)"),
                 NamedConsumer.of(b -> b.copyTo(new byte[10]), "copyTo(byte[])"),
@@ -97,6 +101,7 @@ final class BytesReleaseInvariantNonPerformantMethodsTest extends BytesTestCommo
      * Checks that methods throws ClosedIllegalStateException and does not change the state of the Bytes
      */
     @TestFactory
+    @DisplayName("released bytes non-performant operations throw ClosedIllegalStateException")
     Stream<DynamicTest> nonPerformanceCriticalOperators() {
         final AtomicReference<BytesInitialInfo> initialInfo = new AtomicReference<>();
         return cartesianProductTest(BytesFactoryUtil::provideBytesObjects,
@@ -111,13 +116,17 @@ final class BytesReleaseInvariantNonPerformantMethodsTest extends BytesTestCommo
                     }
                     final String name = createCommand(args) + "->" + bytes(args).getClass().getSimpleName() + "." + nc.name();
 
-                    assertThrows(ClosedIllegalStateException.class, () -> nc.accept(bytes), name);
+                    assertThrows(ClosedIllegalStateException.class,
+                            () -> nc.accept(bytes),
+                            "Released bytes should reject " + name);
 
                     // Unable to check actual size for released MappedBytes
                     if ((Bytes<?>) bytes instanceof MappedBytes || bytes instanceof EmbeddedBytes)
                         return;
                     final BytesInitialInfo info = new BytesInitialInfo(bytes);
-                    assertEquals(initialInfo.get(), info, name);
+                    assertEquals(initialInfo.get(),
+                            info,
+                            "Released bytes should preserve state for " + name);
                 }
         );
     }
@@ -126,6 +135,7 @@ final class BytesReleaseInvariantNonPerformantMethodsTest extends BytesTestCommo
      * Checks the bytes.toDebugString() works with released resources
      */
     @ParameterizedTest
+    @DisplayName("debug string remains available after release")
     @MethodSource("net.openhft.chronicle.bytes.BytesFactoryUtil#provideBytesObjects")
     void toDebugString(final Bytes<?> bytes, final boolean readWrite) {
         toDebug(bytes, readWrite, Bytes::toDebugString);
@@ -135,6 +145,7 @@ final class BytesReleaseInvariantNonPerformantMethodsTest extends BytesTestCommo
      * Checks the bytes.toDebugString(10) works with released resources
      */
     @ParameterizedTest
+    @DisplayName("debug string length ten remains after release")
     @MethodSource("net.openhft.chronicle.bytes.BytesFactoryUtil#provideBytesObjects")
     void toDebugString10(final Bytes<?> bytes, final boolean readWrite) {
         toDebug(bytes, readWrite, b -> b.toDebugString(10));
@@ -147,6 +158,7 @@ final class BytesReleaseInvariantNonPerformantMethodsTest extends BytesTestCommo
         }
         releaseAndAssertReleased(bytes);
         final String actual = operation.apply(bytes);
-        assertEquals("<released>", actual);
+        assertEquals("<released>", actual,
+                "released bytes should render the expected debug marker");
     }
 }

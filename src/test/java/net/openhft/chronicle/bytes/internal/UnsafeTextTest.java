@@ -7,35 +7,37 @@ import net.openhft.chronicle.bytes.BytesTestCommon;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.cooler.CoolerTester;
 import net.openhft.chronicle.core.cooler.CpuCoolers;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import java.util.Random;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
+@DisplayName("UnsafeText formatting and append behaviour checks")
 public class UnsafeTextTest extends BytesTestCommon {
 
     private static long blackhole;
 
     @SuppressWarnings("EmptyMethod")
     @Override
-    @Before
+    @BeforeEach
     public void threadDump() {
         super.threadDump();
     }
 
     @Test
+    @DisplayName("cooler append base10 produces correct memory text")
     public void coolerAppendBase10quick() {
         long address = OS.memory().allocate(32);
 
         try {
 
             new CoolerTester(CpuCoolers.PAUSE1, CpuCoolers.BUSY1)
-//                .add("noop", () -> null)
                     .add("20d", () -> {
                         blackhole = UnsafeText.appendFixed(address, -Integer.MAX_VALUE);
                         return null;
@@ -50,13 +52,15 @@ public class UnsafeTextTest extends BytesTestCommon {
                     .reduce(new StringBuilder(), StringBuilder::append, StringBuilder::append)
                     .toString();
 
-            assertEquals(Long.toString(-Integer.MAX_VALUE), memVal);
+            assertEquals(Long.toString(-Integer.MAX_VALUE), memVal,
+                    "Append base10 output matches expected memory value");
         } finally {
             OS.memory().freeMemory(address, 32);
         }
     }
 
     @Test
+    @DisplayName("append double covers fixed and regression cases")
     public void testAppendDouble() {
         // TODO FIX
         // Examples for https://github.com/OpenHFT/Chronicle-Core/issues/493
@@ -82,7 +86,6 @@ public class UnsafeTextTest extends BytesTestCommon {
         testAppendDoubleOnce(0.7205789375929972, "0.7205789375929972");
         testAppendDoubleOnce(1.7205789375929972E-8, "1.7205789375929972E-8");
         testAppendDoubleOnce(1.000000459754255, "1.000000459754255");
-//        testAppendDoubleOnce(1.0000004597542552, "1.0000004597542552");
         testAppendDoubleOnce(-0.0042633243189823394, "-0.0042633243189823394");
         // too high
         testAppendDoubleOnce(4.3634067645459027E-4, "0.00043634067645459027");
@@ -97,7 +100,6 @@ public class UnsafeTextTest extends BytesTestCommon {
         testAppendDoubleOnce(1.0272238286878982E-7, "0.00000010272238286878982");
         testAppendDoubleOnce(9.077547054210796E-8, "0.00000009077547054210796");
         testAppendDoubleOnce(-1.1914407211387385E-7, "-0.00000011914407211387385");
-//        testAppendDoubleOnce(1.0626477603237785E-10, "0.00000000010626477603237785");
         testAppendDoubleOnce(8.871684275243539E-4, "0.0008871684275243539");
         testAppendDoubleOnce(8.807878708605213E-4, "0.0008807878708605213");
         testAppendDoubleOnce(8.417670165790972E-4, "0.0008417670165790972");
@@ -145,7 +147,8 @@ public class UnsafeTextTest extends BytesTestCommon {
         long address = OS.memory().allocate(size);
         try {
             final String memVal = appendDoubleToString(value, address);
-            assertEquals("value; " + value, expectedValue, memVal);
+            assertEquals(expectedValue, memVal,
+                    "Append double string matches expected for value " + value);
         } finally {
             OS.memory().freeMemory(address, size);
         }
@@ -154,6 +157,7 @@ public class UnsafeTextTest extends BytesTestCommon {
     private static final int max = 32;
 
     @Test
+    @DisplayName("random append double round trip matches values")
     public void testRandom() {
         int runLength = 10_000;
         IntStream.range(0, runLength).parallel().forEach(t -> {
@@ -171,8 +175,8 @@ public class UnsafeTextTest extends BytesTestCommon {
                 String s = appendDoubleToString(d, address);
                 double d2 = Double.parseDouble(s);
                 if (d != d2) {
-                    String message = "" + (d - d2);
-                    assertEquals(message, d, d2, 0);
+                    String message = "Random append mismatch for value " + d + " diff " + (d - d2);
+                    assertEquals(d, d2, 0, message);
                 }
             }
             // this is called unless the test is about to die
@@ -181,6 +185,7 @@ public class UnsafeTextTest extends BytesTestCommon {
     }
 
     @Test
+    @DisplayName("sequential append double round trip matches values")
     public void testSequential() {
         IntStream.range(0, 300).parallel().forEach(t -> {
             // odd numbers have the most precision error
@@ -195,7 +200,8 @@ public class UnsafeTextTest extends BytesTestCommon {
                 String s = appendDoubleToString(d, address);
                 double d2 = Double.parseDouble(s);
                 if (d != d2)
-                    assertEquals("" + (d - d2), d, d2, 0);
+                    assertEquals(d, d2, 0,
+                            "Sequential append mismatch at i " + i + " value " + d + " diff " + (d - d2));
             }
             // this is called unless the test is about to die
             OS.memory().freeMemory(address, size);
@@ -206,10 +212,10 @@ public class UnsafeTextTest extends BytesTestCommon {
         OS.memory().writeLong(address + max, 0L);
         final long endAddress = UnsafeText.appendDouble(address, value);
         if (endAddress > address + max)
-            fail("value: " + value + " length: " + (endAddress - address));
+            fail("Append double overflowed buffer for value " + value + " length " + (endAddress - address));
         long end = OS.memory().readLong(address + max);
         if (end != 0L)
-            fail("Overwrite: " + Long.toHexString(end));
+            fail("Append double overwrote sentinel with value " + Long.toHexString(end));
         return LongStream.range(address, endAddress)
                 .mapToInt(addr -> OS.memory().readByte(addr))
                 .mapToObj(c -> (char) c)

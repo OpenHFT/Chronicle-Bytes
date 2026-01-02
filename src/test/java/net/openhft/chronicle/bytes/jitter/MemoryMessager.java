@@ -32,7 +32,8 @@ class MemoryMessager {
         long pos = bytes.writePosition();
         boolean works = bytes.compareAndSwapInt(pos, 0x0, NOT_READY);
 
-        if (!works) throw new AssertionError();
+        if (!works)
+            throw new AssertionError("Compare and swap failed for header reservation");
         Jvm.safepoint();
         bytes.writeSkip(4);
         bytes.writeLong(count);
@@ -51,7 +52,8 @@ class MemoryMessager {
             bytes.writeByte((byte) 0);
         Jvm.safepoint();
         boolean works2 = bytes.compareAndSwapInt(pos, NOT_READY, (int) (bytes.writePosition() - pos));
-        if (!works2) throw new AssertionError();
+        if (!works2)
+            throw new AssertionError("Compare and swap failed for header completion");
     }
 
     @SuppressWarnings("restriction")

@@ -8,7 +8,8 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.UnsafeMemory;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.IOTools;
-import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
@@ -18,14 +19,14 @@ import java.util.stream.Stream;
 
 import static net.openhft.chronicle.core.Jvm.uncheckedCast;
 import static net.openhft.chronicle.core.UnsafeMemory.MEMORY;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class StructTest extends BytesTestCommon {
 
     /**
      * Common base for structs to take care of initialisation and other boilerplating
      */
-    static abstract class Struct<S extends Struct<S>> {
+    abstract static class Struct<S extends Struct<S>> {
         Bytes<?> self;
         final Bytes<Void> bytes;
         private final int size;
@@ -38,7 +39,7 @@ public class StructTest extends BytesTestCommon {
         /**
          * c++ new - construct with memory owned by self
          *
-         * @param size
+         * @param size size of the struct in bytes
          */
         Struct(int size) {
             this.size = size;
@@ -50,8 +51,8 @@ public class StructTest extends BytesTestCommon {
         /**
          * c++ placement new - construct at given address
          *
-         * @param size
-         * @param address
+         * @param size    size of the struct in bytes
+         * @param address address to initialise from
          */
         Struct(int size, long address) {
             this.size = size;
@@ -71,7 +72,7 @@ public class StructTest extends BytesTestCommon {
         }
 
         /**
-         * return a new instance shared copy of self
+         * Return a new shared instance that references the same address as this struct.
          */
         S share() {
             return construct(this.address);
@@ -110,7 +111,7 @@ public class StructTest extends BytesTestCommon {
          * Fully initialise self at given address
          * Override if struct contains any members which need specific initialisation
          *
-         * @param address
+         * @param address address to initialise from
          */
         void initialise(final long address) {
             assert address != 0;
@@ -124,7 +125,7 @@ public class StructTest extends BytesTestCommon {
         }
 
         /**
-         * Get handle to underlying bytes
+         * Return the Bytes view that backs this struct so callers can inspect raw fields.
          *
          * @return - the underlying bytes corresponding to this instance's members
          */
@@ -202,6 +203,7 @@ public class StructTest extends BytesTestCommon {
     }
 
     @Test
+    @DisplayName("student struct layout and traversal match expected output")
     public void createStudents() {
         Student s3 = new Student()
                 .gender(Gender.FEMALE)
@@ -248,7 +250,9 @@ public class StructTest extends BytesTestCommon {
                     "00000040 00 00 00 00 00 00 00 00  96 07 01 01 33 33 73 3f ········ ····33s?\n" +
                     "00000050 00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00 ········ ········\n" +
                     "........\n" +
-                    "00000070 00 00 00 00 00 00 00 00  00 00 00 00             ········ ····    \n", sb0.toString());
+                    "00000070 00 00 00 00 00 00 00 00  00 00 00 00             ········ ····    \n",
+                    sb0.toString(),
+                    "Student hex dump should match the expected 64-bit layout");
         } else {
             assertEquals("00000000 00 00 00 00 00 00 00 00  54 68 65 20 50 68 61 6e ········ The Phan\n" +
                     "00000010 74 6f 6d 00 00 00 00 00  00 00 00 00 00 00 00 00 tom····· ········\n" +
@@ -272,7 +276,9 @@ public class StructTest extends BytesTestCommon {
                     "00000040 00 00 00 00 00 00 00 00  96 07 01 01 33 33 73 3f ········ ····33s?\n" +
                     "00000050 00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00 ········ ········\n" +
                     "........\n" +
-                    "00000070 00 00 00 00 00 00 00 00                          ········         \n", sb0.toString());
+                    "00000070 00 00 00 00 00 00 00 00                          ········         \n",
+                    sb0.toString(),
+                    "Student hex dump should match the expected 32-bit layout");
         }
 
         // add links here (need the previous null addresses for the above output to be constant between runs)
@@ -291,7 +297,8 @@ public class StructTest extends BytesTestCommon {
                         "The Phantom MALE, born 1936-2-17\n" +
                         "Superman MALE, born 1938-4-18\n" +
                         "Wonder Woman FEMALE, born 1942-1-1\n",
-                sb.toString());
+                sb.toString(),
+                "Student traversal should list names and birth dates in order");
     }
     /*
      *enum Gender{MALE, FEMALE};
@@ -513,12 +520,12 @@ public class StructTest extends BytesTestCommon {
 
         public float grade(int n) {
             assert 0 <= n && n < NUM_GRADES;
-            return MEMORY.readFloat(address + GRADES + Float.BYTES * n);
+            return MEMORY.readFloat(address + GRADES + (Float.BYTES * (long) n));
         }
 
         Student grade(int n, float f) {
             assert 0 <= n && n < NUM_GRADES;
-            MEMORY.writeFloat(address + GRADES + Float.BYTES * n, f);
+            MEMORY.writeFloat(address + GRADES + (Float.BYTES * (long) n), f);
             return this;
         }
 
@@ -578,37 +585,56 @@ public class StructTest extends BytesTestCommon {
     }
 
     @Test
+    @DisplayName("copy and share semantics update date views")
     public void testCopyingVsSharing() {
         Date d1 = new Date((short) 1970, (byte) 1, (byte) 1);
         Date d2 = d1.copy();
         Date d3 = d1.share();
 
-        assertEquals("1970-1-1", d1.toString());
+        assertEquals("1970-1-1",
+                d1.toString(),
+                "Initial date should reflect the constructed month");
 
         d2.month((byte) 2); // d2 only
         d3.month((byte) 3); // d1 and d3
 
-        assertEquals("1970-3-1", d1.toString());
-        assertEquals("1970-3-1", d3.toString());
+        assertEquals("1970-3-1",
+                d1.toString(),
+                "Shared date should reflect the updated month on the original");
+        assertEquals("1970-3-1",
+                d3.toString(),
+                "Shared view should track the original date after update");
 
-        assertEquals("1970-2-1", d2.toString());
+        assertEquals("1970-2-1",
+                d2.toString(),
+                "Copied date should reflect its independent month update");
 
         // point d3 to d2 (from d1)
         d3.share(d2);
-        assertEquals("1970-2-1", d3.toString());
+        assertEquals("1970-2-1",
+                d3.toString(),
+                "Shared view should mirror the month after pointing at the copy");
 
         // change d2 (and so also d3)
         d2.month((byte) 4);
-        assertEquals("1970-4-1", d2.toString());
-        assertEquals("1970-4-1", d3.toString());
+        assertEquals("1970-4-1",
+                d2.toString(),
+                "Copied date should reflect the subsequent month update");
+        assertEquals("1970-4-1",
+                d3.toString(),
+                "Shared view should mirror the copied date after update");
 
         // copy d2 into d3
         d3.copy(d2);
 
         // change d2; d3 stays the same
         d2.month((byte) 5);
-        assertEquals("1970-5-1", d2.toString());
-        assertEquals("1970-4-1", d3.toString());
+        assertEquals("1970-5-1",
+                d2.toString(),
+                "Copied date should change when updated again");
+        assertEquals("1970-4-1",
+                d3.toString(),
+                "Copied view should remain unchanged after sharing is removed");
 
     }
 }

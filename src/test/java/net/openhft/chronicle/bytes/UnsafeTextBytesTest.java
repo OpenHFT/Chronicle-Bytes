@@ -3,13 +3,15 @@
  */
 package net.openhft.chronicle.bytes;
 
-import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.bytes.internal.UnsafeText;
-import org.junit.Test;
+import net.openhft.chronicle.core.Maths;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import java.util.Random;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class UnsafeTextBytesTest extends BytesTestCommon {
 
@@ -18,7 +20,9 @@ public class UnsafeTextBytesTest extends BytesTestCommon {
         final long end = UnsafeText.appendFixed(address, l);
         bytes.readLimit(end - address);
         String message = bytes.toString();
-        assertEquals(message, l, bytes.parseLong());
+        assertEquals(l,
+                bytes.parseLong(),
+                "Parsed long should match appended value " + l + " for text " + message);
     }
 
     static String testAppendDouble(final Bytes<?> bytes, final double l) {
@@ -26,7 +30,10 @@ public class UnsafeTextBytesTest extends BytesTestCommon {
         final long end = UnsafeText.appendDouble(address, l);
         bytes.readLimit(end - address);
         final String message = bytes.toString();
-        assertEquals(message, l, bytes.parseDouble(), Math.ulp(l));
+        assertEquals(l,
+                bytes.parseDouble(),
+                Math.ulp(l),
+                "Parsed double should match appended value " + l + " for text " + message);
         return message;
     }
 
@@ -39,10 +46,14 @@ public class UnsafeTextBytesTest extends BytesTestCommon {
         final String message = bytes.toString();
         final double expected = Maths.round4(l);
         final double actual = bytes.parseDouble();
-        assertEquals(message, expected, actual, 0.0);
+        assertEquals(expected,
+                actual,
+                0.0,
+                "Fixed append should round to " + expected + " for digits " + digits + " from text " + message);
     }
 
     @Test
+    @DisplayName("append fixed base-10 values round trip through parseLong")
     public void appendBase10() {
         final Bytes<?> bytes = Bytes.allocateDirect(32);
         try {
@@ -56,6 +67,7 @@ public class UnsafeTextBytesTest extends BytesTestCommon {
     }
 
     @Test
+    @DisplayName("append double values round trip through parseDouble")
     public void appendDouble() {
 
         final Bytes<?> bytes = Bytes.allocateDirect(32);
@@ -77,12 +89,13 @@ public class UnsafeTextBytesTest extends BytesTestCommon {
     }
 
     @Test
+    @DisplayName("append double handles boundary values and infinities")
     public void appendDouble2() {
         final Bytes<?> bytes = Bytes.allocateDirect(32);
         try {
             for (double d : new double[]{
                     741138311171.555,
-                    0.0, -0.0, 0.1, 0.012, 0.00123, 1.0, Double.NaN, 1 / 0.0, -1 / 0.0})
+                    0.0, -0.0, 0.1, 0.012, 0.00123, 1.0, 1 / 0.0, -1 / 0.0})
                 testAppendDouble(bytes, d);
         } finally {
             bytes.releaseLast();
@@ -90,12 +103,31 @@ public class UnsafeTextBytesTest extends BytesTestCommon {
     }
 
     @Test
+    @DisplayName("append double handles NaN boundary values")
+    public void appendDoubleNan() {
+        final Bytes<?> bytes = Bytes.allocateDirect(32);
+        try {
+            final long address = bytes.clear().addressForRead(0);
+            final long end = UnsafeText.appendDouble(address, Double.NaN);
+            bytes.readLimit(end - address);
+            final String message = bytes.toString();
+            assertTrue(Double.isNaN(bytes.parseDouble()),
+                    "Parsed NaN should remain NaN for text " + message);
+        } finally {
+            bytes.releaseLast();
+        }
+    }
+
+    @Test
+    @DisplayName("append double preserves negative zero formatting")
     public void extraZeros() {
         final Bytes<?> bytes = Bytes.allocateDirect(32);
         try {
             final double d = -0.00002;
             final String output = testAppendDouble(bytes, d);
-            assertEquals("-0.00002", output);
+            assertEquals("-0.00002",
+                    output,
+                    "Negative zero formatting should keep leading zeros");
         } finally {
             bytes.releaseLast();
         }

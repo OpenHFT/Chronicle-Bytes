@@ -4,73 +4,94 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Jvm;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.stream.Stream;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
-@RunWith(Parameterized.class)
 public class StreamingDataInputTest extends BytesTestCommon {
 
-    private final Allocator allocator;
-
-    public StreamingDataInputTest(Allocator allocator) {
-        this.allocator = allocator;
+    public static Stream<Allocator> params() {
+        return Arrays.stream(Allocator.values());
     }
 
-    @Parameterized.Parameters(name = "allocator={0}")
-    public static Object[] params() {
-        return Arrays.stream(Allocator.values()).toArray();
+    private static void assumeNativeMemory(Allocator allocator) {
+        assumeFalse(allocator.name().startsWith("NATIVE") && Jvm.maxDirectMemory() == 0,
+                "Native allocators require direct memory");
     }
 
-    @Before
-    public void hasNativeMemory() {
-        assumeFalse(allocator.name().startsWith("NATIVE") && Jvm.maxDirectMemory() == 0);
-    }
-
-    @Test
-    public void read() {
+    @ParameterizedTest(name = "allocator {0} reads bytes from position")
+    @DisplayName("read fills array from the current read position")
+    @MethodSource("params")
+    public void read(Allocator allocator) {
+        assumeNativeMemory(allocator);
         Bytes<?> b = allocator.elasticBytes(32);
-        b.append("0123456789");
-        byte[] byteArr = "ABCDEFGHIJKLMNOP".getBytes();
-        b.readPosition(3);
-        b.read(byteArr);
-        assertEquals("3456789HIJKLMNOP", new String(byteArr, StandardCharsets.ISO_8859_1));
-        b.releaseLast();
+        try {
+            b.append("0123456789");
+            byte[] byteArr = "ABCDEFGHIJKLMNOP".getBytes(StandardCharsets.ISO_8859_1);
+            b.readPosition(3);
+            b.read(byteArr);
+            assertEquals("3456789HIJKLMNOP",
+                    new String(byteArr, StandardCharsets.ISO_8859_1),
+                    "Read should overwrite the array with remaining bytes");
+        } finally {
+            b.releaseLast();
+        }
     }
 
-    @Test
-    public void readOffset() {
+    @ParameterizedTest(name = "allocator {0} reads bytes into slice")
+    @DisplayName("read with offset updates array and advances position")
+    @MethodSource("params")
+    public void readOffset(Allocator allocator) {
+        assumeNativeMemory(allocator);
         Bytes<?> b = allocator.elasticBytes(32);
-        b.append("0123456789");
-        byte[] byteArr = "ABCDEFGHIJKLMNOP".getBytes();
-        b.read(byteArr, 2, 6);
-        assertEquals("AB012345IJKLMNOP", new String(byteArr, StandardCharsets.ISO_8859_1));
-        assertEquals('6', b.readByte());
-        b.releaseLast();
+        try {
+            b.append("0123456789");
+            byte[] byteArr = "ABCDEFGHIJKLMNOP".getBytes(StandardCharsets.ISO_8859_1);
+            b.read(byteArr, 2, 6);
+            assertEquals("AB012345IJKLMNOP",
+                    new String(byteArr, StandardCharsets.ISO_8859_1),
+                    "Offset read should update only the target slice");
+            assertEquals('6',
+                    b.readByte(),
+                    "Read position should advance past the copied bytes");
+        } finally {
+            b.releaseLast();
+        }
     }
 
-    @Test
-    public void roundTripWorksOnHeap() {
+    @ParameterizedTest(name = "allocator {0} round trips unsafe copy")
+    @DisplayName("unsafe copy round trip preserves object state")
+    @MethodSource("params")
+    public void roundTripWorksOnHeap(Allocator allocator) {
+        assumeNativeMemory(allocator);
         Bytes<?> b = allocator.elasticBytes(32);
-        TestObject source = new TestObject(123L, 123, false);
-        int offset = BytesUtil.triviallyCopyableStart(source.getClass());
-        b.unsafeWriteObject(source, offset, 13);
-        TestObject dest = new TestObject();
-        b.unsafeReadObject(dest, offset, 13);
-        assertEquals(source, dest);
-        b.releaseLast();
+        try {
+            TestObject source = new TestObject(123L, 123, false);
+            int offset = BytesUtil.triviallyCopyableStart(source.getClass());
+            b.unsafeWriteObject(source, offset, 13);
+            TestObject dest = new TestObject();
+            b.unsafeReadObject(dest, offset, 13);
+            assertEquals(source,
+                    dest,
+                    "Unsafe copy should preserve the object fields");
+        } finally {
+            b.releaseLast();
+        }
     }
 
-    @Test
-    public void readWithLength() {
+    @ParameterizedTest(name = "allocator {0} writes length then reads")
+    @DisplayName("writeWithLength encodes size and round trips content")
+    @MethodSource("params")
+    public void readWithLength(Allocator allocator) {
+        assumeNativeMemory(allocator);
         int max = 130; // two bytes of length for a stop bit encoded length
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(max + 2);
         Bytes<?> from = Bytes.wrapForRead(new byte[max]);
@@ -79,9 +100,14 @@ public class StreamingDataInputTest extends BytesTestCommon {
             from.readPositionRemaining(0, len);
             bytes.clear();
             bytes.writeWithLength(from);
-            assertEquals(len + (len < 128 ? 1 : 2), bytes.readRemaining());
+            int expectedRemaining = len + (len < 128 ? 1 : 2);
+            assertEquals(expectedRemaining,
+                    bytes.readRemaining(),
+                    "Encoded length should match expected size for len=" + len);
             bytes.readWithLength(to);
-            assertEquals(len, to.readRemaining());
+            assertEquals(len,
+                    to.readRemaining(),
+                    "Decoded length should match original size for len=" + len);
         }
     }
 

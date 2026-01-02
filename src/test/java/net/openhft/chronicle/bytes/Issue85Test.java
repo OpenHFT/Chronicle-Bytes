@@ -5,17 +5,20 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.bytes.render.GeneralDecimaliser;
 import net.openhft.chronicle.core.Maths;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import java.nio.ByteBuffer;
-import java.security.SecureRandom;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.Locale;
+import java.util.concurrent.ThreadLocalRandom;
 
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
+@DisplayName("Issue 85 decimal parsing and formatting")
 public class Issue85Test extends BytesTestCommon {
     private int different = 0;
     private int different2 = 0;
@@ -67,10 +70,12 @@ public class Issue85Test extends BytesTestCommon {
     }
 
     @Test
+    @DisplayName("bytes parse double for many decimal ranges")
     public void bytesParseDouble_Issue85_Many0() {
         Bytes<ByteBuffer> bytes = Bytes.elasticHeapByteBuffer(64);
         bytes.decimaliser(GeneralDecimaliser.GENERAL);
-        assumeFalse(NativeBytes.areNewGuarded());
+        assumeFalse(NativeBytes.areNewGuarded(),
+                "Guarded native bytes are disabled for issue 85 test");
         int max = 100, count = 0;
         for (double d0 = 1e15; d0 >= 1e-8; d0 /= 10) {
             long val = Double.doubleToRawLongBits(d0);
@@ -80,15 +85,14 @@ public class Issue85Test extends BytesTestCommon {
             }
             count += max + 1;
         }
-        SecureRandom rand = new SecureRandom();
         for (int i = 0; i < max * 1000; i++) {
-            double d = Math.pow(1e12, rand.nextDouble()) / 1e3;
+            double d = Math.pow(1e12, ThreadLocalRandom.current().nextDouble()) / 1e3;
             doTest(bytes, 0, d);
             count++;
         }
         if (different + different2 > 0)
-            Assert.fail("Different toString: " + 100.0 * different / count + "%," +
-                    " parsing: " + 100.0 * different2 / count + "%");
+            fail("Decimaliser mismatch for toString " + 100.0 * different / count + "%, parsing "
+                    + 100.0 * different2 / count + "%");
     }
 
     private void doTest(Bytes<ByteBuffer> bytes, int i, double d) {
@@ -96,35 +100,37 @@ public class Issue85Test extends BytesTestCommon {
         bytes.clear().append(s);
         double d2 = bytes.parseDouble();
         if (d != d2) {
-//            System.out.println(i + ": Parsing " + s + " != " + d2);
             ++different2;
         }
 
         String s2 = bytes.append(d).toString();
         double d3 = Double.parseDouble(s2);
         if (d != d3) {
-//            System.out.println(i + ": ToString " + s + " != " + s2 + " should be " + new BigDecimal(d));
             ++different;
         }
     }
 
     @Test
+    @DisplayName("direct bytes preserve trailing zeros formatting")
     public void loseTrainingZeros() {
         double d = -541098.2421;
-        Assert.assertEquals("" + d,
+        assertEquals("" + d,
                 Bytes.allocateElasticDirect()
                         .append(d)
-                        .toString());
+                        .toString(),
+                "Direct bytes preserve trailing zero formatting");
 
     }
 
     @Test
+    @DisplayName("heap bytes preserve trailing zeros formatting")
     public void loseTrainingZerosHeap() {
         double d = -541098.2421;
-        Assert.assertEquals("" + d,
+        assertEquals("" + d,
                 Bytes.allocateElasticOnHeap()
                         .append(d)
-                        .toString());
+                        .toString(),
+                "Heap bytes preserve trailing zero formatting");
 
     }
 }

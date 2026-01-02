@@ -6,6 +6,7 @@ package net.openhft.chronicle.bytes.issue;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesTestCommon;
 import net.openhft.chronicle.bytes.VanillaBytes;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -18,6 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 final class Issue384ReplaceByteStoreOnEmptyArrayTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{index}: ({0})")
+    @DisplayName("empty arrays replace backing byte store as needed")
     @MethodSource("bytesToTest")
     void reproduce(String classSimpleName, Bytes<?> bytes) {
 
@@ -35,7 +37,8 @@ final class Issue384ReplaceByteStoreOnEmptyArrayTest extends BytesTestCommon {
         } finally {
             bytes.releaseLast();
         }
-        assertTrue(replacedOrRefused);
+        assertTrue(replacedOrRefused,
+                "Empty bytes should replace the backing store or refuse growth for " + classSimpleName);
     }
 
     private static Stream<Arguments> bytesToTest() {

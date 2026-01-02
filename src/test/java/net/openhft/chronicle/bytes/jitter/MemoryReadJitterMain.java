@@ -66,6 +66,7 @@ public class MemoryReadJitterMain {
                     long startTimeNs = System.nanoTime();
                     Jvm.safepoint();
                     long last = mm.consumeBytes();
+                    lastRead.lazySet(last);
                     if (found)
                         Jvm.safepoint();
                     else
@@ -73,7 +74,6 @@ public class MemoryReadJitterMain {
                     long now = System.nanoTime();
                     histoRead.sampleNanos(now - startTimeNs);
                     histoReadWrite.sampleNanos(now - mm.firstLong());
-                    lastRead.lazySet(last);
                     if (found)
                         Jvm.safepoint();
                     else
@@ -102,7 +102,7 @@ public class MemoryReadJitterMain {
             histoWrite.sampleNanos(System.nanoTime() - startTimeNs);
             long start1 = System.nanoTime();
             while (System.nanoTime() < start1 + sampleNS) {
-                // wait one micro-second.
+                Jvm.safepoint();
             }
             if (lastRead.get() != count) {
                 StackTraceElement[] stes = reader.getStackTrace();
@@ -117,7 +117,7 @@ public class MemoryReadJitterMain {
             while (System.nanoTime() < start1 + intervalNS) {
                 Thread.yield();
             }
-        } while (System.currentTimeMillis() < start0 + runTime * 1_000);
+        } while (System.currentTimeMillis() < start0 + runTime * 1_000L);
         running = false;
         mf.releaseLast();
         System.gc();// give it time to release the file so the delete on exit will work on windows.

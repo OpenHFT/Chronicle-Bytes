@@ -3,15 +3,20 @@
  */
 package net.openhft.chronicle.bytes;
 
-import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import java.nio.ByteBuffer;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@DisplayName("Bytes lifecycle behaviour scenarios for reference counting and growth")
 public class BytesLifecycleTest extends BytesTestCommon {
 
     @Test
+    @DisplayName("Slices update reference counts on reserve and release")
     public void slicesRespectReferenceCounts() {
         Bytes<?> parent = Bytes.allocateElasticDirect();
         boolean parentReleased = false;
@@ -22,27 +27,28 @@ public class BytesLifecycleTest extends BytesTestCommon {
 
             Bytes<?> slice = parent.bytesForRead();
             try {
-                assertEquals("bytesForRead should reserve the bytes store",
-                        initialRefCount + 1, store.refCount());
+                assertEquals(initialRefCount + 1, store.refCount(),
+                        "bytesForRead should reserve the bytes store");
             } finally {
                 slice.releaseLast();
             }
-            assertEquals("Releasing the slice should decrement the ref-count",
-                    initialRefCount, store.refCount());
+            assertEquals(initialRefCount, store.refCount(),
+                    "Releasing the slice should decrement the ref-count");
 
             Bytes<?> orphan = parent.bytesForRead();
             try {
                 parent.releaseLast();
                 parentReleased = true;
                 orphan.readPosition(0);
-                assertEquals("reference-test", orphan.readUtf8());
+                assertEquals("reference-test", orphan.readUtf8(),
+                        "orphan slice should retain content after parent release");
             } finally {
                 orphan.releaseLast();
             }
-            assertEquals("Releasing the final slice should drop ref-count to zero",
-                    0, store.refCount());
-            assertThrows("Once both parent and slices are released, access must fail",
-                    NullPointerException.class, () -> parent.peekUnsignedByte(0));
+            assertEquals(0, store.refCount(),
+                    "Releasing the final slice should drop ref-count to zero");
+            assertThrows(NullPointerException.class, () -> parent.peekUnsignedByte(0),
+                    "Once both parent and slices are released, access must fail");
         } finally {
             if (!parentReleased) {
                 parent.releaseLast();
@@ -51,6 +57,7 @@ public class BytesLifecycleTest extends BytesTestCommon {
     }
 
     @Test
+    @DisplayName("Elastic heap bytes grow monotonically under repeated writes")
     public void elasticHeapBytesGrowMonotonically() {
         Bytes<ByteBuffer> elastic = Bytes.elasticByteBuffer(8);
         boolean expanded = false;
@@ -63,18 +70,19 @@ public class BytesLifecycleTest extends BytesTestCommon {
                 if (currentCapacity > previousCapacity) {
                     expanded = true;
                 }
-                assertTrue("Capacity must not shrink during elastic growth",
-                        currentCapacity >= previousCapacity);
+                assertTrue(currentCapacity >= previousCapacity,
+                        "capacity must not shrink during elastic growth at iteration " + i);
                 previousCapacity = currentCapacity;
                 elastic.clear();
             }
         } finally {
             elastic.releaseLast();
         }
-        assertTrue("Elastic buffer should expand at least once", expanded);
+        assertTrue(expanded, "Elastic buffer should expand at least once");
     }
 
     @Test
+    @DisplayName("copyTo only copies readable bytes from the current view")
     public void copyToCopiesReadableBytesOnly() {
         Bytes<?> source = Bytes.allocateElasticOnHeap();
         source.append("header-body");
@@ -83,14 +91,17 @@ public class BytesLifecycleTest extends BytesTestCommon {
         try {
             long expectedRemaining = source.readRemaining();
             long copied = source.copyTo(target);
-            assertEquals(expectedRemaining, copied);
-            assertEquals("copyTo should not mutate readPosition", 7, source.readPosition());
+            assertEquals(expectedRemaining, copied,
+                    "copyTo should return the number of readable bytes copied");
+            assertEquals(7, source.readPosition(),
+                    "copyTo should not mutate readPosition");
             Bytes<?> view = target.bytesForRead();
             try {
                 view.readPositionRemaining(0, copied);
                 byte[] bytes = new byte[(int) copied];
                 view.read(bytes);
-                assertEquals("body", new String(bytes, java.nio.charset.StandardCharsets.ISO_8859_1));
+                assertEquals("body", new String(bytes, java.nio.charset.StandardCharsets.ISO_8859_1),
+                        "copyTo should copy only the readable suffix");
             } finally {
                 view.releaseLast();
             }

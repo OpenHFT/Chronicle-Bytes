@@ -7,6 +7,7 @@ import net.openhft.chronicle.bytes.internal.ChunkedMappedBytes;
 import net.openhft.chronicle.bytes.internal.EmbeddedBytes;
 import net.openhft.chronicle.core.Jvm;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
@@ -47,24 +48,28 @@ final class BytesJavaDocComplianceTest extends BytesTestCommon {
                         Jvm.pause(100);
                     });
             // Make sure we have unique keys
-            assertEquals(count.get(), INITIAL_INFO_MAP.size());
+            assertEquals(count.get(), INITIAL_INFO_MAP.size(),
+                    "initial info map size should match bytes object count");
         }
     }
 
     /**
-     * Checks the Bytes::unchecked method
+     * Verifies the unchecked flag matches the bytes implementation name.
      */
     @ParameterizedTest
+    @DisplayName("unchecked flag matches bytes class name")
     @MethodSource("net.openhft.chronicle.bytes.BytesFactoryUtil#provideBytesObjects")
     void unchecked(final Bytes<?> bytes) {
-        assertEquals(bytes.getClass().getSimpleName().contains("Unchecked"), bytes.unchecked());
+        assertEquals(bytes.getClass().getSimpleName().contains("Unchecked"), bytes.unchecked(),
+                "unchecked flag should align with class name marker");
         releaseAndAssertReleased(bytes);
     }
 
     /**
-     * Checks the Bytes::readWrite method.
+     * Verifies readWrite reflects actual write capability for bytes.
      */
     @ParameterizedTest
+    @DisplayName("readWrite reports actual write capability for bytes")
     @MethodSource("net.openhft.chronicle.bytes.BytesFactoryUtil#provideBytesObjects")
     void readWrite(final Bytes<?> bytes,
                    final boolean readWrite) {
@@ -77,11 +82,13 @@ final class BytesJavaDocComplianceTest extends BytesTestCommon {
             // We cannot write
         }
         // Checks if the actual writing ability corresponds to the reality
-        assertEquals(readWrite, writeable);
+        assertEquals(readWrite, writeable,
+                "readWrite capability should match writeable probe result");
 
         // Checks that bytes reflects this
         if (writeable != bytes.readWrite())
-            assertEquals(writeable, bytes.readWrite());
+            assertEquals(writeable, bytes.readWrite(),
+                    "bytes readWrite should reflect writeable probe outcome");
         releaseAndAssertReleased(bytes);
     }
 
@@ -89,22 +96,22 @@ final class BytesJavaDocComplianceTest extends BytesTestCommon {
      * Checks that ByteBuffers that are read only cannot be wrapped.
      */
     @Test
+    @DisplayName("wrapForRead rejects read only byte buffers")
     void wrapForReadCannotTakeReadOnlyByteBuffers() {
         final ByteBuffer bb = ByteBuffer.allocate(10).asReadOnlyBuffer();
-        assertThrows(ReadOnlyBufferException.class, () ->
-                Bytes.wrapForRead(bb)
-        );
+        assertThrows(ReadOnlyBufferException.class, () -> Bytes.wrapForRead(bb),
+                "wrapForRead should reject read only byte buffers");
     }
 
     /**
      * Checks that ByteBuffers that are read only cannot be wrapped
      */
     @Test
+    @DisplayName("wrapForWrite rejects read only byte buffers")
     void wrapForWriteCannotTakeReadOnlyByteBuffers() {
         final ByteBuffer bb = ByteBuffer.allocate(10).asReadOnlyBuffer();
-        assertThrows(ReadOnlyBufferException.class, () ->
-                Bytes.wrapForWrite(bb)
-        );
+        assertThrows(ReadOnlyBufferException.class, () -> Bytes.wrapForWrite(bb),
+                "wrapForWrite should reject read only byte buffers");
     }
 
     // Todo: Do some write operations so that we know we have content then try operations
@@ -114,6 +121,7 @@ final class BytesJavaDocComplianceTest extends BytesTestCommon {
      * and that no modification of the Bytes object's internal state is made in such cases.
      */
     @TestFactory
+    @DisplayName("non-null parameters reject null input without mutating bytes")
     Stream<DynamicTest> nonNullableOperators() {
         return cartesianProductTest(BytesFactoryUtil::provideBytesObjects,
                 BytesJavaDocComplianceTest::provideThrowsMullPointerExceptionOperations,
@@ -139,10 +147,10 @@ final class BytesJavaDocComplianceTest extends BytesTestCommon {
                                 int foo = 1;
                             }
 
-                            assertNeverWrittenTo(bytes);
+                            verifyNeverWrittenTo(bytes);
                         }
                     }
-                    assertPropertiesNotChanged(createCommand(args), bytes);
+                    verifyPropertiesNotChanged(createCommand(args), bytes);
                 }
         );
     }
@@ -152,6 +160,7 @@ final class BytesJavaDocComplianceTest extends BytesTestCommon {
      * and that the Bytes object's internal state is indeed modified.
      */
     @TestFactory
+    @DisplayName("nullable parameters accept null and mutate writable bytes")
     Stream<DynamicTest> nullableOperators() {
         return cartesianProductTest(BytesFactoryUtil::provideBytesObjects,
                 BytesJavaDocComplianceTest::provideNullableOperations,
@@ -161,11 +170,13 @@ final class BytesJavaDocComplianceTest extends BytesTestCommon {
                     // System.out.println(bytes.getClass().getSimpleName() + " " + isReadWrite(args)+", writePosition()="+bytes.writePosition());
 
                     if (isReadWrite(args)) {
-                        assertDoesNotThrow(() -> nc.accept(bytes));
+                        assertDoesNotThrow(() -> nc.accept(bytes),
+                                "nullable operation should accept null for " + nc.name());
                         // Make sure something was written
-                        assertNotEquals(0, bytes.readShort(0));
+                        assertNotEquals(0, bytes.readShort(0),
+                                "nullable operation should write a non-zero marker for " + nc.name());
                     } else {
-                        assertPropertiesNotChanged(createCommand(args), bytes);
+                        verifyPropertiesNotChanged(createCommand(args), bytes);
                     }
                 }
         );
@@ -216,12 +227,6 @@ final class BytesJavaDocComplianceTest extends BytesTestCommon {
                 NamedConsumer.of(bytes -> bytes.readUtf8((Appendable & CharSequence) null), "readUtf8(ACS)"),
                 NamedConsumer.of(bytes -> bytes.readUtf8((StringBuilder) null), "readUtf8(StringBuilder)"),
                 NamedConsumer.of(bytes -> bytes.readUtf8((Bytes<?>) null), "readUtf8(Bytes)")
-
-                // readHistogram
-
-                // Todo: add unsafe...
-                // Todo: add read operations
-                // Todo: add prewrite
         );
     }
 
@@ -238,10 +243,11 @@ final class BytesJavaDocComplianceTest extends BytesTestCommon {
 
     enum MyEnum {INSTANCE}
 
-    private void assertPropertiesNotChanged(String createCommand, Bytes<?> bytes) {
+    private void verifyPropertiesNotChanged(String createCommand, Bytes<?> bytes) {
         // Make sure that there was no change to the target bytes
         final BytesInitialInfo expectedInfo = INITIAL_INFO_MAP.get(createCommand);
         final BytesInitialInfo actualInfo = new BytesInitialInfo(bytes);
-        assertEquals(expectedInfo, actualInfo, createCommand);
+        assertEquals(expectedInfo, actualInfo,
+                "bytes state should remain unchanged for " + createCommand);
     }
 }

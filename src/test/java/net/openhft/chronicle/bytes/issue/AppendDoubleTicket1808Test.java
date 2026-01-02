@@ -5,150 +5,176 @@ package net.openhft.chronicle.bytes.issue;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesTestCommon;
-import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@DisplayName("Append double formatting for issue 1808 cases")
 public class AppendDoubleTicket1808Test extends BytesTestCommon {
     @Test
+    @DisplayName("append double rounds to 8 decimal places")
     public void appendDoubleRounded08() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(64);
         for (double d : new double[]{2.01, 16777216.1, 67108864}) {
             bytes.append(d, 8);
             String s = String.format("%.8f", d);
-            assertEquals(s, bytes.toString());
+            assertEquals(s, bytes.toString(),
+                    "Formatted output matches scale 8 for value " + d);
             bytes.clear();
         }
         bytes.releaseLast();
     }
 
     @Test
+    @DisplayName("append double rounds to 9 decimal places")
     public void appendDoubleRounded09() {
         Bytes<byte[]> bytes = Bytes.allocateElasticOnHeap(64);
         for (double d : new double[]{2.01, 2097152.2, 8388608}) {
             bytes.append(d, 9);
             String s = String.format("%.9f", d);
-            assertEquals(s, bytes.toString());
+            assertEquals(s, bytes.toString(),
+                    "Formatted output matches scale 9 for value " + d);
             bytes.clear();
         }
         bytes.releaseLast();
     }
 
     @Test
+    @DisplayName("append double rounds to 10 decimal places")
     public void appendDoubleRounded10() {
         Bytes<byte[]> bytes = Bytes.allocateElasticOnHeap(64);
         for (double d : new double[]{0.41, 131072.14, 524288}) {
             bytes.append(d, 10);
             String s = String.format("%.10f", d);
-            assertEquals(s, bytes.toString());
+            assertEquals(s, bytes.toString(),
+                    "Formatted output matches scale 10 for value " + d);
             bytes.clear();
         }
         bytes.releaseLast();
     }
 
     @Test
+    @DisplayName("append double rounds to 11 decimal places")
     public void appendDoubleRounded11() {
         Bytes<byte[]> bytes = Bytes.allocateElasticOnHeap(64);
         for (double d : new double[]{0.29, 16384.06, 327638.3}) {
             bytes.append(d, 11);
             String s = String.format("%.11f", d);
-            assertEquals(s, bytes.toString());
+            assertEquals(s, bytes.toString(),
+                    "Formatted output matches scale 11 for value " + d);
             bytes.clear();
         }
         bytes.releaseLast();
     }
 
     @Test
+    @DisplayName("append double rounds to 12 decimal places")
     public void appendDoubleRounded12() {
         Bytes<byte[]> bytes = Bytes.allocateElasticOnHeap(64);
         for (double d : new double[]{2.01, 2048.01, 4096.1}) {
             bytes.append(d, 12);
             String s = String.format("%.12f", d);
-            assertEquals(s, bytes.toString());
+            assertEquals(s, bytes.toString(),
+                    "Formatted output matches scale 12 for value " + d);
             bytes.clear();
         }
         bytes.releaseLast();
     }
 
     @Test
+    @DisplayName("append double rounds to 13 decimal places")
     public void appendDoubleRounded13() {
         Bytes<byte[]> bytes = Bytes.allocateElasticOnHeap(64);
         for (double d : new double[]{0.41, 128.08, 512.0}) {
             bytes.append(d, 13);
             String s = String.format("%.13f", d);
-            assertEquals(s, bytes.toString());
+            assertEquals(s, bytes.toString(),
+                    "Formatted output matches scale 13 for value " + d);
             bytes.clear();
         }
         bytes.releaseLast();
     }
 
     @Test
+    @DisplayName("append double rounds to 14 decimal places")
     public void appendDoubleRounded14() {
         Bytes<byte[]> bytes = Bytes.allocateElasticOnHeap(64);
         for (double d : new double[]{0.29, 16.01, 32.2}) {
             bytes.append(d, 14);
             String s = String.format("%.14f", d);
-            assertEquals(s, bytes.toString());
+            assertEquals(s, bytes.toString(),
+                    "Formatted output matches scale 14 for value " + d);
             bytes.clear();
         }
         bytes.releaseLast();
     }
 
     @Test
+    @DisplayName("append double rounds to 15 decimal places")
     public void appendDoubleRounded15() {
         Bytes<byte[]> bytes = Bytes.allocateElasticOnHeap(64);
         for (double d : new double[]{2.16, 4.4}) {
             bytes.append(d, 15);
             String s = String.format("%.15f", d);
-            assertEquals(s, bytes.toString());
+            assertEquals(s, bytes.toString(),
+                    "Formatted output matches scale 15 for value " + d);
             bytes.clear();
         }
         bytes.releaseLast();
     }
 
     @Test
+    @DisplayName("append double rounds to 16 decimal places")
     public void appendDoubleRounded16() {
         Bytes<byte[]> bytes = Bytes.allocateElasticOnHeap(64);
         for (double d : new double[]{0.00014, 0.14, 0.5}) {
             bytes.append(d, 16);
             String s = String.format("%.16f", d);
-            assertEquals(s, bytes.toString());
+            assertEquals(s, bytes.toString(),
+                    "Formatted output matches scale 16 for value " + d);
             bytes.clear();
         }
         bytes.releaseLast();
     }
 
     @Test
+    @DisplayName("append double rounds to 17 decimal places")
     public void appendDoubleRounded17() {
         Bytes<byte[]> bytes = Bytes.allocateElasticOnHeap(64);
         for (double d : new double[]{0.00014, 0.5, 2.16, 4.4, 32.2}) {
             bytes.append(d, 17);
             String s = String.format("%.17f", d);
-            assertEquals(s, bytes.toString());
+            assertEquals(s, bytes.toString(),
+                    "Formatted output matches scale 17 for value " + d);
             bytes.clear();
         }
         bytes.releaseLast();
     }
 
     @Test
+    @DisplayName("append double rounds to 18 decimal places")
     public void appendDoubleRounded18() {
         Bytes<byte[]> bytes = Bytes.allocateElasticOnHeap(64);
         for (double d : new double[]{0.000014, 0.5, 2.16, 4.4, 32.2}) {
             bytes.append(d, 18);
             String s = String.format("%.18f", d);
-            assertEquals(s, bytes.toString());
+            assertEquals(s, bytes.toString(),
+                    "Formatted output matches scale 18 for value " + d);
             bytes.clear();
         }
         bytes.releaseLast();
     }
 
     @Test
+    @DisplayName("append double uses full precision at 19 digits")
     public void appendDoubleRounded19Plus() {
         Bytes<byte[]> bytes = Bytes.allocateElasticOnHeap(64);
         for (double d : new double[]{0.14, 0.5, 2.16, 4.4, 32.2}) {
             bytes.append(d, 19);
             String s = Double.toString(d);
-            assertEquals(s, bytes.toString());
+            assertEquals(s, bytes.toString(),
+                    "Unrounded output matches Double.toString for value " + d);
             bytes.clear();
         }
         bytes.releaseLast();

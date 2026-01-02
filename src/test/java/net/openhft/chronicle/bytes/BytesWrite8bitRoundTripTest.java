@@ -3,18 +3,21 @@
  */
 package net.openhft.chronicle.bytes;
 
-import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class BytesWrite8bitRoundTripTest extends BytesTestCommon {
 
     @Test
+    @DisplayName("round trip write8bit on heap bytes")
     public void roundTripOnHeap() {
         roundTrip(Bytes.allocateElasticOnHeap());
     }
 
     @Test
+    @DisplayName("round trip write8bit on direct bytes")
     public void roundTripDirect() {
         roundTrip(Bytes.allocateElasticDirect());
     }
@@ -37,9 +40,11 @@ public class BytesWrite8bitRoundTripTest extends BytesTestCommon {
                 long pos1 = bytes.writePosition();
                 bytes.readPosition(pos0);
                 String got = bytes.read8bit();
-                assertEquals(s, got);
+                assertEquals(s, got,
+                        "write8bit round trip matches input [" + s + "]");
                 // read position should catch up to write
-                assertEquals(pos1, bytes.readPosition());
+                assertEquals(pos1, bytes.readPosition(),
+                        "read position catches up after round trip for [" + s + "]");
             }
         } finally {
             bytes.releaseLast();

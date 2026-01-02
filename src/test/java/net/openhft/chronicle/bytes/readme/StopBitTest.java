@@ -5,13 +5,16 @@ package net.openhft.chronicle.bytes.readme;
 
 import net.openhft.chronicle.bytes.BytesTestCommon;
 import net.openhft.chronicle.bytes.HexDumpBytes;
-import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@DisplayName("Stop bit readme examples for long and double")
 public class StopBitTest extends BytesTestCommon {
 
     @Test
+    @DisplayName("stop bit encodes long and double values")
     public void testString() {
         final HexDumpBytes bytes = new HexDumpBytes();
         try {
@@ -68,7 +71,8 @@ public class StopBitTest extends BytesTestCommon {
                             "bf 7e                                           # NaN\n" +
                             "bf 7c                                           # Infinity\n";
 
-            assertEquals(expected, actual);
+            assertEquals(expected, actual,
+                    "Stop bit hex dump matches expected output snapshot");
 
             // System.out.println(actual);
 

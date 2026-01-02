@@ -4,67 +4,60 @@
 package net.openhft.chronicle.bytes.util;
 
 import net.openhft.chronicle.bytes.BytesTestCommon;
-import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import java.util.Properties;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class PropertyReplacerTest extends BytesTestCommon {
     @Test
+    @DisplayName("missing system property fails with a detailed message")
     public void testSystemPropertyMissing() {
-        try {
-            PropertyReplacer.replaceTokensWithProperties("plainText ${missingPropertyToReplace}");
-        } catch (IllegalArgumentException e) {
-            assertEquals("System property is missing: [property=missingPropertyToReplace, " +
-                    "expression=plainText ${missingPropertyToReplace}]", e.getMessage());
-
-            return;
-        }
-
-        fail("Exception is expected");
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> PropertyReplacer.replaceTokensWithProperties("plainText ${missingPropertyToReplace}"),
+                "Missing system property should raise an exception");
+        assertEquals("System property is missing: [property=missingPropertyToReplace, " +
+                        "expression=plainText ${missingPropertyToReplace}]",
+                exception.getMessage(),
+                "Exception message should include the missing property and expression");
     }
 
     @Test
+    @DisplayName("missing property fails with a detailed message")
     public void testPropertyMissing() {
-        try {
-            final Properties properties = new Properties();
-            properties.setProperty("wrongProperty", "wrongValue");
+        final Properties properties = new Properties();
+        properties.setProperty("wrongProperty", "wrongValue");
 
-            PropertyReplacer.replaceTokensWithProperties("plainText ${missingPropertyToReplace}", properties);
-        } catch (IllegalArgumentException e) {
-            assertEquals("Property is missing: [property=missingPropertyToReplace, " +
-                            "expression=plainText ${missingPropertyToReplace}, properties={wrongProperty=wrongValue}]",
-                    e.getMessage());
-
-            return;
-        }
-
-        fail("Exception is expected");
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> PropertyReplacer.replaceTokensWithProperties("plainText ${missingPropertyToReplace}", properties),
+                "Missing property should raise an exception");
+        assertEquals("Property is missing: [property=missingPropertyToReplace, " +
+                        "expression=plainText ${missingPropertyToReplace}, properties={wrongProperty=wrongValue}]",
+                exception.getMessage(),
+                "Exception message should include the properties map and expression");
     }
 
     @Test
+    @DisplayName("whitespace around property name is ignored in token")
     public void testLeadingAndTrailingSpacesInsideBracketsIgnored() {
         final Properties props = new Properties();
         props.setProperty("myFancyProperty", "myFancyValue");
 
-        String res = PropertyReplacer.replaceTokensWithProperties("plainKey: ${ myFancyProperty }", props);
-        assertEquals("plainKey: myFancyValue", res);
+        assertReplacement(props, "plainKey: ${ myFancyProperty }", "single space inside braces");
+        assertReplacement(props, "plainKey: ${myFancyProperty}", "no whitespace inside braces");
+        assertReplacement(props, "plainKey: ${  myFancyProperty  }", "double space inside braces");
+        assertReplacement(props, "plainKey: ${    myFancyProperty }", "leading spaces inside braces");
+        assertReplacement(props, "plainKey: ${\tmyFancyProperty\t}", "tab characters inside braces");
+        assertReplacement(props, "plainKey: ${ \t\t\nmyFancyProperty \r\f}", "mixed whitespace inside braces");
+    }
 
-        res = PropertyReplacer.replaceTokensWithProperties("plainKey: ${myFancyProperty}", props);
-        assertEquals("plainKey: myFancyValue", res);
-
-        res = PropertyReplacer.replaceTokensWithProperties("plainKey: ${  myFancyProperty  }", props);
-        assertEquals("plainKey: myFancyValue", res);
-
-        res = PropertyReplacer.replaceTokensWithProperties("plainKey: ${    myFancyProperty }", props);
-        assertEquals("plainKey: myFancyValue", res);
-
-        res = PropertyReplacer.replaceTokensWithProperties("plainKey: ${\tmyFancyProperty\t}", props);
-        assertEquals("plainKey: myFancyValue", res);
-
-        res = PropertyReplacer.replaceTokensWithProperties("plainKey: ${ \t\t\nmyFancyProperty \r\f}", props);
-        assertEquals("plainKey: myFancyValue", res);
+    private static void assertReplacement(Properties props, String input, String scenario) {
+        String res = PropertyReplacer.replaceTokensWithProperties(input, props);
+        assertEquals("plainKey: myFancyValue",
+                res,
+                "Property replacement should trim whitespace for " + scenario);
     }
 }

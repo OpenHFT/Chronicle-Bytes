@@ -5,6 +5,7 @@ package net.openhft.chronicle.bytes.pool;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.scoped.ScopedResource;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -13,6 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 class BytesPoolTest {
 
     @Test
+    @DisplayName("thread local pool acquires empty bytes")
     void testAcquireBytes() {
         try (ScopedResource<Bytes<?>> resource = BytesPool.createThreadLocal().get()) {
             Bytes<?> bytes = resource.get();
@@ -23,16 +25,21 @@ class BytesPoolTest {
     }
 
     @Test
+    @DisplayName("thread local pool reuses bytes after write")
     void testBytesPoolUsage() {
         try (ScopedResource<Bytes<?>> resource = BytesPool.createThreadLocal().get()) {
             Bytes<?> bytes = resource.get();
 
             bytes.writeUtf8("Hello, World!");
-            assertEquals("Hello, World!", bytes.readUtf8());
+            assertEquals("Hello, World!",
+                    bytes.readUtf8(),
+                    "Thread local pool should return bytes containing the written text");
 
             bytes.clear();
 
-            assertEquals(0, bytes.readRemaining());
+            assertEquals(0,
+                    bytes.readRemaining(),
+                    "Cleared bytes should have no remaining readable data");
 
             bytes.releaseLast();
         }

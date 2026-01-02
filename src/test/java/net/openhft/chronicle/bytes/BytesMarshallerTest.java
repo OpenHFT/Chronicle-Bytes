@@ -5,13 +5,18 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.annotation.UsedViaReflection;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Field;
-import java.util.Arrays;
 
-import static org.mockito.Mockito.*;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 class BytesMarshallerTest {
 
@@ -74,6 +79,7 @@ class BytesMarshallerTest {
     }
 
     @Test
+    @DisplayName("object array access writes zero length for empty arrays")
     void getValueWithEmptyArray() throws IllegalAccessException {
         // Empty array
         testObject.stringArray = new String[0];
@@ -82,6 +88,7 @@ class BytesMarshallerTest {
     }
 
     @Test
+    @DisplayName("object array access writes length for non-empty arrays")
     void getValueWithNonEmptyArray() throws IllegalAccessException {
         // Non-empty array
         testObject.stringArray = new String[]{"hello", "world"};
@@ -90,46 +97,66 @@ class BytesMarshallerTest {
     }
 
     @Test
+    @DisplayName("null array value is restored when stop bit is -1")
     void setValueWithNullArray() throws IllegalAccessException {
         // Simulate reading -1 for null array
         when(bytesIn.readStopBit()).thenReturn(-1L);
         fieldAccess.setValue(testObject, bytesIn);
-        assertNull(testObject.stringArray);
+        assertNull(testObject.stringArray,
+                "Reading -1 should restore a null array value");
     }
 
     @Test
+    @DisplayName("empty array value is restored when stop bit is zero")
     void setValueWithEmptyArray() throws IllegalAccessException {
         // Simulate reading 0 for empty array
         when(bytesIn.readStopBit()).thenReturn(0L);
         fieldAccess.setValue(testObject, bytesIn);
-        assertEquals(0, testObject.stringArray.length);
+        assertEquals(0,
+                testObject.stringArray.length,
+                "Reading zero should restore an empty array");
     }
 
     @Test
+    @DisplayName("array values are restored when stop bit is positive")
     void setValueWithNonEmptyArray() throws IllegalAccessException {
         // Simulate reading 2 for array size, then read strings
         when(bytesIn.readStopBit()).thenReturn(2L);
         when(bytesIn.readRemaining()).thenReturn(12L);
         when(bytesIn.readObject(String.class)).thenReturn("hello", "world");
         fieldAccess.setValue(testObject, bytesIn);
-        assertArrayEquals(new String[]{"hello", "world"}, testObject.stringArray);
+        assertArrayEquals(new String[]{"hello", "world"},
+                testObject.stringArray,
+                "Reading array values should restore the expected strings");
     }
 
     @Test
+    @DisplayName("marshaller round trip restores all primitive fields")
     void testWriteAndReadMarshallable() {
         TestObject original = new TestObject();
         original.intValue = 42;
         original.stringValue = "Hello";
         original.doubleValue = 3.14;
 
-        marshaller.writeMarshallable(original, bytes);
-        bytes.readPosition(0); // Reset the read position to the start
+        try {
+            marshaller.writeMarshallable(original, bytes);
+            bytes.readPosition(0); // Reset the read position to the start
 
-        TestObject result = new TestObject();
-        marshaller.readMarshallable(result, bytes);
+            TestObject result = new TestObject();
+            marshaller.readMarshallable(result, bytes);
 
-        assertEquals(original.intValue, result.intValue);
-        assertEquals(original.stringValue, result.stringValue);
-        assertEquals(original.doubleValue, result.doubleValue, 0.001);
+            assertEquals(original.intValue,
+                    result.intValue,
+                    "Round trip should preserve the int value");
+            assertEquals(original.stringValue,
+                    result.stringValue,
+                    "Round trip should preserve the string value");
+            assertEquals(original.doubleValue,
+                    result.doubleValue,
+                    0.001,
+                    "Round trip should preserve the double value");
+        } finally {
+            bytes.releaseLast();
+        }
     }
 }

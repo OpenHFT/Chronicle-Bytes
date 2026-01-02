@@ -3,13 +3,15 @@
  */
 package net.openhft.chronicle.bytes;
 
-import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Tests that BytesInternal.to8BitString handles ISO-8859-1 characters gracefully
  */
+@DisplayName("ISO 8859 1 characters render to 8bit")
 public class ISO88591CharsTest {
 
     // String containing all standard printable characters in ISO-8859-1 (via https://en.wikipedia.org/wiki/ISO/IEC_8859-1)
@@ -33,8 +35,10 @@ public class ISO88591CharsTest {
     };
 
     @Test
+    @DisplayName("8bit string conversion preserves ISO text")
     public void testBytesToStringConversion() {
         Bytes<?> isoBytes = Bytes.wrapForRead(ISO_BYTES);
-        assertEquals(ISO_TEXT, isoBytes.to8bitString());
+        assertEquals(ISO_TEXT, isoBytes.to8bitString(),
+                "8bit conversion preserves ISO 8859 1 characters");
     }
 }

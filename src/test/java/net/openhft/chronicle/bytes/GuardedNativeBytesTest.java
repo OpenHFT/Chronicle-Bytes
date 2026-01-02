@@ -3,18 +3,17 @@
  */
 package net.openhft.chronicle.bytes;
 
-import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * This class contains JUnit test methods for testing the behavior
- * of the GuardedNativeBytes class.
- * <p>
- * It aims to test various primitive data types and their conversions
- * using the GuardedNativeBytes class.
+ * GuardedNativeBytes binary primitive and hex dump round trip verification tests.
  */
+@DisplayName("GuardedNativeBytes primitive read and write checks")
 public class GuardedNativeBytesTest {
 
     /**
@@ -28,8 +27,10 @@ public class GuardedNativeBytesTest {
      * </ul>
          */
     @Test
+    @DisplayName("binary primitive hex dump round trip")
     public void testBinaryPrimitive() {
-        final GuardedNativeBytes<?> bytes = new GuardedNativeBytes<>(new HexDumpBytes(), 256);
+        final GuardedNativeBytes<?> guarded = new GuardedNativeBytes<>(BytesStore.nativeStoreWithFixedCapacity(256), 256);
+        final HexDumpBytes bytes = new HexDumpBytes(guarded);
         try {
             bytes.writeHexDumpDescription("flag").writeBoolean(true);
             bytes.writeHexDumpDescription("s8").writeByte((byte) 1);
@@ -64,7 +65,8 @@ public class GuardedNativeBytesTest {
 
             final String actual = bytes.toHexString();
 
-            assertEquals(expected, actual);
+            assertEquals(expected, actual,
+                    "Hex dump matches expected output");
 
             final boolean flag = bytes.readBoolean();
             final byte s8 = bytes.readByte();
@@ -81,22 +83,50 @@ public class GuardedNativeBytesTest {
             final double f64 = bytes.readDouble();
             final String text = bytes.readUtf8();
 
-            assertTrue(flag);
-            assertEquals(1, s8);
-            assertEquals(2, u8);
-            assertEquals(3, s16);
-            assertEquals(4, u16);
-            assertEquals('5', ch);
-            assertEquals(-6_666_666, s24);
-            assertEquals(16_666_666, u24);
-            assertEquals(6, s32);
-            assertEquals(7, u32);
-            assertEquals(8, s64);
-            assertEquals(9, f32, 0.0);
-            assertEquals(10, f64, 0.0);
-            assertEquals("Hello", text);
+            assertTrue(flag, "Boolean flag round trips");
+            assertEquals(1, s8, "Signed byte round trips");
+            assertEquals(2, u8, "Unsigned byte round trips");
+            assertEquals(3, s16, "Signed short round trips");
+            assertEquals(4, u16, "Unsigned short round trips");
+            assertEquals('5', ch, "Stop bit char round trips");
+            assertEquals(-6_666_666, s24, "Signed int24 round trips");
+            assertEquals(16_666_666, u24, "Unsigned int24 round trips");
+            assertEquals(6, s32, "Signed int round trips");
+            assertEquals(7, u32, "Unsigned int round trips");
+            assertEquals(8, s64, "Signed long round trips");
+            assertEquals(9, f32, 0.0, "Float value round trips correctly");
+            assertEquals(10, f64, 0.0, "Double value round trips correctly");
+            assertEquals("Hello", text, "UTF8 string round trips");
         } finally {
             bytes.releaseLast();
+        }
+    }
+
+    @Test
+    @DisplayName("readInt rejects mismatched type markers")
+    public void readIntRejectsMismatchedType() {
+        final GuardedNativeBytes<?> guarded = new GuardedNativeBytes<>(BytesStore.nativeStoreWithFixedCapacity(64), 64);
+        try {
+            guarded.writeLong(7L);
+            assertThrows(IllegalStateException.class,
+                    guarded::readInt,
+                    "readInt should reject mismatched type markers");
+        } finally {
+            guarded.releaseLast();
+        }
+    }
+
+    @Test
+    @DisplayName("readStopBit rejects non stop-bit type markers")
+    public void readStopBitRejectsMismatchedType() {
+        final GuardedNativeBytes<?> guarded = new GuardedNativeBytes<>(BytesStore.nativeStoreWithFixedCapacity(64), 64);
+        try {
+            guarded.writeInt(5);
+            assertThrows(IllegalStateException.class,
+                    guarded::readStopBit,
+                    "readStopBit should reject non stop-bit type markers");
+        } finally {
+            guarded.releaseLast();
         }
     }
 }

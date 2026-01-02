@@ -3,9 +3,9 @@
  */
 package net.openhft.chronicle.bytes;
 
-import org.junit.Before;
-import org.junit.Test;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import java.util.Objects;
 import java.util.Set;
@@ -14,28 +14,31 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@DisplayName("Issue 523 double append concurrency checks")
 public class Issue523Test extends BytesTestCommon {
 
     @SuppressWarnings("EmptyMethod")
-    @Before
     @BeforeEach
     public void threadDump() {
         super.threadDump();
     }
 
     @Test
+    @DisplayName("append doubles on heap uses accurate formatting")
     public void testAppendDoublesHeap() {
         doTestAppendDoubles(Bytes::allocateElasticOnHeap);
     }
 
     @Test
+    @DisplayName("append doubles on heap byte buffer is accurate")
     public void testAppendDoublesHeapByteBuffer() {
         doTestAppendDoubles(Bytes::elasticHeapByteBuffer);
     }
 
     @Test
+    @DisplayName("append doubles on direct memory is accurate")
     public void testAppendDoublesDirect() {
         doTestAppendDoubles(Bytes::allocateElasticDirect);
     }
@@ -71,6 +74,7 @@ public class Issue523Test extends BytesTestCommon {
                 .filter(Objects::nonNull)
                 .collect(Collectors.toCollection(TreeSet::new));
         System.out.println(collect);
-        assertEquals(0, collect.size());
+        assertEquals(0, collect.size(),
+                "No formatting errors returned from parallel append checks");
     }
 }

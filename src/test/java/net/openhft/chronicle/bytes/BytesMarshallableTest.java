@@ -5,11 +5,12 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Jvm;
 import org.jetbrains.annotations.NotNull;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.IOException;
 import java.lang.annotation.RetentionPolicy;
@@ -19,46 +20,42 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.stream.Stream;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
-@RunWith(Parameterized.class)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class BytesMarshallableTest extends BytesTestCommon {
 
-    private final String name;
-    private final boolean guarded;
-
-    public BytesMarshallableTest(String name, boolean guarded) {
-        this.name = name;
-        this.guarded = guarded;
+    private static Stream<Arguments> guardedVariants() {
+        return Stream.of(
+                Arguments.of("Unguarded", false),
+                Arguments.of("Guarded", true)
+        );
     }
 
-    @Parameterized.Parameters(name = "{0}")
-    public static Collection<Object[]> data() {
-        return Arrays.asList(new Object[][]{
-                {"Unguarded", false},
-                {"Guarded", true}
-        });
-    }
-
-    @AfterClass
-    public static void resetGuarded() {
-        NativeBytes.resetNewGuarded();
-    }
-
-    @Before
-    public void setGuarded() {
+    private void applyGuardedSetting(boolean guarded) {
         NativeBytes.setNewGuarded(guarded);
     }
 
-    @Test
-    public void serializePrimitives() {
-        assumeFalse(NativeBytes.areNewGuarded());
+    @AfterAll
+    public void resetGuarded() {
+        NativeBytes.resetNewGuarded();
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("guardedVariants")
+    @DisplayName("Serialise primitive byteable values with stable layout")
+    public void serializePrimitives(String name, boolean guarded) {
+        applyGuardedSetting(guarded);
+        assumeFalse(NativeBytes.areNewGuarded(),
+                "primitive hex dump layout is not stable for guarded bytes");
         final Bytes<?> bytes = new HexDumpBytes();
         try {
             final MyByteable mb1 = new MyByteable(false, (byte) 1, (short) 2, '3', 4, 5.5f, 6, 7.7);
@@ -68,8 +65,7 @@ public class BytesMarshallableTest extends BytesTestCommon {
             bytes.writeHexDumpDescription("mb2").writeUnsignedByte(2);
             mb2.writeMarshallable(bytes);
 
-            assertEquals(
-                    "01                                              # mb1\n" +
+            assertEquals("01                                              # mb1\n" +
                             "   4e                                              # flag\n" +
                             "   01                                              # b\n" +
                             "   02 00                                           # s\n" +
@@ -86,24 +82,33 @@ public class BytesMarshallableTest extends BytesTestCommon {
                             "   2c 00 00 00                                     # i\n" +
                             "   8f c2 b1 40                                     # f\n" +
                             "   42 00 00 00 00 00 00 00                         # l\n" +
-                            "   e1 7a 14 ae 47 71 53 40                         # d\n", bytes.toHexString());
+                            "   e1 7a 14 ae 47 71 53 40                         # d\n",
+                    bytes.toHexString(),
+                    "primitive marshalling should match the expected hex dump");
 
             final MyByteable mb3 = new MyByteable();
             final MyByteable mb4 = new MyByteable();
-            assertEquals(1, bytes.readUnsignedByte());
+            assertEquals(1, bytes.readUnsignedByte(),
+                    "first primitive marker should be present before mb1");
             mb3.readMarshallable(bytes);
-            assertEquals(2, bytes.readUnsignedByte());
+            assertEquals(2, bytes.readUnsignedByte(),
+                    "second primitive marker should be present before mb2");
             mb4.readMarshallable(bytes);
 
-            assertEquals(mb1.toString(), mb3.toString());
-            assertEquals(mb2.toString(), mb4.toString());
+            assertEquals(mb1.toString(), mb3.toString(),
+                    "mb1 should round-trip through bytes");
+            assertEquals(mb2.toString(), mb4.toString(),
+                    "mb2 should round-trip through bytes");
         } finally {
             bytes.releaseLast();
         }
     }
 
-    @Test
-    public void serializeScalars() {
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("guardedVariants")
+    @DisplayName("Serialise scalar values into bytes with expected order")
+    public void serializeScalars(String name, boolean guarded) {
+        applyGuardedSetting(guarded);
         final Bytes<?> bytes = new HexDumpBytes();
         try {
             final MyScalars mb1 = new MyScalars("Hello", BigInteger.ONE, BigDecimal.TEN, LocalDate.now(), LocalTime.now(), LocalDateTime.now(), ZonedDateTime.now(), UUID.randomUUID());
@@ -113,35 +118,6 @@ public class BytesMarshallableTest extends BytesTestCommon {
             bytes.writeHexDumpDescription("mb2").writeUnsignedByte(2);
             mb2.writeMarshallable(bytes);
 
-/*
-        assertEquals(
-                "01                                              # mb1\n" +
-                        "   05 48 65 6c 6c 6f                               # s\n" +
-                        "   01 31                                           # bi\n" +
-                        "   02 31 30                                        # bd\n" +
-                        "   0a 32 30 31 37 2d 31 31 2d 30 36                # date\n" +
-                        "   0c 31 32 3a 32 37 3a 34 34 2e 33 33 30          # time\n" +
-                        "   17 32 30 31 37 2d 31 31 2d 30 36 54 31 32 3a 32 # dateTime\n" +
-                        "   37 3a 34 34 2e 33 33 30 27 32 30 31 37 2d 31 31 # zonedDateTime\n" +
-                        "   2d 30 36 54 31 32 3a 32 37 3a 34 34 2e 33 33 31\n" +
-                        "   5a 5b 45 75 72 6f 70 65 2f 4c 6f 6e 64 6f 6e 5d # uuid\n" +
-                        "   24 63 35 66 33 34 62 39 63 2d 36 34 35 34 2d 34\n" +
-                        "   62 61 63 2d 61 32 66 37 2d 66 37 31 36 35 32 33\n" +
-                        "   62 62 32 64 33\n" +
-                        "02                                              # mb2\n" +
-                        "   05 57 6f 72 6c 64                               # s\n" +
-                        "   01 30                                           # bi\n" +
-                        "   01 30                                           # bd\n" +
-                        "   0a 32 30 31 37 2d 31 31 2d 30 36                # date\n" +
-                        "   0c 31 32 3a 32 37 3a 34 34 2e 33 33 36          # time\n" +
-                        "   17 32 30 31 37 2d 31 31 2d 30 36 54 31 32 3a 32 # dateTime\n" +
-                        "   37 3a 34 34 2e 33 33 36 27 32 30 31 37 2d 31 31 # zonedDateTime\n" +
-                        "   2d 30 36 54 31 32 3a 32 37 3a 34 34 2e 33 33 36\n" +
-                        "   5a 5b 45 75 72 6f 70 65 2f 4c 6f 6e 64 6f 6e 5d # uuid\n" +
-                        "   24 32 65 61 35 66 33 34 35 2d 36 65 38 30 2d 34\n" +
-                        "   35 66 30 2d 62 66 62 64 2d 63 33 30 37 34 34 33\n" +
-                        "   65 32 38 61 34\n", bytes.toHexString());
-*/
             final Bytes<?> bytes2 = HexDumpBytes.fromText(bytes.toHexString());
             try {
                 doSerializeScalars(bytes, mb1, mb2);
@@ -159,17 +135,24 @@ public class BytesMarshallableTest extends BytesTestCommon {
                                     @NotNull final MyScalars mb2) {
         final MyScalars mb3 = new MyScalars();
         final MyScalars mb4 = new MyScalars();
-        assertEquals(1, bytes.readUnsignedByte());
+        assertEquals(1, bytes.readUnsignedByte(),
+                "first scalar marker should be present before mb1");
         mb3.readMarshallable(bytes);
-        assertEquals(2, bytes.readUnsignedByte());
+        assertEquals(2, bytes.readUnsignedByte(),
+                "second scalar marker should be present before mb2");
         mb4.readMarshallable(bytes);
 
-        assertEquals(mb1.toString(), mb3.toString());
-        assertEquals(mb2.toString(), mb4.toString());
+        assertEquals(mb1.toString(), mb3.toString(),
+                "mb1 scalars should round-trip through bytes");
+        assertEquals(mb2.toString(), mb4.toString(),
+                "mb2 scalars should round-trip through bytes");
     }
 
-    @Test
-    public void serializeNested() {
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("guardedVariants")
+    @DisplayName("Serialise nested byteable structures with nested offsets")
+    public void serializeNested(String name, boolean guarded) {
+        applyGuardedSetting(guarded);
         final Bytes<?> bytes = new HexDumpBytes();
         try {
 
@@ -300,26 +283,33 @@ public class BytesMarshallableTest extends BytesTestCommon {
 
             //System.out.println(bytes.toHexString());
 
-            assertEquals(
-                    expected, bytes.toHexString());
+            assertEquals(expected, bytes.toHexString(),
+                    "nested marshalling should match expected hex dump");
 
             final MyNested mn3 = new MyNested();
             final MyNested mn4 = new MyNested();
-            assertEquals(1, bytes.readUnsignedByte());
+            assertEquals(1, bytes.readUnsignedByte(),
+                    "first nested marker should be present before mn1");
             mn3.readMarshallable(bytes);
-            assertEquals(2, bytes.readUnsignedByte());
+            assertEquals(2, bytes.readUnsignedByte(),
+                    "second nested marker should be present before mn2");
             mn4.readMarshallable(bytes);
 
-            assertEquals(mn1.toString(), mn3.toString());
-            assertEquals(mn2.toString(), mn4.toString());
+            assertEquals(mn1.toString(), mn3.toString(),
+                    "mn1 should round-trip through bytes");
+            assertEquals(mn2.toString(), mn4.toString(),
+                    "mn2 should round-trip through bytes");
         } finally {
             bytes.releaseLast();
         }
     }
 
-    @Test
-    public void serializeBytes()
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("guardedVariants")
+    @DisplayName("Serialise bytes store values with offset metadata")
+    public void serializeBytes(String name, boolean guarded)
             throws IOException {
+        applyGuardedSetting(guarded);
         Bytes<?> bytes = new HexDumpBytes();
         final Bytes<?> hello = Bytes.from("hello");
         final Bytes<?> byeee = Bytes.from("byeee");
@@ -334,13 +324,17 @@ public class BytesMarshallableTest extends BytesTestCommon {
             for (int i = 0; i < 2; i++) {
                 try (MyBytes mb3 = new MyBytes();
                      MyBytes mb4 = new MyBytes(Bytes.from("already"), Bytes.allocateElasticDirect().append("value"))) {
-                    assertEquals(1, bytes.readUnsignedByte());
+                    assertEquals(1, bytes.readUnsignedByte(),
+                            "first bytes marker should be present before mb1 at iteration " + i);
                     mb3.readMarshallable(bytes);
-                    assertEquals(2, bytes.readUnsignedByte());
+                    assertEquals(2, bytes.readUnsignedByte(),
+                            "second bytes marker should be present before mb2 at iteration " + i);
                     mb4.readMarshallable(bytes);
 
-                    assertEquals(mb1.toString(), mb3.toString());
-                    assertEquals(mb2.toString(), mb4.toString());
+                    assertEquals(mb1.toString(), mb3.toString(),
+                            "mb1 bytes should round-trip at iteration " + i);
+                    assertEquals(mb2.toString(), mb4.toString(),
+                            "mb2 bytes should round-trip at iteration " + i);
 
                     bytes.releaseLast();
 
@@ -350,9 +344,11 @@ public class BytesMarshallableTest extends BytesTestCommon {
         }
     }
 
-    @Test
-    public void serializeCollections() {
-//        assumeTrue(name.equals("Unguarded"));
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("guardedVariants")
+    @DisplayName("Serialise collection values with element ordering preserved")
+    public void serializeCollections(String name, boolean guarded) {
+        applyGuardedSetting(guarded);
         final Bytes<?> bytes = new HexDumpBytes();
         try {
             final MyCollections mc = new MyCollections();
@@ -369,10 +365,14 @@ public class BytesMarshallableTest extends BytesTestCommon {
 
             final MyCollections mc2 = new MyCollections();
             mc2.readMarshallable(bytes);
-            assertEquals(mc.words, mc2.words);
-            assertEquals(mc.scoreCountMap, mc2.scoreCountMap);
-            assertEquals(mc.policies, mc2.policies);
-            assertEquals(mc.numbers, mc2.numbers);
+            assertEquals(mc.words, mc2.words,
+                    "words collection should round-trip");
+            assertEquals(mc.scoreCountMap, mc2.scoreCountMap,
+                    "scoreCountMap should round-trip");
+            assertEquals(mc.policies, mc2.policies,
+                    "policies collection should round-trip");
+            assertEquals(mc.numbers, mc2.numbers,
+                    "numbers collection should round-trip");
 
             final String expected = "" +
                     "   02 05 48 65 6c 6c 6f 05 57 6f 72 6c 64          # words\n" +
@@ -387,14 +387,18 @@ public class BytesMarshallableTest extends BytesTestCommon {
                     "   00 00 00 00 00 00 ae 02 07 52 55 4e 54 49 4d 45 # policies\n" +
                     "   05 43 4c 41 53 53 ae 03 a6 01 00 00 00 a6 0c 00 # numbers\n" +
                     "   00 00 a6 7b 00 00 00\n";
-            assertEquals(NativeBytes.areNewGuarded() ? expectedG : expected, bytes.toHexString());
+            assertEquals(NativeBytes.areNewGuarded() ? expectedG : expected, bytes.toHexString(),
+                    "collection marshalling should match expected hex dump");
         } finally {
             bytes.releaseLast();
         }
     }
 
-    @Test
-    public void collectionsNotInitializedInConstructor() {
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("guardedVariants")
+    @DisplayName("Collections default initialisation handled during serialisation")
+    public void collectionsNotInitializedInConstructor(String name, boolean guarded) {
+        applyGuardedSetting(guarded);
         final Bytes<?> bytes = new HexDumpBytes();
 
         try {
@@ -439,12 +443,18 @@ public class BytesMarshallableTest extends BytesTestCommon {
             uc.justSortedMap.put(17, "n");
             uc.justSortedMap.put(18, "o");
 
+            uc.nullCollection = Collections.emptyList();
+            uc.nullCollection = null;
+            uc.nullMap = Collections.emptyMap();
+            uc.nullMap = null;
+
             uc.writeMarshallable(bytes);
 
             UninitializedCollections uc2 = new UninitializedCollections();
             uc2.readMarshallable(bytes);
 
-            assertEquals(uc, uc2);
+            assertEquals(uc, uc2,
+                    "uninitialized collections should round-trip");
 
             final String expected = "   02 01 61 01 62                                  # justList\n" +
                     "   03 01 63 01 64 01 65                            # justCollection\n" +
@@ -478,14 +488,18 @@ public class BytesMarshallableTest extends BytesTestCommon {
                     "   ae 02 a6 11 00 00 00 ae 01 6e a6 12 00 00 00 ae # justSortedMap\n" +
                     "   01 6f a5 80 00                                  # nullMap\n";
 
-            assertEquals(NativeBytes.areNewGuarded() ? expectedG : expected, bytes.toHexString());
+            assertEquals(NativeBytes.areNewGuarded() ? expectedG : expected, bytes.toHexString(),
+                    "uninitialized collections should match expected hex dump");
         } finally {
             bytes.releaseLast();
         }
     }
 
-    @Test
-    public void testSpecificCollections() {
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("guardedVariants")
+    @DisplayName("Specific collection implementations serialise correctly across nested fields")
+    public void testSpecificCollections(String name, boolean guarded) {
+        applyGuardedSetting(guarded);
         final Bytes<?> bytes = new HexDumpBytes();
 
         try {
@@ -505,7 +519,8 @@ public class BytesMarshallableTest extends BytesTestCommon {
             SpecificUninitializedCollections suc2 = new SpecificUninitializedCollections();
             suc2.readMarshallable(bytes);
 
-            assertEquals(suc, suc2);
+            assertEquals(suc, suc2,
+                    "specific collections should round-trip");
 
             final String expected = "   03 01 61 01 62 01 63                            # specificSet\n" +
                     "   02 01 00 00 00 00 00 00 00 0a 00 00 00 00 00 00 # specificMap\n" +
@@ -517,14 +532,18 @@ public class BytesMarshallableTest extends BytesTestCommon {
                     "   00 00 00 00 a7 02 00 00 00 00 00 00 00 a7 14 00\n" +
                     "   00 00 00 00 00 00\n";
 
-            assertEquals(NativeBytes.areNewGuarded() ? expectedG : expected, bytes.toHexString());
+            assertEquals(NativeBytes.areNewGuarded() ? expectedG : expected, bytes.toHexString(),
+                    "specific collections should match expected hex dump");
         } finally {
             bytes.releaseLast();
         }
     }
 
-    @Test
-    public void nested() {
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("guardedVariants")
+    @DisplayName("Nested data structures serialise correctly with shared members")
+    public void nested(String name, boolean guarded) {
+        applyGuardedSetting(guarded);
         final Bytes<?> bytes = new HexDumpBytes();
         try {
             final BM1 bm1 = new BM1();
@@ -536,8 +555,10 @@ public class BytesMarshallableTest extends BytesTestCommon {
 
             final BM1 bm1b = new BM1();
             bm1b.readMarshallable(bytes);
-            assertEquals(bm1b.bm2.text, bm1.bm2.text);
-            assertEquals(bm1b.bm3.value, bm1.bm3.value);
+            assertEquals(bm1b.bm2.text, bm1.bm2.text,
+                    "nested text should round-trip");
+            assertEquals(bm1b.bm3.value, bm1.bm3.value,
+                    "nested long value should round-trip");
 
             final String expected = "" +
                     "   05 00 00 00                                     # num\n" +
@@ -551,7 +572,8 @@ public class BytesMarshallableTest extends BytesTestCommon {
                     "      ae 05 68 65 6c 6c 6f                            # text\n" +
                     "                                                # bm3\n" +
                     "      a7 d2 02 96 49 00 00 00 00                      # value\n";
-            assertEquals(NativeBytes.areNewGuarded() ? expected2 : expected, bytes.toHexString());
+            assertEquals(NativeBytes.areNewGuarded() ? expected2 : expected, bytes.toHexString(),
+                    "nested bytes should match expected hex dump");
             final String expectedB = "" +
                     "# net.openhft.chronicle.bytes.BytesMarshallableTest$BM1\n" +
                     "   05 00 00 00                                     # num\n" +
@@ -566,14 +588,18 @@ public class BytesMarshallableTest extends BytesTestCommon {
                     "      ae 05 68 65 6c 6c 6f                            # text\n" +
                     "                                                # bm3\n" +
                     "      a7 d2 02 96 49 00 00 00 00                      # value\n";
-            assertEquals(NativeBytes.areNewGuarded() ? expectedBG : expectedB, bm1.toString());
+            assertEquals(NativeBytes.areNewGuarded() ? expectedBG : expectedB, bm1.toString(),
+                    "toString output should include nested fields");
         } finally {
             bytes.releaseLast();
         }
     }
 
-    @Test
-    public void nullArrays() {
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("guardedVariants")
+    @DisplayName("Null array fields serialise correctly without default allocation")
+    public void nullArrays(String name, boolean guarded) {
+        applyGuardedSetting(guarded);
         final Bytes<?> bytes = new HexDumpBytes();
         try {
             final BMA bma = new BMA();
@@ -589,7 +615,8 @@ public class BytesMarshallableTest extends BytesTestCommon {
                             "   ff ff ff ff                                     # floats\n" +
                             "   ff ff ff ff                                     # longs\n" +
                             "   ff ff ff ff                                     # doubles\n";
-            assertEquals(expected, bytes.toHexString());
+            assertEquals(expected, bytes.toHexString(),
+                    "null arrays should marshal to the expected hex dump");
             final BMA bma2 = new BMA();
             bma2.bytes = new byte[0];
             bma2.ints = new int[0];
@@ -597,19 +624,22 @@ public class BytesMarshallableTest extends BytesTestCommon {
             bma2.longs = new long[0];
             bma2.doubles = new double[0];
             bma2.readMarshallable(bytes);
-            assertNull(bma2.longs);
-            assertNull(bma2.doubles);
+            assertNull(bma2.longs, "null long array should round-trip as null");
+            assertNull(bma2.doubles, "null double array should round-trip as null");
         } finally {
             bytes.releaseLast();
         }
     }
 
-    @Test
-    public void arrays() {
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("guardedVariants")
+    @DisplayName("Array fields serialise correctly with element counts")
+    public void arrays(String name, boolean guarded) {
+        applyGuardedSetting(guarded);
         final Bytes<?> bytes = new HexDumpBytes();
         try {
             final BMA bma = new BMA();
-            bma.bytes = "Hello".getBytes();
+            bma.bytes = "Hello".getBytes(StandardCharsets.ISO_8859_1);
             bma.ints = new int[]{0x12345678};
             bma.floats = new float[]{0x1.234567p0f};
             bma.longs = new long[]{0x123456789ABCDEFL};
@@ -626,18 +656,26 @@ public class BytesMarshallableTest extends BytesTestCommon {
                             "   01 00 00 00 b4 a2 91 3f                         # floats\n" +
                             "   01 00 00 00 ef cd ab 89 67 45 23 01             # longs\n" +
                             "   01 00 00 00 de bc 9a 78 56 34 f2 3f             # doubles\n";
-            assertEquals(expected, bytes.toHexString());
+            assertEquals(expected, bytes.toHexString(),
+                    "array marshalling should match the expected hex dump");
             final BMA bma2 = new BMA();
             bma2.longs = new long[0];
             bma2.doubles = new double[0];
             bma2.readMarshallable(bytes);
-            assertEquals("[72, 101, 108, 108, 111]", Arrays.toString(bma2.bytes));
-            assertEquals("[305419896]", Arrays.toString(bma2.ints));
-            assertEquals("[1.1377778]", Arrays.toString(bma2.floats));
-            assertEquals("[81985529216486895]", Arrays.toString(bma2.longs));
-            assertEquals("[1.1377777777777776]", Arrays.toString(bma2.doubles));
-            assertEquals(0x123456789ABCDEFL, bma2.longs[0]);
-            assertEquals(0x1.23456789ABCDEp0, bma2.doubles[0], 0);
+            assertEquals("[72, 101, 108, 108, 111]", Arrays.toString(bma2.bytes),
+                    "byte array should round-trip");
+            assertEquals("[305419896]", Arrays.toString(bma2.ints),
+                    "int array should round-trip");
+            assertEquals("[1.1377778]", Arrays.toString(bma2.floats),
+                    "float array should round-trip");
+            assertEquals("[81985529216486895]", Arrays.toString(bma2.longs),
+                    "long array should round-trip");
+            assertEquals("[1.1377777777777776]", Arrays.toString(bma2.doubles),
+                    "double array should round-trip");
+            assertEquals(0x123456789ABCDEFL, bma2.longs[0],
+                    "long element should match the written value");
+            assertEquals(0x1.23456789ABCDEp0, bma2.doubles[0], 0,
+                    "double element should match the written value");
         } finally {
             bytes.releaseLast();
         }
@@ -654,6 +692,21 @@ public class BytesMarshallableTest extends BytesTestCommon {
         int num;
         BM2 bm2 = new BM2();
         BM3 bm3 = new BM3();
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            BM1 bm1 = (BM1) o;
+            return num == bm1.num &&
+                    Objects.equals(bm2, bm1.bm2) &&
+                    Objects.equals(bm3, bm1.bm3);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(num, bm2, bm3);
+        }
 
         @Override
         public String toString() {
@@ -710,12 +763,12 @@ public class BytesMarshallableTest extends BytesTestCommon {
         NavigableSet<Long> justNavigableSet;
         Collection<BM3> justBytesMarshallableCollection;
         Set<RetentionPolicy> justSet;
-        Collection<Integer> nullCollection;
+        Collection<Integer> nullCollection = null;
 
         Map<String, Long> justMap;
         NavigableMap<String, BM2> justNavigableMap;
         SortedMap<Integer, String> justSortedMap;
-        Map<Integer, Integer> nullMap;
+        Map<Integer, Integer> nullMap = null;
 
         @Override
         public boolean equals(Object o) {

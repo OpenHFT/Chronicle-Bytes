@@ -3,13 +3,15 @@
  */
 package net.openhft.chronicle.bytes;
 
-import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import java.text.DecimalFormat;
 
 import static net.openhft.chronicle.bytes.UnsafeTextBytesTest.testAppendDouble;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@DisplayName("Issue 128 decimal formatting validation checks")
 public class Issue128Test extends BytesTestCommon {
     private static final DecimalFormat DF;
 
@@ -21,6 +23,7 @@ public class Issue128Test extends BytesTestCommon {
     }
 
     @Test
+    @DisplayName("append double matches decimal formatting in odd cases")
     public void testCorrect() {
         Bytes<?> bytes = Bytes.allocateDirect(32);
         try {
@@ -47,9 +50,11 @@ public class Issue128Test extends BytesTestCommon {
         if (Double.parseDouble(output) != v || format.length() != output.length()) {
             // Don't compare strings if we've added an exponent
             if (!output.contains("E")) {
-                assertEquals(DF.format(v), output);
+                assertEquals(DF.format(v), output,
+                        "Decimal formatted output matches for value " + v);
             } else {
-                assertEquals(v, Double.parseDouble(output), 0.0);
+                assertEquals(v, Double.parseDouble(output), 0.0,
+                        "Parsed output matches numeric value " + v);
             }
         }
     }

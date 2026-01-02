@@ -3,13 +3,15 @@
  */
 package net.openhft.chronicle.bytes;
 
-import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class BytesCopyOfTest extends BytesTestCommon {
 
     @Test
+    @DisplayName("copyOf returns direct bytes with same readable content")
     public void copyOfReturnsDirectBytesWithSameReadableContent() {
         Bytes<?> src = Bytes.allocateElasticOnHeap(32);
         try {
@@ -17,7 +19,8 @@ public class BytesCopyOfTest extends BytesTestCommon {
             src.readSkip(6); // point to "ipsum"
             Bytes<Void> copy = BytesUtil.copyOf(src);
             try {
-                assertEquals("ipsum", copy.toString());
+                assertEquals("ipsum", copy.toString(),
+                        "copyOf preserves readable content");
                 // copy is direct; avoid growing it to keep within fixed capacity
             } finally {
                 copy.releaseLast();

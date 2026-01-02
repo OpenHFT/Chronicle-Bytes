@@ -3,19 +3,24 @@
  */
 package net.openhft.chronicle.bytes;
 
-import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
 
 public class UncheckedBytesBehaviourTest extends BytesTestCommon {
 
     @Test
+    @DisplayName("unchecked direct bytes append while heap bytes return same instance when false")
     public void uncheckedOnDirectAndNoopWhenFalse() {
         Bytes<?> d = Bytes.allocateDirect(16);
         Bytes<?> u = d.unchecked(true);
         try {
             u.append("zz");
-            assertEquals("zz", u.toString());
+            assertEquals("zz",
+                    u.toString(),
+                    "Unchecked direct bytes should preserve appended text");
         } finally {
             u.releaseLast();
         }
@@ -23,7 +28,9 @@ public class UncheckedBytesBehaviourTest extends BytesTestCommon {
         Bytes<?> h = Bytes.allocateElasticOnHeap(8);
         try {
             Bytes<?> same = h.unchecked(false);
-            assertSame(h, same);
+            assertSame(h,
+                    same,
+                    "Unchecked false should return the original heap bytes");
         } finally {
             h.releaseLast();
         }

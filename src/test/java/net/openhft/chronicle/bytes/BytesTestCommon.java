@@ -26,6 +26,14 @@ import static net.openhft.chronicle.core.io.AbstractCloseable.waitForCloseablesT
 import static net.openhft.chronicle.core.io.AbstractReferenceCounted.assertReferencesReleased;
 
 public class BytesTestCommon {
+    private static final boolean IS_WSL =
+            System.getenv("WSL_DISTRO_NAME") != null
+                    || System.getenv("WSL_INTEROP") != null
+                    || System.getenv("WSLENV") != null;
+
+    protected static boolean isWsl() {
+        return IS_WSL;
+    }
 
     private final Map<Predicate<ExceptionKey>, String> ignoredExceptions = new LinkedHashMap<>();
     private final Map<Predicate<ExceptionKey>, String> expectedExceptions = new LinkedHashMap<>();

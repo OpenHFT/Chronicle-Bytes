@@ -4,22 +4,24 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Jvm;
-import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 public class UTF8BytesTest extends BytesTestCommon {
 
     private static final String MESSAGE = "awésome-message-1";
 
     @Test
+    @DisplayName("UTF-8 encoding round trips via mapped bytes")
     public void testUtfEncoding() throws IOException {
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+        assumeFalse(Jvm.maxDirectMemory() == 0, "Mapped bytes require direct memory");
 
         File f = Files.createTempFile("testUtfEncoding", "data").toFile();
         f.deleteOnExit();
@@ -29,7 +31,9 @@ public class UTF8BytesTest extends BytesTestCommon {
 
         StringBuilder sb = new StringBuilder();
         bytes.parseUtf8(sb, true, len);
-        assertEquals(MESSAGE, sb.toString());
+        assertEquals(MESSAGE,
+                sb.toString(),
+                "UTF-8 round trip should preserve the message");
         bytes.releaseLast();
     }
 }

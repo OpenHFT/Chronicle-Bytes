@@ -4,11 +4,12 @@
 package net.openhft.chronicle.bytes;
 
 import org.jetbrains.annotations.NotNull;
-import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import java.nio.ByteBuffer;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * User: peter.lawrey Date: 24/12/13 Time: 19:43
@@ -26,6 +27,7 @@ public class AllocationRatesTest extends BytesTestCommon {
     private static final int ALLOCATIONS = 10000;
 
     @Test
+    @DisplayName("compare allocation rates across buffer types")
     public void compareAllocationRates() {
         for (int i = 4; i >= 0; i--) {
             long timeHBB = timeHeapByteBufferAllocations();
@@ -39,21 +41,31 @@ public class AllocationRatesTest extends BytesTestCommon {
 
     private long timeHeapByteBufferAllocations() {
         long start = System.nanoTime();
+        long totalCapacity = 0;
         for (int i = 0; i < ALLOCATIONS; i += BATCH) {
-            @NotNull ByteBuffer[] bb = new ByteBuffer[BATCH];
+            @NotNull ByteBuffer[] buffers = new ByteBuffer[BATCH];
             for (int j = 0; j < BATCH; j++)
-                bb[j] = ByteBuffer.allocate(BUFFER_SIZE);
+                buffers[j] = ByteBuffer.allocate(BUFFER_SIZE);
+            for (int j = 0; j < BATCH; j++)
+                totalCapacity += buffers[j].capacity();
         }
+        assertEquals((long) BUFFER_SIZE * ALLOCATIONS, totalCapacity,
+                "Heap ByteBuffer allocations should total expected capacity");
         return System.nanoTime() - start;
     }
 
     private long timeDirectByteBufferAllocations() {
         long start = System.nanoTime();
+        long totalCapacity = 0;
         for (int i = 0; i < ALLOCATIONS; i += BATCH) {
-            @NotNull ByteBuffer[] bb = new ByteBuffer[BATCH];
+            @NotNull ByteBuffer[] buffers = new ByteBuffer[BATCH];
             for (int j = 0; j < BATCH; j++)
-                bb[j] = ByteBuffer.allocateDirect(BUFFER_SIZE);
+                buffers[j] = ByteBuffer.allocateDirect(BUFFER_SIZE);
+            for (int j = 0; j < BATCH; j++)
+                totalCapacity += buffers[j].capacity();
         }
+        assertEquals((long) BUFFER_SIZE * ALLOCATIONS, totalCapacity,
+                "Direct ByteBuffer allocations should total expected capacity");
         return System.nanoTime() - start;
     }
 
@@ -66,7 +78,8 @@ public class AllocationRatesTest extends BytesTestCommon {
                 ds[j] = BytesStore.lazyNativeBytesStoreWithFixedCapacity(BUFFER_SIZE);
             for (int j = 0; j < BATCH; j++) {
                 ds[j].releaseLast();
-                assertEquals(0, ds[j].refCount());
+                assertEquals(0, ds[j].refCount(),
+                        "Direct store refCount resets after release at index " + j);
             }
         }
         return System.nanoTime() - start;

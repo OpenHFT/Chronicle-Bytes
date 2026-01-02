@@ -4,13 +4,15 @@
 package net.openhft.chronicle.bytes.util;
 
 import net.openhft.chronicle.bytes.Bytes;
-import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class Bit8StringInternerTest {
 
     @Test
+    @DisplayName("interner returns stored string for 8-bit bytes")
     public void testGetValue() {
         Bytes<byte[]> bytesStore = Bytes.from("Hello World");
         int length = (int) bytesStore.readRemaining();
@@ -19,6 +21,8 @@ public class Bit8StringInternerTest {
 
         String internedString = interner.getValue(bytesStore, length);
 
-        assertEquals("Hello World", internedString);
+        assertEquals("Hello World",
+                internedString,
+                "Interner should return the original string for 8-bit bytes");
     }
 }

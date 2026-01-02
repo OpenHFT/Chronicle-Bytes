@@ -5,12 +5,13 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
-import net.openhft.chronicle.core.io.IOTools;
 import net.openhft.chronicle.core.io.ReferenceOwner;
-import org.junit.Before;
-import org.junit.Test;
+import net.openhft.chronicle.core.util.Time;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -21,30 +22,46 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
+@DisplayName("Mapped file multi thread lock behaviour")
 public class MappedFileMultiThreadTest extends BytesTestCommon {
-    private static final int CORES = Integer.getInteger("cores", Runtime.getRuntime().availableProcessors());
-    private static final int RUNTIME_MS = Integer.getInteger("runtimems", 2_000);
-    private static final String TMP_FILE = System.getProperty("file", IOTools.createTempFile("testMultiThreadLock").getAbsolutePath());
+    private static final int DEFAULT_CORES = isWsl()
+            ? Math.min(2, Runtime.getRuntime().availableProcessors())
+            : Runtime.getRuntime().availableProcessors();
+    private static final int CORES = Integer.getInteger("cores", DEFAULT_CORES);
+    private static final int DEFAULT_RUNTIME_MS = isWsl() ? 500 : 2_000;
+    private static final int RUNTIME_MS = Integer.getInteger("runtimems", DEFAULT_RUNTIME_MS);
+    private static final String TMP_FILE = System.getProperty("file", defaultTempFile());
+
+    private static String defaultTempFile() {
+        File targetDir = new File(OS.getTarget());
+        if (!targetDir.exists())
+            targetDir.mkdirs();
+        return new File(targetDir, "testMultiThreadLock-" + Time.uniqueId() + ".tmp").getAbsolutePath();
+    }
 
     @SuppressWarnings("EmptyMethod")
-    @Before
     @BeforeEach
     public void threadDump() {
         super.threadDump();
     }
 
     @Test
+    @DisplayName("multi thread mapped file lock stays stable")
     public void testMultiThreadLock() throws Exception {
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+        assumeFalse(Jvm.maxDirectMemory() == 0,
+                "Direct memory must be available for multithreaded mapped file test");
+        assumeFalse(isWsl(),
+                "WSL memory mapping can trigger unsafe access faults in this multi-threaded test");
 
         final List<String> garbage = Collections.synchronizedList(new ArrayList<>());
-        final long chunkSize = OS.isWindows() ? 64 << 10 : 4 << 10;
+        final long chunkSize = (OS.isWindows() || isWsl()) ? 64 << 10 : 4 << 10;
         try (MappedFile mf = MappedFile.mappedFile(TMP_FILE, chunkSize, 0)) {
-            assertEquals("refCount: 1", mf.referenceCounts());
+            assertEquals("refCount: 1", mf.referenceCounts(),
+                    "Initial reference counts string matches expected value");
 
             final List<Future<?>> futures = new ArrayList<>();
             final ExecutorService es = Executors.newFixedThreadPool(CORES);
@@ -61,8 +78,10 @@ public class MappedFileMultiThreadTest extends BytesTestCommon {
                         try {
                             bs = mf.acquireByteStore(test, chunkSize * offset);
                             bytes = bs.bytesForRead();
-                            assertNotNull(bytes.toString()); // show it doesn't blow up.
-                            assertNotNull(bs.toString()); // show it doesn't blow up.
+                            assertNotNull(bytes.toString(),
+                                    "Bytes toString returns non null at offset " + offset + " thread i " + finalI); // show it doesn't blow up.
+                            assertNotNull(bs.toString(),
+                                    "BytesStore toString returns non null at offset " + offset + " thread i " + finalI); // show it doesn't blow up.
                             ++offset;
                         } catch (IOException e) {
                             throw Jvm.rethrow(e);
@@ -85,6 +104,6 @@ public class MappedFileMultiThreadTest extends BytesTestCommon {
             es.shutdownNow();
             es.awaitTermination(1, TimeUnit.SECONDS);
         }
-        IOTools.deleteDirWithFiles(TMP_FILE);
+        new File(TMP_FILE).delete();
     }
 }

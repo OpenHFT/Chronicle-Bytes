@@ -8,26 +8,35 @@ import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Assert;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.Random;
 
 import static java.nio.charset.StandardCharsets.US_ASCII;
 import static net.openhft.chronicle.bytes.internal.BytesInternalTest.Nested.LENGTH;
-import static org.junit.Assert.*;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
+@DisplayName("BytesInternal parsing and write behaviour checks")
 public class BytesInternalTest extends BytesTestCommon {
     @Test
+    @DisplayName("parse UTF8 into string builder with flags")
     public void testParseUTF_SB1()
             throws UTFDataFormatRuntimeException {
-        assumeFalse(GuardedNativeBytes.areNewGuarded());
+        assumeFalse(GuardedNativeBytes.areNewGuarded(),
+                "Guarded native bytes disabled for UTF8 parse test");
         @NotNull VanillaBytes<Void> bytes = Bytes.allocateElasticDirect();
         byte[] bytes2 = new byte[128];
         Arrays.fill(bytes2, (byte) '?');
@@ -36,20 +45,26 @@ public class BytesInternalTest extends BytesTestCommon {
         @NotNull StringBuilder sb = new StringBuilder();
 
         BytesInternal.parseUtf8(bytes, sb, true, 128);
-        assertEquals(128, sb.length());
-        assertEquals(new String(bytes2, US_ASCII), sb.toString());
+        assertEquals(128, sb.length(),
+                "UTF8 parse length matches buffer size");
+        assertEquals(new String(bytes2, US_ASCII), sb.toString(),
+                "UTF8 parse content matches ASCII buffer");
         bytes.readPosition(0);
         sb.setLength(0);
         BytesInternal.parseUtf8(bytes, sb, false, 128);
-        assertEquals(128, sb.length());
-        assertEquals(new String(bytes2, US_ASCII), sb.toString());
+        assertEquals(128, sb.length(),
+                "Non-UTF parse length matches buffer size");
+        assertEquals(new String(bytes2, US_ASCII), sb.toString(),
+                "Non-UTF parse content matches ASCII buffer");
         bytes.releaseLast();
     }
 
     @Test
+    @DisplayName("parse long UTF8 string into builder")
     public void testParseUTF8_LongString()
             throws UTFDataFormatRuntimeException {
-        assumeFalse(GuardedNativeBytes.areNewGuarded());
+        assumeFalse(GuardedNativeBytes.areNewGuarded(),
+                "Guarded native bytes disabled for long UTF8 parse test");
         VanillaBytes<Void> bytes = Bytes.allocateElasticDirect();
         int length = LENGTH;
         byte[] bytes2 = new byte[length];
@@ -59,79 +74,102 @@ public class BytesInternalTest extends BytesTestCommon {
         @NotNull StringBuilder sb = new StringBuilder();
 
         BytesInternal.parseUtf8(bytes, sb, true, length);
-        assertEquals(length, sb.length());
+        assertEquals(length, sb.length(),
+                "UTF8 parse length matches long buffer size");
         String actual = sb.toString();
         sb = null; // free some memory.
-        assertEquals(new String(bytes2, US_ASCII), actual);
+        assertEquals(new String(bytes2, US_ASCII), actual,
+                "UTF8 parse content matches long ASCII buffer");
 
         bytes.releaseLast();
     }
 
     @Test
+    @DisplayName("parse empty long tokens as zero")
     public void parseLongEmpty() {
         for (String s : ", , .,-,x, .e".split(",")) {
             final Bytes<byte[]> from = Bytes.from(s);
-            assertEquals(s, 0, from.parseLong());
-            assertFalse(s, from.lastNumberHadDigits());
+            assertEquals(0, from.parseLong(),
+                    "parseLong empty token yields zero for [" + s + "]");
+            assertFalse(from.lastNumberHadDigits(),
+                    "parseLong empty token has no digits for [" + s + "]");
         }
     }
 
     @Test
+    @DisplayName("parse numeric long tokens with digits")
     public void parseLongNonEmpty() {
         for (String s : "0, 0, 0..,0-, 0e".split(",")) {
             final Bytes<byte[]> from = Bytes.from(s);
-            assertEquals(s, 0, from.parseLong());
-            assertTrue(s, from.lastNumberHadDigits());
+            assertEquals(0, from.parseLong(),
+                    "parseLong numeric token yields zero for [" + s + "]");
+            assertTrue(from.lastNumberHadDigits(),
+                    "parseLong numeric token has digits for [" + s + "]");
         }
     }
 
     @Test
+    @DisplayName("parse empty decimal long tokens as zero")
     public void parseLongDecimalEmpty() {
         for (String s : ", , .,-,x, .e".split(",")) {
             final Bytes<byte[]> from = Bytes.from(s);
-            assertEquals(s, 0, from.parseLongDecimal());
-            assertFalse(s, from.lastNumberHadDigits());
+            assertEquals(0, from.parseLongDecimal(),
+                    "parseLongDecimal empty token yields zero for [" + s + "]");
+            assertFalse(from.lastNumberHadDigits(),
+                    "parseLongDecimal empty token has no digits for [" + s + "]");
         }
     }
 
     @Test
+    @DisplayName("parse numeric decimal long tokens with digits")
     public void parseLongDecimalNonEmpty() {
         for (String s : "0, 0, .0,0-,0x, .0e".split(",")) {
             final Bytes<byte[]> from = Bytes.from(s);
-            assertEquals(s, 0, from.parseLongDecimal());
-            assertTrue(s, from.lastNumberHadDigits());
+            assertEquals(0, from.parseLongDecimal(),
+                    "parseLongDecimal numeric token yields zero for [" + s + "]");
+            assertTrue(from.lastNumberHadDigits(),
+                    "parseLongDecimal numeric token has digits for [" + s + "]");
         }
     }
 
     @Test
+    @DisplayName("parse empty double tokens as negative zero")
     public void parseDoubleEmpty() {
         for (String s : ", , .,-,x, .e".split(",")) {
             final Bytes<byte[]> from = Bytes.from(s);
-            assertEquals(s, 0, Double.compare(-0.0, from.parseDouble()));
-            assertFalse(s, from.lastNumberHadDigits());
+            assertEquals(0, Double.compare(-0.0, from.parseDouble()),
+                    "parseDouble empty token yields -0.0 for [" + s + "]");
+            assertFalse(from.lastNumberHadDigits(),
+                    "parseDouble empty token has no digits for [" + s + "]");
         }
     }
 
     @Test
+    @DisplayName("parse double zero tokens with digits")
     public void parseDoubleEmptyZero() {
         for (String s : "0, 0, .0,0-,0x, .0e".split(",")) {
             final Bytes<byte[]> from = Bytes.from(s);
-            assertEquals(s, 0, Double.compare(0.0, from.parseDouble()));
-            assertTrue(s, from.lastNumberHadDigits());
+            assertEquals(0, Double.compare(0.0, from.parseDouble()),
+                    "parseDouble numeric token yields 0.0 for [" + s + "]");
+            assertTrue(from.lastNumberHadDigits(),
+                    "parseDouble numeric token has digits for [" + s + "]");
         }
     }
 
     @Test
+    @DisplayName("parse scientific negative double values with exponents correctly")
     public void parseDoubleScientificNegative() {
         parseDoubleScientific("6.1E-4", 6.1E-4, 5  /*0.00061 needs dp 5*/);
     }
 
     @Test
+    @DisplayName("parse scientific negative double with digits")
     public void parseDoubleScientificNegative1() {
         parseDoubleScientific("6.123E-4", 6.123E-4, 7 /* 0.0006123 needs dp 7 */);
     }
 
     @Test
+    @DisplayName("parse scientific positive double with digits")
     public void parseDoubleScientificPositive1() {
         parseDoubleScientific("6.12345E4", 6.12345E4, 1 /* 6.12345 x 10^4 = 61234.5 needs 1 */);
     }
@@ -141,17 +179,21 @@ public class BytesInternalTest extends BytesTestCommon {
                                        final int expectedDp) {
         final Bytes<?> from = Bytes.from(strDouble);
         try {
-            assertEquals(expected, from.parseDouble(), 0.0);
-            assertEquals(expectedDp, from.lastDecimalPlaces());
+            assertEquals(expected, from.parseDouble(), 0.0,
+                    "Scientific parse matches expected for " + strDouble);
+            assertEquals(expectedDp, from.lastDecimalPlaces(),
+                    "Decimal places match expected for " + strDouble);
         } finally {
             from.releaseLast();
         }
     }
 
     @Test
+    @DisplayName("parse UTF81 long string into builder")
     public void testParseUTF81_LongString()
             throws UTFDataFormatRuntimeException {
-        assumeFalse(GuardedNativeBytes.areNewGuarded());
+        assumeFalse(GuardedNativeBytes.areNewGuarded(),
+                "Guarded native bytes disabled for UTF81 parse test");
         VanillaBytes<Void> bytes = Bytes.allocateElasticDirect();
         int length = LENGTH;
         byte[] bytes2 = new byte[length];
@@ -161,23 +203,29 @@ public class BytesInternalTest extends BytesTestCommon {
         @NotNull StringBuilder sb = new StringBuilder();
 
         BytesInternal.parseUtf81(bytes, sb, true, length);
-        assertEquals(length, sb.length());
-        assertEquals(new String(bytes2, US_ASCII), sb.toString());
+        assertEquals(length, sb.length(),
+                "UTF81 parse length matches buffer size");
+        assertEquals(new String(bytes2, US_ASCII), sb.toString(),
+                "UTF81 parse content matches ASCII buffer");
 
         bytes.readPosition(0);
         sb.setLength(0);
 
         BytesInternal.parseUtf81(bytes, sb, false, length);
-        assertEquals(length, sb.length());
-        assertEquals(new String(bytes2, US_ASCII), sb.toString());
+        assertEquals(length, sb.length(),
+                "UTF81 parse length matches buffer size on second pass");
+        assertEquals(new String(bytes2, US_ASCII), sb.toString(),
+                "UTF81 parse content matches ASCII buffer on second pass");
 
         bytes.releaseLast();
     }
 
     @Test
+    @DisplayName("parse UTF8 SB1 long string into builder")
     public void testParseUTF_SB1_LongString()
             throws UTFDataFormatRuntimeException {
-        assumeFalse(GuardedNativeBytes.areNewGuarded());
+        assumeFalse(GuardedNativeBytes.areNewGuarded(),
+                "Guarded native bytes disabled for UTF8 SB1 parse test");
         VanillaBytes<Void> bytes = Bytes.allocateElasticDirect();
         int length = LENGTH;
         byte[] bytes2 = new byte[length];
@@ -187,25 +235,24 @@ public class BytesInternalTest extends BytesTestCommon {
         @NotNull StringBuilder sb = new StringBuilder();
 
         BytesInternal.parseUtf8_SB1(bytes, sb, true, length);
-        assertEquals(length, sb.length());
-        assertEquals(new String(bytes2, US_ASCII), sb.toString());
+        assertEquals(length, sb.length(),
+                "UTF8 SB1 parse length matches buffer size");
+        assertEquals(new String(bytes2, US_ASCII), sb.toString(),
+                "UTF8 SB1 parse content matches ASCII buffer");
 
         bytes.readPosition(0);
         sb.setLength(0);
 
-/*
-        BytesInternal.parseUtf8_SB1(bytes, sb, false, length);
-        assertEquals(length, sb.length());
-        assertEquals(new String(bytes2, US_ASCII), sb.toString());
-*/
 
         bytes.releaseLast();
     }
 
     @Test
+    @DisplayName("parse 8bit long string into builder")
     public void testParse8bit_LongString()
             throws Exception {
-        assumeFalse(GuardedNativeBytes.areNewGuarded());
+        assumeFalse(GuardedNativeBytes.areNewGuarded(),
+                "Guarded native bytes disabled for 8bit parse test");
         VanillaBytes<Void> bytes = Bytes.allocateElasticDirect();
         int length = LENGTH;
         byte[] bytes2 = new byte[length];
@@ -215,15 +262,19 @@ public class BytesInternalTest extends BytesTestCommon {
         @NotNull StringBuilder sb = new StringBuilder();
 
         BytesInternal.parse8bit(0, bytes, sb, length);
-        assertEquals(length, sb.length());
-        assertEquals(new String(bytes2, US_ASCII), sb.toString());
+        assertEquals(length, sb.length(),
+                "8bit parse length matches buffer size");
+        assertEquals(new String(bytes2, US_ASCII), sb.toString(),
+                "8bit parse content matches ASCII buffer");
 
         bytes.releaseLast();
     }
 
     @Test
+    @DisplayName("parse double across many decimal patterns")
     public void testAllParseDouble() {
-        assumeFalse(GuardedNativeBytes.areNewGuarded());
+        assumeFalse(GuardedNativeBytes.areNewGuarded(),
+                "Guarded native bytes disabled for parseDouble coverage");
         for (String s : "0.,1.,9.".split(",")) {
             // todo FIX for i == 7 && d == 8
             for (int d = 0; d < 8; d++) {
@@ -231,9 +282,9 @@ public class BytesInternalTest extends BytesTestCommon {
                 for (int i = 1; i < 10; i += 2) {
                     String si = s + i;
                     Bytes<?> from = Bytes.from(si);
-                    assertEquals(si,
-                            Double.parseDouble(si),
-                            from.parseDouble(), 0.0);
+                    assertEquals(Double.parseDouble(si),
+                            from.parseDouble(), 0.0,
+                            "parseDouble matches expected for base " + s + " d " + d + " i " + i);
                     from.releaseLast();
                 }
             }
@@ -241,9 +292,11 @@ public class BytesInternalTest extends BytesTestCommon {
     }
 
     @Test
+    @DisplayName("write UTF8 long string and compare output")
     public void testWriteUtf8LongString()
             throws IORuntimeException, BufferUnderflowException {
-        assumeFalse(GuardedNativeBytes.areNewGuarded());
+        assumeFalse(GuardedNativeBytes.areNewGuarded(),
+                "Guarded native bytes disabled for UTF8 write test");
         VanillaBytes<Void> bytes = Bytes.allocateElasticDirect();
         int length = LENGTH;
         StringBuilder sb = new StringBuilder(length);
@@ -255,15 +308,18 @@ public class BytesInternalTest extends BytesTestCommon {
         BytesInternal.writeUtf8(bytes, test);
 
         sb.setLength(0);
-        assertTrue(BytesInternal.compareUtf8(bytes, 0, test));
+        assertTrue(BytesInternal.compareUtf8(bytes, 0, test),
+                "UTF8 write round trip matches source text");
 
         bytes.releaseLast();
     }
 
     @Test
+    @DisplayName("append UTF8 long string and read back")
     public void testAppendUtf8LongString()
             throws Exception {
-        assumeFalse(GuardedNativeBytes.areNewGuarded());
+        assumeFalse(GuardedNativeBytes.areNewGuarded(),
+                "Guarded native bytes disabled for UTF8 append test");
         VanillaBytes<Void> bytes = Bytes.allocateElasticDirect();
         int length = LENGTH;
         StringBuilder sb = new StringBuilder(length);
@@ -277,14 +333,17 @@ public class BytesInternalTest extends BytesTestCommon {
         sb.setLength(0);
         BytesInternal.parse8bit(0, bytes, sb, length);
 
-        assertEquals(test, sb.toString());
+        assertEquals(test, sb.toString(),
+                "UTF8 append long string round trip matches");
         bytes.releaseLast();
     }
 
     @Test
+    @DisplayName("append 8bit long string and read back")
     public void testAppend8bitLongString()
             throws Exception {
-        assumeFalse(GuardedNativeBytes.areNewGuarded());
+        assumeFalse(GuardedNativeBytes.areNewGuarded(),
+                "Guarded native bytes disabled for 8bit append test");
         VanillaBytes<Void> bytes = Bytes.allocateElasticDirect();
         int length = LENGTH;
         StringBuilder sb = new StringBuilder(length);
@@ -298,13 +357,16 @@ public class BytesInternalTest extends BytesTestCommon {
         sb.setLength(0);
         BytesInternal.parse8bit(0, bytes, sb, length);
 
-        assertEquals(test, sb.toString());
+        assertEquals(test, sb.toString(),
+                "8bit append long string round trip matches");
         bytes.releaseLast();
     }
 
     @Test
+    @DisplayName("parse double handles exponent and decimal forms")
     public void testParseDouble() {
-        assumeFalse(GuardedNativeBytes.areNewGuarded());
+        assumeFalse(GuardedNativeBytes.areNewGuarded(),
+                "Guarded native bytes disabled for parseDouble test");
         @NotNull Object[][] tests = {
                 {"0e0 ", 0.0},
                 {"-1E-3 ", -1E-3},
@@ -320,31 +382,37 @@ public class BytesInternalTest extends BytesTestCommon {
             double expected = (Double) objects[1];
 
             Bytes<?> from = Bytes.from(text);
-            assertEquals(expected, from.parseDouble(), 0.0);
-            assertTrue(from.lastNumberHadDigits());
+            assertEquals(expected, from.parseDouble(), 0.0,
+                    "Parsed double matches expected for " + Arrays.toString(objects));
+            assertTrue(from.lastNumberHadDigits(),
+                    "Last number had digits for " + Arrays.toString(objects));
             from.releaseLast();
         }
     }
 
     @Test
+    @DisplayName("copy bytes after skip matches source")
     public void testCopyAfterSkip() {
         final Bytes<byte[]> src = Bytes.from("hello again");
 
         src.readSkip(7);
         BytesStore<Bytes<byte[]>, byte[]> copy = src.copy();
-        assertEquals(copy.toString(), src.toString());
+        assertEquals(copy.toString(), src.toString(),
+                "Copy matches source after skip");
         // shouldn't need to do this
         copy.releaseLast();
     }
 
     @Test
+    @DisplayName("copy to array after skip matches source")
     public void testCopyToArrayAfterSkip() {
         final Bytes<byte[]> src = Bytes.from("hello again");
         src.readSkip(7);
 
         final byte[] buffer = new byte[100];
         final int copiedLen = src.copyTo(buffer);
-        assertEquals(new String(buffer, 0, copiedLen), src.toString());
+        assertEquals(new String(buffer, 0, copiedLen, StandardCharsets.ISO_8859_1), src.toString(),
+                "Copy to array matches source after skip");
     }
 
     private int checkParse(int different, String s) {
@@ -353,15 +421,16 @@ public class BytesInternalTest extends BytesTestCommon {
         double d2 = from.parseDouble();
         from.releaseLast();
         if (d != d2) {
-//            System.out.println(d + " != " + d2);
             ++different;
         }
         return different;
     }
 
     @Test
+    @DisplayName("parse double seeded random values consistently across runs")
     public void bytesParseDouble_Issue85_SeededRandom() {
-        assumeFalse(GuardedNativeBytes.areNewGuarded());
+        assumeFalse(GuardedNativeBytes.areNewGuarded(),
+                "Guarded native bytes disabled for seeded parse test");
         Random random = new Random(1);
         int different = 0;
         int max = 10_000;
@@ -370,11 +439,13 @@ public class BytesInternalTest extends BytesTestCommon {
             String s = String.format(Locale.UK, "%.9f", num);
             different = checkParse(different, s);
         }
-        Assert.assertEquals("Different " + (100.0 * different) / max + "%", 0, different);
+        assertEquals(0, different,
+                "Different " + (100.0 * different) / max + "%");
     }
 
     @Test
-    @Ignore(/* peformance test */)
+    @Disabled("Performance test for direct write strategies")
+    @DisplayName("compare direct write performance strategies with consistent ordering")
     public void testNoneDirectWritePerformance() {
         final int size = 64;
         Bytes<?> a = Bytes.allocateElasticOnHeap(size + 8);
@@ -459,12 +530,12 @@ public class BytesInternalTest extends BytesTestCommon {
             System.out.println("time4 " + time4 + ", time5 " + time5 + ", time6: " + time6);
 
             // This is a performance test so just assert it ran
-            assertTrue(time1 > 0);
-            assertTrue(time2 > 0);
-            assertTrue(time3 > 0);
-            assertTrue(time4 > 0);
-            assertTrue(time5 > 0);
-            assertTrue(time6 > 0);
+            assertTrue(time1 > 0, "time1 recorded positive duration at t " + t);
+            assertTrue(time2 > 0, "time2 recorded positive duration at t " + t);
+            assertTrue(time3 > 0, "time3 recorded positive duration at t " + t);
+            assertTrue(time4 > 0, "time4 recorded positive duration at t " + t);
+            assertTrue(time5 > 0, "time5 recorded positive duration at t " + t);
+            assertTrue(time6 > 0, "time6 recorded positive duration at t " + t);
             Thread.yield();
         }
     }

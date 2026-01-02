@@ -7,48 +7,42 @@ import net.openhft.chronicle.bytes.render.GeneralDecimaliser;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.util.ObjectUtils;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import java.nio.ByteBuffer;
-import java.util.Arrays;
-import java.util.Collection;
+import java.nio.charset.StandardCharsets;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assume.assumeFalse;
-
-@RunWith(Parameterized.class)
 public class ByteStringAppenderTest extends BytesTestCommon {
-    private final Bytes<?> bytes;
+    private Bytes<?> bytes;
 
-    public ByteStringAppenderTest(String name, boolean direct) {
-        bytes = direct ? Bytes.allocateElasticDirect() : Bytes.elasticByteBuffer();
+    @BeforeEach
+    void setUp() {
+        bytes = Bytes.allocateElasticDirect();
     }
 
-    @Parameterized.Parameters(name = "{0}")
-    public static Collection<Object[]> data() {
-        return Arrays.asList(new Object[][]{
-//                {"heap", false},
-                {"native", true}
-        });
-    }
-
-    @Override
-    public void afterChecks() {
+    @AfterEach
+    void tearDown() {
         bytes.releaseLast();
         super.afterChecks();
     }
 
     @Test
+    @DisplayName("convertTo produces bytes content for strings and numbers")
     public void testConvertTo() {
         Bytes<?> hello = Bytes.from("hello");
         Bytes<?> hello1 = ObjectUtils.convertTo(Bytes.class, "hello");
-        assertTrue(hello.contentEquals(hello1));
+        assertTrue(hello.contentEquals(hello1),
+                "string conversion should preserve content");
         VanillaBytes<Void> bytes = Bytes.allocateElasticDirect(2);
         Bytes<?> one = ObjectUtils.convertTo(Bytes.class, 1);
-        assertTrue(bytes.append(1).contentEquals(one));
+        assertTrue(bytes.append(1).contentEquals(one),
+                "numeric conversion should preserve content");
         one.releaseLast();
         hello1.releaseLast();
         hello.releaseLast();
@@ -56,6 +50,7 @@ public class ByteStringAppenderTest extends BytesTestCommon {
     }
 
     @Test
+    @DisplayName("append int values round-trip through parseLong")
     public void testAppendInt()
             throws IORuntimeException {
         for (int expected = 1; expected != 0; expected *= 2) {
@@ -64,12 +59,15 @@ public class ByteStringAppenderTest extends BytesTestCommon {
             bytes.append(-expected);
             bytes.append(",");
 
-            assertEquals(expected, (int) bytes.parseLong());
-            assertEquals(-expected, (int) bytes.parseLong());
+            assertEquals(expected, (int) bytes.parseLong(),
+                    "parseLong should read positive int for expected=" + expected);
+            assertEquals(-expected, (int) bytes.parseLong(),
+                    "parseLong should read negative int for expected=" + expected);
         }
     }
 
     @Test
+    @DisplayName("append long values round-trip through parseLong")
     public void testAppend()
             throws IORuntimeException {
         for (long expected = 1; expected != 0; expected *= 2) {
@@ -78,45 +76,44 @@ public class ByteStringAppenderTest extends BytesTestCommon {
             bytes.append(",");
             bytes.append(-expected);
             bytes.append(",");
-//            System.out.println(bytes);
-            assertEquals(expected, bytes.parseLong());
-            assertEquals(-expected, bytes.parseLong());
+            assertEquals(expected, bytes.parseLong(),
+                    "parseLong should read positive long for expected=" + expected);
+            assertEquals(-expected, bytes.parseLong(),
+                    "parseLong should read negative long for expected=" + expected);
         }
     }
 
     @Test
+    @DisplayName("append long values with offsets round-trip")
     public void testAppendWithOffset() {
         bytes.readLimit(20);
         bytes.writeLimit(20);
         for (long expected : new long[]{123456, 12345, 1234, 123, 12, 1, 0}) {
             bytes.append(10, expected, 6);
-            assertEquals(expected, bytes.parseLong(10));
+            assertEquals(expected, bytes.parseLong(10),
+                    "parseLong should read offset value for expected=" + expected);
         }
     }
 
     @Test
+    @DisplayName("append negative values with offsets round-trip")
     public void testAppendWithOffsetNeg() {
         bytes.readLimit(20);
         bytes.writeLimit(20);
         for (long expected : new long[]{-123456, 12345, -1234, 123, -12, 1, 0}) {
             bytes.append(10, expected, 7);
-            assertEquals(expected, bytes.parseLong(10));
+            assertEquals(expected, bytes.parseLong(10),
+                    "parseLong should read negative offset value for expected=" + expected);
         }
     }
 
     @Test
+    @DisplayName("append double values round-trip through parseDouble")
     public void testAppendDouble()
             throws IORuntimeException {
-        assumeFalse(GuardedNativeBytes.areNewGuarded());
+        assumeFalse(GuardedNativeBytes.areNewGuarded(),
+                "guarded bytes use a different layout for double append");
         testAppendDouble0(-1.42278619425894E11);
-/*
-        @NotNull Random random = new Random(1);
-        for (int i = 0; i < 100000; i++) {
-            double d = Math.pow(1e32, random.nextDouble()) / 1e6;
-            if (i % 3 == 0) d = -d;
-            testAppendDouble0(d);
-        }
-*/
     }
 
     private void testAppendDouble0(double d)
@@ -125,20 +122,15 @@ public class ByteStringAppenderTest extends BytesTestCommon {
         bytes.append(d).append(' ');
 
         double d2 = bytes.parseDouble();
-        assertEquals(d, d2, 0);
-
-/* assumes self terminating.
-        bytes.clear();
-        bytes.appendDouble(d);
-        bytes.flip();
-        double d3 = bytes.parseDouble();
-        Assert.assertEquals(d, d3, 0);
-*/
+        assertEquals(d, d2, 0,
+                "parseDouble should round-trip appended value " + d);
     }
 
     @Test
+    @DisplayName("appendDecimal formats long values with varying precision")
     public void testAppendLongDecimal() {
-        assumeFalse(GuardedNativeBytes.areNewGuarded());
+        assumeFalse(GuardedNativeBytes.areNewGuarded(),
+                "guarded bytes use a different layout for decimal append");
         bytes.appendDecimal(128, 0).append('\n');
         bytes.appendDecimal(128, 1).append('\n');
         bytes.appendDecimal(128, 2).append('\n');
@@ -166,12 +158,15 @@ public class ByteStringAppenderTest extends BytesTestCommon {
                 "0.1\n" +
                 "0.01\n" +
                 "0.001\n" +
-                "0.0001\n", bytes.toString());
+                "0.0001\n", bytes.toString(),
+                "appendDecimal output should match expected formatting");
     }
 
     @Test
+    @DisplayName("append formats doubles with requested precision")
     public void testAppendDoublePrecision() {
-        assumeFalse(GuardedNativeBytes.areNewGuarded());
+        assumeFalse(GuardedNativeBytes.areNewGuarded(),
+                "guarded bytes use a different layout for precision append");
 
         bytes.append(1.28, 0).append('\n');
         bytes.append(-1.28, 1).append('\n');
@@ -203,10 +198,12 @@ public class ByteStringAppenderTest extends BytesTestCommon {
                 "0.11\n" +
                 "1.100\n" +
                 "-0.0111\n" +
-                "64.550199\n", bytes.toString());
+                "64.550199\n", bytes.toString(),
+                "precision formatting should match expected output");
     }
 
     @Test
+    @DisplayName("decimaliser handles powers of ten correctly")
     public void tens() {
         bytes.decimaliser(GeneralDecimaliser.GENERAL);
         for (int i = 0; i <= (int) Math.log10(Double.MAX_VALUE); i++) {
@@ -217,30 +214,35 @@ public class ByteStringAppenderTest extends BytesTestCommon {
                 String s = bytes.toString();
                 double d2 = bytes.parseDouble();
                 double ulp = i < 23 ? 0 : i < 235 ? Math.ulp(d) : Math.ulp(d) * 2;
-                assertEquals(s, d, d2, ulp);
+                assertEquals(d, d2, ulp,
+                        "positive power-of-ten should round-trip for i=" + i + ", text=" + s);
             }
             {
                 double d = Math.pow(10, -i);
                 bytes.append(d).append(' ');
                 String s = bytes.toString();
                 double d2 = bytes.parseDouble();
-                assertEquals(s, d, d2, Jvm.isArm() ? 2E-27 : 2e-40);
+                assertEquals(d, d2, Jvm.isArm() ? 2E-27 : 2e-40,
+                        "negative power-of-ten should round-trip for i=" + i + ", text=" + s);
             }
         }
     }
 
     @Test
+    @DisplayName("append8bit copies selected slices of BytesStore")
     public void testAppend8bit() {
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+        assumeFalse(Jvm.maxDirectMemory() == 0,
+                "append8bit requires direct memory availability");
 
         BytesStore<?, ByteBuffer> bs = BytesStore.elasticByteBuffer(4, 16);
-        bs.write(0, " -\n".getBytes());
+        bs.write(0, " -\n".getBytes(StandardCharsets.ISO_8859_1));
 
         bytes.append8bit((CharSequence) bs, 1, 2);
         bytes.append8bit(bs, (long)0, 1);
         bytes.append8bit(bs, (long)2, 3);
 
-        assertEquals("- \n", bytes.toString());
+        assertEquals("- \n", bytes.toString(),
+                "append8bit should merge slices into expected text");
         bs.releaseLast();
     }
 }
