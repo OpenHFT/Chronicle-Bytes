@@ -5,6 +5,7 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
+import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.ReferenceOwner;
 import net.openhft.chronicle.core.util.Time;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,6 +14,9 @@ import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -37,10 +41,13 @@ public class MappedFileMultiThreadTest extends BytesTestCommon {
     private static final String TMP_FILE = System.getProperty("file", defaultTempFile());
 
     private static String defaultTempFile() {
-        File targetDir = new File(OS.getTarget());
-        if (!targetDir.exists())
-            targetDir.mkdirs();
-        return new File(targetDir, "testMultiThreadLock-" + Time.uniqueId() + ".tmp").getAbsolutePath();
+        Path targetDir = Paths.get(OS.getTarget());
+        try {
+            Files.createDirectories(targetDir);
+        } catch (IOException e) {
+            throw new IORuntimeException("Unable to create target directory: " + targetDir, e);
+        }
+        return targetDir.resolve("testMultiThreadLock-" + Time.uniqueId() + ".tmp").toAbsolutePath().toString();
     }
 
     @SuppressWarnings("EmptyMethod")
@@ -104,6 +111,11 @@ public class MappedFileMultiThreadTest extends BytesTestCommon {
             es.shutdownNow();
             es.awaitTermination(1, TimeUnit.SECONDS);
         }
-        new File(TMP_FILE).delete();
+        Path tempFile = Paths.get(TMP_FILE);
+        try {
+            Files.deleteIfExists(tempFile);
+        } catch (IOException e) {
+            throw new IORuntimeException("Unable to delete temp file: " + tempFile, e);
+        }
     }
 }

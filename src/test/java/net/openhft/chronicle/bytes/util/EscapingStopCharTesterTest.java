@@ -4,7 +4,7 @@
 package net.openhft.chronicle.bytes.util;
 
 import net.openhft.chronicle.bytes.StopCharTester;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;

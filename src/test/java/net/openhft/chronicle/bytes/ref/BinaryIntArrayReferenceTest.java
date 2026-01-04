@@ -101,7 +101,7 @@ public class BinaryIntArrayReferenceTest extends BytesTestCommon {
     }
 
     @Test
-    @DisplayName("forceAllToNotCompleteState updates collected references")
+    @DisplayName("forceAllToNotCompleteState moves collected references to not-complete state")
     public void forceAllToNotCompleteStateUpdatesReferences() {
         BinaryIntArrayReference.startCollecting();
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(64);
@@ -123,7 +123,7 @@ public class BinaryIntArrayReferenceTest extends BytesTestCommon {
     }
 
     @Test
-    @DisplayName("forceAllToNotCompleteState ignores missing collectors")
+    @DisplayName("forceAllToNotCompleteState ignores missing collectors without throwing")
     public void forceAllToNotCompleteStateIgnoresMissingCollectors() {
         assertDoesNotThrow(BinaryIntArrayReference::forceAllToNotCompleteState,
                 "forceAllToNotCompleteState should ignore missing collectors");
@@ -231,7 +231,7 @@ public class BinaryIntArrayReferenceTest extends BytesTestCommon {
         try (BinaryIntArrayReference array = new BinaryIntArrayReference()) {
             String summary = array.toString();
             assertTrue(summary.contains("not set"),
-                    "toString should report missing bytes store");
+                    "summary '" + summary + "' should contain 'not set' when bytes store is missing");
         }
     }
 
@@ -248,7 +248,7 @@ public class BinaryIntArrayReferenceTest extends BytesTestCommon {
             array.setMaxUsed(2);
             String summary = array.toString();
             assertTrue(summary.contains("..."),
-                    "toString should append ellipsis when not all capacity is used");
+                    "summary '" + summary + "' should contain '...' when capacity is not fully used");
         } finally {
             bytes.releaseLast();
         }
@@ -349,7 +349,7 @@ public class BinaryIntArrayReferenceTest extends BytesTestCommon {
     }
 
     @Test
-    @DisplayName("readMarshallable rejects negative capacity")
+    @DisplayName("readMarshallable rejects negative capacity values from input")
     public void readMarshallableRejectsNegativeCapacity() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(32);
         try (BinaryIntArrayReference array = new BinaryIntArrayReference()) {
@@ -398,7 +398,7 @@ public class BinaryIntArrayReferenceTest extends BytesTestCommon {
     }
 
     @Test
-    @DisplayName("compareAndSet updates matching values")
+    @DisplayName("compareAndSet updates array slot when expected value matches")
     public void compareAndSetUpdatesMatchingValues() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(64);
         try (BinaryIntArrayReference array = new BinaryIntArrayReference()) {
@@ -417,7 +417,7 @@ public class BinaryIntArrayReferenceTest extends BytesTestCommon {
     }
 
     @Test
-    @DisplayName("compareAndSet leaves mismatched values unchanged")
+    @DisplayName("compareAndSet leaves array slot unchanged when expected differs")
     public void compareAndSetLeavesMismatchedValues() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(64);
         try (BinaryIntArrayReference array = new BinaryIntArrayReference()) {

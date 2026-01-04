@@ -70,7 +70,7 @@ public class BinaryTwoLongReferenceTest extends BytesTestCommon {
     }
 
     @Test
-    @DisplayName("toString reports null when unbound")
+    @DisplayName("toString reports null when reference is unbound to bytes")
     public void toStringReportsNullWhenUnbound() {
         try (@NotNull BinaryTwoLongReference ref = new BinaryTwoLongReference()) {
             assertEquals("bytes is null",

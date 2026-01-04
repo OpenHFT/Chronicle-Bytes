@@ -4,16 +4,21 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.core.io.IORuntimeException;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import java.nio.BufferUnderflowException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 public class StreamingDataInputTest extends BytesTestCommon {
@@ -145,6 +150,156 @@ public class StreamingDataInputTest extends BytesTestCommon {
                     ", i1=" + i1 +
                     ", b1=" + b1 +
                     '}';
+        }
+    }
+
+    @Test
+    @DisplayName("readPositionForHeader returns current position without skip padding")
+    void readPositionForHeaderNoSkip() {
+        Bytes<?> bytes = Bytes.allocateElasticOnHeap(32);
+        try {
+            bytes.append("0123456789");
+            bytes.readPosition(3);
+            long pos = bytes.readPositionForHeader(false);
+            assertEquals(3, pos, "readPositionForHeader should return current position without padding");
+            assertEquals(3, bytes.readPosition(), "Read position should not change");
+        } finally {
+            bytes.releaseLast();
+        }
+    }
+
+    @Test
+    @DisplayName("readPositionForHeader with skip padding aligns to boundary")
+    void readPositionForHeaderWithSkip() {
+        Bytes<?> bytes = Bytes.allocateElasticOnHeap(32);
+        try {
+            bytes.append("0123456789ABCDEF");
+            bytes.readPosition(1); // Not aligned to 4-byte boundary
+            long pos = bytes.readPositionForHeader(true);
+            // Position 1 should skip 3 bytes to reach position 4 (next 4-byte boundary)
+            assertEquals(4, pos, "readPositionForHeader with skip should align to boundary");
+        } finally {
+            bytes.releaseLast();
+        }
+    }
+
+    @Test
+    @DisplayName("readWithLength supplies consumer with bounded view")
+    void readWithLengthConsumer() {
+        Bytes<?> bytes = Bytes.allocateElasticOnHeap(32);
+        try {
+            bytes.append("0123456789");
+            bytes.readPosition(0);
+            AtomicInteger readCount = new AtomicInteger();
+            bytes.readWithLength(5, b -> {
+                assertEquals(5, b.readRemaining(),
+                        "readWithLength should expose bounded remaining=5 to consumer");
+                readCount.incrementAndGet();
+            });
+            assertEquals(1, readCount.get(), "readWithLength should call consumer once");
+            assertEquals(5, bytes.readPosition(), "readWithLength should advance read position by 5");
+        } finally {
+            bytes.releaseLast();
+        }
+    }
+
+    @Test
+    @DisplayName("readWithLength throws when length exceeds remaining")
+    void readWithLengthThrowsOnOverflow() {
+        Bytes<?> bytes = Bytes.allocateElasticOnHeap(32);
+        try {
+            bytes.append("abc");
+            bytes.readPosition(0);
+            assertThrows(BufferUnderflowException.class,
+                    () -> bytes.readWithLength(10, b -> {}),
+                    "readWithLength should throw when length exceeds remaining");
+        } finally {
+            bytes.releaseLast();
+        }
+    }
+
+    @Test
+    @DisplayName("readWithLength0 supplies consumer with bounded view")
+    void readWithLength0Consumer() {
+        Bytes<?> bytes = Bytes.allocateElasticOnHeap(32);
+        Bytes<?> output = Bytes.allocateElasticOnHeap(32);
+        try {
+            bytes.append("0123456789");
+            bytes.readPosition(0);
+            AtomicInteger readCount = new AtomicInteger();
+            bytes.readWithLength0(5, (b, sb, out) -> {
+                assertEquals(5, b.readRemaining(),
+                        "readWithLength0 should expose bounded remaining=5 to consumer");
+                readCount.incrementAndGet();
+            }, null, output);
+            assertEquals(1, readCount.get(), "readWithLength0 should call consumer once");
+            assertEquals(5, bytes.readPosition(), "readWithLength0 should advance read position by 5");
+        } finally {
+            bytes.releaseLast();
+            output.releaseLast();
+        }
+    }
+
+    @Test
+    @DisplayName("readWithLength0 throws when length exceeds remaining")
+    void readWithLength0ThrowsOnOverflow() {
+        Bytes<?> bytes = Bytes.allocateElasticOnHeap(32);
+        Bytes<?> output = Bytes.allocateElasticOnHeap(32);
+        try {
+            bytes.append("abc");
+            bytes.readPosition(0);
+            assertThrows(BufferUnderflowException.class,
+                    () -> bytes.readWithLength0(10, (b, sb, out) -> {}, null, output),
+                    "readWithLength0 should throw when length exceeds remaining");
+        } finally {
+            bytes.releaseLast();
+            output.releaseLast();
+        }
+    }
+
+    @Test
+    @DisplayName("readPositionUnlimited sets position beyond current read limit")
+    void readPositionUnlimitedTest() {
+        Bytes<?> bytes = Bytes.allocateElasticOnHeap(32);
+        try {
+            bytes.append("0123456789ABCDEF");
+            bytes.readLimit(5); // Restrict limit
+            bytes.readPositionUnlimited(10); // Should work past the limit
+            assertEquals(10, bytes.readPosition(),
+                    "readPositionUnlimited should set position to 10 when limit is 5");
+        } finally {
+            bytes.releaseLast();
+        }
+    }
+
+    @Test
+    @DisplayName("readPositionRemaining sets both position and limit")
+    void readPositionRemainingTest() {
+        Bytes<?> bytes = Bytes.allocateElasticOnHeap(32);
+        try {
+            bytes.append("0123456789ABCDEF");
+            bytes.readPositionRemaining(2, 5);
+            assertEquals(2, bytes.readPosition(),
+                    "readPositionRemaining should set read position to 2");
+            assertEquals(5, bytes.readRemaining(),
+                    "readPositionRemaining should set remaining to 5");
+        } finally {
+            bytes.releaseLast();
+        }
+    }
+
+    @Test
+    @DisplayName("readLimitToCapacity expands limit to full capacity")
+    void readLimitToCapacityTest() {
+        // Use fixed capacity bytes to test readLimitToCapacity
+        Bytes<?> bytes = Bytes.wrapForRead(new byte[16]);
+        try {
+            bytes.readLimit(5);
+            assertEquals(5, bytes.readRemaining(), "Initial limit should be respected");
+            bytes.readLimitToCapacity();
+            assertEquals(16, bytes.readRemaining(), "Limit should expand to full capacity");
+        } finally {
+            bytes.releaseLast();
         }
     }
 }

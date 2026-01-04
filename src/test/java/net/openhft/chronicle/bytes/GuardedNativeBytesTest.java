@@ -103,7 +103,7 @@ public class GuardedNativeBytesTest {
     }
 
     @Test
-    @DisplayName("readInt rejects mismatched type markers")
+    @DisplayName("GuardedNativeBytes readInt rejects mismatched type markers after writeLong")
     public void readIntRejectsMismatchedType() {
         final GuardedNativeBytes<?> guarded = new GuardedNativeBytes<>(BytesStore.nativeStoreWithFixedCapacity(64), 64);
         try {

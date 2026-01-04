@@ -7,7 +7,10 @@ import net.openhft.chronicle.bytes.BinaryWireCode;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.bytes.BytesTestCommon;
 import net.openhft.chronicle.bytes.HexDumpBytes;
+import net.openhft.chronicle.core.OS;
+import net.openhft.chronicle.core.io.ClosedIllegalStateException;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -15,10 +18,20 @@ import java.nio.charset.StandardCharsets;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 public class BooleanReferenceTest extends BytesTestCommon {
+
+    @BeforeEach
+    void skipOnWindowsAndWsl() {
+        // Skip on Windows/WSL due to JVM native crash (STATUS_HEAP_CORRUPTION)
+        assumeFalse(OS.isWindows() || isWsl(), "Skipped on Windows/WSL due to JVM crash");
+    }
+
     @Test
     @DisplayName("binary boolean reference reads and writes true/false")
     public void testBinary() {
@@ -137,5 +150,172 @@ public class BooleanReferenceTest extends BytesTestCommon {
                     "toString should reflect the current boolean value");
         }
         nbs.releaseLast();
+    }
+
+    @Test
+    @DisplayName("text boolean reference toString handles closed state")
+    public void textReferenceToStringWhenClosed() {
+        BytesStore<?, Void> nbs = BytesStore.nativeStoreWithFixedCapacity(5);
+        @NotNull TextBooleanReference ref = new TextBooleanReference();
+        TextBooleanReference.write(false, nbs, 0);
+        ref.bytesStore(nbs, 0, ref.maxSize());
+        ref.close();
+        String result = ref.toString();
+        assertNotNull(result, "toString should not return null when closed");
+        assertTrue(result.contains("Closed"),
+                "toString result '" + result + "' should contain 'Closed'");
+        nbs.releaseLast();
+    }
+
+    @Test
+    @DisplayName("text boolean reference getValue throws when closed")
+    public void textReferenceGetValueThrowsWhenClosed() {
+        BytesStore<?, Void> nbs = BytesStore.nativeStoreWithFixedCapacity(5);
+        @NotNull TextBooleanReference ref = new TextBooleanReference();
+        TextBooleanReference.write(true, nbs, 0);
+        ref.bytesStore(nbs, 0, ref.maxSize());
+        ref.close();
+        assertThrows(ClosedIllegalStateException.class,
+                ref::getValue,
+                "text getValue should throw when reference is closed");
+        nbs.releaseLast();
+    }
+
+    @Test
+    @DisplayName("text boolean reference setValue throws when closed")
+    public void textReferenceSetValueThrowsWhenClosed() {
+        BytesStore<?, Void> nbs = BytesStore.nativeStoreWithFixedCapacity(5);
+        @NotNull TextBooleanReference ref = new TextBooleanReference();
+        TextBooleanReference.write(true, nbs, 0);
+        ref.bytesStore(nbs, 0, ref.maxSize());
+        ref.close();
+        assertThrows(ClosedIllegalStateException.class,
+                () -> ref.setValue(false),
+                "text setValue should throw when reference is closed");
+        nbs.releaseLast();
+    }
+
+    @Test
+    @DisplayName("binary boolean reference getValue throws when closed")
+    public void binaryReferenceGetValueThrowsWhenClosed() {
+        BytesStore<?, Void> nbs = BytesStore.nativeStoreWithFixedCapacity(1);
+        @NotNull BinaryBooleanReference ref = new BinaryBooleanReference();
+        nbs.writeByte(0, (byte) BinaryWireCode.TRUE);
+        ref.bytesStore(nbs, 0, 1);
+        ref.close();
+        assertThrows(ClosedIllegalStateException.class,
+                ref::getValue,
+                "binary getValue should throw when reference is closed");
+        nbs.releaseLast();
+    }
+
+    @Test
+    @DisplayName("binary boolean reference setValue throws when closed")
+    public void binaryReferenceSetValueThrowsWhenClosed() {
+        BytesStore<?, Void> nbs = BytesStore.nativeStoreWithFixedCapacity(1);
+        @NotNull BinaryBooleanReference ref = new BinaryBooleanReference();
+        nbs.writeByte(0, (byte) BinaryWireCode.FALSE);
+        ref.bytesStore(nbs, 0, 1);
+        ref.close();
+        assertThrows(ClosedIllegalStateException.class,
+                () -> ref.setValue(true),
+                "binary setValue should throw when reference is closed");
+        nbs.releaseLast();
+    }
+
+    @Test
+    @DisplayName("binary boolean reference bytesStore throws when closed")
+    public void binaryReferenceBytesStoreThrowsWhenClosed() {
+        BytesStore<?, Void> nbs = BytesStore.nativeStoreWithFixedCapacity(1);
+        @NotNull BinaryBooleanReference ref = new BinaryBooleanReference();
+        ref.close();
+        assertThrows(ClosedIllegalStateException.class,
+                () -> ref.bytesStore(nbs, 0, 1),
+                "bytesStore should throw when reference is closed");
+        nbs.releaseLast();
+    }
+
+    @Test
+    @DisplayName("text boolean reference writes false correctly")
+    public void textReferenceWriteFalse() {
+        BytesStore<?, Void> nbs = BytesStore.nativeStoreWithFixedCapacity(5);
+        try (@NotNull TextBooleanReference ref = new TextBooleanReference()) {
+            TextBooleanReference.write(false, nbs, 0);
+            ref.bytesStore(nbs, 0, ref.maxSize());
+            assertFalse(ref.getValue(),
+                    "Text reference should read false after writing false");
+            assertEquals("value: false",
+                    ref.toString(),
+                    "toString should report false");
+        }
+        nbs.releaseLast();
+    }
+
+    @Test
+    @DisplayName("binary boolean reference returns bytesStore correctly")
+    public void binaryReferenceReturnsBytesStore() {
+        BytesStore<?, Void> nbs = BytesStore.nativeStoreWithFixedCapacity(1);
+        try (@NotNull BinaryBooleanReference ref = new BinaryBooleanReference()) {
+            nbs.writeByte(0, (byte) BinaryWireCode.TRUE);
+            ref.bytesStore(nbs, 0, 1);
+            assertNotNull(ref.bytesStore(),
+                    "binary bytesStore should return the underlying store");
+            assertEquals(0, ref.offset(),
+                    "binary offset should return the configured offset");
+        }
+        nbs.releaseLast();
+    }
+
+    @Test
+    @DisplayName("text boolean reference returns bytesStore correctly")
+    public void textReferenceReturnsBytesStore() {
+        BytesStore<?, Void> nbs = BytesStore.nativeStoreWithFixedCapacity(5);
+        try (@NotNull TextBooleanReference ref = new TextBooleanReference()) {
+            TextBooleanReference.write(true, nbs, 0);
+            ref.bytesStore(nbs, 0, ref.maxSize());
+            assertNotNull(ref.bytesStore(),
+                    "text bytesStore should return the underlying store");
+            assertEquals(0, ref.offset(),
+                    "text offset should return the configured offset");
+        }
+        nbs.releaseLast();
+    }
+
+    @Test
+    @DisplayName("binary boolean reference returns null bytesStore before initialisation")
+    public void binaryReferenceNullBytesStoreBeforeInit() {
+        try (@NotNull BinaryBooleanReference ref = new BinaryBooleanReference()) {
+            assertNull(ref.bytesStore(),
+                    "binary bytesStore should return null before initialisation");
+        }
+    }
+
+    @Test
+    @DisplayName("text boolean reference returns null bytesStore before initialisation")
+    public void textReferenceNullBytesStoreBeforeInit() {
+        try (@NotNull TextBooleanReference ref = new TextBooleanReference()) {
+            assertNull(ref.bytesStore(),
+                    "text bytesStore should return null before initialisation");
+        }
+    }
+
+    @Test
+    @DisplayName("binary boolean reference handles reassignment of bytesStore")
+    public void binaryReferenceReassignBytesStore() {
+        BytesStore<?, Void> nbs1 = BytesStore.nativeStoreWithFixedCapacity(1);
+        BytesStore<?, Void> nbs2 = BytesStore.nativeStoreWithFixedCapacity(1);
+        try (@NotNull BinaryBooleanReference ref = new BinaryBooleanReference()) {
+            nbs1.writeByte(0, (byte) BinaryWireCode.TRUE);
+            ref.bytesStore(nbs1, 0, 1);
+            assertTrue(ref.getValue(),
+                    "Initial bytesStore should report true");
+
+            nbs2.writeByte(0, (byte) BinaryWireCode.FALSE);
+            ref.bytesStore(nbs2, 0, 1);
+            assertFalse(ref.getValue(),
+                    "Reassigned bytesStore should report false");
+        }
+        nbs1.releaseLast();
+        nbs2.releaseLast();
     }
 }

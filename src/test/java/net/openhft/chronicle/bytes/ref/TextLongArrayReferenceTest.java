@@ -65,7 +65,7 @@ public class TextLongArrayReferenceTest extends BytesTestCommon {
     }
 
     @Test
-    @DisplayName("setMaxUsed preserves higher used value")
+    @DisplayName("setMaxUsed preserves higher used count when lower value supplied")
     public void setMaxUsedPreservesHigherValue() {
         try (@NotNull TextLongArrayReference array = new TextLongArrayReference()) {
             Bytes<?> bytes = Bytes.allocateElastic(256);
@@ -85,7 +85,7 @@ public class TextLongArrayReferenceTest extends BytesTestCommon {
     }
 
     @Test
-    @DisplayName("compareAndSet updates matching values")
+    @DisplayName("compareAndSet updates array slot when expected value matches")
     public void compareAndSetUpdatesMatchingValue() {
         try (@NotNull TextLongArrayReference array = new TextLongArrayReference()) {
             Bytes<?> bytes = Bytes.allocateElastic(256);
@@ -106,7 +106,7 @@ public class TextLongArrayReferenceTest extends BytesTestCommon {
     }
 
     @Test
-    @DisplayName("compareAndSet leaves mismatched values unchanged")
+    @DisplayName("compareAndSet leaves array slot unchanged when expected differs")
     public void compareAndSetLeavesMismatchedValue() {
         try (@NotNull TextLongArrayReference array = new TextLongArrayReference()) {
             Bytes<?> bytes = Bytes.allocateElastic(256);
@@ -127,7 +127,7 @@ public class TextLongArrayReferenceTest extends BytesTestCommon {
     }
 
     @Test
-    @DisplayName("bytesStore rejects mismatched lengths")
+    @DisplayName("bytesStore rejects mismatched lengths for text header")
     public void bytesStoreRejectsMismatchedLength() {
         try (@NotNull TextLongArrayReference array = new TextLongArrayReference()) {
             Bytes<?> bytes = Bytes.allocateElastic(256);
@@ -136,7 +136,7 @@ public class TextLongArrayReferenceTest extends BytesTestCommon {
                 long length = TextLongArrayReference.peakLength(bytes, 0);
                 long badLength = length - 1;
                 assertFalse(badLength == length,
-                        "Sanity check should confirm the mismatched length value differs");
+                        "Sanity check should confirm badLength=" + badLength + " differs from length=" + length);
                 assertThrows(IllegalArgumentException.class,
                         () -> array.bytesStore(bytes, 0, badLength),
                         "bytesStore should reject lengths that do not match the header");

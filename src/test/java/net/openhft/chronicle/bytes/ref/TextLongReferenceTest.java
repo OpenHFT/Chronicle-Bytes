@@ -84,7 +84,7 @@ public class TextLongReferenceTest extends BytesTestCommon {
             for (int i = 1; i < 8; i++) {
                 assertEquals(' ',
                         bytesStore.readByte(i),
-                        "Alignment should pad bytes with spaces");
+                        "Alignment should pad bytes with spaces at index " + i);
             }
             Bytes<Void> bytes = bytesStore.bytesForRead();
             bytes.readPosition(value.offset());

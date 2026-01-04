@@ -107,7 +107,7 @@ public class BinaryLongArrayReferenceTest extends BytesTestCommon {
     }
 
     @Test
-    @DisplayName("write rejects negative capacities")
+    @DisplayName("write rejects negative capacity values for binary long arrays")
     public void writeRejectsNegativeCapacity() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(32);
         try {
@@ -120,7 +120,7 @@ public class BinaryLongArrayReferenceTest extends BytesTestCommon {
     }
 
     @Test
-    @DisplayName("forceAllToNotCompleteState resets collected references")
+    @DisplayName("forceAllToNotCompleteState resets collected references to not-complete state")
     public void forceAllToNotCompleteStateResetsReferences() {
         assumeFalse(Jvm.isArm(), "Atomic compareAndSet is not supported on ARM");
         assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory is required for reference collection test");
@@ -167,7 +167,7 @@ public class BinaryLongArrayReferenceTest extends BytesTestCommon {
         try (BinaryLongArrayReference array = new BinaryLongArrayReference()) {
             String summary = array.toString();
             assertTrue(summary.contains("not set"),
-                    "toString should report missing bytes store");
+                    "summary '" + summary + "' should contain 'not set' when bytes store is missing");
         }
     }
 
@@ -182,8 +182,9 @@ public class BinaryLongArrayReferenceTest extends BytesTestCommon {
             array.setValueAt(0, 11);
             array.setValueAt(1, 22);
             array.setMaxUsed(2);
-            assertTrue(array.toString().contains("..."),
-                    "toString should append ellipsis when capacity exceeds used count");
+            String summary = array.toString();
+            assertTrue(summary.contains("..."),
+                    "summary '" + summary + "' should contain '...' when capacity exceeds used count");
         } finally {
             bytes.releaseLast();
         }
@@ -244,7 +245,7 @@ public class BinaryLongArrayReferenceTest extends BytesTestCommon {
     }
 
     @Test
-    @DisplayName("readMarshallable rejects negative capacity")
+    @DisplayName("readMarshallable rejects negative capacity values from input")
     public void readMarshallableRejectsNegativeCapacity() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(32);
         try (BinaryLongArrayReference array = new BinaryLongArrayReference()) {
@@ -253,7 +254,7 @@ public class BinaryLongArrayReferenceTest extends BytesTestCommon {
             bytes.readPosition(0);
             assertThrows(net.openhft.chronicle.core.io.IORuntimeException.class,
                     () -> array.readMarshallable(bytes),
-                    "Negative capacity should be rejected");
+                    "readMarshallable should reject negative capacity values");
         } finally {
             bytes.releaseLast();
         }
@@ -293,7 +294,7 @@ public class BinaryLongArrayReferenceTest extends BytesTestCommon {
     }
 
     @Test
-    @DisplayName("compareAndSet updates matching values")
+    @DisplayName("compareAndSet updates array slot when expected value matches")
     public void compareAndSetUpdatesMatchingValues() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(128);
         try (BinaryLongArrayReference array = new BinaryLongArrayReference()) {
@@ -312,7 +313,7 @@ public class BinaryLongArrayReferenceTest extends BytesTestCommon {
     }
 
     @Test
-    @DisplayName("compareAndSet leaves mismatched values unchanged")
+    @DisplayName("compareAndSet leaves array slot unchanged when expected differs")
     public void compareAndSetLeavesMismatchedValues() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(128);
         try (BinaryLongArrayReference array = new BinaryLongArrayReference()) {

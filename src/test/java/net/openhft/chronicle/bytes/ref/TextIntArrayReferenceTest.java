@@ -194,7 +194,7 @@ public class TextIntArrayReferenceTest extends BytesTestCommon {
     }
 
     @Test
-    @DisplayName("setMaxUsed preserves higher used value")
+    @DisplayName("setMaxUsed preserves higher used count when lower value supplied")
     public void setMaxUsedPreservesHigherValue() {
         try (TextIntArrayReference array = new TextIntArrayReference()) {
             Bytes<?> bytes = Bytes.allocateElastic(256);
@@ -214,7 +214,7 @@ public class TextIntArrayReferenceTest extends BytesTestCommon {
     }
 
     @Test
-    @DisplayName("bytesStore rejects mismatched lengths")
+    @DisplayName("bytesStore rejects mismatched lengths for text header")
     public void bytesStoreRejectsMismatchedLength() {
         Bytes<?> bytes = Bytes.allocateElastic(256);
         try (TextIntArrayReference ref = new TextIntArrayReference()) {
@@ -230,9 +230,10 @@ public class TextIntArrayReferenceTest extends BytesTestCommon {
     }
 
     @Test
-    @DisplayName("compareAndSet updates value when expected matches")
+    @DisplayName("compareAndSet updates array slot when expected value matches")
     public void compareAndSetUpdatesWhenExpectedMatches() {
-        assumeFalse(Jvm.isArm(), "Atomic compareAndSet is not supported on ARM");
+        assumeFalse(Jvm.isArm(),
+                "Atomic compareAndSet is not supported on ARM for TextIntArrayReference");
         Bytes<?> bytes = Bytes.allocateElastic(256);
         try (TextIntArrayReference ref = new TextIntArrayReference()) {
             TextIntArrayReference.write(bytes, 2);

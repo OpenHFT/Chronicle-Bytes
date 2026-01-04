@@ -89,7 +89,7 @@ public class TextIntReferenceTest extends BytesTestCommon {
             for (int i = 1; i < 8; i++) {
                 assertEquals(' ',
                         nbs.readByte(i),
-                        "Alignment should pad bytes with spaces");
+                        "Alignment should pad bytes with spaces at index " + i);
             }
             Bytes<Void> bytes = nbs.bytesForRead();
             bytes.readPosition(ref.offset());

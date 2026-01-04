@@ -5,6 +5,8 @@ package net.openhft.chronicle.bytes;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
@@ -12,6 +14,7 @@ import java.nio.charset.StandardCharsets;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class AppendableUtilTest extends BytesTestCommon {
 
@@ -189,5 +192,175 @@ public class AppendableUtilTest extends BytesTestCommon {
         assertEquals("HelloXWorld", b.toString(),
                 "setCharAt updates Bytes content");
         b.releaseLast();
+    }
+
+    @Test
+    @DisplayName("AppendableUtil append(double) writes formatted value to Bytes")
+    public void appendDoubleToBytes() {
+        Bytes<?> b = Bytes.allocateElasticOnHeap(32);
+        try {
+            AppendableUtil.append(b, 3.14159);
+            assertTrue(b.toString().startsWith("3.14"),
+                    "append formats double into Bytes output");
+        } finally {
+            b.releaseLast();
+        }
+    }
+
+    @Test
+    @DisplayName("AppendableUtil append(long) writes decimal value to Bytes")
+    public void appendLongToBytes() {
+        Bytes<?> b = Bytes.allocateElasticOnHeap(32);
+        try {
+            AppendableUtil.append(b, 123456789L);
+            assertEquals("123456789", b.toString(),
+                    "append formats long into Bytes output");
+        } finally {
+            b.releaseLast();
+        }
+    }
+
+    @Test
+    @DisplayName("AppendableUtil append(long) rejects unsupported Appendable implementations")
+    public void appendLongToUnsupportedAppendable() {
+        Appendable unsupported = new Appendable() {
+            @Override
+            public Appendable append(CharSequence csq) {
+                return this;
+            }
+            @Override
+            public Appendable append(CharSequence csq, int start, int end) {
+                return this;
+            }
+            @Override
+            public Appendable append(char c) {
+                return this;
+            }
+        };
+        assertThrows(IllegalArgumentException.class,
+                () -> AppendableUtil.append(unsupported, 42L),
+                "append(long) rejects unsupported Appendable");
+    }
+
+    @Test
+    @DisplayName("AppendableUtil append(double) rejects unsupported Appendable implementations")
+    public void appendDoubleToUnsupportedAppendable() {
+        Appendable unsupported = new Appendable() {
+            @Override
+            public Appendable append(CharSequence csq) {
+                return this;
+            }
+            @Override
+            public Appendable append(CharSequence csq, int start, int end) {
+                return this;
+            }
+            @Override
+            public Appendable append(char c) {
+                return this;
+            }
+        };
+        assertThrows(IllegalArgumentException.class,
+                () -> AppendableUtil.append(unsupported, 3.14),
+                "append(double) rejects unsupported Appendable");
+    }
+
+    @ParameterizedTest
+    @DisplayName("findUtf8Length reports UTF-8 length for CharSequence input")
+    @CsvSource({
+            "hello, 5",
+            "a, 1",
+            "'', 0"
+    })
+    void findUtf8LengthCharSequence(String input, long expected) {
+        assertEquals(expected, AppendableUtil.findUtf8Length(input),
+                "findUtf8Length should return " + expected + " for input '" + input + "'");
+    }
+
+    @Test
+    @DisplayName("findUtf8Length counts multi-byte UTF-8 characters correctly")
+    void findUtf8LengthMultibyteChars() {
+        // Euro sign (U+20AC) = 3 bytes in UTF-8
+        String euro = "\u20AC";
+        assertEquals(3, AppendableUtil.findUtf8Length(euro),
+                "Euro sign requires 3 bytes in UTF-8");
+
+        // 2-byte character (e.g., Latin Extended character)
+        String twoByteChar = "\u00E9"; // e with acute
+        assertEquals(2, AppendableUtil.findUtf8Length(twoByteChar),
+                "Latin extended char requires 2 bytes");
+    }
+
+    @Test
+    @DisplayName("findUtf8Length with byte array coder 0")
+    void findUtf8LengthByteArrayCoderZero() {
+        byte[] bytes = "hello".getBytes(StandardCharsets.ISO_8859_1);
+        long length = AppendableUtil.findUtf8Length(bytes, (byte) 0);
+        assertEquals(5, length,
+                "findUtf8Length with coder 0 for ASCII");
+    }
+
+    @Test
+    @DisplayName("findUtf8Length with byte array coder 0 and high bytes")
+    void findUtf8LengthByteArrayCoderZeroHighBytes() {
+        // Bytes > 0x7F require 2 bytes in UTF-8
+        byte[] bytes = new byte[]{(byte) 0x80, (byte) 0xFF};
+        long length = AppendableUtil.findUtf8Length(bytes, (byte) 0);
+        assertEquals(4, length,
+                "findUtf8Length counts extra bytes for high values");
+    }
+
+    @Test
+    @DisplayName("findUtf8Length with byte array coder 1 (UTF-16)")
+    void findUtf8LengthByteArrayCoderOne() {
+        // UTF-16 encoding of 'AB' = 0x0041, 0x0042
+        byte[] bytes = new byte[]{0x41, 0x00, 0x42, 0x00};
+        long length = AppendableUtil.findUtf8Length(bytes, (byte) 1);
+        assertEquals(2, length,
+                "findUtf8Length with coder 1 for ASCII chars");
+    }
+
+    @Test
+    @DisplayName("findUtf8Length with char array offset and length")
+    void findUtf8LengthCharArrayWithOffset() {
+        char[] chars = "hello world".toCharArray();
+        long length = AppendableUtil.findUtf8Length(chars, 6, 5);
+        assertEquals(5, length,
+                "findUtf8Length with offset returns correct length");
+    }
+
+    @Test
+    @DisplayName("AppendableUtil appends CharSequence subsequence to StringBuilder")
+    void appendSubsequenceToStringBuilder() {
+        StringBuilder sb = new StringBuilder();
+        AppendableUtil.append(sb, "hello world", 0, 5);
+        assertEquals("hello", sb.toString(),
+                "append should copy CharSequence subsequence into StringBuilder");
+    }
+
+    @Test
+    @DisplayName("AppendableUtil appends Bytes subsequence to StringBuilder")
+    void appendBytesSubsequenceToStringBuilder() {
+        Bytes<?> source = Bytes.from("hello world");
+        StringBuilder sb = new StringBuilder();
+        try {
+            AppendableUtil.append(sb, source, 0, 5);
+            assertEquals("hello", sb.toString(),
+                    "append should copy Bytes subsequence into StringBuilder");
+        } finally {
+            source.releaseLast();
+        }
+    }
+
+    @Test
+    @DisplayName("AppendableUtil appends CharSequence subsequence to Bytes target")
+    void appendSubsequenceToBytes() {
+        Bytes<?> target = Bytes.allocateElasticOnHeap(32);
+        try {
+            AppendableUtil.append(target, "hello world", 0, 5);
+            assertEquals("hello", target.toString(),
+                    "append should copy CharSequence subsequence into Bytes target");
+        } finally {
+            target.releaseLast();
+        }
     }
 }

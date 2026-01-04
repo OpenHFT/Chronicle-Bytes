@@ -81,7 +81,7 @@ public class CompressionTest {
     }
 
     @Test
-    @DisplayName("unsupported uncompress throws an error")
+    @DisplayName("uncompress rejects unsupported algorithm with IllegalArgumentException")
     public void uncompressUnsupportedThrows() {
         Bytes<?> input = Bytes.from("payload");
         Bytes<?> output = Bytes.allocateElasticOnHeap(64);
@@ -242,7 +242,7 @@ public class CompressionTest {
             return new InputStream() {
                 @Override
                 public int read() throws IOException {
-                    throw new IOException("read failure");
+                    throw new IOException("read failure in test decompression stream");
                 }
             };
         }
@@ -252,7 +252,7 @@ public class CompressionTest {
             return new OutputStream() {
                 @Override
                 public void write(int b) throws IOException {
-                    throw new IOException("write failure");
+                    throw new IOException("write failure in test compression stream");
                 }
             };
         }

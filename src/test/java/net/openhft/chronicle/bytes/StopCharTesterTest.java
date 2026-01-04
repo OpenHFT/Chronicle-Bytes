@@ -14,7 +14,7 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@DisplayName("StopCharTester behaviour for standard testers")
+@DisplayName("StopCharTester validates behaviour for standard tester variants")
 public class StopCharTesterTest {
 
     private static Stream<Arguments> stopCharCases() {
@@ -74,7 +74,7 @@ public class StopCharTesterTest {
 
     @ParameterizedTest(name = "{index}: {0} isStopChar({1}) -> {2}")
     @MethodSource("stopCharCases")
-    @DisplayName("standard StopCharTesters follow documented rules")
+    @DisplayName("standard StopCharTesters follow documented stop rules and exceptions")
     public void stopCharTestersMatchExpectedRules(StopCharTester tester, int ch, boolean expected) {
         if (expected) {
             assertTrue(tester.isStopChar(ch),
