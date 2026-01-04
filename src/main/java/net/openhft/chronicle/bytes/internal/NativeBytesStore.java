@@ -758,6 +758,18 @@ public class NativeBytesStore<U>
             throws ClosedIllegalStateException {
         for (; i < length; i++) {
             char c = chars[offset + i];
+            if (Character.isHighSurrogate(c) && i + 1 < length) {
+                char c2 = chars[offset + i + 1];
+                if (Character.isLowSurrogate(c2)) {
+                    int codePoint = Character.toCodePoint(c, c2);
+                    writeByte(pos++, (byte) (0xF0 | ((codePoint >> 18) & 0x07)));
+                    writeByte(pos++, (byte) (0x80 | ((codePoint >> 12) & 0x3F)));
+                    writeByte(pos++, (byte) (0x80 | ((codePoint >> 6) & 0x3F)));
+                    writeByte(pos++, (byte) (0x80 | (codePoint & 0x3F)));
+                    i++;
+                    continue;
+                }
+            }
             if (c <= 0x007F) {
                 writeByte(pos++, (byte) c);
 

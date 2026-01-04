@@ -23,8 +23,8 @@
     <properties>
         <zero.cost.assertions>disabled</zero.cost.assertions>
         <!-- Define the target coverage thresholds as properties -->
-        <jacoco.line.coverage>0.710</jacoco.line.coverage>
-        <jacoco.branch.coverage>0.623</jacoco.branch.coverage>
+        <jacoco.line.coverage>0.760</jacoco.line.coverage>
+        <jacoco.branch.coverage>0.690</jacoco.branch.coverage>
     </properties>
 
     <dependencyManagement>

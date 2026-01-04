@@ -770,20 +770,22 @@ enum BytesInternal {
             throw new IllegalArgumentException("Parse length exceeds remaining bytes for 8-bit parse");
         sb.ensureCapacity(utflen);
 
-        if (Jvm.isJava9Plus() && Jvm.maxDirectMemory() > 0) {
+        if (Jvm.isJava9Plus() && Jvm.maxDirectMemory() > 0
+                && getStringCoder(sb) == JAVA9_STRING_CODER_LATIN) {
             byte[] sbBytes = extractBytes(sb);
             for (int count = 0; count < utflen; count++) {
                 int c = bytes.readUnsignedByte();
                 sbBytes[count] = (byte) c;
             }
-        } else {
-            char[] chars = StringUtils.extractChars(sb);
-            for (int count = 0; count < utflen; count++) {
-                int c = bytes.readUnsignedByte();
-                chars[count] = (char) c;
-            }
+            StringUtils.setLength(sb, utflen);
+            return;
         }
-        StringUtils.setLength(sb, utflen);
+
+        sb.setLength(utflen);
+        for (int count = 0; count < utflen; count++) {
+            int c = bytes.readUnsignedByte();
+            sb.setCharAt(count, (char) c);
+        }
     }
 
     public static void parse8bit1(@NotNull StreamingDataInput bytes, @NotNull Appendable appendable, @NonNegative int utflen)
@@ -1009,7 +1011,27 @@ enum BytesInternal {
                     appendable.append((char) c3);
                     break;
                 }
-                // TODO add code point of characters > 0xFFFF support.
+                case 15: {
+                    /* 1111 0xxx 10xx xxxx 10xx xxxx 10xx xxxx */
+                    count += utf ? 4 : 1;
+                    if (count > length)
+                        throw new UTFDataFormatRuntimeException(
+                                MALFORMED_INPUT_PARTIAL_CHARACTER_AT_END);
+                    int char2 = bytes.readUnsignedByte();
+                    int char3 = bytes.readUnsignedByte();
+                    int char4 = bytes.readUnsignedByte();
+                    if (((char2 & 0xC0) != 0x80) || ((char3 & 0xC0) != 0x80) || ((char4 & 0xC0) != 0x80))
+                        throw newUTFDataFormatRuntimeException(count - 1L, WAS + char2 + " " + char3 + " " + char4);
+                    int codePoint = ((c & 0x07) << 18) |
+                            ((char2 & 0x3F) << 12) |
+                            ((char3 & 0x3F) << 6) |
+                            (char4 & 0x3F);
+                    if (codePoint < 0x10000 || codePoint > 0x10FFFF)
+                        throw newUTFDataFormatRuntimeException(count - 1L, WAS + codePoint);
+                    appendable.append(Character.highSurrogate(codePoint));
+                    appendable.append(Character.lowSurrogate(codePoint));
+                    break;
+                }
                 default:
                     /* 10xx xxxx, 1111 xxxx */
                     throw newUTFDataFormatRuntimeException(count, "");
@@ -1068,7 +1090,26 @@ enum BytesInternal {
                     appendable.append((char) c3);
                     break;
                 }
-                // TODO add code point of characters > 0xFFFF support.
+                case 15: {
+                    /* 1111 0xxx 10xx xxxx 10xx xxxx 10xx xxxx */
+                    if (offset + 3 > limit)
+                        throw new UTFDataFormatRuntimeException(
+                                MALFORMED_INPUT_PARTIAL_CHARACTER_AT_END);
+                    int char2 = input.readUnsignedByte(offset++);
+                    int char3 = input.readUnsignedByte(offset++);
+                    int char4 = input.readUnsignedByte(offset++);
+                    if (((char2 & 0xC0) != 0x80) || ((char3 & 0xC0) != 0x80) || ((char4 & 0xC0) != 0x80))
+                        throw newUTFDataFormatRuntimeException(offset - limit + utflen - 1, WAS + char2 + " " + char3 + " " + char4);
+                    int codePoint = ((c & 0x07) << 18) |
+                            ((char2 & 0x3F) << 12) |
+                            ((char3 & 0x3F) << 6) |
+                            (char4 & 0x3F);
+                    if (codePoint < 0x10000 || codePoint > 0x10FFFF)
+                        throw newUTFDataFormatRuntimeException(offset - limit + utflen - 1, WAS + codePoint);
+                    appendable.append(Character.highSurrogate(codePoint));
+                    appendable.append(Character.lowSurrogate(codePoint));
+                    break;
+                }
                 default:
                     /* 10xx xxxx, 1111 xxxx */
                     throw newUTFDataFormatRuntimeException(offset - limit + utflen, "");
@@ -1220,6 +1261,14 @@ enum BytesInternal {
         throwExceptionIfReleased(str);
         for (; i < length; i++) {
             char c = str.charAt(offset + i);
+            if (Character.isHighSurrogate(c) && i + 1 < length) {
+                char c2 = str.charAt(offset + i + 1);
+                if (Character.isLowSurrogate(c2)) {
+                    appendUtf8Char(bytes, Character.toCodePoint(c, c2));
+                    i++;
+                    continue;
+                }
+            }
             appendUtf8Char(bytes, c);
         }
     }
@@ -1257,6 +1306,14 @@ enum BytesInternal {
         throwExceptionIfReleased(str);
         for (; i < length; i++) {
             char c = str.charAt(strOffset + i);
+            if (Character.isHighSurrogate(c) && i + 1 < length) {
+                char c2 = str.charAt(strOffset + i + 1);
+                if (Character.isLowSurrogate(c2)) {
+                    outOffset = appendUtf8Char(out, outOffset, Character.toCodePoint(c, c2));
+                    i++;
+                    continue;
+                }
+            }
             outOffset = appendUtf8Char(out, outOffset, c);
         }
         return outOffset;

@@ -330,9 +330,16 @@ public enum AppendableUtil {
         long utflen = strlen;/* use charAt instead of copying String to char array */
         for (int i = 0; i < strlen; i++) {
             char c = str.charAt(i);
-            if (c <= 0x007F) {
-                continue;
+            if (Character.isHighSurrogate(c) && i + 1 < strlen) {
+                char c2 = str.charAt(i + 1);
+                if (Character.isLowSurrogate(c2)) {
+                    utflen += 2;
+                    i++;
+                    continue;
+                }
             }
+            if (c <= 0x007F)
+                continue;
             utflen += (c <= 0x07FF) ? 1 : 2;
         }
         return utflen;
@@ -363,7 +370,14 @@ public enum AppendableUtil {
             utflen = 0;/* use charAt instead of copying String to char array */
             for (int i = 0; i < strlen; i += 2) {
                 char c = (char) (((bytes[i + 1] & 0xFF) << 8) | (bytes[i] & 0xFF));
-
+                if (Character.isHighSurrogate(c) && i + 3 < strlen) {
+                    char c2 = (char) (((bytes[i + 3] & 0xFF) << 8) | (bytes[i + 2] & 0xFF));
+                    if (Character.isLowSurrogate(c2)) {
+                        utflen += 4;
+                        i += 2;
+                        continue;
+                    }
+                }
                 if (c <= 0x007F) {
                     utflen += 1;
                     continue;
@@ -417,9 +431,16 @@ public enum AppendableUtil {
         long utflen = length;
         for (int i = offset, end = offset + length; i < end; i++) {
             char c = chars[i];
-            if (c <= 0x007F) {
-                continue;
+            if (Character.isHighSurrogate(c) && i + 1 < end) {
+                char c2 = chars[i + 1];
+                if (Character.isLowSurrogate(c2)) {
+                    utflen += 2;
+                    i++;
+                    continue;
+                }
             }
+            if (c <= 0x007F)
+                continue;
             if (c <= 0x07FF) {
                 utflen++;
             } else {

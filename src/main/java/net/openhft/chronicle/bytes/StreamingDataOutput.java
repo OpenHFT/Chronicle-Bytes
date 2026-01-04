@@ -1006,12 +1006,19 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
             }
         } else {
             assert coder == JAVA9_STRING_CODER_UTF16;
-            for (int i = 0; i < 2 * length; i += 2) {
-                byte b1 = bytes[2 * offset + i];
-                byte b2 = bytes[2 * offset + i + 1];
-
-                int uBE = ((b2 & 0xFF) << 8) | b1 & 0xFF;
-                BytesInternal.appendUtf8Char(this, uBE);
+            for (int i = 0; i < length; i++) {
+                int base = (offset + i) * 2;
+                char c = (char) (((bytes[base + 1] & 0xFF) << 8) | (bytes[base] & 0xFF));
+                if (Character.isHighSurrogate(c) && i + 1 < length) {
+                    int nextBase = (offset + i + 1) * 2;
+                    char c2 = (char) (((bytes[nextBase + 1] & 0xFF) << 8) | (bytes[nextBase] & 0xFF));
+                    if (Character.isLowSurrogate(c2)) {
+                        BytesInternal.appendUtf8Char(this, Character.toCodePoint(c, c2));
+                        i++;
+                        continue;
+                    }
+                }
+                BytesInternal.appendUtf8Char(this, c);
             }
         }
         return (S) this;

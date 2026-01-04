@@ -315,11 +315,20 @@ public class UncheckedBytes<U>
             uncheckedWritePosition(wp);
             return this;
         }
+        long pos = wp;
         for (; i < length; i++) {
             char c = chars[offset + i];
-            BytesInternal.appendUtf8Char(this, c);
+            if (Character.isHighSurrogate(c) && i + 1 < length) {
+                char c2 = chars[offset + i + 1];
+                if (Character.isLowSurrogate(c2)) {
+                    pos = BytesInternal.appendUtf8Char(bytesStore, pos, Character.toCodePoint(c, c2));
+                    i++;
+                    continue;
+                }
+            }
+            pos = BytesInternal.appendUtf8Char(bytesStore, pos, c);
         }
-        uncheckedWritePosition(wp);
+        uncheckedWritePosition(pos);
         return this;
     }
 }
