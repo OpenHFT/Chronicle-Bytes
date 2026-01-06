@@ -35,6 +35,7 @@ public class DistributedUniqueTimeProvider extends SimpleCloseable implements Ti
     private final Bytes<?> bytes;
     private final MappedFile file;
     private final BinaryLongArrayReference values;
+    private final VanillaDistributedUniqueTimeDeduplicator deduplicator;
     private TimeProvider provider = SystemTimeProvider.INSTANCE;
     private int hostId;
 
@@ -53,6 +54,7 @@ public class DistributedUniqueTimeProvider extends SimpleCloseable implements Ti
             bytes.append8bit("&TSF\nTime stamp file used for sharing a unique id\n");
             values = new BinaryLongArrayReference(HOST_IDS);
             values.bytesStore(bytes, DEDUPLICATOR, HOST_IDS * 8L + 16L);
+            deduplicator = new VanillaDistributedUniqueTimeDeduplicator(values);
 
         } catch (Exception ioe) {
             throw new IORuntimeException("Failed to initialise timestamp file backing store", ioe);

@@ -24,6 +24,7 @@ import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
 
 import static net.openhft.chronicle.bytes.Bytes.MAX_CAPACITY;
+import static net.openhft.chronicle.bytes.Bytes.MAX_HEAP_CAPACITY;
 import static net.openhft.chronicle.core.Jvm.uncheckedCast;
 import static net.openhft.chronicle.core.UnsafeMemory.MEMORY;
 import static net.openhft.chronicle.core.util.Ints.requireNonNegative;
@@ -202,7 +203,7 @@ public class NativeBytesStore<U>
 
     @NotNull
     public static NativeBytesStore<ByteBuffer> elasticByteBuffer() {
-        return elasticByteBuffer(OS.pageSize(), MAX_CAPACITY);
+        return elasticByteBuffer(OS.pageSize(), MAX_HEAP_CAPACITY);
     }
 
     @NotNull
