@@ -38,7 +38,7 @@ import static net.openhft.chronicle.bytes.ref.BinaryIntReference.INT_NOT_COMPLET
  * Note: This class is not thread-safe. External synchronisation may be
  * required if instances are shared between threads.
  */
-@SuppressWarnings("rawtypes")
+@SuppressWarnings({"rawtypes", "deprecation"})
 public class BinaryIntArrayReference extends AbstractReference implements ByteableIntArrayValues, BytesMarshallable {
 
     public static final int SHIFT = 2;
@@ -303,7 +303,7 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
 
         if (!(value instanceof BinaryIntReference)) {
             throw new IllegalArgumentException("Expected BinaryIntReference for index " + index
-                    + " but was " + String.valueOf(value));
+                    + " but was " + value);
         }
         ((BinaryIntReference) value).bytesStore(bytesStore, VALUES + offset + (index << SHIFT), 8);
     }

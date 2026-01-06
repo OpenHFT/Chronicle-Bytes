@@ -38,7 +38,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
-@SuppressWarnings("rawtypes")
+@SuppressWarnings({"rawtypes", "deprecation"})
 @DisplayName("Mapped bytes behaviours across mapping and threading cases")
 public class MappedBytesTest extends BytesTestCommon {
 

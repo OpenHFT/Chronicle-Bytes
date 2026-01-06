@@ -37,6 +37,7 @@ import static org.junit.jupiter.api.Assumptions.assumeFalse;
  * support, histogram utilities, and reference counting edge cases for native
  * stores.
  */
+@SuppressWarnings("deprecation")
 @DisplayName("Native bytes store behaviours including cipher and checksums")
 public class NativeBytesStoreTest extends BytesTestCommon {
 

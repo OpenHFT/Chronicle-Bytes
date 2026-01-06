@@ -20,6 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
+@SuppressWarnings("deprecation")
 @DisplayName("Binary int array reference marshalling and access")
 public class BinaryIntArrayReferenceTest extends BytesTestCommon {
     @Test

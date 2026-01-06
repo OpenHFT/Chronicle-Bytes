@@ -11,6 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@SuppressWarnings("deprecation")
 @DisplayName("BytesStore default methods cover boundary and comparison scenarios")
 public class BytesStoreAdditionalTest extends BytesTestCommon {
 

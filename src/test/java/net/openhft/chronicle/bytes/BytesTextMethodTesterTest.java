@@ -14,6 +14,7 @@ import java.io.IOException;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
+@SuppressWarnings("deprecation")
 @DisplayName("BytesTextMethodTester integration workflow scenarios for text IO")
 public class BytesTextMethodTesterTest extends BytesTestCommon {
     @BeforeEach

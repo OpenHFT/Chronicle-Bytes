@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
-@SuppressWarnings({"squid:S2699", "squid:S5786"})
+@SuppressWarnings({"squid:S2699", "squid:S5786", "deprecation"})
 @DisplayName("Double decimaliser behaviour and formatting checks")
 class DecimaliserDoubleTest extends BytesTestCommon {
 

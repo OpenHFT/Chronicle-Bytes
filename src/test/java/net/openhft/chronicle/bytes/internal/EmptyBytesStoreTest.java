@@ -27,6 +27,7 @@ import static net.openhft.chronicle.core.Jvm.uncheckedCast;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 import static org.junit.jupiter.api.Assertions.*;
 
+@SuppressWarnings("deprecation")
 public class EmptyBytesStoreTest extends BytesTestCommon {
 
     private BytesStore<?, ?> instance;
@@ -554,7 +555,7 @@ public class EmptyBytesStoreTest extends BytesTestCommon {
         assumeFalse(instance instanceof NativeBytesStore,
                 "compareAndSwapInt is verified on non-native empty stores");
         expectBufferException("Empty store compareAndSwapInt should throw buffer exception",
-                () -> ((RandomDataOutput<?>) instance).compareAndSwapInt(0, 1, 1));
+                () -> instance.compareAndSwapInt(0, 1, 1));
     }
 
     @ParameterizedTest(name = "{index} {0}")
@@ -565,7 +566,7 @@ public class EmptyBytesStoreTest extends BytesTestCommon {
         assumeFalse(instance instanceof NativeBytesStore,
                 "compareAndSwapLong is verified on non-native empty stores");
         expectBufferException("Empty store compareAndSwapLong should throw buffer exception",
-                () -> ((RandomDataOutput<?>) instance).compareAndSwapLong(0, 1L, 1L));
+                () -> instance.compareAndSwapLong(0, 1L, 1L));
     }
 
     @ParameterizedTest(name = "{index} {0}")
@@ -576,7 +577,7 @@ public class EmptyBytesStoreTest extends BytesTestCommon {
         assumeFalse(instance instanceof NativeBytesStore,
                 "compareAndSwapDouble is verified on non-native empty stores");
         expectBufferException("Empty store compareAndSwapDouble should throw",
-                () -> ((RandomDataOutput<?>) instance).compareAndSwapDouble(0, 1d, 1d));
+                () -> instance.compareAndSwapDouble(0, 1d, 1d));
     }
 
     @ParameterizedTest(name = "{index} {0}")
@@ -587,7 +588,7 @@ public class EmptyBytesStoreTest extends BytesTestCommon {
         assumeFalse(instance instanceof NativeBytesStore,
                 "compareAndSwapFloat is verified on non-native empty stores");
         expectBufferException("Empty store compareAndSwapFloat should throw",
-                () -> ((RandomDataOutput<?>) instance).compareAndSwapFloat(0, 1f, 1f));
+                () -> instance.compareAndSwapFloat(0, 1f, 1f));
     }
 
     @ParameterizedTest(name = "{index} {0}")
@@ -598,7 +599,7 @@ public class EmptyBytesStoreTest extends BytesTestCommon {
         assumeFalse(instance instanceof NativeBytesStore,
                 "testAndSetInt is verified on non-native empty stores");
         expectBufferException("Empty store testAndSetInt should throw",
-                () -> ((RandomDataOutput<?>) instance).testAndSetInt(0, 1, 1));
+                () -> instance.testAndSetInt(0, 1, 1));
     }
 
     @ParameterizedTest(name = "{index} {0}")

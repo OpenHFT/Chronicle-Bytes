@@ -15,6 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
+@SuppressWarnings("deprecation")
 @DisplayName("Lenient reads return default values on empty input")
 public class ReadLenientTest extends BytesTestCommon {
     @Test

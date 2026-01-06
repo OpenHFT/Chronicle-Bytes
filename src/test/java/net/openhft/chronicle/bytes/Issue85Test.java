@@ -18,11 +18,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
+@SuppressWarnings("deprecation")
 @DisplayName("Issue 85 decimal parsing and formatting")
 public class Issue85Test extends BytesTestCommon {
     private int different = 0;
     private int different2 = 0;
-    private DecimalFormat df = new DecimalFormat();
+    private final DecimalFormat df = new DecimalFormat();
 
     {
         df.setMaximumIntegerDigits(99);

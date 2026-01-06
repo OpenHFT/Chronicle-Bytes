@@ -26,6 +26,7 @@ import java.nio.file.Path;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
+@SuppressWarnings("deprecation")
 @DisplayName("Mapped file behaviours for reference counts and IO")
 public class MappedFileTest extends BytesTestCommon {
 
@@ -118,7 +119,7 @@ public class MappedFileTest extends BytesTestCommon {
             try {
                 assertEquals(chunkSize, bs.start(),
                         "Byte store start equals chunk size");
-                assertEquals(chunkSize * 2, bs.capacity(),
+                assertEquals(chunkSize * 2L, bs.capacity(),
                         "Byte store capacity doubles chunk size");
                 final Bytes<?> bytes = bs.bytesForRead();
 

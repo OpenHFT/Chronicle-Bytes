@@ -16,6 +16,7 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Tests for UnsafeText branch coverage.
  */
+@SuppressWarnings("deprecation")
 class UnsafeTextBranchTest extends BytesTestCommon {
 
     private Bytes<?> bytes;

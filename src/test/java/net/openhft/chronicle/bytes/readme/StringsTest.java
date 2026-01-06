@@ -22,6 +22,7 @@ import static org.junit.jupiter.api.Assumptions.assumeFalse;
  * of the string pooling when the same text is written and read in different
  * ways.</p>
  */
+@SuppressWarnings("deprecation")
 @DisplayName("String readme examples for pooled UTF8 and 8bit values")
 public class StringsTest extends BytesTestCommon {
 
@@ -82,7 +83,7 @@ public class StringsTest extends BytesTestCommon {
     public void testNull() {
         final HexDumpBytes bytes = new HexDumpBytes();
         try {
-            bytes.writeHexDumpDescription("write8bit").write8bit((String) null);
+            bytes.writeHexDumpDescription("write8bit").write8bit(null);
             bytes.writeHexDumpDescription("writeUtf8").writeUtf8(null);
 
             //System.out.println(bytes.toHexString());

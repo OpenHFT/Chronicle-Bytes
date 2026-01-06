@@ -40,7 +40,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
-@SuppressWarnings("rawtypes")
+@SuppressWarnings({"rawtypes", "deprecation"})
 @DisplayName("Bytes behaviour across allocator variants and scenarios")
 public class BytesTest extends BytesTestCommon {
     private boolean parseDouble;

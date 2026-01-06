@@ -44,7 +44,7 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
  * @param <U> underlying store type
  */
 @SingleThreaded
-@SuppressWarnings({"rawtypes", "unchecked"})
+@SuppressWarnings({"rawtypes", "unchecked", "deprecation"})
 public interface Bytes<U> extends
         BytesStore<Bytes<U>, U>,
         BytesIn<U>,
@@ -875,7 +875,7 @@ public interface Bytes<U> extends
     @Override
     @NotNull
     default Bytes<U> bytesForWrite()
-            throws IllegalStateException, ClosedIllegalStateException {
+            throws IllegalStateException {
         throwExceptionIfReleased(this);
 
         BytesStore<?, U> bytesStore = bytesStore();

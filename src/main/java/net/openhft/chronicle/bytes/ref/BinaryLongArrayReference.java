@@ -43,7 +43,7 @@ import static net.openhft.chronicle.bytes.ref.BinaryLongReference.LONG_NOT_COMPL
  * @see BytesStore
  * @see BinaryLongReference
  */
-@SuppressWarnings("rawtypes")
+@SuppressWarnings({"rawtypes", "deprecation"})
 public class BinaryLongArrayReference extends AbstractReference implements ByteableLongArrayValues, BytesMarshallable {
     public static final int SHIFT = 3;
     private static final long CAPACITY = 0;
@@ -286,7 +286,7 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
 
         if (!(value instanceof BinaryLongReference)) {
             throw new IllegalArgumentException("Expected BinaryLongReference for index " + index
-                    + " but was " + String.valueOf(value));
+                    + " but was " + value);
         }
         ((BinaryLongReference) value).bytesStore(bytesStore, VALUES + offset + (index << SHIFT), 8);
     }

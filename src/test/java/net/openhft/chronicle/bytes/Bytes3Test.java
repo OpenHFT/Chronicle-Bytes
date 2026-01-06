@@ -26,7 +26,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@SuppressWarnings({"rawtypes", "unchecked"})
+@SuppressWarnings({"rawtypes", "unchecked", "deprecation"})
 public class Bytes3Test extends BytesTestCommon {
 
     private static final String TMP_FILE = OS.getTarget() + "/Bytes3Test-deleteme";
@@ -60,7 +60,7 @@ public class Bytes3Test extends BytesTestCommon {
         }
         new File(TMP_FILE).deleteOnExit();
         return tests.stream()
-                .map(args -> Arguments.of((String) args[0], (Supplier<Bytes<?>>) args[1]));
+                .map(args -> Arguments.of(args[0], args[1]));
     }
 
     @ParameterizedTest(name = "{0}")

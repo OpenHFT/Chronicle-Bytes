@@ -30,6 +30,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
+@SuppressWarnings("deprecation")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class BytesMarshallableTest extends BytesTestCommon {
 
@@ -225,8 +226,7 @@ public class BytesMarshallableTest extends BytesTestCommon {
                     "      32 32 32 32 32 32 32 32 32 32\n";
 
             if (GuardedNativeBytes.areNewGuarded()) {
-                expected = "" +
-                        "a4 01                                           # mn1\n" +
+                expected = "a4 01                                           # mn1\n" +
                         "                                                # byteable\n" +
                         "      a4 4e                                           # flag\n" +
                         "      a4 01                                           # b\n" +
@@ -264,14 +264,12 @@ public class BytesMarshallableTest extends BytesTestCommon {
                         "      ae 01 30                                        # bi\n" +
                         "      ae 01 30                                        # bd\n" +
                         "      ae 0a 32 30 31 36 2d 31 30 2d 30 35             # date\n" +
-                        (Jvm.isJava9Plus() ? "" +
-                                "      ae 0c 30 32 3a 33 34 3a 35 36 2e 37 37 35       # time\n" +
+                        (Jvm.isJava9Plus() ? "      ae 0c 30 32 3a 33 34 3a 35 36 2e 37 37 35       # time\n" +
                                 "      ae 17 32 30 31 36 2d 31 30 2d 30 35 54 30 32 3a # dateTime\n" +
                                 "      33 34 3a 35 36 2e 37 37 35 ae 2c 32 30 31 36 2d # zonedDateTime\n" +
                                 "      31 30 2d 30 35 54 30 32 3a 33 34 3a 35 36 2e 37\n" +
                                 "      37 35 2b 30 31 3a 30 30 5b 45 75 72 6f 70 65 2f\n"
-                                : "" +
-                                "      ae 0c 30 31 3a 33 34 3a 35 36 2e 37 37 35       # time\n" +
+                                : "      ae 0c 30 31 3a 33 34 3a 35 36 2e 37 37 35       # time\n" +
                                 "      ae 17 32 30 31 36 2d 31 30 2d 30 35 54 30 31 3a # dateTime\n" +
                                 "      33 34 3a 35 36 2e 37 37 35 ae 2c 32 30 31 36 2d # zonedDateTime\n" +
                                 "      31 30 2d 30 35 54 30 31 3a 33 34 3a 35 36 2e 37\n" +
@@ -374,14 +372,12 @@ public class BytesMarshallableTest extends BytesTestCommon {
             assertEquals(mc.numbers, mc2.numbers,
                     "numbers collection should round-trip");
 
-            final String expected = "" +
-                    "   02 05 48 65 6c 6c 6f 05 57 6f 72 6c 64          # words\n" +
+            final String expected = "   02 05 48 65 6c 6c 6f 05 57 6f 72 6c 64          # words\n" +
                     "   02 cd cc cc cc cc cc f4 3f 0b 00 00 00 00 00 00 # scoreCountMap\n" +
                     "   00 9a 99 99 99 99 99 01 40 16 00 00 00 00 00 00\n" +
                     "   00 02 07 52 55 4e 54 49 4d 45 05 43 4c 41 53 53 # policies\n" +
                     "   03 01 00 00 00 0c 00 00 00 7b 00 00 00          # numbers\n";
-            final String expectedG = "" +
-                    "   ae 02 ae 05 48 65 6c 6c 6f ae 05 57 6f 72 6c 64 # words\n" +
+            final String expectedG = "   ae 02 ae 05 48 65 6c 6c 6f ae 05 57 6f 72 6c 64 # words\n" +
                     "   ae 02 91 cd cc cc cc cc cc f4 3f a7 0b 00 00 00 # scoreCountMap\n" +
                     "   00 00 00 00 91 9a 99 99 99 99 99 01 40 a7 16 00\n" +
                     "   00 00 00 00 00 00 ae 02 07 52 55 4e 54 49 4d 45 # policies\n" +
@@ -560,29 +556,25 @@ public class BytesMarshallableTest extends BytesTestCommon {
             assertEquals(bm1b.bm3.value, bm1.bm3.value,
                     "nested long value should round-trip");
 
-            final String expected = "" +
-                    "   05 00 00 00                                     # num\n" +
+            final String expected = "   05 00 00 00                                     # num\n" +
                     "                                                # bm2\n" +
                     "      05 68 65 6c 6c 6f                               # text\n" +
                     "                                                # bm3\n" +
                     "      d2 02 96 49 00 00 00 00                         # value\n";
-            final String expected2 = "" +
-                    "   a6 05 00 00 00                                  # num\n" +
+            final String expected2 = "   a6 05 00 00 00                                  # num\n" +
                     "                                                # bm2\n" +
                     "      ae 05 68 65 6c 6c 6f                            # text\n" +
                     "                                                # bm3\n" +
                     "      a7 d2 02 96 49 00 00 00 00                      # value\n";
             assertEquals(NativeBytes.areNewGuarded() ? expected2 : expected, bytes.toHexString(),
                     "nested bytes should match expected hex dump");
-            final String expectedB = "" +
-                    "# net.openhft.chronicle.bytes.BytesMarshallableTest$BM1\n" +
+            final String expectedB = "# net.openhft.chronicle.bytes.BytesMarshallableTest$BM1\n" +
                     "   05 00 00 00                                     # num\n" +
                     "                                                # bm2\n" +
                     "      05 68 65 6c 6c 6f                               # text\n" +
                     "                                                # bm3\n" +
                     "      d2 02 96 49 00 00 00 00                         # value\n";
-            final String expectedBG = "" +
-                    "# net.openhft.chronicle.bytes.BytesMarshallableTest$BM1\n" +
+            final String expectedBG = "# net.openhft.chronicle.bytes.BytesMarshallableTest$BM1\n" +
                     "   a6 05 00 00 00                                  # num\n" +
                     "                                                # bm2\n" +
                     "      ae 05 68 65 6c 6c 6f                            # text\n" +

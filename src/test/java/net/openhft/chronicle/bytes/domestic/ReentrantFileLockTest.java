@@ -30,6 +30,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@SuppressWarnings("deprecation")
 @DisplayName("Reentrant file lock acquisition and process coordination checks")
 class ReentrantFileLockTest extends BytesTestCommon {
 

@@ -16,6 +16,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * Additional tests for Compression to achieve branch coverage in the static
  * compress and uncompress methods.
  */
+@SuppressWarnings("deprecation")
 @DisplayName("Compression branch coverage for compress and uncompress fallbacks")
 class CompressionBranchCoverageTest extends BytesTestCommon {
 

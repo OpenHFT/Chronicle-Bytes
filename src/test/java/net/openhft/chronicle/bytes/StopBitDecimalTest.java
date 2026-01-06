@@ -15,6 +15,7 @@ import java.util.Random;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
+@SuppressWarnings("deprecation")
 public class StopBitDecimalTest extends BytesTestCommon {
     @Test
     @DisplayName("stop-bit decimal round trip preserves scale and value")

@@ -18,6 +18,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * Tests for BytesStore interface default methods covering branch paths for
  * creation, wrapping, atomic updates, and copy operations.
  */
+@SuppressWarnings("deprecation")
 class BytesStoreBranchTest extends BytesTestCommon {
 
     @Test

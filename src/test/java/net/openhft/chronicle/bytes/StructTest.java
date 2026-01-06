@@ -21,6 +21,7 @@ import static net.openhft.chronicle.core.Jvm.uncheckedCast;
 import static net.openhft.chronicle.core.UnsafeMemory.MEMORY;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@SuppressWarnings("deprecation")
 public class StructTest extends BytesTestCommon {
 
     /**
@@ -117,7 +118,7 @@ public class StructTest extends BytesTestCommon {
             assert address != 0;
 
             @SuppressWarnings({"unchecked", "rawtypes"})
-            PointerBytesStore store = (PointerBytesStore) (BytesStore) bytes.bytesStore();
+            PointerBytesStore store = (PointerBytesStore) bytes.bytesStore();
             store.set(address, size);
             bytes.readPosition(0);
             bytes.writePosition(size);
@@ -293,8 +294,7 @@ public class StructTest extends BytesTestCommon {
         }
 
         System.out.print(sb);
-        assertEquals("" +
-                        "The Phantom MALE, born 1936-2-17\n" +
+        assertEquals("The Phantom MALE, born 1936-2-17\n" +
                         "Superman MALE, born 1938-4-18\n" +
                         "Wonder Woman FEMALE, born 1942-1-1\n",
                 sb.toString(),
@@ -457,7 +457,7 @@ public class StructTest extends BytesTestCommon {
             }
 
             @SuppressWarnings({"unchecked", "rawtypes"})
-            PointerBytesStore store = (PointerBytesStore) (BytesStore) name.bytesStore();
+            PointerBytesStore store = (PointerBytesStore) name.bytesStore();
             store.set(address + NAME, NAME_SIZE);
             nameStr = null;
         }

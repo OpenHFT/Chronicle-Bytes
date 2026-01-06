@@ -20,6 +20,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * Branch coverage tests for AppendableUtil formatting, parsing, UTF-8 handling,
  * and unsupported Appendable errors.
  */
+@SuppressWarnings("deprecation")
 class AppendableUtilBranchTest extends BytesTestCommon {
 
     @Test

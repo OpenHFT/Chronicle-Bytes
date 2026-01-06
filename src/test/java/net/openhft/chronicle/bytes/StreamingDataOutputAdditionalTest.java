@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@SuppressWarnings("deprecation")
 @DisplayName("StreamingDataOutput covers decimal stop bit encoding branches")
 public class StreamingDataOutputAdditionalTest extends BytesTestCommon {
 

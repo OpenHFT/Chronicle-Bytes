@@ -20,6 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 import static net.openhft.chronicle.bytes.ref.BinaryLongReference.LONG_NOT_COMPLETE;
 
+@SuppressWarnings("deprecation")
 @DisplayName("Binary long array reference marshalling and access")
 public class BinaryLongArrayReferenceTest extends BytesTestCommon {
     @Test

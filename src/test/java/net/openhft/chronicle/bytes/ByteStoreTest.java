@@ -29,6 +29,7 @@ import static net.openhft.chronicle.core.io.ReferenceOwner.INIT;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
+@SuppressWarnings("deprecation")
 @DisplayName("ByteStore read and write behaviour coverage tests")
 public class ByteStoreTest extends BytesTestCommon {
 
@@ -725,7 +726,7 @@ public class ByteStoreTest extends BytesTestCommon {
         }
 
         for (int i = 0; i < 128; i++) {
-            assertEquals(i, (int) direct.get(i), "Direct buffer byte should match value at index " + i);
+            assertEquals(i, direct.get(i), "Direct buffer byte should match value at index " + i);
         }
     }
 }

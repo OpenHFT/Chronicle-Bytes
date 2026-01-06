@@ -29,6 +29,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
+@SuppressWarnings("deprecation")
 @DisplayName("Distributed unique time provider monotonicity and concurrency checks")
 public class DistributedUniqueTimeProviderTest extends BytesTestCommon {
 
@@ -79,7 +80,7 @@ public class DistributedUniqueTimeProviderTest extends BytesTestCommon {
         int count = 0;
         do {
             for (int i = 0; i < 1000; i++)
-                blackHole = ((TimeProvider) timeProvider).currentTimeMicros();
+                blackHole = timeProvider.currentTimeMicros();
             count += 1000;
         } while ((end = System.currentTimeMillis()) < start + 500);
         long rate = 1000L * count / (end - start);
@@ -97,7 +98,7 @@ public class DistributedUniqueTimeProviderTest extends BytesTestCommon {
         int count = 0;
         do {
             for (int i = 0; i < 1000; i++)
-                blackHole = ((TimeProvider) timeProvider).currentTimeNanos();
+                blackHole = timeProvider.currentTimeNanos();
             count += 1000;
         } while ((end = System.currentTimeMillis()) < start + 500);
         long rate = 1000L * count / (end - start);
@@ -111,12 +112,12 @@ public class DistributedUniqueTimeProviderTest extends BytesTestCommon {
     @Test
     @DisplayName("currentTimeNanos returns increasing nanos over duration")
     public void currentTimeNanos() {
-        long start = ((TimeProvider) timeProvider).currentTimeNanos();
+        long start = timeProvider.currentTimeNanos();
         long last = start;
         int count = 0;
         long runTime = Jvm.isArm() ? 3_000_000_000L : 500_000_000L;
         for (; ; ) {
-            long now = ((TimeProvider) timeProvider).currentTimeNanos();
+            long now = timeProvider.currentTimeNanos();
             assertEquals(LongTime.toNanos(now), now,
                     "Nanosecond value stays aligned after conversion");
             if (now > start + runTime)
@@ -170,7 +171,7 @@ public class DistributedUniqueTimeProviderTest extends BytesTestCommon {
     public void testMonotonicallyIncreasing() {
         long last = 0;
         for (int i = 0; i < 10_000; i++) {
-            long now = DistributedUniqueTimeProvider.timestampFor(((TimeProvider) timeProvider).currentTimeNanos());
+            long now = DistributedUniqueTimeProvider.timestampFor(timeProvider.currentTimeNanos());
             assertTrue(now > last,
                     "Timestamp advances on iteration " + i);
             last = now;

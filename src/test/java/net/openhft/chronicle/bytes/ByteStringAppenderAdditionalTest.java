@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@SuppressWarnings("deprecation")
 @DisplayName("ByteStringAppender covers append branches and formatting paths")
 public class ByteStringAppenderAdditionalTest extends BytesTestCommon {
 

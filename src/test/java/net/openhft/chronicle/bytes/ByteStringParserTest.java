@@ -20,9 +20,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
+@SuppressWarnings("deprecation")
 public class ByteStringParserTest extends BytesTestCommon {
     @NotNull
-    private
+    private final
     Bytes<?> bytes = Bytes.allocateElastic();
 
     @Override
@@ -335,10 +336,10 @@ public class ByteStringParserTest extends BytesTestCommon {
         verifyFlexibleLong("-0001.00000", -1L);
         verifyFlexibleLong("6432643.0", 6432643L);
         verifyFlexibleLong("-16432620987.", -16432620987L);
-        verifyFlexibleLong(String.valueOf(Long.MAX_VALUE - 20) + ".0", Long.MAX_VALUE - 20);
-        verifyFlexibleLong(String.valueOf(Long.MIN_VALUE + 20) + ".0", Long.MIN_VALUE + 20);
-        verifyFlexibleLong(String.valueOf(Long.MAX_VALUE - 3) + ".0", Long.MAX_VALUE - 3);
-        verifyFlexibleLong(String.valueOf(Long.MIN_VALUE + 3) + ".0", Long.MIN_VALUE + 3);
+        verifyFlexibleLong(Long.MAX_VALUE - 20 + ".0", Long.MAX_VALUE - 20);
+        verifyFlexibleLong(Long.MIN_VALUE + 20 + ".0", Long.MIN_VALUE + 20);
+        verifyFlexibleLong(Long.MAX_VALUE - 3 + ".0", Long.MAX_VALUE - 3);
+        verifyFlexibleLong(Long.MIN_VALUE + 3 + ".0", Long.MIN_VALUE + 3);
 
     }
 
@@ -346,8 +347,8 @@ public class ByteStringParserTest extends BytesTestCommon {
     @DisplayName("parseFlexibleLong handles scientific and edge values")
     public void testFlexibleLong2() {
 
-        verifyFlexibleLong(String.valueOf(Long.MAX_VALUE) + ".0", Long.MAX_VALUE);
-        verifyFlexibleLong(String.valueOf(Long.MIN_VALUE) + ".0", Long.MIN_VALUE);
+        verifyFlexibleLong(Long.MAX_VALUE + ".0", Long.MAX_VALUE);
+        verifyFlexibleLong(Long.MIN_VALUE + ".0", Long.MIN_VALUE);
 
         // Test scientific format
         verifyFlexibleLong("1e1", 10L);
@@ -358,17 +359,17 @@ public class ByteStringParserTest extends BytesTestCommon {
         verifyFlexibleLong("9E12", 9000000000000L);
         verifyFlexibleLong("6410269E3", 6410269000L);
         verifyFlexibleLong("5000000000E-3", 5000000L);
-        verifyFlexibleLong(String.valueOf(Long.MAX_VALUE) + "e0", Long.MAX_VALUE);
-        verifyFlexibleLong(String.valueOf(Long.MIN_VALUE) + "E0", Long.MIN_VALUE);
-        verifyFlexibleLong(String.valueOf(Long.MAX_VALUE) + "000000e-6", Long.MAX_VALUE);
-        verifyFlexibleLong(String.valueOf(Long.MIN_VALUE) + "00000000000000000000E-20", Long.MIN_VALUE);
+        verifyFlexibleLong(Long.MAX_VALUE + "e0", Long.MAX_VALUE);
+        verifyFlexibleLong(Long.MIN_VALUE + "E0", Long.MIN_VALUE);
+        verifyFlexibleLong(Long.MAX_VALUE + "000000e-6", Long.MAX_VALUE);
+        verifyFlexibleLong(Long.MIN_VALUE + "00000000000000000000E-20", Long.MIN_VALUE);
         verifyFlexibleLong("0.000000000000000000000000000001E33", 1000L);
         verifyFlexibleLong("789000000000000000000000000000000E-25", 78900000L);
 
         // Test values outside long range
         verifyFlexibleLongRejects("9E40", "overflowing exponent");
         verifyFlexibleLongRejects("-8473289704324748391027491830", "overflowing digits");
-        verifyFlexibleLongRejects(String.valueOf(Long.MAX_VALUE) + "0", "overflowing magnitude");
+        verifyFlexibleLongRejects(Long.MAX_VALUE + "0", "overflowing magnitude");
 
         // Test rounded fractional numbers
         verifyFlexibleLongRejects("0.1", "rounded fractional value");
@@ -387,14 +388,14 @@ public class ByteStringParserTest extends BytesTestCommon {
         verifyFlexibleLongRejects("-0.9", "rounded fractional value");
         verifyFlexibleLongRejects("4.4000000000000000000000000000001E1", "fractional overflow");
         verifyFlexibleLongRejects("4.3999999999999999999999999999991E1", "fractional overflow");
-        verifyFlexibleLongRejects(String.valueOf(Long.MAX_VALUE) + ".1", "overflowing fractional long");
-        verifyFlexibleLongRejects(String.valueOf(Long.MAX_VALUE - 1) + ".9", "overflowing fractional long");
-        verifyFlexibleLongRejects(String.valueOf(Long.MAX_VALUE - 1) + ".1", "overflowing fractional long");
-        verifyFlexibleLongRejects(String.valueOf(Long.MIN_VALUE) + ".1", "overflowing fractional long");
-        verifyFlexibleLongRejects(String.valueOf(Long.MIN_VALUE + 1) + ".9", "overflowing fractional long");
-        verifyFlexibleLongRejects(String.valueOf(Long.MIN_VALUE + 1) + ".1", "overflowing fractional long");
-        verifyFlexibleLongRejects(String.valueOf(Long.MIN_VALUE + 5) + ".1", "overflowing fractional long");
-        verifyFlexibleLongRejects(String.valueOf(Long.MIN_VALUE + 5) + ".9", "overflowing fractional long");
+        verifyFlexibleLongRejects(Long.MAX_VALUE + ".1", "overflowing fractional long");
+        verifyFlexibleLongRejects(Long.MAX_VALUE - 1 + ".9", "overflowing fractional long");
+        verifyFlexibleLongRejects(Long.MAX_VALUE - 1 + ".1", "overflowing fractional long");
+        verifyFlexibleLongRejects(Long.MIN_VALUE + ".1", "overflowing fractional long");
+        verifyFlexibleLongRejects(Long.MIN_VALUE + 1 + ".9", "overflowing fractional long");
+        verifyFlexibleLongRejects(Long.MIN_VALUE + 1 + ".1", "overflowing fractional long");
+        verifyFlexibleLongRejects(Long.MIN_VALUE + 5 + ".1", "overflowing fractional long");
+        verifyFlexibleLongRejects(Long.MIN_VALUE + 5 + ".9", "overflowing fractional long");
 
         // Test extreme double values
         verifyFlexibleLongRejects("Infinity", "infinite value");

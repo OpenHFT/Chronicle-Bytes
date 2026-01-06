@@ -21,6 +21,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * Tests for UncheckedNativeBytes covering branch coverage for unchecked
  * native memory operations.
  */
+@SuppressWarnings("deprecation")
 @DisplayName("UncheckedNativeBytes branch coverage for unchecked native memory operations")
 class UncheckedNativeBytesBranchTest extends BytesTestCommon {
 

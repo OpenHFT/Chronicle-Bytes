@@ -13,6 +13,7 @@ import java.util.Random;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@SuppressWarnings("deprecation")
 public class UnsafeTextBytesTest extends BytesTestCommon {
 
     private static void testAppendBase10(final Bytes<?> bytes, final long l) {

@@ -31,6 +31,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 /**
  * Tests if certain non-performant methods works as expected when called on a released Bytes object
  */
+@SuppressWarnings("deprecation")
 final class BytesReleaseInvariantNonPerformantMethodsTest extends BytesTestCommon {
 
     private static final String SILLY_NAME = "Tryggve";
@@ -47,8 +48,8 @@ final class BytesReleaseInvariantNonPerformantMethodsTest extends BytesTestCommo
                 NamedConsumer.of(b -> b.parseUtf8(l -> true), "parseUtf8(StopCharTester)"),
                 NamedConsumer.of(b -> b.parse8bit(l -> true), "parse8bit(StopCharTester)"),
                 NamedConsumer.of(b -> b.parse8bit(bytes, l -> true), "parse8bit(bytes, StopCharTester)"),
-                NamedConsumer.of(b -> b.parse8bit(new StringBuilder(), (StopCharTester) l -> true), "parse8bit(sb, StopCharTester)"),
-                NamedConsumer.of(b -> b.parse8bit(new StringBuilder(), (StopCharsTester) (l, m) -> true), "parse8bit(sb, StopCharsTester)"),
+                NamedConsumer.of(b -> b.parse8bit(new StringBuilder(), l -> true), "parse8bit(sb, StopCharTester)"),
+                NamedConsumer.of(b -> b.parse8bit(new StringBuilder(), (l, m) -> true), "parse8bit(sb, StopCharsTester)"),
                 NamedConsumer.of(b -> b.parse8bit(new StringBuilder(), l -> true), "parse8bit(sb, p)"),
                 NamedConsumer.of(ByteStringParser::parseBigDecimal, "parseBigDecimal()"),
                 NamedConsumer.of(ByteStringParser::parseBoolean, "parseBoolean()"),

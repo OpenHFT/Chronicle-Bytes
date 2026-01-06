@@ -17,6 +17,7 @@ import java.util.Map;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 
+@SuppressWarnings("deprecation")
 class AbstractInternerTest {
 
     private static final class TestInterner extends AbstractInterner<String> {

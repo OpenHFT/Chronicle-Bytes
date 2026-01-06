@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
-@SuppressWarnings("unchecked")
+@SuppressWarnings({"unchecked", "deprecation"})
 public class AbstractBytesTest {
 
     private ConcreteBytes bytes;
@@ -42,7 +42,7 @@ public class AbstractBytesTest {
         }
 
         @Override
-        public BytesStore<Bytes<ByteBuffer>, ByteBuffer> copy() throws IllegalStateException, ClosedIllegalStateException, ThreadingIllegalStateException {
+        public BytesStore<Bytes<ByteBuffer>, ByteBuffer> copy() throws IllegalStateException {
             return null;
         }
     }

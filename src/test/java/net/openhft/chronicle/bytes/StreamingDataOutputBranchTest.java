@@ -20,6 +20,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * Branch coverage for StreamingDataOutput write and append operations,
  * including null handling, range writes, numeric encodings, and round-trip checks.
  */
+@SuppressWarnings("deprecation")
 @DisplayName("StreamingDataOutput branch coverage for write and append methods")
 class StreamingDataOutputBranchTest extends BytesTestCommon {
 
@@ -140,7 +141,7 @@ class StreamingDataOutputBranchTest extends BytesTestCommon {
     @Test
     @DisplayName("writeUtf8 returns null for null string input")
     void shouldWriteUtf8Null() {
-        bytes.writeUtf8((String) null);
+        bytes.writeUtf8(null);
 
         bytes.readPosition(0);
         assertNull(bytes.readUtf8(), "writeUtf8 returns null for null input");
@@ -360,7 +361,7 @@ class StreamingDataOutputBranchTest extends BytesTestCommon {
         try {
             source.write(new byte[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10});
 
-            bytes.write((BytesStore<?, ?>) source, 2L, 5L);
+            bytes.write(source, 2L, 5L);
 
             bytes.readPosition(0);
             assertEquals(5, bytes.readRemaining(), "write(BytesStore) writes 5 bytes from offset 2");

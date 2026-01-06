@@ -20,6 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+@SuppressWarnings("deprecation")
 public class CompressionTest {
 
     @Test

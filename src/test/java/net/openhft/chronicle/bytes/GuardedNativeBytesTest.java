@@ -13,6 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 /**
  * GuardedNativeBytes binary primitive and hex dump round trip verification tests.
  */
+@SuppressWarnings("deprecation")
 @DisplayName("GuardedNativeBytes primitive read and write checks")
 public class GuardedNativeBytesTest {
 
@@ -47,8 +48,7 @@ public class GuardedNativeBytesTest {
             bytes.writeHexDumpDescription("f64").writeDouble(10);
             bytes.writeHexDumpDescription("Utf8").writeUtf8("Hello");
 
-            final String expected = "" +
-                    "a4 59                                           # flag\n" +
+            final String expected = "a4 59                                           # flag\n" +
                     "a4 01                                           # s8\n" +
                     "a4 02                                           # u8\n" +
                     "a5 03 00                                        # s16\n" +

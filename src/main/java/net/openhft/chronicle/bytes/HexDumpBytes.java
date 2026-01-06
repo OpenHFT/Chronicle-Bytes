@@ -37,7 +37,7 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
  * Primarily intended for diagnostics and testing.
  */
 
-@SuppressWarnings("rawtypes")
+@SuppressWarnings({"rawtypes", "deprecation"})
 public class HexDumpBytes
         implements Bytes<Void>, DecimalAppender {
 

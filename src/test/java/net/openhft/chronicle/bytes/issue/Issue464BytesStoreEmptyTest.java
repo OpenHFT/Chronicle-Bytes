@@ -14,6 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+@SuppressWarnings("deprecation")
 @DisplayName("Empty BytesStore allocation avoids new backing")
 public class Issue464BytesStoreEmptyTest extends BytesTestCommon {
     @Test

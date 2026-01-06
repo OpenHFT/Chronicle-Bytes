@@ -23,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
-@SuppressWarnings("rawtypes")
+@SuppressWarnings({"rawtypes", "deprecation"})
 @DisplayName("BytesInternal guarded and unguarded mode checks")
 public class BytesInternalGuardedTest extends BytesTestCommon {
     static Stream<Arguments> guardedModes() {

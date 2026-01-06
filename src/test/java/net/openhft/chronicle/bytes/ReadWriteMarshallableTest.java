@@ -12,7 +12,7 @@ import java.nio.BufferUnderflowException;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
-@SuppressWarnings("rawtypes")
+@SuppressWarnings({"rawtypes", "deprecation"})
 @DisplayName("Read write marshallable round trip examples")
 public class ReadWriteMarshallableTest extends BytesTestCommon {
     @Test
@@ -52,7 +52,7 @@ public class ReadWriteMarshallableTest extends BytesTestCommon {
         @Override
         public void readMarshallable(BytesIn<?> bytes)
                 throws IORuntimeException, BufferUnderflowException {
-            BytesIn<?> in = (BytesIn<?>) bytes;
+            BytesIn<?> in = bytes;
             i1 = in.readMarshallableLength16(RWInner.class, i1);
             i2 = in.readMarshallableLength16(RWInner.class, i2);
         }

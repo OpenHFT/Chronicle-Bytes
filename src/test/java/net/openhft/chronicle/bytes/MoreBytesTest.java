@@ -30,6 +30,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
+@SuppressWarnings("deprecation")
 @DisplayName("More bytes utilities and index operations")
 public class MoreBytesTest extends BytesTestCommon {
 

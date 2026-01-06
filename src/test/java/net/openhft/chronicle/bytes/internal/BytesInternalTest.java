@@ -29,6 +29,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
+@SuppressWarnings("deprecation")
 @DisplayName("BytesInternal parsing and write behaviour checks")
 public class BytesInternalTest extends BytesTestCommon {
     @Test
