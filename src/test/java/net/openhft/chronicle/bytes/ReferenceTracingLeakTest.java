@@ -18,7 +18,7 @@ public class ReferenceTracingLeakTest extends BytesTestCommon {
     public void leakDetectionReportsCreatedHere() {
         final NativeBytes<Void> leaked = Bytes.allocateElasticDirect(64);
         try {
-            assertNotNull(((AbstractReferenceCounted) leaked).createdHere(),
+            assertNotNull(leaked.createdHere(),
                     "createdHere should be recorded for traced resources");
 
             final AssertionError leak = assertThrows(AssertionError.class,

@@ -6,6 +6,7 @@ package net.openhft.chronicle.bytes;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.IOTools;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
@@ -20,6 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class TempDirectoryIntegrationTest extends BytesTestCommon {
 
     @Test
+    @DisplayName("creates temp directory under target and cleans up")
     public void createTempDirectoryUnderTargetAndCleanup() throws Exception {
         final Path tempDir = IOTools.createTempDirectory("bytes-temp");
         final Path targetRoot = new File(OS.getTarget()).getAbsoluteFile().toPath().normalize();

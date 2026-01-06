@@ -5,6 +5,7 @@ package net.openhft.chronicle.bytes.util;
 
 import net.openhft.chronicle.bytes.StopCharsTester;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.Assert.*;
@@ -21,6 +22,7 @@ public class EscapingStopCharsTesterTest {
     }
 
     @Test
+    @DisplayName("escape character suppresses stop character for one subsequent call")
     public void testIsStopCharWithEscape() {
         // First call with escape character
         assertFalse("Escaped character should not be stop char", tester.isStopChar('\\', 'x'));
@@ -31,6 +33,7 @@ public class EscapingStopCharsTesterTest {
     }
 
     @Test
+    @DisplayName("non-stop characters are not treated as stop characters by tester")
     public void testIsStopCharWithoutEscape() {
         assertFalse("Non-stop char should not be recognized as stop char", tester.isStopChar('y', ' '));
     }
