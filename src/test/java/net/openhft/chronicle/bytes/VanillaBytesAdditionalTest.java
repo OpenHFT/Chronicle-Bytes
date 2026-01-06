@@ -105,9 +105,9 @@ public class VanillaBytesAdditionalTest extends BytesTestCommon {
             heap.write("abc".getBytes(ISO_8859_1));
             direct.readPosition(0);
             heap.readPosition(0);
-            assertTrue(((VanillaBytes<?>) direct).isEqual("abc"),
+            assertTrue(direct.isEqual("abc"),
                     "Direct bytes should report equality with matching content");
-            assertTrue(((VanillaBytes<?>) heap).isEqual("abc"),
+            assertTrue(heap.isEqual("abc"),
                     "Heap bytes should report equality with matching content");
         } finally {
             direct.releaseLast();
@@ -136,6 +136,8 @@ public class VanillaBytesAdditionalTest extends BytesTestCommon {
             assertEquals('x',
                     arrayCopy.readByte(0),
                     "Array-backed copy should preserve data");
+            arrayCopy.releaseLast();
+            bufferCopy.releaseLast();
         } finally {
             bufferBytes.releaseLast();
             arrayBytes.releaseLast();

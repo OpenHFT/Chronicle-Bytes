@@ -165,12 +165,13 @@ public class BinaryIntArrayReferenceTest extends BytesTestCommon {
             BinaryIntArrayReference.write(bytes, 2);
             long length = BinaryIntArrayReference.peakLength(bytes, 0);
             array.bytesStore(bytes, 0, length);
-            TextIntReference invalid = new TextIntReference();
-            assertNotNull(invalid,
-                    "Test must supply a non-binary int reference");
-            assertThrows(IllegalArgumentException.class,
-                    () -> array.bindValueAt(0, invalid),
-                    "bindValueAt should reject non-binary int references");
+            try (TextIntReference invalid = new TextIntReference()) {
+                assertNotNull(invalid,
+                        "Test must supply a non-binary int reference");
+                assertThrows(IllegalArgumentException.class,
+                        () -> array.bindValueAt(0, invalid),
+                        "bindValueAt should reject non-binary int references");
+            }
         } finally {
             bytes.releaseLast();
         }
@@ -184,10 +185,11 @@ public class BinaryIntArrayReferenceTest extends BytesTestCommon {
             BinaryIntArrayReference.write(bytes, 2);
             long length = BinaryIntArrayReference.peakLength(bytes, 0);
             array.bytesStore(bytes, 0, length);
-            BinaryIntReference value = new BinaryIntReference();
-            assertThrows(IllegalArgumentException.class,
-                    () -> array.bindValueAt(1, value),
-                    "Binary int references enforce the expected element length");
+            try (BinaryIntReference value = new BinaryIntReference()) {
+                assertThrows(IllegalArgumentException.class,
+                        () -> array.bindValueAt(1, value),
+                        "Binary int references enforce the expected element length");
+            }
         } finally {
             bytes.releaseLast();
         }

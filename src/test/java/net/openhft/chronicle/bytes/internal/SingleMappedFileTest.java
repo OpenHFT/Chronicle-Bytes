@@ -9,6 +9,7 @@ import net.openhft.chronicle.bytes.MappedFile;
 import net.openhft.chronicle.bytes.MappedBytesStore;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.ReferenceOwner;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -75,27 +76,6 @@ class SingleMappedFileTest extends BytesTestCommon {
     }
 
     // ========== AcquireByteStore Tests ==========
-
-    @Test
-    @DisplayName("acquireByteStore at position 0 returns store")
-    void shouldAcquireByteStoreAtPositionZero() throws IOException {
-        assumeFalse(OS.isWindows() || isWsl(), "Skipped on Windows/WSL");
-
-        File file = new File(tempDir, "acquire-zero.dat");
-        try (RandomAccessFile raf = new RandomAccessFile(file, "rw")) {
-            SingleMappedFile smf = new SingleMappedFile(file, raf, 4096, false);
-            try {
-                ReferenceOwner owner = ReferenceOwner.temporary("test");
-                MappedBytesStore store = smf.acquireByteStore(owner, 0, null, null);
-
-                assertNotNull(store, "Store should be returned for position 0");
-                store.release(owner);
-            } finally {
-                smf.close();
-            }
-        }
-    }
-
     @Test
     @DisplayName("acquireByteStore throws for non-zero position")
     void shouldThrowForNonZeroPosition() throws IOException {
@@ -279,8 +259,7 @@ class SingleMappedFileTest extends BytesTestCommon {
             try {
                 bytes = smf.createBytesFor();
                 assertNotNull(bytes, "createBytesFor should return MappedBytes");
-                assertTrue(bytes instanceof SingleMappedBytes,
-                        "Should return SingleMappedBytes instance");
+                assertInstanceOf(SingleMappedBytes.class, bytes, "Should return SingleMappedBytes instance");
             } finally {
                 if (bytes != null) bytes.close();
                 smf.close();

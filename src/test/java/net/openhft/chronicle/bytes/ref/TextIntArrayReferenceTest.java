@@ -96,8 +96,8 @@ public class TextIntArrayReferenceTest extends BytesTestCommon {
     @Test
     @DisplayName("bindValueAt rejects unsupported value binding requests")
     public void testBindValueAt() {
-        try (TextIntArrayReference ref = new TextIntArrayReference()) {
-            IntValue value = new BinaryIntReference();
+        try (TextIntArrayReference ref = new TextIntArrayReference();
+             IntValue value = new BinaryIntReference()) {
             assertThrows(UnsupportedOperationException.class,
                     () -> ref.bindValueAt(0, value),
                     "bindValueAt should throw UnsupportedOperationException");

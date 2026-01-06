@@ -25,10 +25,7 @@ import java.nio.channels.OverlappingFileLockException;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadLocalRandom;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -125,14 +122,16 @@ class ReentrantFileLockTest extends BytesTestCommon {
     @DisplayName("cross thread usage logs error for lock reuse")
     @ValueSource(booleans = {true, false})
     void errorIsLoggedWhenLocksArePassedBetweenThreads(boolean useTryLock) throws IOException, ExecutionException, InterruptedException {
-        try (FileChannel channel = FileChannel.open(fileToLock.toPath(), StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE)) {
-            final ReentrantFileLock lock = acquireLock(useTryLock, fileToLock, channel);
+        try (FileChannel channel = FileChannel.open(fileToLock.toPath(), StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
+             final ReentrantFileLock lock = acquireLock(useTryLock, fileToLock, channel)) {
             final AtomicLong spawnedThreadId = new AtomicLong();
-            Executors.newSingleThreadExecutor().submit(() -> {
+            ExecutorService executorService = Executors.newSingleThreadExecutor();
+            executorService.submit(() -> {
                 spawnedThreadId.set(Jvm.currentThreadId());
                 assertTrue(lock.isValid(),
                         "Lock remains valid when accessed from spawned thread");
             }).get();
+            executorService.shutdown();
             expectException("You're accessing a ReentrantFileLock created by thread " + Jvm.currentThreadId() + " on thread " + spawnedThreadId.get() + " this can have unexpected results, don't do it.");
         }
     }

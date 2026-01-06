@@ -198,12 +198,13 @@ public class BinaryLongArrayReferenceTest extends BytesTestCommon {
             BinaryLongArrayReference.write(bytes, 2);
             long length = BinaryLongArrayReference.peakLength(bytes, 0);
             array.bytesStore(bytes, 0, length);
-            TextLongReference invalid = new TextLongReference();
-            assertNotNull(invalid,
-                    "Test should provide a non-binary long reference");
-            assertThrows(IllegalArgumentException.class,
-                    () -> array.bindValueAt(0, invalid),
-                    "bindValueAt should reject non-binary long references");
+            try (TextLongReference invalid = new TextLongReference()) {
+                assertNotNull(invalid,
+                        "Test should provide a non-binary long reference");
+                assertThrows(IllegalArgumentException.class,
+                        () -> array.bindValueAt(0, invalid),
+                        "bindValueAt should reject non-binary long references");
+            }
         } finally {
             bytes.releaseLast();
         }
