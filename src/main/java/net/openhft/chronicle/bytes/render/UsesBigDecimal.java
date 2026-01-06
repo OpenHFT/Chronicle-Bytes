@@ -25,6 +25,13 @@ public class UsesBigDecimal implements Decimaliser {
     public static final Decimaliser USES_BIG_DECIMAL = new UsesBigDecimal();
 
     /**
+     * Creates a decimaliser that leverages {@link BigDecimal} for precision.
+     */
+    public UsesBigDecimal() {
+        // default
+    }
+
+    /**
      * Reference to the private {@code intCompact} field of {@link BigDecimal}.
      * Access may fail on some JVMs, in which case a slower fallback is used.
      */
@@ -46,36 +53,14 @@ public class UsesBigDecimal implements Decimaliser {
      * @param decimalAppender The {@link DecimalAppender} used to store and append the converted decimal value.
      * @return {@code true} if the conversion and appending were successful, {@code false} otherwise.
      */
+    @Override
     public boolean toDecimal(double value, DecimalAppender decimalAppender) {
         // Check for non-finite values or negative zero
         if (!Double.isFinite(value) || Double.doubleToLongBits(value) == NEGATIVE_ZERO_BITS)
             return false;
 
         // Convert the double to BigDecimal for high precision representation
-        BigDecimal bd = BigDecimal.valueOf(value);
-        int exp = bd.scale();
-
-        try {
-            if (INT_COMPACT == null) {
-                // This block is a fallback for JVM implementations where BigDecimal doesn't have an 'intCompact' field.
-                BigInteger bi = bd.unscaledValue();
-                long l = bi.longValueExact();
-                decimalAppender.append(l < 0, Math.abs(l), exp);
-                return true;
-
-            } else {
-                // Use reflection to access internal long representation of BigDecimal if possible.
-                long l = INT_COMPACT.getLong(bd);
-                if (l != NEGATIVE_ZERO_BITS) {
-                    decimalAppender.append(l < 0, Math.abs(l), exp);
-                    return true;
-                }
-            }
-        } catch (ArithmeticException | IllegalAccessException ae) {
-            // Fall back in case of exception.
-        }
-
-        return false;
+        return appendBigDecimal(BigDecimal.valueOf(value), decimalAppender);
     }
 
     /**
@@ -88,18 +73,22 @@ public class UsesBigDecimal implements Decimaliser {
      * @param decimalAppender The {@link DecimalAppender} used to store and append the converted decimal value.
      * @return {@code true} if the conversion and appending were successful, {@code false} otherwise.
      */
+    @Override
     public boolean toDecimal(float value, DecimalAppender decimalAppender) {
         // Check for non-finite values
         if (!Float.isFinite(value))
             return false;
 
         // Convert the float to BigDecimal by first converting it to String to avoid precision issues.
-        BigDecimal bd = new BigDecimal(Float.toString(value));
+        return appendBigDecimal(new BigDecimal(Float.toString(value)), decimalAppender);
+    }
+
+    private boolean appendBigDecimal(BigDecimal bd, DecimalAppender decimalAppender) {
         int exp = bd.scale();
 
         try {
             if (INT_COMPACT == null) {
-                // This block is a fallback for JVM implementations where BigDecimal doesn't have an 'intCompact' field.
+                // Fallback for JVMs without 'intCompact'.
                 BigInteger bi = bd.unscaledValue();
                 long l = bi.longValueExact();
                 decimalAppender.append(l < 0, Math.abs(l), exp);

@@ -48,6 +48,8 @@ public interface BytesMarshallable extends ReadBytesMarshallable, WriteBytesMars
 
     /**
      * Dumps the binary form of this object as a hex string for debugging.
+     *
+     * @return hex dump of the marshalled form
      */
     default String $toString() {
         ValidatableUtil.startValidateDisabled();

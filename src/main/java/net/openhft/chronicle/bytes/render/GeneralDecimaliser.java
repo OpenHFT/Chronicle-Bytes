@@ -19,6 +19,13 @@ public class GeneralDecimaliser implements Decimaliser {
     public static final Decimaliser GENERAL = new GeneralDecimaliser();
 
     /**
+     * Creates a decimaliser that blends simple and {@link BigDecimal}-backed strategies.
+     */
+    public GeneralDecimaliser() {
+        // default
+    }
+
+    /**
      * Convert {@code value} using the simple decimaliser then fall back to
      * {@link UsesBigDecimal} if necessary.
      * Values outside [1e-29, 1e45) are rejected.

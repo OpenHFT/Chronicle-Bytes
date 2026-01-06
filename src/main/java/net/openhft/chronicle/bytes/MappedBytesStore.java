@@ -75,6 +75,16 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
 
     /**
      * Factory method mirroring the protected constructor.
+     *
+     * @param owner        owner of the mapping reference
+     * @param mappedFile   mapped file backing the store
+     * @param start        starting offset within the file
+     * @param address      base memory address of the mapping
+     * @param capacity     total capacity of the mapping
+     * @param safeCapacity capacity guaranteed to be writable
+     * @param pageSize     system page size used for alignment
+     * @return new {@link MappedBytesStore} wrapping the mapping
+     * @throws ClosedIllegalStateException if the mapped file is closed
      */
     public static MappedBytesStore create(ReferenceOwner owner, MappedFile mappedFile, @NonNegative long start, long address, @NonNegative long capacity, @NonNegative long safeCapacity, @Positive int pageSize)
             throws ClosedIllegalStateException {
@@ -91,8 +101,9 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
     }
 
     /**
-     * @return capacity of the underlying file, which may differ from
-     * {@link #capacity()} if alignment is applied
+     * Reports the capacity of the underlying mapped file.
+     *
+     * @return capacity of the underlying file, which may differ from {@link #capacity()} if alignment is applied
      */
     public long underlyingCapacity() {
         return mappedFile.capacity();
@@ -431,6 +442,8 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
     }
 
     /**
+     * Returns the configured sync mode for this ByteStore.
+     *
      * @return the sync mode for this ByteStore
      */
     public SyncMode syncMode() {

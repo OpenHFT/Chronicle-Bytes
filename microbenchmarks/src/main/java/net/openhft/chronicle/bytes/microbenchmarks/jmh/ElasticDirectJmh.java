@@ -59,7 +59,7 @@ public class ElasticDirectJmh {
     }
 
     @Benchmark
-    @Fork(value = 1)
+    @Fork(1)
     @Warmup(iterations = 1)
     @BenchmarkMode(Mode.AverageTime)
     @OutputTimeUnit(TimeUnit.NANOSECONDS)
@@ -68,7 +68,7 @@ public class ElasticDirectJmh {
     }
 
     @Benchmark
-    @Fork(value = 1)
+    @Fork(1)
     @Warmup(iterations = 1)
     @BenchmarkMode(Mode.AverageTime)
     @OutputTimeUnit(TimeUnit.NANOSECONDS)
@@ -77,7 +77,7 @@ public class ElasticDirectJmh {
     }
 
     @Benchmark
-    @Fork(value = 1)
+    @Fork(1)
     @Warmup(iterations = 1)
     @BenchmarkMode(Mode.AverageTime)
     @OutputTimeUnit(TimeUnit.NANOSECONDS)
@@ -87,7 +87,7 @@ public class ElasticDirectJmh {
     }
 
     @Benchmark
-    @Fork(value = 1)
+    @Fork(1)
     @Warmup(iterations = 1)
     @BenchmarkMode(Mode.AverageTime)
     @OutputTimeUnit(TimeUnit.NANOSECONDS)
@@ -97,7 +97,7 @@ public class ElasticDirectJmh {
     }
 
     @Benchmark
-    @Fork(value = 1)
+    @Fork(1)
     @Warmup(iterations = 1)
     @BenchmarkMode(Mode.AverageTime)
     @OutputTimeUnit(TimeUnit.NANOSECONDS)
@@ -107,7 +107,7 @@ public class ElasticDirectJmh {
     }
 
     @Benchmark
-    @Fork(value = 1)
+    @Fork(1)
     @Warmup(iterations = 1)
     @BenchmarkMode(Mode.AverageTime)
     @OutputTimeUnit(TimeUnit.NANOSECONDS)
@@ -117,7 +117,7 @@ public class ElasticDirectJmh {
     }
 
     @Benchmark
-    @Fork(value = 1)
+    @Fork(1)
     @Warmup(iterations = 1)
     @BenchmarkMode(Mode.AverageTime)
     @OutputTimeUnit(TimeUnit.NANOSECONDS)

@@ -30,6 +30,10 @@ public final class PageUtil {
      */
     public static final int DEFAULT_HUGE_PAGE_SIZE = 2 * 1024 * 1024;
 
+    private PageUtil() {
+        // utility
+    }
+
     private static final Pattern PAGE_SIZE_PATTERN = Pattern.compile("pagesize=([0-9]+)([KkMmGg])");
     private static final TrieNode root = new TrieNode();
 
@@ -99,6 +103,7 @@ public final class PageUtil {
      * or OS default page size for a given absolute file path
      *
      * @param absolutePath file path
+     * @return page size in bytes to use for the supplied path
      */
     @Positive
     public static int getPageSize(@NotNull String absolutePath) {

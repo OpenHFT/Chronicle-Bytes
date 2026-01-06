@@ -23,6 +23,9 @@ public interface BytesPrepender<B extends BytesPrepender<B>> {
     /**
      * Clears the buffer then advances both cursors by {@code length} bytes so
      * data can be prepended later.
+     *
+     * @param length number of bytes to reserve
+     * @return this prepender
      */
     @NotNull
     B clearAndPad(@NonNegative long length)

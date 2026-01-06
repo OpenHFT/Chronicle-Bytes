@@ -574,22 +574,20 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
         if (writePosition() < 0 || writePosition() > capacity() - 1L + length)
             throw writeBufferOverflowException0(writePosition());
         int i;
-        ascii:
-        {
-            for (i = 0; i < length; i++) {
-                char c = chars[offset + i];
-                if (c > 0x007F)
-                    break ascii;
-                long oldPosition = writePosition();
-                BytesStore<?, ?> bytesStore = this.bytesStore;
-                if ((writePosition() & 0xff) == 0 && !bytesStore.inside(writePosition(), (length - i) * 3L)) {
-                    bytesStore = acquireNextByteStore0(writePosition(), false);
-                }
-                uncheckedWritePosition(writePosition() + 1);
-                bytesStore.writeByte(oldPosition, (byte) c);
+        for (i = 0; i < length; i++) {
+            char c = chars[offset + i];
+            if (c > 0x007F)
+                break;
+            long oldPosition = writePosition();
+            BytesStore<?, ?> bytesStore = this.bytesStore;
+            if ((writePosition() & 0xff) == 0 && !bytesStore.inside(writePosition(), (length - i) * 3L)) {
+                bytesStore = acquireNextByteStore0(writePosition(), false);
             }
-            return this;
+            uncheckedWritePosition(writePosition() + 1);
+            bytesStore.writeByte(oldPosition, (byte) c);
         }
+        if (i == length)
+            return this;
         for (; i < length; i++) {
             char c = chars[offset + i];
             BytesInternal.appendUtf8Char(this, c);

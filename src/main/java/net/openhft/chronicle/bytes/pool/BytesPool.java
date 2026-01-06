@@ -23,6 +23,10 @@ public final class BytesPool {
     private static final int DEFAULT_BYTES_POOL_SIZE_PER_THREAD =
             Jvm.getInteger("chronicle.bytesPool.instancesPerThread", 4);
 
+    private BytesPool() {
+        // utility class
+    }
+
     /**
      * Create a scoped-thread-local pool of bytes resources using the default per-thread size.
      *

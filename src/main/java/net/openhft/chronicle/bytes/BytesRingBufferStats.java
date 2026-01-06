@@ -16,11 +16,15 @@ public interface BytesRingBufferStats {
      * Minimum free space observed for the writer since the last call. Reset on
      * each invocation. Returns {@link Long#MAX_VALUE} if no reads occurred in
      * that period.
+     *
+     * @return smallest number of writable bytes seen since the last reset
      */
     @NonNegative
     long minNumberOfWriteBytesRemaining();
 
     /**
+     * Total capacity available in the ring buffer.
+     *
      * @return the total capacity of the ring buffer in bytes.
      */
     @NonNegative
@@ -51,6 +55,8 @@ public interface BytesRingBufferStats {
     long getAndClearContentionCount();
 
     /**
+     * Retrieves per-reader statistics snapshots.
+     *
      * @return a list of {@link RingBufferReaderStats} objects, each representing the statistics
      * for a reader of the ring buffer.
      */

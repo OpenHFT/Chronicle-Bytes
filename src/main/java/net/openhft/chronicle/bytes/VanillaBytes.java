@@ -5,6 +5,7 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.bytes.internal.BytesInternal;
 import net.openhft.chronicle.bytes.internal.NativeBytesStore;
+import net.openhft.chronicle.bytes.util.BufferUtil;
 import net.openhft.chronicle.core.*;
 import net.openhft.chronicle.core.annotation.Java9;
 import net.openhft.chronicle.core.annotation.NonNegative;
@@ -31,7 +32,7 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
  *
  * @param <U> type of the object representation
  */
-@SuppressWarnings("rawtypes")
+@SuppressWarnings({"rawtypes", "deprecation", "PMD.OverrideBothEqualsAndHashCodeOnComparable"})
 public class VanillaBytes<U>
         extends AbstractBytes<U>
         implements Byteable, Comparable<CharSequence> {
@@ -69,6 +70,7 @@ public class VanillaBytes<U>
     /**
      * Factory method for creating an instance of VanillaBytes that wraps the provided BytesStore.
      *
+     * @param <U>        type of the underlying BytesStore
      * @param bytesStore the BytesStore to be wrapped by the VanillaBytes.
      * @return a new instance of VanillaBytes that wraps the given BytesStore.
      * @throws IllegalArgumentException       If the write limit is negative.
@@ -84,6 +86,8 @@ public class VanillaBytes<U>
      * Creates a new {@code VanillaBytes} backed by an empty native store.
      * The returned instance is elastic as it actually delegates to
      * {@link NativeBytes}.
+     *
+     * @return elastic {@code VanillaBytes} backed by an empty store
      */
     @NotNull
     public static VanillaBytes<Void> vanillaBytes() {
@@ -285,17 +289,25 @@ public class VanillaBytes<U>
             ByteBuffer bb = ByteBuffer.allocateDirect(Maths.toInt32(readRemaining()));
             @NotNull ByteBuffer bbu = (ByteBuffer) bytesStore.underlyingObject();
             ByteBuffer slice = bbu.slice();
-            slice.position((int) readPosition());
-            slice.limit((int) readLimit());
+            BufferUtil.position(slice, (int) readPosition());
+            BufferUtil.limit(slice, (int) readLimit());
             bb.put(slice);
-            bb.clear();
+            BufferUtil.clear(bb);
             return uncheckedCast(BytesStore.wrap(bb));
         } else {
             return uncheckedCast(BytesUtil.copyOf(this));
         }
     }
 
+    /**
+     * Optimised bulk write that falls back to a copy when direct memory is available.
+     *
+     * @param bytes  source to copy from
+     * @param offset starting offset within the source
+     * @param length number of bytes to copy
+     */
     @SuppressWarnings("deprecation")
+    @Deprecated(/* to be removed in 2027 */)
     protected void optimisedWrite(@NotNull RandomDataInput bytes, @NonNegative long offset, @NonNegative long length)
             throws BufferOverflowException, BufferUnderflowException, ClosedIllegalStateException, IllegalArgumentException, ThreadingIllegalStateException {
         requireNonNull(bytes);
@@ -315,6 +327,14 @@ public class VanillaBytes<U>
         }
     }
 
+    /**
+     * Writes a subsequence of {@code str} to an absolute position without moving writePosition.
+     *
+     * @param position absolute position to start writing
+     * @param str      source characters
+     * @param offset   start offset in {@code str}
+     * @param length   number of characters to write
+     */
     public void write(long position, @NotNull CharSequence str, @NonNegative int offset, @NonNegative int length)
             throws BufferOverflowException, IllegalArgumentException, ArithmeticException, ClosedIllegalStateException, BufferUnderflowException, ThreadingIllegalStateException {
         requireNonNull(str);
@@ -542,6 +562,12 @@ public class VanillaBytes<U>
         return StringUtils.newString(chars);
     }
 
+    /**
+     * Renders the readable bytes as an ISO-8859-1 string.
+     *
+     * @return string view of readable bytes
+     * @throws ClosedIllegalStateException if the bytes have been released
+     */
     @NotNull
     protected String toString0()
             throws ClosedIllegalStateException {
@@ -557,6 +583,12 @@ public class VanillaBytes<U>
         return StringUtils.newString(chars);
     }
 
+    /**
+     * Appends 8-bit characters from {@code cs} without length prefixing.
+     *
+     * @param cs characters to append
+     * @return this instance for chaining
+     */
     @NotNull
     protected Bytes<U> append8bit0(@NotNull CharSequence cs)
             throws BufferOverflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
@@ -606,6 +638,12 @@ public class VanillaBytes<U>
         }
     }
 
+    /**
+     * Reads {@code length} 8-bit characters into {@code chars}.
+     *
+     * @param chars  destination array
+     * @param length number of characters to read
+     */
     public void read8Bit(char[] chars, @NonNegative int length)
             throws BufferUnderflowException, ClosedIllegalStateException {
         ReportUnoptimised.reportOnce();

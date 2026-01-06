@@ -38,6 +38,7 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      * @return Writer object representing the ByteStringAppender
      */
     @NotNull
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     default Writer writer() {
         return new ByteStringWriter(this);
     }
@@ -87,6 +88,7 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
     @NotNull
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     default B append(boolean flag)
             throws BufferOverflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
         return append(flag ? 'T' : 'F');
@@ -141,6 +143,7 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
     @NotNull
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     default B appendBase(long value, int base)
             throws BufferOverflowException, IllegalArgumentException, ClosedIllegalStateException, ThreadingIllegalStateException {
         if (base == 10)
@@ -209,6 +212,9 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
     /**
      * Appends {@code f} using the configured {@link Decimaliser}.  Very small or
      * large values may fall back to {@link Float#toString()}.
+     *
+     * @param f value to append
+     * @return this appender
      */
     @NotNull
     default B append(float f)
@@ -224,6 +230,9 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
 
     /**
      * Appends {@code d} using the current {@link Decimaliser} strategy.
+     *
+     * @param d value to append
+     * @return this appender
      */
     @NotNull
     default B append(double d)
@@ -238,7 +247,10 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
 
     /**
      * Returns the strategy used to convert floating point values to text.
+     *
+     * @return current decimaliser
      */
+    @Deprecated(/* to be removed in 2027 */)
     Decimaliser decimaliser();
 
     /**
@@ -253,6 +265,7 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      * Whether a trailing {@code .0} is appended to whole floating point values.
      *
      * @deprecated to be removed in x.28.  Use {@link #decimaliser(Decimaliser)} to control formatting.
+     * @return {@code true} if trailing .0 is appended
      */
     @Deprecated(/* to remove in x.28 */)
     boolean fpAppend0();
@@ -261,6 +274,8 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      * Controls whether a trailing {@code .0} is appended to whole floating point values.
      *
      * @deprecated to be removed in x.28.  Use {@link #decimaliser(Decimaliser)} instead.
+     * @param append0 whether to append .0 for whole values
+     * @return this appender
      */
     @Deprecated(/* to remove in x.28 */)
     B fpAppend0(boolean append0);
@@ -394,6 +409,7 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     default B append8bit(@NotNull BytesStore<?, ?> bs, @NonNegative long start, @NonNegative long end)
             throws IllegalArgumentException, BufferOverflowException, BufferUnderflowException, IndexOutOfBoundsException, ClosedIllegalStateException, ThreadingIllegalStateException {
         assert end > start : "append8bit(BytesStore) requires end>start: end=" + end + ", start=" + start;

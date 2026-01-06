@@ -23,8 +23,9 @@ public class EscapingStopCharTester implements StopCharTester {
     private boolean escaped = false;
 
     /**
-     * @param sct the underlying {@link StopCharTester} used when the character
-     *            is not escaped
+     * Creates an escaping tester that delegates to {@code sct} when characters are not escaped.
+     *
+     * @param sct the underlying {@link StopCharTester} used when the character is not escaped
      */
     public EscapingStopCharTester(StopCharTester sct) {
         this.sct = sct;

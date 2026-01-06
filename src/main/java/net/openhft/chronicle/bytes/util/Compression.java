@@ -21,6 +21,10 @@ import java.nio.BufferOverflowException;
  * to various types of input data.
  */
 public interface Compression {
+    /**
+     * Shared empty byte array returned for no-op decompression.
+     */
+    byte[] EMPTY_BYTES = new byte[0];
 
     /**
      * Compresses {@code uncompressed} into {@code compressed} using the named algorithm.
@@ -101,6 +105,7 @@ public interface Compression {
      * @param bytes A function to read bytes from the input data.
      * @return The uncompressed data as byte array.
      * @throws IORuntimeException If an I/O error occurs.
+     * @param <T>   type of the compressed source
      */
     static <T> byte[] uncompress(@NotNull CharSequence cs, T t, @NotNull ThrowingFunction<T, byte[], IORuntimeException> bytes)
             throws IORuntimeException {
@@ -119,9 +124,9 @@ public interface Compression {
                     return Compressions.GZIP.uncompress(bytes.apply(t));
                 break;
             default:
-                return null;
+                return EMPTY_BYTES;
         }
-        return null;
+        return EMPTY_BYTES;
     }
 
     /**
@@ -132,6 +137,7 @@ public interface Compression {
      * @return the compressed data
      * @throws AssertionError if an unexpected {@link IOException} occurs
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     default byte[] compress(byte[] bytes) {
         @NotNull ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try (OutputStream output = compressingStream(baos)) {
@@ -237,6 +243,7 @@ public interface Compression {
      *
      * @return true if available, false otherwise.
      */
+    @Deprecated(/* to be removed in 2027 */)
     default boolean available() {
         return true;
     }

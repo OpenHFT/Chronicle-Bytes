@@ -42,7 +42,7 @@ class ContentEqualJLBH implements JLBHTask {
             rv.add(b);
         }
         rv.add(example);
-        return rv.toArray(new Bytes<?>[rv.size()]);
+        return rv.toArray(new Bytes<?>[0]);
     }
 
     @Override

@@ -25,12 +25,12 @@ public class BytesMethodReaderBuilder implements MethodReaderBuilder {
     private ExceptionHandler exceptionHandlerOnUnknownMethod = Jvm.debug();
 
     /**
-     * @param in the {@link BytesIn} stream from which serialised method calls
-     *           will be read. Must not be {@code null}.
-     * @throws NullPointerException        if {@code in} is {@code null}
-     * @throws ClosedIllegalStateException if {@code in} has been released
-     * @throws ThreadingIllegalStateException if {@code in} is accessed by
-     *                                        multiple threads unsafely
+     * Creates a builder bound to the supplied input stream of serialised method calls.
+     *
+     * @param in the {@link BytesIn} stream from which serialised method calls will be read. Must not be {@code null}.
+     * @throws NullPointerException           if {@code in} is {@code null}
+     * @throws ClosedIllegalStateException    if {@code in} has been released
+     * @throws ThreadingIllegalStateException if {@code in} is accessed by multiple threads unsafely
      */
     public BytesMethodReaderBuilder(BytesIn<?> in) {
         throwExceptionIfReleased(in);
@@ -53,7 +53,10 @@ public class BytesMethodReaderBuilder implements MethodReaderBuilder {
     /**
      * Returns the currently configured {@link MethodEncoderLookup} strategy used
      * to find decoders for method calls.
+     *
+     * @return lookup to use when building the reader
      */
+    @Deprecated(/* to be removed in 2027 */)
     public MethodEncoderLookup methodEncoderLookup() {
         return methodEncoderLookup;
     }
@@ -64,6 +67,7 @@ public class BytesMethodReaderBuilder implements MethodReaderBuilder {
      * @param methodEncoderLookup the MethodEncoderLookup function
      * @return this builder for chained invocation
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public BytesMethodReaderBuilder methodEncoderLookup(MethodEncoderLookup methodEncoderLookup) {
         this.methodEncoderLookup = methodEncoderLookup;
         return this;
@@ -74,6 +78,8 @@ public class BytesMethodReaderBuilder implements MethodReaderBuilder {
      * for which no specific handler is registered. If not explicitly set,
      * it is initialised based on the
      * {@link #exceptionHandlerOnUnknownMethod(ExceptionHandler)} configuration.
+     *
+     * @return parselet for unknown messages
      */
     public BytesParselet defaultParselet() {
         if (defaultParselet == null)
@@ -134,6 +140,7 @@ public class BytesMethodReaderBuilder implements MethodReaderBuilder {
      * @param objects the target objects whose methods will be invoked
      * @return a new configured {@link BytesMethodReader}
      */
+    @Override
     public BytesMethodReader build(Object... objects) {
         return new BytesMethodReader(in, defaultParselet(), methodEncoderLookup, objects);
     }

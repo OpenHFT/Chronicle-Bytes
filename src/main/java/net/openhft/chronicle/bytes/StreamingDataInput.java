@@ -391,6 +391,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     default int readInt24()
             throws BufferUnderflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
         return readUnsignedShort() | (readUnsignedByte() << 24 >> 8);
@@ -406,6 +407,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     default int readUnsignedInt24()
             throws BufferUnderflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
         return readUnsignedShort() | (readUnsignedByte() << 16);
@@ -475,10 +477,13 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
     }
 
     /**
+     * Reads as many remaining bytes as possible to form a little-endian long value.
+     *
      * @return a long using the bytes remaining
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     default long readIncompleteLong()
             throws ClosedIllegalStateException, ThreadingIllegalStateException {
         long left = readRemaining();
@@ -551,6 +556,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
      * Reads a UTF-8 encoded string from the input stream and appends it to the provided appendable.
      * This method is similar to {@code readUtf8()}, except it populates a provided appendable instead of creating a new string.
      *
+     * @param <C> appendable type
      * @param sb the appendable to which the read string will be appended
      * @return {@code true} if there was a String, or {@code false} if it was {@code null}
      * @throws IORuntimeException          If an IO error occurs
@@ -631,9 +637,9 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
      *
      * @param b the Bytes instance to which the read string will be appended
      * @return {@code true} if there was a String, or {@code false} if it was {@code null}
-     * @throws BufferUnderflowException    If there's not enough data to read
-     * @throws ArithmeticException         If numeric overflow or underflow occurs
-     * @throws BufferOverflowException     If the buffer is full
+     * @throws BufferUnderflowException       If there's not enough data to read
+     * @throws ArithmeticException            If numeric overflow or underflow occurs
+     * @throws BufferOverflowException        If the buffer is full
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
@@ -840,6 +846,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     default S unsafeRead(long address, @NonNegative int length) throws ClosedIllegalStateException, ThreadingIllegalStateException {
         if (isDirectMemory()) {
             long src = addressForRead(readPosition());
@@ -891,6 +898,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
     /**
      * Reads an Enum value from the input stream using its encoded form.
      *
+     * @param <E>   enum type
      * @param eClass the class of the Enum
      * @return the read Enum value
      * @throws IORuntimeException          If an I/O error occurs
@@ -982,6 +990,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
      * @throws ClosedIllegalStateException If the resource has been released or closed.
      * @throws ArithmeticException         If the number format is invalid
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     default void readHistogram(@NotNull Histogram histogram)
             throws BufferUnderflowException, IllegalStateException, ArithmeticException, ClosedIllegalStateException {
         BytesInternal.readHistogram(this, histogram);
@@ -1015,6 +1024,11 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
      */
     void lenient(boolean lenient);
 
+    /**
+     * Indicates whether lenient parsing is enabled.
+     *
+     * @return {@code true} if lenient parsing is enabled
+     */
     boolean lenient();
 
     /**
@@ -1029,6 +1043,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     @NotNull
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     default BigDecimal readBigDecimal()
             throws ArithmeticException, BufferUnderflowException, IllegalStateException, ClosedIllegalStateException {
         throwExceptionIfReleased(this);

@@ -47,6 +47,8 @@ public abstract class MappedBytes extends AbstractBytes<Void> implements Closeab
     /**
      * Constructs an instance for use by subclasses with a descriptive name.
      * The instance initially references an empty store.
+     *
+     * @param name label used for diagnostics
      */
     protected MappedBytes(final String name)
             throws ClosedIllegalStateException, ThreadingIllegalStateException {
@@ -74,6 +76,11 @@ public abstract class MappedBytes extends AbstractBytes<Void> implements Closeab
 
     /**
      * As {@link #singleMappedBytes(String, long)} but accepting a {@link File} instance.
+     *
+     * @param file     file to map
+     * @param capacity total capacity
+     * @return a new {@code MappedBytes}
+     * @throws FileNotFoundException if the file does not exist
      */
     @NotNull
     public static MappedBytes singleMappedBytes(@NotNull final File file, @NonNegative final long capacity)
@@ -187,6 +194,14 @@ public abstract class MappedBytes extends AbstractBytes<Void> implements Closeab
      * Convenience overload using the default page size.
      *
      * @see #mappedBytes(File, long, long, int, boolean)
+     *
+     * @param file        file to map
+     * @param chunkSize   size of each chunk in bytes
+     * @param overlapSize number of bytes to overlap between chunks
+     * @param readOnly    whether the mapping should be read-only
+     * @return a new {@code MappedBytes}
+     * @throws FileNotFoundException       if the file cannot be found
+     * @throws ClosedIllegalStateException if mapping fails due to closed file
      */
     @NotNull
     public static MappedBytes mappedBytes(@NotNull final File file,
@@ -221,6 +236,7 @@ public abstract class MappedBytes extends AbstractBytes<Void> implements Closeab
      * @throws ThreadingIllegalStateException if accessed from multiple threads
      */
     @NotNull
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public static MappedBytes readOnly(@NotNull final File file)
             throws FileNotFoundException, ClosedIllegalStateException, ThreadingIllegalStateException {
         final MappedFile mappedFile = MappedFile.readOnly(file);
@@ -232,6 +248,8 @@ public abstract class MappedBytes extends AbstractBytes<Void> implements Closeab
     }
 
     /**
+     * Indicates whether the underlying file was mapped in read-only mode.
+     *
      * @return {@code true} if the underlying file was mapped read only
      */
     public abstract boolean isBackingFileReadOnly();
@@ -246,10 +264,14 @@ public abstract class MappedBytes extends AbstractBytes<Void> implements Closeab
 
     /**
      * Populates the supplied array with the number of chunks held by the underlying {@link MappedFile}.
+     *
+     * @param chunkCount destination for the chunk count (index 0)
      */
     public abstract void chunkCount(long[] chunkCount);
 
     /**
+     * Exposes the underlying {@link MappedFile} used by this bytes instance.
+     *
      * @return the underlying {@link MappedFile}
      */
     public abstract MappedFile mappedFile();

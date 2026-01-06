@@ -25,7 +25,8 @@ import static java.nio.charset.StandardCharsets.ISO_8859_1;
  * <p> Constants such as {@code TRU} and {@code FALS} encode the lock state.
  * <p> For debugging only, not tuned for throughput.
  */
-@SuppressWarnings("rawtypes")
+@SuppressWarnings({"rawtypes", "deprecation"})
+// CPD-OFF
 public class TextLongArrayReference extends AbstractReference implements ByteableLongArrayValues {
     private static final byte[] SECTION1 = "{ locked: false, capacity: ".getBytes(ISO_8859_1);
     private static final byte[] SECTION2 = ", used: ".getBytes(ISO_8859_1);
@@ -38,6 +39,13 @@ public class TextLongArrayReference extends AbstractReference implements Byteabl
     private static final int CAPACITY = SECTION1.length;
     private static final int USED = CAPACITY + DIGITS + SECTION2.length;
     private static final int VALUES = USED + DIGITS + SECTION3.length;
+
+    /**
+     * Creates an empty reference; set a backing store before use.
+     */
+    public TextLongArrayReference() {
+        // default
+    }
     private static final int VALUE_SIZE = DIGITS + SEP.length;
     private static final int LOCK_OFFSET = 10;
     private static final int FALS = 'f' | ('a' << 8) | ('l' << 16) | ('s' << 24);
@@ -113,6 +121,7 @@ public class TextLongArrayReference extends AbstractReference implements Byteabl
         }
     }
 
+    @Override
     public void setUsed(long used)
             throws IllegalStateException {
         try {
@@ -303,3 +312,4 @@ public class TextLongArrayReference extends AbstractReference implements Byteabl
         return (capacity * VALUE_SIZE) + VALUES + SECTION3.length - SEP.length;
     }
 }
+// CPD-ON

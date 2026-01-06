@@ -20,6 +20,7 @@ import java.io.File;
  * <p>
  * {@link #currentTimeMillis()} simply delegates to the underlying provider and is therefore not unique.
  */
+@SuppressWarnings("deprecation")
 public class DistributedUniqueTimeProvider extends SimpleCloseable implements TimeProvider, Monitorable {
 
     /** Maximum supported host identifiers used to partition timestamp space across JVMs. */
@@ -112,6 +113,9 @@ public class DistributedUniqueTimeProvider extends SimpleCloseable implements Ti
 
     /**
      * Configures the host identifier used in generated timestamps.
+     *
+     * @param hostId host identifier to encode into timestamps
+     * @return this provider for chaining
      */
     public DistributedUniqueTimeProvider hostId(@NonNegative int hostId) {
         // Check if the provided hostId is negative and throw an exception if it is
@@ -128,13 +132,27 @@ public class DistributedUniqueTimeProvider extends SimpleCloseable implements Ti
 
     /**
      * Replaces the underlying time source used for wall-clock time.
+     *
+     * @param provider time source to delegate to
+     * @return this provider for chaining
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public DistributedUniqueTimeProvider provider(TimeProvider provider) {
         // Assign the provided TimeProvider to the instance variable
         this.provider = provider;
 
         // Return the current instance with the updated TimeProvider
         return this;
+    }
+
+    /**
+     * Exposes the deduplicator used to co-ordinate timestamps across hosts.
+     *
+     * @return the deduplicator for this instance
+     */
+    @Deprecated(/* to be removed in 2027 */)
+    DistributedUniqueTimeDeduplicator deduplicator() {
+        return deduplicator;
     }
 
     /**

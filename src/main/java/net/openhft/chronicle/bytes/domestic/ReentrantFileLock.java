@@ -134,6 +134,7 @@ public final class ReentrantFileLock extends FileLock {
      * @throws IOException If an I/O error occurs.
      */
     @Nullable
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public static ReentrantFileLock tryLock(File file, FileChannel fileChannel) throws IOException {
         final String canonicalPath = CanonicalPathUtil.of(file);
         final ReentrantFileLock reentrantFileLock = heldLocks.get().get(canonicalPath);
@@ -177,6 +178,7 @@ public final class ReentrantFileLock extends FileLock {
      * @param file The file to check
      * @return true if there is a cached file lock, false otherwise
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public static boolean isHeldByCurrentThread(File file) {
         return heldLocks.get().containsKey(CanonicalPathUtil.of(file));
     }

@@ -59,8 +59,7 @@ class MemoryMessager {
     @SuppressWarnings("restriction")
     public int length() {
         UnsafeMemory.unsafeLoadFence();
-        int length = UnsafeMemory.unsafeGetInt(address);
-        return length;
+        return UnsafeMemory.unsafeGetInt(address);
     }
 
     public long consumeBytes() {
@@ -72,7 +71,14 @@ class MemoryMessager {
         bytes.readSkip(4);
         long ret = bytes.readLong();
         this.firstLong = bytes.readLong();
-        length -= HEADER_LENGTH;
+        return finalizeConsume(ret, length - HEADER_LENGTH);
+    }
+
+    public long firstLong() {
+        return firstLong;
+    }
+
+    private void skipPayload(int length) {
         int i = 0;
         Jvm.safepoint();
         for (; i < length - 7; i += 8)
@@ -80,11 +86,11 @@ class MemoryMessager {
         for (; i < length; i++)
             bytes.readByte();
         Jvm.safepoint();
-        address = bytes.addressForRead(bytes.readPosition(), 4);
-        return ret;
     }
 
-    public long firstLong() {
-        return firstLong;
+    private long finalizeConsume(long result, int payloadLength) {
+        skipPayload(payloadLength);
+        address = bytes.addressForRead(bytes.readPosition(), 4);
+        return result;
     }
 }

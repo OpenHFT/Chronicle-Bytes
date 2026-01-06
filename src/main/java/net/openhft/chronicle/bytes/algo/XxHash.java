@@ -22,7 +22,6 @@ import java.nio.BufferUnderflowException;
  * @see BytesStoreHash
  * @see BytesStore
  */
-// Migration of XxHash from Zero-Allocation-Hashing
 @SuppressWarnings("rawtypes")
 public class XxHash implements BytesStoreHash<BytesStore<?, ?>> {
     // Primes if treated as unsigned

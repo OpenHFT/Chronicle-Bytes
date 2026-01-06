@@ -9,10 +9,15 @@ import net.openhft.chronicle.core.io.ThreadingIllegalStateException;
 import static net.openhft.chronicle.core.Jvm.uncheckedCast;
 
 /**
- * Provides hooks for adding comments and controlling indentation when generating hex dumps.
+ * Describes optional behaviours for {@link Bytes} implementations that emit hex dumps, such
+ * as retaining comments and adjusting indentation for readability.
+ *
+ * @param <B> self type for fluent chaining
  */
 public interface HexDumpBytesDescription<B extends HexDumpBytesDescription<B>> {
     /**
+     * Indicates whether the producer should retain human-readable comments in the hex dump.
+     *
      * @return {@code true} if comments are retained for later inclusion in the hex dump
      */
     default boolean retainedHexDumpDescription() {
@@ -22,6 +27,9 @@ public interface HexDumpBytesDescription<B extends HexDumpBytesDescription<B>> {
     /**
      * Adds {@code comment} to the output, either as a full line (if starting with {@code '#'}) or
      * appended to the current line.
+     *
+     * @param comment text to add to the dump
+     * @return this for chaining
      */
     default B writeHexDumpDescription(CharSequence comment)
             throws ClosedIllegalStateException, ThreadingIllegalStateException {
@@ -30,6 +38,9 @@ public interface HexDumpBytesDescription<B extends HexDumpBytesDescription<B>> {
 
     /**
      * Adjusts the indentation level for subsequent dump lines.
+     *
+     * @param n indentation delta to apply
+     * @return this for chaining
      */
     default B adjustHexDumpIndentation(int n)
             throws IllegalStateException {

@@ -35,11 +35,17 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
  * stream or buffer. Methods typically advance the {@link #writePosition()} by
  * the number of bytes written. Implementations may throw
  * {@link BufferOverflowException} if insufficient space is available.
+ *
+ * @param <S> self type for fluent API
  */
 @SuppressWarnings("unchecked")
 @DontChain
 public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends StreamingCommon<S> {
+    /**
+     * String coder constant for Latin-1 encoded strings in JDK9+ compact strings.
+     */
     int JAVA9_STRING_CODER_LATIN = 0;
+    /** String coder constant for UTF-16 encoded strings in JDK9+ compact strings. */
     int JAVA9_STRING_CODER_UTF16 = 1;
 
     /**
@@ -174,6 +180,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     @NotNull
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     default S writeStopBitDecimal(double d)
             throws BufferOverflowException, ClosedIllegalStateException {
         boolean negative = d < 0;
@@ -485,6 +492,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     @NotNull
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     default S writeInt24(int i)
             throws BufferOverflowException, ArithmeticException, ClosedIllegalStateException, ThreadingIllegalStateException {
         writeShort((short) i);
@@ -501,6 +509,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     @NotNull
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     default S writeUnsignedInt24(int i)
             throws BufferOverflowException, ArithmeticException, ClosedIllegalStateException, ThreadingIllegalStateException {
         writeShort((short) i);
@@ -642,6 +651,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     @NotNull
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     S writeDoubleAndInt(double d, int i)
             throws BufferOverflowException, ClosedIllegalStateException, ThreadingIllegalStateException;
 
@@ -805,6 +815,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     default S unsafeWrite(long address, @NonNegative int length) throws ClosedIllegalStateException, ThreadingIllegalStateException {
         if (isDirectMemory()) {
             writeSkip(length); // blow up if there isn't that much space left
@@ -883,6 +894,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     /**
      * Writes an enum value to this output stream by writing the enum's name.
      *
+     * @param <E> enum type
      * @param e The enum value to be written.
      * @return The current StreamingDataOutput instance.
      * @throws BufferOverflowException        If there is not enough space left in the output stream.
@@ -944,17 +956,16 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     default S appendUtf8(char[] chars, @NonNegative int offset, @NonNegative int length)
             throws BufferOverflowException, ClosedIllegalStateException, BufferUnderflowException, IllegalArgumentException, ThreadingIllegalStateException {
         int i;
-        ascii:
-        {
-            ensureCapacity(length);
-            for (i = 0; i < length; i++) {
-                char c = chars[offset + i];
-                if (c > 0x007F)
-                    break ascii;
-                rawWriteByte((byte) c);
+        ensureCapacity(length);
+        for (i = 0; i < length; i++) {
+            char c = chars[offset + i];
+            if (c > 0x007F) {
+                break;
             }
-            return (S) this;
+            rawWriteByte((byte) c);
         }
+        if (i == length)
+            return (S) this;
         for (; i < length; i++) {
             char c = chars[offset + i];
             BytesInternal.appendUtf8Char(this, c);
@@ -1110,6 +1121,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     default void writeHistogram(@NotNull Histogram histogram)
             throws BufferOverflowException, ClosedIllegalStateException {
         BytesInternal.writeHistogram(this, histogram);
@@ -1124,6 +1136,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     default void writeBigDecimal(@NotNull BigDecimal bd)
             throws BufferOverflowException, ClosedIllegalStateException, IllegalArgumentException, ThreadingIllegalStateException {
         writeBigInteger(bd.unscaledValue());

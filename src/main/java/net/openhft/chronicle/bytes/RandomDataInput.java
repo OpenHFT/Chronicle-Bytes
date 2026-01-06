@@ -5,6 +5,7 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.bytes.internal.BytesInternal;
 import net.openhft.chronicle.bytes.internal.Chars;
+import net.openhft.chronicle.bytes.util.BufferUtil;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.UnsafeMemory;
 import net.openhft.chronicle.core.annotation.NonNegative;
@@ -134,6 +135,7 @@ public interface RandomDataInput extends RandomCommon {
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
+    @Deprecated(/* to be removed in 2027 */)
     default int readUnsignedInt24(@NonNegative long offset)
             throws BufferUnderflowException, ClosedIllegalStateException {
         return readUnsignedShort(offset) | (readUnsignedByte(offset) << 16);
@@ -265,6 +267,7 @@ public interface RandomDataInput extends RandomCommon {
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     default float readVolatileFloat(@NonNegative long offset)
             throws BufferUnderflowException, ClosedIllegalStateException {
         return Float.intBitsToFloat(readVolatileInt(offset));
@@ -293,6 +296,7 @@ public interface RandomDataInput extends RandomCommon {
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     default double readVolatileDouble(@NonNegative long offset)
             throws BufferUnderflowException, ClosedIllegalStateException {
         return Double.longBitsToDouble(readVolatileLong(offset));
@@ -322,6 +326,7 @@ public interface RandomDataInput extends RandomCommon {
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     void nativeRead(@NonNegative long position, long address, @NonNegative long size)
             throws BufferUnderflowException, ClosedIllegalStateException, ThreadingIllegalStateException;
 
@@ -466,6 +471,7 @@ public interface RandomDataInput extends RandomCommon {
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      * @see RandomDataOutput#writeUtf8(long, CharSequence)
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     default <T extends Appendable & CharSequence> long readUtf8(@NonNegative long offset, @NotNull T sb)
             throws IORuntimeException, IllegalArgumentException, BufferUnderflowException, ArithmeticException, ClosedIllegalStateException {
         AppendableUtil.setLength(sb, 0);
@@ -583,6 +589,7 @@ public interface RandomDataInput extends RandomCommon {
      * @see RandomDataOutput#writeUtf8Limited(long, CharSequence, int)
      */
     @Nullable
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     default String readUtf8Limited(@NonNegative long offset, @NonNegative int maxUtf8Len)
             throws BufferUnderflowException, IORuntimeException, IllegalArgumentException,
             ClosedIllegalStateException {
@@ -602,11 +609,18 @@ public interface RandomDataInput extends RandomCommon {
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      * @throws IORuntimeException             If the contents are not a valid string.
      */
+    @Deprecated(/* to be removed in 2027 */)
     default boolean compareUtf8(@NonNegative long offset, @Nullable CharSequence other)
             throws IORuntimeException, BufferUnderflowException, ClosedIllegalStateException {
         return BytesInternal.compareUtf8(this, offset, other);
     }
 
+    /**
+     * Copies the readable bytes from this input into a newly allocated byte array.
+     *
+     * @return array containing the readable bytes
+     * @throws ClosedIllegalStateException if this input has been released
+     */
     default byte[] toByteArray()
             throws ClosedIllegalStateException {
         return BytesInternal.toByteArray(this);
@@ -650,7 +664,7 @@ public interface RandomDataInput extends RandomCommon {
         ByteBuffer bb = ByteBuffer.allocateDirect(len);
         bb.order(ByteOrder.nativeOrder());
         copyTo(bb);
-        bb.clear();
+        BufferUtil.clear(bb);
         return bb;
     }
 
@@ -692,6 +706,7 @@ public interface RandomDataInput extends RandomCommon {
      *
      * @return true if the byte sequence can be read directly, false otherwise.
      */
+    @Deprecated(/* to be removed in 2027 */)
     default boolean canReadDirect() {
         return canReadDirect(0);
     }

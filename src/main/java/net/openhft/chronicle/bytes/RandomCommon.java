@@ -20,6 +20,8 @@ import java.nio.ByteOrder;
  */
 public interface RandomCommon extends ReferenceCounted {
     /**
+     * Returns the smallest position allowed in this buffer.
+     *
      * @return The smallest position allowed in this buffer.
      */
     @NonNegative
@@ -28,6 +30,8 @@ public interface RandomCommon extends ReferenceCounted {
     }
 
     /**
+     * Returns the maximum addressable capacity.
+     *
      * @return the maximum addressable capacity.
      * May be as large as {@link Bytes#MAX_CAPACITY} for virtual mappings.
      */
@@ -37,6 +41,8 @@ public interface RandomCommon extends ReferenceCounted {
     }
 
     /**
+     * Returns the current allocated capacity of the underlying storage.
+     *
      * @return the current allocated capacity of the underlying storage.
      * For elastic buffers this may be less than {@link #capacity()} and can grow on demand.
      */
@@ -57,6 +63,8 @@ public interface RandomCommon extends ReferenceCounted {
     }
 
     /**
+     * Returns the current write position.
+     *
      * @return the current write position.
      * Typically {@code readPosition() <= writePosition() <= writeLimit()}.
      */
@@ -120,6 +128,7 @@ public interface RandomCommon extends ReferenceCounted {
      *
      * @return The number of bytes that can still be written with resizing.
      */
+    @Deprecated(/* to be removed in 2027 */)
     default long realWriteRemaining() {
         return Math.min(realCapacity(), writeLimit()) - writePosition();
     }
@@ -162,9 +171,9 @@ public interface RandomCommon extends ReferenceCounted {
      * @param offset the logical offset within this buffer relative to {@link #start()}.
      * @param buffer the buffer index if this store is backed by multiple buffers.
      * @return the native address for the specified offset.
-     * @throws UnsupportedOperationException if the buffer uses heap memory.
-     * @throws BufferUnderflowException      if the offset is outside the allowed range.
-     * @throws ClosedIllegalStateException   if the resource has been released or closed.
+     * @throws UnsupportedOperationException  if the buffer uses heap memory.
+     * @throws BufferUnderflowException       if the offset is outside the allowed range.
+     * @throws ClosedIllegalStateException    if the resource has been released or closed.
      * @throws ThreadingIllegalStateException if accessed concurrently in an unsafe way.
      */
     default long addressForRead(@NonNegative long offset, @NonNegative int buffer)
@@ -177,8 +186,8 @@ public interface RandomCommon extends ReferenceCounted {
      *
      * @param offset within this buffer. addressForRead(start()) is the actual addressForRead of the first byte.
      * @return the underlying addressForRead of the buffer
-     * @throws UnsupportedOperationException If the underlying buffer is on the heap
-     * @throws BufferOverflowException       If the offset is before the start() or the after the capacity()
+     * @throws UnsupportedOperationException  If the underlying buffer is on the heap
+     * @throws BufferOverflowException        If the offset is before the start() or the after the capacity()
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
@@ -189,8 +198,8 @@ public interface RandomCommon extends ReferenceCounted {
      * Retrieves the underlying memory address for writing at the current write position.  This is for expert users only.
      *
      * @return The underlying memory address for writing at the current write position.
-     * @throws UnsupportedOperationException If the underlying buffer is on the heap.
-     * @throws BufferOverflowException       If the current write position is before the start or after the capacity.
+     * @throws UnsupportedOperationException  If the underlying buffer is on the heap.
+     * @throws BufferOverflowException        If the current write position is before the start or after the capacity.
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
@@ -207,8 +216,12 @@ public interface RandomCommon extends ReferenceCounted {
     }
 
     /**
-     * @return a {@link Bytes} view for reading from this buffer.
+     * Returns a {@link Bytes} view for reading from this buffer.
      * The returned view reflects the current positions and limits.
+     *
+     * @return a {@link Bytes} view for reading
+     * @throws ClosedIllegalStateException    if released
+     * @throws ThreadingIllegalStateException if accessed from the wrong thread
      */
     @NotNull
     Bytes<?> bytesForRead()

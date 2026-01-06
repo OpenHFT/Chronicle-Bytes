@@ -29,6 +29,8 @@ import static net.openhft.chronicle.core.util.StringUtils.extractChars;
  * where the caller guarantees that all offsets are valid.
  * <p>
  * <strong>Warning:</strong> misuse can corrupt data or crash the JVM.
+ *
+ * @param <U> self type for fluent operations
  */
 @SuppressWarnings("rawtypes")
 public class UncheckedBytes<U>
@@ -304,14 +306,16 @@ public class UncheckedBytes<U>
         requireNonNull(chars);
         long wp = writePosition();
         int i;
-        ascii:
-        {
-            for (i = 0; i < length; i++) {
-                char c = chars[offset + i];
-                if (c > 0x007F)
-                    break ascii;
-                bytesStore.writeByte(wp++, (byte) c);
+        boolean allAscii = true;
+        for (i = 0; i < length; i++) {
+            char c = chars[offset + i];
+            if (c > 0x007F) {
+                allAscii = false;
+                break;
             }
+            bytesStore.writeByte(wp++, (byte) c);
+        }
+        if (allAscii) {
             uncheckedWritePosition(wp);
             return this;
         }

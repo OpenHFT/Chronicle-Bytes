@@ -23,6 +23,7 @@ public class StreamingOutputStream extends OutputStream {
     /**
      * Constructs a new StreamingOutputStream instance and initializes the data destination as an empty ByteStore.
      */
+    @Deprecated(/* to be removed in 2027 */)
     public StreamingOutputStream() {
         this(NoBytesStore.NO_BYTES);
     }
@@ -43,6 +44,7 @@ public class StreamingOutputStream extends OutputStream {
      * @return this StreamingOutputStream instance, for chaining.
      */
     @NotNull
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public StreamingOutputStream init(StreamingDataOutput sdo) {
         this.sdo = sdo;
         return this;

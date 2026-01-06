@@ -8,16 +8,14 @@ import net.openhft.chronicle.bytes.internal.migration.HashCodeEqualsUtil;
 import net.openhft.chronicle.bytes.render.DecimalAppender;
 import net.openhft.chronicle.bytes.render.Decimaliser;
 import net.openhft.chronicle.bytes.render.StandardDecimaliser;
+import net.openhft.chronicle.bytes.util.BufferUtil;
 import net.openhft.chronicle.bytes.util.DecoratedBufferOverflowException;
 import net.openhft.chronicle.bytes.util.DecoratedBufferUnderflowException;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.UnsafeMemory;
 import net.openhft.chronicle.core.annotation.NonNegative;
-import net.openhft.chronicle.core.annotation.UsedViaReflection;
-import net.openhft.chronicle.bytes.internal.UnsafeText;
 import net.openhft.chronicle.core.io.*;
-import net.openhft.chronicle.core.scoped.ScopedResource;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -38,7 +36,7 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
  *
  * @param <U> underlying memory type
  */
-@SuppressWarnings("rawtypes")
+@SuppressWarnings({"rawtypes", "deprecation"})
 public abstract class AbstractBytes<U>
         extends AbstractReferenceCounted
         implements Bytes<U>,
@@ -66,36 +64,54 @@ public abstract class AbstractBytes<U>
     @Deprecated(/* to remove in x.28 */)
     private static final boolean APPEND_0 = Jvm.getBoolean("bytes.append.0", true);
 
-    /** Optional name used only for debugging and diagnostic output. */
-    @UsedViaReflection
-    private final String name;
-
     private final UncheckedRandomDataInput uncheckedRandomDataInput = new UncheckedRandomDataInputHolder();
+    /**
+     * Backing store that holds the actual bytes; defaults to an empty sentinel.
+     */
     @NotNull
-    protected BytesStore<?, U> bytesStore = BytesStore.empty();
-    /** Offset, from {@link #start()}, of the next byte to read. */
+    protected BytesStore<?, U> bytesStore = NoBytesStore.noBytesStore();
+    /**
+     * Offset, from {@link #start()}, of the next byte to read.
+     */
     protected long readPosition;
-    /** Highest byte index that may be written. */
+    /**
+     * Highest byte index that may be written.
+     */
     protected long writeLimit;
-    /** Whether the underlying store is open. */
+    /**
+     * Whether the underlying store is open.
+     */
+    @Deprecated(/* to be removed in 2027 */)
     protected boolean isPresent;
-    /** Offset for the next byte to write. */
+    /**
+     * Offset for the next byte to write.
+     */
     private long writePosition;
-    /** Number of decimal places of the last appended floating point value. */
+    /**
+     * Number of decimal places of the last appended floating point value.
+     */
     private int lastDecimalPlaces = 0;
-    /** Lenient mode suppresses {@link BufferUnderflowException} on some reads. */
+    /**
+     * Lenient mode suppresses {@link BufferUnderflowException} on some reads.
+     */
     private boolean lenient = false;
-    /** Tracks whether the last parsed number contained digits. */
+    /**
+     * Tracks whether the last parsed number contained digits.
+     */
     private boolean lastNumberHadDigits = false;
-    /** Strategy used when appending decimal numbers. */
+    /**
+     * Strategy used when appending decimal numbers.
+     */
     private Decimaliser decimaliser = StandardDecimaliser.STANDARD;
-    /** Whether to append the ".0" suffix for whole numbers. */
+    /**
+     * Whether to append the ".0" suffix for whole numbers.
+     */
     private boolean append0 = APPEND_0;
 
     /**
      * Creates a bytes view over the provided store.
      *
-     * @param bytesStore   the underlying store
+     * @param bytesStore    the underlying store
      * @param writePosition initial {@link #writePosition()} relative to {@link #start()}
      * @param writeLimit    initial {@link #writeLimit()}
      * @throws ClosedIllegalStateException    if the store is closed
@@ -111,6 +127,7 @@ public abstract class AbstractBytes<U>
     /**
      * Implementation detail constructor allowing a debug name.
      */
+    // TODO Inline this constructor in 2026
     AbstractBytes(@NotNull BytesStore<Bytes<U>, U> bytesStore,
                   @NonNegative long writePosition,
                   @NonNegative long writeLimit,
@@ -122,8 +139,7 @@ public abstract class AbstractBytes<U>
         readPosition = bytesStore.readPosition();
         this.uncheckedWritePosition(writePosition);
         this.writeLimit = writeLimit;
-        // used for debugging
-        this.name = name;
+        // Optional name for debugging only.
     }
 
     @Override
@@ -366,6 +382,7 @@ public abstract class AbstractBytes<U>
     }
 
     @Override
+    @SuppressWarnings("deprecation")
     public Decimaliser decimaliser() {
         return decimaliser;
     }
@@ -749,6 +766,15 @@ public abstract class AbstractBytes<U>
         }
     }
 
+    /**
+     * Returns the current read offset then advances {@link #readPosition()} by {@code adding}.
+     *
+     * @param adding number of bytes to move the read position forward
+     * @return starting offset before the move
+     * @throws BufferUnderflowException       if the move would exceed the read limit
+     * @throws ClosedIllegalStateException    if the bytes have been released
+     * @throws ThreadingIllegalStateException if accessed from the wrong thread
+     */
     protected long readOffsetPositionMoved(@NonNegative long adding)
             throws BufferUnderflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
         long offset = readPosition;
@@ -867,6 +893,7 @@ public abstract class AbstractBytes<U>
         return this;
     }
 
+    @Override
     public Bytes<U> write(@NotNull BytesStore<?, ?> bytes)
             throws BufferOverflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
         assert bytes != this : "you should not write to yourself !";
@@ -958,6 +985,17 @@ public abstract class AbstractBytes<U>
         return this;
     }
 
+    /**
+     * Writes the contents of {@code bs} with a stop-bit length prefix, or -1 if {@code bs} is {@code null}.
+     *
+     * @param bs optional source store to serialise
+     * @return this instance for chaining
+     * @throws BufferOverflowException        if there is insufficient space to write
+     * @throws ClosedIllegalStateException    if this Bytes has been released
+     * @throws BufferUnderflowException       if the source store is corrupt
+     * @throws ThreadingIllegalStateException if called from the wrong thread
+     */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public @NotNull Bytes<U> write8bit(@Nullable BytesStore<?, ?> bs)
             throws BufferOverflowException, ClosedIllegalStateException, BufferUnderflowException, ThreadingIllegalStateException {
         if (bs == null) {
@@ -1000,6 +1038,15 @@ public abstract class AbstractBytes<U>
         return bytesStore.write8bit(position, s, start, length);
     }
 
+    /**
+     * Validates that writing {@code adding} bytes at {@code offset} stays within bounds.
+     *
+     * @param offset starting offset for the write
+     * @param adding number of bytes that will be written
+     * @throws BufferOverflowException        if the write would exceed the limit
+     * @throws ClosedIllegalStateException    if this Bytes has been released
+     * @throws ThreadingIllegalStateException if accessed from the wrong thread
+     */
     protected void writeCheckOffset(@NonNegative long offset, @NonNegative long adding)
             throws BufferOverflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
         if (BYTES_BOUNDS_UNCHECKED)
@@ -1079,6 +1126,16 @@ public abstract class AbstractBytes<U>
         return bytesStore.readDouble(offset);
     }
 
+    /**
+     * Verifies that reading {@code adding} bytes from {@code offset} is within bounds.
+     *
+     * @param offset read start offset
+     * @param adding number of bytes to read
+     * @param given  whether the offset was supplied by the caller (for error reporting)
+     * @throws BufferUnderflowException       if the read would exceed the limit
+     * @throws ClosedIllegalStateException    if this Bytes has been released
+     * @throws ThreadingIllegalStateException if accessed from the wrong thread
+     */
     protected void readCheckOffset(@NonNegative long offset, long adding, boolean given)
             throws BufferUnderflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
         if (BYTES_BOUNDS_UNCHECKED)
@@ -1195,11 +1252,30 @@ public abstract class AbstractBytes<U>
         return this;
     }
 
+    /**
+     * Returns the current write offset and advances the write position by {@code adding}.
+     *
+     * @param adding bytes to move forward
+     * @return offset prior to the move
+     * @throws BufferOverflowException        if the new position exceeds {@link #writeLimit()}
+     * @throws ClosedIllegalStateException    if this Bytes has been released
+     * @throws ThreadingIllegalStateException if accessed from the wrong thread
+     */
     protected final long writeOffsetPositionMoved(@NonNegative long adding)
             throws BufferOverflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
         return writeOffsetPositionMoved(adding, adding);
     }
 
+    /**
+     * Returns the current write offset and advances by {@code advance}, validating {@code adding} bytes of space.
+     *
+     * @param adding  bytes required for the operation
+     * @param advance amount to move the write position
+     * @return offset prior to the move
+     * @throws BufferOverflowException        if the new position exceeds {@link #writeLimit()}
+     * @throws ClosedIllegalStateException    if this Bytes has been released
+     * @throws ThreadingIllegalStateException if accessed from the wrong thread
+     */
     protected long writeOffsetPositionMoved(@NonNegative long adding, @NonNegative long advance)
             throws BufferOverflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
         long oldPosition = writePosition();
@@ -1209,10 +1285,22 @@ public abstract class AbstractBytes<U>
         return oldPosition;
     }
 
+    /**
+     * Sets the write position without performing bounds checks.
+     *
+     * @param writePosition new write position
+     */
     protected void uncheckedWritePosition(@NonNegative long writePosition) {
         this.writePosition = writePosition;
     }
 
+    /**
+     * Moves the read position backwards by {@code subtracting} to allow pre-writing.
+     *
+     * @param subtracting number of bytes to move backwards
+     * @return offset that should be used for the prewrite
+     * @throws BufferOverflowException if the new position would precede {@link #start()}
+     */
     protected long prewriteOffsetPositionMoved(@NonNegative long subtracting)
             throws BufferOverflowException {
         prewriteCheckOffset(readPosition, subtracting);
@@ -1352,6 +1440,11 @@ public abstract class AbstractBytes<U>
         return this;
     }
 
+    /**
+     * Maximum chunk size used when copying data to avoid oversized transfers.
+     *
+     * @return chunk size in bytes
+     */
     protected int safeCopySize() {
         return 64 << 10;
     }
@@ -1364,7 +1457,7 @@ public abstract class AbstractBytes<U>
         ensureCapacity(writePosition() + length);
         bytesStore.write(writePosition(), buffer, buffer.position(), length);
         uncheckedWritePosition(writePosition() + length);
-        buffer.position(buffer.position() + length);
+        BufferUtil.position(buffer, buffer.position() + length);
         return this;
     }
 
@@ -1458,6 +1551,11 @@ public abstract class AbstractBytes<U>
         return bytesStore;
     }
 
+    /**
+     * Sets the underlying bytes store after validating it is not a Bytes-on-Bytes structure.
+     *
+     * @param bytesStore new backing store
+     */
     protected void bytesStore(BytesStore<?, U> bytesStore) {
         this.bytesStore = BytesInternal.failIfBytesOnBytes(bytesStore);
     }
@@ -1473,6 +1571,7 @@ public abstract class AbstractBytes<U>
     }
 
     @Override
+    @SuppressWarnings("deprecation")
     public boolean lastNumberHadDigits() {
         return lastNumberHadDigits;
     }
@@ -1549,6 +1648,11 @@ public abstract class AbstractBytes<U>
         return sum & 0xFF;
     }
 
+    /**
+     * Indicates whether this instance uses the shared zero-capacity immutable store.
+     *
+     * @return {@code true} if the backing store is the immutable zero-capacity instance
+     */
     protected boolean isImmutableEmptyByteStore() {
         return bytesStore.capacity() == 0;
     }

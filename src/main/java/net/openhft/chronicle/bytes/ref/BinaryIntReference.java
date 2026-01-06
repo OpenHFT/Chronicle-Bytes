@@ -37,6 +37,12 @@ import java.nio.BufferUnderflowException;
  */
 @SuppressWarnings("rawtypes")
 public class BinaryIntReference extends AbstractReference implements IntValue {
+
+    /**
+     * Creates an uninitialised int reference.
+     */
+    public BinaryIntReference() {
+    }
     /**
      * Sentinel value used when an integer operation fails to complete normally.
      */

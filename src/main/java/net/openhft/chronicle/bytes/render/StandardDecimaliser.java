@@ -7,12 +7,20 @@ package net.openhft.chronicle.bytes.render;
  * Default decimaliser that attempts {@link MaximumPrecision} with precision 18
  * and falls back to {@link UsesBigDecimal} for large numbers.
  */
+@SuppressWarnings("deprecation")
 public class StandardDecimaliser implements Decimaliser {
 
     /**
      * Singleton instance of StandardDecimaliser for shared, stateless reuse across threads.
      */
     public static final StandardDecimaliser STANDARD = new StandardDecimaliser();
+
+    /**
+     * Creates the default decimaliser combining maximum precision and BigDecimal fallback.
+     */
+    public StandardDecimaliser() {
+        // default
+    }
 
     /**
      * Initial strategy rounding to eighteen decimal places.
@@ -23,6 +31,7 @@ public class StandardDecimaliser implements Decimaliser {
      * Convert the double {@code value} using {@link #PRECISION_18} then {@link UsesBigDecimal} for wide ranges.
      */
     @Override
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public boolean toDecimal(double value, DecimalAppender decimalAppender) {
         // Tries to convert using MaximumPrecision first, then falls back to UsesBigDecimal.
         return PRECISION_18.toDecimal(value, decimalAppender)
@@ -33,6 +42,7 @@ public class StandardDecimaliser implements Decimaliser {
      * Convert the float {@code value} using {@link #PRECISION_18} then {@link UsesBigDecimal} for single precision.
      */
     @Override
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public boolean toDecimal(float value, DecimalAppender decimalAppender) {
         // Tries to convert using MaximumPrecision first, then falls back to UsesBigDecimal.
         return PRECISION_18.toDecimal(value, decimalAppender)

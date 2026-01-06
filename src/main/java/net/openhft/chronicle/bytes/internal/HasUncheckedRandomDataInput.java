@@ -13,6 +13,8 @@ import org.jetbrains.annotations.NotNull;
 public interface HasUncheckedRandomDataInput {
 
     /**
+     * Returns a view for random reads with minimal bounds checking.
+     *
      * @return a view for random reads with minimal bounds checking
      */
     @NotNull

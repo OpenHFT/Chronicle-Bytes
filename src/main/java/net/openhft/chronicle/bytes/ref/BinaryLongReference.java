@@ -35,6 +35,13 @@ public class BinaryLongReference extends AbstractReference implements LongRefere
     public static final long LONG_NOT_COMPLETE = -1;
 
     /**
+     * Creates an empty reference; the backing store must be provided before use.
+     */
+    public BinaryLongReference() {
+        // default
+    }
+
+    /**
      * Stores bytes from the given BytesStore into this BinaryLongReference.
      *
      * @param bytes  The BytesStore from which bytes will be stored.

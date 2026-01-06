@@ -49,7 +49,10 @@ public class BytesTextMethodTester<T> {
 
     /**
      * Returns the path to the optional setup file.
+     *
+     * @return path to setup file or {@code null} if none
      */
+    @Deprecated(/* to be removed in 2027 */)
     public String setup() {
         return setup;
     }
@@ -61,6 +64,7 @@ public class BytesTextMethodTester<T> {
      * @return this tester for chaining
      */
     @NotNull
+    @Deprecated(/* to be removed in 2027 */)
     public BytesTextMethodTester setup(String setup) {
         this.setup = setup;
         return this;
@@ -68,7 +72,10 @@ public class BytesTextMethodTester<T> {
 
     /**
      * Returns the post-processing function applied to actual and expected output.
+     *
+     * @return normalising function applied after the run
      */
+    @Deprecated(/* to be removed in 2027 */)
     public Function<String, String> afterRun() {
         return afterRun;
     }
@@ -80,6 +87,7 @@ public class BytesTextMethodTester<T> {
      * @return this tester for chaining
      */
     @NotNull
+    @Deprecated(/* to be removed in 2027 */)
     public BytesTextMethodTester afterRun(UnaryOperator<String> afterRun) {
         this.afterRun = afterRun;
         return this;
@@ -123,7 +131,7 @@ public class BytesTextMethodTester<T> {
 
         Bytes<?> text = BytesUtil.readFile(input);
         for (String text2 : text.toString().split("###[^\n]*\n")) {
-            if (text2.trim().length() <= 0)
+            if (text2.trim().isEmpty())
                 continue;
             Bytes<?> bytes = HexDumpBytes.fromText(text2);
 
@@ -160,6 +168,8 @@ public class BytesTextMethodTester<T> {
 
     /**
      * Returns the contents of the expected output file after optional post-processing.
+     *
+     * @return expected output text
      */
     public String expected() {
         return expected;
@@ -167,6 +177,8 @@ public class BytesTextMethodTester<T> {
 
     /**
      * Returns the text generated from running the component under test.
+     *
+     * @return actual output text
      */
     public String actual() {
         return actual;

@@ -15,6 +15,7 @@ import java.util.Map;
 
 import static java.lang.System.setProperty;
 
+@SuppressWarnings("deprecation")
 public class BytesReadWriteJLBH implements JLBHTask {
 
     public static final int SHORT_LENGTH = 37;
@@ -37,7 +38,7 @@ public class BytesReadWriteJLBH implements JLBHTask {
     private NanoSampler writeASCIIAsUTF8;
     private NanoSampler readASCIIAsUTF8;
     private Bytes<?> targetBytes;
-    private int length;
+    private final int length;
 
     private BytesReadWriteJLBH(Bytes<?> bytes, int length) {
         this.bytesImpl = bytes;
@@ -216,9 +217,9 @@ public class BytesReadWriteJLBH implements JLBHTask {
             }
         };
 
-        private Map<Integer, String> stringsForLength = new HashMap<>();
-        private Map<Integer, Integer> lengthOfEncodedStrings = new HashMap<>();
-        private Map<Integer, Integer> lengthOfEncodedStringsWithoutLength = new HashMap<>();
+        private final Map<Integer, String> stringsForLength = new HashMap<>();
+        private final Map<Integer, Integer> lengthOfEncodedStrings = new HashMap<>();
+        private final Map<Integer, Integer> lengthOfEncodedStringsWithoutLength = new HashMap<>();
         private final char firstChar;
         private final char lastChar;
 

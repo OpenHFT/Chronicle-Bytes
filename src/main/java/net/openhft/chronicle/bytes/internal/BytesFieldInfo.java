@@ -160,6 +160,7 @@ public class BytesFieldInfo {
      *
      * @return a set of group names
      */
+    @Deprecated(/* to be removed in 2027 */)
     public Set<String> groups() {
         return groups.keySet();
     }
@@ -190,11 +191,11 @@ public class BytesFieldInfo {
      * @return a human readable dump of the discovered groups and their offsets
      */
     public String dump() {
-        final StringBuilder sb = new StringBuilder().append("type: ").append(getClass().getSimpleName()).append(", groups: { ");
-        sb.append(groups.entrySet().stream()
-                .map(e -> e.getKey() + ": " + e.getValue().start + " to " + e.getValue().end)
-                .collect(Collectors.joining(", ")));
-        return sb.append(" }").toString();
+        return "type: " + getClass().getSimpleName() + ", groups: { " +
+                groups.entrySet().stream()
+                        .map(e -> e.getKey() + ": " + e.getValue().start + " to " + e.getValue().end)
+                        .collect(Collectors.joining(", ")) +
+                " }";
     }
 
     /**

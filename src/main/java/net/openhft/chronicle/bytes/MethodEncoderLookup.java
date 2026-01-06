@@ -22,6 +22,9 @@ import java.util.function.Function;
  * This enum is primarily used for encoding and decoding methods annotated with {@link MethodId} for efficient method representation.
  */
 public enum MethodEncoderLookup implements Function<Method, MethodEncoder> {
+    /**
+     * Resolves encoders based solely on the {@link MethodId} annotation.
+     */
     BY_ANNOTATION;
 
     @Override

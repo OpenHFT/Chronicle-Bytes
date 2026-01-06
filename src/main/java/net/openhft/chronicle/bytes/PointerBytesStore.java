@@ -26,6 +26,9 @@ public class PointerBytesStore extends NativeBytesStore<Void> {
 
     /**
      * Points this store at a new memory region.
+     *
+     * @param address  base address of the region
+     * @param capacity length of the region in bytes
      */
     public void set(long address, @NonNegative long capacity) throws IllegalArgumentException {
         setAddress(address);

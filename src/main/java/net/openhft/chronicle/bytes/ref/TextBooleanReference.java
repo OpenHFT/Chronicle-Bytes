@@ -28,6 +28,13 @@ public class TextBooleanReference extends AbstractReference implements BooleanVa
     private static final int TRUE = ' ' | ('t' << 8) | ('r' << 16) | ('u' << 24);
 
     /**
+     * Creates an empty reference; call {@link #bytesStore(BytesStore, long, long)} before use.
+     */
+    public TextBooleanReference() {
+        // default
+    }
+
+    /**
      * Writes a boolean value to the specified {@link BytesStore} at the given offset
      * in text wire format.
      *

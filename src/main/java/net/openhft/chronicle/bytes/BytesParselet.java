@@ -13,5 +13,11 @@ public interface BytesParselet {
      * Handles a message of the supplied {@code messageType} using bytes from
      * {@code in}.
      */
+    /**
+     * Consumes a message of the given type from the input stream.
+     *
+     * @param messageType numeric identifier for the message
+     * @param in          stream containing the message payload
+     */
     void accept(long messageType, BytesIn<?> in);
 }

@@ -14,10 +14,15 @@ public interface DistributedUniqueTimeDeduplicator {
      * @param timestampHostId value embedding time and host id
      * @return -1 if older, 0 if equal or no previous value, +1 if newer
      */
+    @Deprecated(/* to be removed in 2027 */)
     int compareByHostId(long timestampHostId);
 
     /**
      * As {@link #compareByHostId(long)} but also retains {@code timestampHostId} if it is newer.
+     *
+     * @param timestampHostId value embedding time and host id
+     * @return comparison result: negative if older, zero if equal/unknown, positive if newer and retained
      */
+    @Deprecated(/* to be removed in 2027 */)
     int compareAndRetainNewer(long timestampHostId);
 }

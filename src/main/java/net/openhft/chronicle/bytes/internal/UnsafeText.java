@@ -14,6 +14,7 @@ import static net.openhft.chronicle.core.UnsafeMemory.MEMORY;
  */
 public final class UnsafeText {
 
+    @Deprecated(/* to be removed in 2027 */)
     public static final long MASK32 = 0xFFFF_FFFFL;
 
     // Suppresses default constructor, ensuring non-instantiability.
@@ -64,6 +65,7 @@ public final class UnsafeText {
         }
     }
 
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public static long appendFixed(long address, double num, int digits) {
         long tens = Maths.tens(digits);
         double mag = num * tens;
@@ -284,6 +286,7 @@ public final class UnsafeText {
     }
 
     /** writes a byte array at {@code address} */
+    @Deprecated(/* to be removed in 2027 */)
     public static long append8bit(long address, byte[] bytes) {
         final int len = bytes.length;
         int i;
@@ -295,6 +298,7 @@ public final class UnsafeText {
     }
 
     /** writes the lower 8 bits of each char into memory */
+    @Deprecated(/* to be removed in 2027 */)
     public static long append8bit(long address, char[] chars) {
         final int len = chars.length;
         int i;

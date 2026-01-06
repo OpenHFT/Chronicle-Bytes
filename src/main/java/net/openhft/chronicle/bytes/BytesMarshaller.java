@@ -70,6 +70,9 @@ public class BytesMarshaller<T> {
 
     /**
      * Populates {@code t} by reading each field from {@code in} using reflection.
+     *
+     * @param t  target object to populate
+     * @param in source of field data
      */
     public void readMarshallable(ReadBytesMarshallable t, BytesIn<?> in) throws InvalidMarshallableException {
         for (@NotNull FieldAccess field : fields) {
@@ -79,6 +82,9 @@ public class BytesMarshaller<T> {
 
     /**
      * Writes all fields of {@code t} to {@code out} using reflection.
+     *
+     * @param t   source object to serialise
+     * @param out destination for field data
      */
     public void writeMarshallable(WriteBytesMarshallable t, BytesOut<?> out)
             throws IllegalArgumentException, ClosedIllegalStateException, BufferOverflowException, BufferUnderflowException, ArithmeticException, InvalidMarshallableException, ThreadingIllegalStateException {
@@ -293,7 +299,7 @@ public class BytesMarshaller<T> {
     }
 
     static class ObjectArrayFieldAccess extends FieldAccess {
-        Class<?> componentType;
+        final Class<?> componentType;
 
         public ObjectArrayFieldAccess(Field field) {
             super(field);

@@ -37,6 +37,11 @@ public interface BytesOut<U> extends
     /**
      * Returns a proxy that serialises method calls to this output. Additional
      * interfaces may be supplied.
+     *
+     * @param <T>       proxy interface type
+     * @param tClass    primary interface to implement
+     * @param additional additional interfaces to implement
+     * @return proxy that writes method invocations to this output
      */
     @NotNull
     default <T> T bytesMethodWriter(@NotNull Class<T> tClass, Class<?>... additional)
@@ -51,7 +56,10 @@ public interface BytesOut<U> extends
 
     /**
      * Serialises {@code marshallable} prefixed with a 16-bit length.
+     *
+     * @param marshallable object to write
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     void writeMarshallableLength16(WriteBytesMarshallable marshallable)
             throws IllegalArgumentException, BufferOverflowException, BufferUnderflowException, InvalidMarshallableException, ClosedIllegalStateException, ThreadingIllegalStateException;
 
@@ -59,6 +67,9 @@ public interface BytesOut<U> extends
      * Writes {@code obj} according to {@code componentType}. Supported types
      * include {@link String}, boxed primitives, {@link BytesStore} and
      * {@link BytesMarshallable} implementations.
+     *
+     * @param componentType expected type of the value
+     * @param obj           value to write
      */
     default void writeObject(Class<?> componentType, Object obj)
             throws IllegalArgumentException, BufferOverflowException, ArithmeticException, ClosedIllegalStateException, BufferUnderflowException, InvalidMarshallableException, ThreadingIllegalStateException {
