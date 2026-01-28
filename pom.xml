@@ -15,7 +15,7 @@
     </parent>
 
     <artifactId>chronicle-bytes</artifactId>
-    <version>2026.0-SNAPSHOT</version>
+    <version>2026.0</version>
     <name>OpenHFT/Chronicle Bytes</name>
     <description>Chronicle-Bytes</description>
     <packaging>bundle</packaging>
@@ -25,7 +25,7 @@
         <!-- Define the target coverage thresholds as properties -->
         <jacoco.line.coverage>0.710</jacoco.line.coverage>
         <jacoco.branch.coverage>0.623</jacoco.branch.coverage>
-        <surefireArgLine/>
+        <surefireArgLine />
     </properties>
 
     <dependencyManagement>
@@ -330,7 +330,7 @@
         <connection>scm:git:git@github.com:OpenHFT/Chronicle-Bytes.git</connection>
         <developerConnection>scm:git:git@github.com:OpenHFT/Chronicle-Bytes.git
         </developerConnection>
-        <tag>ea</tag>
+        <tag>chronicle-bytes-2026.0</tag>
     </scm>
 
     <profiles>
