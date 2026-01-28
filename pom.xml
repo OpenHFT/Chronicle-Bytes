@@ -15,7 +15,7 @@
     </parent>
 
     <artifactId>chronicle-bytes</artifactId>
-    <version>2026.2</version>
+    <version>2026.3-SNAPSHOT</version>
     <name>OpenHFT/Chronicle Bytes</name>
     <description>Chronicle-Bytes</description>
     <packaging>bundle</packaging>
@@ -330,7 +330,7 @@
         <connection>scm:git:git@github.com:OpenHFT/Chronicle-Bytes.git</connection>
         <developerConnection>scm:git:git@github.com:OpenHFT/Chronicle-Bytes.git
         </developerConnection>
-        <tag>chronicle-bytes-2026.2</tag>
+        <tag>ea</tag>
     </scm>
 
     <profiles>
