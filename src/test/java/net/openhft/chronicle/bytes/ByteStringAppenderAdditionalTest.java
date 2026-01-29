@@ -8,6 +8,10 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+/**
+ * Tests additional ByteStringAppender branches for append operations because complete coverage
+ * of formatting paths is essential for reliable string serialisation.
+ */
 @SuppressWarnings("deprecation")
 @DisplayName("ByteStringAppender covers append branches and formatting paths")
 public class ByteStringAppenderAdditionalTest extends BytesTestCommon {

@@ -4,6 +4,7 @@
 package net.openhft.chronicle.bytes.internal;
 
 import net.openhft.chronicle.bytes.*;
+import net.openhft.chronicle.bytes.util.DecoratedBufferOverflowException;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Memory;
 import net.openhft.chronicle.core.OS;
@@ -190,9 +191,9 @@ public abstract class CommonMappedBytes extends MappedBytes {
             throws BufferOverflowException {
         //  throwExceptionIfClosed
         if (position > writeLimit)
-            throw new BufferOverflowException(/* writePosition exceeds writeLimit */);
+            throw new DecoratedBufferOverflowException("writePosition exceeds writeLimit");
         if (position < 0L)
-            throw new BufferOverflowException(/* writePosition is negative */);
+            throw new DecoratedBufferOverflowException("writePosition is negative");
         if (position < readPosition)
             this.readPosition = position;
         uncheckedWritePosition(position);

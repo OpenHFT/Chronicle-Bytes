@@ -16,6 +16,12 @@ import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+/**
+ * Tests streaming input stream behaviour because correct byte ordering
+ * and zero-length read semantics are essential for interoperability with
+ * standard Java I/O consumers.
+ */
+@DisplayName("StreamingInputStream - validates InputStream adapter behaviour")
 public class StreamingInputStreamTest extends BytesTestCommon {
 
     // https://github.com/OpenHFT/Chronicle-Bytes/issues/48

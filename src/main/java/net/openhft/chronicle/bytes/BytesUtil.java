@@ -209,7 +209,8 @@ public enum BytesUtil {
             file = new File(file2);
         }
         if (!file.exists())
-            throw new FileNotFoundException(name);
+            // File not found on filesystem or classpath
+            throw new FileNotFoundException("File not found: " + name);
         return file.getAbsolutePath();
     }
 

@@ -9,6 +9,11 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
+/**
+ * Tests BytesUtil UTF-8 append, parse, and debug string generation because
+ * correct encoding round-trip and debug visibility are required for diagnostics.
+ */
+@DisplayName("BytesUtil - UTF-8 append, parse, and debug string generation")
 public class BytesDebugAndUtf8Test extends BytesTestCommon {
 
     @Test

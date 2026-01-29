@@ -9,6 +9,11 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+/**
+ * Tests BytesUtil equality methods covering long, int, short, and byte comparison paths
+ * because correct byte-wise equality is essential for content verification.
+ */
+@DisplayName("BytesUtil equality should verify byte content across long, int, short, and byte comparison paths")
 public class BytesUtilEqualityTest extends BytesTestCommon {
 
     @Test
@@ -30,4 +35,3 @@ public class BytesUtilEqualityTest extends BytesTestCommon {
         }
     }
 }
-

@@ -9,6 +9,8 @@ import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.io.*;
 import org.jetbrains.annotations.NotNull;
 
+import net.openhft.chronicle.bytes.util.DecoratedBufferOverflowException;
+
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
@@ -21,7 +23,7 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
  * Immutable {@link BytesStore} with zero capacity used as a placeholder for
  * elastic {@link net.openhft.chronicle.bytes.Bytes} before any data is written.
  */
-@SuppressWarnings({"rawtypes", "unchecked", "deprecation"})
+@SuppressWarnings({"rawtypes", "unchecked", "deprecation", "checkstyle:MMOverusedWord"})
 public final class NoBytesStore implements BytesStore<NoBytesStore, Void> {
     /** Singleton instance representing an immutable empty BytesStore. */
     public static final BytesStore<?, ?> NO_BYTES_STORE = new NoBytesStore();
@@ -49,7 +51,8 @@ public final class NoBytesStore implements BytesStore<NoBytesStore, Void> {
 
     private static BufferUnderflowException throwBUE(long offset) {
         requireNonNegative(offset);
-        return new BufferUnderflowException(/* read beyond empty store */);
+        // Read operation attempted on empty store
+        return new BufferUnderflowException();
     }
 
     @Override
@@ -198,6 +201,7 @@ public final class NoBytesStore implements BytesStore<NoBytesStore, Void> {
 
     @Override
     public byte readByte(@NonNegative long offset) {
+        // Empty store cannot read any bytes
         throw throwBUE(offset);
     }
 
@@ -208,50 +212,59 @@ public final class NoBytesStore implements BytesStore<NoBytesStore, Void> {
 
     @Override
     public short readShort(@NonNegative long offset) {
+        // Empty store cannot read any bytes
         throw throwBUE(offset);
     }
 
     @Override
     public int readInt(@NonNegative long offset) {
+        // Empty store cannot read any bytes
         throw throwBUE(offset);
     }
 
     @Override
     public long readLong(@NonNegative long offset) {
+        // Empty store cannot read any bytes
         throw throwBUE(offset);
     }
 
     @Override
     public float readFloat(@NonNegative long offset) {
+        // Empty store cannot read any bytes
         throw throwBUE(offset);
     }
 
     @Override
     public double readDouble(@NonNegative long offset) {
+        // Empty store cannot read any bytes
         throw throwBUE(offset);
     }
 
     @Override
     public byte readVolatileByte(@NonNegative long offset)
             throws BufferUnderflowException {
+        // Empty store cannot read any bytes
         throw throwBUE(offset);
     }
 
     @Override
     public short readVolatileShort(@NonNegative long offset)
             throws BufferUnderflowException {
+        // Empty store cannot read any bytes
         throw throwBUE(offset);
     }
 
     @Override
     public int readVolatileInt(@NonNegative long offset)
             throws BufferUnderflowException {
+        // Empty store cannot read any bytes
         throw throwBUE(offset);
     }
 
     @Override
     public long readVolatileLong(@NonNegative long offset)
             throws BufferUnderflowException {
+        // Empty store cannot read any bytes
         throw throwBUE(offset);
     }
 
@@ -284,6 +297,7 @@ public final class NoBytesStore implements BytesStore<NoBytesStore, Void> {
      */
     @Override
     public Void underlyingObject() {
+        // No underlying object exists for empty store
         return null;
     }
 
@@ -307,41 +321,46 @@ public final class NoBytesStore implements BytesStore<NoBytesStore, Void> {
     @Override
     public void nativeWrite(long address, @NonNegative long position, @NonNegative long size) {
         requireNonNegative((size | position));
-        if ((size | position) > 0)
-            throw new BufferOverflowException(/* no capacity for nativeWrite */);
+        if ((size | position) > 0) {
+            throw new DecoratedBufferOverflowException("NoBytesStore has no capacity for nativeWrite");
+        }
     }
 
     @Override
     public long write8bit(@NonNegative long position, @NotNull BytesStore<?, ?> bs) {
         requireNonNull(bs);
         requireNonNegative(position);
-        throw new BufferOverflowException(/* no capacity for write8bit(BytesStore) */);
+        throw new DecoratedBufferOverflowException("Empty store has no capacity for BytesStore write");
     }
 
     @Override
     public long write8bit(@NonNegative long position, @NotNull String s, @NonNegative int start, @NonNegative int length) {
         requireNonNull(s);
         requireNonNegative((long) (start | length));
-        throw new BufferOverflowException(/* no capacity for write8bit(String) */);
+        throw new DecoratedBufferOverflowException("Empty store has no capacity for String write");
     }
 
     @Override
     public void nativeRead(@NonNegative long position, long address, @NonNegative long size) {
+        // Empty store has no data for native read
         throw new UnsupportedOperationException();
     }
 
     @Override
     public boolean compareAndSwapInt(@NonNegative long offset, int expected, int value) {
+        // Empty store cannot perform CAS operations
         throw new UnsupportedOperationException();
     }
 
     @Override
     public void testAndSetInt(@NonNegative long offset, int expected, int value) {
+        // Empty store cannot perform test-and-set operations
         throw new UnsupportedOperationException();
     }
 
     @Override
     public boolean compareAndSwapLong(@NonNegative long offset, long expected, long value) {
+        // Empty store cannot perform CAS operations
         throw new UnsupportedOperationException();
     }
 
@@ -354,6 +373,7 @@ public final class NoBytesStore implements BytesStore<NoBytesStore, Void> {
 
     @Override
     public void move(@NonNegative long from, @NonNegative long to, @NonNegative long length) {
+        // Empty store cannot perform move operations
         throw new UnsupportedOperationException();
     }
 
@@ -361,14 +381,14 @@ public final class NoBytesStore implements BytesStore<NoBytesStore, Void> {
     public long addressForRead(@NonNegative long offset)
             throws BufferUnderflowException {
         requireNonNegative(offset);
-        throw new BufferOverflowException(/* empty store has no readable address */);
+        throw new DecoratedBufferOverflowException("Empty store has no addressable memory for reading");
     }
 
     @Override
     public long addressForWrite(@NonNegative long offset)
             throws BufferOverflowException {
         requireNonNegative(offset);
-        throw new BufferOverflowException(/* empty store has no writable address */);
+        throw new DecoratedBufferOverflowException("Empty store has no addressable memory for writing");
     }
 
     @Override
@@ -380,7 +400,7 @@ public final class NoBytesStore implements BytesStore<NoBytesStore, Void> {
     @NotNull
     @Override
     public Bytes<Void> bytesForWrite() {
-        throw new UnsupportedOperationException("todo");
+        throw new UnsupportedOperationException("NoBytesStore does not support bytesForWrite");
     }
 
     @Override

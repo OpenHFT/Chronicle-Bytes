@@ -16,7 +16,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+/**
+ * Tests UncheckedBytes operations because bypassing bounds validation
+ * requires careful verification to avoid silent memory corruption.
+ */
 @SuppressWarnings({"unchecked", "rawtypes"})
+@DisplayName("UncheckedBytes - validates unchecked position and write operations")
 class UncheckedBytesTest {
 
     private Bytes<?> underlyingBytes;

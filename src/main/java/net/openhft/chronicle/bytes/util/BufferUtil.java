@@ -18,7 +18,8 @@ import java.nio.ByteBuffer;
 public final class BufferUtil {
 
     /**
-     * Utility holder; not instantiable.
+     * Static utility class providing Java 8 compatible buffer operations.
+     * No instances are permitted.
      */
     private BufferUtil() {
     }
@@ -43,7 +44,8 @@ public final class BufferUtil {
     }
 
     /**
-     * Invokes {@link Buffer#flip()} on the provided buffer.
+     * Flips the buffer to prepare for reading after writing; sets limit to current
+     * position and resets position to zero.
      *
      * @param byteBuffer buffer to flip
      */

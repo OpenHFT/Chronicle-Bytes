@@ -22,6 +22,12 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+/**
+ * Tests binary length encoding because correct bit-width selection is
+ * essential to avoid truncation when serialising large payloads.
+ */
+@SuppressWarnings("checkstyle:MMOverusedWord")
+@DisplayName("BinaryLengthLength - validates 8/16/32-bit length wire codes")
 public class BinaryLengthLengthTest extends BytesTestCommon {
 
     private static Stream<Arguments> lengthAndCode() {

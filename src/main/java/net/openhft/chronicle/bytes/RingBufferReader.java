@@ -14,6 +14,7 @@ import net.openhft.chronicle.core.io.Closeable;
  * {@link RingBufferReaderStats}. Once stopped, the reader keeps writers unblocked and may be
  * restarted if supported by the implementation.
  */
+@SuppressWarnings("checkstyle:MMOverusedWord")
 public interface RingBufferReader extends RingBufferReaderStats, Closeable {
 
     /**

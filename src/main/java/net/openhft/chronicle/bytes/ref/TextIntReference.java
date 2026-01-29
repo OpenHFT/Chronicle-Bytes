@@ -84,6 +84,7 @@ public class TextIntReference extends AbstractReference implements IntValue {
                 }
             }
         } catch (Exception e) {
+            // Propagate exception from within the lock
             throw Jvm.rethrow(e);
         }
     }

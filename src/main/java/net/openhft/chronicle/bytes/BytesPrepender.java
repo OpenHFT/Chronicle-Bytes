@@ -13,7 +13,8 @@ import java.nio.BufferOverflowException;
 
 /**
  * Supports writing data before the current {@link Bytes#readPosition()}.
- * After each operation the read position moves backwards.
+ * After each operation the read position moves backwards. This is useful
+ * when building length-prefixed structures in order to avoid temporary copies.
  *
  * @param <B> self type
  */

@@ -20,6 +20,7 @@ import static net.openhft.chronicle.bytes.BinaryWireCode.*;
  *
  * @param <U> self type for fluent API
  */
+@SuppressWarnings("checkstyle:MMOverusedWord")
 public class GuardedNativeBytes<U> extends NativeBytes<U> {
     /** Type marker used when guarding a single byte write operation. */
     static final byte BYTE_T = (byte) INT8;
@@ -39,7 +40,9 @@ public class GuardedNativeBytes<U> extends NativeBytes<U> {
     private static final String[] STRING_FOR_CODE = stringForCode(GuardedNativeBytes.class);
 
     /**
-     * Constructs a new GuardedNativeBytes instance backed by the specified BytesStore and with the specified capacity.
+     * Constructs a new GuardedNativeBytes instance backed by the specified
+     * BytesStore and with the specified capacity so that type markers can be
+     * inserted before each primitive for debugging purposes.
      *
      * @param store    The backing BytesStore.
      * @param capacity The capacity of the new GuardedNativeBytes instance.

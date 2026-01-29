@@ -19,9 +19,10 @@ import java.nio.ByteOrder;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Tests for HeapBytesStore branch coverage across wrapping, atomic updates,
- * read/write paths, and boundary checks.
+ * Tests for HeapBytesStore branch coverage, because atomic operations
+ * and boundary checks must be validated to avoid data corruption.
  */
+@DisplayName("HeapBytesStore branch coverage for wrapping, atomics, and boundaries")
 class HeapBytesStoreBranchTest extends BytesTestCommon {
 
     @Test
@@ -40,10 +41,10 @@ class HeapBytesStoreBranchTest extends BytesTestCommon {
     }
 
     @Test
-    @DisplayName("wrap(byte[]) should throw on null array")
+    @DisplayName("wrap(byte[]) should throw on null array to prevent NullPointerException later")
     void wrapNullArrayThrows() {
         assertThrows(NullPointerException.class, () -> HeapBytesStore.wrap((byte[]) null),
-                "wrapping null array should throw NPE");
+                "wrapping null byte array should throw NPE to prevent deferred failure");
     }
 
     @Test
@@ -62,7 +63,7 @@ class HeapBytesStoreBranchTest extends BytesTestCommon {
     }
 
     @Test
-    @DisplayName("move should copy data within the store")
+    @DisplayName("move should copy data from source to target offset within same store")
     void moveCopiesDataWithinStore() {
         byte[] data = new byte[16];
         HeapBytesStore<byte[]> store = HeapBytesStore.wrap(data);
@@ -72,48 +73,48 @@ class HeapBytesStoreBranchTest extends BytesTestCommon {
             store.writeByte(2, (byte) 0x33);
             store.move(0, 8, 3);
 
-            assertEquals((byte) 0x11, store.readByte(8), "first byte should be moved");
-            assertEquals((byte) 0x22, store.readByte(9), "second byte should be moved");
-            assertEquals((byte) 0x33, store.readByte(10), "third byte should be moved");
+            assertEquals((byte) 0x11, store.readByte(8), "byte at offset 8 should be 0x11 after move from offset 0");
+            assertEquals((byte) 0x22, store.readByte(9), "byte at offset 9 should be 0x22 after move from offset 1");
+            assertEquals((byte) 0x33, store.readByte(10), "byte at offset 10 should be 0x33 after move from offset 2");
         } finally {
             store.releaseLast();
         }
     }
 
     @Test
-    @DisplayName("move with negative from offset should throw")
+    @DisplayName("move with negative from offset should throw to prevent invalid memory access")
     void moveNegativeFromThrows() {
         byte[] data = new byte[16];
         HeapBytesStore<byte[]> store = HeapBytesStore.wrap(data);
         try {
             assertThrows(IllegalArgumentException.class, () -> store.move(-1, 0, 1),
-                    "negative from offset should throw");
+                    "move with from=-1 should throw because negative offsets are invalid");
         } finally {
             store.releaseLast();
         }
     }
 
     @Test
-    @DisplayName("move with negative to offset should throw")
+    @DisplayName("move with negative to offset should throw to prevent invalid memory access")
     void moveNegativeToThrows() {
         byte[] data = new byte[16];
         HeapBytesStore<byte[]> store = HeapBytesStore.wrap(data);
         try {
             assertThrows(IllegalArgumentException.class, () -> store.move(0, -1, 1),
-                    "negative to offset should throw");
+                    "move with to=-1 should throw because negative offsets are invalid");
         } finally {
             store.releaseLast();
         }
     }
 
     @Test
-    @DisplayName("move with negative length should throw")
+    @DisplayName("move with negative length should throw to prevent invalid memory access")
     void moveNegativeLengthThrows() {
         byte[] data = new byte[16];
         HeapBytesStore<byte[]> store = HeapBytesStore.wrap(data);
         try {
             assertThrows(IllegalArgumentException.class, () -> store.move(0, 1, -1),
-                    "negative length should throw");
+                    "move with length=-1 should throw because negative lengths are invalid");
         } finally {
             store.releaseLast();
         }
@@ -203,14 +204,14 @@ class HeapBytesStoreBranchTest extends BytesTestCommon {
     }
 
     @Test
-    @DisplayName("testAndSetInt should throw when expected int value does not match")
+    @DisplayName("testAndSetInt should throw when expected value 50 does not match stored value 100")
     void testAndSetIntThrowsOnMismatch() {
         byte[] data = new byte[16];
         HeapBytesStore<byte[]> store = HeapBytesStore.wrap(data);
         try {
             store.writeInt(0, 100);
             assertThrows(IllegalStateException.class, () -> store.testAndSetInt(0, 50, 200),
-                    "testAndSetInt should throw for mismatched expected int");
+                    "testAndSetInt should throw because expected=50 does not match stored=100");
         } finally {
             store.releaseLast();
         }
@@ -376,8 +377,8 @@ class HeapBytesStoreBranchTest extends BytesTestCommon {
         try {
             byte[] target = new byte[4];
             long read = store.read(2, target, 0, 4);
-            assertEquals(4, read, "read(offset, ...) should return 4 bytes copied");
-            assertArrayEquals(new byte[]{3, 4, 5, 6}, target, "read data should match");
+            assertEquals(4, read, "read(offset, ...) should return 4 bytes copied from position 2");
+            assertArrayEquals(new byte[]{3, 4, 5, 6}, target, "target array should contain bytes {3,4,5,6} from source offset 2");
         } finally {
             store.releaseLast();
         }
@@ -446,8 +447,8 @@ class HeapBytesStoreBranchTest extends BytesTestCommon {
             source.writeLong(0xAABBCCDDEEFF0011L);
 
             store.write(0, source, 0, 16);
-            assertEquals(0x1122334455667788L, store.readLong(0), "first long should match");
-            assertEquals(0xAABBCCDDEEFF0011L, store.readLong(8), "second long should match");
+            assertEquals(0x1122334455667788L, store.readLong(0), "first long at offset 0 should be 0x1122334455667788L after write");
+            assertEquals(0xAABBCCDDEEFF0011L, store.readLong(8), "second long at offset 8 should be 0xAABBCCDDEEFF0011L after write");
             source.releaseLast();
         } finally {
             store.releaseLast();
@@ -590,13 +591,13 @@ class HeapBytesStoreBranchTest extends BytesTestCommon {
     }
 
     @Test
-    @DisplayName("nativeRead with position before start should throw")
+    @DisplayName("nativeRead with position before start should throw underflow exception")
     void nativeReadBeforeStartThrows() {
         byte[] data = new byte[16];
         HeapBytesStore<byte[]> store = HeapBytesStore.wrap(data);
         try {
             assertThrows(BufferUnderflowException.class, () -> store.nativeRead(-1, 0, 1),
-                    "nativeRead should throw for position before start");
+                    "nativeRead with position=-1 should throw underflow because position is before start");
         } finally {
             store.releaseLast();
         }
@@ -616,13 +617,13 @@ class HeapBytesStoreBranchTest extends BytesTestCommon {
     }
 
     @Test
-    @DisplayName("nativeRead with negative size should throw")
+    @DisplayName("nativeRead with negative size should throw illegal argument exception")
     void nativeReadNegativeSizeThrows() {
         byte[] data = new byte[16];
         HeapBytesStore<byte[]> store = HeapBytesStore.wrap(data);
         try {
             assertThrows(IllegalArgumentException.class, () -> store.nativeRead(0, 0, -1),
-                    "nativeRead should throw for negative size");
+                    "nativeRead with size=-1 should throw because negative sizes are invalid");
         } finally {
             store.releaseLast();
         }
@@ -655,13 +656,13 @@ class HeapBytesStoreBranchTest extends BytesTestCommon {
     }
 
     @Test
-    @DisplayName("nativeWrite with position before start should throw")
+    @DisplayName("nativeWrite with position before start should throw underflow exception")
     void nativeWriteBeforeStartThrows() {
         byte[] data = new byte[16];
         HeapBytesStore<byte[]> store = HeapBytesStore.wrap(data);
         try {
             assertThrows(BufferUnderflowException.class, () -> store.nativeWrite(0, -1, 1),
-                    "nativeWrite should throw for position before start");
+                    "nativeWrite with position=-1 should throw underflow because position is before start");
         } finally {
             store.releaseLast();
         }
@@ -681,13 +682,13 @@ class HeapBytesStoreBranchTest extends BytesTestCommon {
     }
 
     @Test
-    @DisplayName("nativeWrite with negative size should throw")
+    @DisplayName("nativeWrite with negative size should throw illegal argument exception")
     void nativeWriteNegativeSizeThrows() {
         byte[] data = new byte[16];
         HeapBytesStore<byte[]> store = HeapBytesStore.wrap(data);
         try {
             assertThrows(IllegalArgumentException.class, () -> store.nativeWrite(0, 0, -1),
-                    "nativeWrite should throw for negative size");
+                    "nativeWrite with size=-1 should throw because negative sizes are invalid");
         } finally {
             store.releaseLast();
         }
@@ -719,14 +720,14 @@ class HeapBytesStoreBranchTest extends BytesTestCommon {
     }
 
     @Test
-    @DisplayName("toString should return non-empty content string representation")
+    @DisplayName("toString should return non-empty string representation for debugging")
     void toStringReturnsRepresentation() {
         byte[] data = new byte[]{0x48, 0x65, 0x6C, 0x6C, 0x6F}; // "Hello"
         HeapBytesStore<byte[]> store = HeapBytesStore.wrap(data);
         try {
             String str = store.toString();
-            assertNotNull(str, "toString should return non-null content string");
-            assertFalse(str.isEmpty(), "toString should return non-empty content string");
+            assertNotNull(str, "toString should return non-null string for 5-byte store containing 'Hello'");
+            assertFalse(str.isEmpty(), "toString should return non-empty string for 5-byte store containing 'Hello'");
         } finally {
             store.releaseLast();
         }

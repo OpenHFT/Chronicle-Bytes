@@ -298,6 +298,7 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
 
         throwExceptionIfClosed();
         if (offset + adding < start() || offset > mappedFile.capacity() - adding)
+            // Offset outside valid range for write operation
             throw writeBufferOverflowException0(offset);
         BytesStore<?, ?> bytesStore = this.bytesStore;
         if (adding > 0 && !bytesStore.inside(offset, checkSize0(adding))) {
@@ -369,6 +370,7 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
             throws ClosedIllegalStateException, ThreadingIllegalStateException {
         throwExceptionIfClosed();
         if (DEBUG_CHUNKED_MAPPED_BYTES && LOG.isDebugEnabled())
+            // Debug logging uses System.identityHashCode for instance tracing in chunked byte acquisition
             Jvm.debug().on(LOG, Integer.toHexString(System.identityHashCode(this)) + ", file: " + mappedFile.file().getName() + ", offset: 0x" + Long.toHexString(offset) + ", read: " + set);
 
         final BytesStore<?, ?> oldBS = this.bytesStore;
@@ -403,7 +405,7 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
             return this;
 
         if (readPosition + bytesToSkip > readLimit())
-            throw new BufferUnderflowException(/* readSkip exceeds readLimit */);
+            throw new DecoratedBufferUnderflowException("readSkip exceeds readLimit");
         long check = bytesToSkip >= 0 ? this.readPosition : this.readPosition + bytesToSkip;
         BytesStore<?, ?> bytesStore = this.bytesStore;
         if (bytesToSkip != (int) bytesToSkip || !bytesStore.inside(readPosition, (int) bytesToSkip)) {
@@ -572,6 +574,7 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
         throwExceptionIfClosed();
 
         if (writePosition() < 0 || writePosition() > capacity() - 1L + length)
+            // Write position outside valid range for UTF-8 append operation
             throw writeBufferOverflowException0(writePosition());
         int i;
         for (i = 0; i < length; i++) {
@@ -602,6 +605,7 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
         throwExceptionIfClosed();
 
         if (offset < 0 || offset > mappedFile.capacity() - 8L)
+            // Offset outside valid range for 8-byte CAS operation
             throw writeBufferOverflowException0(offset);
         // this is correct that it uses the maximumLimit, yes it is different from the method above.
         BytesStore<?, ?> bytesStore = this.bytesStore;

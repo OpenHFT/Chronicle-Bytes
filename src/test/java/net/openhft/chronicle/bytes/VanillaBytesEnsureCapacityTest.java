@@ -8,6 +8,11 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+/**
+ * Tests ensureCapacity behaviour because correct elastic growth is
+ * essential to avoid BufferOverflowException during bulk writes.
+ */
+@DisplayName("VanillaBytesEnsureCapacity - validates elastic growth on demand")
 public class VanillaBytesEnsureCapacityTest extends BytesTestCommon {
 
     @Test

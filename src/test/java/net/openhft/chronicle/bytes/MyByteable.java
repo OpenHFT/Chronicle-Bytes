@@ -7,6 +7,11 @@ import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import net.openhft.chronicle.core.io.Validatable;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * Test support class implementing BytesMarshallable because validation
+ * tests require a concrete Byteable type to verify marshalling and
+ * validation behaviour.
+ */
 class MyByteable implements BytesMarshallable, Validatable {
     private boolean flag;
     byte b;

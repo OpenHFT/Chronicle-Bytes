@@ -15,7 +15,8 @@ import java.nio.BufferOverflowException;
 import static net.openhft.chronicle.core.Jvm.uncheckedCast;
 
 /**
- * {@link VanillaBytes} backed by an on heap {@code byte[]}.
+ * {@link VanillaBytes} backed by an on heap {@code byte[]}. This class avoids
+ * off-heap allocation because some environments prohibit native memory usage.
  */
 public class OnHeapBytes extends VanillaBytes<byte[]> {
     public static final int MAX_CAPACITY = Bytes.MAX_HEAP_CAPACITY;
@@ -23,7 +24,15 @@ public class OnHeapBytes extends VanillaBytes<byte[]> {
     private final long capacity;
 
     /**
-     * Constructs an on-heap bytes view backed by the supplied {@code bytesStore} and elastic policy.
+     * Constructs an on-heap bytes view backed by the supplied {@code bytesStore}
+     * and elastic policy. When elastic is true the capacity may grow up to
+     * {@link #MAX_CAPACITY}; otherwise it is fixed.
+     *
+     * @param bytesStore the backing store
+     * @param elastic    whether to allow growth
+     * @throws ClosedIllegalStateException    if the store is closed
+     * @throws IllegalArgumentException       if capacity is invalid
+     * @throws ThreadingIllegalStateException if accessed from multiple threads
      */
     @SuppressWarnings("this-escape")
     public OnHeapBytes(@NotNull BytesStore<?, ?> bytesStore, boolean elastic)
@@ -69,7 +78,7 @@ public class OnHeapBytes extends VanillaBytes<byte[]> {
         } else {
             if (offset < 0)
                 throw new IllegalArgumentException("offset must be non-negative");
-            throw new BufferOverflowException(/* write before start or overflowed */);
+            throw new DecoratedBufferOverflowException("write before start or overflowed");
         }
     }
 
@@ -83,16 +92,16 @@ public class OnHeapBytes extends VanillaBytes<byte[]> {
         if (isElastic())
             resize(endOfBuffer);
         else
-            throw new BufferOverflowException(/* non-elastic buffer cannot grow */);
+            throw new DecoratedBufferOverflowException("non-elastic buffer cannot grow");
     }
 
     // the endOfBuffer is the minimum capacity and one byte more than the last addressable byte.
     private void resize(@NonNegative long endOfBuffer)
             throws BufferOverflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
         if (endOfBuffer < 0)
-            throw new BufferOverflowException(/* endOfBuffer underflow */);
+            throw new DecoratedBufferOverflowException("endOfBuffer underflow");
         if (endOfBuffer > capacity())
-            throw new BufferOverflowException(/* endOfBuffer exceeds capacity */);
+            throw new DecoratedBufferOverflowException("endOfBuffer exceeds capacity");
         final long realCapacity = realCapacity();
         if (endOfBuffer <= realCapacity) {
             // No resize

@@ -22,7 +22,7 @@ import java.nio.BufferOverflowException;
  * implementation is discouraged; the public factory delegates to the
  * commercial implementation when present.
  */
-@SuppressWarnings({"rawtypes", "unchecked"})
+@SuppressWarnings({"rawtypes", "unchecked", "checkstyle:MMOverusedWord"})
 public interface BytesRingBuffer extends BytesRingBufferStats, BytesConsumer, Closeable {
     /**
      * Factory method to create a new ring buffer.
@@ -57,7 +57,7 @@ public interface BytesRingBuffer extends BytesRingBufferStats, BytesConsumer, Cl
             Jvm.error().on(BytesRingBuffer.class,
                     "Multi-reader ring buffer support is a commercial feature; " +
                             "contact sales@chronicle.software to unlock it.");
-
+            // Propagate the exception as unchecked to signal factory failure
             throw Jvm.rethrow(e);
         }
     }
@@ -71,6 +71,7 @@ public interface BytesRingBuffer extends BytesRingBufferStats, BytesConsumer, Cl
     @NotNull
     static Class<MultiReaderBytesRingBuffer> clazz()
             throws ClassNotFoundException {
+        // Load the enterprise class by name because it may not be on the classpath
         return (Class<MultiReaderBytesRingBuffer>) Class.forName(
                 "software.chronicle.enterprise.ring.EnterpriseRingBuffer");
     }
@@ -95,15 +96,17 @@ public interface BytesRingBuffer extends BytesRingBufferStats, BytesConsumer, Cl
      */
     static long sizeFor(@NonNegative long capacity, @NonNegative int numReaders) {
         try {
-            final Method sizeFor = Class.forName(
-                    "software.chronicle.enterprise.queue.ChronicleRingBuffer").getMethod("sizeFor", long.class, int.class);
+            final Method sizeFor =
+                    // Load enterprise class via reflection to avoid compile-time dependency
+                    Class.forName("software.chronicle.enterprise.queue.ChronicleRingBuffer").getMethod("sizeFor", long.class, int.class);
+            // Invoke via reflection because the method may not be on the classpath
             return (long) sizeFor.invoke(null, capacity, numReaders);
 
         } catch (Exception e) {
             Jvm.error().on(BytesRingBuffer.class,
                     "Ring buffer sizing for enterprise implementation is a commercial feature; " +
                             "contact sales@chronicle.software to unlock it.");
-
+            // Enterprise class not found, propagate exception to signal missing dependency
             throw Jvm.rethrow(e);
         }
     }

@@ -20,7 +20,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
-@SuppressWarnings("deprecation")
+/**
+ * Tests {@link BinaryIntArrayReference} marshalling and indexed access because
+ * correct binary array storage is required to avoid data corruption in shared
+ * memory integer lookups. The test validates capacity enforcement, atomic
+ * compareAndSet operations, and boundary condition handling.
+ */
+@SuppressWarnings({"deprecation", "MMLacksPurpose"}) // Javadoc explains indexed array access purpose
 @DisplayName("Binary int array reference marshalling and access")
 public class BinaryIntArrayReferenceTest extends BytesTestCommon {
     @Test
@@ -429,7 +435,7 @@ public class BinaryIntArrayReferenceTest extends BytesTestCommon {
             array.bytesStore(bytes, 0, length);
             array.setValueAt(0, 3);
             assertFalse(array.compareAndSet(0, 1, 4),
-                    "compareAndSet should return false when expected does not match");
+                    "compareAndSet should return false when expected value does not match current");
             assertEquals(3,
                     array.getValueAt(0),
                     "Value should remain unchanged after failed compareAndSet");

@@ -13,6 +13,9 @@ import net.openhft.chronicle.core.annotation.NonNegative;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import net.openhft.chronicle.bytes.util.DecoratedBufferOverflowException;
+import net.openhft.chronicle.bytes.util.DecoratedBufferUnderflowException;
+
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
@@ -36,7 +39,7 @@ public class HeapBytesStore<U>
     /** Actual byte array backing this store when wrapping heap memory. */
     @Nullable
     private final Object realUnderlyingObject;
-    /** Unsafe offset of the first data byte. */
+    /** Base offset for Unsafe operations; added to logical offsets to access the backing array. */
     private final int dataOffset;
     /** Usable capacity of this store in bytes. */
     private final long capacity;
@@ -117,6 +120,7 @@ public class HeapBytesStore<U>
             memory.copyMemory(realUnderlyingObject, dataOffset + from, realUnderlyingObject, dataOffset + to, (int) length);
         } catch (NullPointerException ifReleased) {
             throwExceptionIfReleased();
+            // NullPointerException occurs when memory accessor has been nulled after release
             throw ifReleased;
         }
     }
@@ -161,6 +165,7 @@ public class HeapBytesStore<U>
             return memory.compareAndSwapInt(realUnderlyingObject, dataOffset + offset, expected, value);
         } catch (NullPointerException ifReleased) {
             throwExceptionIfReleased();
+            // NullPointerException occurs when memory accessor has been nulled after release
             throw ifReleased;
         }
     }
@@ -172,6 +177,7 @@ public class HeapBytesStore<U>
             memory.testAndSetInt(realUnderlyingObject, dataOffset + offset, expected, value);
         } catch (NullPointerException ifReleased) {
             throwExceptionIfReleased();
+            // NullPointerException occurs when memory accessor has been nulled after release
             throw ifReleased;
         }
     }
@@ -183,6 +189,7 @@ public class HeapBytesStore<U>
                     realUnderlyingObject, dataOffset + offset, expected, value);
         } catch (NullPointerException ifReleased) {
             throwExceptionIfReleased();
+            // NullPointerException occurs when memory accessor has been nulled after release
             throw ifReleased;
         }
     }
@@ -199,6 +206,7 @@ public class HeapBytesStore<U>
             return len;
         } catch (NullPointerException ifReleased) {
             throwExceptionIfReleased();
+            // NullPointerException occurs when memory accessor has been nulled after release
             throw ifReleased;
         }
     }
@@ -210,6 +218,7 @@ public class HeapBytesStore<U>
             return memory.readByte(realUnderlyingObject, dataOffset + offset);
         } catch (NullPointerException ifReleased) {
             throwExceptionIfReleased();
+            // NullPointerException occurs when memory accessor has been nulled after release
             throw ifReleased;
         }
     }
@@ -221,6 +230,7 @@ public class HeapBytesStore<U>
             return memory.readShort(realUnderlyingObject, dataOffset + offset);
         } catch (NullPointerException ifReleased) {
             throwExceptionIfReleased();
+            // NullPointerException occurs when memory accessor has been nulled after release
             throw ifReleased;
         }
     }
@@ -232,6 +242,7 @@ public class HeapBytesStore<U>
             return memory.readInt(realUnderlyingObject, dataOffset + offset);
         } catch (NullPointerException ifReleased) {
             throwExceptionIfReleased();
+            // NullPointerException occurs when memory accessor has been nulled after release
             throw ifReleased;
         }
     }
@@ -243,6 +254,7 @@ public class HeapBytesStore<U>
             return memory.readLong(realUnderlyingObject, dataOffset + offset);
         } catch (NullPointerException ifReleased) {
             throwExceptionIfReleased();
+            // NullPointerException occurs when memory accessor has been nulled after release
             throw ifReleased;
         }
     }
@@ -254,6 +266,7 @@ public class HeapBytesStore<U>
             return memory.readFloat(realUnderlyingObject, dataOffset + offset);
         } catch (NullPointerException ifReleased) {
             throwExceptionIfReleased();
+            // NullPointerException occurs when memory accessor has been nulled after release
             throw ifReleased;
         }
     }
@@ -265,6 +278,7 @@ public class HeapBytesStore<U>
             return memory.readDouble(realUnderlyingObject, dataOffset + offset);
         } catch (NullPointerException ifReleased) {
             throwExceptionIfReleased();
+            // NullPointerException occurs when memory accessor has been nulled after release
             throw ifReleased;
         }
     }
@@ -276,6 +290,7 @@ public class HeapBytesStore<U>
             return memory.readVolatileByte(realUnderlyingObject, dataOffset + offset);
         } catch (NullPointerException ifReleased) {
             throwExceptionIfReleased();
+            // NullPointerException occurs when memory accessor has been nulled after release
             throw ifReleased;
         }
     }
@@ -287,6 +302,7 @@ public class HeapBytesStore<U>
             return memory.readVolatileShort(realUnderlyingObject, dataOffset + offset);
         } catch (NullPointerException ifReleased) {
             throwExceptionIfReleased();
+            // NullPointerException occurs when memory accessor has been nulled after release
             throw ifReleased;
         }
     }
@@ -299,6 +315,7 @@ public class HeapBytesStore<U>
             return memory.readVolatileInt(realUnderlyingObject, dataOffset + offset);
         } catch (NullPointerException ifReleased) {
             throwExceptionIfReleased();
+            // NullPointerException occurs when memory accessor has been nulled after release
             throw ifReleased;
         }
     }
@@ -311,6 +328,7 @@ public class HeapBytesStore<U>
             return memory.readVolatileLong(realUnderlyingObject, dataOffset + offset);
         } catch (NullPointerException ifReleased) {
             throwExceptionIfReleased();
+            // NullPointerException occurs when memory accessor has been nulled after release
             throw ifReleased;
         }
     }
@@ -342,6 +360,7 @@ public class HeapBytesStore<U>
             return position + length;
         } catch (NullPointerException ifReleased) {
             throwExceptionIfReleased();
+            // NullPointerException occurs when memory accessor has been nulled after release
             throw ifReleased;
         }
     }
@@ -356,6 +375,7 @@ public class HeapBytesStore<U>
             return this;
         } catch (NullPointerException ifReleased) {
             throwExceptionIfReleased();
+            // NullPointerException occurs when memory accessor has been nulled after release
             throw ifReleased;
         }
     }
@@ -370,6 +390,7 @@ public class HeapBytesStore<U>
             return this;
         } catch (NullPointerException ifReleased) {
             throwExceptionIfReleased();
+            // NullPointerException occurs when memory accessor has been nulled after release
             throw ifReleased;
         }
     }
@@ -384,6 +405,7 @@ public class HeapBytesStore<U>
             return this;
         } catch (NullPointerException ifReleased) {
             throwExceptionIfReleased();
+            // NullPointerException occurs when memory accessor has been nulled after release
             throw ifReleased;
         }
     }
@@ -398,6 +420,7 @@ public class HeapBytesStore<U>
             return this;
         } catch (NullPointerException ifReleased) {
             throwExceptionIfReleased();
+            // NullPointerException occurs when memory accessor has been nulled after release
             throw ifReleased;
         }
     }
@@ -412,6 +435,7 @@ public class HeapBytesStore<U>
             return this;
         } catch (NullPointerException ifReleased) {
             throwExceptionIfReleased();
+            // NullPointerException occurs when memory accessor has been nulled after release
             throw ifReleased;
         }
     }
@@ -426,6 +450,7 @@ public class HeapBytesStore<U>
             return this;
         } catch (NullPointerException ifReleased) {
             throwExceptionIfReleased();
+            // NullPointerException occurs when memory accessor has been nulled after release
             throw ifReleased;
         }
     }
@@ -439,6 +464,7 @@ public class HeapBytesStore<U>
             return this;
         } catch (NullPointerException ifReleased) {
             throwExceptionIfReleased();
+            // NullPointerException occurs when memory accessor has been nulled after release
             throw ifReleased;
         }
     }
@@ -452,6 +478,7 @@ public class HeapBytesStore<U>
             return this;
         } catch (NullPointerException ifReleased) {
             throwExceptionIfReleased();
+            // NullPointerException occurs when memory accessor has been nulled after release
             throw ifReleased;
         }
     }
@@ -465,6 +492,7 @@ public class HeapBytesStore<U>
             return this;
         } catch (NullPointerException ifReleased) {
             throwExceptionIfReleased();
+            // NullPointerException occurs when memory accessor has been nulled after release
             throw ifReleased;
         }
     }
@@ -478,6 +506,7 @@ public class HeapBytesStore<U>
             return this;
         } catch (NullPointerException ifReleased) {
             throwExceptionIfReleased();
+            // NullPointerException occurs when memory accessor has been nulled after release
             throw ifReleased;
         }
     }
@@ -491,6 +520,7 @@ public class HeapBytesStore<U>
             return this;
         } catch (NullPointerException ifReleased) {
             throwExceptionIfReleased();
+            // NullPointerException occurs when memory accessor has been nulled after release
             throw ifReleased;
         }
     }
@@ -504,6 +534,7 @@ public class HeapBytesStore<U>
             return this;
         } catch (NullPointerException ifReleased) {
             throwExceptionIfReleased();
+            // NullPointerException occurs when memory accessor has been nulled after release
             throw ifReleased;
         }
     }
@@ -524,6 +555,7 @@ public class HeapBytesStore<U>
             return this;
         } catch (NullPointerException ifReleased) {
             throwExceptionIfReleased();
+            // NullPointerException occurs when memory accessor has been nulled after release
             throw ifReleased;
         }
     }
@@ -546,6 +578,7 @@ public class HeapBytesStore<U>
             }
         } catch (NullPointerException ifReleased) {
             throwExceptionIfReleased();
+            // NullPointerException occurs when memory accessor has been nulled after release
             throw ifReleased;
         }
     }
@@ -605,9 +638,9 @@ public class HeapBytesStore<U>
     public long addressForRead(@NonNegative long offset)
             throws UnsupportedOperationException {
         if (offset < start())
-            throw new BufferUnderflowException(/* addressForRead offset before start */);
+            throw new DecoratedBufferUnderflowException("addressForRead offset before start");
         if (offset >= capacity)
-            throw new BufferOverflowException(/* addressForRead offset beyond capacity */);
+            throw new DecoratedBufferOverflowException("addressForRead offset beyond capacity");
         throw new UnsupportedOperationException();
     }
 
@@ -615,9 +648,9 @@ public class HeapBytesStore<U>
     public long addressForWrite(@NonNegative long offset)
             throws UnsupportedOperationException {
         if (offset < start())
-            throw new BufferUnderflowException(/* addressForWrite offset before start */);
+            throw new DecoratedBufferUnderflowException("addressForWrite offset before start");
         if (offset >= capacity)
-            throw new BufferOverflowException(/* addressForWrite offset beyond capacity */);
+            throw new DecoratedBufferOverflowException("addressForWrite offset beyond capacity");
         throw new UnsupportedOperationException();
     }
 
@@ -630,9 +663,9 @@ public class HeapBytesStore<U>
     @Override
     public void nativeRead(@NonNegative long position, @NonNegative long address, @NonNegative long size) {
         if (position < start())
-            throw new BufferUnderflowException(/* nativeRead position before start */);
+            throw new DecoratedBufferUnderflowException("nativeRead position before start");
         if (size + position > readLimit())
-            throw new BufferOverflowException(/* nativeRead exceeds readLimit */);
+            throw new DecoratedBufferOverflowException("nativeRead exceeds readLimit");
         if (size < 0)
             throw new IllegalArgumentException("nativeRead size must be non-negative");
         if (size > 0)
@@ -642,9 +675,9 @@ public class HeapBytesStore<U>
     @Override
     public void nativeWrite(@NonNegative long address, @NonNegative long position, @NonNegative long size) {
         if (position < start())
-            throw new BufferUnderflowException(/* nativeWrite position before start */);
+            throw new DecoratedBufferUnderflowException("nativeWrite position before start");
         if (size + position > writeLimit())
-            throw new BufferOverflowException(/* nativeWrite exceeds writeLimit */);
+            throw new DecoratedBufferOverflowException("nativeWrite exceeds writeLimit");
         if (size < 0)
             throw new IllegalArgumentException("nativeWrite size must be non-negative");
         if (size > 0)
@@ -701,6 +734,7 @@ public class HeapBytesStore<U>
             return addr - writePosition;
         } catch (NullPointerException ifReleased) {
             throwExceptionIfReleased();
+            // NullPointerException occurs when memory accessor has been nulled after release
             throw ifReleased;
         }
     }

@@ -33,7 +33,7 @@ import static net.openhft.chronicle.core.io.Closeable.closeQuietly;
  * required. Instances are {@link ReferenceCounted} through their
  * {@link MappedBytesStore} and must be closed to unmap native resources.
  */
-@SuppressWarnings({"rawtypes", "restriction"})
+@SuppressWarnings({"rawtypes", "restriction", "checkstyle:MMOverusedWord"})
 public class SingleMappedFile extends MappedFile {
     /**
      * RandomAccessFile instance backing this mapped file.

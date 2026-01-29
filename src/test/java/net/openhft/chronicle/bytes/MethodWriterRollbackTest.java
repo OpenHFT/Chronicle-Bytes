@@ -16,6 +16,11 @@ import java.util.function.Function;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+/**
+ * Tests method writer rollback behaviour because write position restoration
+ * on failure is essential to avoid partial writes corrupting the output
+ * stream.
+ */
 @DisplayName("Method writer rollback restores write position")
 public class MethodWriterRollbackTest extends BytesTestCommon {
 

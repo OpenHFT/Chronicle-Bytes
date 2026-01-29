@@ -10,7 +10,9 @@ import net.openhft.chronicle.core.io.ReferenceOwner;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * Factory for creating {@link MappedBytesStore} instances for file-backed mapping operations only.
+ * Factory for creating {@link MappedBytesStore} instances for file-backed
+ * mapping operations only. This interface exists so that callers can
+ * customise store construction without coupling to a specific implementation.
  */
 @FunctionalInterface
 public interface MappedBytesStoreFactory {

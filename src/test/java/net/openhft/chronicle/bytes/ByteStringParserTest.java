@@ -20,7 +20,12 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
+/**
+ * Tests ByteStringParser operations for parsing primitives and strings because
+ * correct deserialisation is essential for reliable data retrieval.
+ */
 @SuppressWarnings("deprecation")
+@DisplayName("ByteStringParser primitive and string deserialisation verifies round-trip parsing of numeric and text tokens")
 public class ByteStringParserTest extends BytesTestCommon {
     @NotNull
     private final

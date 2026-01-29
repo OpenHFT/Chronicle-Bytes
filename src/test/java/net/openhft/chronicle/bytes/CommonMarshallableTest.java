@@ -8,6 +8,11 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+/**
+ * Tests CommonMarshallable default behaviour because self-describing message support
+ * is essential for flexible serialisation.
+ */
+@DisplayName("CommonMarshallable should default to self-describing message format for flexible serialisation")
 public class CommonMarshallableTest extends BytesTestCommon {
 
     @Test

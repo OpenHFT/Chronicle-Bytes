@@ -17,10 +17,20 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
+/**
+ * Tests equals and contentEquals across heap and direct buffers because correct
+ * comparison is required to avoid data mismatches in caching and deduplication.
+ */
+@SuppressWarnings("checkstyle:MMOverusedWord")
 class BytesEqualityTests {
 
+    /**
+     * Tests boundary conditions for Bytes equality because edge cases with zero length,
+     * mismatched lengths, and aligned read positions must be handled correctly.
+     */
     @TestInstance(TestInstance.Lifecycle.PER_CLASS)
     @Nested
+    @DisplayName("BoundaryTests - equality across zero, short, and long content lengths")
     class BoundaryTests {
 
         @ParameterizedTest
@@ -126,10 +136,12 @@ class BytesEqualityTests {
     }
 
     /**
-     * A suite of tests for exercising contentEquals and a variety of different heap and direct buffer combinations.
+     * Tests contentEquals for direct versus heap buffer combinations because correct
+     * cross-memory comparison is required for interoperability between buffer types.
      */
     @SuppressWarnings("java:S5976")
     @Nested
+    @DisplayName("DirectVsHeapContentEqualsTests - contentEquals across memory types")
     class DirectVsHeapContentEqualsTests {
 
         @Test

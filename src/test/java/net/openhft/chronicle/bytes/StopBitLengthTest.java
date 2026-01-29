@@ -9,6 +9,11 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+/**
+ * Tests stop-bit length computation because correct byte counts are essential
+ * to avoid buffer overruns when reserving space for variable-length fields.
+ */
+@DisplayName("StopBitLength - validates byte count boundaries for stop-bit encoding")
 public class StopBitLengthTest extends BytesTestCommon {
 
     @Test
@@ -34,4 +39,3 @@ public class StopBitLengthTest extends BytesTestCommon {
                 "Maximum long value should use at least nine stop-bit bytes");
     }
 }
-

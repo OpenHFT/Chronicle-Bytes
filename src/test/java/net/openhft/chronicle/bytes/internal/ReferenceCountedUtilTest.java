@@ -15,6 +15,11 @@ import java.util.function.Consumer;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+/**
+ * Tests for ReferenceCountedUtil, because release guards must detect
+ * already-released resources and handle null values appropriately.
+ */
+@DisplayName("ReferenceCountedUtil release guard and null handling validation")
 class ReferenceCountedUtilTest extends BytesTestCommon {
 
     @Test
@@ -36,6 +41,7 @@ class ReferenceCountedUtilTest extends BytesTestCommon {
                 "Null value should trigger NullPointerException in the guard");
     }
 
+    @SuppressWarnings("checkstyle:MMUnhandled")
     private void test(Consumer<Object> method, String releasedMessage) {
         final Bytes<?> bytes = Bytes.from("A");
         assertDoesNotThrow(() -> method.accept(bytes),

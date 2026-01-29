@@ -15,8 +15,10 @@ import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Tests for VanillaBytesStoreHash covering all branch paths including
- * zero length, small data, medium data, and large data with multiple 32-byte chunks.
+ * zero length, small data, medium data, and large data with multiple 32-byte chunks
+ * because correct hashing is essential to avoid key collisions in high-throughput maps.
  */
+@SuppressWarnings("checkstyle:MMOverusedWord")
 @DisplayName("VanillaBytesStoreHash behaviour across zero, small, medium, and large inputs")
 class VanillaBytesStoreHashTest extends BytesTestCommon {
 

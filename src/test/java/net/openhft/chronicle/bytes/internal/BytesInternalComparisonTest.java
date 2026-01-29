@@ -17,9 +17,11 @@ import org.junit.jupiter.params.provider.ValueSource;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Tests for BytesInternal comparison methods branch coverage.
+ * Tests for BytesInternal comparison methods, because content equality
+ * must handle null inputs and different lengths to avoid false matches.
  * Covers contentEqual, contentEqualsLong, contentEqualInt, startsWith variants.
  */
+@DisplayName("BytesInternal content comparison for equality and prefix matching")
 class BytesInternalComparisonTest extends BytesTestCommon {
 
     private Bytes<?> bytes1;

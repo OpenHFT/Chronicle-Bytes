@@ -12,6 +12,11 @@ import java.util.function.Predicate;
 
 import static org.junit.jupiter.api.Assertions.assertSame;
 
+/**
+ * Tests MethodReaderBuilder default method behaviour because correct
+ * handler selection is essential to avoid silent failures when processing
+ * unknown method invocations.
+ */
 @DisplayName("MethodReaderBuilder default methods select expected handlers")
 public class MethodReaderBuilderDefaultsTest {
 
@@ -64,6 +69,7 @@ public class MethodReaderBuilderDefaultsTest {
 
         @Override
         public MethodReader build(Object... components) {
+            // Stub implementation: returns null as no real reader is needed
             return null;
         }
 

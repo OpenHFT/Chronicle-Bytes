@@ -18,6 +18,12 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+/**
+ * Tests Byteable reference reservation and release because correct store
+ * reference counting is essential to avoid memory leaks when swapping
+ * backing stores.
+ */
+@DisplayName("Byteable reference store reservation and release")
 @SuppressWarnings("rawtypes")
 public class ByteableReferenceTest extends BytesTestCommon {
 

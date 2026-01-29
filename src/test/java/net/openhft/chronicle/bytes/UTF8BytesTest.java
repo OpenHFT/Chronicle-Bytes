@@ -14,6 +14,11 @@ import java.nio.file.Files;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
+/**
+ * Tests UTF-8 bytes encoding because correct round-trip serialisation
+ * is essential for preserving multi-byte characters via mapped files.
+ */
+@DisplayName("UTF8Bytes - validates UTF-8 encoding via mapped bytes")
 public class UTF8BytesTest extends BytesTestCommon {
 
     private static final String MESSAGE = "awésome-message-1";

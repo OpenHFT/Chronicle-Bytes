@@ -13,6 +13,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+/**
+ * Tests VanillaBytes read and compareTo branches because correct path
+ * selection is essential to optimise throughput for direct vs heap stores.
+ */
+@SuppressWarnings("checkstyle:MMOverusedWord")
 @DisplayName("VanillaBytes covers read and compareTo branch scenarios")
 public class VanillaBytesAdditionalTest extends BytesTestCommon {
 

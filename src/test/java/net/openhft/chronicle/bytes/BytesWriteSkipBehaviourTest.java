@@ -4,6 +4,7 @@
 package net.openhft.chronicle.bytes;
 
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.nio.BufferOverflowException;
@@ -11,6 +12,11 @@ import java.nio.BufferOverflowException;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+/**
+ * Tests writeSkip behaviour for header reservation and backtracking because correct
+ * position manipulation is essential for variable-length message framing.
+ */
+@DisplayName("writeSkip position reservation and backtracking scenarios")
 public class BytesWriteSkipBehaviourTest extends BytesTestCommon {
 
     @Test

@@ -106,6 +106,7 @@ enum BytesInternal {
         MethodHandle vectorizedMismatchMethodHandle = null;
         try {
             if (Jvm.isJava9Plus() && !Jvm.getBoolean("disable.vectorized.content_equals")) {
+                // Access JDK internal ArraysSupport for optimised byte comparison
                 final Class<?> arraysSupportClass = Class.forName("jdk.internal.util.ArraysSupport");
                 final Method vectorizedMismatch = Jvm.getMethod(arraysSupportClass, "vectorizedMismatch",
                         Object.class,
@@ -120,9 +121,8 @@ enum BytesInternal {
             }
         } catch (Exception e) {
             if (e.getClass().getName().equals("java.lang.reflect.InaccessibleObjectException"))
-                Jvm.debug().on(BytesInternal.class, "BytesInternal cannot access vectorizedMismatch. The following command line args are required: " +
-                        "--illegal-access=permit --add-exports java.base/jdk.internal.ref=ALL-UNNAMED --add-exports java.base/jdk.internal.util=ALL-UNNAMED" +
-                        ". exception: " + e);
+                Jvm.debug().on(BytesInternal.class, "BytesInternal vectorizedMismatch unavailable. " +
+                        "Add JVM args: --add-exports java.base/jdk.internal.util=ALL-UNNAMED", e);
             else
                 Jvm.warn().on(BytesInternal.class, e);
         } finally {
@@ -616,7 +616,7 @@ enum BytesInternal {
         throwExceptionIfReleased(input);
         throwExceptionIfReleased(other);
         if (offset + utfLen > input.realCapacity())
-            throw new BufferUnderflowException(/* offset + utfLen exceeds real capacity */);
+            throw new DecoratedBufferUnderflowException("UTF length exceeds available bytes");
         int i = 0;
         while (i < utfLen && i < other.length()) {
             int c = input.readByte(offset + i);
@@ -658,10 +658,12 @@ enum BytesInternal {
                     /* 110x xxxx 10xx xxxx */
                     if (offset == limit)
                         throw new UTFDataFormatRuntimeException(
-                                MALFORMED_INPUT_PARTIAL_CHARACTER_AT_END);
+                                "malformed 2-byte UTF-8: partial character at end of compareUtf82");
                     int char2 = input.readUnsignedByte(offset++);
-                    if ((char2 & 0xC0) != 0x80)
-                        throw newUTFDataFormatRuntimeException((offset - limit + utfLen), "was " + char2);
+                    if ((char2 & 0xC0) != 0x80) {
+                        // 2-byte UTF-8 continuation byte validation failed in compareUtf82
+                        throw newUTFDataFormatRuntimeException((offset - limit + utfLen), "invalid 2-byte continuation 0x" + Integer.toHexString(char2));
+                    }
                     int c2 = (char) (((c & 0x1F) << 6) |
                             (char2 & 0x3F));
                     if ((char) c2 != other.charAt(charI))
@@ -673,14 +675,14 @@ enum BytesInternal {
                     /* 1110 xxxx 10xx xxxx 10xx xxxx */
                     if (offset + 2 > limit)
                         throw new UTFDataFormatRuntimeException(
-                                MALFORMED_INPUT_PARTIAL_CHARACTER_AT_END);
+                                "malformed 3-byte UTF-8: partial character at end of compareUtf82");
                     int char2 = input.readUnsignedByte(offset++);
                     int char3 = input.readUnsignedByte(offset++);
 
                     if (((char2 & 0xC0) != 0x80) || ((char3 & 0xC0) != 0x80))
                         throw new UTFDataFormatRuntimeException(
-                                MALFORMED_INPUT_AROUND_BYTE + (offset - limit + utfLen - 1) +
-                                        WAS + char2 + " " + char3);
+                                "malformed 3-byte UTF-8 at byte " + (offset - limit + utfLen - 1) +
+                                        ": invalid continuation bytes 0x" + Integer.toHexString(char2) + " 0x" + Integer.toHexString(char3));
                     int c3 = (char) (((c & 0x0F) << 12) |
                             ((char2 & 0x3F) << 6) |
                             (char3 & 0x3F));
@@ -691,7 +693,7 @@ enum BytesInternal {
                 // TODO add code point of characters > 0xFFFF support.
                 default:
                     /* 10xx xxxx, 1111 xxxx */
-                    throw newUTFDataFormatRuntimeException(offset - limit + utfLen, "");
+                    throw newUTFDataFormatRuntimeException(offset - limit + utfLen, "invalid lead byte in compareUtf82");
             }
             charI++;
         }
@@ -732,6 +734,7 @@ enum BytesInternal {
             if (length > count)
                 parseUtf82(bytes, appendable, utf, length, count);
         } catch (IOException e) {
+            // Convert checked IOException to unchecked for interface compatibility
             throw Jvm.rethrow(e);
         }
     }
@@ -759,6 +762,7 @@ enum BytesInternal {
             if (limit > offset)
                 parseUtf82(input, offset, limit, appendable, utflen);
         } catch (IOException e) {
+            // Convert checked IOException to unchecked for interface compatibility
             throw Jvm.rethrow(e);
         }
     }
@@ -818,8 +822,10 @@ enum BytesInternal {
             assert utf;
 
             if (utflen > bytes.readRemaining()) {
-                @NotNull final BufferUnderflowException bue = new BufferUnderflowException();
+                @NotNull final BufferUnderflowException bue =
+                        new BufferUnderflowException(/* UTF length exceeds remaining bytes in parseUtf8_SB1 */);
                 bue.initCause(new ClosedIllegalStateException("utflen: " + utflen + ", readRemaining: " + bytes.readRemaining()));
+                // Throw underflow with cause chain for debugging
                 throw bue;
             }
             long readPosition = bytes.readPosition();
@@ -834,6 +840,7 @@ enum BytesInternal {
                 parseUtf82Guarded(bytes, sb, utf, utflen, count, rp0);
             }
         } catch (IOException | ClosedIllegalStateException e) {
+            // Convert checked exception to unchecked for interface compatibility
             throw Jvm.rethrow(e);
         }
     }
@@ -876,7 +883,7 @@ enum BytesInternal {
         requireNonNull(sb);
         try {
             if (offset + utflen > bytes.realCapacity())
-                throw new BufferUnderflowException(/* offset + utflen exceeds real capacity */);
+                throw new DecoratedBufferUnderflowException("Offset plus UTF length exceeds real capacity");
             long address = bytes.address + bytes.translate(offset);
             Memory memory = bytes.memory;
             sb.ensureCapacity(utflen);
@@ -904,6 +911,7 @@ enum BytesInternal {
                 parseUtf82(bytes, offset + count, offset + utflen, sb, utflen);
             assert bytes.memory != null;
         } catch (IOException e) {
+            // Convert checked IOException to unchecked for interface compatibility
             throw Jvm.rethrow(e);
         }
     }
@@ -983,7 +991,7 @@ enum BytesInternal {
                     count += utf ? 2 : 1;
                     if (count > length)
                         throw new UTFDataFormatRuntimeException(
-                                MALFORMED_INPUT_PARTIAL_CHARACTER_AT_END);
+                                "malformed 2-byte UTF-8: partial character at end in streaming parseUtf82");
                     int char2 = bytes.readUnsignedByte();
                     if ((char2 & 0xC0) != 0x80)
                         throw new UTFDataFormatRuntimeException(
@@ -999,12 +1007,14 @@ enum BytesInternal {
                     count += utf ? 3 : 1;
                     if (count > length)
                         throw new UTFDataFormatRuntimeException(
-                                MALFORMED_INPUT_PARTIAL_CHARACTER_AT_END);
+                                "malformed 3-byte UTF-8: partial character at end in streaming parseUtf82");
                     int char2 = bytes.readUnsignedByte();
                     int char3 = bytes.readUnsignedByte();
 
-                    if (((char2 & 0xC0) != 0x80) || ((char3 & 0xC0) != 0x80))
-                        throw newUTFDataFormatRuntimeException(count - 1L, WAS + char2 + " " + char3);
+                    if (((char2 & 0xC0) != 0x80) || ((char3 & 0xC0) != 0x80)) {
+                        // 3-byte UTF-8 continuation byte validation failed
+                        throw newUTFDataFormatRuntimeException(count - 1L, "invalid continuation bytes " + char2 + " " + char3);
+                    }
                     int c3 = (char) (((c & 0x0F) << 12) |
                             ((char2 & 0x3F) << 6) |
                             (char3 & 0x3F));
@@ -1016,25 +1026,29 @@ enum BytesInternal {
                     count += utf ? 4 : 1;
                     if (count > length)
                         throw new UTFDataFormatRuntimeException(
-                                MALFORMED_INPUT_PARTIAL_CHARACTER_AT_END);
+                                "malformed 4-byte UTF-8: partial character at end in streaming parseUtf82");
                     int char2 = bytes.readUnsignedByte();
                     int char3 = bytes.readUnsignedByte();
                     int char4 = bytes.readUnsignedByte();
-                    if (((char2 & 0xC0) != 0x80) || ((char3 & 0xC0) != 0x80) || ((char4 & 0xC0) != 0x80))
-                        throw newUTFDataFormatRuntimeException(count - 1L, WAS + char2 + " " + char3 + " " + char4);
+                    if (((char2 & 0xC0) != 0x80) || ((char3 & 0xC0) != 0x80) || ((char4 & 0xC0) != 0x80)) {
+                        // 4-byte UTF-8 continuation byte validation failed
+                        throw newUTFDataFormatRuntimeException(count - 1L, "invalid continuation bytes " + char2 + " " + char3 + " " + char4);
+                    }
                     int codePoint = ((c & 0x07) << 18) |
                             ((char2 & 0x3F) << 12) |
                             ((char3 & 0x3F) << 6) |
                             (char4 & 0x3F);
-                    if (codePoint < 0x10000 || codePoint > 0x10FFFF)
-                        throw newUTFDataFormatRuntimeException(count - 1L, WAS + codePoint);
+                    if (codePoint < 0x10000 || codePoint > 0x10FFFF) {
+                        // Codepoint outside valid supplementary range
+                        throw newUTFDataFormatRuntimeException(count - 1L, "invalid codepoint " + codePoint);
+                    }
                     appendable.append(Character.highSurrogate(codePoint));
                     appendable.append(Character.lowSurrogate(codePoint));
                     break;
                 }
                 default:
                     /* 10xx xxxx, 1111 xxxx */
-                    throw newUTFDataFormatRuntimeException(count, "");
+                    throw newUTFDataFormatRuntimeException(count, "invalid lead byte in streaming parseUtf82");
             }
         }
     }
@@ -1064,10 +1078,12 @@ enum BytesInternal {
                     /* 110x xxxx 10xx xxxx */
                     if (offset == limit)
                         throw new UTFDataFormatRuntimeException(
-                                MALFORMED_INPUT_PARTIAL_CHARACTER_AT_END);
+                                "malformed 2-byte UTF-8: partial character at end in random-access parseUtf82");
                     int char2 = input.readUnsignedByte(offset++);
-                    if ((char2 & 0xC0) != 0x80)
-                        throw newUTFDataFormatRuntimeException(offset - limit + utflen, "was " + char2);
+                    if ((char2 & 0xC0) != 0x80) {
+                        // 2-byte UTF-8 continuation byte validation failed
+                        throw newUTFDataFormatRuntimeException(offset - limit + utflen, "invalid continuation byte " + char2);
+                    }
                     int c2 = (char) (((c & 0x1F) << 6) |
                             (char2 & 0x3F));
                     appendable.append((char) c2);
@@ -1078,12 +1094,14 @@ enum BytesInternal {
                     /* 1110 xxxx 10xx xxxx 10xx xxxx */
                     if (offset + 2 > limit)
                         throw new UTFDataFormatRuntimeException(
-                                MALFORMED_INPUT_PARTIAL_CHARACTER_AT_END);
+                                "malformed 3-byte UTF-8: partial character at end in random-access parseUtf82");
                     int char2 = input.readUnsignedByte(offset++);
                     int char3 = input.readUnsignedByte(offset++);
 
-                    if (((char2 & 0xC0) != 0x80) || ((char3 & 0xC0) != 0x80))
-                        throw newUTFDataFormatRuntimeException(offset - limit + utflen - 1, WAS + char2 + " " + char3);
+                    if (((char2 & 0xC0) != 0x80) || ((char3 & 0xC0) != 0x80)) {
+                        // 3-byte UTF-8 continuation byte validation failed
+                        throw newUTFDataFormatRuntimeException(offset - limit + utflen - 1, "invalid continuation bytes " + char2 + " " + char3);
+                    }
                     int c3 = (char) (((c & 0x0F) << 12) |
                             ((char2 & 0x3F) << 6) |
                             (char3 & 0x3F));
@@ -1094,25 +1112,29 @@ enum BytesInternal {
                     /* 1111 0xxx 10xx xxxx 10xx xxxx 10xx xxxx */
                     if (offset + 3 > limit)
                         throw new UTFDataFormatRuntimeException(
-                                MALFORMED_INPUT_PARTIAL_CHARACTER_AT_END);
+                                "malformed 4-byte UTF-8: partial character at end in random-access parseUtf82");
                     int char2 = input.readUnsignedByte(offset++);
                     int char3 = input.readUnsignedByte(offset++);
                     int char4 = input.readUnsignedByte(offset++);
-                    if (((char2 & 0xC0) != 0x80) || ((char3 & 0xC0) != 0x80) || ((char4 & 0xC0) != 0x80))
-                        throw newUTFDataFormatRuntimeException(offset - limit + utflen - 1, WAS + char2 + " " + char3 + " " + char4);
+                    if (((char2 & 0xC0) != 0x80) || ((char3 & 0xC0) != 0x80) || ((char4 & 0xC0) != 0x80)) {
+                        // 4-byte UTF-8 continuation byte validation failed
+                        throw newUTFDataFormatRuntimeException(offset - limit + utflen - 1, "invalid continuation bytes " + char2 + " " + char3 + " " + char4);
+                    }
                     int codePoint = ((c & 0x07) << 18) |
                             ((char2 & 0x3F) << 12) |
                             ((char3 & 0x3F) << 6) |
                             (char4 & 0x3F);
-                    if (codePoint < 0x10000 || codePoint > 0x10FFFF)
-                        throw newUTFDataFormatRuntimeException(offset - limit + utflen - 1, WAS + codePoint);
+                    if (codePoint < 0x10000 || codePoint > 0x10FFFF) {
+                        // Codepoint outside valid supplementary character range
+                        throw newUTFDataFormatRuntimeException(offset - limit + utflen - 1, "invalid codepoint " + codePoint);
+                    }
                     appendable.append(Character.highSurrogate(codePoint));
                     appendable.append(Character.lowSurrogate(codePoint));
                     break;
                 }
                 default:
                     /* 10xx xxxx, 1111 xxxx */
-                    throw newUTFDataFormatRuntimeException(offset - limit + utflen, "");
+                    throw newUTFDataFormatRuntimeException(offset - limit + utflen, "invalid lead byte in random-access parseUtf82");
             }
         }
     }
@@ -1250,6 +1272,7 @@ enum BytesInternal {
             }
             appendUtf82(bytes, str, offset, length, i);
         } catch (BufferOverflowException | ClosedIllegalStateException e) {
+            // Propagate buffer/state exceptions as unchecked
             throw Jvm.rethrow(e);
         }
     }
@@ -1627,7 +1650,7 @@ enum BytesInternal {
                         break;
                 }
             } catch (@NotNull UnsupportedOperationException | BufferUnderflowException e) {
-                Jvm.debug().on(BytesInternal.class, "vectorized toString check failed", e);
+                Jvm.debug().on(BytesInternal.class, "Skipping trailing zero detection for toString: buffer does not support long reads", e);
             }
             toString(bytes, sb, start, readPosition, readLimit, end);
             if (end < bytes.readLimit())
@@ -1651,6 +1674,7 @@ enum BytesInternal {
             try {
                 ((VanillaBytes) bytes).read8Bit(chars, len);
             } catch (BufferUnderflowException | ClosedIllegalStateException e) {
+                // Propagate buffer/state exceptions as unchecked
                 throw Jvm.rethrow(e);
             }
         } else {
@@ -1677,6 +1701,7 @@ enum BytesInternal {
                         ? toUtf8StringNativeBytes((NativeBytesStore<?>) bytesStore)
                         : toUtf8StringBytesStore(bytesStore);
             } catch (IllegalStateException e) {
+                // Propagate state exception (may be ClosedIllegalStateException)
                 throw Jvm.rethrow(e);
             }
         } catch (Exception e) {
@@ -2374,11 +2399,13 @@ enum BytesInternal {
             RandomDataInput rdi = (RandomDataInput) in;
             if (rdi.peekUnsignedByte(in.readPosition() + 1) == 0) {
                 in.readSkip(2);
+                // Null marker (0x80 0x00) found in UTF-8 encoding
                 return null;
             }
         }
         try (ScopedResource<StringBuilder> stlSb = acquireStringBuilderScoped()) {
             StringBuilder sb = stlSb.get();
+            // Return null if readUtf8 failed to parse a valid string
             return in.readUtf8(sb) ? SI.intern(sb) : null;
         }
     }
@@ -2390,6 +2417,7 @@ enum BytesInternal {
         throwExceptionIfReleased(in);
         try (ScopedResource<StringBuilder> stlSb = acquireStringBuilderScoped()) {
             StringBuilder sb = stlSb.get();
+            // Return null if no UTF-8 bytes could be read
             return in.readUtf8Limited(offset, sb, maxUtf8Len) > 0 ? SI.intern(sb) : null;
         }
     }
@@ -2415,11 +2443,13 @@ enum BytesInternal {
             // checks if the string was null
             if (rdi.peekUnsignedByte(in.readPosition() + 1) == 0) {
                 in.readSkip(2);
+                // Null marker (0x80 0x00) found in 8-bit encoding
                 return null;
             }
         }
         try (ScopedResource<Bytes<?>> stlBytes = BytesInternal.acquireBytesScoped()) {
             Bytes<?> bytes = stlBytes.get();
+            // Return null if read8bit failed to parse a valid string
             return in.read8bit(bytes) ? SI.intern(bytes, (int) bytes.readRemaining()) : null;
         }
     }
@@ -2454,10 +2484,10 @@ enum BytesInternal {
                 readUtf81(bytes, builder, tester);
             }
         } catch (UTFDataFormatException e) {
-            @NotNull UTFDataFormatRuntimeException e2 = new UTFDataFormatRuntimeException("Unable to parse invalid UTF-8 code", e);
-            throw e2;
-
+            // Wrap checked UTF exception with context about the parse operation
+            throw new UTFDataFormatRuntimeException("Unable to parse invalid UTF-8 code", e);
         } catch (IOException | IllegalArgumentException e) {
+            // Propagate IO/argument exceptions as unchecked
             throw Jvm.rethrow(e);
         }
     }
@@ -2529,8 +2559,10 @@ enum BytesInternal {
                 case 13: {
                     /* 110x xxxx 10xx xxxx */
                     int char2 = bytes.readUnsignedByte();
-                    if ((char2 & 0xC0) != 0x80)
-                        throw newUTFDataFormatException(-1, "");
+                    if ((char2 & 0xC0) != 0x80) {
+                        // 2-byte UTF-8 continuation byte validation failed in readUtf81
+                        throw newUTFDataFormatException(-1, "invalid 2-byte continuation in readUtf81");
+                    }
                     int c2 = (char) (((c & 0x1F) << 6) |
                             (char2 & 0x3F));
                     if (tester.isStopChar(c2))
@@ -2544,8 +2576,10 @@ enum BytesInternal {
                     int char2 = bytes.readUnsignedByte();
                     int char3 = bytes.readUnsignedByte();
 
-                    if (((char2 & 0xC0) != 0x80) || ((char3 & 0xC0) != 0x80))
-                        throw newUTFDataFormatException(-1, "");
+                    if (((char2 & 0xC0) != 0x80) || ((char3 & 0xC0) != 0x80)) {
+                        // 3-byte UTF-8 continuation byte validation failed in readUtf81
+                        throw newUTFDataFormatException(-1, "invalid 3-byte continuation in readUtf81");
+                    }
                     int c3 = (char) (((c & 0x0F) << 12) |
                             ((char2 & 0x3F) << 6) |
                             (char3 & 0x3F));
@@ -2557,7 +2591,7 @@ enum BytesInternal {
 
                 default:
                     /* 10xx xxxx, 1111 xxxx */
-                    throw newUTFDataFormatException(-1, "");
+                    throw newUTFDataFormatException(-1, "invalid lead byte in readUtf81");
             }
         }
     }
@@ -2614,7 +2648,7 @@ enum BytesInternal {
                     int char2 = bytes.readUnsignedByte();
                     if ((char2 & 0xC0) != 0x80)
                         throw new UTFDataFormatException(
-                                "malformed input around byte");
+                                "malformed 2-byte UTF-8: invalid continuation byte in readUtf82");
                     int c2 = (char) (((c & 0x1F) << 6) |
                             (char2 & 0x3F));
                     if (tester.isStopChar(c2))
@@ -2630,7 +2664,7 @@ enum BytesInternal {
 
                     if (((char2 & 0xC0) != 0x80) || ((char3 & 0xC0) != 0x80))
                         throw new UTFDataFormatException(
-                                MALFORMED_INPUT_AROUND_BYTE);
+                                "malformed 3-byte UTF-8: invalid continuation bytes in readUtf82");
                     int c3 = (char) (((c & 0x0F) << 12) |
                             ((char2 & 0x3F) << 6) |
                             (char3 & 0x3F));
@@ -2643,7 +2677,7 @@ enum BytesInternal {
                 default:
                     /* 10xx xxxx, 1111 xxxx */
                     throw new UTFDataFormatException(
-                            MALFORMED_INPUT_AROUND_BYTE);
+                            "malformed UTF-8: invalid lead byte in readUtf82");
             }
         }
     }
@@ -2654,6 +2688,7 @@ enum BytesInternal {
             AppendableUtil.setLength(builder, 0);
             AppendableUtil.readUtf8AndAppend(bytes, builder, tester);
         } catch (IOException | IllegalArgumentException e) {
+            // Propagate IO/argument exceptions as unchecked
             throw Jvm.rethrow(e);
         }
     }
@@ -2829,8 +2864,10 @@ enum BytesInternal {
                 ch = in.rawReadByte();
             }
 
-            if (parsingError != null)
+            if (parsingError != null) {
+                // Throw accumulated parsing error if numeric overflow detected
                 throw parsingError;
+            }
 
             if (!digits)
                 return 0L;
@@ -3340,6 +3377,7 @@ enum BytesInternal {
                 canReadBytesAt(b2, rp2 + i, 1); i++) {
             byte i1 = b1.readByte(rp1 + i);
             byte i2 = b2.readByte(rp2 + i);
+            // Byte mismatch found, buffers are not equal
             if (i1 != i2)
                 return false;
         }
@@ -3351,6 +3389,7 @@ enum BytesInternal {
         DateCache dateCache = dateCacheTL.get();
         if (dateCache == null) {
             dateCache = new DateCache();
+            // Initialise thread-local cache for date formatting
             dateCacheTL.set(dateCache);
         }
         final long date = timeInMS / 86400000;
@@ -3466,25 +3505,33 @@ enum BytesInternal {
             Bytes<?> sb = stlBytes.get();
             parseUtf8(parser, sb, tester);
             if (sb.length() == 0)
+                // Empty input cannot be parsed as boolean
                 return null;
             switch (sb.charAt(0)) {
                 case 't':
                 case 'T':
+                    // Return null if input is not "t", "T", "true", or "TRUE"
                     return sb.length() == 1 || StringUtils.equalsCaseIgnore(sb, "true") ? Boolean.TRUE : null;
                 case 'y':
                 case 'Y':
+                    // Return null if input is not "y", "Y", "yes", or "YES"
                     return sb.length() == 1 || StringUtils.equalsCaseIgnore(sb, "yes") ? Boolean.TRUE : null;
                 case '0':
+                    // Return null if input is not exactly "0"
                     return sb.length() == 1 ? Boolean.FALSE : null;
                 case '1':
+                    // Return null if input is not exactly "1"
                     return sb.length() == 1 ? Boolean.TRUE : null;
                 case 'f':
                 case 'F':
+                    // Return null if input is not "f", "F", "false", or "FALSE"
                     return sb.length() == 1 || StringUtils.equalsCaseIgnore(sb, "false") ? Boolean.FALSE : null;
                 case 'n':
                 case 'N':
+                    // Return null if input is not "n", "N", "no", or "NO"
                     return sb.length() == 1 || StringUtils.equalsCaseIgnore(sb, "no") ? Boolean.FALSE : null;
                 default:
+                    // Unrecognised boolean value - caller must handle null for unknown input
                     return null;
             }
         }

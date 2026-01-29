@@ -96,23 +96,23 @@ class StreamingDataOutputBranchTest extends BytesTestCommon {
     // ========== writeStopBitDecimal Tests ==========
 
     @Test
-    @DisplayName("writeStopBitDecimal handles whole number values")
+    @DisplayName("writeStopBitDecimal encodes 123.0 and round-trips through readStopBitDecimal")
     void shouldWriteStopBitDecimalWholeNumbers() {
         bytes.writeStopBitDecimal(123.0);
 
         bytes.readPosition(0);
         assertEquals(123.0, bytes.readStopBitDecimal(), 0.0001,
-                "stop bit decimal round-trip returns 123.0");
+                "writeStopBitDecimal should encode whole numbers with scale zero so that round-trip returns 123.0");
     }
 
     @Test
-    @DisplayName("writeStopBitDecimal handles negative decimal values")
+    @DisplayName("writeStopBitDecimal encodes -45.67 and round-trips through readStopBitDecimal")
     void shouldWriteStopBitDecimalNegative() {
         bytes.writeStopBitDecimal(-45.67);
 
         bytes.readPosition(0);
         assertEquals(-45.67, bytes.readStopBitDecimal(), 0.0001,
-                "stop bit decimal round-trip returns -45.67");
+                "writeStopBitDecimal should encode negative decimals so that round-trip returns -45.67");
     }
 
     @Test
@@ -139,21 +139,21 @@ class StreamingDataOutputBranchTest extends BytesTestCommon {
     // ========== writeUtf8 Tests ==========
 
     @Test
-    @DisplayName("writeUtf8 returns null for null string input")
+    @DisplayName("writeUtf8 encodes null marker so readUtf8 returns null for null input")
     void shouldWriteUtf8Null() {
         bytes.writeUtf8(null);
 
         bytes.readPosition(0);
-        assertNull(bytes.readUtf8(), "writeUtf8 returns null for null input");
+        assertNull(bytes.readUtf8(), "writeUtf8 should encode a null marker so that readUtf8 returns null");
     }
 
     @Test
-    @DisplayName("writeUtf8 returns empty string for empty input")
+    @DisplayName("writeUtf8 encodes zero-length payload so readUtf8 returns empty string")
     void shouldWriteUtf8Empty() {
         bytes.writeUtf8("");
 
         bytes.readPosition(0);
-        assertEquals("", bytes.readUtf8(), "writeUtf8 returns empty string for empty input");
+        assertEquals("", bytes.readUtf8(), "writeUtf8 should encode zero-length payload so readUtf8 returns empty string");
     }
 
     @Test
@@ -191,12 +191,12 @@ class StreamingDataOutputBranchTest extends BytesTestCommon {
     // ========== write8bit Tests ==========
 
     @Test
-    @DisplayName("write8bit returns null for null CharSequence input")
+    @DisplayName("write8bit encodes null marker so read8bit returns null for null CharSequence")
     void shouldWrite8bitNull() {
         bytes.write8bit((CharSequence) null);
 
         bytes.readPosition(0);
-        assertNull(bytes.read8bit(), "write8bit returns null for null input");
+        assertNull(bytes.read8bit(), "write8bit should encode a null marker so that read8bit returns null");
     }
 
     @Test
@@ -278,10 +278,10 @@ class StreamingDataOutputBranchTest extends BytesTestCommon {
     }
 
     @Test
-    @DisplayName("writeUnsignedByte rejects value above 255")
+    @DisplayName("writeUnsignedByte throws ArithmeticException for 256 because it exceeds byte range")
     void shouldThrowForInvalidUnsignedByte() {
         assertThrows(ArithmeticException.class, () -> bytes.writeUnsignedByte(256),
-                "writeUnsignedByte throws for value 256");
+                "writeUnsignedByte should throw ArithmeticException for value 256 because it exceeds the unsigned byte range");
     }
 
     @Test
@@ -497,7 +497,7 @@ class StreamingDataOutputBranchTest extends BytesTestCommon {
     }
 
     @Test
-    @DisplayName("appendUtf8 writes CharSequence range slice")
+    @DisplayName("appendUtf8 writes 'World' when using offset 7 and length 5 from 'Hello, World!'")
     void shouldAppendUtf8CharSequenceRange() {
         bytes.appendUtf8("Hello, World!", 7, 5);
 
@@ -505,7 +505,7 @@ class StreamingDataOutputBranchTest extends BytesTestCommon {
         StringBuilder sb = new StringBuilder();
         bytes.parseUtf8(sb, (int) bytes.readRemaining());
         assertEquals("World", sb.toString(),
-                "appendUtf8 range writes substring value");
+                "appendUtf8 should write substring from offset 7 with length 5 so that parseUtf8 returns 'World'");
     }
 
     // ========== writePositionRemaining Tests ==========
@@ -534,12 +534,12 @@ class StreamingDataOutputBranchTest extends BytesTestCommon {
     }
 
     @Test
-    @DisplayName("writeFloat handles NaN value input")
+    @DisplayName("writeFloat preserves NaN bit pattern so readFloat returns NaN value")
     void shouldWriteFloatNaN() {
         bytes.writeFloat(Float.NaN);
 
         bytes.readPosition(0);
-        assertTrue(Float.isNaN(bytes.readFloat()), "writeFloat preserves NaN value");
+        assertTrue(Float.isNaN(bytes.readFloat()), "writeFloat should preserve NaN bit pattern so that readFloat returns NaN");
     }
 
     @ParameterizedTest(name = "writeDouble round-trip value {0}")
@@ -555,12 +555,12 @@ class StreamingDataOutputBranchTest extends BytesTestCommon {
     }
 
     @Test
-    @DisplayName("writeDouble handles NaN value input")
+    @DisplayName("writeDouble preserves NaN bit pattern so readDouble returns NaN value")
     void shouldWriteDoubleNaN() {
         bytes.writeDouble(Double.NaN);
 
         bytes.readPosition(0);
-        assertTrue(Double.isNaN(bytes.readDouble()), "writeDouble preserves NaN value");
+        assertTrue(Double.isNaN(bytes.readDouble()), "writeDouble should preserve NaN bit pattern so that readDouble returns NaN");
     }
 
     // ========== rawWrite Tests ==========
@@ -611,6 +611,6 @@ class StreamingDataOutputBranchTest extends BytesTestCommon {
     @DisplayName("canWriteDirect returns false for heap bytes default path")
     void shouldReturnFalseForCanWriteDirect() {
         assertFalse(bytes.canWriteDirect(10),
-                "canWriteDirect returns false for heap bytes default path");
+                "canWriteDirect should return false for heap-backed bytes because direct writes require native memory");
     }
 }

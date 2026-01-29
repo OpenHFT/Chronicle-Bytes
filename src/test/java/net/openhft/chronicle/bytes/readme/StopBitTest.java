@@ -10,6 +10,11 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+/**
+ * Tests stop-bit encoding from the readme because variable-length encoding
+ * is essential to minimise message sizes when storing integers with typical
+ * value distributions.
+ */
 @DisplayName("Stop bit readme examples for long and double")
 public class StopBitTest extends BytesTestCommon {
 

@@ -26,6 +26,11 @@ import java.nio.file.Path;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
+/**
+ * Tests MappedFile reference counting and IO operations because correct
+ * resource lifecycle management is essential to avoid memory leaks and
+ * file handle exhaustion.
+ */
 @SuppressWarnings("deprecation")
 @DisplayName("Mapped file behaviours for reference counts and IO")
 public class MappedFileTest extends BytesTestCommon {
@@ -179,6 +184,7 @@ public class MappedFileTest extends BytesTestCommon {
     @Test
     @DisplayName("large read only file can be mapped")
     public void largeReadOnlyFile() throws IOException {
+        // Check heap size to ensure enough memory for large mapping operation
         assumeFalse(Runtime.getRuntime().maxMemory() < Integer.MAX_VALUE || OS.isWindows(),
                 "Large read only test requires non Windows with enough heap");
         assumeFalse(Jvm.maxDirectMemory() == 0,
@@ -201,6 +207,7 @@ public class MappedFileTest extends BytesTestCommon {
     public void largeReadOnlyFileSingle() throws IOException {
         assumeFalse(OS.isWindows(),
                 "Single mapped large file test requires non Windows");
+        // Check heap size to ensure enough memory for single large mapping
         assumeFalse(Runtime.getRuntime().maxMemory() < Integer.MAX_VALUE,
                 "Single mapped large file test requires enough heap");
         assumeFalse(Jvm.maxDirectMemory() == 0,

@@ -177,11 +177,12 @@ public abstract class AbstractBinaryArrayReference extends AbstractReference imp
     @FunctionalInterface
     protected interface ValueReader {
         /**
-         * Reads the value at the given index.
+         * Reads a single element from the underlying binary array storage at the specified index.
+         * The value is returned as a long to accommodate both int and long array types.
          *
-         * @param index element index
-         * @return value at that index
-         * @throws BufferUnderflowException if out of bounds
+         * @param index zero-based element index within the array
+         * @return value at that index, widened to long
+         * @throws BufferUnderflowException if the index is out of bounds
          */
         long read(long index) throws BufferUnderflowException;
     }
@@ -269,10 +270,11 @@ public abstract class AbstractBinaryArrayReference extends AbstractReference imp
     }
 
     /**
-     * Validates that {@code capacity} is within {@code 0..maxCapacity}.
+     * Validates that the requested capacity is within valid bounds (0 to maxCapacity inclusive).
+     * Throws IllegalArgumentException if capacity is negative or exceeds the allowed maximum.
      *
-     * @param capacity    requested capacity
-     * @param maxCapacity maximum allowed capacity
+     * @param capacity    requested capacity in elements
+     * @param maxCapacity maximum allowed capacity in elements
      */
     protected static void checkCapacity(long capacity, long maxCapacity) {
         if (capacity < 0)

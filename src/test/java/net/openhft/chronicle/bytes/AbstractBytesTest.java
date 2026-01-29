@@ -21,7 +21,12 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
+/**
+ * Tests AbstractBytes mock interactions for position, clear, and release operations because
+ * correct delegation to the underlying BytesStore is required for memory safety and correctness.
+ */
 @SuppressWarnings({"unchecked", "deprecation"})
+@DisplayName("AbstractBytes - mock-based tests for delegation and state management")
 public class AbstractBytesTest {
 
     private ConcreteBytes bytes;
@@ -43,6 +48,7 @@ public class AbstractBytesTest {
 
         @Override
         public BytesStore<Bytes<ByteBuffer>, ByteBuffer> copy() throws IllegalStateException {
+            // Copy is not implemented in this test stub
             return null;
         }
     }
@@ -169,12 +175,12 @@ public class AbstractBytesTest {
     }
 
     @Test
-    @DisplayName("readLong throws when insufficient data remains")
+    @DisplayName("readLong throws BufferUnderflowException when remaining bytes are insufficient")
     public void readLong_WithInsufficientDataThrowsException() {
         doThrow(new BufferUnderflowException()).when(mockBytesStore).readLong(anyLong());
         bytes.lenient(false);
         assertThrows(BufferUnderflowException.class, bytes::readLong,
-                "readLong throws when buffer underflows");
+                "readLong should throw BufferUnderflowException when fewer than 8 bytes remain at the current read position");
     }
 
     @Test
@@ -200,7 +206,7 @@ public class AbstractBytesTest {
         when(mockBytesStore.toString()).thenReturn("MockBytesStore");
         String result = bytes.toString();
         assertNotNull(result,
-                "toString returns a non-null string value");
+                "toString should return a non-null string representation of the bytes content");
         assertFalse(result.contains("MockBytesStore"),
                 "toString output " + result + " hides MockBytesStore");
     }

@@ -4,11 +4,18 @@
 package net.openhft.chronicle.bytes;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Tests MultiReaderBytesRingBuffer behaviour because independent reader
+ * positions are essential to support multiple consumers reading from the
+ * same buffer without interference.
+ */
+@DisplayName("Multi reader bytes ring buffer independent read behaviour")
 public class MultiReaderBytesRingBufferTest {
     private MultiReaderBytesRingBuffer ringBuffer;
 
@@ -24,6 +31,7 @@ public class MultiReaderBytesRingBufferTest {
     }
 
     @Test
+    @DisplayName("readers read from buffer independently without interference")
     public void testReadersReadIndependently() {
         // Setup data in the ring buffer (this step will depend on your implementation)
 
@@ -48,6 +56,7 @@ public class MultiReaderBytesRingBufferTest {
     }
 
     @Test
+    @DisplayName("reader toEnd moves position past existing data")
     public void testReaderToEnd() {
         // Setup data in the ring buffer
 

@@ -15,7 +15,12 @@ import java.util.Random;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
+/**
+ * Tests stop-bit decimal encoding because this compact format is critical
+ * for efficient serialisation of financial data with variable precision.
+ */
 @SuppressWarnings("deprecation")
+@DisplayName("StopBitDecimal - validates decimal encoding with scale preservation")
 public class StopBitDecimalTest extends BytesTestCommon {
     @Test
     @DisplayName("stop-bit decimal round trip preserves scale and value")

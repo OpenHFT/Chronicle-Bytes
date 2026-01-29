@@ -214,6 +214,7 @@ public class SingleMappedBytes extends CommonMappedBytes {
         throwExceptionIfClosed();
 
         if (offset < 0 || offset > capacity())
+            // Offset outside valid range for 8-byte CAS operation
             throw newBufferOverflowException(offset);
 
         return bytesStore.compareAndSwapLong(offset, expected, value);

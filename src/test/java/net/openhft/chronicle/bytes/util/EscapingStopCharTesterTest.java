@@ -7,9 +7,14 @@ import net.openhft.chronicle.bytes.StopCharTester;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
+/**
+ * Tests escaping stop-char tester because correct escape handling is
+ * essential to allow delimiter characters within quoted values.
+ */
+@DisplayName("EscapingStopCharTester - validates single-char escape handling")
 public class EscapingStopCharTesterTest {
 
     @Test
@@ -21,16 +26,16 @@ public class EscapingStopCharTesterTest {
         EscapingStopCharTester escapingTester = new EscapingStopCharTester(baseTester);
 
         // Verify that 'x' is normally considered a stop character
-        assertTrue("EscapingStopCharTester should treat 'x' as a stop character",
-                escapingTester.isStopChar('x'));
+        assertTrue(escapingTester.isStopChar('x'),
+                "EscapingStopCharTester should treat 'x' as a stop character");
 
         // Simulate escaping by passing the escape character before 'x'
-        assertFalse("Escape character should not be considered a stop character", escapingTester.isStopChar('\\'));
-        assertFalse("Escaped 'x' should not be considered a stop character", escapingTester.isStopChar('x'));
+        assertFalse(escapingTester.isStopChar('\\'), "Escape character should not be considered a stop character");
+        assertFalse(escapingTester.isStopChar('x'), "Escaped 'x' should not be considered a stop character");
 
         // Ensure 'x' is considered a stop character again after escaping
-        assertTrue("EscapingStopCharTester should treat 'x' as a stop character when not escaped",
-                escapingTester.isStopChar('x'));
+        assertTrue(escapingTester.isStopChar('x'),
+                "EscapingStopCharTester should treat 'x' as a stop character when not escaped");
     }
 
     @Test
@@ -39,8 +44,8 @@ public class EscapingStopCharTesterTest {
         StopCharTester baseTester = ch -> ch == 'x'; // Let's say 'x' is a stop character
         EscapingStopCharTester tester = new EscapingStopCharTester(baseTester);
 
-        assertFalse("First escape character should not be stop char", tester.isStopChar('\\'));
-        assertFalse("Second escape character should not be stop char", tester.isStopChar('\\'));
-        assertTrue("Non-escaped character following escapes should be considered stop char if it matches baseTester", tester.isStopChar('x'));
+        assertFalse(tester.isStopChar('\\'), "First escape character should not be stop char");
+        assertFalse(tester.isStopChar('\\'), "Second escape character should not be stop char");
+        assertTrue(tester.isStopChar('x'), "Non-escaped character following escapes should be considered stop char if it matches baseTester");
     }
 }

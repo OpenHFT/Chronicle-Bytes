@@ -11,6 +11,11 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+/**
+ * Tests string interner bytes because correct value counting is essential
+ * to verify that repeated interns do not inflate the cache.
+ */
+@DisplayName("StringInternerBytes - validates string intern value counting")
 public class StringInternerBytesTest extends BytesTestCommon {
 
     @Test

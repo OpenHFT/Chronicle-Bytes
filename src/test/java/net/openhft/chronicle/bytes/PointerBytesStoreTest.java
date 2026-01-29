@@ -11,6 +11,12 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
+/**
+ * Tests PointerBytesStore operations and capacity handling because correct
+ * pointer management is essential to avoid memory corruption when wrapping
+ * native addresses.
+ */
+@SuppressWarnings("MMOverusedWord") // bytes domain terminology
 @DisplayName("Pointer bytes store operations and capacity checks")
 public class PointerBytesStoreTest extends BytesTestCommon {
 

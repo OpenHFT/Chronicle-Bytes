@@ -12,7 +12,12 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 
+/**
+ * Tests BytesMethodReaderBuilder configuration because correct builder setup is
+ * essential for creating properly configured method readers.
+ */
 @SuppressWarnings("deprecation")
+@DisplayName("BytesMethodReaderBuilder configuration and chaining verifies fluent setup returns proper instances")
 class BytesMethodReaderBuilderTest {
 
     private BytesIn<?> mockBytesIn;

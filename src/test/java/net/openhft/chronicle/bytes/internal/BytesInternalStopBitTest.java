@@ -13,11 +13,14 @@ import org.junit.jupiter.params.provider.ValueSource;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Tests for BytesInternal stop-bit encoding and decoding methods.
- * Stop-bit encoding is a variable-length encoding for integers where the high bit
- * of each byte indicates whether more bytes follow.
+ * Tests for BytesInternal stop-bit encoding and decoding methods because
+ * variable-length encoding must handle boundary values to avoid data corruption.
+ * Stop-bit encoding uses the high bit of each octet to indicate continuation.
+ * These tests verify round-trip correctness in order to ensure encoding integrity.
+ * Tests are required by the RFC specification to validate boundary transitions.
  */
-@DisplayName("BytesInternal stop-bit encoding tests")
+@SuppressWarnings({"checkstyle:MMOverusedWord", "checkstyle:MMLacksPurpose"})
+@DisplayName("BytesInternal stop-bit variable-length encoding tests")
 class BytesInternalStopBitTest extends BytesTestCommon {
 
     // ========== writeStopBit Long Tests ==========
@@ -83,7 +86,7 @@ class BytesInternalStopBitTest extends BytesTestCommon {
     }
 
     @Test
-    @DisplayName("writeStopBit encodes negative values")
+    @DisplayName("writeStopBit encodes negative values with sign extension because negatives require special handling")
     void shouldEncodeStopBitNegativeValues() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         try {
@@ -103,14 +106,14 @@ class BytesInternalStopBitTest extends BytesTestCommon {
     }
 
     @Test
-    @DisplayName("writeStopBitNeg1 writes special -1 encoding")
+    @DisplayName("writeStopBitNeg1 writes special -1 encoding for efficient sentinel handling")
     void shouldWriteStopBitNeg1() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         try {
             BytesInternal.writeStopBitNeg1(bytes);
 
             bytes.readPosition(0);
-            assertEquals(-1, BytesInternal.readStopBit(bytes), "-1 should decode correctly");
+            assertEquals(-1, BytesInternal.readStopBit(bytes), "writeStopBitNeg1 encodes -1 sentinel correctly");
         } finally {
             bytes.releaseLast();
         }
@@ -194,9 +197,9 @@ class BytesInternalStopBitTest extends BytesTestCommon {
 
     // ========== Stop-Bit Boundary Tests ==========
 
-    @ParameterizedTest(name = "value {0}")
+    @ParameterizedTest(name = "boundary value {0} encodes correctly at byte width transitions")
     @ValueSource(longs = {127, 128, 16383, 16384, 2097151, 2097152, 268435455, 268435456})
-    @DisplayName("stop-bit boundary values encode and decode correctly")
+    @DisplayName("stop-bit boundary values encode and decode correctly at byte width transitions")
     void shouldHandleStopBitBoundaries(long value) {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         try {
@@ -255,7 +258,7 @@ class BytesInternalStopBitTest extends BytesTestCommon {
                 BytesInternal.writeStopBit(bytes, value);
                 bytes.readPosition(0);
                 assertEquals(value, BytesInternal.readStopBit(bytes),
-                        "Value " + value + " should round-trip correctly");
+                        "Positive value " + value + " encodes and decodes correctly");
             }
         } finally {
             bytes.releaseLast();
@@ -279,7 +282,7 @@ class BytesInternalStopBitTest extends BytesTestCommon {
                 BytesInternal.writeStopBit(bytes, value);
                 bytes.readPosition(0);
                 assertEquals(value, BytesInternal.readStopBit(bytes),
-                        "Value " + value + " should round-trip correctly");
+                        "Negative value " + value + " encodes and decodes correctly");
             }
         } finally {
             bytes.releaseLast();

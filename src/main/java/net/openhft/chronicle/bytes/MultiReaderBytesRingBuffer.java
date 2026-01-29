@@ -8,7 +8,9 @@ import org.jetbrains.annotations.NotNull;
 /**
  * Extension of the BytesRingBuffer interface that supports multiple readers.
  * Each reader in a MultiReaderBytesRingBuffer has a separate read position,
- * allowing independent progression through the buffer.
+ * allowing independent progression through the buffer. This separation is
+ * required because different consumers may read at different rates and should
+ * not affect each other's progress.
  */
 public interface MultiReaderBytesRingBuffer extends BytesRingBuffer {
 

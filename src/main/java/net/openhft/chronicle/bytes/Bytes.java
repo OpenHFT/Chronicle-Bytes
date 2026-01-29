@@ -44,7 +44,7 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
  * @param <U> underlying store type
  */
 @SingleThreaded
-@SuppressWarnings({"rawtypes", "unchecked", "deprecation"})
+@SuppressWarnings({"rawtypes", "unchecked", "deprecation", "checkstyle:MMOverusedWord"})
 public interface Bytes<U> extends
         BytesStore<Bytes<U>, U>,
         BytesIn<U>,

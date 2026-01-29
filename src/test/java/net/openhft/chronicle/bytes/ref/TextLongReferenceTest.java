@@ -16,6 +16,12 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+/**
+ * Tests TextLongReference value updates and text formatting because correct
+ * locking and alignment are essential to avoid concurrent modification
+ * issues in text-based long stores.
+ */
+@DisplayName("Text long reference update locking and alignment")
 public class TextLongReferenceTest extends BytesTestCommon {
 
     @Test

@@ -15,6 +15,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+/**
+ * Tests for HeapBytesStore additional branches, because copy, move, and
+ * atomic operations require explicit boundary validation to avoid memory corruption.
+ */
 @DisplayName("Heap bytes store additional branch coverage")
 public class HeapBytesStoreAdditionalTest {
 

@@ -8,6 +8,11 @@ import net.openhft.chronicle.jlbh.JLBH;
 import net.openhft.chronicle.jlbh.JLBHOptions;
 import net.openhft.chronicle.jlbh.JLBHTask;
 
+/**
+ * Benchmark harness for content equality checks, in order to measure
+ * performance of vectorized mismatch operations under varying buffer sizes.
+ */
+@SuppressWarnings("checkstyle:MMOverusedWord")
 public class ContentEqualsJLBHMain {
 
     // to use vectorizedMismatch you should run on java 11 or later, with the following VM args
@@ -15,6 +20,7 @@ public class ContentEqualsJLBHMain {
 
     static {
         ClassLoader.getSystemClassLoader().setDefaultAssertionStatus(false);
+        // Disable resource tracing to avoid interference with benchmark measurements
         System.setProperty("jvm.resource.tracing", "false");
     }
 

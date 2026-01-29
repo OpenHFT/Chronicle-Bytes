@@ -12,7 +12,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
+/**
+ * Tests Byteable interface methods using mocks because correct offset, maxSize, and
+ * lock behaviour must be verified to avoid memory access errors in production.
+ */
 @SuppressWarnings("deprecation")
+@DisplayName("Byteable - offset, maxSize, and lock method behaviour via mocks")
 public class ByteableTest {
 
     private Byteable byteable;
@@ -27,13 +32,13 @@ public class ByteableTest {
     }
 
     @Test
-    @DisplayName("offset returns configured byteable offset position value")
+    @DisplayName("offset returns configured byteable offset position five for mocked instance")
     public void testOffset() {
         long expectedOffset = 5L;
         when(byteable.offset()).thenReturn(expectedOffset);
 
         assertEquals(expectedOffset, byteable.offset(),
-                "offset returns expected byteable offset value");
+                "Byteable.offset() should return 5L when mock is configured to return that offset position");
     }
 
     @Test
@@ -44,13 +49,13 @@ public class ByteableTest {
     }
 
     @Test
-    @DisplayName("maxSize returns configured byteable size value")
+    @DisplayName("maxSize returns configured byteable size 1024 for mocked instance")
     public void testMaxSize() {
         long expectedSize = 1024L;
         when(byteable.maxSize()).thenReturn(expectedSize);
 
         assertEquals(expectedSize, byteable.maxSize(),
-                "maxSize returns expected byteable size value");
+                "Byteable.maxSize() should return 1024L when mock is configured to return that size value");
     }
 
     @Test

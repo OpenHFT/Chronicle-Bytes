@@ -18,7 +18,13 @@ import java.util.stream.LongStream;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
-@DisplayName("UnsafeText formatting and append behaviour checks")
+/**
+ * Tests UnsafeText formatting behaviour because low-level memory writes must produce
+ * correct text output to avoid data corruption. Behaviour checks verify numeric
+ * formatting in order to ensure round-trip accuracy.
+ */
+@SuppressWarnings("checkstyle:MMOverusedWord")
+@DisplayName("UnsafeText formatting and text output behaviour checks")
 public class UnsafeTextTest extends BytesTestCommon {
 
     private static long blackhole;
@@ -40,6 +46,7 @@ public class UnsafeTextTest extends BytesTestCommon {
             new CoolerTester(CpuCoolers.PAUSE1, CpuCoolers.BUSY1)
                     .add("20d", () -> {
                         blackhole = UnsafeText.appendFixed(address, -Integer.MAX_VALUE);
+                        // Lambda result: return null because CoolerTester expects Callable<Void>
                         return null;
                     })
                     .runTimeMS(100)
@@ -175,8 +182,8 @@ public class UnsafeTextTest extends BytesTestCommon {
                 String s = appendDoubleToString(d, address);
                 double d2 = Double.parseDouble(s);
                 if (d != d2) {
-                    String message = "Random append mismatch for value " + d + " diff " + (d - d2);
-                    assertEquals(d, d2, 0, message);
+                    assertEquals(d, d2, 0,
+                            "Random append at i=" + i + " mismatch for value " + d + " diff " + (d - d2));
                 }
             }
             // this is called unless the test is about to die

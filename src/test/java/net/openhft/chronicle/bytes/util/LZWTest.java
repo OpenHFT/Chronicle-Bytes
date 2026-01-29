@@ -19,7 +19,12 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+/**
+ * Tests LZW compression because correct round-trip behaviour and
+ * consistent output are essential for reliable data storage and transfer.
+ */
 @SuppressWarnings("deprecation")
+@DisplayName("LZW - validates LZW compression round-trip behaviour")
 public class LZWTest extends BytesTestCommon {
 
     @Test

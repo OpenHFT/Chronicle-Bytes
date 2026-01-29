@@ -10,6 +10,11 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
+/**
+ * Tests Unicode-to-string conversion because correct encoding is essential
+ * to preserve multi-byte characters during round-trip serialisation.
+ */
+@DisplayName("UnicodeToString - validates UTF-8 string round-trip conversion")
 public class UnicodeToStringTest {
 
     @Test

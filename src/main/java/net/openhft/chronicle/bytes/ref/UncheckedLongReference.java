@@ -16,7 +16,8 @@ import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 
 /**
- * Unsafe view of a long value with no bounds checking, used on performance-critical paths.
+ * Unsafe view of a long value with no bounds checking, used on
+ * performance-critical paths because bounds checks would add overhead.
  * <p>The {@link #create(BytesStore, long, int)} factory chooses
  * {@link BinaryLongReference} when {@link Jvm#isDebug()} is true and otherwise
  * returns an {@code UncheckedLongReference}.</p>

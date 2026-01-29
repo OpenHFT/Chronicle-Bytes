@@ -14,6 +14,11 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+/**
+ * Tests bounds checking for writeLimit, readLimit, and zeroOut because correct
+ * enforcement of limits is required to avoid buffer overflow and underflow errors.
+ */
+@DisplayName("Bytes - bounds checking for limits, clear, and zeroOut operations")
 public class BytesBoundsAndLimitsTest extends BytesTestCommon {
 
     @Test

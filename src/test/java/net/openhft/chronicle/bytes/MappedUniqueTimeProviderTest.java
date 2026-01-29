@@ -20,6 +20,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
+/**
+ * Tests MappedUniqueTimeProvider performance and ordering guarantees
+ * because monotonically increasing timestamps are essential for event
+ * sequencing in distributed systems.
+ */
 @DisplayName("Mapped unique time provider performance and ordering")
 public class MappedUniqueTimeProviderTest extends BytesTestCommon {
 
@@ -37,8 +42,11 @@ public class MappedUniqueTimeProviderTest extends BytesTestCommon {
         try {
             DistributedUniqueTimeProviderTest.checks();
         } catch (FileNotFoundException e) {
-            if (!OS.isWindows())
+            // Windows may fail to access mapped time file due to file locking restrictions
+            if (!OS.isWindows()) {
+                // Non-Windows: propagate exception because file should be accessible
                 throw e;
+            }
         }
     }
 

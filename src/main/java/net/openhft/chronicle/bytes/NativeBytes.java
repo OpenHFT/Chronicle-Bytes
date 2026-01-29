@@ -187,12 +187,14 @@ public class NativeBytes<U>
                 return; // do nothing.
             }
             if (writeEnd > capacity)
+                // Write exceeds capacity and cannot be resized
                 throw newDBOE(writeEnd);
             checkResize(writeEnd);
         } else {
             if (offset < 0)
                 throw new IllegalArgumentException("writeCheckOffset offset must be non-negative");
-            throw new BufferOverflowException(/* writeCheckOffset outside capacity */);
+            // Write offset outside valid capacity range
+            throw new DecoratedBufferOverflowException("Write offset " + offset + " outside valid capacity range");
         }
     }
 
@@ -209,10 +211,12 @@ public class NativeBytes<U>
                 return; // do nothing.
             }
             if (offset >= capacity)
-                throw new BufferOverflowException(/*"Write exceeds capacity"*/);
+                // Write exceeds current capacity and cannot be resized
+                throw new DecoratedBufferOverflowException("Write offset " + offset + " exceeds capacity " + capacity);
             checkResize(offset);
         } else {
-            throw new BufferOverflowException(/* prewriteCheckOffset outside capacity */);
+            // Prewrite offset outside valid capacity range
+            throw new DecoratedBufferOverflowException("Prewrite offset " + offset + " outside valid capacity range");
         }
     }
 
@@ -231,7 +235,7 @@ public class NativeBytes<U>
         if (isElastic())
             resize(endOfBuffer);
         else
-            throw new BufferOverflowException(/* resize requested for non-elastic bytes */);
+            throw new DecoratedBufferOverflowException("resize requested for non-elastic bytes");
     }
 
     @Override
@@ -307,8 +311,9 @@ public class NativeBytes<U>
             }
             store.reserveTransfer(INIT, this);
         } catch (IllegalArgumentException e) {
-            BufferOverflowException boe = new BufferOverflowException(/* elastic bytes exceeded capacity */);
+            BufferOverflowException boe = new BufferOverflowException();
             boe.initCause(e);
+            // Elastic buffer resize failed: requested capacity exceeds maximum
             throw boe;
         }
 
@@ -368,7 +373,7 @@ public class NativeBytes<U>
             throws BufferOverflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
         final long oldPosition = writePosition();
         if (writePosition() < bytesStore.start())
-            throw new BufferOverflowException(/* write beyond buffer limit */);
+            throw new DecoratedBufferOverflowException("write beyond buffer limit");
         final long writeEnd = writePosition() + adding;
         if (writeEnd > writeLimit)
             throwBeyondWriteLimit(advance, writeEnd);

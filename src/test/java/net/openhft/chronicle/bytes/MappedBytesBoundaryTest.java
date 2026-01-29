@@ -25,6 +25,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
+/**
+ * Tests mapped bytes boundary operations because correct handling of chunk
+ * boundaries is critical to avoid data corruption when writes span multiple
+ * memory-mapped regions.
+ */
 @DisplayName("Mapped bytes boundary conditions for write and read")
 public class MappedBytesBoundaryTest extends BytesTestCommon {
     @BeforeEach
@@ -43,7 +48,9 @@ public class MappedBytesBoundaryTest extends BytesTestCommon {
         final byte[] prefix = new byte[chunk - 4];
         final byte[] tail = "HELLO".getBytes(StandardCharsets.ISO_8859_1);
         final byte[] expected = new byte[prefix.length + tail.length];
+        // Build expected array: prefix bytes followed by tail bytes
         System.arraycopy(prefix, 0, expected, 0, prefix.length);
+        // Append tail after prefix to form complete expected payload
         System.arraycopy(tail, 0, expected, prefix.length, tail.length);
 
         File file = new File(OS.getTarget(), "mapped-boundary-" + System.nanoTime() + ".dat");

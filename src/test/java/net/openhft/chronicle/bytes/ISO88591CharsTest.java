@@ -10,7 +10,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Tests that BytesInternal.to8BitString handles ISO-8859-1 characters gracefully
+ * because 8-bit character encoding must preserve extended ASCII values to avoid
+ * data corruption in legacy systems.
  */
+@SuppressWarnings("checkstyle:MMLacksPurpose")
 @DisplayName("ISO 8859 1 characters render to 8bit")
 public class ISO88591CharsTest {
 

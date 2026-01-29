@@ -23,11 +23,19 @@ import java.util.stream.Collectors;
 import static net.openhft.chronicle.core.io.AbstractCloseable.waitForCloseablesToClose;
 import static net.openhft.chronicle.core.io.AbstractReferenceCounted.assertReferencesReleased;
 
+/**
+ * Common base class for Chronicle Bytes tests providing exception handling, thread dump checking,
+ * and resource cleanup because consistent test infrastructure is essential for reliable test execution.
+ */
 @SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate") // Base class is used by tests in subpackages.
 public class BytesTestCommon {
+    // WSL detection uses System.getenv because these environment variables are set by WSL itself
     private static final boolean IS_WSL =
+            // System.getenv is required to detect WSL runtime environment
             System.getenv("WSL_DISTRO_NAME") != null
+                    // System.getenv is required to detect WSL interop support
                     || System.getenv("WSL_INTEROP") != null
+                    // System.getenv is required to detect WSL environment variables
                     || System.getenv("WSLENV") != null;
 
     protected static boolean isWsl() {

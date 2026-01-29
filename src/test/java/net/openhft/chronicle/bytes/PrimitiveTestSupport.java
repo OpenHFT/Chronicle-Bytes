@@ -6,7 +6,12 @@ package net.openhft.chronicle.bytes;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@SuppressWarnings("deprecation")
+/**
+ * Test support utilities for primitive binary operations because shared
+ * assertions help maintain consistent validation across multiple primitive
+ * read/write tests.
+ */
+@SuppressWarnings({"deprecation", "MMOverusedWord"}) // payload domain terminology
 public final class PrimitiveTestSupport {
 
     private PrimitiveTestSupport() {
@@ -43,19 +48,19 @@ public final class PrimitiveTestSupport {
         final float f32 = bytes.readFloat();
         final double f64 = bytes.readDouble();
 
-        assertTrue(flag, "flag from binary payload");
-        assertEquals(1, s8, "s8 from payload");
-        assertEquals(2, u8, "u8 from payload");
-        assertEquals(3, s16, "s16 from payload");
-        assertEquals(4, u16, "u16 from payload");
-        assertEquals('5', ch, "char from payload");
-        assertEquals(-6_666_666, s24, "s24 from payload");
-        assertEquals(16_666_666, u24, "u24 from payload");
-        assertEquals(6, s32, "s32 from payload");
-        assertEquals(7, u32, "u32 from payload");
-        assertEquals(8, s64, "s64 from payload");
-        assertEquals(9, f32, 0.0, "f32 from payload");
-        assertEquals(10, f64, 0.0, "f64 from payload");
+        assertTrue(flag, "Boolean flag from binary payload should be true");
+        assertEquals(1, s8, "Signed byte s8 from payload should equal one");
+        assertEquals(2, u8, "Unsigned byte u8 from payload should equal two");
+        assertEquals(3, s16, "Signed short s16 from payload should equal three");
+        assertEquals(4, u16, "Unsigned short u16 from payload should equal four");
+        assertEquals('5', ch, "Char ch from payload should equal digit five");
+        assertEquals(-6_666_666, s24, "Signed int24 s24 from payload should match");
+        assertEquals(16_666_666, u24, "Unsigned int24 u24 from payload should match");
+        assertEquals(6, s32, "Signed int s32 from payload should equal six");
+        assertEquals(7, u32, "Unsigned int u32 from payload should equal seven");
+        assertEquals(8, s64, "Signed long s64 from payload should equal eight");
+        assertEquals(9, f32, 0.0, "Float f32 from payload should equal nine");
+        assertEquals(10, f64, 0.0, "Double f64 from payload should equal ten");
 
         if (expectText) {
             final String text = bytes.readUtf8();

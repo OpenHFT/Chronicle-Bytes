@@ -14,7 +14,11 @@ import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@SuppressWarnings("deprecation")
+/**
+ * Regression tests for Issue 464, because creating BytesStore instances from
+ * empty sources should reuse a shared singleton instance to avoid memory allocation.
+ */
+@SuppressWarnings({"deprecation", "checkstyle:MMOverusedWord"})
 @DisplayName("Empty BytesStore allocation avoids new backing")
 public class Issue464BytesStoreEmptyTest extends BytesTestCommon {
     @Test

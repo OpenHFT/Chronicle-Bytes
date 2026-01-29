@@ -15,10 +15,11 @@ import java.nio.ByteBuffer;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Tests for BytesStore interface default methods covering branch paths for
- * creation, wrapping, atomic updates, and copy operations.
+ * Tests BytesStore interface default methods covering branch paths for creation, wrapping,
+ * atomic updates, and copy operations because complete coverage ensures reliable behaviour.
  */
 @SuppressWarnings("deprecation")
+@DisplayName("BytesStore interface default method branch coverage")
 class BytesStoreBranchTest extends BytesTestCommon {
 
     @Test
@@ -395,16 +396,16 @@ class BytesStoreBranchTest extends BytesTestCommon {
     }
 
     @Test
-    @DisplayName("subSequence with invalid range should throw")
+    @DisplayName("subSequence with invalid start or end should throw IndexOutOfBoundsException")
     void subSequenceInvalidRange() {
         BytesStore<?, byte[]> store = BytesStore.wrap(new byte[]{'H', 'i'});
         try {
             assertThrows(IndexOutOfBoundsException.class, () -> store.subSequence(-1, 2),
-                    "negative start should throw");
+                    "subSequence should throw when start index is negative");
             assertThrows(IndexOutOfBoundsException.class, () -> store.subSequence(0, 10),
-                    "end beyond length should throw");
+                    "subSequence should throw when end index exceeds store length");
             assertThrows(IndexOutOfBoundsException.class, () -> store.subSequence(2, 1),
-                    "end < start should throw");
+                    "subSequence should throw when end index is less than start index");
         } finally {
             store.releaseLast();
         }
@@ -668,7 +669,7 @@ class BytesStoreBranchTest extends BytesTestCommon {
         try {
             assertEquals(5, store.capacity(),
                     "nativeStoreFrom should report capacity 5 for five-byte array");
-            assertEquals(1, store.readByte(0), "first byte should match");
+            assertEquals(1, store.readByte(0), "nativeStoreFrom should copy byte array so readByte(0) returns 1");
         } finally {
             store.releaseLast();
         }

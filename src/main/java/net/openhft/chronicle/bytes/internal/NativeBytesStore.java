@@ -4,6 +4,8 @@
 package net.openhft.chronicle.bytes.internal;
 
 import net.openhft.chronicle.bytes.*;
+import net.openhft.chronicle.bytes.util.DecoratedBufferOverflowException;
+import net.openhft.chronicle.bytes.util.DecoratedBufferUnderflowException;
 import net.openhft.chronicle.core.*;
 import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.cleaner.CleanerServiceLocator;
@@ -456,6 +458,7 @@ public class NativeBytesStore<U>
             return this;
         } catch (NullPointerException e) {
             throwExceptionIfReleased();
+            // NullPointerException occurs when memory accessor has been nulled after release
             throw e;
         }
     }
@@ -584,7 +587,7 @@ public class NativeBytesStore<U>
         if (offset < start() || offset > realCapacity()) {
             if (offset < 0)
                 throw new IllegalArgumentException("Read offset must be non-negative");
-            throw new BufferUnderflowException(/* read offset beyond real capacity */);
+            throw new DecoratedBufferUnderflowException("read offset beyond real capacity");
         }
         return address + translate(offset);
     }
@@ -595,7 +598,7 @@ public class NativeBytesStore<U>
         if (offset < start() || offset > realCapacity()) {
             if (offset < 0)
                 throw new IllegalArgumentException("Write offset must be non-negative");
-            throw new BufferOverflowException(/* write offset beyond real capacity */);
+            throw new DecoratedBufferOverflowException("write offset beyond real capacity");
         }
         return address + translate(offset);
     }
@@ -722,7 +725,7 @@ public class NativeBytesStore<U>
             throws BufferOverflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
         requireNonNull(chars);
         if (pos + length > realCapacity())
-            throw new BufferOverflowException(/* append exceeds real capacity */);
+            throw new DecoratedBufferOverflowException("append exceeds real capacity");
 
         long addr = this.address + translate(0);
         @Nullable Memory mem = this.memory;
@@ -963,6 +966,7 @@ public class NativeBytesStore<U>
 
         } catch (NullPointerException npe) {
             throwExceptionIfReleased();
+            // NullPointerException occurs when memory accessor has been nulled after release
             throw npe;
         }
     }

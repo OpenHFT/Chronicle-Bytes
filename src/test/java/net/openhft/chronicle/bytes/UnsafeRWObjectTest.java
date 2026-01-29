@@ -14,6 +14,14 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
+/**
+ * Tests unsafe read/write object operations because correct field layout
+ * serialisation is essential to support zero-copy data exchange with native code.
+ * This test verifies that trivially copyable ranges are preserved so that
+ * unsafe memory operations can be used safely in performance-critical paths.
+ */
+@SuppressWarnings("checkstyle:MMOverusedWord")
+@DisplayName("UnsafeRWObject - validates unsafe object field serialisation")
 class UnsafeRWObjectTest extends BytesTestCommon {
     @Test
     @DisplayName("unsafe write and read of long object uses elastic direct buffer")
@@ -35,14 +43,15 @@ class UnsafeRWObjectTest extends BytesTestCommon {
 
         directElastic.unsafeReadObject(bb2, offset,8 * 8);
 
-        assertEquals(bb1.l0, bb2.l0, "Unsafe read should restore the first long value");
-        assertEquals(bb1.l1, bb2.l1, "Unsafe read should restore the second long value");
-        assertEquals(bb1.l2, bb2.l2, "Unsafe read should restore the third long value");
-        assertEquals(bb1.l3, bb2.l3, "Unsafe read should restore the fourth long value");
-        assertEquals(bb1.l4, bb2.l4, "Unsafe read should restore the fifth long value");
-        assertEquals(bb1.l5, bb2.l5, "Unsafe read should restore the sixth long value");
-        assertEquals(bb1.l6, bb2.l6, "Unsafe read should restore the seventh long value");
-        assertEquals(bb1.l7, bb2.l7, "Unsafe read should restore the eighth long value");
+        // Verify all long fields are restored because any difference indicates memory layout errors
+        assertEquals(bb1.l0, bb2.l0, "Unsafe read should restore l0 to avoid silent data corruption");
+        assertEquals(bb1.l1, bb2.l1, "Unsafe read should restore l1 to avoid silent data corruption");
+        assertEquals(bb1.l2, bb2.l2, "Unsafe read should restore l2 to avoid silent data corruption");
+        assertEquals(bb1.l3, bb2.l3, "Unsafe read should restore l3 to avoid silent data corruption");
+        assertEquals(bb1.l4, bb2.l4, "Unsafe read should restore l4 to avoid silent data corruption");
+        assertEquals(bb1.l5, bb2.l5, "Unsafe read should restore l5 to avoid silent data corruption");
+        assertEquals(bb1.l6, bb2.l6, "Unsafe read should restore l6 to avoid silent data corruption");
+        assertEquals(bb1.l7, bb2.l7, "Unsafe read should restore l7 to avoid silent data corruption");
 
         directElastic.releaseLast();
     }

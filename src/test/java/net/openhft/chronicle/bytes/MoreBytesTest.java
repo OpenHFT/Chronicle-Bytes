@@ -30,6 +30,11 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
+/**
+ * Tests additional Bytes utility operations and index handling because
+ * correct string interning and substring matching are essential for
+ * efficient message parsing.
+ */
 @SuppressWarnings("deprecation")
 @DisplayName("More bytes utilities and index operations")
 public class MoreBytesTest extends BytesTestCommon {
@@ -41,7 +46,7 @@ public class MoreBytesTest extends BytesTestCommon {
                 "IndexOf matches String result for source '" + sourceStr + "' and sub '" + subStr + "'");
     }
 
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({"rawtypes", "MMAnnotationTestOrder"})
     @Test
     @DisplayName("release reduces reference counts for all bytes")
     public void testOneRelease() {
@@ -332,7 +337,7 @@ public class MoreBytesTest extends BytesTestCommon {
         }
     }
 
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({"rawtypes", "MMAnnotationTestOrder"})
     @Test
     @DisplayName("readWithLength transfers bytes into output buffer")
     public void testReadWithLength()

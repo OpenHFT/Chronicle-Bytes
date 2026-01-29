@@ -12,8 +12,11 @@ import java.nio.ByteBuffer;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
- * This enum represents different types of Allocators. Each Allocator provides a way to create elastic bytes and byte buffers.
+ * Represents different Allocator types, each providing a way to create elastic bytes and buffers
+ * because test parameterisation across heap, direct, unchecked, and embedded variants is required
+ * to avoid allocation-specific regressions.
  */
+@SuppressWarnings("checkstyle:MMOverusedWord")
 public enum Allocator {
     /**
      * NATIVE allocator type uses native (off-heap) memory for both ByteBuffer and elastic Bytes.

@@ -11,6 +11,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+/**
+ * Tests released bytes store behaviour because accessing memory after release
+ * can cause crashes or data corruption if resource lifecycle is mismanaged.
+ */
+@DisplayName("ReleasedBytesStore - validates post-release rejection of operations")
 public class ReleasedBytesStoreTest extends BytesTestCommon {
 
     @Test

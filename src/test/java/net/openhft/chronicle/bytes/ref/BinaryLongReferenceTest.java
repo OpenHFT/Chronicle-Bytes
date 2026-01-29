@@ -22,6 +22,12 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
+/**
+ * Tests BinaryLongReference native store updates because correct atomic
+ * operations are essential for lock-free sequence numbers in shared memory
+ * queues.
+ */
+@SuppressWarnings("MMOverusedWord") // value domain terminology
 @DisplayName("Binary long reference behaviour for native store updates")
 public class BinaryLongReferenceTest extends BytesTestCommon {
     @Test
@@ -61,6 +67,7 @@ public class BinaryLongReferenceTest extends BytesTestCommon {
             assertEquals(10L, nbs.readLong(16),
                     "Direct set writes ten to backing store");
             ref.setOrderedValue(20);
+            // Allow memory visibility propagation
             Thread.yield();
             assertEquals(20L, nbs.readVolatileLong(16),
                     "Ordered write visible through volatile read at offset");

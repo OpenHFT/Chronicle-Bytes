@@ -30,14 +30,25 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
+/**
+ * Tests MappedFile multi-threaded lock behaviour because concurrent access
+ * to memory-mapped files requires proper synchronisation to avoid data
+ * races and memory corruption.
+ */
+@SuppressWarnings("checkstyle:MMOverusedWord")
 @DisplayName("Mapped file multi thread lock behaviour")
 public class MappedFileMultiThreadTest extends BytesTestCommon {
+    // Limit parallelism on WSL to reduce resource contention; use all cores on native
     private static final int DEFAULT_CORES = isWsl()
+            // WSL: limit parallelism to reduce resource contention in emulated environment
             ? Math.min(2, Runtime.getRuntime().availableProcessors())
+            // Native: query processor count for maximum concurrency stress testing
             : Runtime.getRuntime().availableProcessors();
     private static final int CORES = Integer.getInteger("cores", DEFAULT_CORES);
     private static final int DEFAULT_RUNTIME_MS = isWsl() ? 500 : 2_000;
+    // System property allows custom runtime duration for extended testing
     private static final int RUNTIME_MS = Integer.getInteger("runtimems", DEFAULT_RUNTIME_MS);
+    // System property allows test file path override for isolation
     private static final String TMP_FILE = System.getProperty("file", defaultTempFile());
 
     private static String defaultTempFile() {
@@ -91,6 +102,7 @@ public class MappedFileMultiThreadTest extends BytesTestCommon {
                                     "BytesStore toString returns non null at offset " + offset + " thread i " + finalI); // show it doesn't blow up.
                             ++offset;
                         } catch (IOException e) {
+                            // Rethrow as unchecked to propagate within parallel stream
                             throw Jvm.rethrow(e);
                         } finally {
                             if (bytes != null) bytes.releaseLast();
@@ -98,6 +110,7 @@ public class MappedFileMultiThreadTest extends BytesTestCommon {
                         }
                         if (finalI == 0 && offset % 1_000 == 0) {
                             garbage.clear();
+                            // Memory pressure test: trigger GC to validate finaliser behaviour
                             System.gc();
                         }
                     }

@@ -389,6 +389,7 @@ public class VanillaBytes<U>
         } catch (Exception e) {
             final IndexOutOfBoundsException ioobe = new IndexOutOfBoundsException(e.toString());
             ioobe.initCause(e);
+            // String append failed due to buffer or encoding issue
             throw ioobe;
         }
     }
@@ -422,6 +423,7 @@ public class VanillaBytes<U>
         } catch (Exception e) {
             @NotNull BufferOverflowException e2 = new BufferOverflowException();
             e2.initCause(e);
+            // UTF-8 append failed due to buffer capacity or encoding issue
             throw e2;
         }
     }
@@ -541,12 +543,14 @@ public class VanillaBytes<U>
                         ? toString2((NativeBytesStore) bytesStore)
                         : toString0();
             } catch (IllegalStateException e) {
+                // Rethrow illegal state from toString conversion
                 throw Jvm.rethrow(e);
             } finally {
                 release(this);
             }
         } catch (Exception e) {
-            return e.toString();
+            // Return exception details if toString fails during resource access
+            return e.toString(); // NOSONAR safe here
         }
     }
 

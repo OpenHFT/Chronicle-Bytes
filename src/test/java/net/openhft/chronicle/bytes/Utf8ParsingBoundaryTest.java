@@ -12,9 +12,11 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * Consolidates UTF-8 parsing boundary tests (explicit length, stop-char parsing,
- * null sequences and over-length failures).
+ * Consolidates UTF-8 parsing boundary tests because explicit length handling,
+ * stop-char parsing, null sequences and over-length failures require validation
+ * to avoid data corruption or unexpected exceptions during deserialisation.
  */
+@DisplayName("Utf8ParsingBoundary - validates UTF-8 length and stop-char boundaries")
 public class Utf8ParsingBoundaryTest extends BytesTestCommon {
 
     @Test

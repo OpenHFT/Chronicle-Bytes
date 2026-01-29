@@ -14,6 +14,11 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+/**
+ * Tests unchecked long reference operations because bypassing bounds checking
+ * requires careful validation to avoid memory corruption in production systems.
+ */
+@DisplayName("UncheckedLongReference - validates atomic operations on unguarded long slots")
 public class UncheckedLongReferenceTest extends BytesTestCommon {
     @Test
     @DisplayName("unchecked long reference updates backing store correctly")
@@ -63,6 +68,7 @@ public class UncheckedLongReferenceTest extends BytesTestCommon {
                     nbs.readLong(16),
                     "setValue should update the backing store value");
             ref.setOrderedValue(20);
+            // Allow store-buffer drain so ordered write becomes visible
             Thread.yield();
             assertEquals(20L,
                     nbs.readLong(16),

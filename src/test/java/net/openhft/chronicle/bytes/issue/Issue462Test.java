@@ -15,6 +15,11 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+/**
+ * Regression tests for Issue 462, because ByteBuffer byte order must match
+ * native order to avoid silent data corruption during reads and writes.
+ */
+@DisplayName("Issue 462 - ByteBuffer byte order alignment validation")
 class Issue462Test {
 
     private static Stream<Bytes<ByteBuffer>> bytesToTest() {

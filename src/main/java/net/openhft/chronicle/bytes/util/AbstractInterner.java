@@ -23,12 +23,12 @@ import static net.openhft.chronicle.core.Jvm.uncheckedCast;
  * This class provides a caching mechanism that returns a value which matches the decoded bytes. It does not
  * guarantee the return of the same object across different invocations or from different threads, but it
  * guarantees that the contents will be the same. Although not strictly thread-safe, it behaves correctly
- * under concurrent access.
+ * under concurrent access because all racing writes result in semantically equivalent values.
  * <p>
  * The main usage is to reduce the amount of memory used by creating new objects when the same byte sequence is
  * repeatedly decoded into an object.
  * <p>
- * This cache only guarantees it will provide a String which matches the decoded bytes.
+ * This cache only guarantees it will provide a String which matches the decoded data.
  * <p>
  * It doesn't guarantee it will always return the same object,
  * nor that different threads will return the same object,
@@ -46,7 +46,7 @@ import static net.openhft.chronicle.core.Jvm.uncheckedCast;
  *
  * @param <T> the type of the object being interned
  */
-@SuppressWarnings("rawtypes")
+@SuppressWarnings({"rawtypes", "checkstyle:MMOverusedWord"})
 public abstract class AbstractInterner<T> {
     /**
      * The array storing {@link InternerEntry} objects. Concurrent modifications

@@ -35,6 +35,11 @@ Ping pong rate: 52,583,207 ping-pong/second
 Ping pong rate: 52,590,468 ping-pong/second
 Ping pong rate: 52,661,971 ping-pong/second
  */
+/**
+ * Memory-mapped ping-pong benchmark because measuring inter-core latency
+ * via CAS operations is essential for tuning CPU affinity in low-latency
+ * applications.
+ */
 public class MMapPingPongMain {
     private static final boolean PONG = Jvm.getBoolean("pong");
     private static final boolean USE_AFFINITY = Jvm.getBoolean("useAffinity");
@@ -45,13 +50,17 @@ public class MMapPingPongMain {
         int from = PONG ? 0 : 1;
         int to = PONG ? 1 : 0;
         final int count = 20_000_000;
+        // CPU affinity: select core based on available processors
         int lastCPU = Runtime.getRuntime().availableProcessors() - 1;
 
+        // Synchronisation: acquire optional affinity lock and mapped bytes for ping-pong
         try (AffinityLock ignored = USE_AFFINITY ? AffinityLock.acquireLock(PONG ? lastCPU : lastCPU / 2) : null;
              MappedBytes bytes = MappedBytes.mappedBytes(tmpFile, OS.pageSize())) {
-            // wait for the first one
+            // Synchronisation: wait for peer to complete its initial CAS handshake
             while (!bytes.compareAndSwapLong(0, from, to))
+                // Yield: spin waiting for peer CAS completion
                 Thread.yield();
+            // Benchmark progress: announce handshake completion
             System.out.println("Started...");
             for (int t = 0; t < 5; t++) {
                 long start = System.nanoTime();

@@ -17,6 +17,11 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
+/**
+ * Tests MappedBytesStoreFactory creation behaviour because proper factory
+ * validation is essential to avoid illegal state exceptions when accessing
+ * closed or invalid mapped files.
+ */
 @DisplayName("Mapped bytes store factory creation behaviour")
 public class MappedBytesStoreFactoryTest {
 

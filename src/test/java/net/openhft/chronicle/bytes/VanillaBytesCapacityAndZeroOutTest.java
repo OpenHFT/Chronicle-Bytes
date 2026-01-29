@@ -9,6 +9,11 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+/**
+ * Tests capacity growth and zeroOut operations because correct elastic
+ * expansion and clearing are essential to avoid stale data leaks.
+ */
+@DisplayName("VanillaBytesCapacityAndZeroOut - validates growth and clearing")
 public class VanillaBytesCapacityAndZeroOutTest extends BytesTestCommon {
 
     @Test
@@ -44,4 +49,3 @@ public class VanillaBytesCapacityAndZeroOutTest extends BytesTestCommon {
         }
     }
 }
-

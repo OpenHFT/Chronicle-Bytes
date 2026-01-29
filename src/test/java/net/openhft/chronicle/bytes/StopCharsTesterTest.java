@@ -6,6 +6,11 @@ package net.openhft.chronicle.bytes;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+/**
+ * Tests custom stop-chars tester because applications must define parsing
+ * delimiters so that tokenisation extracts the expected substrings.
+ */
+@DisplayName("StopCharsTester - validates custom delimiter detection logic")
 public class StopCharsTesterTest {
 
     @Test

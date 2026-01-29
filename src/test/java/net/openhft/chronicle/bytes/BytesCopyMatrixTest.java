@@ -13,6 +13,11 @@ import java.nio.charset.StandardCharsets;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+/**
+ * Tests copyTo across heap and native byte stores because correct data transfer is
+ * required to avoid corruption when moving bytes between different memory regions.
+ */
+@DisplayName("Bytes - copyTo matrix tests for heap and native store combinations")
 public class BytesCopyMatrixTest extends BytesTestCommon {
 
     @Test

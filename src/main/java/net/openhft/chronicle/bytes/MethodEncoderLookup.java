@@ -30,6 +30,7 @@ public enum MethodEncoderLookup implements Function<Method, MethodEncoder> {
     @Override
     public MethodEncoder apply(Method method) {
         MethodId methodId = Jvm.findAnnotation(method, MethodId.class);
+        // Sentinel: method lacks @MethodId annotation, no encoder available
         if (methodId == null) return null;
         long messageId = methodId.value();
         return new MethodEncoder() {

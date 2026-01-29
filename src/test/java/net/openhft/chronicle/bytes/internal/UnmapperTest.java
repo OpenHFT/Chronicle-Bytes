@@ -20,18 +20,20 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 /**
- * Tests for Unmapper class covering branch coverage for the run() method.
+ * Tests for Unmapper class, because the run() method must be idempotent
+ * and safely handle repeated invocations to avoid double-unmap errors.
  */
+@DisplayName("Unmapper idempotent run() and lifecycle validation")
 class UnmapperTest extends BytesTestCommon {
 
     @TempDir
     File tempDir;
 
     @Test
-    @DisplayName("Unmapper run() is idempotent - second call does nothing")
+    @DisplayName("Unmapper run() is idempotent - second call leaves state unchanged")
     void shouldIgnoreSecondRunCall() throws IOException {
         // Skip on Windows/WSL due to potential file locking issues
-        assumeFalse(OS.isWindows() || isWsl(), "Skipped on Windows/WSL");
+        assumeFalse(OS.isWindows() || isWsl(), "Skipped on Windows/WSL due to file locking");
 
         File file = new File(tempDir, "unmapper-test.dat");
 
@@ -42,7 +44,7 @@ class UnmapperTest extends BytesTestCommon {
 
             int pageSize = OS.pageSize();
             long address = OS.map(channel, FileChannel.MapMode.READ_WRITE, 0, 4096, pageSize);
-            assertTrue(address != 0, "Mapped address should not be zero");
+            assertTrue(address != 0, "Mapped address=" + address + " should not be zero for valid mapping");
 
             Unmapper unmapper = new Unmapper(address, 4096, pageSize);
 
@@ -57,20 +59,20 @@ class UnmapperTest extends BytesTestCommon {
     }
 
     @Test
-    @DisplayName("Unmapper constructor accepts valid parameters")
+    @DisplayName("Unmapper constructor accepts valid parameters and creates instance")
     void shouldCreateWithValidParameters() {
         // We're just testing construction, not actual unmapping
         // Use a non-zero address that won't be unmapped
         Unmapper unmapper = new Unmapper(0x1000L, 4096, OS.pageSize());
 
-        assertNotNull(unmapper, "Unmapper should be created successfully");
+        assertNotNull(unmapper, "Unmapper instance should be created from valid address 0x1000 and size 4096");
     }
 
     @Test
-    @DisplayName("Unmapper works with MappedBytes lifecycle")
+    @DisplayName("Unmapper works with MappedBytes lifecycle and cleans up correctly")
     void shouldWorkWithMappedBytesLifecycle() throws IOException {
         // Skip on Windows/WSL due to potential file locking issues
-        assumeFalse(OS.isWindows() || isWsl(), "Skipped on Windows/WSL");
+        assumeFalse(OS.isWindows() || isWsl(), "Test requires POSIX file semantics for unmap verification");
 
         File file = new File(tempDir, "mapped-bytes-test.dat");
 

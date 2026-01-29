@@ -21,6 +21,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
+/**
+ * Tests streaming data input operations because correct position tracking
+ * and bounded views are essential to avoid reading past valid data.
+ * This test verifies position management, unsafe copy round trips, and
+ * length-prefixed reads so that consumers can safely parse serialised data.
+ */
+@DisplayName("StreamingDataInput - validates read operations and position management")
 public class StreamingDataInputTest extends BytesTestCommon {
 
     public static Stream<Allocator> params() {

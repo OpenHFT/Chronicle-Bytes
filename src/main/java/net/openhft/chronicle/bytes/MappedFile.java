@@ -78,6 +78,7 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
                             @NonNegative final int chunk,
                             final long delayMicros) {
         if (delayMicros < 100 || !Jvm.isDebugEnabled(MappedFile.class))
+            // Skip logging if delay is trivial or debug logging is disabled
             return;
 
         // avoid a GC while trying to memory map.
@@ -87,7 +88,7 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
                     .append(" chunk in ").append(filename)
                     .append(" took ").append(delayMicros / 1e3).append(" ms.")
                     .toString();
-            Jvm.perf().on(ChunkedMappedFile.class, message);
+            Jvm.perf().on(ChunkedMappedFile.class, /* slow chunk allocation */ message);
         }
     }
 
@@ -500,9 +501,10 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
     public abstract long overlapSize();
 
     /**
-     * Returns the listener that is notified when a new chunk is created.
+     * Returns the callback invoked when a new memory-mapped chunk is allocated.
+     * This can be used for monitoring or pre-touching memory pages.
      *
-     * @return The listener for new chunks.
+     * @return the listener for new chunk events, or a no-op listener if none is set
      */
     public NewChunkListener getNewChunkListener() {
         return newChunkListener;

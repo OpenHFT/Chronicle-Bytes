@@ -8,6 +8,11 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+/**
+ * Tests VanillaBytes primitive operations because correct read/write
+ * and zeroOut behaviour are essential for reliable data storage.
+ */
+@DisplayName("VanillaBytesOps - validates primitive read/write and zeroOut")
 public class VanillaBytesOpsTest extends BytesTestCommon {
 
     @Test
@@ -39,4 +44,3 @@ public class VanillaBytesOpsTest extends BytesTestCommon {
         }
     }
 }
-

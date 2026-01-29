@@ -20,7 +20,7 @@ import java.nio.ByteOrder;
  * @see BytesStoreHash
  * @see BytesStore
  */
-@SuppressWarnings("rawtypes")
+@SuppressWarnings({"rawtypes", "checkstyle:MMOverusedWord"})
 public enum VanillaBytesStoreHash implements BytesStoreHash<BytesStore<?,?>> {
     /**
      * Singleton instance providing the vanilla hash implementation.
@@ -76,6 +76,7 @@ public enum VanillaBytesStoreHash implements BytesStoreHash<BytesStore<?,?>> {
         try {
             return applyAsLong(store, remaining);
         } catch (IllegalStateException | BufferUnderflowException e) {
+            // Propagate as unchecked because the contract requires a long return
             throw Jvm.rethrow(e);
         }
     }

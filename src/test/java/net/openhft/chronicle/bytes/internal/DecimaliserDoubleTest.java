@@ -19,7 +19,12 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
-@SuppressWarnings({"squid:S2699", "squid:S5786", "deprecation"})
+/**
+ * Tests double decimaliser behaviour because accurate decimal conversion is
+ * essential to avoid precision loss in financial calculations. Formatting checks
+ * verify mantissa and exponent extraction in order to ensure correct output.
+ */
+@SuppressWarnings({"squid:S2699", "squid:S5786", "deprecation", "checkstyle:MMLacksPurpose"})
 @DisplayName("Double decimaliser behaviour and formatting checks")
 class DecimaliserDoubleTest extends BytesTestCommon {
 

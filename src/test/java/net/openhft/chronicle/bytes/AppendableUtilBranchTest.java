@@ -18,14 +18,20 @@ import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Branch coverage tests for AppendableUtil formatting, parsing, UTF-8 handling,
- * and unsupported Appendable errors.
+ * and unsupported Appendable errors because correct handling of edge cases is required
+ * to avoid data corruption and exceptions in production text processing.
+ *
+ * <p>Exercises setCharAt, setLength, and parseUtf8 in order to verify all branches
+ * are covered, to avoid silent failures when edge-case inputs are provided.
  */
 @SuppressWarnings("deprecation")
+@DisplayName("AppendableUtilBranch - branch coverage for formatting, parsing, and UTF-8")
 class AppendableUtilBranchTest extends BytesTestCommon {
 
     @Test
-    @DisplayName("setCharAt with StringBuilder should modify character at index")
+    @DisplayName("setCharAt with StringBuilder should modify character at index due to direct access")
     void setCharAtStringBuilder() {
+        // StringBuilder supports setCharAt natively
         StringBuilder sb = new StringBuilder("Hello");
         AppendableUtil.setCharAt(sb, 0, 'J');
         assertEquals("Jello", sb.toString(),
@@ -33,22 +39,24 @@ class AppendableUtilBranchTest extends BytesTestCommon {
     }
 
     @Test
-    @DisplayName("setCharAt with Bytes should modify byte at index")
+    @DisplayName("setCharAt with Bytes should modify underlying storage despite wrapper abstraction")
     void setCharAtBytes() {
+            // Elastic heap allocation to verify in-place modification
             Bytes<?> bytes = Bytes.allocateElasticOnHeap(16);
             try {
                 bytes.append("Hello");
                 AppendableUtil.setCharAt(bytes, 0, 'J');
                 assertEquals((byte) 'J', bytes.readByte(0),
-                        "setCharAt should modify the first byte in Bytes");
+                        "setCharAt should modify the underlying storage at the given index");
         } finally {
             bytes.releaseLast();
         }
     }
 
     @Test
-    @DisplayName("setCharAt with unsupported type should throw IllegalArgumentException")
+    @DisplayName("setCharAt with unsupported type should throw despite valid index")
     void setCharAtUnsupportedType() {
+        // StringWriter does not support random access modification
         StringWriter writer = new StringWriter();
         assertThrows(IllegalArgumentException.class, () -> AppendableUtil.setCharAt(writer, 0, 'X'),
                 "setCharAt should reject unsupported Appendable types");
@@ -519,7 +527,7 @@ class AppendableUtilBranchTest extends BytesTestCommon {
     }
 
     @Test
-    @DisplayName("parseUtf8 should decode data to StringBuilder")
+    @DisplayName("parseUtf8 should decode UTF-8 content World from BytesStore into StringBuilder")
     void parseUtf8As8bitToStringBuilder() {
         // Test parseUtf8 with NativeBytesStore - uses position 0 of the store
         Bytes<?> bytes = Bytes.allocateElasticDirect(32);
@@ -530,7 +538,7 @@ class AppendableUtilBranchTest extends BytesTestCommon {
             // parseUtf8 in UTF mode (utf=true)
             AppendableUtil.parseUtf8(store, sb, true, 5);
             assertEquals("World", sb.toString(),
-                    "parseUtf8 should decode UTF-8 from BytesStore");
+                    "parseUtf8 should decode UTF-8 content from the underlying BytesStore");
         } finally {
             bytes.releaseLast();
         }

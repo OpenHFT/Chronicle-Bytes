@@ -9,6 +9,11 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+/**
+ * Tests 8-bit string interner because correct ISO-8859-1 decoding is
+ * essential to cache single-byte character strings efficiently.
+ */
+@DisplayName("Bit8StringInterner - validates 8-bit string caching")
 public class Bit8StringInternerTest {
 
     @Test

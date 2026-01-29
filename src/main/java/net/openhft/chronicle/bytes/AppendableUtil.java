@@ -54,7 +54,8 @@ public enum AppendableUtil {
         else if (sb instanceof Bytes)
             ((Bytes) sb).writeByte(index, ch);
         else
-            throw new IllegalArgumentException(String.valueOf(sb.getClass()));
+            // Appendable type not supported: only StringBuilder and Bytes are valid
+            throw new IllegalArgumentException("Unsupported Appendable type: " + sb.getClass());
     }
 
     /**
@@ -87,7 +88,8 @@ public enum AppendableUtil {
         else if (sb instanceof Bytes)
             ((Bytes) sb).readPositionRemaining(0, newLength);
         else
-            throw new IllegalArgumentException(String.valueOf(sb.getClass()));
+            // Appendable type not supported: only StringBuilder and Bytes are valid
+            throw new IllegalArgumentException("setLength: Unsupported Appendable type " + sb.getClass());
     }
 
     /**
@@ -104,7 +106,8 @@ public enum AppendableUtil {
         else if (sb instanceof Bytes)
             ((Bytes) sb).append(value);
         else
-            throw new IllegalArgumentException(String.valueOf(sb.getClass()));
+            // Appendable type not supported for double: only StringBuilder and Bytes are valid
+            throw new IllegalArgumentException("append(double): Unsupported Appendable type " + sb.getClass());
     }
 
     /**
@@ -120,7 +123,8 @@ public enum AppendableUtil {
         else if (sb instanceof Bytes)
             ((Bytes) sb).append(value);
         else
-            throw new IllegalArgumentException(String.valueOf(sb.getClass()));
+            // Appendable type not supported for long: only StringBuilder and Bytes are valid
+            throw new IllegalArgumentException("append(long): Unsupported Appendable type " + sb.getClass());
     }
 
     /**
@@ -245,6 +249,7 @@ public enum AppendableUtil {
                     /* 110x xxxx 10xx xxxx */
                     int char2 = bytes.readUnsignedByte();
                     if ((char2 & 0xC0) != 0x80)
+                        // Continuation byte must have pattern 10xxxxxx
                         throw newUTFDataFormatException(char2);
                     int c2 = (char) (((c & 0x1F) << 6) |
                             (char2 & 0x3F));
@@ -261,8 +266,10 @@ public enum AppendableUtil {
                     int char3 = bytes.readUnsignedByte();
 
                     if (((char2 & 0xC0) != 0x80))
+                        // First continuation byte must have pattern 10xxxxxx
                         throw newUTFDataFormatException(char2);
                     if ((char3 & 0xC0) != 0x80)
+                        // Second continuation byte must have pattern 10xxxxxx
                         throw newUTFDataFormatException(char3);
                     int c3 = (char) (((c & 0x0F) << 12) |
                             ((char2 & 0x3F) << 6) |

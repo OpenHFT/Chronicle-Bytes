@@ -31,6 +31,7 @@ import static net.openhft.chronicle.core.io.Closeable.closeQuietly;
  * <p>
  * See {@code domestic-overview.adoc} for usage notes.
  */
+@SuppressWarnings("checkstyle:MMOverusedWord")
 public final class ReentrantFileLock extends FileLock {
 
     /**
@@ -45,7 +46,8 @@ public final class ReentrantFileLock extends FileLock {
     private final String canonicalPath;
 
     /**
-     * The actual FileLock delegate that does the locking.
+     * Underlying system FileLock that performs the actual OS-level locking operations.
+     * This delegate is acquired via FileChannel and released when the counter reaches zero.
      */
     private final FileLock delegate;
 
@@ -148,6 +150,7 @@ public final class ReentrantFileLock extends FileLock {
             heldLocks.get().put(canonicalPath, refl);
             return refl;
         }
+        // Sentinel: file is already locked by another process, lock not acquired
         return null;
     }
 

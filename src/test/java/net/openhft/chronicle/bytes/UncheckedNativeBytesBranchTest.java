@@ -656,7 +656,7 @@ class UncheckedNativeBytesBranchTest extends BytesTestCommon {
 
         boolean result = uncheckedBytes.compareAndSwapInt(0, 100, 200);
 
-        assertTrue(result, "compareAndSwapInt returns true on match");
+        assertTrue(result, "compareAndSwapInt should return true when expected value 100 matches, enabling atomic update");
         assertEquals(200, uncheckedBytes.readInt(0),
                 "compareAndSwapInt updates value to 200");
     }
@@ -680,7 +680,7 @@ class UncheckedNativeBytesBranchTest extends BytesTestCommon {
 
         boolean result = uncheckedBytes.compareAndSwapLong(0, 100L, 200L);
 
-        assertTrue(result, "compareAndSwapLong returns true on match");
+        assertTrue(result, "compareAndSwapLong should return true when expected value 100 matches, enabling atomic update");
         assertEquals(200L, uncheckedBytes.readLong(0),
                 "compareAndSwapLong updates value to 200");
     }

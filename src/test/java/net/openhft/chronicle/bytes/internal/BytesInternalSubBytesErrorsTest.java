@@ -5,15 +5,18 @@ package net.openhft.chronicle.bytes.internal;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesTestCommon;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.nio.BufferUnderflowException;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+@DisplayName("BytesInternal subBytes error handling for boundary conditions")
 public class BytesInternalSubBytesErrorsTest extends BytesTestCommon {
 
     @Test
+    @DisplayName("subBytes throws when requested length exceeds remaining data")
     public void subBytesThrowsWhenLengthTooLarge() {
         assertThrows(BufferUnderflowException.class, () -> {
             Bytes<?> src = Bytes.from("abc");
@@ -23,7 +26,6 @@ public class BytesInternalSubBytesErrorsTest extends BytesTestCommon {
             } finally {
                 src.releaseLast();
             }
-        });
+        }, "subBytes should throw underflow when length 10 exceeds source length 3");
     }
 }
-

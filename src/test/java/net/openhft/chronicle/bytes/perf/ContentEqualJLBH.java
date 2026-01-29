@@ -17,6 +17,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
+/**
+ * JLBH benchmark for content equality comparisons because measuring
+ * latency across different buffer positions is essential to optimise
+ * byte comparison paths.
+ */
 class ContentEqualJLBH implements JLBHTask {
     private static final int ITERATIONS = 5_000_000;
     private final Bytes<?> bytes1;
@@ -65,6 +70,7 @@ class ContentEqualJLBH implements JLBHTask {
     }
 
     static void runWith(Supplier<Bytes<?>> bytesSupplier) {
+        // Benchmark setup: disable resource tracing to avoid overhead
         System.setProperty("jvm.resource.tracing", "false");
         new JLBH(new JLBHOptions()
                 .warmUpIterations(50_000)

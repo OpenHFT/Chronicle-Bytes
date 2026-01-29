@@ -30,8 +30,16 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
+/**
+ * Tests BytesMarshallable serialisation and deserialisation because correct round-trip
+ * behaviour is essential for reliable binary data persistence and transfer.
+ *
+ * <p>Verifies primitives, scalars, nested structures, and collections in order to ensure
+ * that marshalled data can be reconstructed, to avoid data loss or corruption.
+ */
 @SuppressWarnings("deprecation")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@DisplayName("BytesMarshallable serialisation round-trip coverage")
 public class BytesMarshallableTest extends BytesTestCommon {
 
     private static Stream<Arguments> guardedVariants() {
@@ -52,9 +60,10 @@ public class BytesMarshallableTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("guardedVariants")
-    @DisplayName("Serialise primitive byteable values with stable layout")
+    @DisplayName("Serialise primitive byteable values with stable layout in order to verify round-trip")
     public void serializePrimitives(String name, boolean guarded) {
         applyGuardedSetting(guarded);
+        // Hex dump layout differs for guarded bytes due to metadata overhead
         assumeFalse(NativeBytes.areNewGuarded(),
                 "primitive hex dump layout is not stable for guarded bytes");
         final Bytes<?> bytes = new HexDumpBytes();
@@ -107,9 +116,10 @@ public class BytesMarshallableTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("guardedVariants")
-    @DisplayName("Serialise scalar values into bytes with expected order")
+    @DisplayName("Serialise scalar values into bytes with expected order so that reconstruction succeeds")
     public void serializeScalars(String name, boolean guarded) {
         applyGuardedSetting(guarded);
+        // HexDumpBytes provides human-readable output to verify layout
         final Bytes<?> bytes = new HexDumpBytes();
         try {
             final MyScalars mb1 = new MyScalars("Hello", BigInteger.ONE, BigDecimal.TEN, LocalDate.now(), LocalTime.now(), LocalDateTime.now(), ZonedDateTime.now(), UUID.randomUUID());
@@ -151,9 +161,10 @@ public class BytesMarshallableTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("guardedVariants")
-    @DisplayName("Serialise nested byteable structures with nested offsets")
+    @DisplayName("Serialise nested byteable structures to verify recursive marshalling")
     public void serializeNested(String name, boolean guarded) {
         applyGuardedSetting(guarded);
+        // Nested structures require recursive writeMarshallable calls
         final Bytes<?> bytes = new HexDumpBytes();
         try {
 
@@ -304,10 +315,11 @@ public class BytesMarshallableTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("guardedVariants")
-    @DisplayName("Serialise bytes store values with offset metadata")
+    @DisplayName("Serialise bytes store values to verify binary content round-trip")
     public void serializeBytes(String name, boolean guarded)
             throws IOException {
         applyGuardedSetting(guarded);
+        // Binary content requires length-prefix encoding to avoid data corruption
         Bytes<?> bytes = new HexDumpBytes();
         final Bytes<?> hello = Bytes.from("hello");
         final Bytes<?> byeee = Bytes.from("byeee");
@@ -344,9 +356,10 @@ public class BytesMarshallableTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("guardedVariants")
-    @DisplayName("Serialise collection values with element ordering preserved")
+    @DisplayName("Serialise collection values to verify element ordering is preserved despite serialisation")
     public void serializeCollections(String name, boolean guarded) {
         applyGuardedSetting(guarded);
+        // Collection serialisation must preserve insertion order
         final Bytes<?> bytes = new HexDumpBytes();
         try {
             final MyCollections mc = new MyCollections();
@@ -392,9 +405,10 @@ public class BytesMarshallableTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("guardedVariants")
-    @DisplayName("Collections default initialisation handled during serialisation")
+    @DisplayName("Collections default initialisation handled during serialisation to avoid NPE")
     public void collectionsNotInitializedInConstructor(String name, boolean guarded) {
         applyGuardedSetting(guarded);
+        // Uninitialised collections must be handled gracefully to avoid null pointer exceptions
         final Bytes<?> bytes = new HexDumpBytes();
 
         try {

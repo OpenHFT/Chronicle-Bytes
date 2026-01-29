@@ -244,7 +244,6 @@ public class BytesInternalTest extends BytesTestCommon {
         bytes.readPosition(0);
         sb.setLength(0);
 
-
         bytes.releaseLast();
     }
 
@@ -537,6 +536,7 @@ public class BytesInternalTest extends BytesTestCommon {
             assertTrue(time4 > 0, "time4 recorded positive duration at t " + t);
             assertTrue(time5 > 0, "time5 recorded positive duration at t " + t);
             assertTrue(time6 > 0, "time6 recorded positive duration at t " + t);
+            // Yield thread to allow JIT optimizations to settle between runs
             Thread.yield();
         }
     }
@@ -545,6 +545,7 @@ public class BytesInternalTest extends BytesTestCommon {
         static final int LENGTH;
 
         static {
+            // Calculate maximum test length based on available heap memory to avoid OOM
             long maxMemory = Runtime.getRuntime().maxMemory();
             int maxLength = OS.isLinux() ? 1 << 30 : 1 << 28;
             LENGTH = (int) Math.min(maxMemory / 32, maxLength);

@@ -15,6 +15,11 @@ import java.nio.file.Path;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+/**
+ * Tests temp directory creation and cleanup because correct placement under
+ * the target directory is essential to avoid polluting the user file system.
+ */
+@DisplayName("TempDirectoryIntegration - validates temp dir creation and cleanup")
 public class TempDirectoryIntegrationTest extends BytesTestCommon {
 
     @Test

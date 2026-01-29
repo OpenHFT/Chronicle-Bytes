@@ -15,6 +15,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+/**
+ * Tests BytesInternal parsing for booleans and UTF8 segments because text parsing
+ * must correctly extract values to avoid data corruption in deserialization.
+ */
+@SuppressWarnings("checkstyle:MMOverusedWord")
 @DisplayName("BytesInternal parsing for booleans and UTF8 segments")
 public class BytesInternalParsingTest extends BytesTestCommon {
 

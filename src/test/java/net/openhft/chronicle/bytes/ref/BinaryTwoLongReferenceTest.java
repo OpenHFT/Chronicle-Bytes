@@ -13,6 +13,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+/**
+ * Tests BinaryTwoLongReference paired updates because atomically managing
+ * two related longs is essential for versioned pointers in lock-free data
+ * structures.
+ */
 @DisplayName("Binary two long reference behaviour for paired updates")
 public class BinaryTwoLongReferenceTest extends BytesTestCommon {
     @Test
@@ -62,6 +67,7 @@ public class BinaryTwoLongReferenceTest extends BytesTestCommon {
             assertEquals(10L, nbs.readLong(16),
                     "Direct set writes ten to primary backing store");
             ref.setOrderedValue(20);
+            // Allow memory visibility propagation
             Thread.yield();
             assertEquals(20L, nbs.readVolatileLong(16),
                     "Ordered primary write visible via volatile read");

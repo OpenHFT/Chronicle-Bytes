@@ -8,6 +8,11 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+/**
+ * Tests write8bit round-trip behaviour for heap and direct bytes because correct
+ * 8-bit string encoding is essential for ISO-8859-1 content storage.
+ */
+@DisplayName("write8bit round-trip for heap and direct bytes")
 public class BytesWrite8bitRoundTripTest extends BytesTestCommon {
 
     @Test
@@ -57,4 +62,3 @@ public class BytesWrite8bitRoundTripTest extends BytesTestCommon {
         return sb.toString();
     }
 }
-

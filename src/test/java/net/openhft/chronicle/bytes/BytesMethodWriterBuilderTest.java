@@ -19,7 +19,12 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
+/**
+ * Tests BytesMethodWriterBuilder for method writing because correct writer behaviour
+ * is essential for serialising method calls to bytes.
+ */
 @SuppressWarnings("deprecation")
+@DisplayName("BytesMethodWriterBuilder method serialisation round-trip")
 public class BytesMethodWriterBuilderTest extends BytesTestCommon {
 
     @Test

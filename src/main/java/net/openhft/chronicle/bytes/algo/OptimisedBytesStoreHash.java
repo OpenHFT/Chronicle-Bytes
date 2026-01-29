@@ -24,7 +24,7 @@ import static net.openhft.chronicle.bytes.algo.VanillaBytesStoreHash.*;
  * depending on the data size and whether the {@code BytesStore} resides in direct memory,
  * leveraging system architecture details like endianness for performance.
  */
-@SuppressWarnings("rawtypes")
+@SuppressWarnings({"rawtypes", "checkstyle:MMOverusedWord"})
 public enum OptimisedBytesStoreHash implements BytesStoreHash<BytesStore<?,?>> {
     /**
      * Default hash implementation using optimised native access where available.
@@ -350,6 +350,7 @@ public enum OptimisedBytesStoreHash implements BytesStoreHash<BytesStore<?,?>> {
         try {
             return applyAsLong(store, remaining);
         } catch (IllegalStateException | BufferUnderflowException e) {
+            // Propagate as unchecked because the contract requires a long return
             throw Jvm.rethrow(e);
         }
     }

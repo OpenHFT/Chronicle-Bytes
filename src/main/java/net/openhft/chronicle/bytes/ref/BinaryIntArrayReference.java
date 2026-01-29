@@ -353,7 +353,8 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
     }
 
     /**
-     * Reads and deserializes data from the input stream.
+     * Reads and deserializes the int array header (capacity and used count) from the input stream,
+     * then binds this reference to the backing bytes for subsequent element access.
      *
      * @param bytes the input stream.
      * @throws IORuntimeException       If an IO exception occurs.
@@ -384,7 +385,8 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
     }
 
     /**
-     * Serializes and writes data to the output stream.
+     * Serializes and writes the int array including capacity, used count, and element data
+     * to the output stream in a format suitable for later deserialization.
      *
      * @param bytes the output stream.
      * @throws BufferOverflowException If buffer overflow occurs.

@@ -100,12 +100,12 @@ public interface Compression {
     /**
      * Uncompresses data using the specified algorithm and a custom function to read bytes.
      *
+     * @param <T>   type of the compressed source
      * @param cs    The compression algorithm to be used (e.g. "lzw", "gzip").
      * @param t     The input data.
      * @param bytes A function to read bytes from the input data.
      * @return The uncompressed data as byte array.
      * @throws IORuntimeException If an I/O error occurs.
-     * @param <T>   type of the compressed source
      */
     static <T> byte[] uncompress(@NotNull CharSequence cs, T t, @NotNull ThrowingFunction<T, byte[], IORuntimeException> bytes)
             throws IORuntimeException {

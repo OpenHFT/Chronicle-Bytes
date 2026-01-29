@@ -29,6 +29,13 @@ import static net.openhft.chronicle.core.io.ReferenceOwner.INIT;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
+/**
+ * Tests ByteStore read and write operations because correct byte-level I/O is required
+ * to avoid data corruption in high-throughput streaming and persistence scenarios.
+ *
+ * <p>Covers primitive reads, stop-bit encoding, compare-and-swap atomics, and stream
+ * operations in order to verify correctness across position-based and indexed access.
+ */
 @SuppressWarnings("deprecation")
 @DisplayName("ByteStore read and write behaviour coverage tests")
 public class ByteStoreTest extends BytesTestCommon {
@@ -45,15 +52,18 @@ public class ByteStoreTest extends BytesTestCommon {
 
     @BeforeEach
     public void beforeTest() {
+        // Wrap native-order ByteBuffer to avoid byte swapping during multi-byte operations
         bytesStore = BytesStore.wrap(ByteBuffer.allocate(SIZE).order(ByteOrder.nativeOrder()));
         bytes = bytesStore.bytesForWrite();
+        // Release INIT reference so that the test owns the only reference
         bytesStore.release(INIT);
         bytes.clear();
     }
 
     @Test
-    @DisplayName("Read incomplete long values from written bytes")
+    @DisplayName("Read incomplete long values from written bytes to verify partial decoding")
     public void testReadIncompleteLong() {
+        // Write full long first to verify complete read
         bytes.writeLong(0x0102030405060708L);
         assertEquals(0x0102030405060708L, bytes.readIncompleteLong(0),
                 "readIncompleteLong should return the full long when all bytes are present");
@@ -69,8 +79,9 @@ public class ByteStoreTest extends BytesTestCommon {
     }
 
     @Test
-    @DisplayName("Compare-and-swap updates long values atomically")
+    @DisplayName("Compare-and-swap updates long values atomically to verify lock-free update")
     public void testCAS() {
+        // ARM architecture does not support certain CAS operations natively
         assumeFalse(Jvm.isArm(), "ARM does not support ByteStore compare-and-swap long test");
         final BytesStore<?, ?> bytes = BytesStore.wrap(ByteBuffer.allocate(100));
         bytes.compareAndSwapLong(0, 0L, 1L);
@@ -113,8 +124,9 @@ public class ByteStoreTest extends BytesTestCommon {
     }
 
     @Test
-    @DisplayName("Compare-and-swap on long values succeeds and fails correctly")
+    @DisplayName("Compare-and-swap on long values succeeds and fails correctly due to atomic semantics")
     public void testCompareAndSetLong() {
+        // ARM architecture lacks native 64-bit CAS in some configurations
         assumeFalse(Jvm.isArm(), "ARM does not support compare-and-swap long test");
 
         assertTrue(bytes.compareAndSwapLong(0L, 0L, 1L), "CAS should update zero to one at offset 0");
@@ -124,8 +136,9 @@ public class ByteStoreTest extends BytesTestCommon {
     }
 
     @Test
-    @DisplayName("Read position updates control sequential reads")
+    @DisplayName("Read position updates control sequential reads to verify random access pattern")
     public void testPosition() {
+        // Fill buffer to verify position-based access works regardless of fill order
         for (int i = 0; i < bytes.capacity(); i++)
             bytes.writeByte((byte) i);
         for (int i = (int) (bytes.capacity() - 1); i >= 0; i--) {
@@ -594,6 +607,7 @@ public class ByteStoreTest extends BytesTestCommon {
             assertEquals("[pos: 0, rlim: 0, wlim: 8EiB, cap: 8EiB ] ǁ‡٠٠٠٠٠٠٠٠", bytes.toDebugString(),
                     "Initial debug string should reflect empty positions");
             bytes.writeUnsignedByte(1);
+            // Trigger GC to verify that reference counting survives garbage collection
             System.gc();
             assertEquals(1, bytes.refCount(), "Reference count should remain at one after GC");
             assertEquals("[pos: 0, rlim: 1, wlim: 8EiB, cap: 8EiB ] ǁ⒈‡٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠", bytes.toDebugString(),
@@ -614,6 +628,7 @@ public class ByteStoreTest extends BytesTestCommon {
                     "Debug string should include fifth byte marker");
             bytes.writeUnsignedByte(6);
             bytes.readByte();
+            // Trigger GC again to ensure reference counting remains stable mid-test
             System.gc();
             assertEquals(1, bytes.refCount(), "Reference count should stay stable after GC");
             assertEquals("[pos: 3, rlim: 6, wlim: 8EiB, cap: 8EiB ] ⒈⒉⒊ǁ⒋⒌⒍‡٠٠٠٠٠٠٠٠٠٠", bytes.toDebugString(),

@@ -18,7 +18,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
+/**
+ * Tests ByteStringAppender operations for appending primitives and strings because
+ * correct serialisation is essential for reliable data storage.
+ */
 @SuppressWarnings("deprecation")
+@DisplayName("ByteStringAppender primitive and string serialisation verifies round-trip append and parse operations")
 public class ByteStringAppenderTest extends BytesTestCommon {
     private Bytes<?> bytes;
 

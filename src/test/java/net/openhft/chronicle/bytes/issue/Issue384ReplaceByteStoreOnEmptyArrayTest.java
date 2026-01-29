@@ -16,6 +16,12 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+/**
+ * Regression tests for Issue 384, because writing to empty Bytes should
+ * trigger a backing store replacement or refuse the operation, to avoid
+ * corrupting the shared empty singleton.
+ */
+@DisplayName("Issue 384 - Empty array backing store replacement validation")
 final class Issue384ReplaceByteStoreOnEmptyArrayTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{index}: ({0})")

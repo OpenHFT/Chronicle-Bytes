@@ -10,7 +10,8 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@DisplayName("Append double formatting for issue 1808 cases")
+@SuppressWarnings("checkstyle:MMOverusedWord")
+@DisplayName("Append decimal formatting for issue 1808 cases")
 public class AppendDoubleTicket1808Test extends BytesTestCommon {
     @Test
     @DisplayName("append double rounds to 8 decimal places")

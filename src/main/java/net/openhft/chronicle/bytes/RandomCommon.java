@@ -18,6 +18,7 @@ import java.nio.ByteOrder;
  * It defines start position, capacity and cursor operations.
  * Extends {@link net.openhft.chronicle.core.io.ReferenceCounted} for lifecycle management and underpins {@link RandomDataInput} and {@link RandomDataOutput}.
  */
+@SuppressWarnings("checkstyle:MMOverusedWord")
 public interface RandomCommon extends ReferenceCounted {
     /**
      * Returns the smallest position allowed in this buffer.
@@ -30,10 +31,11 @@ public interface RandomCommon extends ReferenceCounted {
     }
 
     /**
-     * Returns the maximum addressable capacity.
+     * Returns the maximum addressable capacity in bytes.
+     * For virtual or elastic buffers this represents the upper bound that can theoretically
+     * be addressed, which may be as large as {@link Bytes#MAX_CAPACITY}.
      *
-     * @return the maximum addressable capacity.
-     * May be as large as {@link Bytes#MAX_CAPACITY} for virtual mappings.
+     * @return the maximum addressable capacity in bytes
      */
     @NonNegative
     default long capacity() {
@@ -63,10 +65,11 @@ public interface RandomCommon extends ReferenceCounted {
     }
 
     /**
-     * Returns the current write position.
+     * Returns the current write position as a zero-based byte offset.
+     * This is the location where the next write operation will occur.
+     * Invariant: {@code readPosition() <= writePosition() <= writeLimit()}.
      *
-     * @return the current write position.
-     * Typically {@code readPosition() <= writePosition() <= writeLimit()}.
+     * @return the current write position as a byte offset
      */
     @NonNegative
     default long writePosition() {

@@ -13,6 +13,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+/**
+ * Tests BinaryIntReference native store updates because correct atomic
+ * operations are essential for lock-free counters in shared memory
+ * structures.
+ */
+@SuppressWarnings("MMOverusedWord") // value domain terminology
 @DisplayName("Binary int reference behaviour for native store updates")
 public class BinaryIntReferenceTest extends BytesTestCommon {
     @Test
@@ -52,6 +58,7 @@ public class BinaryIntReferenceTest extends BytesTestCommon {
             assertEquals(10, nbs.readInt(16),
                     "Direct set writes ten to int backing store");
             ref.setOrderedValue(20);
+            // Allow memory visibility propagation
             Thread.yield();
             assertEquals(20, nbs.readVolatileInt(16),
                     "Ordered int write visible through volatile read");

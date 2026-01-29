@@ -19,7 +19,8 @@ import java.nio.ByteBuffer;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Tests for NativeBytesStore covering branch coverage for native memory operations.
+ * Tests for NativeBytesStore, because native memory operations must be validated
+ * to avoid memory corruption and ensure atomic semantics are honoured.
  */
 @DisplayName("NativeBytesStore branch coverage for native memory operations")
 class NativeBytesStoreBranchTest extends BytesTestCommon {
@@ -55,26 +56,26 @@ class NativeBytesStoreBranchTest extends BytesTestCommon {
     }
 
     @Test
-    @DisplayName("nativeStoreWithFixedCapacity returns fixed native store")
+    @DisplayName("nativeStoreWithFixedCapacity returns fixed native store with specified size")
     void shouldCreateFixedNativeStore() {
         NativeBytesStore<Void> fixed = NativeBytesStore.nativeStoreWithFixedCapacity(128);
         try {
             assertTrue(fixed.isDirectMemory(),
-                    "fixed native store uses direct memory");
+                    "fixed native store should use direct memory for 128 byte allocation");
             assertEquals(128, fixed.realCapacity(),
-                    "fixed native store real capacity is 128 bytes");
+                    "fixed native store real capacity should be exactly 128 bytes");
         } finally {
             fixed.releaseLast();
         }
     }
 
     @Test
-    @DisplayName("lazyNativeBytesStoreWithFixedCapacity returns lazy native store")
+    @DisplayName("lazyNativeBytesStoreWithFixedCapacity returns lazy native store with deferred allocation")
     void shouldCreateLazyStore() {
         NativeBytesStore<Void> lazy = NativeBytesStore.lazyNativeBytesStoreWithFixedCapacity(64);
         try {
-            assertNotNull(lazy, "lazy native store instance is present");
-            assertEquals(64, lazy.capacity(), "lazy native store capacity is 64 bytes");
+            assertNotNull(lazy, "lazy native store instance should be present for 64 byte capacity");
+            assertEquals(64, lazy.capacity(), "lazy native store capacity should be 64 bytes after allocation");
         } finally {
             lazy.releaseLast();
         }
@@ -125,27 +126,27 @@ class NativeBytesStoreBranchTest extends BytesTestCommon {
     }
 
     @Test
-    @DisplayName("elasticByteBuffer honours initial size minimum")
+    @DisplayName("elasticByteBuffer with initial size 128 honours minimum capacity requirement")
     void shouldCreateElasticByteBufferWithSize() {
         NativeBytesStore<ByteBuffer> elastic = NativeBytesStore.elasticByteBuffer(128, 1024);
         try {
             // Elastic buffer may round up capacity but should be at least requested size
             assertTrue(elastic.capacity() >= 128,
-                    "elastic buffer capacity is at least 128 bytes");
+                    "elastic buffer capacity=" + elastic.capacity() + " should be at least 128 bytes");
         } finally {
             elastic.releaseLast();
         }
     }
 
     @Test
-    @DisplayName("from(String) creates store from string data")
+    @DisplayName("from(String) creates native store containing string bytes")
     void shouldCreateFromString() {
         NativeBytesStore<?> fromString = NativeBytesStore.from("Hello");
         try {
             assertEquals(5, fromString.capacity(),
-                    "string store capacity equals string length");
+                    "native store from 'Hello' should have capacity 5 bytes");
             assertEquals('H', fromString.readByte(0),
-                    "string store first byte equals 'H'");
+                    "native store first byte should be 'H' (0x48)");
         } finally {
             fromString.releaseLast();
         }
@@ -169,113 +170,113 @@ class NativeBytesStoreBranchTest extends BytesTestCommon {
     // ========== Basic Properties ==========
 
     @Test
-    @DisplayName("native store reports direct memory allocation")
+    @DisplayName("native store isDirectMemory returns true for off-heap allocation")
     void shouldReturnTrueForDirectMemory() {
         assertTrue(store.isDirectMemory(),
-                "native store reports direct memory allocation");
+                "isDirectMemory should return true for 256 byte native allocation");
     }
 
     @Test
-    @DisplayName("canReadDirect honours length within capacity")
+    @DisplayName("canReadDirect returns true for length within capacity and false beyond")
     void shouldCheckCanReadDirect() {
         assertTrue(store.canReadDirect(100),
-                "canReadDirect accepts length 100 within capacity");
+                "canReadDirect(100) should be true for 256 byte capacity store");
         assertFalse(store.canReadDirect(1000),
-                "canReadDirect rejects length 1000 beyond capacity");
+                "canReadDirect(1000) should be false for 256 byte capacity store");
     }
 
     // ========== Read Operations ==========
 
     @Test
-    @DisplayName("readByte returns written byte value")
+    @DisplayName("readByte at offset 0 returns the byte value 42 after writeByte")
     void shouldReadByte() {
         store.writeByte(0, (byte) 42);
 
         assertEquals(42, store.readByte(0),
-                "readByte returns 42 after write");
+                "readByte(0) should return 42 after writeByte(0, 42)");
     }
 
     @Test
-    @DisplayName("readShort returns written short value")
+    @DisplayName("readShort at offset 0 returns the short value 1234 after writeShort")
     void shouldReadShort() {
         store.writeShort(0, (short) 1234);
 
         assertEquals(1234, store.readShort(0),
-                "readShort returns 1234 after write");
+                "readShort(0) should return 1234 after writeShort(0, 1234)");
     }
 
     @Test
-    @DisplayName("readInt returns written int value")
+    @DisplayName("readInt at offset 0 returns the int value 0x12345678 after writeInt")
     void shouldReadInt() {
         store.writeInt(0, 0x12345678);
 
         assertEquals(0x12345678, store.readInt(0),
-                "readInt returns 0x12345678 after write");
+                "readInt(0) should return 0x12345678 after writeInt(0, 0x12345678)");
     }
 
     @Test
-    @DisplayName("readLong returns written long value")
+    @DisplayName("readLong at offset 0 returns the long value 0x123456789ABCDEF0 after writeLong")
     void shouldReadLong() {
         store.writeLong(0, 0x123456789ABCDEF0L);
 
         assertEquals(0x123456789ABCDEF0L, store.readLong(0),
-                "readLong returns 0x123456789ABCDEF0 after write");
+                "readLong(0) should return 0x123456789ABCDEF0L after writeLong");
     }
 
     @Test
-    @DisplayName("readFloat returns written float value")
+    @DisplayName("readFloat at offset 0 returns 3.14f after writeFloat within tolerance")
     void shouldReadFloat() {
         store.writeFloat(0, 3.14f);
 
         assertEquals(3.14f, store.readFloat(0), 0.001f,
-                "readFloat returns 3.14 within tolerance");
+                "readFloat(0) should return 3.14f within 0.001 tolerance after writeFloat");
     }
 
     @Test
-    @DisplayName("readDouble returns written double value")
+    @DisplayName("readDouble at offset 0 returns 3.14159 after writeDouble within tolerance")
     void shouldReadDouble() {
         store.writeDouble(0, 3.14159);
 
         assertEquals(3.14159, store.readDouble(0), 0.00001,
-                "readDouble returns 3.14159 within tolerance");
+                "readDouble(0) should return 3.14159 within 0.00001 tolerance after writeDouble");
     }
 
     // ========== Volatile Operations ==========
 
     @Test
-    @DisplayName("readVolatileByte returns latest written value")
+    @DisplayName("readVolatileByte returns 77 after writeVolatileByte with memory barrier")
     void shouldReadVolatileByte() {
         store.writeVolatileByte(0, (byte) 77);
 
         assertEquals(77, store.readVolatileByte(0),
-                "readVolatileByte returns 77 after volatile write");
+                "readVolatileByte(0) should return 77 after writeVolatileByte(0, 77)");
     }
 
     @Test
-    @DisplayName("readVolatileShort returns latest written value")
+    @DisplayName("readVolatileShort returns 1234 after writeVolatileShort with memory barrier")
     void shouldReadVolatileShort() {
         store.writeVolatileShort(0, (short) 1234);
 
         assertEquals(1234, store.readVolatileShort(0),
-                "readVolatileShort returns 1234 after volatile write");
+                "readVolatileShort(0) should return 1234 after writeVolatileShort(0, 1234)");
     }
 
     @Test
-    @DisplayName("readVolatileInt returns latest written value")
+    @DisplayName("readVolatileInt returns 0x12345678 after writeVolatileInt with memory barrier")
     void shouldReadVolatileInt() {
         store.writeVolatileInt(0, 0x12345678);
 
         assertEquals(0x12345678, store.readVolatileInt(0),
-                "readVolatileInt returns 0x12345678 after volatile write");
+                "readVolatileInt(0) should return 0x12345678 after writeVolatileInt");
     }
 
     @Test
-    @DisplayName("readVolatileLong returns latest written value")
+    @DisplayName("readVolatileLong returns 0x123456789ABCDEF0 after writeVolatileLong with memory barrier")
     void shouldReadVolatileLong() {
         store.writeVolatileLong(0, 0x123456789ABCDEF0L);
 
         assertEquals(0x123456789ABCDEF0L, store.readVolatileLong(0),
-                "readVolatileLong returns 0x123456789ABCDEF0 after volatile write");
+                "readVolatileLong(0) should return 0x123456789ABCDEF0L after writeVolatileLong");
     }
 
     // ========== Ordered Write Operations ==========
@@ -301,60 +302,60 @@ class NativeBytesStoreBranchTest extends BytesTestCommon {
     // ========== Compare and Swap Operations ==========
 
     @Test
-    @DisplayName("compareAndSwapInt updates value on match")
+    @DisplayName("compareAndSwapInt updates value from 100 to 200 when expected matches stored")
     void shouldCompareAndSwapInt() {
         store.writeInt(0, 100);
 
         boolean result = store.compareAndSwapInt(0, 100, 200);
 
-        assertTrue(result, "compareAndSwapInt returns true on match");
-        assertEquals(200, store.readInt(0), "compareAndSwapInt updates value to 200");
+        assertTrue(result, "compareAndSwapInt(0, 100, 200) should return true when stored value is 100");
+        assertEquals(200, store.readInt(0), "readInt(0) should return 200 after successful CAS");
     }
 
     @Test
-    @DisplayName("compareAndSwapInt leaves value on mismatch")
+    @DisplayName("compareAndSwapInt leaves value unchanged when expected 50 does not match stored 100")
     void shouldFailCompareAndSwapInt() {
         store.writeInt(0, 100);
 
         boolean result = store.compareAndSwapInt(0, 50, 200);
 
-        assertFalse(result, "compareAndSwapInt returns false on mismatch");
-        assertEquals(100, store.readInt(0), "compareAndSwapInt keeps value at 100");
+        assertFalse(result, "compareAndSwapInt(0, 50, 200) should return false when stored value is 100");
+        assertEquals(100, store.readInt(0), "readInt(0) should remain 100 after failed CAS");
     }
 
     @Test
-    @DisplayName("compareAndSwapLong updates value on match")
+    @DisplayName("compareAndSwapLong updates value from 100L to 200L when expected matches stored")
     void shouldCompareAndSwapLong() {
         store.writeLong(0, 100L);
 
         boolean result = store.compareAndSwapLong(0, 100L, 200L);
 
-        assertTrue(result, "compareAndSwapLong returns true on match");
-        assertEquals(200L, store.readLong(0), "compareAndSwapLong updates value to 200");
+        assertTrue(result, "compareAndSwapLong(0, 100L, 200L) should return true when stored value is 100L");
+        assertEquals(200L, store.readLong(0), "readLong(0) should return 200L after successful CAS");
     }
 
     @Test
-    @DisplayName("compareAndSwapDouble updates value on match")
+    @DisplayName("compareAndSwapDouble updates value from 1.0 to 2.0 when expected matches stored")
     void shouldCompareAndSwapDouble() {
         store.writeDouble(0, 1.0);
 
         boolean result = store.compareAndSwapDouble(0, 1.0, 2.0);
 
-        assertTrue(result, "compareAndSwapDouble returns true on match");
+        assertTrue(result, "compareAndSwapDouble(0, 1.0, 2.0) should return true when stored value is 1.0");
         assertEquals(2.0, store.readDouble(0), 0.0001,
-                "compareAndSwapDouble updates value to 2.0");
+                "readDouble(0) should return 2.0 after successful CAS");
     }
 
     @Test
-    @DisplayName("compareAndSwapFloat updates value on match")
+    @DisplayName("compareAndSwapFloat updates value from 1.0f to 2.0f when expected matches stored")
     void shouldCompareAndSwapFloat() {
         store.writeFloat(0, 1.0f);
 
         boolean result = store.compareAndSwapFloat(0, 1.0f, 2.0f);
 
-        assertTrue(result, "compareAndSwapFloat returns true on match");
+        assertTrue(result, "compareAndSwapFloat(0, 1.0f, 2.0f) should return true when stored value is 1.0f");
         assertEquals(2.0f, store.readFloat(0), 0.0001f,
-                "compareAndSwapFloat updates value to 2.0");
+                "readFloat(0) should return 2.0f after successful CAS");
     }
 
     // ========== Move Operation ==========
@@ -371,24 +372,24 @@ class NativeBytesStoreBranchTest extends BytesTestCommon {
     }
 
     @Test
-    @DisplayName("move rejects negative source offset")
+    @DisplayName("move rejects from=-1 because negative source offsets are invalid")
     void shouldThrowForNegativeMoveOffsets() {
         assertThrows(IllegalArgumentException.class,
                 () -> store.move(-1, 0, 8),
-                "move rejects negative source offset");
+                "move(-1, 0, 8) should throw because from=-1 is an invalid negative offset");
     }
 
     // ========== bytesForWrite ==========
 
     @Test
-    @DisplayName("bytesForWrite returns writable VanillaBytes view")
+    @DisplayName("bytesForWrite returns writable VanillaBytes that updates underlying native store")
     void shouldReturnBytesForWrite() {
         VanillaBytes<?> vanillaBytes = store.bytesForWrite();
         try {
-            assertNotNull(vanillaBytes, "bytesForWrite returns non-null VanillaBytes");
+            assertNotNull(vanillaBytes, "bytesForWrite should return non-null VanillaBytes for 256 byte store");
             vanillaBytes.writeLong(0x123456789ABCDEF0L);
             assertEquals(0x123456789ABCDEF0L, store.readLong(0),
-                    "bytesForWrite writeLong updates native store");
+                    "store.readLong(0) should return value written via bytesForWrite");
         } finally {
             vanillaBytes.releaseLast();
         }
@@ -397,19 +398,19 @@ class NativeBytesStoreBranchTest extends BytesTestCommon {
     // ========== Address Operations ==========
 
     @Test
-    @DisplayName("addressForRead returns non-zero native address")
+    @DisplayName("addressForRead returns non-zero native address for valid offset")
     void shouldReturnAddressForRead() {
         long address = store.addressForRead(0);
 
-        assertTrue(address != 0, "addressForRead returns non-zero native address");
+        assertTrue(address != 0, "addressForRead(0) should return non-zero address=" + address + " for native store");
     }
 
     @Test
-    @DisplayName("addressForWrite returns non-zero native address")
+    @DisplayName("addressForWrite returns non-zero native address for valid offset")
     void shouldReturnAddressForWrite() {
         long address = store.addressForWrite(0);
 
-        assertTrue(address != 0, "addressForWrite returns non-zero native address");
+        assertTrue(address != 0, "addressForWrite(0) should return non-zero address=" + address + " for native store");
     }
 
     // ========== Write Operations with Arrays ==========
@@ -439,12 +440,12 @@ class NativeBytesStoreBranchTest extends BytesTestCommon {
     // ========== Capacity and Limits ==========
 
     @Test
-    @DisplayName("realCapacity reports native allocation size")
+    @DisplayName("realCapacity reports 256 bytes for native store created with that capacity")
     void shouldReturnCapacity() {
         // nativeStore creates an elastic store with large max capacity
         // realCapacity returns actual allocation
         assertEquals(256, store.realCapacity(),
-                "realCapacity returns 256 byte allocation");
+                "realCapacity() should return 256 for store created with nativeStore(256)");
     }
 
     @Test
@@ -464,22 +465,22 @@ class NativeBytesStoreBranchTest extends BytesTestCommon {
     // ========== underlyingObject ==========
 
     @Test
-    @DisplayName("underlyingObject is null for native allocation")
+    @DisplayName("underlyingObject returns null for direct native allocation")
     void shouldReturnNullUnderlyingObject() {
         assertNull(store.underlyingObject(),
-                "underlyingObject is null for native allocation");
+                "underlyingObject() should be null for direct native 256 byte allocation");
     }
 
     @Test
-    @DisplayName("underlyingObject is ByteBuffer when wrapped")
+    @DisplayName("underlyingObject returns ByteBuffer instance when store wraps a direct buffer")
     void shouldReturnByteBufferWhenWrapped() {
         ByteBuffer bb = ByteBuffer.allocateDirect(64);
         NativeBytesStore<ByteBuffer> wrapped = NativeBytesStore.wrap(bb);
         try {
             assertNotNull(wrapped.underlyingObject(),
-                    "wrapped store underlyingObject is present");
+                    "underlyingObject() should be present for wrapped 64 byte direct buffer");
             assertTrue(wrapped.underlyingObject() instanceof ByteBuffer,
-                    "wrapped store underlyingObject is ByteBuffer");
+                    "underlyingObject() should be ByteBuffer instance for wrapped store");
         } finally {
             wrapped.releaseLast();
         }
@@ -506,7 +507,7 @@ class NativeBytesStoreBranchTest extends BytesTestCommon {
     void shouldWrite8bitString() {
         long nextPos = store.write8bit(0, "Hello", 0, 5);
 
-        assertTrue(nextPos > 5, "write8bit returns end position after payload");
+        assertTrue(nextPos > 5, "write8bit(0, 'Hello', 0, 5) should return end position=" + nextPos + " > 5 after payload");
 
         Bytes<?> bytes = store.bytesForRead();
         try {
@@ -520,14 +521,14 @@ class NativeBytesStoreBranchTest extends BytesTestCommon {
 
     // ========== Edge Cases ==========
 
-    @ParameterizedTest(name = "write at offset {0}")
+    @ParameterizedTest(name = "writeLong and readLong at offset {0} should preserve value")
     @ValueSource(longs = {0, 8, 16, 100, 200})
     @DisplayName("writeLong and readLong work at different offsets")
     void shouldWriteAtVariousOffsets(long offset) {
         store.writeLong(offset, 0x123456789ABCDEF0L);
 
         assertEquals(0x123456789ABCDEF0L, store.readLong(offset),
-                "readLong returns value at offset " + offset);
+                "readLong(" + offset + ") should return 0x123456789ABCDEF0L after writeLong");
     }
 
     @Test
@@ -549,13 +550,13 @@ class NativeBytesStoreBranchTest extends BytesTestCommon {
     // ========== HashCode and Equals ==========
 
     @Test
-    @DisplayName("hashCode remains consistent across calls")
+    @DisplayName("hashCode returns same value on repeated calls for unchanged store content")
     void shouldReturnConsistentHashCode() {
         store.writeLong(0, 0x123456789ABCDEF0L);
 
         int hash1 = store.hashCode();
         int hash2 = store.hashCode();
 
-        assertEquals(hash1, hash2, "hashCode returns same value across calls");
+        assertEquals(hash1, hash2, "hashCode() should return " + hash1 + " on repeated calls for unchanged content");
     }
 }

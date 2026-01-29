@@ -30,7 +30,12 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@SuppressWarnings("deprecation")
+/**
+ * Tests reentrant file lock acquisition and process coordination because
+ * file locking must handle concurrent access to avoid data corruption
+ * in multi-process scenarios.
+ */
+@SuppressWarnings({"deprecation", "checkstyle:MMOverusedWord"})
 @DisplayName("Reentrant file lock acquisition and process coordination checks")
 class ReentrantFileLockTest extends BytesTestCommon {
 

@@ -7,7 +7,8 @@ import net.openhft.chronicle.core.io.IORuntimeException;
 
 /**
  * Thrown to indicate a failure when encoding or decoding UTF-8 data. Extends
- * {@link IORuntimeException} so callers need not catch it.
+ * {@link IORuntimeException} so callers need not catch it, but may choose to
+ * if they want to recover from malformed input.
  */
 public class UTFDataFormatRuntimeException extends IORuntimeException {
     private static final long serialVersionUID = 0L;

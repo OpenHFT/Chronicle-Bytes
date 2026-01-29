@@ -12,9 +12,10 @@ import java.nio.ByteBuffer;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Tests for ByteBuffers utility class covering branch coverage for
- * setAddressCapacity overflow behaviour.
+ * Tests for ByteBuffers utility class, because setAddressCapacity must validate
+ * capacity bounds to avoid integer overflow when configuring direct buffers.
  */
+@DisplayName("ByteBuffers capacity and address configuration validation")
 class ByteBuffersTest extends BytesTestCommon {
 
     @Test

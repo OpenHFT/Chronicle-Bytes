@@ -16,7 +16,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+/**
+ * Tests AppendableUtil formatting, length adjustment, and UTF-8 parsing helpers because
+ * correct character handling is required for text protocols and human-readable output.
+ */
 @SuppressWarnings("deprecation")
+@DisplayName("AppendableUtil - formatting, length, and UTF-8 helpers for StringBuilder and Bytes")
 public class AppendableUtilTest extends BytesTestCommon {
 
     @Test
@@ -160,8 +165,8 @@ public class AppendableUtilTest extends BytesTestCommon {
                 "append writes string into Appendable destination");
     }
 
-    @SuppressWarnings("rawtypes")
     @Test
+    @SuppressWarnings("rawtypes")
     @DisplayName("setLength truncates StringBuilder and Bytes targets")
     public void setLength() {
         StringBuilder sb = new StringBuilder("hello world");

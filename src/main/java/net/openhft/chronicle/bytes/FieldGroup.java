@@ -8,8 +8,10 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 /**
- * Groups related fields so a contiguous {@link Bytes} view can be created via utilities such as
- * {@link Bytes#forFieldGroup(Object, String)}.
+ * Groups related fields so a contiguous {@link Bytes} view can be created via
+ * utilities such as {@link Bytes#forFieldGroup(Object, String)}. This is
+ * useful in order to avoid per-field overhead when multiple fields are
+ * accessed together.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)

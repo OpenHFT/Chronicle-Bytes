@@ -23,7 +23,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
-@DisplayName("Mapped memory performance and reference count tests")
+/**
+ * Tests mapped memory performance and reference counting because these
+ * metrics are critical to ensure low-latency access and proper resource
+ * cleanup in high-frequency trading systems. In order to prevent memory
+ * leaks, reference counts must be decremented correctly after use.
+ */
+@SuppressWarnings("checkstyle:MMOverusedWord")
+@DisplayName("Mapped memory performance and reference count tracking validation")
 public class MappedMemoryTest extends BytesTestCommon {
 
     private static final long SHIFT = 27L;

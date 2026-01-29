@@ -14,9 +14,11 @@ import org.junit.jupiter.params.provider.ValueSource;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Tests for BytesInternal number appending methods covering various input formats
- * and edge cases.
+ * Tests for BytesInternal number appending methods because correct text formatting
+ * is essential to avoid data corruption in serialized output. Coverage includes
+ * various input formats and edge cases in order to verify formatting accuracy.
  */
+@SuppressWarnings("checkstyle:MMLacksPurpose")
 @DisplayName("BytesInternal number appending behaviour coverage tests")
 class BytesInternalAppendTest extends BytesTestCommon {
 
@@ -494,12 +496,12 @@ class BytesInternalAppendTest extends BytesTestCommon {
     }
 
     @Test
-    @DisplayName("appendTimeMillis handles zero time value input")
+    @DisplayName("appendTimeMillis renders zero time 0L as '00:00:00.000' midnight epoch format")
     void shouldAppendTimeMillisZero() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         try {
             BytesInternal.appendTimeMillis(bytes, 0L);
-            assertEquals("00:00:00.000", bytes.toString(), "appendTimeMillis renders 00:00:00.000 for zero");
+            assertEquals("00:00:00.000", bytes.toString(), "appendTimeMillis(0L) renders as '00:00:00.000' for epoch midnight");
         } finally {
             bytes.releaseLast();
         }

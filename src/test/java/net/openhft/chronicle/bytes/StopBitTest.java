@@ -12,6 +12,11 @@ import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+/**
+ * Tests stop-bit encoding round trips because this variable-length format
+ * must preserve payload integrity across all supported sizes.
+ */
+@DisplayName("StopBit - validates round-trip encoding with variable payload sizes")
 public class StopBitTest extends BytesTestCommon {
 
     @Test

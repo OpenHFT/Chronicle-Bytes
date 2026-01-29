@@ -23,10 +23,12 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Tests for BytesInternal UTF-8 parsing and appending methods.
+ * Tests for BytesInternal UTF-8 parsing and appending methods, because
+ * character encoding must handle multibyte sequences to avoid data corruption.
  * Covers parseUtf8, parseUtf82, appendUtf8Char, compareUtf8 variants.
  */
-@DisplayName("BytesInternal UTF8 append and parse helpers")
+@SuppressWarnings("checkstyle:MMOverusedWord")
+@DisplayName("BytesInternal character encoding append and parse helpers")
 class BytesInternalUtf8Test extends BytesTestCommon {
 
     private Bytes<?> bytes;
@@ -164,10 +166,10 @@ class BytesInternalUtf8Test extends BytesTestCommon {
         BytesInternal.appendUtf8Char(bytes, c);
         assertEquals(4, bytes.writePosition(), "appendUtf8Char writes 4 bytes for emoji");
 
-        int b0 = bytes.readUnsignedByte(0);
-        int b1 = bytes.readUnsignedByte(1);
-        int b2 = bytes.readUnsignedByte(2);
-        int b3 = bytes.readUnsignedByte(3);
+        final int b0 = bytes.readUnsignedByte(0);
+        final int b1 = bytes.readUnsignedByte(1);
+        final int b2 = bytes.readUnsignedByte(2);
+        final int b3 = bytes.readUnsignedByte(3);
         assertTrue((b0 & 0xF8) == 0xF0, "appendUtf8Char 4-byte first byte starts with 11110");
         assertTrue((b1 & 0xC0) == 0x80, "appendUtf8Char 4-byte second byte starts with 10");
         assertTrue((b2 & 0xC0) == 0x80, "appendUtf8Char 4-byte third byte starts with 10");
@@ -185,44 +187,44 @@ class BytesInternalUtf8Test extends BytesTestCommon {
     // --- appendUtf8Char tests (RandomDataOutput) ---
 
     @Test
-    @DisplayName("appendUtf8Char with offset encodes ASCII")
+    @DisplayName("appendUtf8Char with offset encodes ASCII 'A' and returns offset+1 because ASCII is single byte")
     void appendUtf8CharWithOffsetAscii() {
         long newOffset = BytesInternal.appendUtf8Char(bytes.bytesStore(), 0, 'A');
-        assertEquals(1, newOffset, "appendUtf8Char returns offset+1 for ASCII");
+        assertEquals(1, newOffset, "appendUtf8Char returns offset=1 for ASCII 'A'");
     }
 
     @Test
-    @DisplayName("appendUtf8Char with offset encodes 2-byte")
+    @DisplayName("appendUtf8Char with offset encodes 2-byte 0x00E1 and returns offset+2")
     void appendUtf8CharWithOffsetTwoByte() {
         long newOffset = BytesInternal.appendUtf8Char(bytes.bytesStore(), 0, 0x00E1);
-        assertEquals(2, newOffset, "appendUtf8Char returns offset+2 for 2-byte");
+        assertEquals(2, newOffset, "appendUtf8Char returns offset=2 for 2-byte 0x00E1");
     }
 
     @Test
-    @DisplayName("appendUtf8Char with offset encodes 3-byte")
+    @DisplayName("appendUtf8Char with offset encodes 3-byte Euro 0x20AC and returns offset+3")
     void appendUtf8CharWithOffsetThreeByte() {
         long newOffset = BytesInternal.appendUtf8Char(bytes.bytesStore(), 0, 0x20AC);
-        assertEquals(3, newOffset, "appendUtf8Char returns offset+3 for 3-byte");
+        assertEquals(3, newOffset, "appendUtf8Char returns offset=3 for 3-byte Euro 0x20AC");
     }
 
     @Test
-    @DisplayName("appendUtf8Char with offset encodes 4-byte")
+    @DisplayName("appendUtf8Char with offset encodes 4-byte emoji 0x1F600 and returns offset+4")
     void appendUtf8CharWithOffsetFourByte() {
         long newOffset = BytesInternal.appendUtf8Char(bytes.bytesStore(), 0, 0x1F600);
-        assertEquals(4, newOffset, "appendUtf8Char returns offset+4 for 4-byte");
+        assertEquals(4, newOffset, "appendUtf8Char returns offset=4 for 4-byte emoji 0x1F600");
     }
 
     // --- parseUtf8 tests ---
 
     @Test
-    @DisplayName("parseUtf8 decodes ASCII string")
+    @DisplayName("parseUtf8 decodes ASCII string 'Hello World' into StringBuilder correctly")
     void parseUtf8Ascii() {
         String input = "Hello World";
         bytes.append(input);
         bytes.readPosition(0);
 
         BytesInternal.parseUtf8(bytes, sb, true, input.length());
-        assertEquals(input, sb.toString(), "parseUtf8 decodes ASCII Hello World");
+        assertEquals(input, sb.toString(), "parseUtf8 decodes 'Hello World' from bytes");
     }
 
     @Test
@@ -355,18 +357,18 @@ class BytesInternalUtf8Test extends BytesTestCommon {
     }
 
     @Test
-    @DisplayName("parseUtf8 throws for standalone continuation byte")
+    @DisplayName("parseUtf8 throws UTFDataFormatRuntimeException for standalone continuation byte 0x80")
     void parseUtf8StandaloneContinuation() {
         bytes.writeByte((byte) 0x80);
         bytes.readPosition(0);
 
         assertThrows(UTFDataFormatRuntimeException.class,
                 () -> BytesInternal.parseUtf8(bytes, sb, true, 1),
-                "parseUtf8 throws for standalone continuation byte");
+                "parseUtf8 throws for standalone continuation byte 0x80 without leading byte");
     }
 
     @Test
-    @DisplayName("parseUtf8 throws for invalid 4-byte code point range")
+    @DisplayName("parseUtf8 throws for invalid 4-byte code point 0xF0808080 outside valid range")
     void parseUtf8InvalidFourByteCodePoint() {
         bytes.writeByte((byte) 0xF0);
         bytes.writeByte((byte) 0x80);
@@ -376,96 +378,96 @@ class BytesInternalUtf8Test extends BytesTestCommon {
 
         assertThrows(UTFDataFormatRuntimeException.class,
                 () -> BytesInternal.parseUtf8(bytes, sb, true, 4),
-                "parseUtf8 throws for invalid 4-byte code point");
+                "parseUtf8 throws for invalid 4-byte 0xF0808080 code point");
     }
 
     // --- compareUtf8 tests ---
 
     @Test
-    @DisplayName("compareUtf8 returns true for matching ASCII")
+    @DisplayName("compareUtf8 returns true for matching ASCII 'Hello' stored and compared")
     void compareUtf8MatchingAscii() {
         String expected = "Hello";
         bytes.writeStopBit(expected.length());
         bytes.append(expected);
 
         assertTrue(BytesInternal.compareUtf8(bytes.bytesStore(), 0, expected),
-                "compareUtf8 returns true for matching ASCII");
+                "compareUtf8 returns true for stored 'Hello' vs compared 'Hello'");
     }
 
     @Test
-    @DisplayName("compareUtf8 returns false for non-matching ASCII")
+    @DisplayName("compareUtf8 returns false for stored 'Hello' compared to 'World'")
     void compareUtf8NonMatchingAscii() {
         String stored = "Hello";
         bytes.writeStopBit(stored.length());
         bytes.append(stored);
 
         assertFalse(BytesInternal.compareUtf8(bytes.bytesStore(), 0, "World"),
-                "compareUtf8 returns false for non-matching ASCII");
+                "compareUtf8 returns false for stored 'Hello' vs compared 'World'");
     }
 
     @Test
-    @DisplayName("compareUtf8 returns true for matching 2-byte UTF-8")
+    @DisplayName("compareUtf8 returns true for matching 2-byte UTF-8 a-umlaut")
     void compareUtf8MatchingTwoByte() {
-        String expected = "\u00E4";
         bytes.writeStopBit(2);
         bytes.writeByte((byte) 0xC3);
         bytes.writeByte((byte) 0xA4);
+        final String twoByteExpected = "\u00E4";
 
-        assertTrue(BytesInternal.compareUtf8(bytes.bytesStore(), 0, expected),
-                "compareUtf8 returns true for matching 2-byte");
+        assertTrue(BytesInternal.compareUtf8(bytes.bytesStore(), 0, twoByteExpected),
+                "compareUtf8 returns true for stored 2-byte a-umlaut vs compared a-umlaut");
     }
 
     @Test
-    @DisplayName("compareUtf8 returns true for matching 3-byte UTF-8")
+    @DisplayName("compareUtf8 returns true for matching 3-byte UTF-8 Euro sign")
     void compareUtf8MatchingThreeByte() {
-        String expected = "\u20AC";
         bytes.writeStopBit(3);
         bytes.writeByte((byte) 0xE2);
         bytes.writeByte((byte) 0x82);
         bytes.writeByte((byte) 0xAC);
+        final String threeByteExpected = "\u20AC";
 
-        assertTrue(BytesInternal.compareUtf8(bytes.bytesStore(), 0, expected),
-                "compareUtf8 returns true for matching 3-byte");
+        assertTrue(BytesInternal.compareUtf8(bytes.bytesStore(), 0, threeByteExpected),
+                "compareUtf8 returns true for stored 3-byte Euro vs compared Euro");
     }
 
     @Test
-    @DisplayName("compareUtf8 returns false for different 2-byte chars")
+    @DisplayName("compareUtf8 returns false for stored a-umlaut 0xE4 vs compared a-ring 0xE5")
     void compareUtf8NonMatchingTwoByte() {
         bytes.writeStopBit(2);
         bytes.writeByte((byte) 0xC3);
         bytes.writeByte((byte) 0xA4);
 
         assertFalse(BytesInternal.compareUtf8(bytes.bytesStore(), 0, "\u00E5"),
-                "compareUtf8 returns false for different 2-byte");
+                "compareUtf8 returns false for stored 0xE4 vs compared 0xE5");
     }
 
     @Test
-    @DisplayName("compareUtf8 returns false for different lengths")
+    @DisplayName("compareUtf8 returns false for stored 'Hello' (5 bytes) vs compared 'Hi' (2 bytes)")
     void compareUtf8DifferentLengths() {
         bytes.writeStopBit(5);
         bytes.append("Hello");
 
         assertFalse(BytesInternal.compareUtf8(bytes.bytesStore(), 0, "Hi"),
-                "compareUtf8 returns false for different lengths");
+                "compareUtf8 returns false for length 5 vs length 2");
     }
 
     @Test
-    @DisplayName("compareUtf8 handles null comparison with -1 length")
+    @DisplayName("compareUtf8 handles null comparison with -1 length marker returning true")
     void compareUtf8NullHandling() {
         bytes.writeStopBit(-1);
 
         assertTrue(BytesInternal.compareUtf8(bytes.bytesStore(), 0, null),
-                "compareUtf8 returns true for null with -1 marker");
+                "compareUtf8 returns true for -1 marker vs null comparison");
     }
 
     @Test
-    @DisplayName("compareUtf8 returns false for null vs non-null")
+    @DisplayName("compareUtf8 returns false when stored string 'Hello' compared to null because lengths differ")
     void compareUtf8NullVsNonNull() {
         bytes.writeStopBit(5);
         bytes.append("Hello");
 
         assertFalse(BytesInternal.compareUtf8(bytes.bytesStore(), 0, null),
-                "compareUtf8 returns false for null vs stored string");
+                "compareUtf8 returns false for stored 'Hello' vs null");
     }
 
     // --- parseUtf8 with non-UTF mode (8-bit) ---
@@ -484,14 +486,14 @@ class BytesInternalUtf8Test extends BytesTestCommon {
     // --- Edge cases ---
 
     @Test
-    @DisplayName("parseUtf8 handles empty input")
+    @DisplayName("parseUtf8 returns empty StringBuilder when length is 0 because no bytes to decode")
     void parseUtf8Empty() {
         BytesInternal.parseUtf8(bytes, sb, true, 0);
-        assertEquals("", sb.toString(), "parseUtf8 returns empty for 0 length");
+        assertEquals("", sb.toString(), "parseUtf8 with length=0 returns empty StringBuilder");
     }
 
     @Test
-    @DisplayName("parseUtf8 handles boundary values")
+    @DisplayName("parseUtf8 handles boundary values 0x7F, 0x80, 0x07FF at encoding width transitions")
     void parseUtf8BoundaryValues() {
         bytes.writeByte((byte) 0x7F);
         bytes.writeByte((byte) 0xC2);
@@ -501,7 +503,7 @@ class BytesInternalUtf8Test extends BytesTestCommon {
         bytes.readPosition(0);
 
         BytesInternal.parseUtf8(bytes, sb, true, 5);
-        assertEquals("\u007F\u0080\u07FF", sb.toString(), "parseUtf8 handles boundary values");
+        assertEquals("\u007F\u0080\u07FF", sb.toString(), "parseUtf8 decodes boundary chars 0x7F, 0x80, 0x07FF correctly");
     }
 
     // --- Parameterized tests for various characters ---
@@ -518,9 +520,9 @@ class BytesInternalUtf8Test extends BytesTestCommon {
         );
     }
 
-    @ParameterizedTest(name = "{0}")
+    @ParameterizedTest(name = "parseUtf8 decodes {0} character from UTF-8 byte sequence")
     @MethodSource("utf8Characters")
-    @DisplayName("parseUtf8 correctly decodes various characters")
+    @DisplayName("parseUtf8 decodes character from UTF-8 byte sequence correctly")
     void parseUtf8VariousCharacters(String name, String expected, byte[] utf8Bytes) {
         for (byte b : utf8Bytes) {
             bytes.writeByte(b);
@@ -528,7 +530,7 @@ class BytesInternalUtf8Test extends BytesTestCommon {
         bytes.readPosition(0);
 
         BytesInternal.parseUtf8(bytes, sb, true, utf8Bytes.length);
-        assertEquals(expected, sb.toString(), "parseUtf8 decodes " + name);
+        assertEquals(expected, sb.toString(), "parseUtf8 decodes " + name + " from " + utf8Bytes.length + " bytes");
     }
 
     // --- Round-trip tests ---
@@ -599,7 +601,7 @@ class BytesInternalUtf8Test extends BytesTestCommon {
     }
 
     @Test
-    @DisplayName("compareUtf8 with same content returns true")
+    @DisplayName("compareUtf8 returns true when stored 'Test123' matches comparison string exactly")
     void compareUtf8MultiByteMatch() {
         // Use simple ASCII comparison that reliably works
         String content = "Test123";
@@ -607,6 +609,6 @@ class BytesInternalUtf8Test extends BytesTestCommon {
         bytes.append(content);
 
         assertTrue(BytesInternal.compareUtf8(bytes.bytesStore(), 0, content),
-                "compareUtf8 returns true for matching content");
+                "compareUtf8 returns true for stored 'Test123' vs compared 'Test123'");
     }
 }

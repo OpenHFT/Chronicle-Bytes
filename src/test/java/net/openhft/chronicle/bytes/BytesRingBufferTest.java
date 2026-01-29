@@ -14,6 +14,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
+/**
+ * Tests BytesRingBuffer mock delegation behaviour because correct ring buffer operations
+ * are essential for circular buffer scenarios.
+ */
 @SuppressWarnings("deprecation")
 @DisplayName("Bytes ring buffer mock delegation scenarios")
 public class BytesRingBufferTest {

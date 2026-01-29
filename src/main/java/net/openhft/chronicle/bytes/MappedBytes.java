@@ -193,8 +193,6 @@ public abstract class MappedBytes extends AbstractBytes<Void> implements Closeab
     /**
      * Convenience overload using the default page size.
      *
-     * @see #mappedBytes(File, long, long, int, boolean)
-     *
      * @param file        file to map
      * @param chunkSize   size of each chunk in bytes
      * @param overlapSize number of bytes to overlap between chunks
@@ -202,6 +200,7 @@ public abstract class MappedBytes extends AbstractBytes<Void> implements Closeab
      * @return a new {@code MappedBytes}
      * @throws FileNotFoundException       if the file cannot be found
      * @throws ClosedIllegalStateException if mapping fails due to closed file
+     * @see #mappedBytes(File, long, long, int, boolean)
      */
     @NotNull
     public static MappedBytes mappedBytes(@NotNull final File file,

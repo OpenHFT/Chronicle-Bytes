@@ -12,6 +12,10 @@ import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+/**
+ * Tests for ByteStringWriter, because writers must translate internal
+ * IllegalStateException to IOException for stream-compatible error handling.
+ */
 @DisplayName("ByteStringWriter handles closed state and error translation")
 public class ByteStringWriterTest extends BytesTestCommon {
 

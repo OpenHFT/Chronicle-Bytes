@@ -13,7 +13,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
-@SuppressWarnings("deprecation")
+/**
+ * Tests primitive read/write operations from the readme because correct
+ * binary encoding is required to avoid incompatibility when exchanging
+ * data with external systems. This test validates HexDumpBytes output
+ * matching, DTO marshallable round trips, and offset-based primitive access.
+ */
+@SuppressWarnings({"deprecation", "MMLacksPurpose"}) // Javadoc explains readme example verification purpose
 @DisplayName("Primitive readme examples for binary and text values")
 public class PrimitiveTest extends BytesTestCommon {
 

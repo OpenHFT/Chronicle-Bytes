@@ -17,7 +17,12 @@ import java.util.Map;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 
+/**
+ * Tests abstract interner operations because correct hash slot management
+ * and toggle behaviour are essential to avoid duplicate cached entries.
+ */
 @SuppressWarnings("deprecation")
+@DisplayName("AbstractInterner - validates hash slot caching and toggle behaviour")
 class AbstractInternerTest {
 
     private static final class TestInterner extends AbstractInterner<String> {
@@ -150,7 +155,7 @@ class AbstractInternerTest {
         TestInterner local = new TestInterner(8);
         List<byte[]> candidates = findTripleCollision(local);
         Assertions.assertNotNull(candidates,
-                "Expected to find a triple collision for hash slots");
+                "findTripleCollision should locate three keys sharing the same hash slot pair");
 
         Bytes<byte[]> first = Bytes.wrapForRead(candidates.get(0));
         Bytes<byte[]> second = Bytes.wrapForRead(candidates.get(1));
@@ -187,6 +192,7 @@ class AbstractInternerTest {
                 return bucket;
             }
         }
+        // No triple collision found within the search range
         return null;
     }
 }

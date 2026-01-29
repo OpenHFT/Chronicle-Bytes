@@ -8,6 +8,11 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+/**
+ * Tests string read/write performance because UTF-8 and 8-bit encoding
+ * paths must preserve content while maintaining acceptable throughput.
+ */
+@DisplayName("StringRWPerf - validates string encoding round-trip performance")
 public class StringRWPerfTest extends BytesTestCommon {
 
     private static final String UTF8 = "0123456789£123456789€123456789";
@@ -86,6 +91,7 @@ public class StringRWPerfTest extends BytesTestCommon {
                 long end2 = System.nanoTime();
                 timeUtf += end2 - start2;
             }
+            // Allow the scheduler to run other threads between timing iterations
             Thread.yield();
             timeAscii /= runs;
             timeUtf /= runs;

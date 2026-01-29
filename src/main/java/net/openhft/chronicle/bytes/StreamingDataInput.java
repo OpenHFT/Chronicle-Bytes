@@ -4,6 +4,7 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.bytes.internal.BytesInternal;
+import net.openhft.chronicle.bytes.util.DecoratedBufferUnderflowException;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.UnsafeMemory;
 import net.openhft.chronicle.core.annotation.NonNegative;
@@ -39,7 +40,7 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
  *
  * @param <S> the concrete type
  */
-@SuppressWarnings({"rawtypes", "unchecked"})
+@SuppressWarnings({"rawtypes", "unchecked", "checkstyle:MMOverusedWord"})
 public interface StreamingDataInput<S extends StreamingDataInput<S>> extends StreamingCommon<S> {
 
     /**
@@ -177,7 +178,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
             throws BufferUnderflowException, IORuntimeException, ClosedIllegalStateException, ThreadingIllegalStateException {
         requireNonNull(bytesConsumer);
         if (length > readRemaining())
-            throw new BufferUnderflowException(/* length exceeds remaining bytes */);
+            throw new DecoratedBufferUnderflowException("readWithLength0: length exceeds remaining bytes");
         long limit0 = readLimit();
         long limit = readPosition() + length;
         try {
@@ -205,7 +206,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
             throws BufferUnderflowException, IORuntimeException, ClosedIllegalStateException, ThreadingIllegalStateException {
         requireNonNull(bytesConsumer);
         if (length > readRemaining())
-            throw new BufferUnderflowException(/* length exceeds remaining bytes */);
+            throw new DecoratedBufferUnderflowException("readWithLength: length exceeds remaining bytes");
         long limit0 = readLimit();
         long limit = readPosition() + length;
         try {
@@ -819,7 +820,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
         requireNonNull(o);
         assert BytesUtil.isTriviallyCopyable(o.getClass(), offset, length);
         if (readRemaining() < length)
-            throw new BufferUnderflowException(/* not enough bytes for unsafe object copy */);
+            throw new DecoratedBufferUnderflowException("Not enough bytes for unsafe object copy");
         if (isDirectMemory()) {
             final long src = addressForRead(readPosition());
             readSkip(length); // blow up here first
@@ -1069,7 +1070,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
             if (lenient()) {
                 return BigInteger.ZERO;
             } else {
-                throw new BufferUnderflowException(/* lenient mode off and no bytes available */);
+                throw new DecoratedBufferUnderflowException("Lenient mode off and no bytes available");
             }
         }
         byte[] bytes = new byte[length];

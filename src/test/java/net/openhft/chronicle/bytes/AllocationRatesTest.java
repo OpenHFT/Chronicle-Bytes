@@ -20,20 +20,29 @@ buffers 128 KB took an average of 13,062 ns for heap ByteBuffer, 17,855 ns for d
 buffers 128 KB took an average of 12,809 ns for heap ByteBuffer, 21,602 ns for direct ByteBuffer and 922 for DirectStore
 buffers 128 KB took an average of 10,768 ns for heap ByteBuffer, 21,444 ns for direct ByteBuffer and 894 for DirectStore
 buffers 128 KB took an average of 8,739 ns for heap ByteBuffer, 22,684 ns for direct ByteBuffer and 890 for DirectStore
+ *
+ * Tests allocation performance of heap, direct, and native BytesStore because understanding
+ * allocation costs is required to avoid latency spikes in low-latency applications.
+ *
+ * <p>Measures timing in order to identify the fastest allocation path and
+ * verifies reference counts are properly reset to avoid resource leaks.
  */
+@DisplayName("AllocationRates - compare heap, direct, and native store allocation timings")
 public class AllocationRatesTest extends BytesTestCommon {
     private static final int BATCH = 10;
     private static final int BUFFER_SIZE = 128 * 1024;
     private static final int ALLOCATIONS = 10000;
 
     @Test
-    @DisplayName("compare allocation rates across buffer types")
+    @DisplayName("compare allocation rates across buffer types in order to identify fastest path")
     public void compareAllocationRates() {
+        // Running multiple iterations to avoid JIT warmup bias
         for (int i = 4; i >= 0; i--) {
             long timeHBB = timeHeapByteBufferAllocations();
             long timeDBB = timeDirectByteBufferAllocations();
             long timeDS = timeDirectStoreAllocations();
             if (i == 0)
+                // Output timing results so that performance differences are visible
                 System.out.printf("buffers %d KB took an average of %,d ns for heap ByteBuffer, %,d ns for direct ByteBuffer and %,d for DirectStore%n",
                         BUFFER_SIZE / 1024, timeHBB / ALLOCATIONS, timeDBB / ALLOCATIONS, timeDS / ALLOCATIONS);
         }
@@ -49,6 +58,7 @@ public class AllocationRatesTest extends BytesTestCommon {
             for (int j = 0; j < BATCH; j++)
                 totalCapacity += buffers[j].capacity();
         }
+        // Verify total capacity to ensure all allocations succeeded despite GC pressure
         assertEquals((long) BUFFER_SIZE * ALLOCATIONS, totalCapacity,
                 "Heap ByteBuffer allocations should total expected capacity");
         return System.nanoTime() - start;

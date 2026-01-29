@@ -91,8 +91,10 @@ public class TextLongReference extends AbstractReference implements LongReferenc
             }
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
+            // bytesStore was null but reference is not closed
             throw e;
         } catch (Exception e) {
+            // Propagate exception from within the lock
             throw Jvm.rethrow(e);
         }
     }

@@ -29,7 +29,7 @@ import java.nio.BufferUnderflowException;
  *
  * @param <B> concrete type for fluent chaining
  */
-@SuppressWarnings({"rawtypes", "unchecked"})
+@SuppressWarnings({"rawtypes", "unchecked", "checkstyle:MMOverusedWord"})
 public interface ByteStringAppender<B extends ByteStringAppender<B>> extends StreamingDataOutput<B>, Appendable {
 
     /**
@@ -264,8 +264,8 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
     /**
      * Whether a trailing {@code .0} is appended to whole floating point values.
      *
-     * @deprecated to be removed in x.28.  Use {@link #decimaliser(Decimaliser)} to control formatting.
      * @return {@code true} if trailing .0 is appended
+     * @deprecated to be removed in x.28.  Use {@link #decimaliser(Decimaliser)} to control formatting.
      */
     @Deprecated(/* to remove in x.28 */)
     boolean fpAppend0();
@@ -273,9 +273,9 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
     /**
      * Controls whether a trailing {@code .0} is appended to whole floating point values.
      *
-     * @deprecated to be removed in x.28.  Use {@link #decimaliser(Decimaliser)} instead.
      * @param append0 whether to append .0 for whole values
      * @return this appender
+     * @deprecated to be removed in x.28.  Use {@link #decimaliser(Decimaliser)} instead.
      */
     @Deprecated(/* to remove in x.28 */)
     B fpAppend0(boolean append0);

@@ -14,6 +14,11 @@ import java.util.Properties;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
+/**
+ * Tests property replacer because correct token expansion is essential
+ * to avoid configuration failures when placeholders reference missing keys.
+ */
+@DisplayName("PropertyReplacer - validates token replacement for system properties")
 public class PropertyReplacerTest extends BytesTestCommon {
 
     @Test
@@ -76,9 +81,9 @@ public class PropertyReplacerTest extends BytesTestCommon {
     }
 
     @Test
-    @DisplayName("system property replacement succeeds when property exists")
+    @DisplayName("replaceTokensWithProperties expands java.version from system properties")
     void shouldReplaceSystemPropertySuccessfully() {
-        // Use a known system property that always exists
+        // System.getProperty is used to retrieve the expected value for comparison
         String javaVersion = System.getProperty("java.version");
         assertNotNull(javaVersion, "java.version system property should be available");
 
@@ -155,9 +160,11 @@ public class PropertyReplacerTest extends BytesTestCommon {
     }
 
     @Test
-    @DisplayName("system property replacement with multiple tokens")
+    @DisplayName("replaceTokensWithProperties expands java.version and java.vendor from system")
     void shouldReplaceMultipleSystemPropertiesSuccessfully() {
+        // Retrieve the current JVM version for comparison
         String javaVersion = System.getProperty("java.version");
+        // Retrieve the JVM vendor name for comparison
         String javaVendor = System.getProperty("java.vendor");
         assertNotNull(javaVersion, "java.version system property should be available for replacement");
         assertNotNull(javaVendor, "java.vendor should exist");

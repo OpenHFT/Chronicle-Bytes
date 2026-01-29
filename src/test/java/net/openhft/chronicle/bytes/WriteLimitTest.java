@@ -19,8 +19,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * Parameterised tests checking that write limits and elastic resizing behave
- * correctly across different allocator strategies.
+ * correctly across different allocator strategies because correct boundary
+ * enforcement is essential to avoid silent data corruption.
  */
+@DisplayName("WriteLimit - validates write limit enforcement across allocators")
 public class WriteLimitTest extends BytesTestCommon {
     private static final Allocator[] ALLOCATORS = {Allocator.HEAP, Allocator.HEAP_EMBEDDED, Allocator.HEAP_UNCHECKED};
 

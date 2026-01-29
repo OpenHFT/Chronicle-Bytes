@@ -25,7 +25,12 @@ import java.util.stream.Stream;
 import static net.openhft.chronicle.bytes.BytesFactoryUtil.*;
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Tests that Bytes implementations comply with their Javadoc contracts because
+ * correct null handling and state preservation are essential for reliable API behaviour.
+ */
 @SuppressWarnings("deprecation")
+@DisplayName("Bytes Javadoc contract compliance across implementations")
 final class BytesJavaDocComplianceTest extends BytesTestCommon {
 
     private static final Map<String, BytesInitialInfo> INITIAL_INFO_MAP = new LinkedHashMap<>();
@@ -57,11 +62,11 @@ final class BytesJavaDocComplianceTest extends BytesTestCommon {
      * Verifies the unchecked flag matches the bytes implementation name.
      */
     @ParameterizedTest
-    @DisplayName("unchecked flag matches bytes class name")
+    @DisplayName("unchecked flag aligns with class simple name marker")
     @MethodSource("net.openhft.chronicle.bytes.BytesFactoryUtil#provideBytesObjects")
     void unchecked(final Bytes<?> bytes) {
         assertEquals(bytes.getClass().getSimpleName().contains("Unchecked"), bytes.unchecked(),
-                "unchecked flag should align with class name marker");
+                "unchecked flag should correspond to class simple name marker");
         releaseAndAssertReleased(bytes);
     }
 
@@ -69,7 +74,7 @@ final class BytesJavaDocComplianceTest extends BytesTestCommon {
      * Verifies readWrite reflects actual write capability for bytes.
      */
     @ParameterizedTest
-    @DisplayName("readWrite reports actual write capability for bytes")
+    @DisplayName("readWrite reports actual write capability for buffer")
     @MethodSource("net.openhft.chronicle.bytes.BytesFactoryUtil#provideBytesObjects")
     void readWrite(final Bytes<?> bytes,
                    final boolean readWrite) {
@@ -83,12 +88,12 @@ final class BytesJavaDocComplianceTest extends BytesTestCommon {
         }
         // Checks if the actual writing ability corresponds to the reality
         assertEquals(readWrite, writeable,
-                "readWrite capability should match writeable probe result");
+                "readWrite capability should match writeable probe result for the buffer");
 
-        // Checks that bytes reflects this
+        // Checks that the buffer reflects this
         if (writeable != bytes.readWrite())
             assertEquals(writeable, bytes.readWrite(),
-                    "bytes readWrite should reflect writeable probe outcome");
+                    "buffer readWrite should reflect writeable probe outcome");
         releaseAndAssertReleased(bytes);
     }
 
@@ -96,22 +101,22 @@ final class BytesJavaDocComplianceTest extends BytesTestCommon {
      * Checks that ByteBuffers that are read only cannot be wrapped.
      */
     @Test
-    @DisplayName("wrapForRead rejects read only byte buffers")
+    @DisplayName("wrapForRead throws ReadOnlyBufferException for asReadOnlyBuffer ByteBuffer")
     void wrapForReadCannotTakeReadOnlyByteBuffers() {
         final ByteBuffer bb = ByteBuffer.allocate(10).asReadOnlyBuffer();
         assertThrows(ReadOnlyBufferException.class, () -> Bytes.wrapForRead(bb),
-                "wrapForRead should reject read only byte buffers");
+                "wrapForRead should throw ReadOnlyBufferException when given a read only ByteBuffer");
     }
 
     /**
      * Checks that ByteBuffers that are read only cannot be wrapped
      */
     @Test
-    @DisplayName("wrapForWrite rejects read only byte buffers")
+    @DisplayName("wrapForWrite throws ReadOnlyBufferException for asReadOnlyBuffer ByteBuffer")
     void wrapForWriteCannotTakeReadOnlyByteBuffers() {
         final ByteBuffer bb = ByteBuffer.allocate(10).asReadOnlyBuffer();
         assertThrows(ReadOnlyBufferException.class, () -> Bytes.wrapForWrite(bb),
-                "wrapForWrite should reject read only byte buffers");
+                "wrapForWrite should throw ReadOnlyBufferException when given a read only ByteBuffer");
     }
 
     // Todo: Do some write operations so that we know we have content then try operations
@@ -121,7 +126,7 @@ final class BytesJavaDocComplianceTest extends BytesTestCommon {
      * and that no modification of the Bytes object's internal state is made in such cases.
      */
     @TestFactory
-    @DisplayName("non-null parameters reject null input without mutating bytes")
+    @DisplayName("non-null parameters reject null input without mutating buffer state")
     Stream<DynamicTest> nonNullableOperators() {
         return cartesianProductTest(BytesFactoryUtil::provideBytesObjects,
                 BytesJavaDocComplianceTest::provideThrowsMullPointerExceptionOperations,
@@ -135,6 +140,7 @@ final class BytesJavaDocComplianceTest extends BytesTestCommon {
                             // @NotNull annotation processing might have been applied.
                             if (e.getMessage().endsWith("must not be null"))
                                 throw new NullPointerException(e.getMessage());
+                            // Re-throw unhandled exception to preserve stack trace
                             throw e;
                         }
                     }, name);
@@ -160,7 +166,7 @@ final class BytesJavaDocComplianceTest extends BytesTestCommon {
      * and that the Bytes object's internal state is indeed modified.
      */
     @TestFactory
-    @DisplayName("nullable parameters accept null and mutate writable bytes")
+    @DisplayName("nullable parameters accept null and mutate writable buffer")
     Stream<DynamicTest> nullableOperators() {
         return cartesianProductTest(BytesFactoryUtil::provideBytesObjects,
                 BytesJavaDocComplianceTest::provideNullableOperations,

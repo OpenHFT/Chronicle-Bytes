@@ -11,11 +11,15 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@DisplayName("parse8bit variants for string output checks")
+/**
+ * Tests for parse8bit variants, because 8-bit string parsing must correctly
+ * populate both StringBuilder and Bytes output targets for downstream processing.
+ */
+@DisplayName("parse8bit variants populate StringBuilder and Bytes correctly")
 public class Parse8bitVariantsTest extends BytesTestCommon {
 
     @Test
-    @DisplayName("parse8bit fills string builder and bytes")
+    @DisplayName("parse8bit fills StringBuilder with 'alpha' and Bytes with 'beta' from input")
     public void parse8bitIntoStringBuilderAndBytes() {
         Bytes<?> alpha = Bytes.from("alpha");
         Bytes<?> beta = Bytes.from("beta");

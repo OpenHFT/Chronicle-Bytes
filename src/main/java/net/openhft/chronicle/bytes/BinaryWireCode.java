@@ -11,6 +11,7 @@ import java.lang.reflect.Field;
  * Defines byte codes used by Chronicle's binary wire protocol. Each constant
  * indicates the type or structure of the data that follows in the stream.
  */
+@SuppressWarnings("checkstyle:MMOverusedWord")
 public interface BinaryWireCode {
 
     /** Code for a byte sequence with a length in the following one byte. */

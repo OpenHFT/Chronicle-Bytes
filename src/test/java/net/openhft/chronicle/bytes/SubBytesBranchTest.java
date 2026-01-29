@@ -11,9 +11,11 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Tests for SubBytes branch coverage.
- * SubBytes is created through bytesForRead() when readPosition has advanced.
+ * Tests SubBytes branch coverage because correct sub-region views are
+ * essential to avoid reading outside the intended slice when positions advance.
  */
+@SuppressWarnings("checkstyle:MMOverusedWord")
+@DisplayName("SubBytes - validates sub-region view behaviour after position advance")
 class SubBytesBranchTest extends BytesTestCommon {
 
     private Bytes<?> parentBytes;
@@ -78,27 +80,27 @@ class SubBytesBranchTest extends BytesTestCommon {
     }
 
     @Test
-    @DisplayName("SubBytes realCapacity equals capacity value")
+    @DisplayName("SubBytes realCapacity equals capacity because non-elastic views have fixed size")
     void subBytesRealCapacityEqualsCapacity() {
         parentBytes.readPosition(10);
 
         Bytes<?> sub = parentBytes.bytesForRead();
         try {
             assertEquals(sub.capacity(), sub.realCapacity(),
-                    "SubBytes realCapacity equals capacity");
+                    "SubBytes realCapacity should equal capacity because the view is non-elastic and backed by a fixed region");
         } finally {
             sub.releaseLast();
         }
     }
 
     @Test
-    @DisplayName("bytesForRead from start returns non-null bytes")
+    @DisplayName("bytesForRead from start provides non-null view so callers can read")
     void bytesForReadFromStartNotSubBytes() {
         // When readPosition is at start, bytesForRead returns store's bytesForRead
         Bytes<?> sub = parentBytes.bytesForRead();
         try {
             // At start position, SubBytes may or may not be created
-            assertNotNull(sub, "bytesForRead returns non-null bytes view");
+            assertNotNull(sub, "bytesForRead should return a non-null view so callers can read from the current position");
         } finally {
             sub.releaseLast();
         }

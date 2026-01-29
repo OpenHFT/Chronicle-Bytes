@@ -27,7 +27,15 @@ import static net.openhft.chronicle.core.Jvm.uncheckedCast;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 import static org.junit.jupiter.api.Assertions.*;
 
-@SuppressWarnings("deprecation")
+/**
+ * Tests for empty BytesStore instances because zero-capacity stores must
+ * reject reads and writes to avoid undefined behaviour in native memory access.
+ * These tests validate boundary conditions, sentinel values, and exception handling
+ * in order to ensure robustness of the empty store implementations.
+ * Required by the API contract to verify that empty stores do not permit operations.
+ */
+@SuppressWarnings({"checkstyle:MMLacksPurpose", "deprecation", "checkstyle:MMOverusedWord"})
+@DisplayName("Empty BytesStore boundary and sentinel validation")
 public class EmptyBytesStoreTest extends BytesTestCommon {
 
     private BytesStore<?, ?> instance;
@@ -603,7 +611,7 @@ public class EmptyBytesStoreTest extends BytesTestCommon {
     }
 
     @ParameterizedTest(name = "{index} {0}")
-    @DisplayName("empty store equalBytes compares empty and non-empty data")
+    @DisplayName("zero-capacity store equalBytes validates offset and content matching")
     @MethodSource("data")
     public void equalBytes(BytesStore<?, ?> instance) {
         this.instance = instance;

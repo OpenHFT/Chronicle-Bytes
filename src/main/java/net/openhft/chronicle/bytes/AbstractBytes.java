@@ -236,6 +236,7 @@ public abstract class AbstractBytes<U>
         assert DISABLE_SINGLE_THREADED_CHECK || threadSafetyCheck(true);
         final long start = start();
         if ((start + length) > capacity()) {
+            // Pad length exceeds remaining capacity from start position
             throw newBOERange(start, length, "clearAndPad failed. Start: %d + length: %d > capacity: %d", capacity());
         }
         long l = start + length;
@@ -460,9 +461,11 @@ public abstract class AbstractBytes<U>
 
         assert DISABLE_SINGLE_THREADED_CHECK || threadSafetyCheck(true);
         if (limit < start())
+            // Read limit cannot be before start position
             throw limitLessThanStart(limit);
 
         if (limit > writeLimit())
+            // Read limit cannot exceed write limit
             throw limitGreaterThanWriteLimit(limit);
 
         uncheckedWritePosition(limit);
@@ -485,9 +488,11 @@ public abstract class AbstractBytes<U>
             return this;
 
         if (position > writeLimit())
+            // Write position cannot exceed write limit
             throw writePositionTooLarge(position);
 
         if (position < start())
+            // Write position cannot be before start position
             throw writePositionTooSmall(position);
 
         if (position < readPosition())
@@ -557,10 +562,12 @@ public abstract class AbstractBytes<U>
             return this;
 
         if (limit < start()) {
+            // Write limit cannot be before start position
             throw writeLimitTooSmall(limit);
         }
         long capacity = capacity();
         if (limit > capacity) {
+            // Write limit cannot exceed buffer capacity
             throw writeLimitTooBig(limit, capacity);
         }
         this.writeLimit = limit;
@@ -624,8 +631,10 @@ public abstract class AbstractBytes<U>
 
         } catch (BufferUnderflowException e) {
             if (lenient) {
+                // Lenient mode: return zero when buffer is exhausted
                 return 0;
             }
+            // Buffer underflow and not in lenient mode
             throw e;
         }
     }
@@ -648,8 +657,10 @@ public abstract class AbstractBytes<U>
             return bytesStore.readShort(offset);
         } catch (BufferUnderflowException e) {
             if (lenient) {
+                // Lenient mode: return zero when buffer is exhausted
                 return 0;
             }
+            // Buffer underflow and not in lenient mode
             throw e;
         }
     }
@@ -662,8 +673,10 @@ public abstract class AbstractBytes<U>
             return bytesStore.readInt(offset);
         } catch (BufferUnderflowException e) {
             if (lenient) {
+                // Lenient mode: return zero when buffer is exhausted
                 return 0;
             }
+            // Buffer underflow and not in lenient mode
             throw e;
         }
     }
@@ -704,8 +717,10 @@ public abstract class AbstractBytes<U>
             return bytesStore.readLong(offset);
         } catch (BufferUnderflowException e) {
             if (lenient) {
+                // Lenient mode: return zero when buffer is exhausted
                 return 0;
             }
+            // Buffer underflow and not in lenient mode
             throw e;
         }
     }
@@ -718,8 +733,10 @@ public abstract class AbstractBytes<U>
             return bytesStore.readFloat(offset);
         } catch (BufferUnderflowException e) {
             if (lenient) {
+                // Lenient mode: return zero when buffer is exhausted
                 return 0;
             }
+            // Buffer underflow and not in lenient mode
             throw e;
         }
     }
@@ -732,8 +749,10 @@ public abstract class AbstractBytes<U>
             return bytesStore.readDouble(offset);
         } catch (BufferUnderflowException e) {
             if (lenient) {
+                // Lenient mode: return zero when buffer is exhausted
                 return 0;
             }
+            // Buffer underflow and not in lenient mode
             throw e;
         }
     }
@@ -746,8 +765,10 @@ public abstract class AbstractBytes<U>
             return bytesStore.readVolatileInt(offset);
         } catch (BufferUnderflowException e) {
             if (lenient) {
+                // Lenient mode: return zero when buffer is exhausted
                 return 0;
             }
+            // Buffer underflow and not in lenient mode
             throw e;
         }
     }
@@ -760,8 +781,10 @@ public abstract class AbstractBytes<U>
             return bytesStore.readVolatileLong(offset);
         } catch (BufferUnderflowException e) {
             if (lenient) {
+                // Lenient mode: return zero when buffer is exhausted
                 return 0;
             }
+            // Buffer underflow and not in lenient mode
             throw e;
         }
     }
@@ -1058,9 +1081,11 @@ public abstract class AbstractBytes<U>
             throws DecoratedBufferOverflowException {
         final long start = start();
         if (offset < start || offset + adding < start) {
+            // Write offset before start position
             throw newBOELower(offset);
         }
         if ((offset + adding) > writeLimit()) {
+            // Write would exceed write limit
             throw newBOERange(offset, adding, "writeCheckOffset failed. Offset: %d + adding %d> writeLimit: %d", writeLimit());
         }
     }
@@ -1146,10 +1171,12 @@ public abstract class AbstractBytes<U>
     private void readCheckOffset0(@NonNegative long offset, long adding, boolean given)
             throws DecoratedBufferUnderflowException {
         if (offset < start()) {
+            // Read offset before start position
             throw newBOEReadLower(offset);
         }
         long limit0 = given ? writeLimit() : readLimit();
         if ((offset + adding) > limit0) {
+            // Read would exceed limit
             throw newBOEReadUpper(offset, adding, given);
         }
     }
@@ -1180,10 +1207,12 @@ public abstract class AbstractBytes<U>
     private void prewriteCheckOffset0(@NonNegative long offset, long subtracting)
             throws BufferOverflowException {
         if ((offset - subtracting) < start()) {
+            // Prewrite would extend before start position
             throw newBOERange(offset, subtracting, "prewriteCheckOffset0 failed. Offset: %d - subtracting: %d < start: %d", start());
         }
         long limit0 = readLimit();
         if (offset > limit0) {
+            // Prewrite offset exceeds read limit
             throw new DecoratedBufferOverflowException(
                     String.format("prewriteCheckOffset0 failed. Offset: %d > readLimit: %d", offset, limit0));
         }

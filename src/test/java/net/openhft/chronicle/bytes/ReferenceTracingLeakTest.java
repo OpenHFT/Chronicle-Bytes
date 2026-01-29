@@ -11,6 +11,12 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+/**
+ * Tests reference tracing leak detection because allocation site tracking
+ * is essential to diagnose unreleased off-heap resources during
+ * development.
+ */
+@DisplayName("Reference tracing leak detection and allocation tracking")
 public class ReferenceTracingLeakTest extends BytesTestCommon {
 
     @Test

@@ -43,7 +43,7 @@ import static net.openhft.chronicle.bytes.ref.BinaryLongReference.LONG_NOT_COMPL
  * @see BytesStore
  * @see BinaryLongReference
  */
-@SuppressWarnings({"rawtypes", "deprecation"})
+@SuppressWarnings({"rawtypes", "deprecation", "checkstyle:MMOverusedWord"})
 public class BinaryLongArrayReference extends AbstractReference implements ByteableLongArrayValues, BytesMarshallable {
     public static final int SHIFT = 3;
     private static final long CAPACITY = 0;
@@ -137,7 +137,7 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
      */
     public static void write(@NotNull Bytes<?> bytes, @NonNegative long capacity)
             throws BufferOverflowException, IllegalArgumentException, IllegalStateException {
-        assert (bytes.writePosition() & 0x7) == 0;
+        assert (bytes.writePosition() & 0x7) == 0 : "Write position must be 8-byte aligned";
 
         checkCapacity(capacity);
 
@@ -169,7 +169,7 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
      */
     public static void lazyWrite(@NotNull Bytes<?> bytes, @NonNegative long capacity)
             throws BufferOverflowException, IllegalStateException {
-        assert (bytes.writePosition() & 0x7) == 0;
+        assert (bytes.writePosition() & 0x7) == 0 : "Lazy write position must be 8-byte aligned";
 
         checkCapacity(capacity);
 
@@ -310,7 +310,7 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
             if (length != peakLength)
                 throw new IllegalArgumentException(length + " != " + peakLength);
         } catch (BufferUnderflowException e) {
-            throw new DecoratedBufferOverflowException(e.toString());
+            throw new DecoratedBufferOverflowException("Insufficient data to read required length from bytesStore: " + e);
         }
 
         if (bytes instanceof HexDumpBytes) {
@@ -448,7 +448,7 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
         if (bytesStore == null) {
             this.length = len;
         } else {
-            assert this.length == len;
+            assert this.length == len : "Capacity mismatch: expected " + len + " but was " + this.length;
         }
         return this;
     }

@@ -16,13 +16,11 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 /**
- * Examples showing how to read and write {@code String} values with Chronicle Bytes.
- *
- * <p>This test uses both 8-bit and UTF-8 encoding to illustrate the behaviour
- * of the string pooling when the same text is written and read in different
- * ways.</p>
+ * Tests string read and write operations from the readme because correct
+ * encoding and pooling behaviour is essential for efficient string handling
+ * across both 8-bit and UTF-8 encodings.
  */
-@SuppressWarnings("deprecation")
+@SuppressWarnings({"deprecation", "MMOverusedWord"}) // string domain terminology
 @DisplayName("String readme examples for pooled UTF8 and 8bit values")
 public class StringsTest extends BytesTestCommon {
 

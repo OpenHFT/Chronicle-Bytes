@@ -29,6 +29,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
+/**
+ * Utility class providing parameterised Bytes factory methods for tests because
+ * consistent setup of heap, direct, mapped, and field-group buffers is required
+ * to avoid duplication and ensure uniform resource cleanup across all test classes.
+ */
 final class BytesFactoryUtil {
 
     private static final int SIZE = 128;

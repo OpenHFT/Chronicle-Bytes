@@ -35,11 +35,12 @@ import java.nio.BufferUnderflowException;
  * @see BytesStore
  * @see IntValue
  */
-@SuppressWarnings("rawtypes")
+@SuppressWarnings({"rawtypes", "checkstyle:MMOverusedWord"})
 public class BinaryIntReference extends AbstractReference implements IntValue {
 
     /**
-     * Creates an uninitialised int reference.
+     * Creates an uninitialised int reference; the backing store must be
+     * assigned via {@link #bytesStore(BytesStore, long, long)} before use.
      */
     public BinaryIntReference() {
     }

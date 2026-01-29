@@ -20,7 +20,15 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@SuppressWarnings("deprecation")
+/**
+ * Tests encoding utilities because correct algorithm selection and
+ * round-trip behaviour are essential to avoid data loss or corruption.
+ * This test exercises fallback paths so that unknown algorithms are
+ * handled gracefully, and verifies that LZW, GZIP and binary modes
+ * preserve payload integrity.
+ */
+@SuppressWarnings({"deprecation", "checkstyle:MMOverusedWord"})
+@DisplayName("Compression - validates algorithm fallback and round-trip behaviour")
 public class CompressionTest {
 
     @Test

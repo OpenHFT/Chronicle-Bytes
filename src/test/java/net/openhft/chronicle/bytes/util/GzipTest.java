@@ -21,7 +21,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
+/**
+ * Tests GZIP compression because correct round-trip behaviour and
+ * consistent output are essential for reliable data storage and transfer.
+ */
 @SuppressWarnings("deprecation")
+@DisplayName("Gzip - validates GZIP compression round-trip behaviour")
 public class GzipTest extends BytesTestCommon {
 
     @Test

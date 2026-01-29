@@ -19,6 +19,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
+/**
+ * Tests partial write, full write, and parse operations across allocator combinations because
+ * correct cross-allocator data transfer is required for heterogeneous deployment scenarios.
+ */
+@DisplayName("Bytes - partial and full write operations across NATIVE and HEAP allocators")
 public class Bytes2Test extends BytesTestCommon {
 
     static Stream<Arguments> data() {
@@ -34,10 +39,10 @@ public class Bytes2Test extends BytesTestCommon {
 
     @ParameterizedTest
     @MethodSource("data")
-    @DisplayName("partial write copies expected prefix bytes")
+    @DisplayName("bounded copy transfers expected prefix of buffer")
     public void testPartialWrite(Allocator alloc1, Allocator alloc2) {
         assumeFalse(Jvm.maxDirectMemory() == 0,
-                "Direct memory must be available for partial prefix writes");
+                "Direct memory must be available for bounded prefix copies");
 
         Bytes<?> from = alloc1.elasticBytes(1);
         Bytes<?> to = alloc2.fixedBytes(6);
@@ -48,9 +53,9 @@ public class Bytes2Test extends BytesTestCommon {
             ByteBuffer buffer = from.toTemporaryDirectByteBuffer();
             to.writeSome(buffer);
             assertEquals("Hello ", to.toString(),
-                    "Partial write copies expected prefix into target");
+                    "Bounded copy transfers expected prefix into target");
             assertEquals("Hello World", from.toString(),
-                    "Source content remains unchanged after partial write");
+                    "Source content remains unchanged after bounded copy");
         } finally {
             from.releaseLast();
             to.releaseLast();
@@ -59,10 +64,10 @@ public class Bytes2Test extends BytesTestCommon {
 
     @ParameterizedTest
     @MethodSource("data")
-    @DisplayName("partial write handles payloads larger than 64 bytes")
+    @DisplayName("bounded copy handles payloads larger than 64 characters")
     public void testPartialWrite64plus(Allocator alloc1, Allocator alloc2) {
         assumeFalse(Jvm.maxDirectMemory() == 0,
-                "Direct memory must be available for 64+ partial writes");
+                "Direct memory must be available for 64+ bounded copies");
         Bytes<?> from = alloc1.elasticBytes(1);
         Bytes<?> to = alloc2.fixedBytes(6);
 
@@ -81,7 +86,7 @@ public class Bytes2Test extends BytesTestCommon {
 
     @ParameterizedTest
     @MethodSource("data")
-    @DisplayName("write copies full payload for 64+ byte strings")
+    @DisplayName("full copy transfers entire payload for 64+ character strings")
     public void testWrite64plus(Allocator alloc1, Allocator alloc2) {
         Bytes<?> from = alloc1.fixedBytes(128);
         Bytes<?> to = alloc2.fixedBytes(128);
@@ -91,7 +96,7 @@ public class Bytes2Test extends BytesTestCommon {
         try {
             to.write(from);
             assertEquals(from.toString(), to.toString(),
-                    "write copies full payload between Bytes instances");
+                    "full copy transfers entire payload between buffer instances");
         } finally {
             from.releaseLast();
             to.releaseLast();

@@ -11,6 +11,12 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+/**
+ * Tests BytesPool thread-local pooling behaviour because efficient buffer
+ * reuse is essential to avoid allocation overhead in high-frequency
+ * messaging scenarios.
+ */
+@DisplayName("Bytes pool thread local acquisition and reuse")
 class BytesPoolTest {
 
     @Test

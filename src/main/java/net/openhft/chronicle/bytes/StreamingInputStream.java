@@ -14,7 +14,8 @@ import java.nio.BufferUnderflowException;
 /**
  * An {@link InputStream} adapter that sources its data from a
  * {@link StreamingDataInput}. Useful when an API requires an
- * {@code InputStream} but the data resides in a Chronicle Bytes stream.
+ * {@code InputStream} but the data resides in a Chronicle Bytes stream,
+ * avoiding unnecessary copies.
  */
 @SuppressWarnings("rawtypes")
 public class StreamingInputStream extends InputStream {
@@ -22,7 +23,9 @@ public class StreamingInputStream extends InputStream {
     private StreamingDataInput in;
 
     /**
-     * Constructs a new StreamingInputStream instance and initializes the data source as an empty ByteStore.
+     * Constructs a new StreamingInputStream instance and initializes the data
+     * source as an empty ByteStore so that it can later be assigned via
+     * {@link #init(StreamingDataInput)}.
      */
     @Deprecated(/* to be removed in 2027 */)
     public StreamingInputStream() {
@@ -30,7 +33,9 @@ public class StreamingInputStream extends InputStream {
     }
 
     /**
-     * Constructs a new StreamingInputStream instance with a specific StreamingDataInput as the data source.
+     * Constructs a new StreamingInputStream instance with a specific
+     * StreamingDataInput as the data source so that reads delegate directly
+     * to the provided input.
      *
      * @param in the StreamingDataInput instance to read data from.
      */
@@ -39,7 +44,9 @@ public class StreamingInputStream extends InputStream {
     }
 
     /**
-     * Initializes this StreamingInputStream instance with a specific StreamingDataInput as the data source.
+     * Initializes this StreamingInputStream instance with a specific
+     * StreamingDataInput as the data source so that reads delegate directly
+     * to the provided input.
      *
      * @param in the StreamingDataInput instance to read data from.
      * @return this StreamingInputStream instance, for chaining.

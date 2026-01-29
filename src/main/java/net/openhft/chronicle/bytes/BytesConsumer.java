@@ -7,7 +7,8 @@ import java.nio.BufferOverflowException;
 
 /**
  * Consumes bytes from a source and writes them to a {@link BytesOut} instance.
- * Implementations typically pull data from a queue or ring buffer.
+ * Implementations typically pull data from a queue or ring buffer because
+ * direct coupling would introduce unwanted dependencies.
  */
 @FunctionalInterface
 public interface BytesConsumer {

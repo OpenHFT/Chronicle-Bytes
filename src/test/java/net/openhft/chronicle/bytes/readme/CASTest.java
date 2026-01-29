@@ -13,6 +13,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
+/**
+ * Tests compare-and-swap operations from the readme because atomic updates
+ * are essential for lock-free coordination between concurrent readers and
+ * writers.
+ */
 @SuppressWarnings("deprecation")
 @DisplayName("Compare and swap readme example for bytes")
 public class CASTest extends BytesTestCommon {
@@ -48,12 +53,10 @@ public class CASTest extends BytesTestCommon {
             assertEquals(expected1, actual1,
                     "Initial hex dump matches expected alignment output");
 
-
             assertTrue(bytes.compareAndSwapInt(s32, 0, Integer.MAX_VALUE),
                     "CAS int updates value from zero to max");
             assertTrue(bytes.compareAndSwapLong(s64, 0, Long.MAX_VALUE),
                     "CAS long updates value from zero to max");
-
 
             final String expected2 = "0000 03 73 33 32 ff ff ff 7f                         # s32\n" +
                     "0008 03 73 36 34 00 00 00 00 ff ff ff ff ff ff ff 7f # s64\n";

@@ -8,38 +8,43 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+/**
+ * Tests for ConnectionDroppedException constructors, because exception classes
+ * must properly propagate message and cause to support debugging and logging.
+ */
+@DisplayName("Connection dropped exception constructor and field validation")
 public class ConnectionDroppedExceptionTest {
 
     @Test
-    @DisplayName("message constructor preserves provided text message")
+    @DisplayName("String constructor stores the error description for later retrieval")
     public void testMessageConstructor() {
         String expectedMessage = "Connection dropped unexpectedly.";
         ConnectionDroppedException exception = new ConnectionDroppedException(expectedMessage);
 
         assertEquals(expectedMessage, exception.getMessage(),
-                "Message constructor keeps supplied text unchanged");
+                "getMessage() should return the exact string 'Connection dropped unexpectedly.' passed to constructor");
     }
 
     @Test
-    @DisplayName("cause constructor preserves provided throwable cause")
+    @DisplayName("Throwable constructor stores the root cause for exception chaining")
     public void testCauseConstructor() {
         Throwable expectedCause = new RuntimeException("Underlying cause");
         ConnectionDroppedException exception = new ConnectionDroppedException(expectedCause);
 
         assertEquals(expectedCause, exception.getCause(),
-                "Cause constructor keeps supplied throwable unchanged");
+                "getCause() should return the RuntimeException passed to the Throwable constructor");
     }
 
     @Test
-    @DisplayName("message and cause constructor preserves text and cause")
+    @DisplayName("String and Throwable constructor stores both description and root cause")
     public void testMessageAndCauseConstructor() {
         String expectedMessage = "Connection dropped with details.";
         Throwable expectedCause = new RuntimeException("Specific cause");
         ConnectionDroppedException exception = new ConnectionDroppedException(expectedMessage, expectedCause);
 
         assertEquals(expectedMessage, exception.getMessage(),
-                "Message and cause constructor keeps text message");
+                "getMessage() should return 'Connection dropped with details.' from combined constructor");
         assertEquals(expectedCause, exception.getCause(),
-                "Message and cause constructor keeps throwable cause");
+                "getCause() should return RuntimeException from combined constructor");
     }
 }

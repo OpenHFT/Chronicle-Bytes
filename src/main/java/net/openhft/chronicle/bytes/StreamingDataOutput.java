@@ -38,7 +38,7 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
  *
  * @param <S> self type for fluent API
  */
-@SuppressWarnings("unchecked")
+@SuppressWarnings({"unchecked", "checkstyle:MMOverusedWord"})
 @DontChain
 public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends StreamingCommon<S> {
     /**
@@ -396,7 +396,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     }
 
     /**
-     * Writes a byte to the data stream.
+     * Writes a single byte to the stream and advances the write position by one.
      *
      * @param i8 The byte to be written.
      * @return The current StreamingDataOutput instance.
@@ -517,7 +517,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     }
 
     /**
-     * Writes an integer to the data stream.
+     * Writes a 32-bit integer to the stream and advances the write position by four.
      *
      * @param i The integer to be written.
      * @return The current StreamingDataOutput instance.

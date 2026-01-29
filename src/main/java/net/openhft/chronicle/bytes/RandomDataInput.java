@@ -6,6 +6,7 @@ package net.openhft.chronicle.bytes;
 import net.openhft.chronicle.bytes.internal.BytesInternal;
 import net.openhft.chronicle.bytes.internal.Chars;
 import net.openhft.chronicle.bytes.util.BufferUtil;
+import net.openhft.chronicle.bytes.util.DecoratedBufferUnderflowException;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.UnsafeMemory;
 import net.openhft.chronicle.core.annotation.NonNegative;
@@ -30,6 +31,7 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
  * memory and helper utilities such as hashing and search. Implementations may be backed by heap,
  * direct or memory-mapped storage; thread-safety is implementation dependent.
  */
+@SuppressWarnings("checkstyle:MMOverusedWord")
 public interface RandomDataInput extends RandomCommon {
     /**
      * Reads a volatile int value from the current reading position.
@@ -479,7 +481,7 @@ public interface RandomDataInput extends RandomCommon {
         requireNonNegative(offset);
         long remaining = requireNonNegative(readLimit() - offset);
         if (remaining < 1)
-            throw new BufferUnderflowException(/* no bytes left to read length */);
+            throw new DecoratedBufferUnderflowException("readUtf8: no bytes left to read length");
 
         long utfLen;
         if ((utfLen = readByte(offset++)) < 0) {
@@ -506,7 +508,7 @@ public interface RandomDataInput extends RandomCommon {
             return ~offset;
         int len = Maths.toUInt31(utfLen);
         if (requireNonNegative(readLimit() - offset) < len)
-            throw new BufferUnderflowException(/* declared length exceeds read limit */);
+            throw new DecoratedBufferUnderflowException("Declared length exceeds read limit");
         BytesInternal.parseUtf8(this, offset, sb, true, len);
         return offset + utfLen;
     }
@@ -542,7 +544,7 @@ public interface RandomDataInput extends RandomCommon {
         requireNonNegative(maxUtf8Len);
         long remaining = requireNonNegative(readLimit() - offset);
         if (remaining < 1)
-            throw new BufferUnderflowException(/* no bytes left to read length */);
+            throw new DecoratedBufferUnderflowException("readUtf8Limited: no bytes left to read length");
 
         long utfLen;
         if ((utfLen = readByte(offset++)) < 0) {
@@ -571,7 +573,7 @@ public interface RandomDataInput extends RandomCommon {
             throw new ClosedIllegalStateException("Attempted to read a char sequence of " +
                     "utf8 size " + utfLen + ", when only " + maxUtf8Len + " allowed");
         if (requireNonNegative(readLimit() - offset) < utfLen)
-            throw new BufferUnderflowException(/* encoded length exceeds read limit */);
+            throw new DecoratedBufferUnderflowException("Encoded length exceeds read limit");
         BytesInternal.parseUtf8(this, offset, sb, true, (int) utfLen);
         return offset + utfLen;
     }

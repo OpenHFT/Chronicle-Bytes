@@ -12,6 +12,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+/**
+ * Tests Bytes lifecycle scenarios for reference counting and elastic growth because
+ * correct resource management is required to avoid memory leaks and dangling references.
+ */
 @DisplayName("Bytes lifecycle behaviour scenarios for reference counting and growth")
 public class BytesLifecycleTest extends BytesTestCommon {
 

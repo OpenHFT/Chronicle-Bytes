@@ -15,8 +15,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("HeapBytesStore equality and capacity behaviour for heap stores")
 public class HeapByteStoreTest extends BytesTestCommon {
-    @SuppressWarnings("rawtypes")
     @Test
+    @SuppressWarnings("rawtypes")
     @DisplayName("heap bytes store equality matches content")
     public void testEquals() {
         @NotNull HeapBytesStore hbs = HeapBytesStore.wrap("Hello".getBytes(StandardCharsets.ISO_8859_1));

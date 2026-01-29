@@ -18,6 +18,12 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+/**
+ * Tests BytesMarshaller read and write operations for primitive and array fields because
+ * correct round-trip serialisation is required to avoid data loss during persistence.
+ */
+@SuppressWarnings("checkstyle:MMOverusedWord")
+@DisplayName("BytesMarshaller - read and write operations for primitive and array fields")
 class BytesMarshallerTest {
 
     static class TestClass {

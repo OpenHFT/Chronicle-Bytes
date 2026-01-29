@@ -11,9 +11,12 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * GuardedNativeBytes binary primitive and hex dump round trip verification tests.
+ * Tests {@link GuardedNativeBytes} binary primitive and hex dump round trip
+ * verification because type markers are required to avoid reading mismatched
+ * data types. This test checks type marker rejection and hex dump output
+ * matching.
  */
-@SuppressWarnings("deprecation")
+@SuppressWarnings({"deprecation", "MMOverusedWord"}) // round trips domain terminology
 @DisplayName("GuardedNativeBytes primitive read and write checks")
 public class GuardedNativeBytesTest {
 

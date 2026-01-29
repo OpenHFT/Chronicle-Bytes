@@ -106,6 +106,7 @@ public class TextIntArrayReference extends AbstractReference implements Byteable
             return bytesStore.parseLong(USED + offset);
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
+            // bytesStore was null but reference is not closed
             throw e;
         }
     }
@@ -116,6 +117,7 @@ public class TextIntArrayReference extends AbstractReference implements Byteable
             bytesStore.append(USED + offset, used, DIGITS);
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
+            // bytesStore was null but reference is not closed
             throw e;
         }
     }
@@ -138,6 +140,7 @@ public class TextIntArrayReference extends AbstractReference implements Byteable
             }
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
+            // bytesStore was null but reference is not closed
             throw e;
         }
     }
@@ -154,7 +157,7 @@ public class TextIntArrayReference extends AbstractReference implements Byteable
         if (bytesStore == null) {
             this.length = len;
         } else {
-            assert this.length == len;
+            assert this.length == len : "Capacity mismatch: expected " + len + " but was " + this.length;
         }
         return this;
     }
@@ -166,6 +169,7 @@ public class TextIntArrayReference extends AbstractReference implements Byteable
             return (int) bytesStore.parseLong(VALUES + offset + index * VALUE_SIZE);
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
+            // bytesStore was null but reference is not closed
             throw e;
         }
     }
@@ -177,13 +181,14 @@ public class TextIntArrayReference extends AbstractReference implements Byteable
             bytesStore.append(VALUES + offset + index * VALUE_SIZE, value, DIGITS);
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
+            // bytesStore was null but reference is not closed
             throw e;
         }
     }
 
     @Override
     public void bindValueAt(@NonNegative long index, IntValue value) {
-        throw new UnsupportedOperationException("todo");
+        throw new UnsupportedOperationException("bindValueAt is not supported for TextIntArrayReference");
     }
 
     @Override
@@ -218,6 +223,7 @@ public class TextIntArrayReference extends AbstractReference implements Byteable
             }
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
+            // bytesStore was null but reference is not closed
             throw e;
         }
     }

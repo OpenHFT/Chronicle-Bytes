@@ -8,6 +8,11 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+/**
+ * Tests BytesUtil.copyOf for preserving readable content because correct duplication
+ * is required to avoid data loss when copying partial buffer views.
+ */
+@DisplayName("BytesUtil - copyOf preserves readable content from source position")
 public class BytesCopyOfTest extends BytesTestCommon {
 
     @Test

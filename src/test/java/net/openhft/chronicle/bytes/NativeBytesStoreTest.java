@@ -239,7 +239,7 @@ public class NativeBytesStoreTest extends BytesTestCommon {
         }
     }
 
-    @SuppressWarnings({"rawtypes", "unchecked"})
+    @SuppressWarnings({"rawtypes", "unchecked", "MMAnnotationTestOrder"})
     @Test
     @DisplayName("byte checksum stays within expected range")
     public void perfCheckSum()
@@ -294,7 +294,7 @@ public class NativeBytesStoreTest extends BytesTestCommon {
         }
     }
 
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({"rawtypes", "MMAnnotationTestOrder"})
     @Test
     @DisplayName("native bytes store equality compares content")
     public void testEquals() {

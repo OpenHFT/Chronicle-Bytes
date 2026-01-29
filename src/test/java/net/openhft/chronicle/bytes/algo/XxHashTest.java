@@ -16,8 +16,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * Validates xxHash implementations for Chronicle Bytes, including empty inputs,
- * small payloads, and behaviour when truncating hashes.
+ * small payloads, and behaviour when truncating hashes because consistent
+ * deterministic hashing is required for data integrity and cache lookups.
  */
+@DisplayName("XxHash - deterministic hashing for empty, short, and truncated inputs")
 public class XxHashTest {
 
     @Test

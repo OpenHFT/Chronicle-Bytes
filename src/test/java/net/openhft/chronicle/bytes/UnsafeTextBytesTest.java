@@ -13,7 +13,12 @@ import java.util.Random;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@SuppressWarnings("deprecation")
+/**
+ * Tests unsafe low-level byte operations because correct base-10 and double
+ * encoding is essential for high-performance numeric serialisation.
+ */
+@SuppressWarnings({"deprecation", "checkstyle:MMOverusedWord"})
+@DisplayName("UnsafeTextBytes - validates unsafe numeric encoding")
 public class UnsafeTextBytesTest extends BytesTestCommon {
 
     private static void testAppendBase10(final Bytes<?> bytes, final long l) {

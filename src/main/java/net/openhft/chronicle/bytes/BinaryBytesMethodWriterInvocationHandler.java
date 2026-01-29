@@ -48,6 +48,7 @@ public class BinaryBytesMethodWriterInvocationHandler extends AbstractInvocation
             throws IllegalStateException, BufferOverflowException, BufferUnderflowException, IllegalArgumentException, ArithmeticException, InvalidMarshallableException {
         MethodEncoder info = methodToIdMap.computeIfAbsent(method, methodToId);
         if (info == null) {
+            // Method lacks @MethodId annotation, no encoder available
             Jvm.warn().on(getClass(), "Unknown method " + method + " ignored");
         } else {
             long pos = out.writePosition();
@@ -57,9 +58,11 @@ public class BinaryBytesMethodWriterInvocationHandler extends AbstractInvocation
                 info.encode(args, out);
             } catch (Throwable t) {
                 out.writePosition(pos);
+                // Rethrow after rolling back write position
                 throw t;
             }
         }
+        // Proxy invocation handler returns null for void methods
         return null;
     }
 }

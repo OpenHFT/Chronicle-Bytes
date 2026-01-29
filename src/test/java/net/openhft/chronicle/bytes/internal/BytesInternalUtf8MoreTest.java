@@ -14,7 +14,12 @@ import java.nio.charset.StandardCharsets;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@DisplayName("BytesInternal UTF8 edge cases and multibyte parsing")
+/**
+ * Tests BytesInternal character encoding edge cases because multibyte UTF-8
+ * parsing must handle boundary conditions to avoid data corruption.
+ */
+@SuppressWarnings("checkstyle:MMOverusedWord")
+@DisplayName("BytesInternal character encoding edge cases and multibyte parsing")
 public class BytesInternalUtf8MoreTest extends BytesTestCommon {
 
     @Test

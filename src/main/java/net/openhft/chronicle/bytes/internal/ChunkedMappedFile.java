@@ -113,7 +113,7 @@ public class ChunkedMappedFile extends MappedFile {
             for (int j = 0; j <= compileThreshold; j += chunks) {
                 warmupChunks(errorsDuringWarmup, file, mapAlignment, chunks);
             }
-            Thread.yield();
+            Thread.yield(); // Yield to allow JIT compilation between warmup batches
             IOTools.deleteDirWithFiles(path.toFile());
         } catch (IOException e) {
             Jvm.setExceptionHandlers(error, warn, debug, perf);
@@ -135,7 +135,7 @@ public class ChunkedMappedFile extends MappedFile {
                     warmup0(mapAlignment, chunks, mappedFile);
                 }
             }
-            Thread.yield();
+            Thread.yield(); // Yield to allow JIT compilation after chunk warmup
         } catch (Exception e) {
             errorsDuringWarmup.add(e);
         }

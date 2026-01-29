@@ -4,8 +4,11 @@
 package net.openhft.chronicle.bytes;
 
 /**
- * A collection of predefined {@link StopCharTester} implementations that define common stop character criteria.
+ * A collection of predefined {@link StopCharTester} implementations that
+ * define common criteria for ending parsing operations so callers avoid
+ * duplicating logic.
  */
+@SuppressWarnings("checkstyle:MMOverusedWord")
 public enum StopCharTesters implements StopCharTester {
     /**
      * Stop character tester which considers a comma (',') as a stop character.

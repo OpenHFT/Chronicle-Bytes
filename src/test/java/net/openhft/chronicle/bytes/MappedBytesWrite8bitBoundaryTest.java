@@ -18,6 +18,11 @@ import java.nio.file.Files;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
+/**
+ * Tests write8bit operations across chunk boundaries because incorrect
+ * boundary handling can corrupt string data when the encoded length and
+ * content span multiple memory-mapped regions.
+ */
 @DisplayName("Write8bit crosses mapped chunk boundary correctly")
 public class MappedBytesWrite8bitBoundaryTest extends BytesTestCommon {
 

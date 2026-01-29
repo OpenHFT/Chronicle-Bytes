@@ -24,6 +24,14 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
+/**
+ * Tests {@link BinaryBooleanReference} and {@link TextBooleanReference}
+ * binary and text formats because correct boolean encoding is required
+ * to avoid flag corruption in protocol state management. This test validates
+ * read, write, closed-state errors, and bytesStore reassignment behaviour.
+ */
+@SuppressWarnings("MMOverusedWord") // reference domain terminology
+@DisplayName("Boolean reference binary and text format behaviours")
 public class BooleanReferenceTest extends BytesTestCommon {
 
     @BeforeEach
@@ -161,7 +169,7 @@ public class BooleanReferenceTest extends BytesTestCommon {
         ref.bytesStore(nbs, 0, ref.maxSize());
         ref.close();
         String result = ref.toString();
-        assertNotNull(result, "toString should not return null when closed");
+        assertNotNull(result, "toString should return a non-null string when reference is closed");
         assertTrue(result.contains("Closed"),
                 "toString result '" + result + "' should contain 'Closed'");
         nbs.releaseLast();
@@ -246,7 +254,7 @@ public class BooleanReferenceTest extends BytesTestCommon {
                     "Text reference should read false after writing false");
             assertEquals("value: false",
                     ref.toString(),
-                    "toString should report false");
+                    "toString should report value equals false after writing false");
         }
         nbs.releaseLast();
     }

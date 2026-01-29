@@ -11,6 +11,10 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+/**
+ * Tests for heap BytesStore primitive operations, because ordered writes
+ * must maintain memory ordering guarantees for concurrent access.
+ */
 @DisplayName("heap bytes store primitive operation coverage")
 public class HeapBytesStoreOpsTest extends BytesTestCommon {
 
@@ -32,4 +36,3 @@ public class HeapBytesStoreOpsTest extends BytesTestCommon {
         }
     }
 }
-

@@ -27,7 +27,7 @@ import static net.openhft.chronicle.bytes.HexDumpBytes.MASK;
  * @see BytesStore
  * @see LongReference
  */
-@SuppressWarnings("rawtypes")
+@SuppressWarnings({"rawtypes", "checkstyle:MMOverusedWord"})
 public class BinaryLongReference extends AbstractReference implements LongReference {
     /**
      * Sentinel value indicating that a long operation did not complete as expected.
@@ -122,6 +122,7 @@ public class BinaryLongReference extends AbstractReference implements LongRefere
             bytesStore.writeLong(offset, value);
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
+            // bytesStore was null but reference is not closed
             throw e;
         }
     }
@@ -140,6 +141,7 @@ public class BinaryLongReference extends AbstractReference implements LongRefere
             return bytesStore.readVolatileLong(offset);
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
+            // bytesStore was null but reference is not closed
             throw e;
         }
     }
@@ -158,6 +160,7 @@ public class BinaryLongReference extends AbstractReference implements LongRefere
             bytesStore.writeVolatileLong(offset, value);
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
+            // bytesStore was null but reference is not closed
             throw e;
         }
     }
@@ -176,6 +179,7 @@ public class BinaryLongReference extends AbstractReference implements LongRefere
             bytesStore.writeOrderedLong(offset, value);
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
+            // bytesStore was null but reference is not closed
             throw e;
         }
     }
@@ -195,6 +199,7 @@ public class BinaryLongReference extends AbstractReference implements LongRefere
             return bytesStore.addAndGetLong(offset, delta);
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
+            // bytesStore was null but reference is not closed
             throw e;
         }
     }
@@ -230,6 +235,7 @@ public class BinaryLongReference extends AbstractReference implements LongRefere
             return bytesStore.compareAndSwapLong(offset, expected, value);
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
+            // bytesStore was null but reference is not closed
             throw e;
         }
     }

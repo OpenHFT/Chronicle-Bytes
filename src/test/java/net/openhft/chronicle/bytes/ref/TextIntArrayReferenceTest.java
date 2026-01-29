@@ -17,6 +17,12 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
+/**
+ * Tests TextIntArrayReference write and read operations because correct
+ * text-formatted arrays are essential for human-readable data inspection
+ * in diagnostic tools.
+ */
+@DisplayName("Text int array reference write read and capacity checks")
 @SuppressWarnings("deprecation")
 public class TextIntArrayReferenceTest extends BytesTestCommon {
 
@@ -131,7 +137,7 @@ public class TextIntArrayReferenceTest extends BytesTestCommon {
     }
 
     @Test
-    @DisplayName("maxSize returns the configured reference length")
+    @DisplayName("maxSize returns the configured length set during bytesStore binding")
     public void testMaxSize() {
         Bytes<?> bytes = Bytes.allocateDirect(256);
         try (TextIntArrayReference ref = new TextIntArrayReference()) {
@@ -143,7 +149,7 @@ public class TextIntArrayReferenceTest extends BytesTestCommon {
         bytes.releaseLast();
     }
 
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({"rawtypes", "MMAnnotationTestOrder"})
     @Test
     @DisplayName("text int array formats values and reports capacity")
     public void getSetValues() {
@@ -252,7 +258,7 @@ public class TextIntArrayReferenceTest extends BytesTestCommon {
     }
 
     @Test
-    @DisplayName("toString reports null state before initialisation")
+    @DisplayName("toString reports bytes equals null before initialisation binding")
     public void toStringReportsNullState() {
         try (TextIntArrayReference ref = new TextIntArrayReference()) {
             String value = ref.toString();

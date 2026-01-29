@@ -16,7 +16,12 @@ import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@DisplayName("Issue 523 double append concurrency checks")
+/**
+ * Tests for Issue 523 because concurrent double append operations must produce
+ * accurate formatting to avoid rounding errors in financial calculations.
+ */
+@SuppressWarnings("checkstyle:MMOverusedWord")
+@DisplayName("Issue 523 double append validates concurrent formatting accuracy")
 public class Issue523Test extends BytesTestCommon {
 
     @SuppressWarnings("EmptyMethod")
@@ -69,6 +74,7 @@ public class Issue523Test extends BytesTestCommon {
                     } finally {
                         bytes.releaseLast();
                     }
+                    // Successful iteration: return null to indicate no error detected
                     return null;
                 })
                 .filter(Objects::nonNull)

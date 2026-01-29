@@ -26,7 +26,7 @@ public class BytesInternalContentEqualTest extends BytesTestCommon {
             direct.readPosition(0);
 
             assertTrue(BytesInternal.contentEqual(heap.bytesStore(), direct.bytesStore()),
-                    "Expected equal content across heap and direct stores");
+                    "contentEqual returns true for heap 'abcdef' and direct 'abcdef'");
         } finally {
             heap.releaseLast();
             direct.releaseLast();

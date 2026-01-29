@@ -9,6 +9,11 @@ import org.junit.jupiter.api.Test;
 import java.nio.charset.StandardCharsets;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+/**
+ * Tests prewrite operations because reverse-order writes are essential for
+ * building message headers when the content length is only known after
+ * encoding the payload.
+ */
 @DisplayName("Prewrite operations build expected string output")
 public class PrewriteTest extends BytesTestCommon {
     @Test

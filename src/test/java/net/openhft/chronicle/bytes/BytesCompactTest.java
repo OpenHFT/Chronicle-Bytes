@@ -15,8 +15,11 @@ import java.util.function.Supplier;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
- * Tests compact behaviour of Bytes across read, skip, append, and buffer state operations.
+ * Tests compact behaviour of Bytes across read, skip, append, and buffer state operations
+ * because correct position reset is required to avoid buffer exhaustion during reuse.
  */
+@SuppressWarnings("checkstyle:MMOverusedWord")
+@DisplayName("Bytes - compact behaviour across native and heap allocators")
 public class BytesCompactTest {
 
     /**

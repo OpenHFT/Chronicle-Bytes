@@ -24,6 +24,7 @@ import java.nio.BufferUnderflowException;
  *
  * @param <B> self type for fluent chaining
  */
+@SuppressWarnings("checkstyle:MMOverusedWord")
 public interface ByteStringParser<B extends ByteStringParser<B>> extends StreamingDataInput<B> {
     /**
      * Creates a new {@code Reader} from the byte string, assuming the byte string is

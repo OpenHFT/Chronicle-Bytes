@@ -27,7 +27,7 @@ import org.jetbrains.annotations.NotNull;
  *
  * @see BinaryLongReference
  */
-@SuppressWarnings("rawtypes")
+@SuppressWarnings({"rawtypes", "checkstyle:MMOverusedWord"})
 public class BinaryTwoLongReference extends BinaryLongReference implements TwoLongReference {
 
     /**
@@ -76,6 +76,7 @@ public class BinaryTwoLongReference extends BinaryLongReference implements TwoLo
             return bytesStore.readLong(offset + Long.BYTES);
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
+            // bytesStore was null but reference is not closed
             throw e;
         }
     }
@@ -94,6 +95,7 @@ public class BinaryTwoLongReference extends BinaryLongReference implements TwoLo
             bytesStore.writeLong(offset + Long.BYTES, value);
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
+            // bytesStore was null but reference is not closed
             throw e;
         }
     }
@@ -111,6 +113,7 @@ public class BinaryTwoLongReference extends BinaryLongReference implements TwoLo
             return bytesStore.readVolatileLong(offset + Long.BYTES);
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
+            // bytesStore was null but reference is not closed
             throw e;
         }
     }
@@ -129,6 +132,7 @@ public class BinaryTwoLongReference extends BinaryLongReference implements TwoLo
             bytesStore.writeVolatileLong(offset + Long.BYTES, value);
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
+            // bytesStore was null but reference is not closed
             throw e;
         }
     }
@@ -147,6 +151,7 @@ public class BinaryTwoLongReference extends BinaryLongReference implements TwoLo
             bytesStore.writeOrderedLong(offset + Long.BYTES, value);
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
+            // bytesStore was null but reference is not closed
             throw e;
         }
     }
@@ -166,6 +171,7 @@ public class BinaryTwoLongReference extends BinaryLongReference implements TwoLo
             return bytesStore.addAndGetLong(offset + Long.BYTES, delta);
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
+            // bytesStore was null but reference is not closed
             throw e;
         }
     }
@@ -185,6 +191,7 @@ public class BinaryTwoLongReference extends BinaryLongReference implements TwoLo
             return addValue2(delta);
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
+            // bytesStore was null but reference is not closed
             throw e;
         }
     }
@@ -206,6 +213,7 @@ public class BinaryTwoLongReference extends BinaryLongReference implements TwoLo
             return bytesStore.compareAndSwapLong(offset + Long.BYTES, expected, value);
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
+            // bytesStore was null but reference is not closed
             throw e;
         }
     }

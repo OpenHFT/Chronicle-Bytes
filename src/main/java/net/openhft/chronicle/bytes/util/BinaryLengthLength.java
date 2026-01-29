@@ -26,6 +26,7 @@ import org.jetbrains.annotations.NotNull;
  * Note: Each {@code writeLength} call performs a store fence as required by
  * JSR-133 to ensure the length is visible to other threads.
  */
+@SuppressWarnings("checkstyle:MMOverusedWord")
 public enum BinaryLengthLength {
     /**
      * Represents an 8-bit length prefix capable of encoding data lengths from 0
@@ -70,7 +71,8 @@ public enum BinaryLengthLength {
         public void writeLength(@NotNull Bytes<?> bytes, @NonNegative long positionReturnedFromInitialise, @NonNegative long end) {
             long length = (end - positionReturnedFromInitialise - 1) & MASK;
             if (length >= 1 << 8)
-                throw invalidLength(length);
+                // Data length exceeds 8-bit prefix maximum of 255 bytes
+                throw invalidLength(length, "8-bit prefix max is 255");
             bytes.writeByte(positionReturnedFromInitialise, (byte) length);
             UnsafeMemory.MEMORY.storeFence(); // ensures visibility between threads
         }
@@ -116,7 +118,8 @@ public enum BinaryLengthLength {
         public void writeLength(@NotNull Bytes<?> bytes, @NonNegative long positionReturnedFromInitialise, @NonNegative long end) {
             final long length = (end - positionReturnedFromInitialise - 2) & MASK;
             if (length >= 1 << 16)
-                throw invalidLength(length);
+                // Data length exceeds 16-bit prefix maximum of 65535 bytes
+                throw invalidLength(length, "16-bit prefix max is 65535");
             bytes.writeShort(positionReturnedFromInitialise, (short) length);
             UnsafeMemory.MEMORY.storeFence(); // ensures visibility between threads
         }
@@ -162,7 +165,8 @@ public enum BinaryLengthLength {
         public void writeLength(@NotNull Bytes<?> bytes, @NonNegative long positionReturnedFromInitialise, @NonNegative long end) {
             final long length = (end - positionReturnedFromInitialise - 4) & MASK;
             if (length >= 1L << 31)
-                throw invalidLength(length);
+                // Data length exceeds 32-bit prefix maximum of 2147483647 bytes
+                throw invalidLength(length, "32-bit prefix max is 2147483647");
             bytes.writeOrderedInt(positionReturnedFromInitialise, (int) length);
             UnsafeMemory.MEMORY.storeFence(); // ensures visibility between threads
         }
@@ -174,10 +178,11 @@ public enum BinaryLengthLength {
      * Constructs an IllegalStateException for an invalid length.
      *
      * @param length the invalid length
+     * @param reason description of the constraint that was violated
      * @return the IllegalStateException instance with a message regarding the invalid length
      */
-    IllegalStateException invalidLength(@NonNegative final long length) {
-        return new IllegalStateException("length: " + length);
+    IllegalStateException invalidLength(@NonNegative final long length, String reason) {
+        return new IllegalStateException("length " + length + " exceeds limit: " + reason);
     }
 
     /**

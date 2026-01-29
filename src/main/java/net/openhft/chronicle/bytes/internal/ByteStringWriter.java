@@ -14,9 +14,11 @@ import java.io.Writer;
 import static net.openhft.chronicle.bytes.internal.ReferenceCountedUtil.throwExceptionIfReleased;
 
 /**
- * Writer adapter for an underlying Bytes that forwards characters and advances the writePosition up to the writeLimit.
+ * Writer adapter for an underlying Bytes that forwards characters and advances
+ * the writePosition up to the writeLimit because some APIs require a
+ * {@link Writer} rather than a {@link ByteStringAppender}.
  */
-@SuppressWarnings("rawtypes")
+@SuppressWarnings({"rawtypes", "checkstyle:MMOverusedWord"})
 public class ByteStringWriter extends Writer {
     private final ByteStringAppender out;
 

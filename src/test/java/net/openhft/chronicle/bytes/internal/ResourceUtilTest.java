@@ -12,6 +12,11 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+/**
+ * Tests for ReferenceCountedUtil, because release guards must detect
+ * already-released resources to avoid use-after-free errors.
+ */
+@DisplayName("ReferenceCountedUtil guards detect released resources to prevent use-after-free")
 class ResourceUtilTest extends BytesTestCommon {
 
     @Test

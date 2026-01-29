@@ -14,9 +14,13 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Tests for UnsafeText branch coverage.
+ * Tests for UnsafeText branch coverage because low-level text formatting
+ * must handle edge cases to avoid buffer corruption in native memory.
+ * These tests verify formatting of numbers, decimals, and character arrays
+ * in order to ensure consistent output across all code paths.
  */
-@SuppressWarnings("deprecation")
+@SuppressWarnings({"deprecation", "checkstyle:MMOverusedWord"})
+@DisplayName("UnsafeText formatting handles edge cases for native memory safety")
 class UnsafeTextBranchTest extends BytesTestCommon {
 
     private Bytes<?> bytes;
@@ -46,27 +50,27 @@ class UnsafeTextBranchTest extends BytesTestCommon {
     // appendFixed(long address, long num) tests
 
     @Test
-    @DisplayName("appendFixed should write positive long")
+    @DisplayName("appendFixed writes positive long 12345 because multi-digit values require digit extraction")
     void appendFixedPositiveLong() {
         long address = bytes.addressForWrite(0);
         long end = UnsafeText.appendFixed(address, 12345L);
-        assertEquals("12345", readString(0, end - address), "positive long should be formatted");
+        assertEquals("12345", readString(0, end - address), "appendFixed formats positive long 12345 to '12345'");
     }
 
     @Test
-    @DisplayName("appendFixed should write zero")
+    @DisplayName("appendFixed writes zero value to single character because zero is a boundary case")
     void appendFixedZero() {
         long address = bytes.addressForWrite(0);
         long end = UnsafeText.appendFixed(address, 0L);
-        assertEquals("0", readString(0, end - address), "zero should be formatted");
+        assertEquals("0", readString(0, end - address), "appendFixed formats zero to '0'");
     }
 
     @Test
-    @DisplayName("appendFixed should write negative long")
+    @DisplayName("appendFixed writes negative long -12345 with minus sign because negatives require sign handling")
     void appendFixedNegativeLong() {
         long address = bytes.addressForWrite(0);
         long end = UnsafeText.appendFixed(address, -12345L);
-        assertEquals("-12345", readString(0, end - address), "negative long should be formatted");
+        assertEquals("-12345", readString(0, end - address), "appendFixed formats negative long -12345 to '-12345'");
     }
 
     @Test
@@ -88,11 +92,11 @@ class UnsafeTextBranchTest extends BytesTestCommon {
     }
 
     @Test
-    @DisplayName("appendFixed should handle single digit")
+    @DisplayName("appendFixed writes single digit 7 because single digits use optimised path")
     void appendFixedSingleDigit() {
         long address = bytes.addressForWrite(0);
         long end = UnsafeText.appendFixed(address, 7L);
-        assertEquals("7", readString(0, end - address), "single digit should be formatted");
+        assertEquals("7", readString(0, end - address), "appendFixed formats single digit 7 to '7'");
     }
 
     // appendFixed(long address, double num, int digits) tests
@@ -125,27 +129,27 @@ class UnsafeTextBranchTest extends BytesTestCommon {
         long end = UnsafeText.appendFixed(address, 1e20, 2);
         String result = readString(0, end - address);
         assertNotNull(result, "large magnitude double should be formatted");
-        assertTrue(result.length() > 0, "result should not be empty");
+        assertTrue(result.length() > 0, "appendFixed for large magnitude returns non-empty output");
     }
 
     // appendBase10d tests
 
     @Test
-    @DisplayName("appendBase10d should write with decimal point")
+    @DisplayName("appendBase10d writes 12345 with decimal 2 placing point between digits")
     void appendBase10dWithDecimal() {
         long address = bytes.addressForWrite(0);
         long end = UnsafeText.appendBase10d(address, 12345, 2);
         assertEquals("123.45", readString(0, end - address),
-                "should format with decimal point at position 2");
+                "appendBase10d formats 12345 with decimal=2 to '123.45'");
     }
 
     @Test
-    @DisplayName("appendBase10d should handle negative number")
+    @DisplayName("appendBase10d handles negative -12345 with decimal point because negatives require sign prefix")
     void appendBase10dNegative() {
         long address = bytes.addressForWrite(0);
         long end = UnsafeText.appendBase10d(address, -12345, 2);
         assertEquals("-123.45", readString(0, end - address),
-                "negative should format with decimal point");
+                "appendBase10d formats -12345 with decimal=2 to '-123.45'");
     }
 
     @Test
@@ -158,64 +162,64 @@ class UnsafeTextBranchTest extends BytesTestCommon {
     }
 
     @Test
-    @DisplayName("appendBase10d should handle decimal larger than number")
+    @DisplayName("appendBase10d pads with zeros when decimal position exceeds number length")
     void appendBase10dDecimalLargerThanNumber() {
         long address = bytes.addressForWrite(0);
         long end = UnsafeText.appendBase10d(address, 5, 3);
         assertEquals("0.005", readString(0, end - address),
-                "should pad with zeros when decimal > number length");
+                "appendBase10d formats 5 with decimal=3 to '0.005' with zero padding");
     }
 
     // appendDouble tests
 
     @Test
-    @DisplayName("appendDouble should format normal double")
+    @DisplayName("appendDouble formats normal double 123.456 with decimal precision")
     void appendDoubleNormal() {
         long address = bytes.addressForWrite(0);
         long end = UnsafeText.appendDouble(address, 123.456);
         String result = readString(0, end - address);
         assertTrue(result.startsWith("123.45"),
-                "normal double should be formatted: " + result);
+                "appendDouble formats 123.456 with decimal precision: " + result);
     }
 
     @Test
-    @DisplayName("appendDouble should handle zero")
+    @DisplayName("appendDouble formats zero to '0.0' because trailing decimal is required")
     void appendDoubleZero() {
         long address = bytes.addressForWrite(0);
         long end = UnsafeText.appendDouble(address, 0.0);
-        assertEquals("0.0", readString(0, end - address), "zero should be formatted as 0.0");
+        assertEquals("0.0", readString(0, end - address), "appendDouble formats zero to '0.0'");
     }
 
     @Test
-    @DisplayName("appendDouble should handle negative zero")
+    @DisplayName("appendDouble formats negative zero to '-0.0' preserving sign bit")
     void appendDoubleNegativeZero() {
         long address = bytes.addressForWrite(0);
         long end = UnsafeText.appendDouble(address, -0.0);
-        assertEquals("-0.0", readString(0, end - address), "negative zero should be -0.0");
+        assertEquals("-0.0", readString(0, end - address), "appendDouble formats negative zero to '-0.0'");
     }
 
     @Test
-    @DisplayName("appendDouble should handle positive infinity")
+    @DisplayName("appendDouble formats positive infinity to 'Infinity' string literal")
     void appendDoublePositiveInfinity() {
         long address = bytes.addressForWrite(0);
         long end = UnsafeText.appendDouble(address, Double.POSITIVE_INFINITY);
-        assertEquals("Infinity", readString(0, end - address), "positive infinity");
+        assertEquals("Infinity", readString(0, end - address), "appendDouble formats positive infinity to 'Infinity'");
     }
 
     @Test
-    @DisplayName("appendDouble should handle negative infinity")
+    @DisplayName("appendDouble formats negative infinity to '-Infinity' string literal")
     void appendDoubleNegativeInfinity() {
         long address = bytes.addressForWrite(0);
         long end = UnsafeText.appendDouble(address, Double.NEGATIVE_INFINITY);
-        assertEquals("-Infinity", readString(0, end - address), "negative infinity");
+        assertEquals("-Infinity", readString(0, end - address), "appendDouble formats negative infinity to '-Infinity'");
     }
 
     @Test
-    @DisplayName("appendDouble should handle NaN")
+    @DisplayName("appendDouble formats NaN to 'NaN' string literal for special IEEE value")
     void appendDoubleNaN() {
         long address = bytes.addressForWrite(0);
         long end = UnsafeText.appendDouble(address, Double.NaN);
-        assertEquals("NaN", readString(0, end - address), "NaN should be formatted");
+        assertEquals("NaN", readString(0, end - address), "appendDouble formats NaN to 'NaN' string");
     }
 
     @Test
@@ -230,13 +234,13 @@ class UnsafeTextBranchTest extends BytesTestCommon {
     }
 
     @Test
-    @DisplayName("appendDouble should handle very large number")
+    @DisplayName("appendDouble formats very large 1e35 using scientific notation")
     void appendDoubleVeryLarge() {
         long address = bytes.addressForWrite(0);
         long end = UnsafeText.appendDouble(address, 1e35);
         String result = readString(0, end - address);
-        assertNotNull(result, "very large number should be formatted");
-        assertTrue(result.length() > 0, "result should not be empty");
+        assertNotNull(result, "appendDouble formats very large 1e35");
+        assertTrue(result.length() > 0, "appendDouble for 1e35 returns non-empty output");
     }
 
     @Test
@@ -250,53 +254,53 @@ class UnsafeTextBranchTest extends BytesTestCommon {
     }
 
     @Test
-    @DisplayName("appendDouble should handle small fraction")
+    @DisplayName("appendDouble formats small fraction 1e-7 with leading zeros or scientific notation")
     void appendDoubleSmallFraction() {
         long address = bytes.addressForWrite(0);
         // Small fraction above 6e-8
         long end = UnsafeText.appendDouble(address, 1e-7);
         String result = readString(0, end - address);
         assertTrue(result.startsWith("0.") || result.contains("E") || result.contains("e"),
-                "small fraction should be formatted: " + result);
+                "appendDouble formats 1e-7 with leading zeros or scientific notation: " + result);
     }
 
     @Test
-    @DisplayName("appendDouble should handle integer value")
+    @DisplayName("appendDouble formats integer 42.0 with trailing decimal zero")
     void appendDoubleIntegerValue() {
         long address = bytes.addressForWrite(0);
         long end = UnsafeText.appendDouble(address, 42.0);
-        assertEquals("42.0", readString(0, end - address), "integer value should have .0");
+        assertEquals("42.0", readString(0, end - address), "appendDouble formats 42.0 with trailing decimal");
     }
 
     @Test
-    @DisplayName("appendDouble should handle negative double")
+    @DisplayName("appendDouble formats negative -123.456 with minus sign prefix")
     void appendDoubleNegative() {
         long address = bytes.addressForWrite(0);
         long end = UnsafeText.appendDouble(address, -123.456);
         String result = readString(0, end - address);
         assertTrue(result.startsWith("-123.45"),
-                "negative double should be formatted: " + result);
+                "appendDouble formats -123.456 with minus sign: " + result);
     }
 
     @Test
-    @DisplayName("appendDouble should handle subnormal number")
+    @DisplayName("appendDouble formats subnormal Double.MIN_VALUE using scientific notation")
     void appendDoubleSubnormal() {
         long address = bytes.addressForWrite(0);
         // Subnormal number (denormalized)
         long end = UnsafeText.appendDouble(address, Double.MIN_VALUE);
         String result = readString(0, end - address);
-        assertNotNull(result, "subnormal should be formatted");
+        assertNotNull(result, "appendDouble formats subnormal Double.MIN_VALUE");
     }
 
     // append8bit(byte[]) tests
 
     @Test
-    @DisplayName("append8bit should write byte array")
+    @DisplayName("append8bit writes byte array 'Hello' copying each byte to memory")
     void append8bitByteArray() {
         long address = bytes.addressForWrite(0);
         byte[] data = "Hello".getBytes();
         long end = UnsafeText.append8bit(address, data);
-        assertEquals("Hello", readString(0, end - address), "byte array should be written");
+        assertEquals("Hello", readString(0, end - address), "append8bit writes byte array 'Hello' to memory");
     }
 
     @Test
@@ -333,12 +337,12 @@ class UnsafeTextBranchTest extends BytesTestCommon {
     // append8bit(char[]) tests
 
     @Test
-    @DisplayName("append8bit should write char array")
+    @DisplayName("append8bit writes char array 'Hello' extracting lower 8 bits from each char")
     void append8bitCharArray() {
         long address = bytes.addressForWrite(0);
         char[] data = "Hello".toCharArray();
         long end = UnsafeText.append8bit(address, data);
-        assertEquals("Hello", readString(0, end - address), "char array should be written");
+        assertEquals("Hello", readString(0, end - address), "append8bit writes char array 'Hello' to memory");
     }
 
     @Test
@@ -392,12 +396,12 @@ class UnsafeTextBranchTest extends BytesTestCommon {
     }
 
     @Test
-    @DisplayName("appendDouble should handle max finite double")
+    @DisplayName("appendDouble formats Double.MAX_VALUE using scientific notation")
     void appendDoubleMaxValue() {
         long address = bytes.addressForWrite(0);
         long end = UnsafeText.appendDouble(address, Double.MAX_VALUE);
         String result = readString(0, end - address);
-        assertNotNull(result, "max double should be formatted");
-        assertTrue(result.length() > 0, "result should not be empty");
+        assertNotNull(result, "appendDouble formats Double.MAX_VALUE");
+        assertTrue(result.length() > 0, "appendDouble for MAX_VALUE returns non-empty output");
     }
 }

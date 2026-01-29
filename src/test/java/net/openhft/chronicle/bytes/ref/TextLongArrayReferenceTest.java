@@ -14,6 +14,12 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+/**
+ * Tests TextLongArrayReference value storage and formatting because correct
+ * text-formatted long arrays are essential for debugging and manual
+ * inspection of stored data.
+ */
+@DisplayName("Text long array reference storage formatting and access")
 public class TextLongArrayReferenceTest extends BytesTestCommon {
     @Test
     @DisplayName("text long array reference stores values and formats output")
@@ -116,7 +122,7 @@ public class TextLongArrayReferenceTest extends BytesTestCommon {
                 array.bytesStore(bytes, 0, length);
                 array.setValueAt(0, 4);
                 assertFalse(array.compareAndSet(0, 2, 9),
-                        "compareAndSet should return false when expected does not match");
+                        "compareAndSet should return false when expected value does not match current");
                 assertEquals(4,
                         array.getValueAt(0),
                         "Value should remain unchanged when compareAndSet fails");
@@ -136,7 +142,7 @@ public class TextLongArrayReferenceTest extends BytesTestCommon {
                 long length = TextLongArrayReference.peakLength(bytes, 0);
                 long badLength = length - 1;
                 assertFalse(badLength == length,
-                        "Sanity check should confirm badLength=" + badLength + " differs from length=" + length);
+                        "Precondition sanity check: badLength " + badLength + " must differ from header length " + length);
                 assertThrows(IllegalArgumentException.class,
                         () -> array.bytesStore(bytes, 0, badLength),
                         "bytesStore should reject lengths that do not match the header");
@@ -147,7 +153,7 @@ public class TextLongArrayReferenceTest extends BytesTestCommon {
     }
 
     @Test
-    @DisplayName("toString reports null state before initialisation")
+    @DisplayName("toString reports bytes equals null before bytesStore initialisation")
     public void toStringReportsNullState() {
         try (@NotNull TextLongArrayReference array = new TextLongArrayReference()) {
             String value = array.toString();

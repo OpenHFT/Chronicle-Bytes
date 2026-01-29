@@ -9,6 +9,11 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
+/**
+ * Tests unchecked bytes behaviour because bypassing bounds checks requires
+ * validation to ensure the correct wrapper is returned for direct memory.
+ */
+@DisplayName("UncheckedBytesBehaviour - validates unchecked wrapper selection")
 public class UncheckedBytesBehaviourTest extends BytesTestCommon {
 
     @Test

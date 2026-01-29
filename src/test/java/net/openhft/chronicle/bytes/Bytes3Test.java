@@ -26,7 +26,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+/**
+ * Tests various Bytes implementations across multiple factory methods because correct
+ * behaviour must be verified for heap, direct, elastic, mapped, and checked variants
+ * to avoid runtime failures in different deployment scenarios.
+ */
 @SuppressWarnings({"rawtypes", "unchecked", "deprecation"})
+@DisplayName("Bytes - parameterised tests for read, write, append, and toString across allocators")
 public class Bytes3Test extends BytesTestCommon {
 
     private static final String TMP_FILE = OS.getTarget() + "/Bytes3Test-deleteme";
@@ -51,8 +57,10 @@ public class Bytes3Test extends BytesTestCommon {
                     {"Bytes.wrapForWrite(ByteBuffer.allocateDirect(200))", (Supplier<Bytes<?>>) () -> Bytes.wrapForWrite(ByteBuffer.allocateDirect(260))},
                     {"MappedBytes.mappedBytes(64K)", (Supplier<Bytes<?>>) () -> {
                         try {
+                            // MappedBytes requires file-backed storage for memory-mapped IO
                             return MappedBytes.mappedBytes(TMP_FILE, 64 << 10);
                         } catch (FileNotFoundException e) {
+                            // Re-throw wrapped for test infrastructure
                             throw Jvm.rethrow(e);
                         }
                     }}
@@ -347,9 +355,9 @@ public class Bytes3Test extends BytesTestCommon {
         doAppend(name, supplier, name.contains("ForRead"), (b, s) -> b.writeUtf8(Bytes.from(s)));
     }
 
-    @SuppressWarnings("rawtypes")
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
+    @SuppressWarnings("rawtypes")
     @DisplayName("toString8bit produces expected character mapping output")
     public void toString8bit(String name, Supplier<Bytes<?>> supplier) {
         boolean forRead = name.contains("ForRead");
@@ -367,7 +375,7 @@ public class Bytes3Test extends BytesTestCommon {
                         "Character mismatch at index " + (int) ch + " in: " + s);
             }
             assertEquals(256, s.length(),
-                    "Expected 256 characters, but got: " + s.length());
+                    "toString should return 256 characters, but got: " + s.length());
         } finally {
             bytes.releaseLast();
         }

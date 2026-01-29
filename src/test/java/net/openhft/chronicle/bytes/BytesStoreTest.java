@@ -8,6 +8,13 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+/**
+ * Tests BytesStore substring and slicing operations because correct subsequence behaviour
+ * is essential for extracting data from byte buffers.
+ *
+ * <p>Verifies subBytes and subSequence in order to ensure that sliced views return the expected
+ * content, to avoid off-by-one errors and data corruption.
+ */
 @DisplayName("BytesStore substring and slicing scenario coverage")
 public class BytesStoreTest extends BytesTestCommon {
     @Test
@@ -32,8 +39,9 @@ public class BytesStoreTest extends BytesTestCommon {
     }
 
     @Test
-    @DisplayName("Heap bytes subsequence returns expected slices")
+    @DisplayName("Heap allocation subsequence returns expected slices due to position tracking")
     public void testSubSequenceOnHeap() {
+        // On-heap elastic allocation to verify subsequence works in managed memory
         final Bytes<?> bytes = Bytes.allocateElasticOnHeap();
 
         bytes.append("Hello");
@@ -42,8 +50,9 @@ public class BytesStoreTest extends BytesTestCommon {
     }
 
     @Test
-    @DisplayName("Direct bytes subsequence returns expected slices")
+    @DisplayName("Direct allocation subsequence returns expected slices despite off-heap memory")
     public void testSubSequenceDirect() {
+        // Off-heap direct allocation to verify subsequence works with native memory
         final Bytes<?> bytes = Bytes.allocateElasticDirect();
 
         bytes.append("Hello");
@@ -54,6 +63,7 @@ public class BytesStoreTest extends BytesTestCommon {
     }
 
     private void testSubSequence(Bytes<?> hello) {
+        // Full range should capture all characters
         CharSequence helloSubsequence = hello.subSequence(0, 5);
         assertEquals("Hello", helloSubsequence.toString(), "Full subsequence should return Hello");
 
@@ -66,6 +76,7 @@ public class BytesStoreTest extends BytesTestCommon {
         CharSequence elSubsequence = hello.subSequence(1, 3);
         assertEquals("el", elSubsequence.toString(), "Short inner subsequence should return el");
 
+        // Shifting readPosition to verify subsequence respects current position
         hello.readPosition(1);
 
         assertEquals("ello", hello.toString(), "Read position shift should expose ello");

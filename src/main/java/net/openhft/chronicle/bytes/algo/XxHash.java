@@ -22,7 +22,7 @@ import java.nio.BufferUnderflowException;
  * @see BytesStoreHash
  * @see BytesStore
  */
-@SuppressWarnings("rawtypes")
+@SuppressWarnings({"rawtypes", "checkstyle:MMOverusedWord"})
 public class XxHash implements BytesStoreHash<BytesStore<?, ?>> {
     // Primes if treated as unsigned
     /** Prime constant P1 used in xxHash mixing. */

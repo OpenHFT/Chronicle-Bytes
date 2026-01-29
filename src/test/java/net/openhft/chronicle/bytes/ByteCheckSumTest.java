@@ -8,6 +8,11 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+/**
+ * Tests byteCheckSum for direct and heap bytes because correct checksums are required
+ * for data integrity verification in streaming and persistence scenarios.
+ */
+@DisplayName("Bytes - byteCheckSum for direct and heap allocations")
 public class ByteCheckSumTest extends BytesTestCommon {
     @Test
     @DisplayName("byteCheckSum computes checksum for direct bytes")

@@ -50,6 +50,7 @@ public class DistributedUniqueTimeProviderTest extends BytesTestCommon {
 
     @BeforeAll
     public static void checks() throws IOException {
+        // Configure timestamp directory so that DistributedUniqueTimeProvider uses the target folder
         System.setProperty("timestamp.dir", OS.getTarget());
         final File file = new File(BytesUtil.TIME_STAMP_PATH);
         deleteIfPossible(file);

@@ -4,10 +4,17 @@
 package net.openhft.chronicle.bytes;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.mockito.Mockito.*;
 
+/**
+ * Tests RingBufferReader mock behaviour because the reader interface
+ * must honour empty, stopped, and stop state transitions in order to
+ * support correct buffer consumption patterns.
+ */
+@DisplayName("RingBufferReader - validates mock-based state transitions")
 public class RingBufferReaderTest {
 
     private RingBufferReader reader;
@@ -18,6 +25,7 @@ public class RingBufferReaderTest {
     }
 
     @Test
+    @DisplayName("mock isEmpty reports true so consumer knows buffer is drained")
     public void testIsEmpty() {
         when(reader.isEmpty()).thenReturn(true);
 
@@ -27,6 +35,7 @@ public class RingBufferReaderTest {
     }
 
     @Test
+    @DisplayName("mock isStopped reports false so consumer knows reading can continue")
     public void testIsStopped() {
         when(reader.isStopped()).thenReturn(false);
 
@@ -36,6 +45,7 @@ public class RingBufferReaderTest {
     }
 
     @Test
+    @DisplayName("stop invokes reader stop method exactly once")
     public void testStop() {
         reader.stop();
 

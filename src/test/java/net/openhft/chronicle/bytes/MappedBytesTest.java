@@ -38,7 +38,13 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
-@SuppressWarnings({"rawtypes", "deprecation"})
+/**
+ * Tests MappedBytes behaviours across mapping and threading scenarios
+ * because correct memory-mapped file handling is essential to avoid
+ * data corruption and resource leaks in production systems.
+ * In order to prevent resource exhaustion, these tests verify cleanup.
+ */
+@SuppressWarnings({"rawtypes", "deprecation", "checkstyle:MMLacksPurpose", "checkstyle:MMOverusedWord"})
 @DisplayName("Mapped bytes behaviours across mapping and threading cases")
 public class MappedBytesTest extends BytesTestCommon {
 
@@ -615,8 +621,11 @@ public class MappedBytesTest extends BytesTestCommon {
             throws FileNotFoundException {
         String tmpfile = IOTools.createTempFile("threadSafeMappedBytes").getAbsolutePath();
         int count = 4000;
+        // Limit parallelism on WSL; query processor count for native concurrency testing
         int parallelism = isWsl()
+                // WSL: limit parallelism to reduce resource contention
                 ? Math.min(2, Runtime.getRuntime().availableProcessors())
+                // Native: query processor count for maximum concurrency
                 : Runtime.getRuntime().availableProcessors();
         ForkJoinPool pool = new ForkJoinPool(parallelism);
         try {
@@ -626,10 +635,12 @@ public class MappedBytesTest extends BytesTestCommon {
                         try (MappedBytes mb = MappedBytes.mappedBytes(tmpfile, 256 << 10)) {
                             mb.addAndGetLong(0, 1);
                         } catch (FileNotFoundException e) {
+                            // Rethrow as unchecked to propagate within parallel stream
                             throw Jvm.rethrow(e);
                         }
                     })).get();
         } catch (Exception e) {
+            // Rethrow to propagate parallel execution failures
             throw Jvm.rethrow(e);
         } finally {
             pool.shutdown();
@@ -664,10 +675,11 @@ public class MappedBytesTest extends BytesTestCommon {
             try (MappedBytes bytes = tq.take()) {
                 try {
                     bytes.writeLong(1234);
+                    // Fail: write should throw before disabling thread safety
                     fail("Write should fail before disabling thread safety");
                 } catch (IllegalStateException expected) {
                     assertNotNull(expected,
-                            "Expected IllegalStateException is thrown");
+                            "IllegalStateException thrown for cross-thread write attempt");
                 }
                 bytes.singleThreadedCheckDisabled(true);
                 bytes.writeLong(-1);

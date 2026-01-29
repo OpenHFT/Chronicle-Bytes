@@ -22,6 +22,13 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
+/**
+ * Tests large message writes to mapped bytes because correct expansion
+ * is essential for handling messages larger than initial chunk size,
+ * so that the underlying store grows dynamically to avoid buffer overflows.
+ */
+@SuppressWarnings({"checkstyle:MMOverusedWord", "checkstyle:MMLacksPurpose"})
+@DisplayName("Large message writes trigger mapped bytes store expansion")
 public class CheckOverSizedMessagesTest extends BytesTestCommon {
 
     private static final byte[] BYTE6K = new byte[6000];

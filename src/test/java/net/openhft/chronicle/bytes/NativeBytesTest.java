@@ -172,6 +172,7 @@ public class NativeBytesTest extends BytesTestCommon {
                 "Direct memory required for heap buffer growth test");
         assumeFalse(alloc == HEAP,
                 "Heap allocator does not support heap buffer grow test");
+        // Capacity check: ensure max memory allows over-capacity test
         long maxMemory = Runtime.getRuntime().maxMemory();
         assumeTrue(maxMemory >= Bytes.MAX_HEAP_CAPACITY * 3L / 2,
                 "Max heap memory must allow over capacity test");

@@ -29,9 +29,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
- * Tests if certain non-performant methods works as expected when called on a released Bytes object
+ * Tests that non-performant methods throw ClosedIllegalStateException when called on released
+ * Bytes objects because safe failure is essential for detecting resource management errors.
  */
 @SuppressWarnings("deprecation")
+@DisplayName("Closed buffer non-performant operations throw expected exceptions")
 final class BytesReleaseInvariantNonPerformantMethodsTest extends BytesTestCommon {
 
     private static final String SILLY_NAME = "Tryggve";
@@ -102,7 +104,7 @@ final class BytesReleaseInvariantNonPerformantMethodsTest extends BytesTestCommo
      * Checks that methods throws ClosedIllegalStateException and does not change the state of the Bytes
      */
     @TestFactory
-    @DisplayName("released bytes non-performant operations throw ClosedIllegalStateException")
+    @DisplayName("closed buffer non-performant methods throw ClosedIllegalStateException")
     Stream<DynamicTest> nonPerformanceCriticalOperators() {
         final AtomicReference<BytesInitialInfo> initialInfo = new AtomicReference<>();
         return cartesianProductTest(BytesFactoryUtil::provideBytesObjects,
@@ -119,15 +121,15 @@ final class BytesReleaseInvariantNonPerformantMethodsTest extends BytesTestCommo
 
                     assertThrows(ClosedIllegalStateException.class,
                             () -> nc.accept(bytes),
-                            "Released bytes should reject " + name);
+                            "Closed buffer should reject operation " + name);
 
-                    // Unable to check actual size for released MappedBytes
+                    // Unable to check actual size for closed MappedBytes
                     if ((Bytes<?>) bytes instanceof MappedBytes || bytes instanceof EmbeddedBytes)
                         return;
                     final BytesInitialInfo info = new BytesInitialInfo(bytes);
                     assertEquals(initialInfo.get(),
                             info,
-                            "Released bytes should preserve state for " + name);
+                            "Closed buffer should preserve state after " + name);
                 }
         );
     }
@@ -136,17 +138,17 @@ final class BytesReleaseInvariantNonPerformantMethodsTest extends BytesTestCommo
      * Checks the bytes.toDebugString() works with released resources
      */
     @ParameterizedTest
-    @DisplayName("debug string remains available after release")
+    @DisplayName("debug string remains available after closure")
     @MethodSource("net.openhft.chronicle.bytes.BytesFactoryUtil#provideBytesObjects")
     void toDebugString(final Bytes<?> bytes, final boolean readWrite) {
         toDebug(bytes, readWrite, Bytes::toDebugString);
     }
 
     /**
-     * Checks the bytes.toDebugString(10) works with released resources
+     * Checks the bytes.toDebugString(10) works with closed resources
      */
     @ParameterizedTest
-    @DisplayName("debug string length ten remains after release")
+    @DisplayName("debug string length ten remains after closure")
     @MethodSource("net.openhft.chronicle.bytes.BytesFactoryUtil#provideBytesObjects")
     void toDebugString10(final Bytes<?> bytes, final boolean readWrite) {
         toDebug(bytes, readWrite, b -> b.toDebugString(10));
@@ -160,6 +162,6 @@ final class BytesReleaseInvariantNonPerformantMethodsTest extends BytesTestCommo
         releaseAndAssertReleased(bytes);
         final String actual = operation.apply(bytes);
         assertEquals("<released>", actual,
-                "released bytes should render the expected debug marker");
+                "closed buffer should render the expected debug marker");
     }
 }

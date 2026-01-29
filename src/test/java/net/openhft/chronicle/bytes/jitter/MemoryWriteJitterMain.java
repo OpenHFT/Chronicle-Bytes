@@ -12,6 +12,10 @@ import net.openhft.chronicle.core.util.Time;
 import java.io.File;
 import java.io.IOException;
 
+/**
+ * Benchmark harness for measuring memory write jitter on mapped bytes, in order to
+ * measure latency variance caused by memory access patterns and safepoints.
+ */
 @SuppressWarnings("PMD.UnusedAssignment") // writing flag is polled from another thread; local writes appear unused
 public class MemoryWriteJitterMain {
     private static final String PROFILE_OF_THE_THREAD = "profile of the thread";
@@ -26,7 +30,9 @@ public class MemoryWriteJitterMain {
     private static volatile int count = 0;
 
     static {
+        // Enable safepoint tracing to detect JVM pauses during write operations
         System.setProperty("jvm.safepoint.enabled", "true");
+        // Reduce logging noise so that benchmark output remains readable
         System.setProperty("org.slf4j.simpleLogger.defaultLogLevel", "info");
     }
 
@@ -59,13 +65,16 @@ public class MemoryWriteJitterMain {
                     histoWrite.sampleNanos(now - startTimeNs);
                     writing = false;
                     long start = System.nanoTime();
+                    // Yield to allow main thread to observe the write completion
                     Thread.yield();
+                    // Busy-wait until next interval to maintain consistent throughput timing
                     //noinspection StatementWithEmptyBody
                     while (System.nanoTime() < start + intervalNS);
                 }
                 mf.releaseLast();
             } catch (Throwable t) {
                 t.printStackTrace();
+                // Exit immediately on writer thread failure to avoid deadlock
                 System.exit(-1);
             }
         });

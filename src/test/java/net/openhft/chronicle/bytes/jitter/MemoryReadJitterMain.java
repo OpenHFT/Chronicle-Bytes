@@ -13,6 +13,10 @@ import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicLong;
 
+/**
+ * Benchmark harness for measuring memory read jitter on mapped bytes, in order to
+ * measure latency variance caused by memory access patterns and safepoints.
+ */
 public class MemoryReadJitterMain {
     private static final String PROFILE_OF_THE_THREAD = "profile of the thread";
 
@@ -24,7 +28,9 @@ public class MemoryReadJitterMain {
     private static volatile boolean running = true;
 
     static {
+        // Enable safepoint tracing to detect JVM pauses during read operations
         System.setProperty("jvm.safepoint.enabled", "true");
+        // Reduce logging noise so that benchmark output remains readable
         System.setProperty("org.slf4j.simpleLogger.defaultLogLevel", "info");
     }
 
@@ -115,12 +121,14 @@ public class MemoryReadJitterMain {
                 }
             }
             while (System.nanoTime() < start1 + intervalNS) {
+                // Yield thread until next interval to maintain target throughput
                 Thread.yield();
             }
         } while (System.currentTimeMillis() < start0 + runTime * 1_000L);
         running = false;
         mf.releaseLast();
-        System.gc();// give it time to release the file so the delete on exit will work on windows.
+        // Trigger GC to release file handles so that the delete on exit will work on Windows
+        System.gc();
 
         System.out.println("size=" + size + " padTo=" + padTo);
         System.out.println("histoRead     =" + histoRead.toMicrosFormat());

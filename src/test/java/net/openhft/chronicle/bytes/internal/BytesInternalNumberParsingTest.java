@@ -14,9 +14,11 @@ import org.junit.jupiter.params.provider.ValueSource;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Tests for BytesInternal number parsing methods covering various input formats
- * and edge cases.
+ * Tests for BytesInternal number parsing methods because text-to-number conversion
+ * must handle various input formats to avoid parsing errors. Edge cases are tested
+ * in order to ensure correct handling of boundary values and malformed input.
  */
+@SuppressWarnings("checkstyle:MMOverusedWord")
 @DisplayName("BytesInternal number parsing coverage for formats and edge cases")
 class BytesInternalNumberParsingTest extends BytesTestCommon {
 

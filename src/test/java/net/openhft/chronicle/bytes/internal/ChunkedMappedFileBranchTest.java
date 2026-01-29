@@ -20,8 +20,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Tests for ChunkedMappedFile branch coverage.
+ * Tests for ChunkedMappedFile branch coverage, because chunk acquisition
+ * and file locking must handle edge cases to avoid memory leaks and corruption.
  */
+@DisplayName("ChunkedMappedFile chunk acquisition and file lifecycle validation")
 class ChunkedMappedFileBranchTest extends BytesTestCommon implements ReferenceOwner {
 
     @TempDir
@@ -52,38 +54,39 @@ class ChunkedMappedFileBranchTest extends BytesTestCommon implements ReferenceOw
     }
 
     @Test
-    @DisplayName("capacity should return configured capacity")
+    @DisplayName("capacity returns at least 16384 bytes when configured with that value")
     void capacityReturnsConfigured() throws IOException {
         chunkedFile = createChunkedFile(4096, 0, 16384, false);
-        assertTrue(chunkedFile.capacity() >= 16384, "capacity should be at least configured");
+        assertTrue(chunkedFile.capacity() >= 16384, "capacity=" + chunkedFile.capacity() + " should be at least 16384");
     }
 
     @Test
-    @DisplayName("chunkSize should return configured chunk size")
+    @DisplayName("chunkSize returns at least 4096 bytes when configured with that value")
     void chunkSizeReturnsConfigured() throws IOException {
         chunkedFile = createChunkedFile(4096, 0, 16384, false);
-        assertTrue(chunkedFile.chunkSize() >= 4096, "chunk size should be at least configured");
+        assertTrue(chunkedFile.chunkSize() >= 4096, "chunkSize=" + chunkedFile.chunkSize() + " should be at least 4096");
     }
 
     @Test
-    @DisplayName("overlapSize should return configured overlap")
+    @DisplayName("overlapSize returns at least 1024 bytes when configured because overlap enables cross-chunk reads")
     void overlapSizeReturnsConfigured() throws IOException {
         chunkedFile = createChunkedFile(4096, 1024, 16384, false);
-        assertTrue(chunkedFile.overlapSize() >= 0, "overlap size should be non-negative");
+        long overlapSize = chunkedFile.overlapSize();
+        assertTrue(overlapSize >= 0, "overlapSize=" + overlapSize + " should be non-negative because overlap is optional");
     }
 
     @Test
-    @DisplayName("raf should return underlying RandomAccessFile")
+    @DisplayName("raf returns the underlying RandomAccessFile for direct channel access")
     void rafReturnsUnderlyingFile() throws IOException {
         chunkedFile = createChunkedFile(4096, 0, 16384, false);
-        assertNotNull(chunkedFile.raf(), "raf should not be null");
+        assertNotNull(chunkedFile.raf(), "raf() should return non-null RandomAccessFile for open chunked file");
     }
 
     @Test
-    @DisplayName("actualSize should return file size")
+    @DisplayName("actualSize returns non-negative value representing the file length on disk")
     void actualSizeReturnsFileSize() throws IOException {
         chunkedFile = createChunkedFile(4096, 0, 16384, false);
-        assertTrue(chunkedFile.actualSize() >= 0, "actual size should be non-negative");
+        assertTrue(chunkedFile.actualSize() >= 0, "actualSize=" + chunkedFile.actualSize() + " should be non-negative");
     }
 
     @Test
@@ -92,8 +95,8 @@ class ChunkedMappedFileBranchTest extends BytesTestCommon implements ReferenceOw
         chunkedFile = createChunkedFile(4096, 0, 16384, false);
         MappedBytesStore store = chunkedFile.acquireByteStore(this, 0);
         try {
-            assertNotNull(store, "store should not be null");
-            assertTrue(store.capacity() > 0, "store should have capacity");
+            assertNotNull(store, "acquireByteStore(0) should return non-null store for valid position");
+            assertTrue(store.capacity() > 0, "store.capacity()=" + store.capacity() + " should be positive");
         } finally {
             store.release(this);
         }
@@ -114,11 +117,11 @@ class ChunkedMappedFileBranchTest extends BytesTestCommon implements ReferenceOw
     }
 
     @Test
-    @DisplayName("acquireByteStore with negative position should throw")
+    @DisplayName("acquireByteStore throws exception when position is -1 because negative offsets are invalid")
     void acquireByteStoreNegativePositionThrows() throws IOException {
         chunkedFile = createChunkedFile(4096, 0, 16384, false);
         assertThrows(Exception.class, () -> chunkedFile.acquireByteStore(this, -1),
-                "negative position should throw");
+                "acquireByteStore(-1) should throw because negative positions are invalid");
     }
 
     @Test
@@ -135,12 +138,12 @@ class ChunkedMappedFileBranchTest extends BytesTestCommon implements ReferenceOw
     }
 
     @Test
-    @DisplayName("chunkCount can be set externally")
+    @DisplayName("chunkCount(array) sets external counter and chunkCount returns array[0]=5")
     void chunkCountCanBeSet() throws IOException {
         chunkedFile = createChunkedFile(4096, 0, 16384, false);
         long[] externalCount = {5L};
         chunkedFile.chunkCount(externalCount);
-        assertEquals(5L, chunkedFile.chunkCount(), "chunk count should reflect external array");
+        assertEquals(5L, chunkedFile.chunkCount(), "chunkCount() should return 5 from external array after chunkCount(array)");
     }
 
     @Test
@@ -157,21 +160,21 @@ class ChunkedMappedFileBranchTest extends BytesTestCommon implements ReferenceOw
     }
 
     @Test
-    @DisplayName("referenceCounts should return reference info")
+    @DisplayName("referenceCounts returns string containing refCount for debugging resource leaks")
     void referenceCountsReturnsInfo() throws IOException {
         chunkedFile = createChunkedFile(4096, 0, 16384, false);
         MappedBytesStore store = chunkedFile.acquireByteStore(this, 0);
         try {
             String refs = chunkedFile.referenceCounts();
-            assertNotNull(refs, "reference counts should not be null");
-            assertTrue(refs.contains("refCount"), "should contain refCount");
+            assertNotNull(refs, "referenceCounts() should return non-null string for active chunked file");
+            assertTrue(refs.contains("refCount"), "referenceCounts() string should contain 'refCount' substring");
         } finally {
             store.release(this);
         }
     }
 
     @Test
-    @DisplayName("NewChunkListener should be called on new chunk")
+    @DisplayName("NewChunkListener registration persists and getter returns same listener instance")
     void newChunkListenerCalled() throws IOException {
         chunkedFile = createChunkedFile(4096, 0, 16384, false);
         AtomicInteger callCount = new AtomicInteger(0);
@@ -189,13 +192,13 @@ class ChunkedMappedFileBranchTest extends BytesTestCommon implements ReferenceOw
     }
 
     @Test
-    @DisplayName("lock should acquire file lock")
+    @DisplayName("lock(0, 100, false) acquires valid exclusive FileLock on first 100 bytes")
     void lockAcquiresFileLock() throws IOException {
         chunkedFile = createChunkedFile(4096, 0, 16384, false);
         FileLock lock = chunkedFile.lock(0, 100, false);
         try {
-            assertNotNull(lock, "lock should not be null");
-            assertTrue(lock.isValid(), "lock should be valid");
+            assertNotNull(lock, "lock(0, 100, false) should return non-null FileLock");
+            assertTrue(lock.isValid(), "acquired FileLock.isValid() should return true");
         } finally {
             lock.release();
         }
@@ -216,13 +219,13 @@ class ChunkedMappedFileBranchTest extends BytesTestCommon implements ReferenceOw
     }
 
     @Test
-    @DisplayName("createBytesFor should create ChunkedMappedBytes")
+    @DisplayName("createBytesFor returns ChunkedMappedBytes instance for chunked file access")
     void createBytesForCreatesChunkedMappedBytes() throws IOException {
         chunkedFile = createChunkedFile(4096, 0, 16384, false);
         MappedBytes bytes = chunkedFile.createBytesFor();
         try {
-            assertNotNull(bytes, "bytes should not be null");
-            assertTrue(bytes instanceof ChunkedMappedBytes, "should be ChunkedMappedBytes");
+            assertNotNull(bytes, "createBytesFor() should return non-null MappedBytes");
+            assertTrue(bytes instanceof ChunkedMappedBytes, "createBytesFor() should return ChunkedMappedBytes instance");
         } finally {
             bytes.releaseLast();
         }
@@ -242,7 +245,7 @@ class ChunkedMappedFileBranchTest extends BytesTestCommon implements ReferenceOw
         RandomAccessFile raf = new RandomAccessFile(file, "r");
         chunkedFile = new ChunkedMappedFile(file, raf, 4096, 0, 16384, true);
 
-        assertTrue(chunkedFile.readOnly(), "file should be read-only");
+        assertTrue(chunkedFile.readOnly(), "readOnly() should return true for file opened with read-only flag");
     }
 
     @Test
@@ -273,20 +276,20 @@ class ChunkedMappedFileBranchTest extends BytesTestCommon implements ReferenceOw
     }
 
     @Test
-    @DisplayName("file should return underlying file")
+    @DisplayName("file() returns the original File object used to create the ChunkedMappedFile")
     void fileReturnsUnderlyingFile() throws IOException {
         chunkedFile = createChunkedFile(4096, 0, 16384, false);
-        assertEquals(file, chunkedFile.file(), "file should match");
+        assertEquals(file, chunkedFile.file(), "file() should return the same File instance passed to constructor");
     }
 
     @Test
-    @DisplayName("acquireByteStore can extend capacity")
+    @DisplayName("acquireByteStore at position 100000 extends file capacity beyond initial 16384")
     void acquireByteStoreCanExtendCapacity() throws IOException {
         chunkedFile = createChunkedFile(4096, 0, 16384, false);
         // Position beyond initial capacity - file can grow
         MappedBytesStore store = chunkedFile.acquireByteStore(this, 100000);
         try {
-            assertNotNull(store, "store beyond initial capacity should be created");
+            assertNotNull(store, "acquireByteStore(100000) should return non-null store after capacity extension");
         } finally {
             store.release(this);
         }

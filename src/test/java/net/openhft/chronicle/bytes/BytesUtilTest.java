@@ -23,6 +23,11 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
+/**
+ * Tests BytesUtil utility methods for stop bit encoding, alignment, and trivially copyable
+ * detection because correct utility behaviour is essential for low-level byte operations.
+ */
+@DisplayName("BytesUtil utility methods should handle stop bit encoding, alignment, and copyable detection")
 public class BytesUtilTest extends BytesTestCommon {
 
     File testFile;
@@ -85,14 +90,14 @@ public class BytesUtilTest extends BytesTestCommon {
     }
 
     @Test
-    @DisplayName("findFile locates a writable file path")
+    @DisplayName("locating a file path returns an existing writable file")
     public void findFile()
             throws FileNotFoundException {
         String file = BytesUtil.findFile("file-to-find.txt");
         assertTrue(new File(file).exists(),
-                "findFile returns a path that exists");
+                "located path should exist on disk");
         assertTrue(new File(file).canWrite(),
-                "findFile returns a path that is writable");
+                "located path should be writable");
     }
 
     @Test
@@ -239,8 +244,8 @@ public class BytesUtilTest extends BytesTestCommon {
                 "equals matches equivalent Bytes instances");
     }
 
-    @SuppressWarnings({"deprecation", "removal"})
     @Test
+    @SuppressWarnings({"deprecation", "removal"})
     @DisplayName("equals returns true for equivalent boxed integer objects")
     public void equals_equivalentObjects() {
         // Intentional boxing to create two equivalent but distinct objects

@@ -21,7 +21,12 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+/**
+ * Tests UncheckedNativeBytes operations because bypassing bounds validation
+ * on native memory requires careful verification to avoid silent corruption.
+ */
 @SuppressWarnings({"unchecked", "rawtypes"})
+@DisplayName("UncheckedNativeBytes - validates native memory unchecked operations")
 class UncheckedNativeBytesTest {
 
     private Bytes<?> underlyingBytes;

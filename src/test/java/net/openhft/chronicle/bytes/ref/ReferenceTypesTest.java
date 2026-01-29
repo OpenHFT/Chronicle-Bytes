@@ -12,6 +12,12 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+/**
+ * Tests reference type behaviours for text and binary values because
+ * correct value storage is essential for both human-readable and compact
+ * binary formats.
+ */
+@SuppressWarnings("MMOverusedWord") // value domain terminology
 @DisplayName("Reference type behaviours for text and binary values")
 public class ReferenceTypesTest extends BytesTestCommon {
 

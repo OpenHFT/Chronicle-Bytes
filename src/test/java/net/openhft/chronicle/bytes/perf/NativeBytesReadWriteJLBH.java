@@ -6,8 +6,9 @@ package net.openhft.chronicle.bytes.perf;
 import net.openhft.chronicle.bytes.Bytes;
 
 /**
- * Convenience entry point to run the Bytes read/write JLBH benchmark using a
- * direct native buffer.
+ * Convenience entry point for the Bytes read/write JLBH benchmark because
+ * measuring native buffer throughput is essential to validate off-heap
+ * performance characteristics.
  */
 public class NativeBytesReadWriteJLBH {
 

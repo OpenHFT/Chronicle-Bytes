@@ -27,16 +27,21 @@ import java.util.stream.IntStream;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-/*
-    Averages from TeamCity logs:
-
-    Type.        Linux [us]   Windows [us]   ARM [us]
-    ===========================================================
-    Sequential   15           49             120
-    Parallel      3.5         15              51
-*/
-
+/**
+ * Tests concurrent RAF access performance for parallel and sequential file operations
+ * because understanding file expansion overhead is essential for capacity planning.
+ * <p>
+ * Averages from TeamCity logs:
+ * <pre>
+ * Type.        Linux [us]   Windows [us]   ARM [us]
+ * ===========================================================
+ * Sequential   15           49             120
+ * Parallel      3.5         15              51
+ * </pre>
+ */
+@SuppressWarnings("checkstyle:MMOverusedWord")
 @Disabled("This is a performance test and should not be run as a part of the normal build")
+@DisplayName("Concurrent RAF access should demonstrate parallel file expansion outperforms sequential access")
 public class ConcurrentRafAccessTest extends BytesTestCommon {
 
     private static final String MODE = "rw";
@@ -69,6 +74,7 @@ public class ConcurrentRafAccessTest extends BytesTestCommon {
                     } catch (IOException e) {
                         e.printStackTrace();
                         fail("unable to create file for " + i);
+                        // Return null to satisfy compiler; fail() above always throws
                         return null;
                     }
                 })

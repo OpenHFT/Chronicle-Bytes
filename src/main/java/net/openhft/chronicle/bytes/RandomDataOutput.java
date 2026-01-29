@@ -27,7 +27,7 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
  * @param <R> self type for fluent chaining
  * @see RandomDataInput
  */
-@SuppressWarnings({"rawtypes", "unchecked"})
+@SuppressWarnings({"rawtypes", "unchecked", "checkstyle:MMOverusedWord"})
 public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomCommon {
     /**
      * Writes a byte value at the specified offset.

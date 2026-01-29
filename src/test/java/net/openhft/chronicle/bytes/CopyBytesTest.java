@@ -17,6 +17,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
+/**
+ * Tests copy operations across direct and mapped memory regions because correct data
+ * transfer is required to avoid corruption when crossing chunk boundaries in mapped files.
+ */
+@SuppressWarnings("checkstyle:MMOverusedWord")
+@DisplayName("Bytes copy operations across direct and mapped memory regions")
 public class CopyBytesTest extends BytesTestCommon {
 
     private static void doTest(Bytes<?> toTest, int from) {

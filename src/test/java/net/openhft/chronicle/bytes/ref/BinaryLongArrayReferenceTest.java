@@ -20,6 +20,11 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 import static net.openhft.chronicle.bytes.ref.BinaryLongReference.LONG_NOT_COMPLETE;
 
+/**
+ * Tests BinaryLongArrayReference marshalling and access because correct
+ * array storage is essential for indexed long lookups in memory-mapped
+ * data structures.
+ */
 @SuppressWarnings("deprecation")
 @DisplayName("Binary long array reference marshalling and access")
 public class BinaryLongArrayReferenceTest extends BytesTestCommon {
@@ -324,10 +329,10 @@ public class BinaryLongArrayReferenceTest extends BytesTestCommon {
             array.bytesStore(bytes, 0, length);
             array.setValueAt(0, 3);
             assertFalse(array.compareAndSet(0, 1, 4),
-                    "compareAndSet should return false when expected does not match");
+                    "compareAndSet should return false when expected value does not match current");
             assertEquals(3,
                     array.getValueAt(0),
-                    "Value should remain unchanged after failed compareAndSet");
+                    "Array slot value should remain unchanged after failed compareAndSet operation");
         } finally {
             bytes.releaseLast();
         }

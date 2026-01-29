@@ -23,6 +23,12 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
+/**
+ * Tests PageUtil page size parsing and mount info detection because
+ * correct huge page configuration is essential for optimal memory-mapped
+ * file performance on Linux systems.
+ */
+@SuppressWarnings("MMOverusedWord") // page domain terminology
 @DisplayName("PageUtil parses page sizes and mount info")
 class PageUtilTest {
 
@@ -73,6 +79,7 @@ class PageUtilTest {
                 "Mount info read returns full expected mount lines");
     }
 
+    @SuppressWarnings("MMAnnotationTestOrder") // ParameterizedTest before Test is intentional
     @CsvSource(delimiter = '|',
             value = {
                     "hugetlbfs nodev rw,seclabel,pagesize=512K,size=68719476|524288",

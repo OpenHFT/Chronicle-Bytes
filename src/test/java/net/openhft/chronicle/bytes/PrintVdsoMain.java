@@ -8,6 +8,11 @@ import org.jetbrains.annotations.NotNull;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 
+/**
+ * Utility to extract the Linux vDSO ELF image because analysing the
+ * virtual dynamic shared object helps diagnose system call performance
+ * on different kernel configurations.
+ */
 public class PrintVdsoMain {
     public static void main(String[] args)
             throws IOException, IllegalStateException {
@@ -26,6 +31,7 @@ public class PrintVdsoMain {
 
             }
         } catch (IOException ioe) {
+            // Propagate: unable to read /proc/self/maps for vDSO detection
             throw ioe;
         }
         System.out.printf("vdso %x to %x %n", start, end);

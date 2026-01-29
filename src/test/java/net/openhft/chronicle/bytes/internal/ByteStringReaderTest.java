@@ -10,6 +10,10 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+/**
+ * Tests for ByteStringReader, because readers must handle closed state
+ * gracefully to avoid exceptions during stream-based processing.
+ */
 @DisplayName("ByteStringReader handles closed state and skip behaviour")
 public class ByteStringReaderTest extends BytesTestCommon {
 

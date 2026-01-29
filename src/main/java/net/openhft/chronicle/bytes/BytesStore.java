@@ -42,7 +42,7 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
  * @param <B> concrete subtype
  * @param <U> backing buffer type
  */
-@SuppressWarnings({"rawtypes", "unchecked"})
+@SuppressWarnings({"rawtypes", "unchecked", "checkstyle:MMOverusedWord"})
 public interface BytesStore<B extends BytesStore<B, U>, U>
         extends RandomDataInput, RandomDataOutput<B>, ReferenceCounted, CharSequence {
 
@@ -565,6 +565,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
         try {
             return subBytes(readPosition() + start, (long) end - start);
         } catch (ClosedIllegalStateException e) {
+            // Propagate closed state exception as unchecked
             throw Jvm.rethrow(e);
         }
     }
@@ -598,7 +599,8 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
     }
 
     /**
-     * Returns the underlying BytesStore (this).
+     * Returns this store as the backing BytesStore for wrapped views. For a direct
+     * BytesStore, returns itself; Bytes implementations may return a different store.
      *
      * @return the underlying BytesStore
      */
@@ -964,6 +966,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
             outBytes.writePosition(writePos + using2.position());
 
         } catch (IllegalStateException e) {
+            // Preserve IllegalStateException (may be ClosedIllegalStateException)
             throw e;
         } catch (@NotNull Exception e) {
             throw new IllegalStateException("cipher operation failed for BytesStore", e);

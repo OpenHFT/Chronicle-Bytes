@@ -21,7 +21,12 @@ import static net.openhft.chronicle.core.Jvm.uncheckedCast;
 import static net.openhft.chronicle.core.UnsafeMemory.MEMORY;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+/**
+ * Tests struct-based memory layouts because correct field offsets and
+ * linked-list traversal are essential to support C-interoperable data structures.
+ */
 @SuppressWarnings("deprecation")
+@DisplayName("Struct - validates native memory layouts and pointer traversal")
 public class StructTest extends BytesTestCommon {
 
     /**
@@ -197,6 +202,7 @@ public class StructTest extends BytesTestCommon {
 
         T get() {
             if (address == 0)
+                // Null address indicates an uninitialised or reset pointer
                 return null;
 
             return ptr;

@@ -9,6 +9,12 @@ import org.junit.jupiter.api.Test;
 import java.nio.charset.StandardCharsets;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+/**
+ * Tests HexDumpBytes advanced formatting because correct indentation and offset
+ * display are essential for debugging binary data. Behaviour checks verify
+ * nested headers in order to ensure readable diagnostic output.
+ */
+@SuppressWarnings("checkstyle:MMLacksPurpose")
 @DisplayName("HexDumpBytes advanced formatting and indentation behaviour checks")
 public class HexDumpBytesAdvancedTest extends BytesTestCommon {
 

@@ -19,10 +19,12 @@ import net.openhft.chronicle.core.io.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import net.openhft.chronicle.bytes.util.BufferUtil;
+import net.openhft.chronicle.bytes.util.DecoratedBufferOverflowException;
+
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
-import net.openhft.chronicle.bytes.util.BufferUtil;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static net.openhft.chronicle.core.Jvm.uncheckedCast;
@@ -38,7 +40,7 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
  *
  * @param <U> the type this bytes can reference
  */
-@SuppressWarnings({"rawtypes", "deprecation"})
+@SuppressWarnings({"rawtypes", "deprecation", "checkstyle:MMOverusedWord"})
 public class UncheckedNativeBytes<U>
         extends AbstractReferenceCounted
         implements Bytes<U>, HasUncheckedRandomDataInput, DecimalAppender {
@@ -58,11 +60,11 @@ public class UncheckedNativeBytes<U>
     /** The BytesStore that the underlying Bytes operates on. */
     @NotNull
     protected BytesStore<?, U> bytesStore;
-    /** The position of the next byte to be read. */
+    /** The offset from which the next read will occur; caller must keep within bounds. */
     protected long readPosition;
-    /** The position of the next byte to be written. */
+    /** The offset at which the next write will occur; caller must keep within bounds. */
     protected long writePosition;
-    /** The limit of the write buffer. */
+    /** Maximum offset up to which writes are allowed; exceeding this may corrupt memory. */
     protected long writeLimit;
     // Tracks the number of decimal places in the last number read
     private int lastDecimalPlaces = 0;
@@ -324,7 +326,7 @@ public class UncheckedNativeBytes<U>
     public Bytes<U> clearAndPad(@NonNegative long length)
             throws BufferOverflowException {
         if (start() + length > capacity())
-            throw new BufferOverflowException(/* clear length exceeds capacity */);
+            throw new DecoratedBufferOverflowException("clear length exceeds capacity");
         readPosition = writePosition = start() + length;
         writeLimit = capacity();
         return this;
@@ -793,7 +795,7 @@ public class UncheckedNativeBytes<U>
             throw new ArrayIndexOutOfBoundsException("bytes.length=" + byteArray.length + ", " +
                     "length=" + length + ", offset=" + offset);
         if (length > writeRemaining())
-            throw new BufferOverflowException(/* write length exceeds remaining capacity */);
+            throw new DecoratedBufferOverflowException("write length exceeds remaining capacity");
         long offsetInRDO = writeOffsetPositionMoved(length);
         bytesStore.write(offsetInRDO, byteArray, offset, length);
         return this;

@@ -40,6 +40,10 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
+/**
+ * Tests Bytes behaviour across allocator variants and scenarios because comprehensive coverage
+ * is essential for ensuring consistent behaviour across heap, direct, and mapped implementations.
+ */
 @SuppressWarnings({"rawtypes", "deprecation"})
 @DisplayName("Bytes behaviour across allocator variants and scenarios")
 public class BytesTest extends BytesTestCommon {
@@ -115,9 +119,9 @@ public class BytesTest extends BytesTestCommon {
         postTest(bytes);
         try {
             ((AbstractReferenceCounted) bytes).throwExceptionIfReleased();
-            fail("Expected IllegalStateException after releasing bytes");
+            fail("IllegalStateException should be thrown after releasing bytes");
         } catch (IllegalStateException ise) {
-            // expected.
+            // expected - released bytes should reject use
         }
     }
 
@@ -917,7 +921,7 @@ public class BytesTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    @DisplayName("Time millis formatting matches expected output")
+    @DisplayName("Time millis formatting converts 12345678ms to HH:MM:SS.mmm string")
     public void testTimeMillis(Allocator alloc1) {
         @NotNull Bytes<?> b = alloc1.elasticBytes(16);
         try {
@@ -968,7 +972,7 @@ public class BytesTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    @DisplayName("toString does not mutate bytes content")
+    @DisplayName("toString returns appended string without mutating read or write positions")
     public void testToStringDoesNotChange(Allocator alloc1) {
         @NotNull Bytes<?> a = alloc1.elasticBytes(16);
         @NotNull Bytes<?> b = alloc1.elasticBytes(16);
@@ -977,13 +981,13 @@ public class BytesTest extends BytesTestCommon {
             a.append(hello);
             b.append(hello);
 
-            assertTrue(a.contentEquals(b), "Content should match before toString");
-            assertEquals(a.bytesStore(), b.bytesStore(), "BytesStore should match before toString");
+            assertTrue(a.contentEquals(b), "Bytes a and b contentEquals should return true before calling toString on b");
+            assertEquals(a.bytesStore(), b.bytesStore(), "Bytes a and b bytesStore equality should hold before calling toString on b");
 
             assertEquals(hello, b.toString(), "toString should return the appended content");
 
-            assertTrue(a.contentEquals(b), "Content should match after toString");
-            assertEquals(a.bytesStore(), b.bytesStore(), "BytesStore should match after toString");
+            assertTrue(a.contentEquals(b), "Bytes a and b contentEquals should remain true after calling toString on b");
+            assertEquals(a.bytesStore(), b.bytesStore(), "Bytes a and b bytesStore equality should remain after calling toString on b");
         } finally {
             postTest(a);
             postTest(b);

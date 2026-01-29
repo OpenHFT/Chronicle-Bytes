@@ -9,6 +9,12 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+/**
+ * Tests VanillaBytes bytesForRead behaviour because correct position
+ * and content sharing are essential for sub-region reads.
+ */
+@SuppressWarnings("checkstyle:MMOverusedWord")
+@DisplayName("VanillaBytes - validates bytesForRead position and content sharing")
 final class VanillaBytesTest extends BytesTestCommon {
 
     @Test

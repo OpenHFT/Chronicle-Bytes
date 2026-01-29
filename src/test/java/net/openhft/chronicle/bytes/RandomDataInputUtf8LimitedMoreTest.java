@@ -10,7 +10,12 @@ import java.nio.BufferUnderflowException;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@DisplayName("UTF8 limited random data input behaviours")
+/**
+ * Tests UTF-8 limited read behaviour because correct underflow detection
+ * is essential to avoid reading beyond declared string boundaries in
+ * binary protocols.
+ */
+@DisplayName("UTF8 limited reads detect underflow when declared length exceeds remaining")
 public class RandomDataInputUtf8LimitedMoreTest extends BytesTestCommon {
 
     @Test
@@ -30,4 +35,3 @@ public class RandomDataInputUtf8LimitedMoreTest extends BytesTestCommon {
         }
     }
 }
-

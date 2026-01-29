@@ -15,7 +15,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
-@SuppressWarnings("deprecation")
+/**
+ * Tests lenient read mode because returning default values on empty input
+ * is essential to avoid exceptions when parsing optional fields in
+ * variable-length messages.
+ */
+@SuppressWarnings({"deprecation", "MMOverusedWord"}) // read domain terminology
 @DisplayName("Lenient reads return default values on empty input")
 public class ReadLenientTest extends BytesTestCommon {
     @Test

@@ -18,6 +18,11 @@ import java.nio.file.Path;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
+/**
+ * Tests mapped bytes view selection and sync operations because these
+ * code paths require coverage to avoid regressions in memory-mapped file
+ * handling.
+ */
 @DisplayName("MappedBytes covers view selection and sync branch scenarios")
 public class MappedBytesCoverageTest extends BytesTestCommon {
 
@@ -89,6 +94,7 @@ public class MappedBytesCoverageTest extends BytesTestCommon {
 
             @Override
             public MappedFile mappedFile() {
+                // Test stub: return null to simulate detached state
                 return null;
             }
         };
