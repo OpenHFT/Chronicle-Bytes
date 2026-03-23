@@ -3,11 +3,11 @@
  */
 package net.openhft.chronicle.bytes;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 public class ByteableTest {
@@ -16,7 +16,7 @@ public class ByteableTest {
     private BytesStore<?, ?> bytesStore;
 
     @SuppressWarnings("unchecked")
-    @Before
+    @BeforeEach
     public void setUp() throws IOException {
         byteable = mock(Byteable.class);
         bytesStore = mock(BytesStore.class);
@@ -33,10 +33,12 @@ public class ByteableTest {
         assertEquals(expectedOffset, byteable.offset());
     }
 
-    @Test(expected = UnsupportedOperationException.class)
+    @Test
     public void testAddressThrowsUnsupportedOperationException() {
-        when(byteable.address()).thenCallRealMethod();
-        byteable.address();
+        assertThrows(UnsupportedOperationException.class, () -> {
+            when(byteable.address()).thenCallRealMethod();
+            byteable.address();
+        });
     }
 
     @Test
@@ -47,13 +49,17 @@ public class ByteableTest {
         assertEquals(expectedSize, byteable.maxSize());
     }
 
-    @Test(expected = UnsupportedOperationException.class)
+    @Test
     public void testLockThrowsUnsupportedOperationException() throws IOException {
-        byteable.lock(true);
+        assertThrows(UnsupportedOperationException.class, () -> {
+            byteable.lock(true);
+        });
     }
 
-    @Test(expected = UnsupportedOperationException.class)
+    @Test
     public void testTryLockThrowsUnsupportedOperationException() throws IOException {
-        byteable.tryLock(true);
+        assertThrows(UnsupportedOperationException.class, () -> {
+            byteable.tryLock(true);
+        });
     }
 }

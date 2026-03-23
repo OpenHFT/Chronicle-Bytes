@@ -10,9 +10,8 @@ import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.util.Histogram;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import javax.crypto.Cipher;
 import javax.crypto.NoSuchPaddingException;
@@ -25,14 +24,14 @@ import java.security.SecureRandom;
 import java.util.Random;
 import java.util.stream.Stream;
 
-import static org.junit.Assert.*;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.*;
 
 public class NativeBytesStoreTest extends BytesTestCommon {
 
     private volatile int bcs;
 
-    @Before
+    @BeforeEach
     public void hasDirectMemory() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
     }
@@ -61,7 +60,7 @@ public class NativeBytesStoreTest extends BytesTestCommon {
             final StringBuilder sb = new StringBuilder();
             bytesStore.readUtf8(0, sb);
 
-            Assert.assertEquals("failed at " + i, expected, sb.toString());
+            assertEquals(expected, sb.toString(), "failed at " + i);
 
             bytes.releaseLast();
             expected = expected + "aaaaaaaaaaaaaaaaaaaaaaa"; // 23 characters

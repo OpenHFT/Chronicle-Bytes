@@ -10,8 +10,7 @@ import net.openhft.chronicle.core.pool.StringInterner;
 import net.openhft.chronicle.core.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
@@ -22,14 +21,14 @@ import java.util.Arrays;
 import java.util.List;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class MoreBytesTest extends BytesTestCommon {
 
     private static void testIndexOf(@NotNull final String sourceStr, @NotNull final String subStr) {
         final Bytes<?> source = Bytes.wrapForRead(sourceStr.getBytes(StandardCharsets.ISO_8859_1));
         final Bytes<?> subBytes = Bytes.wrapForRead(subStr.getBytes(StandardCharsets.ISO_8859_1));
-        Assert.assertEquals(sourceStr.indexOf(subStr), source.indexOf(subBytes));
+        assertEquals(sourceStr.indexOf(subStr), source.indexOf(subBytes));
     }
 
     @SuppressWarnings("rawtypes")
@@ -54,12 +53,12 @@ public class MoreBytesTest extends BytesTestCommon {
         }
         for (Bytes<?> b : bytesArray) {
             try {
-                assertEquals(count + ": " + b.getClass().getSimpleName(), 1, b.refCount());
-                assertEquals(count + ": " + b.getClass().getSimpleName(), 1, b.bytesStore().refCount());
+                assertEquals(1, b.refCount(), count + ": " + b.getClass().getSimpleName());
+                assertEquals(1, b.bytesStore().refCount(), count + ": " + b.getClass().getSimpleName());
             } finally {
                 b.releaseLast();
-                assertEquals(count + ": " + b.getClass().getSimpleName(), 0, b.refCount());
-                assertEquals(count++ + ": " + b.getClass().getSimpleName(), 0, b.bytesStore().refCount());
+                assertEquals(0, b.refCount(), count + ": " + b.getClass().getSimpleName());
+                assertEquals(0, b.bytesStore().refCount(), count++ + ": " + b.getClass().getSimpleName());
             }
         }
     }
@@ -108,19 +107,21 @@ public class MoreBytesTest extends BytesTestCommon {
         }
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testAppendLongRandomPositionShouldThrowIllegalArgumentException() {
-        final byte[] bytes = "000".getBytes(ISO_8859_1);
-        final ByteBuffer bb = ByteBuffer.wrap(bytes);
-        final Bytes<?> to = Bytes.wrapForWrite(bb);
-        try {
-            to.append(0, 1000, 3);
-        } catch (BufferOverflowException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } finally {
-            to.releaseLast();
-        }
+        assertThrows(IllegalArgumentException.class, () -> {
+            final byte[] bytes = "000".getBytes(ISO_8859_1);
+            final ByteBuffer bb = ByteBuffer.wrap(bytes);
+            final Bytes<?> to = Bytes.wrapForWrite(bb);
+            try {
+                to.append(0, 1000, 3);
+            } catch (BufferOverflowException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } finally {
+                to.releaseLast();
+            }
+        });
     }
 
     @Test
@@ -149,16 +150,17 @@ public class MoreBytesTest extends BytesTestCommon {
         }
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testAppendDoubleRandomPositionShouldThrowIllegalArgumentException() {
-
-        final byte[] bytes = "000000".getBytes(ISO_8859_1);
-        final Bytes<?> to = Bytes.wrapForWrite(bytes);
-        try {
-            to.append(0, 33333.14, 2, 6);
-        } finally {
-            to.releaseLast();
-        }
+        assertThrows(IllegalArgumentException.class, () -> {
+            final byte[] bytes = "000000".getBytes(ISO_8859_1);
+            final Bytes<?> to = Bytes.wrapForWrite(bytes);
+            try {
+                to.append(0, 33333.14, 2, 6);
+            } finally {
+                to.releaseLast();
+            }
+        });
     }
 
     @Test
@@ -217,7 +219,7 @@ public class MoreBytesTest extends BytesTestCommon {
         final Bytes<?> source = Bytes.wrapForRead(sourceStr.getBytes(StandardCharsets.ISO_8859_1));
         source.readSkip(1);
         final Bytes<?> subBytes = Bytes.wrapForRead(subStr.getBytes(StandardCharsets.ISO_8859_1));
-        Assert.assertEquals(0, source.indexOf(subBytes));
+        assertEquals(0, source.indexOf(subBytes));
     }
 
     @Test
@@ -228,7 +230,7 @@ public class MoreBytesTest extends BytesTestCommon {
         final Bytes<?> subBytes = Bytes.wrapForRead(subStr.getBytes(StandardCharsets.ISO_8859_1));
         subBytes.readSkip(1);
 
-        Assert.assertEquals(0, source.indexOf(subBytes));
+        assertEquals(0, source.indexOf(subBytes));
         assertEquals(1, subBytes.readPosition());
         assertEquals(0, source.readPosition());
     }

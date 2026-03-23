@@ -11,8 +11,6 @@ import net.openhft.chronicle.core.onoes.Slf4jExceptionHandler;
 import net.openhft.chronicle.core.threads.CleaningThread;
 import net.openhft.chronicle.core.threads.ThreadDump;
 import org.jetbrains.annotations.NotNull;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 
@@ -43,8 +41,13 @@ public class BytesTestCommon {
         return text != null && text.contains(message);
     }
 
-    @Before
     @BeforeEach
+    public void beforeEachBytesTestCommon() {
+        enableReferenceTracing();
+        recordExceptions();
+        assumeFinishedNormally();
+    }
+
     public void enableReferenceTracing() {
         AbstractReferenceCounted.enableReferenceTracing();
     }
@@ -58,13 +61,10 @@ public class BytesTestCommon {
             threadDump.assertNoNewThreads();
     }
 
-    @Before
-    @BeforeEach
     public void recordExceptions() {
         exceptions = Jvm.recordExceptions();
     }
 
-    @Before
     public void assumeFinishedNormally() {
         finishedNormally = true;
     }
@@ -77,7 +77,7 @@ public class BytesTestCommon {
         expectException(k -> contains(k.message, message) || (k.throwable != null && contains(k.throwable.getMessage(), message)), message);
     }
 
-    private void ignoreException(Predicate<ExceptionKey> predicate, String description) {
+    void ignoreException(Predicate<ExceptionKey> predicate, String description) {
         ignoredExceptions.put(predicate, description);
     }
 
@@ -106,7 +106,6 @@ public class BytesTestCommon {
         }
     }
 
-    @After
     @AfterEach
     public void afterChecks() {
         cleanResources();

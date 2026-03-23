@@ -6,7 +6,7 @@ package net.openhft.chronicle.bytes;
 import net.openhft.chronicle.assertions.AssertUtil;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class ZeroCostAssertionStatusTest extends BytesTestCommon {
 

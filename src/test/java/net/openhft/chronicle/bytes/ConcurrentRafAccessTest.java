@@ -4,8 +4,12 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.io.IOTools;
-import org.junit.*;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,7 +26,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.*;
 
 /*
     Averages from TeamCity logs:
@@ -33,7 +37,7 @@ import static org.junit.Assert.fail;
     Parallel      3.5         15              51
 */
 
-@Ignore("This is a performance test and should not be run as a part of the normal build")
+@Disabled("This is a performance test and should not be run as a part of the normal build")
 public class ConcurrentRafAccessTest extends BytesTestCommon {
 
     private static final String MODE = "rw";
@@ -44,8 +48,8 @@ public class ConcurrentRafAccessTest extends BytesTestCommon {
 
     private List<Worker> workers;
 
-    @Rule
-    public TemporaryFolder tmpDir = new TemporaryFolder();
+    @TempDir
+    File tmpDir;
 
     private static void bumpSize(File file, final RandomAccessFile raf, final FileChannel fc)
             throws IOException {
@@ -53,7 +57,7 @@ public class ConcurrentRafAccessTest extends BytesTestCommon {
         raf.setLength(currentSize * 2);
     }
 
-    @Before
+    @BeforeEach
     public void setup()
             throws IOException {
         Files.createDirectories(Paths.get(BASE_DIR));
@@ -75,7 +79,7 @@ public class ConcurrentRafAccessTest extends BytesTestCommon {
                 .collect(Collectors.toList());
     }
 
-    @After
+    @AfterEach
     public void cleanup() {
         IOTools.deleteDirWithFiles(BASE_DIR);
     }
@@ -140,7 +144,9 @@ public class ConcurrentRafAccessTest extends BytesTestCommon {
 
     private File fileFromInt(int i)
             throws IOException {
-        return tmpDir.newFile(Integer.toString(i));
+        File f = new File(tmpDir, Integer.toString(i));
+        f.createNewFile();
+        return f;
     }
 
     private static final class Worker implements Runnable {

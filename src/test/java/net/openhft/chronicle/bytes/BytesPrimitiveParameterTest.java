@@ -19,8 +19,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 
 import static net.openhft.chronicle.bytes.BytesFactoryUtil.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Tests if certain methods with constraints on primitive method parameters work as expected.

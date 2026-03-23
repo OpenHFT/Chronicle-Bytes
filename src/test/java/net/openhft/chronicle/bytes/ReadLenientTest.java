@@ -3,16 +3,15 @@
  */
 package net.openhft.chronicle.bytes;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.*;
 
 public class ReadLenientTest extends BytesTestCommon {
     @Test

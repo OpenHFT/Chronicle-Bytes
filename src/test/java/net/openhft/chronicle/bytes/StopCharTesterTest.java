@@ -3,8 +3,8 @@
  */
 package net.openhft.chronicle.bytes;
 
-import org.junit.Test;
-import static org.junit.Assert.*;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class StopCharTesterTest {
 
@@ -12,9 +12,9 @@ public class StopCharTesterTest {
     public void testIsStopChar() {
         StopCharTester tester = ch -> ch == ';' || ch == ',';
 
-        assertTrue("Semicolon should be a stop char", tester.isStopChar(';'));
-        assertTrue("Comma should be a stop char", tester.isStopChar(','));
-        assertFalse("Letter should not be a stop char", tester.isStopChar('A'));
+        assertTrue(tester.isStopChar(';'), "Semicolon should be a stop char");
+        assertTrue(tester.isStopChar(','), "Comma should be a stop char");
+        assertFalse(tester.isStopChar('A'), "Letter should not be a stop char");
     }
 
     @Test
@@ -22,7 +22,7 @@ public class StopCharTesterTest {
         StopCharTester baseTester = ch -> ch == ';';
         StopCharTester escapingTester = baseTester.escaping();
 
-        assertTrue("Semicolon should be a stop char without escaping", baseTester.isStopChar(';'));
-        assertFalse("Escaped semicolon should not be a stop char", escapingTester.isStopChar('\\'));
+        assertTrue(baseTester.isStopChar(';'), "Semicolon should be a stop char without escaping");
+        assertFalse(escapingTester.isStopChar('\\'), "Escaped semicolon should not be a stop char");
     }
 }

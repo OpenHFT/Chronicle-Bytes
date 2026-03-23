@@ -8,22 +8,22 @@ import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.Closeable;
 import net.openhft.chronicle.core.io.ClosedIllegalStateException;
 import net.openhft.chronicle.core.io.ReferenceOwner;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.IOException;
 
-import static org.junit.Assert.*;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.*;
 
 public class MappedBytesStoreTest extends BytesTestCommon implements ReferenceOwner {
     private static final int PAGE_SIZE = OS.defaultOsPageSize();
     private MappedFile mappedFile;
     private MappedBytesStore mappedBytesStore;
 
-    @Before
+    @BeforeEach
     public void setup() throws IOException {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
@@ -33,7 +33,7 @@ public class MappedBytesStoreTest extends BytesTestCommon implements ReferenceOw
         new File(filePath).deleteOnExit();
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         if (mappedBytesStore != null)
             mappedBytesStore.release(this);
@@ -47,35 +47,37 @@ public class MappedBytesStoreTest extends BytesTestCommon implements ReferenceOw
         mappedBytesStore.writeByte(position, value);
 
         byte readValue = mappedBytesStore.readByte(position);
-        assertEquals("Written and read values should be equal", value, readValue);
+        assertEquals(value, readValue, "Written and read values should be equal");
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void testWriteAfterClose() {
-        try {
-            mappedBytesStore.release(this);
-            mappedBytesStore.release(ReferenceOwner.INIT);
-            mappedBytesStore.writeByte(0, (byte) 1);
-        } finally {
-            mappedBytesStore = null;
-        }
+        assertThrows(IllegalStateException.class, () -> {
+            try {
+                mappedBytesStore.release(this);
+                mappedBytesStore.release(ReferenceOwner.INIT);
+                mappedBytesStore.writeByte(0, (byte) 1);
+            } finally {
+                mappedBytesStore = null;
+            }
+        });
     }
 
     @Test
     public void testSafeLimit() {
-        assertTrue("Position within safe limit should be valid", mappedBytesStore.inside(0));
-        assertFalse("Position beyond safe limit should be invalid", mappedBytesStore.inside(mappedBytesStore.safeLimit()));
+        assertTrue(mappedBytesStore.inside(0), "Position within safe limit should be valid");
+        assertFalse(mappedBytesStore.inside(mappedBytesStore.safeLimit()), "Position beyond safe limit should be invalid");
     }
 
     @Test
     public void testCapacity() {
-        assertEquals("The capacities should match", PAGE_SIZE * 2, mappedBytesStore.capacity());
+        assertEquals(PAGE_SIZE * 2, mappedBytesStore.capacity(), "The capacities should match");
     }
 
     @Test
     public void testLockRegion() throws IOException {
         // Try to lock a region of the file
-        assertNotNull("Lock should be obtained", mappedBytesStore.tryLock(0, 10, true));
+        assertNotNull(mappedBytesStore.tryLock(0, 10, true), "Lock should be obtained");
     }
 
     @Test
@@ -89,7 +91,7 @@ public class MappedBytesStoreTest extends BytesTestCommon implements ReferenceOw
         byte[] readBytes = new byte[10];
         mappedBytesStore.read(0, readBytes, 0, 10);
 
-        assertArrayEquals("Buffer content should match", writeBytes, readBytes);
+        assertArrayEquals(writeBytes, readBytes, "Buffer content should match");
     }
 
     @Test

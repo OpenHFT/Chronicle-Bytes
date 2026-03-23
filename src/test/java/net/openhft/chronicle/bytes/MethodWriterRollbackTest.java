@@ -4,7 +4,7 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.io.InvalidMarshallableException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
@@ -12,8 +12,7 @@ import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.util.function.Function;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class MethodWriterRollbackTest extends BytesTestCommon {
 
@@ -51,7 +50,7 @@ public class MethodWriterRollbackTest extends BytesTestCommon {
 
             long pos0 = out.writePosition();
             assertThrows(Throwable.class, proxy::go);
-            assertEquals("write position must be restored on failure", pos0, out.writePosition());
+            assertEquals(pos0, out.writePosition(), "write position must be restored on failure");
         } finally {
             out.releaseLast();
         }

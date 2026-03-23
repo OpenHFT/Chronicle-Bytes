@@ -5,9 +5,9 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.bytes.internal.HeapBytesStore;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class HeapByteStoreTest extends BytesTestCommon {
     @SuppressWarnings("rawtypes")

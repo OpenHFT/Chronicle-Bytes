@@ -4,15 +4,14 @@
 package net.openhft.chronicle.bytes;
 
 import org.jetbrains.annotations.NotNull;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class StreamingInputStreamTest extends BytesTestCommon {
 
@@ -28,7 +27,9 @@ public class StreamingInputStreamTest extends BytesTestCommon {
         b.releaseLast();
     }
 
-    @Test(timeout = 1000)
+    @Test
+
+    @org.junit.jupiter.api.Timeout(value = 1000, unit = java.util.concurrent.TimeUnit.MILLISECONDS)
     public void testReadBlock()
             throws IOException {
 

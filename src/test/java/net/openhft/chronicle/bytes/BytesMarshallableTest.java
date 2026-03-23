@@ -5,11 +5,10 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Jvm;
 import org.jetbrains.annotations.NotNull;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.IOException;
 import java.lang.annotation.RetentionPolicy;
@@ -22,42 +21,33 @@ import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.stream.Stream;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.*;
 
-@RunWith(Parameterized.class)
 public class BytesMarshallableTest extends BytesTestCommon {
 
-    private final String name;
-    private final boolean guarded;
-
-    public BytesMarshallableTest(String name, boolean guarded) {
-        this.name = name;
-        this.guarded = guarded;
+    static Stream<Arguments> data() {
+        return Stream.of(
+                Arguments.of("Unguarded", false),
+                Arguments.of("Guarded", true)
+        );
     }
 
-    @Parameterized.Parameters(name = "{0}")
-    public static Collection<Object[]> data() {
-        return Arrays.asList(new Object[][]{
-                {"Unguarded", false},
-                {"Guarded", true}
-        });
-    }
-
-    @AfterClass
+    @AfterAll
     public static void resetGuarded() {
         NativeBytes.resetNewGuarded();
     }
 
-    @Before
-    public void setGuarded() {
+    private void setGuarded(boolean guarded) {
         NativeBytes.setNewGuarded(guarded);
     }
 
-    @Test
-    public void serializePrimitives() {
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("data")
+    public void serializePrimitives(String name, boolean guarded) {
+        setGuarded(guarded);
         assumeFalse(NativeBytes.areNewGuarded());
         final Bytes<?> bytes = new HexDumpBytes();
         try {
@@ -102,8 +92,10 @@ public class BytesMarshallableTest extends BytesTestCommon {
         }
     }
 
-    @Test
-    public void serializeScalars() {
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("data")
+    public void serializeScalars(String name, boolean guarded) {
+        setGuarded(guarded);
         final Bytes<?> bytes = new HexDumpBytes();
         try {
             final MyScalars mb1 = new MyScalars("Hello", BigInteger.ONE, BigDecimal.TEN, LocalDate.now(), LocalTime.now(), LocalDateTime.now(), ZonedDateTime.now(), UUID.randomUUID());
@@ -168,8 +160,10 @@ public class BytesMarshallableTest extends BytesTestCommon {
         assertEquals(mb2.toString(), mb4.toString());
     }
 
-    @Test
-    public void serializeNested() {
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("data")
+    public void serializeNested(String name, boolean guarded) {
+        setGuarded(guarded);
         final Bytes<?> bytes = new HexDumpBytes();
         try {
 
@@ -317,9 +311,11 @@ public class BytesMarshallableTest extends BytesTestCommon {
         }
     }
 
-    @Test
-    public void serializeBytes()
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("data")
+    public void serializeBytes(String name, boolean guarded)
             throws IOException {
+        setGuarded(guarded);
         Bytes<?> bytes = new HexDumpBytes();
         final Bytes<?> hello = Bytes.from("hello");
         final Bytes<?> byeee = Bytes.from("byeee");
@@ -350,8 +346,10 @@ public class BytesMarshallableTest extends BytesTestCommon {
         }
     }
 
-    @Test
-    public void serializeCollections() {
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("data")
+    public void serializeCollections(String name, boolean guarded) {
+        setGuarded(guarded);
 //        assumeTrue(name.equals("Unguarded"));
         final Bytes<?> bytes = new HexDumpBytes();
         try {
@@ -393,8 +391,10 @@ public class BytesMarshallableTest extends BytesTestCommon {
         }
     }
 
-    @Test
-    public void collectionsNotInitializedInConstructor() {
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("data")
+    public void collectionsNotInitializedInConstructor(String name, boolean guarded) {
+        setGuarded(guarded);
         final Bytes<?> bytes = new HexDumpBytes();
 
         try {
@@ -484,8 +484,10 @@ public class BytesMarshallableTest extends BytesTestCommon {
         }
     }
 
-    @Test
-    public void testSpecificCollections() {
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("data")
+    public void testSpecificCollections(String name, boolean guarded) {
+        setGuarded(guarded);
         final Bytes<?> bytes = new HexDumpBytes();
 
         try {
@@ -523,8 +525,10 @@ public class BytesMarshallableTest extends BytesTestCommon {
         }
     }
 
-    @Test
-    public void nested() {
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("data")
+    public void nested(String name, boolean guarded) {
+        setGuarded(guarded);
         final Bytes<?> bytes = new HexDumpBytes();
         try {
             final BM1 bm1 = new BM1();
@@ -572,8 +576,10 @@ public class BytesMarshallableTest extends BytesTestCommon {
         }
     }
 
-    @Test
-    public void nullArrays() {
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("data")
+    public void nullArrays(String name, boolean guarded) {
+        setGuarded(guarded);
         final Bytes<?> bytes = new HexDumpBytes();
         try {
             final BMA bma = new BMA();
@@ -604,8 +610,10 @@ public class BytesMarshallableTest extends BytesTestCommon {
         }
     }
 
-    @Test
-    public void arrays() {
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("data")
+    public void arrays(String name, boolean guarded) {
+        setGuarded(guarded);
         final Bytes<?> bytes = new HexDumpBytes();
         try {
             final BMA bma = new BMA();

@@ -3,9 +3,9 @@
  */
 package net.openhft.chronicle.bytes;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Tests that BytesInternal.to8BitString handles ISO-8859-1 characters gracefully

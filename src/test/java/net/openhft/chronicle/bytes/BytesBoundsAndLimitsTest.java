@@ -3,36 +3,40 @@
  */
 package net.openhft.chronicle.bytes;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class BytesBoundsAndLimitsTest extends BytesTestCommon {
 
-    @Test(expected = BufferOverflowException.class)
+    @Test
     public void writeBeyondWriteLimitThrows() {
-        Bytes<?> b = Bytes.allocateElasticOnHeap(8);
-        try {
-            b.writeLimit(4);
-            b.writeLong(1L); // 8 bytes > writeLimit
-        } finally {
-            b.releaseLast();
-        }
+        assertThrows(BufferOverflowException.class, () -> {
+            Bytes<?> b = Bytes.allocateElasticOnHeap(8);
+            try {
+                b.writeLimit(4);
+                b.writeLong(1L); // 8 bytes > writeLimit
+            } finally {
+                b.releaseLast();
+            }
+        });
     }
 
-    @Test(expected = BufferUnderflowException.class)
+    @Test
     public void readBeyondReadLimitThrows() {
-        Bytes<?> b = Bytes.allocateElasticOnHeap(8);
-        try {
-            b.writeInt(123);
-            b.readPosition(0);
-            b.readLong(); // 8 bytes > available 4
-        } finally {
-            b.releaseLast();
-        }
+        assertThrows(BufferUnderflowException.class, () -> {
+            Bytes<?> b = Bytes.allocateElasticOnHeap(8);
+            try {
+                b.writeInt(123);
+                b.readPosition(0);
+                b.readLong(); // 8 bytes > available 4
+            } finally {
+                b.releaseLast();
+            }
+        });
     }
 
     @Test

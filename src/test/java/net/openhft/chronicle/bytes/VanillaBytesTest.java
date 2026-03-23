@@ -6,7 +6,7 @@ package net.openhft.chronicle.bytes;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 final class VanillaBytesTest extends BytesTestCommon {
 

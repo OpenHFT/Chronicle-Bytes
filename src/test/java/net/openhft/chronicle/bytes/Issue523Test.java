@@ -3,9 +3,8 @@
  */
 package net.openhft.chronicle.bytes;
 
-import org.junit.Before;
-import org.junit.Test;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.Objects;
 import java.util.Set;
@@ -14,12 +13,11 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class Issue523Test extends BytesTestCommon {
 
     @SuppressWarnings("EmptyMethod")
-    @Before
     @BeforeEach
     public void threadDump() {
         super.threadDump();

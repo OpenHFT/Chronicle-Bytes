@@ -5,15 +5,15 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.Closeable;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.nio.BufferOverflowException;
 import java.nio.file.Files;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.*;
 
 public class CopyBytesTest extends BytesTestCommon {
 
@@ -44,7 +44,7 @@ public class CopyBytesTest extends BytesTestCommon {
         }
     }
 
-    @Before
+    @BeforeEach
     public void directEnabled() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
     }
@@ -94,11 +94,13 @@ public class CopyBytesTest extends BytesTestCommon {
         doTest(MappedBytes.mappedBytes(bytes, 16 << 10, 16 << 10), (64 << 10) - 8);
     }
 
-    @Test(expected = BufferOverflowException.class)
+    @Test
     public void testCanCopyBytesFromMappedBytesSingle3()
             throws Exception {
-        File bytes = Files.createTempFile("mapped-test", "bytes").toFile();
-        bytes.deleteOnExit();
-        doTest(MappedBytes.singleMappedBytes(bytes, 32 << 10), (64 << 10) - 8);
-    }
+                assertThrows(BufferOverflowException.class, () -> {
+            File bytes = Files.createTempFile("mapped-test", "bytes").toFile();
+            bytes.deleteOnExit();
+            doTest(MappedBytes.singleMappedBytes(bytes, 32 << 10), (64 << 10) - 8);
+                });
+            }
 }

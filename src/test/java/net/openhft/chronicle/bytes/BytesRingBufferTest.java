@@ -3,12 +3,13 @@
  */
 package net.openhft.chronicle.bytes;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 public class BytesRingBufferTest {
@@ -19,7 +20,7 @@ public class BytesRingBufferTest {
     @Mock
     private BytesStore<?, Void> mockBytesStore;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         MockitoAnnotations.openMocks(this);
     }
@@ -55,8 +56,10 @@ public class BytesRingBufferTest {
         assertTrue(bytesRingBuffer.isEmpty());
     }
 
-    @Test(expected = ClassNotFoundException.class)
+    @Test
     public void testNewInstanceThrowsException() {
-        BytesRingBuffer.newInstance(mockBytesStore);
+        assertThrows(ClassNotFoundException.class, () -> {
+            BytesRingBuffer.newInstance(mockBytesStore);
+        });
     }
 }

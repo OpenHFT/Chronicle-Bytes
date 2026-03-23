@@ -5,7 +5,7 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.util.Mocker;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.StringWriter;
 import java.math.BigDecimal;
@@ -13,10 +13,8 @@ import java.math.BigInteger;
 import java.time.ZonedDateTime;
 import java.util.UUID;
 
-import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertTrue;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.*;
 
 public class BytesMethodWriterBuilderTest extends BytesTestCommon {
 
@@ -128,8 +126,7 @@ public class BytesMethodWriterBuilderTest extends BytesTestCommon {
 /*        System.out.println(expected);
         System.out.println(out.toString().replaceAll("\n", ""));*/
 
-            assertEquals(expected,
-                    out.toString().replaceAll("\r", ""));
+            assertEquals(expected, out.toString().replaceAll("\r", ""));
         } finally {
             bytes.releaseLast();
         }

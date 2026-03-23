@@ -6,12 +6,10 @@ package net.openhft.chronicle.bytes;
 import net.openhft.chronicle.bytes.internal.CommonMappedBytes;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
-import net.openhft.chronicle.core.io.BackgroundResourceReleaser;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.BufferOverflowException;
@@ -19,13 +17,11 @@ import java.nio.ReadOnlyBufferException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.*;
 
 public class MappedBytesBoundaryTest extends BytesTestCommon {
-    @Before
+    @BeforeEach
     public void setUp() {
         if (OS.isWindows())
             ignoreException("Unable to delete");
@@ -80,7 +76,7 @@ public class MappedBytesBoundaryTest extends BytesTestCommon {
             } catch (ReadOnlyBufferException | BufferOverflowException | IllegalStateException expected) {
                 writeFailed = true;
             }
-            assertTrue("Expected write to read-only mapping to fail", writeFailed);
+            assertTrue(writeFailed, "Expected write to read-only mapping to fail");
         }
 
         deleteIfPossible(file);
@@ -118,7 +114,7 @@ public class MappedBytesBoundaryTest extends BytesTestCommon {
 
                 bytes.readPosition(0);
                 assertEquals(message, bytes.read8bit());
-                assertTrue("Expected bytes to advance past written payload", bytes.writePosition() > message.length());
+                assertTrue(bytes.writePosition() > message.length(), "Expected bytes to advance past written payload");
             }
         } finally {
             deleteIfPossible(file);

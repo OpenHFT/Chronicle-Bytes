@@ -5,8 +5,10 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.bytes.internal.EmbeddedBytes;
 import net.openhft.chronicle.core.io.ClosedIllegalStateException;
+import net.openhft.chronicle.core.onoes.ExceptionKey;
 import net.openhft.chronicle.core.io.ReferenceCounted;
 import net.openhft.chronicle.core.util.Histogram;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -24,8 +26,7 @@ import java.util.stream.Stream;
 
 import static net.openhft.chronicle.bytes.BytesFactoryUtil.*;
 import static net.openhft.chronicle.core.io.ReferenceOwner.INIT;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Tests if certain non-performant methods works as expected when called on a released Bytes object
@@ -33,6 +34,14 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 final class BytesReleaseInvariantNonPerformantMethodsTest extends BytesTestCommon {
 
     private static final String SILLY_NAME = "Tryggve";
+
+    @BeforeEach
+    void ignoreChunkedMappedBytesCleanupNoise() {
+        ignoreException("Discarded without closing");
+        ignoreException("Discarded without being released by [ChunkedMappedBytes");
+        ignoreException(BytesReleaseInvariantNonPerformantMethodsTest::isChunkedMappedBytesReservationNoise,
+                "ChunkedMappedBytes reservation noise");
+    }
 
     private static Stream<NamedConsumer<Bytes<Object>>> provideNonPerformantOperations() {
         final OutputStream os = new OutputStream() {
@@ -148,5 +157,11 @@ final class BytesReleaseInvariantNonPerformantMethodsTest extends BytesTestCommo
         releaseAndAssertReleased(bytes);
         final String actual = operation.apply(bytes);
         assertEquals("<released>", actual);
+    }
+
+    private static boolean isChunkedMappedBytesReservationNoise(ExceptionKey key) {
+        return key.throwable instanceof IllegalStateException
+                && key.throwable.getMessage() != null
+                && key.throwable.getMessage().contains("not reserved by ChunkedMappedBytes");
     }
 }

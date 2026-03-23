@@ -5,8 +5,7 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.bytes.render.GeneralDecimaliser;
 import net.openhft.chronicle.core.Maths;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.nio.ByteBuffer;
 import java.security.SecureRandom;
@@ -14,7 +13,8 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.Locale;
 
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.*;
 
 public class Issue85Test extends BytesTestCommon {
     private int different = 0;
@@ -87,7 +87,7 @@ public class Issue85Test extends BytesTestCommon {
             count++;
         }
         if (different + different2 > 0)
-            Assert.fail("Different toString: " + 100.0 * different / count + "%," +
+            fail("Different toString: " + 100.0 * different / count + "%," +
                     " parsing: " + 100.0 * different2 / count + "%");
     }
 
@@ -111,20 +111,18 @@ public class Issue85Test extends BytesTestCommon {
     @Test
     public void loseTrainingZeros() {
         double d = -541098.2421;
-        Assert.assertEquals("" + d,
-                Bytes.allocateElasticDirect()
-                        .append(d)
-                        .toString());
+        assertEquals("" + d, Bytes.allocateElasticDirect()
+                .append(d)
+                .toString());
 
     }
 
     @Test
     public void loseTrainingZerosHeap() {
         double d = -541098.2421;
-        Assert.assertEquals("" + d,
-                Bytes.allocateElasticOnHeap()
-                        .append(d)
-                        .toString());
+        assertEquals("" + d, Bytes.allocateElasticOnHeap()
+                .append(d)
+                .toString());
 
     }
 }

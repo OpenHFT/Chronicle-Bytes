@@ -3,11 +3,11 @@
  */
 package net.openhft.chronicle.bytes;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.nio.BufferUnderflowException;
 
-import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class RandomDataInputUtf8LimitedMoreTest extends BytesTestCommon {
 

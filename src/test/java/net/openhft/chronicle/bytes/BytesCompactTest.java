@@ -3,55 +3,39 @@
  */
 package net.openhft.chronicle.bytes;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
-import java.util.Arrays;
-import java.util.Collection;
+import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Tests for the compact behavior of Bytes.
  */
-@RunWith(Parameterized.class)
 public class BytesCompactTest {
-
-    private final String name;
-    private final Bytes<?> bytes;
-
-    /**
-     * Constructor for parameterized test with name and bytes.
-     *
-     * @param name  the name of the test scenario.
-     * @param bytes the Bytes instance under test.
-     */
-    public BytesCompactTest(String name, Bytes<?> bytes) {
-        this.name = name;
-        this.bytes = bytes;
-    }
 
     /**
      * Provides test data for parameterized tests.
      *
-     * @return a collection of test scenarios with name and Bytes instances.
+     * @return a stream of test scenarios with name and Bytes instances.
      */
-    @Parameterized.Parameters(name = "{0}")
-    public static Collection<Object[]> data() {
-        return Arrays.asList(new Object[][]{
-                {"native", Bytes.allocateElasticDirect(128)},
-                {"heap", Bytes.allocateElasticOnHeap(128)},
-                {"unchecked native", Bytes.allocateElasticDirect(128).unchecked(true)},
-                {"unchecked heap", Bytes.allocateElasticOnHeap(128).unchecked(true)}
-        });
+    static Stream<Arguments> data() {
+        return Stream.of(
+                Arguments.of("native", Bytes.allocateElasticDirect(128)),
+                Arguments.of("heap", Bytes.allocateElasticOnHeap(128)),
+                Arguments.of("unchecked native", Bytes.allocateElasticDirect(128).unchecked(true)),
+                Arguments.of("unchecked heap", Bytes.allocateElasticOnHeap(128).unchecked(true))
+        );
     }
 
     /**
      * Test compact behavior of Bytes after various write and read operations.
      */
-    @Test
-    public void compact() {
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("data")
+    public void compact(String name, Bytes<?> bytes) {
         // Initialize buffer with a sample string
         bytes.clear().append("Hello World");
 
@@ -91,8 +75,9 @@ public class BytesCompactTest {
     /**
      * Test compact behavior of Bytes when skipping bytes.
      */
-    @Test
-    public void skipCompact() {
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("data")
+    public void skipCompact(String name, Bytes<?> bytes) {
         // Clear and move the write position 64 bytes ahead
         bytes.clear().writeSkip(64);
 

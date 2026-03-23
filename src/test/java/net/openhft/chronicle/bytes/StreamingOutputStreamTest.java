@@ -10,9 +10,8 @@ import org.mockito.Mockito;
 import java.io.IOException;
 import java.nio.BufferOverflowException;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SuppressWarnings({"unchecked", "rawtypes"})
 class StreamingOutputStreamTest {

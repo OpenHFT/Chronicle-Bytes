@@ -3,14 +3,11 @@
  */
 package net.openhft.chronicle.bytes;
 
-import org.junit.Test;
-import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class AppendableUtilTest extends BytesTestCommon {
@@ -54,7 +51,7 @@ public class AppendableUtilTest extends BytesTestCommon {
     public void testSetCharAtWithStringBuilder() throws BufferOverflowException {
         StringBuilder sb = new StringBuilder("Hello World");
         AppendableUtil.setCharAt(sb, 6, 'J');
-        Assertions.assertEquals("Hello Jorld", sb.toString());
+        assertEquals("Hello Jorld", sb.toString());
     }
 
     @Test
@@ -62,35 +59,35 @@ public class AppendableUtilTest extends BytesTestCommon {
         BytesStore<?, byte[]> bs = BytesStore.from("Hello World");
         StringBuilder sb = new StringBuilder();
         AppendableUtil.parseUtf8(bs, sb, true, 11);
-        Assertions.assertEquals("Hello World", sb.toString());
+        assertEquals("Hello World", sb.toString());
     }
 
     @Test
     public void testSetLengthWithStringBuilder() {
         StringBuilder sb = new StringBuilder("Hello World");
         AppendableUtil.setLength(sb, 5);
-        Assertions.assertEquals("Hello", sb.toString());
+        assertEquals("Hello", sb.toString());
     }
 
     @Test
     public void testAppendDoubleWithStringBuilder() {
         StringBuilder sb = new StringBuilder();
         AppendableUtil.append(sb, 3.14);
-        Assertions.assertEquals("3.14", sb.toString());
+        assertEquals("3.14", sb.toString());
     }
 
     @Test
     public void testFindUtf8LengthByteArray() {
         byte[] bytes = "Hello World".getBytes();
         long length = AppendableUtil.findUtf8Length(bytes);
-        Assertions.assertEquals(22, length);
+        assertEquals(22, length);
     }
 
     @Test
     public void testFindUtf8LengthCharArray() {
         char[] chars = "Hello World".toCharArray();
         long length = AppendableUtil.findUtf8Length(chars);
-        Assertions.assertEquals(11, length);
+        assertEquals(11, length);
     }
 
     @Test

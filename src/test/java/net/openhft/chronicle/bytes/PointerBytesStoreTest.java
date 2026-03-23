@@ -5,11 +5,9 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.bytes.internal.NativeBytesStore;
 import net.openhft.chronicle.bytes.internal.NoBytesStore;
-import org.junit.Test;
-import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class PointerBytesStoreTest extends BytesTestCommon {
 
@@ -59,7 +57,7 @@ public class PointerBytesStoreTest extends BytesTestCommon {
             final PointerBytesStore pbs = new PointerBytesStore();
             pbs.set(addr, len);
             Bytes<Void> voidBytes = pbs.bytesForRead();
-            Assertions.assertEquals(voidBytes.read8bit(), "some data");
+            assertEquals(voidBytes.read8bit(), "some data");
             voidBytes.releaseLast();
         } finally {
             bytesFixed.releaseLast();

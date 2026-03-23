@@ -6,10 +6,9 @@ package net.openhft.chronicle.bytes;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.BackgroundResourceReleaser;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -17,19 +16,19 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Arrays;
 
-import static org.junit.Assert.*;
-import static org.junit.Assume.assumeTrue;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.*;
 
 public class BytesUtilTest extends BytesTestCommon {
 
     File testFile;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         testFile = new File(OS.getTarget(), "testFile-" + System.nanoTime() + ".bin");
     }
 
-    @After
+    @AfterEach
     public void tearDown() throws IOException {
         BackgroundResourceReleaser.releasePendingResources();
         Files.deleteIfExists(testFile.toPath());
@@ -95,8 +94,8 @@ public class BytesUtilTest extends BytesTestCommon {
 
         assertTrue(BytesUtil.isTriviallyCopyable(A.class));
 
-        Assert.assertEquals(start, BytesUtil.triviallyCopyableStart(A.class));
-        Assert.assertEquals(20, BytesUtil.triviallyCopyableLength(A.class));
+        assertEquals(start, BytesUtil.triviallyCopyableStart(A.class));
+        assertEquals(20, BytesUtil.triviallyCopyableLength(A.class));
     }
 
     @Test
@@ -105,7 +104,7 @@ public class BytesUtilTest extends BytesTestCommon {
 
         int start = BytesUtil.triviallyCopyableStart(Nested.class);
 
-        Assert.assertEquals("[" + start + ", " + (start + 20) + "]", Arrays.toString(BytesUtil.triviallyCopyableRange(A.class)));
+        assertEquals("[" + start + ", " + (start + 20) + "]", Arrays.toString(BytesUtil.triviallyCopyableRange(A.class)));
         assertTrue(BytesUtil.isTriviallyCopyable(A.class, start, 4 + 2 * 8));
         assertTrue(BytesUtil.isTriviallyCopyable(A.class, start + 4, 8));
         assertFalse(BytesUtil.isTriviallyCopyable(A.class, start - 4, 4 + 2 * 8));
@@ -113,20 +112,20 @@ public class BytesUtilTest extends BytesTestCommon {
 
         assertTrue(BytesUtil.isTriviallyCopyable(A2.class));
         int size = Jvm.isAzulZing() ? 28 : 24;
-        Assert.assertEquals("[" + start + ", " + (start + size) + "]", Arrays.toString(BytesUtil.triviallyCopyableRange(A2.class)));
+        assertEquals("[" + start + ", " + (start + size) + "]", Arrays.toString(BytesUtil.triviallyCopyableRange(A2.class)));
         assertTrue(BytesUtil.isTriviallyCopyable(A2.class, start, 4 + 2 * 8 + 2 * 2));
         assertTrue(BytesUtil.isTriviallyCopyable(A2.class, start + 4, 8));
         assertFalse(BytesUtil.isTriviallyCopyable(A2.class, start - 4, 4 + 2 * 8));
-        Assert.assertEquals(Jvm.isAzulZing(), BytesUtil.isTriviallyCopyable(A2.class, start + 8, 4 + 2 * 8));
+        assertEquals(Jvm.isAzulZing(), BytesUtil.isTriviallyCopyable(A2.class, start + 8, 4 + 2 * 8));
         assertFalse(BytesUtil.isTriviallyCopyable(A2.class, start + 12, 4 + 2 * 8));
 
         assertTrue(BytesUtil.isTriviallyCopyable(A3.class));
         // However, by copying a region that is safe.
-        Assert.assertEquals("[" + start + ", " + (start + size) + "]", Arrays.toString(BytesUtil.triviallyCopyableRange(A3.class)));
+        assertEquals("[" + start + ", " + (start + size) + "]", Arrays.toString(BytesUtil.triviallyCopyableRange(A3.class)));
         assertTrue(BytesUtil.isTriviallyCopyable(A3.class, start, 4 + 2 * 8 + 2 * 2));
         assertTrue(BytesUtil.isTriviallyCopyable(A3.class, start + 4, 8));
         assertFalse(BytesUtil.isTriviallyCopyable(A3.class, start - 4, 4 + 2 * 8));
-        Assert.assertEquals(Jvm.isAzulZing(), BytesUtil.isTriviallyCopyable(A3.class, start + 8, 4 + 2 * 8));
+        assertEquals(Jvm.isAzulZing(), BytesUtil.isTriviallyCopyable(A3.class, start + 8, 4 + 2 * 8));
         assertFalse(BytesUtil.isTriviallyCopyable(A3.class, start + 12, 4 + 2 * 8));
     }
 
@@ -136,7 +135,7 @@ public class BytesUtilTest extends BytesTestCommon {
         assertTrue(BytesUtil.isTriviallyCopyable(E.class));
         int size2 = 20;
         int[] range = BytesUtil.triviallyCopyableRange(E.class);
-        Assert.assertEquals(size2, range[1] - range[0]);
+        assertEquals(size2, range[1] - range[0]);
     }
 
     @Test
@@ -186,7 +185,7 @@ public class BytesUtilTest extends BytesTestCommon {
         Bytes<byte[]> bytes = Bytes.from("test");
         char[] charArray = BytesUtil.toCharArray(bytes);
         for (char c : charArray) {
-            Assert.assertEquals(bytes.readChar(), c);
+            assertEquals(bytes.readChar(), c);
         }
     }
 
@@ -194,7 +193,7 @@ public class BytesUtilTest extends BytesTestCommon {
     public void reverse() {
         Bytes<byte[]> test = Bytes.from("test");
         BytesUtil.reverse(test, 0);
-        Assert.assertEquals(Bytes.from("tset"), test);
+        assertEquals(Bytes.from("tset"), test);
     }
 
     @Test
@@ -239,17 +238,17 @@ public class BytesUtilTest extends BytesTestCommon {
         int expected = java.nio.ByteBuffer.wrap("1234".getBytes(java.nio.charset.StandardCharsets.ISO_8859_1))
                 .order(java.nio.ByteOrder.nativeOrder())
                 .getInt();
-        Assert.assertEquals(expected, BytesUtil.asInt("1234"));
-        Assert.assertEquals(1, BytesUtil.stopBitLength(0x7F));
-        Assert.assertEquals(2, BytesUtil.stopBitLength(0x80));
-        Assert.assertEquals(2, BytesUtil.stopBitLength(0x3FFF));
+        assertEquals(expected, BytesUtil.asInt("1234"));
+        assertEquals(1, BytesUtil.stopBitLength(0x7F));
+        assertEquals(2, BytesUtil.stopBitLength(0x80));
+        assertEquals(2, BytesUtil.stopBitLength(0x3FFF));
         assertTrue(BytesUtil.stopBitLength(0x4000) >= 3);
 
-        Assert.assertEquals(64L, BytesUtil.roundUpTo64ByteAlign(1));
-        Assert.assertEquals(0L, BytesUtil.roundUpTo64ByteAlign(0));
-        Assert.assertEquals(8L, BytesUtil.roundUpTo8ByteAlign(1));
-        Assert.assertEquals(0L, BytesUtil.padOffset(0));
-        Assert.assertEquals(2L, BytesUtil.padOffset(2));
+        assertEquals(64L, BytesUtil.roundUpTo64ByteAlign(1));
+        assertEquals(0L, BytesUtil.roundUpTo64ByteAlign(0));
+        assertEquals(8L, BytesUtil.roundUpTo8ByteAlign(1));
+        assertEquals(0L, BytesUtil.padOffset(0));
+        assertEquals(2L, BytesUtil.padOffset(2));
     }
 
     @Test
@@ -258,7 +257,7 @@ public class BytesUtilTest extends BytesTestCommon {
         try {
             bytes.append("hello");
             BytesUtil.read8ByteAlignPadding(bytes);
-            Assert.assertEquals(0, bytes.readPosition());
+            assertEquals(0, bytes.readPosition());
 
             bytes.clear();
             bytes.append("abc");
@@ -267,23 +266,23 @@ public class BytesUtilTest extends BytesTestCommon {
             long newWp = bytes.writePosition();
             assertTrue(newWp >= wp);
             for (long i = wp; i < newWp; i++) {
-                Assert.assertEquals(0, bytes.peekUnsignedByte(i));
+                assertEquals(0, bytes.peekUnsignedByte(i));
             }
 
             bytes.clear();
             bytes.append("abcdef");
             BytesUtil.reverse(bytes, 0);
-            Assert.assertEquals("fedcba", bytes.toString());
+            assertEquals("fedcba", bytes.toString());
 
             bytes.clear();
             bytes.append("line1\n\n");
             BytesUtil.combineDoubleNewline(bytes);
-            Assert.assertEquals("line1\n", bytes.toString());
+            assertEquals("line1\n", bytes.toString());
 
             bytes.clear();
             bytes.append("a \n");
             BytesUtil.combineDoubleNewline(bytes);
-            Assert.assertEquals("a\n", bytes.toString());
+            assertEquals("a\n", bytes.toString());
 
         } finally {
             bytes.releaseLast();
@@ -295,21 +294,22 @@ public class BytesUtilTest extends BytesTestCommon {
         // exercise literal path in readFile
         Bytes<?> literal = BytesUtil.readFile("=XYZ");
         try {
-            Assert.assertEquals("XYZ", literal.toString());
+            assertEquals("XYZ", literal.toString());
         } finally {
             literal.releaseLast();
         }
     }
 
-    @Test(expected = FileNotFoundException.class)
-    public void findFileThrowsWhenMissing() throws Exception {
-        BytesUtil.findFile("this-file-should-not-exist-chronicle-bytes");
+    @Test
+    public void findFileThrowsWhenMissing() {
+        assertThrows(FileNotFoundException.class, () ->
+                BytesUtil.findFile("this-file-should-not-exist-chronicle-bytes"));
     }
 
     private void doTestCombineDoubleNewline(String a, String b) {
         final Bytes<byte[]> b2 = Bytes.from(b);
         BytesUtil.combineDoubleNewline(b2);
-        Assert.assertEquals(a, b2.toString());
+        assertEquals(a, b2.toString());
     }
 
     static class A {

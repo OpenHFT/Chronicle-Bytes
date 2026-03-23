@@ -3,11 +3,11 @@
  */
 package net.openhft.chronicle.bytes;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.nio.BufferOverflowException;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class BytesWriteSkipBehaviourTest extends BytesTestCommon {
 
@@ -49,15 +49,17 @@ public class BytesWriteSkipBehaviourTest extends BytesTestCommon {
         }
     }
 
-    @Test(expected = BufferOverflowException.class)
+    @Test
     public void excessiveNegativeSkipThrows() {
-        Bytes<?> bytes = Bytes.allocateElasticOnHeap(16);
-        try {
-            bytes.append("xx");
-            // attempt to backtrack beyond start
-            bytes.writeSkip(- (bytes.writePosition() + 2));
-        } finally {
-            bytes.releaseLast();
-        }
+        assertThrows(BufferOverflowException.class, () -> {
+            Bytes<?> bytes = Bytes.allocateElasticOnHeap(16);
+            try {
+                bytes.append("xx");
+                // attempt to backtrack beyond start
+                bytes.writeSkip(- (bytes.writePosition() + 2));
+            } finally {
+                bytes.releaseLast();
+            }
+        });
     }
 }

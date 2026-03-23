@@ -4,11 +4,11 @@
 package net.openhft.chronicle.bytes;
 
 import org.jetbrains.annotations.NotNull;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.nio.ByteBuffer;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * User: peter.lawrey Date: 24/12/13 Time: 19:43

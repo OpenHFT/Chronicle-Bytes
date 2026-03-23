@@ -18,7 +18,7 @@ import java.util.List;
 import static java.util.Arrays.asList;
 import static net.openhft.chronicle.bytes.PageUtil.DEFAULT_HUGE_PAGE_SIZE;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assumptions.assumeTrue;
+import static org.junit.jupiter.api.Assumptions.*;
 
 class PageUtilTest {
 

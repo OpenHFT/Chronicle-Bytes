@@ -8,7 +8,7 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.UnsafeMemory;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.IOTools;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
@@ -18,7 +18,7 @@ import java.util.stream.Stream;
 
 import static net.openhft.chronicle.core.Jvm.uncheckedCast;
 import static net.openhft.chronicle.core.UnsafeMemory.MEMORY;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class StructTest extends BytesTestCommon {
 
@@ -290,8 +290,7 @@ public class StructTest extends BytesTestCommon {
         assertEquals("" +
                         "The Phantom MALE, born 1936-2-17\n" +
                         "Superman MALE, born 1938-4-18\n" +
-                        "Wonder Woman FEMALE, born 1942-1-1\n",
-                sb.toString());
+                        "Wonder Woman FEMALE, born 1942-1-1\n", sb.toString());
     }
     /*
      *enum Gender{MALE, FEMALE};

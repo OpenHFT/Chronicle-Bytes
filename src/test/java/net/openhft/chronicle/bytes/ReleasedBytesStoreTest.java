@@ -4,9 +4,9 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.bytes.internal.NativeBytesStore;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ReleasedBytesStoreTest extends BytesTestCommon {
 
@@ -15,7 +15,7 @@ public class ReleasedBytesStoreTest extends BytesTestCommon {
         Bytes<?> bytes = Bytes.allocateElasticDirect();
         assertNull(bytes.bytesStore().underlyingObject());
         bytes.writeLong(0, 0);
-        assertEquals(NativeBytesStore.class, bytes.bytesStore().getClass());
+        assertSame(NativeBytesStore.class, bytes.bytesStore().getClass());
         bytes.releaseLast();
         assertEquals(0, bytes.bytesStore().refCount());
         try {

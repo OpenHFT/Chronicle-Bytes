@@ -5,33 +5,27 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IOTools;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.stream.Stream;
 
 import static net.openhft.chronicle.core.Jvm.uncheckedCast;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.*;
 
-@RunWith(Parameterized.class)
 public class SyncModeTest extends BytesTestCommon {
-    private final SyncMode syncMode;
 
-    public SyncModeTest(SyncMode syncMode) {
-        this.syncMode = syncMode;
+    static Stream<Arguments> parameters() {
+        return Stream.of(SyncMode.values()).map(Arguments::of);
     }
 
-    @Parameterized.Parameters(name = "{0}")
-    public static Object[][] parameters() {
-        return Stream.of(SyncMode.values()).map(s -> new Object[]{s}).toArray(Object[][]::new);
-    }
-
-    @Test
-    public void largeFile() throws FileNotFoundException {
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("parameters")
+    public void largeFile(SyncMode syncMode) throws FileNotFoundException {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         File tmpfile = IOTools.createTempFile("sync.dat");

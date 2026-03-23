@@ -53,6 +53,11 @@ class BytesMarshallerTest {
     }
 
     @BeforeEach
+    public void beforeEachBytesMarshallerTest() throws Exception {
+        setup();
+        setUp();
+    }
+
     void setup() throws NoSuchFieldException {
         marshaller = new BytesMarshaller<>(TestObject.class);
         bytes = Bytes.allocateDirect(64);
@@ -62,7 +67,6 @@ class BytesMarshallerTest {
         bytesIn = mock(BytesIn.class);
     }
 
-    @BeforeEach
     void setUp() throws Exception {
         // Initialize your test object
         testObject = new TestClass();

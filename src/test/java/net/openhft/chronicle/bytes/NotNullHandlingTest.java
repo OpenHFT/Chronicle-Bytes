@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 import static net.openhft.chronicle.assertions.AssertUtil.SKIP_ASSERTIONS;
 import static net.openhft.chronicle.core.util.Ints.requireNonNegative;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 class NotNullHandlingTest extends BytesTestCommon {
 

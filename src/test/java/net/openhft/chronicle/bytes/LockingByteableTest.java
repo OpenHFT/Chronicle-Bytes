@@ -6,24 +6,25 @@ package net.openhft.chronicle.bytes;
 import net.openhft.chronicle.bytes.ref.BinaryLongReference;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IOTools;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.channels.FileLock;
 import java.nio.channels.OverlappingFileLockException;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.*;
 
 public class LockingByteableTest extends BytesTestCommon {
-    @Test(expected = UnsupportedOperationException.class)
+    @Test
     public void notLockable() throws IOException {
-        try (BinaryLongReference blr = new BinaryLongReference()) {
-            blr.bytesStore(Bytes.from("Hello World"), 0, 8);
-            blr.lock(false);
-        }
+        assertThrows(UnsupportedOperationException.class, () -> {
+            try (BinaryLongReference blr = new BinaryLongReference()) {
+                blr.bytesStore(Bytes.from("Hello World"), 0, 8);
+                blr.lock(false);
+            }
+        });
     }
 
     @Test
@@ -68,22 +69,24 @@ public class LockingByteableTest extends BytesTestCommon {
         }
     }
 
-    @Test(expected = OverlappingFileLockException.class)
+    @Test
     public void doubleLockableShared() throws IOException {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
-        final String tmp = IOTools.tempName("doubleLockableShared");
-        new File(tmp).deleteOnExit();
+        assertThrows(OverlappingFileLockException.class, () -> {
+            final String tmp = IOTools.tempName("doubleLockableShared");
+            new File(tmp).deleteOnExit();
 
-        try (MappedBytes mbs = MappedBytes.mappedBytes(tmp, 64 << 10);
-             BinaryLongReference blr = new BinaryLongReference()) {
-            blr.bytesStore(mbs, 0, 8);
-            try (FileLock fl = blr.lock(true)) {
-                blr.lock(false);
-                fail();
-                assertNotNull(fl); // keep compiler happy.
+            try (MappedBytes mbs = MappedBytes.mappedBytes(tmp, 64 << 10);
+                 BinaryLongReference blr = new BinaryLongReference()) {
+                blr.bytesStore(mbs, 0, 8);
+                try (FileLock fl = blr.lock(true)) {
+                    blr.lock(false);
+                    fail();
+                    assertNotNull(fl); // keep compiler happy.
+                }
             }
-        }
+        });
     }
 
     @Test
@@ -128,21 +131,23 @@ public class LockingByteableTest extends BytesTestCommon {
         }
     }
 
-    @Test(expected = OverlappingFileLockException.class)
+    @Test
     public void doubleLockableSharedSingle() throws IOException {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
-        final String tmp = IOTools.tempName("doubleLockableShared");
-        new File(tmp).deleteOnExit();
+        assertThrows(OverlappingFileLockException.class, () -> {
+            final String tmp = IOTools.tempName("doubleLockableShared");
+            new File(tmp).deleteOnExit();
 
-        try (MappedBytes mbs = MappedBytes.singleMappedBytes(tmp, 64 << 10);
-             BinaryLongReference blr = new BinaryLongReference()) {
-            blr.bytesStore(mbs, 0, 8);
-            try (FileLock fl = blr.lock(true)) {
-                blr.lock(false);
-                fail();
-                assertNotNull(fl); // keep compiler happy.
+            try (MappedBytes mbs = MappedBytes.singleMappedBytes(tmp, 64 << 10);
+                 BinaryLongReference blr = new BinaryLongReference()) {
+                blr.bytesStore(mbs, 0, 8);
+                try (FileLock fl = blr.lock(true)) {
+                    blr.lock(false);
+                    fail();
+                    assertNotNull(fl); // keep compiler happy.
+                }
             }
-        }
+        });
     }
 }

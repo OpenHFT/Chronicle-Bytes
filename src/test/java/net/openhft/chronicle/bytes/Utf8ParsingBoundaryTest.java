@@ -4,10 +4,9 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.bytes.internal.BytesInternal;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Consolidates UTF-8 parsing boundary tests (explicit length, stop-char parsing,
@@ -56,23 +55,25 @@ public class Utf8ParsingBoundaryTest extends BytesTestCommon {
         try {
             b.writeStopBit(-1);
             long res = b.readUtf8Limited(0, new StringBuilder(), 10);
-            assertTrue("Expected negative return value signalling null", res < 0);
+            assertTrue(res < 0, "Expected negative return value signalling null");
         } finally {
             b.releaseLast();
         }
     }
 
-    @Test(expected = net.openhft.chronicle.core.io.ClosedIllegalStateException.class)
+    @Test
     public void throwsWhenUtf8LengthExceedsMax() {
-        Bytes<?> b = Bytes.allocateElasticOnHeap(32);
-        try {
-            String payload = "WXYZ";
-            b.writeStopBit(AppendableUtil.findUtf8Length(payload));
-            b.append(payload);
-            StringBuilder sb = new StringBuilder();
-            b.readUtf8Limited(0, sb, 3);
-        } finally {
-            b.releaseLast();
-        }
+        assertThrows(net.openhft.chronicle.core.io.ClosedIllegalStateException.class, () -> {
+            Bytes<?> b = Bytes.allocateElasticOnHeap(32);
+            try {
+                String payload = "WXYZ";
+                b.writeStopBit(AppendableUtil.findUtf8Length(payload));
+                b.append(payload);
+                StringBuilder sb = new StringBuilder();
+                b.readUtf8Limited(0, sb, 3);
+            } finally {
+                b.releaseLast();
+            }
+        });
     }
 }

@@ -4,39 +4,28 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Jvm;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.stream.Stream;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.*;
 
-@RunWith(Parameterized.class)
 public class StreamingDataInputTest extends BytesTestCommon {
 
-    private final Allocator allocator;
-
-    public StreamingDataInputTest(Allocator allocator) {
-        this.allocator = allocator;
+    static Stream<Arguments> params() {
+        return Arrays.stream(Allocator.values()).map(Arguments::of);
     }
 
-    @Parameterized.Parameters(name = "allocator={0}")
-    public static Object[] params() {
-        return Arrays.stream(Allocator.values()).toArray();
-    }
-
-    @Before
-    public void hasNativeMemory() {
+    @ParameterizedTest(name = "allocator={0}")
+    @MethodSource("params")
+    public void read(Allocator allocator) {
         assumeFalse(allocator.name().startsWith("NATIVE") && Jvm.maxDirectMemory() == 0);
-    }
-
-    @Test
-    public void read() {
         Bytes<?> b = allocator.elasticBytes(32);
         b.append("0123456789");
         byte[] byteArr = "ABCDEFGHIJKLMNOP".getBytes();
@@ -46,8 +35,10 @@ public class StreamingDataInputTest extends BytesTestCommon {
         b.releaseLast();
     }
 
-    @Test
-    public void readOffset() {
+    @ParameterizedTest(name = "allocator={0}")
+    @MethodSource("params")
+    public void readOffset(Allocator allocator) {
+        assumeFalse(allocator.name().startsWith("NATIVE") && Jvm.maxDirectMemory() == 0);
         Bytes<?> b = allocator.elasticBytes(32);
         b.append("0123456789");
         byte[] byteArr = "ABCDEFGHIJKLMNOP".getBytes();
@@ -57,8 +48,10 @@ public class StreamingDataInputTest extends BytesTestCommon {
         b.releaseLast();
     }
 
-    @Test
-    public void roundTripWorksOnHeap() {
+    @ParameterizedTest(name = "allocator={0}")
+    @MethodSource("params")
+    public void roundTripWorksOnHeap(Allocator allocator) {
+        assumeFalse(allocator.name().startsWith("NATIVE") && Jvm.maxDirectMemory() == 0);
         Bytes<?> b = allocator.elasticBytes(32);
         TestObject source = new TestObject(123L, 123, false);
         int offset = BytesUtil.triviallyCopyableStart(source.getClass());
@@ -69,8 +62,10 @@ public class StreamingDataInputTest extends BytesTestCommon {
         b.releaseLast();
     }
 
-    @Test
-    public void readWithLength() {
+    @ParameterizedTest(name = "allocator={0}")
+    @MethodSource("params")
+    public void readWithLength(Allocator allocator) {
+        assumeFalse(allocator.name().startsWith("NATIVE") && Jvm.maxDirectMemory() == 0);
         int max = 130; // two bytes of length for a stop bit encoded length
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(max + 2);
         Bytes<?> from = Bytes.wrapForRead(new byte[max]);
