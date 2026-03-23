@@ -13,8 +13,8 @@ import org.junit.jupiter.api.Test;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 
-import static org.junit.Assert.*;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.*;
 
 @SuppressWarnings({"squid:S2699", "squid:S5786"})
 class DecimaliserDoubleTest extends BytesTestCommon {
@@ -130,7 +130,7 @@ class DecimaliserDoubleTest extends BytesTestCommon {
                         double d2 = -Double.longBitsToDouble(l + x);
                         boolean decimal = UsesBigDecimal.USES_BIG_DECIMAL.toDecimal(d2, CHECK_OK);
                         boolean notZero = d2 < 0; // BigDecimal doesn't handle negative 0
-                        assertEquals("d: " + d, notZero, decimal);
+                        assertEquals(notZero, decimal, "d: " + d);
                         f *= 10;
                     }
                 });
@@ -140,15 +140,13 @@ class DecimaliserDoubleTest extends BytesTestCommon {
     void toDoubleLarge() {
         DecimalAppender check = (negative, mantissa, exponent) -> {
             assertTrue(0 <= exponent);
-            assertTrue("exponent: " + exponent, exponent <= 18);
+            assertTrue(exponent <= 18, "exponent: " + exponent);
         };
         IntStream.range(-325, 309)
                 .forEach(x -> {
                     double d = (-18 < x && x < -1) ? 1.0 / Maths.tens(-x) : Math.pow(10, x);
                     double lower = 1e-18;
-                    assertEquals("x: " + x,
-                            d == 0.0 || (lower <= d && d <= 1e18),
-                            SimpleDecimaliser.SIMPLE.toDecimal(d, check));
+                    assertEquals(d == 0.0 || (lower <= d && d <= 1e18), SimpleDecimaliser.SIMPLE.toDecimal(d, check), "x: " + x);
                 });
     }
 

@@ -7,52 +7,44 @@ import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.IOException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
-import java.util.Arrays;
-import java.util.Collection;
+import java.util.stream.Stream;
 
-import static org.junit.Assert.*;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.*;
 
 @SuppressWarnings("rawtypes")
-@RunWith(Parameterized.class)
 public class BytesInternalGuardedTest extends BytesTestCommon {
 
-    private final boolean guarded;
-
-    public BytesInternalGuardedTest(String name, boolean guarded) {
-        this.guarded = guarded;
+    static Stream<Arguments> data() {
+        return Stream.of(
+                Arguments.of("Unguarded", false),
+                Arguments.of("Guarded", true)
+        );
     }
 
-    @Parameterized.Parameters(name = "{0}")
-    public static Collection<Object[]> data() {
-        return Arrays.asList(new Object[][]{
-                {"Unguarded", false},
-                {"Guarded", true}
-        });
-    }
-
-    @AfterClass
+    @AfterAll
     public static void resetGuarded() {
         NativeBytes.resetNewGuarded();
     }
 
-    @Before
-    public void setGuarded() {
+    private void setGuarded(boolean guarded) {
         NativeBytes.setNewGuarded(guarded);
     }
 
-    @Test
-    public void testParse8bitAndStringBuilderWithUtf16Coder()
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("data")
+    public void testParse8bitAndStringBuilderWithUtf16Coder(String name, boolean guarded)
             throws BufferUnderflowException, IOException {
+        setGuarded(guarded);
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         @NotNull BytesStore<?, ?> bs = BytesStore.nativeStore(32);
@@ -69,9 +61,11 @@ public class BytesInternalGuardedTest extends BytesTestCommon {
         bs.releaseLast();
     }
 
-    @Test
-    public void testCompareUTF()
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("data")
+    public void testCompareUTF(String name, boolean guarded)
             throws IORuntimeException {
+        setGuarded(guarded);
         @NotNull BytesStore<?, ?> bs = BytesStore.nativeStore(32);
         bs.writeUtf8(0, "test");
         assertTrue(BytesInternal.compareUtf8(bs, 0, "test"));
@@ -91,8 +85,10 @@ public class BytesInternalGuardedTest extends BytesTestCommon {
         bs.releaseLast();
     }
 
-    @Test
-    public void shouldHandleDifferentSizedStores() {
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("data")
+    public void shouldHandleDifferentSizedStores(String name, boolean guarded) {
+        setGuarded(guarded);
         Bytes<ByteBuffer> bytes = Bytes.elasticHeapByteBuffer(32);
         final BytesStore<?, ?> storeOfThirtyTwoBytes = bytes.bytesStore();
         storeOfThirtyTwoBytes.writeUtf8(0, "thirty_two_bytes_of_utf8_chars_");
@@ -106,8 +102,10 @@ public class BytesInternalGuardedTest extends BytesTestCommon {
         bytes.releaseLast();
     }
 
-    @Test
-    public void testWritingDecimalVsJava() {
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("data")
+    public void testWritingDecimalVsJava(String name, boolean guarded) {
+        setGuarded(guarded);
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(32);
         bytes.clear();
         double d = 0.04595828484241039; //Math.pow(1e9, rand.nextDouble()) / 1e3;
@@ -121,8 +119,10 @@ public class BytesInternalGuardedTest extends BytesTestCommon {
         bytes.releaseLast();
     }
 
-    @Test
-    public void contentsEqual() {
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("data")
+    public void contentsEqual(String name, boolean guarded) {
+        setGuarded(guarded);
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         Bytes<?> a = Bytes.elasticByteBuffer(9, 20)
@@ -148,8 +148,10 @@ public class BytesInternalGuardedTest extends BytesTestCommon {
         c.releaseLast();
     }
 
-    @Test
-    public void testStopBits() {
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("data")
+    public void testStopBits(String name, boolean guarded) {
+        setGuarded(guarded);
         final VanillaBytes<Void> bytes = Bytes.allocateDirect(10);
 
         for (int i = 0; i < (1L << (2 * 7)) + 1; i++) {

@@ -6,10 +6,9 @@ package net.openhft.chronicle.bytes.internal;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesTestCommon;
 import net.openhft.chronicle.bytes.StopCharTesters;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class BytesInternalWireUsageTest extends BytesTestCommon {
 
@@ -57,7 +56,7 @@ public class BytesInternalWireUsageTest extends BytesTestCommon {
             BytesInternal.parseUtf8(bytes, sideValue, StopCharTesters.ALL);
             assertEquals("SELL", sideValue.toString());
 
-            assertTrue("All bytes consumed", bytes.readRemaining() <= 1);
+            assertTrue(bytes.readRemaining() <= 1, "All bytes consumed");
         } finally {
             bytes.releaseLast();
         }

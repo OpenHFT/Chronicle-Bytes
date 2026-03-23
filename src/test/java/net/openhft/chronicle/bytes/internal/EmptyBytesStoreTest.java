@@ -8,148 +8,215 @@ import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.bytes.BytesTestCommon;
 import net.openhft.chronicle.bytes.RandomDataOutput;
 import net.openhft.chronicle.core.io.IOTools;
-import org.junit.After;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.opentest4j.AssertionFailedError;
 
 import java.io.ByteArrayOutputStream;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.function.ObjLongConsumer;
+import java.util.stream.Stream;
 
 import static net.openhft.chronicle.bytes.Bytes.elasticHeapByteBuffer;
 import static net.openhft.chronicle.core.Jvm.uncheckedCast;
-import static org.junit.Assume.assumeFalse;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.*;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
-@RunWith(Parameterized.class)
 public class EmptyBytesStoreTest extends BytesTestCommon {
 
-    private final BytesStore<?, ?> instance;
-
-    public EmptyBytesStoreTest(String type, BytesStore<?, ?> instance) {
-        this.instance = instance;
+    static Stream<Arguments> data() {
+        return Stream.of(
+                Arguments.of("Bytes.empty()", Bytes.empty()),
+                Arguments.of("BytesStore.empty()", BytesStore.empty()),
+                Arguments.of("native", NativeBytesStore.nativeStoreWithFixedCapacity(0)),
+                Arguments.of("NativeByteStore.bytesForRead()", NativeBytesStore.nativeStoreWithFixedCapacity(0).bytesForRead()),
+                Arguments.of("NativeByteStore.bytesForWrite()", NativeBytesStore.nativeStoreWithFixedCapacity(0).bytesForWrite())
+        );
     }
 
-    @Parameterized.Parameters(name = "{0}")
-    public static Collection<Object[]> data() {
-        return Arrays.asList(new Object[][]{
-                {"Bytes.empty()", Bytes.empty()},
-                {"BytesStore.empty()", BytesStore.empty()},
-                {"native", NativeBytesStore.nativeStoreWithFixedCapacity(0)},
-                {"NativeByteStore.bytesForRead()", NativeBytesStore.nativeStoreWithFixedCapacity(0).bytesForRead()},
-                {"NativeByteStore.bytesForWrite()", NativeBytesStore.nativeStoreWithFixedCapacity(0).bytesForWrite()},
-        });
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("data")
+    public void notSameAsEmpty(String type, BytesStore<?, ?> instance) {
+        try {
+            // a case which should produce a different instance. Wire depends on this
+            assertNotSame(BytesStore.wrap(new byte[0]), instance);
+        } finally {
+            IOTools.unmonitor(instance);
+        }
     }
 
-    @After
-    public void teardown() {
-        IOTools.unmonitor(instance);
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("data")
+    public void refCount(String type, BytesStore<?, ?> instance) {
+        try {
+            assertNotEquals(0, instance.refCount());
+        } finally {
+            IOTools.unmonitor(instance);
+        }
     }
 
-    @Test
-    public void notSameAsEmpty() {
-        // a case which should produce a different instance. Wire depends on this
-        assertNotSame(BytesStore.wrap(new byte[0]), instance);
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("data")
+    public void writeByteInt(String type, BytesStore<?, ?> instance) {
+        try {
+            assumeFalse(instance instanceof NativeBytesStore);
+            assertThrowsBufferException(() -> instance.writeByte(0, 0));
+        } finally {
+            IOTools.unmonitor(instance);
+        }
     }
 
-    @Test
-    public void refCount() {
-        assertNotEquals(0, instance.refCount());
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("data")
+    public void writeByte(String type, BytesStore<?, ?> instance) {
+        try {
+            assumeFalse(instance instanceof NativeBytesStore);
+            assertThrowsBufferException(() -> instance.writeByte(0, (byte) 0));
+        } finally {
+            IOTools.unmonitor(instance);
+        }
     }
 
-    @Test
-    public void writeByteInt() {
-        assumeFalse(instance instanceof NativeBytesStore);
-        assertThrowsBufferException(() -> instance.writeByte(0, 0));
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("data")
+    public void writeShort(String type, BytesStore<?, ?> instance) {
+        try {
+            assumeFalse(instance instanceof NativeBytesStore);
+            assertThrowsBufferException(() -> instance.writeShort(0, (short) 0));
+        } finally {
+            IOTools.unmonitor(instance);
+        }
     }
 
-    @Test
-    public void writeByte() {
-        assumeFalse(instance instanceof NativeBytesStore);
-        assertThrowsBufferException(() -> instance.writeByte(0, (byte) 0));
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("data")
+    public void writeInt(String type, BytesStore<?, ?> instance) {
+        try {
+            assumeFalse(instance instanceof NativeBytesStore);
+            assertThrowsBufferException(() -> instance.writeInt(0, 0));
+        } finally {
+            IOTools.unmonitor(instance);
+        }
     }
 
-    @Test
-    public void writeShort() {
-        assumeFalse(instance instanceof NativeBytesStore);
-        assertThrowsBufferException(() -> instance.writeShort(0, (short) 0));
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("data")
+    public void writeOrderedInt(String type, BytesStore<?, ?> instance) {
+        try {
+            assumeFalse(instance instanceof NativeBytesStore);
+            assertThrowsBufferException(() -> instance.writeOrderedInt(0, 0));
+        } finally {
+            IOTools.unmonitor(instance);
+        }
     }
 
-    @Test
-    public void writeInt() {
-        assumeFalse(instance instanceof NativeBytesStore);
-        assertThrowsBufferException(() -> instance.writeInt(0, 0));
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("data")
+    public void writeLong(String type, BytesStore<?, ?> instance) {
+        try {
+            assumeFalse(instance instanceof NativeBytesStore);
+            assertThrowsBufferException(() -> instance.writeLong(0, 0));
+        } finally {
+            IOTools.unmonitor(instance);
+        }
     }
 
-    @Test
-    public void writeOrderedInt() {
-        assumeFalse(instance instanceof NativeBytesStore);
-        assertThrowsBufferException(() -> instance.writeOrderedInt(0, 0));
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("data")
+    public void writeOrderedLong(String type, BytesStore<?, ?> instance) {
+        try {
+            assumeFalse(instance instanceof NativeBytesStore);
+            assertThrowsBufferException(() -> instance.writeOrderedLong(0, 0L));
+        } finally {
+            IOTools.unmonitor(instance);
+        }
     }
 
-    @Test
-    public void writeLong() {
-        assumeFalse(instance instanceof NativeBytesStore);
-        assertThrowsBufferException(() -> instance.writeLong(0, 0));
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("data")
+    public void writeFloat(String type, BytesStore<?, ?> instance) {
+        try {
+            assumeFalse(instance instanceof NativeBytesStore);
+            assertThrowsBufferException(() -> instance.writeFloat(0, 0.0f));
+        } finally {
+            IOTools.unmonitor(instance);
+        }
     }
 
-    @Test
-    public void writeOrderedLong() {
-        assumeFalse(instance instanceof NativeBytesStore);
-        assertThrowsBufferException(() -> instance.writeOrderedLong(0, 0L));
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("data")
+    public void writeDouble(String type, BytesStore<?, ?> instance) {
+        try {
+            assumeFalse(instance instanceof NativeBytesStore);
+            assertThrowsBufferException(() -> instance.writeDouble(0, 0.0d));
+        } finally {
+            IOTools.unmonitor(instance);
+        }
     }
 
-    @Test
-    public void writeFloat() {
-        assumeFalse(instance instanceof NativeBytesStore);
-        assertThrowsBufferException(() -> instance.writeFloat(0, 0.0f));
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("data")
+    public void writeVolatileByte(String type, BytesStore<?, ?> instance) {
+        try {
+            assumeFalse(instance instanceof NativeBytesStore);
+            assertThrowsBufferException(() -> instance.writeVolatileByte(0, (byte) 0));
+        } finally {
+            IOTools.unmonitor(instance);
+        }
     }
 
-    @Test
-    public void writeDouble() {
-        assumeFalse(instance instanceof NativeBytesStore);
-        assertThrowsBufferException(() -> instance.writeDouble(0, 0.0d));
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("data")
+    public void writeVolatileShort(String type, BytesStore<?, ?> instance) {
+        try {
+            assumeFalse(instance instanceof NativeBytesStore);
+            assertThrowsBufferException(() -> instance.writeVolatileShort(0, (short) 0));
+        } finally {
+            IOTools.unmonitor(instance);
+        }
     }
 
-    @Test
-    public void writeVolatileByte() {
-        assumeFalse(instance instanceof NativeBytesStore);
-        assertThrowsBufferException(() -> instance.writeVolatileByte(0, (byte) 0));
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("data")
+    public void writeVolatileInt(String type, BytesStore<?, ?> instance) {
+        try {
+            assumeFalse(instance instanceof NativeBytesStore);
+            assertThrowsBufferException(() -> instance.writeVolatileInt(0, 0));
+        } finally {
+            IOTools.unmonitor(instance);
+        }
     }
 
-    @Test
-    public void writeVolatileShort() {
-        assumeFalse(instance instanceof NativeBytesStore);
-        assertThrowsBufferException(() -> instance.writeVolatileShort(0, (short) 0));
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("data")
+    public void writeVolatileLong(String type, BytesStore<?, ?> instance) {
+        try {
+            assumeFalse(instance instanceof NativeBytesStore);
+            assertThrowsBufferException(() -> instance.writeVolatileLong(0, 0L));
+        } finally {
+            IOTools.unmonitor(instance);
+        }
     }
 
-    @Test
-    public void writeVolatileInt() {
-        assumeFalse(instance instanceof NativeBytesStore);
-        assertThrowsBufferException(() -> instance.writeVolatileInt(0, 0));
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("data")
+    public void write(String type, BytesStore<?, ?> instance) {
+        try {
+            assertDoesNotThrow(() -> instance.write(0, new byte[1], 0, 0));
+            assumeFalse(instance instanceof NativeBytesStore);
+            assertThrowsBufferException(() -> instance.write(0, new byte[1], 0, 1));
+        } finally {
+            IOTools.unmonitor(instance);
+        }
     }
 
-    @Test
-    public void writeVolatileLong() {
-        assumeFalse(instance instanceof NativeBytesStore);
-        assertThrowsBufferException(() -> instance.writeVolatileLong(0, 0L));
-    }
-
-    @Test
-    public void write() {
-        assertDoesNotThrow(() -> instance.write(0, new byte[1], 0, 0));
-        assumeFalse(instance instanceof NativeBytesStore);
-        assertThrowsBufferException(() -> instance.write(0, new byte[1], 0, 1));
-    }
-
-    @Test
-    public void write2() {
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("data")
+    public void write2(String type, BytesStore<?, ?> instance) {
         final Bytes<ByteBuffer> bytes = elasticHeapByteBuffer();
         bytes.append("Hello");
         try {
@@ -158,17 +225,24 @@ public class EmptyBytesStoreTest extends BytesTestCommon {
             assertThrowsBufferException(() -> instance.write(0, bytes, 0, 1));
         } finally {
             bytes.releaseLast();
+            IOTools.unmonitor(instance);
         }
     }
 
-    @Test
-    public void write3() {
-        assumeFalse(instance instanceof NativeBytesStore);
-        assertThrowsBufferException(() -> instance.write(0, new byte[1]));
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("data")
+    public void write3(String type, BytesStore<?, ?> instance) {
+        try {
+            assumeFalse(instance instanceof NativeBytesStore);
+            assertThrowsBufferException(() -> instance.write(0, new byte[1]));
+        } finally {
+            IOTools.unmonitor(instance);
+        }
     }
 
-    @Test
-    public void write4() {
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("data")
+    public void write4(String type, BytesStore<?, ?> instance) {
         final Bytes<ByteBuffer> bytes = elasticHeapByteBuffer();
         try {
             assertDoesNotThrow(() -> instance.write(0, bytes));
@@ -178,205 +252,352 @@ public class EmptyBytesStoreTest extends BytesTestCommon {
             assertThrowsBufferException(() -> instance.write(1, bytes));
         } finally {
             bytes.releaseLast();
+            IOTools.unmonitor(instance);
         }
     }
 
-    @Test
-    public void readByte() {
-        read(BytesStore::readByte);
-    }
-
-    @Test
-    public void peekUnsignedByte() {
-        assertEquals(-1, instance.peekUnsignedByte(0));
-    }
-
-    @Test
-    public void readShort() {
-        read(BytesStore::readShort);
-    }
-
-    @Test
-    public void readInt() {
-        read(BytesStore::readLong);
-    }
-
-    @Test
-    public void readLong() {
-        read(BytesStore::readLong);
-    }
-
-    @Test
-    public void readFloat() {
-        read(BytesStore::readFloat);
-    }
-
-    @Test
-    public void readDouble() {
-        read(BytesStore::readDouble);
-    }
-
-    @Test
-    public void readVolatileByte() {
-        read(BytesStore::readVolatileByte);
-    }
-
-    @Test
-    public void readVolatileShort() {
-        read(BytesStore::readVolatileShort);
-    }
-
-    @Test
-    public void readVolatileInt() {
-        read(BytesStore::readVolatileInt);
-    }
-
-    @Test
-    public void readVolatileLong() {
-        read(BytesStore::readVolatileLong);
-    }
-
-    @Test
-    public void hashCodeTest() {
-        int actual = instance.hashCode();
-        int expected = NativeBytesStore.from("").hashCode();
-        assertEquals(expected, actual);
-    }
-
-    @Test
-    public void equalsTest() {
-        assertNotEquals(null, instance);
-        assertNotEquals(instance, null);
-        assertEquals(NativeBytesStore.from(""), instance);
-        assertEquals(instance, NativeBytesStore.from(""));
-    }
-
-    @Test
-    public void copy() {
-        final BytesStore<?, Void> copy = uncheckedCast(instance.copy());
-        assertEquals(instance, copy);
-        copy.releaseLast();
-    }
-
-    @Test
-    public void bytesForRead() {
-        final Bytes<Void> bytes = uncheckedCast(instance.bytesForRead());
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("data")
+    public void readByte(String type, BytesStore<?, ?> instance) {
         try {
-            assertEquals(0, bytes.capacity());
-            assertEquals(0, bytes.readPosition());
+            read(instance, BytesStore::readByte);
         } finally {
-            bytes.releaseLast();
+            IOTools.unmonitor(instance);
         }
     }
 
-    @Test
-    public void capacity() {
-        assertEquals(0, instance.capacity());
-    }
-
-    @Test
-    public void underlyingObject() {
-        assertNull(instance.underlyingObject());
-    }
-
-    @Test
-    public void inside() {
-        assertTrue(instance.inside(0, 0));  // Nothing at index zero is in the empty store
-        assertFalse(instance.inside(0, 1));
-        assertFalse(instance.inside(1, 0));
-    }
-
-    @Test
-    public void testInside() {
-        assertFalse(instance.inside(0));
-    }
-
-    @Test
-    public void copyTo() {
-        final Bytes<ByteBuffer> bytes = elasticHeapByteBuffer();
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("data")
+    public void peekUnsignedByte(String type, BytesStore<?, ?> instance) {
         try {
-            assertDoesNotThrow(() -> instance.copyTo(bytes));
+            assertEquals(-1, instance.peekUnsignedByte(0));
         } finally {
-            bytes.releaseLast();
+            IOTools.unmonitor(instance);
         }
-
-        final byte[] arr = new byte[1];
-        arr[0] = 13;
-        assertDoesNotThrow(() -> instance.copyTo(arr));
-        assertEquals(13, arr[0]);
-
-        final ByteBuffer bb = ByteBuffer.allocate(1);
-        assertDoesNotThrow(() -> instance.copyTo(bb));
-        assertEquals(0, bb.position());
-
-        final ByteArrayOutputStream os = new ByteArrayOutputStream();
-        assertDoesNotThrow(() -> instance.copyTo(os));
-        final byte[] toByteArray = os.toByteArray();
-        assertEquals(0, toByteArray.length);
     }
 
-    @Test
-    public void nativeWrite() {
-        assertThrows(IllegalArgumentException.class, () -> instance.nativeWrite(34, -1, 0));
-        assertThrows(IllegalArgumentException.class, () -> instance.nativeWrite(34, 0, -1));
-        assertDoesNotThrow(() -> instance.nativeWrite(34, 0, 0));
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("data")
+    public void readShort(String type, BytesStore<?, ?> instance) {
+        try {
+            read(instance, BytesStore::readShort);
+        } finally {
+            IOTools.unmonitor(instance);
+        }
     }
 
-    @Test
-    public void write8bit() {
-        final BytesStore<?, ?> bs = BytesStore.from("A");
-        assertThrows(IllegalArgumentException.class, () -> instance.write8bit(-1, bs));
-        assumeFalse(instance instanceof NativeBytesStore);
-        assertThrows(BufferOverflowException.class, () -> instance.write8bit(0, bs));
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("data")
+    public void readInt(String type, BytesStore<?, ?> instance) {
+        try {
+            read(instance, BytesStore::readLong);
+        } finally {
+            IOTools.unmonitor(instance);
+        }
     }
 
-    @Test
-    public void testWrite8bit() {
-        assertThrowsBufferException(() -> instance.write8bit(0, "A", 0, 1));
-        assertThrows(IllegalArgumentException.class, () -> instance.write8bit(-1, "A", -1, 0));
-        assertThrows(IllegalArgumentException.class, () -> instance.write8bit(0, "A", 0, -1));
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("data")
+    public void readLong(String type, BytesStore<?, ?> instance) {
+        try {
+            read(instance, BytesStore::readLong);
+        } finally {
+            IOTools.unmonitor(instance);
+        }
     }
 
-    @Test
-    public void nativeRead() {
-        assumeFalse(instance instanceof NativeBytesStore);
-        assertThrowsBufferException(() -> instance.nativeRead(0, 1, 1));
-        assertThrows(IllegalArgumentException.class, () -> instance.nativeRead(-1, 1, 0));
-        assertThrows(IllegalArgumentException.class, () -> instance.nativeRead(0, 1, -1));
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("data")
+    public void readFloat(String type, BytesStore<?, ?> instance) {
+        try {
+            read(instance, BytesStore::readFloat);
+        } finally {
+            IOTools.unmonitor(instance);
+        }
     }
 
-    @Test
-    public void compareAndSwapInt() {
-        assumeFalse(instance instanceof NativeBytesStore);
-        assertThrowsBufferException(() -> ((RandomDataOutput<?>) instance).compareAndSwapInt(0, 1, 1));
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("data")
+    public void readDouble(String type, BytesStore<?, ?> instance) {
+        try {
+            read(instance, BytesStore::readDouble);
+        } finally {
+            IOTools.unmonitor(instance);
+        }
     }
 
-    @Test
-    public void compareAndSwapLong() {
-        assumeFalse(instance instanceof NativeBytesStore);
-        assertThrowsBufferException(() -> ((RandomDataOutput<?>) instance).compareAndSwapLong(0, 1L, 1L));
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("data")
+    public void readVolatileByte(String type, BytesStore<?, ?> instance) {
+        try {
+            read(instance, BytesStore::readVolatileByte);
+        } finally {
+            IOTools.unmonitor(instance);
+        }
     }
 
-    @Test
-    public void compareAndSwapDouble() {
-        assumeFalse(instance instanceof NativeBytesStore);
-        assertThrowsBufferException(() -> ((RandomDataOutput<?>) instance).compareAndSwapDouble(0, 1d, 1d));
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("data")
+    public void readVolatileShort(String type, BytesStore<?, ?> instance) {
+        try {
+            read(instance, BytesStore::readVolatileShort);
+        } finally {
+            IOTools.unmonitor(instance);
+        }
     }
 
-    @Test
-    public void compareAndSwapFloat() {
-        assumeFalse(instance instanceof NativeBytesStore);
-        assertThrowsBufferException(() -> ((RandomDataOutput<?>) instance).compareAndSwapFloat(0, 1f, 1f));
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("data")
+    public void readVolatileInt(String type, BytesStore<?, ?> instance) {
+        try {
+            read(instance, BytesStore::readVolatileInt);
+        } finally {
+            IOTools.unmonitor(instance);
+        }
     }
 
-    @Test
-    public void testAndSetInt() {
-        assumeFalse(instance instanceof NativeBytesStore);
-        assertThrowsBufferException(() -> ((RandomDataOutput<?>) instance).testAndSetInt(0, 1, 1));
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("data")
+    public void readVolatileLong(String type, BytesStore<?, ?> instance) {
+        try {
+            read(instance, BytesStore::readVolatileLong);
+        } finally {
+            IOTools.unmonitor(instance);
+        }
     }
 
-    @Test
-    public void equalBytes() {
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("data")
+    public void hashCodeTest(String type, BytesStore<?, ?> instance) {
+        try {
+            int actual = instance.hashCode();
+            int expected = NativeBytesStore.from("").hashCode();
+            assertEquals(expected, actual);
+        } finally {
+            IOTools.unmonitor(instance);
+        }
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("data")
+    public void equalsTest(String type, BytesStore<?, ?> instance) {
+        try {
+            assertNotEquals(null, instance);
+            assertNotEquals(instance, null);
+            assertEquals(NativeBytesStore.from(""), instance);
+            assertEquals(instance, NativeBytesStore.from(""));
+        } finally {
+            IOTools.unmonitor(instance);
+        }
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("data")
+    public void copy(String type, BytesStore<?, ?> instance) {
+        try {
+            final BytesStore<?, Void> copy = uncheckedCast(instance.copy());
+            assertEquals(instance, copy);
+            copy.releaseLast();
+        } finally {
+            IOTools.unmonitor(instance);
+        }
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("data")
+    public void bytesForRead(String type, BytesStore<?, ?> instance) {
+        try {
+            final Bytes<Void> bytes = uncheckedCast(instance.bytesForRead());
+            try {
+                assertEquals(0, bytes.capacity());
+                assertEquals(0, bytes.readPosition());
+            } finally {
+                bytes.releaseLast();
+            }
+        } finally {
+            IOTools.unmonitor(instance);
+        }
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("data")
+    public void capacity(String type, BytesStore<?, ?> instance) {
+        try {
+            assertEquals(0, instance.capacity());
+        } finally {
+            IOTools.unmonitor(instance);
+        }
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("data")
+    public void underlyingObject(String type, BytesStore<?, ?> instance) {
+        try {
+            assertNull(instance.underlyingObject());
+        } finally {
+            IOTools.unmonitor(instance);
+        }
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("data")
+    public void inside(String type, BytesStore<?, ?> instance) {
+        try {
+            assertTrue(instance.inside(0, 0));  // Nothing at index zero is in the empty store
+            assertFalse(instance.inside(0, 1));
+            assertFalse(instance.inside(1, 0));
+        } finally {
+            IOTools.unmonitor(instance);
+        }
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("data")
+    public void testInside(String type, BytesStore<?, ?> instance) {
+        try {
+            assertFalse(instance.inside(0));
+        } finally {
+            IOTools.unmonitor(instance);
+        }
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("data")
+    public void copyTo(String type, BytesStore<?, ?> instance) {
+        try {
+            final Bytes<ByteBuffer> bytes = elasticHeapByteBuffer();
+            try {
+                assertDoesNotThrow(() -> instance.copyTo(bytes));
+            } finally {
+                bytes.releaseLast();
+            }
+
+            final byte[] arr = new byte[1];
+            arr[0] = 13;
+            assertDoesNotThrow(() -> instance.copyTo(arr));
+            assertEquals(13, arr[0]);
+
+            final ByteBuffer bb = ByteBuffer.allocate(1);
+            assertDoesNotThrow(() -> instance.copyTo(bb));
+            assertEquals(0, bb.position());
+
+            final ByteArrayOutputStream os = new ByteArrayOutputStream();
+            assertDoesNotThrow(() -> instance.copyTo(os));
+            final byte[] toByteArray = os.toByteArray();
+            assertEquals(0, toByteArray.length);
+        } finally {
+            IOTools.unmonitor(instance);
+        }
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("data")
+    public void nativeWrite(String type, BytesStore<?, ?> instance) {
+        try {
+            assertThrowsAny(IllegalArgumentException.class, () -> instance.nativeWrite(34, -1, 0));
+            assertThrowsAny(IllegalArgumentException.class, () -> instance.nativeWrite(34, 0, -1));
+            assertDoesNotThrow(() -> instance.nativeWrite(34, 0, 0));
+        } finally {
+            IOTools.unmonitor(instance);
+        }
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("data")
+    public void write8bit(String type, BytesStore<?, ?> instance) {
+        try {
+            final BytesStore<?, ?> bs = BytesStore.from("A");
+            assertThrowsAny(IllegalArgumentException.class, () -> instance.write8bit(-1, bs));
+            assumeFalse(instance instanceof NativeBytesStore);
+            assertThrowsAny(BufferOverflowException.class, () -> instance.write8bit(0, bs));
+        } finally {
+            IOTools.unmonitor(instance);
+        }
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("data")
+    public void testWrite8bit(String type, BytesStore<?, ?> instance) {
+        try {
+            assertThrowsBufferException(() -> instance.write8bit(0, "A", 0, 1));
+            assertThrowsAny(IllegalArgumentException.class, () -> instance.write8bit(-1, "A", -1, 0));
+            assertThrowsAny(IllegalArgumentException.class, () -> instance.write8bit(0, "A", 0, -1));
+        } finally {
+            IOTools.unmonitor(instance);
+        }
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("data")
+    public void nativeRead(String type, BytesStore<?, ?> instance) {
+        try {
+            assumeFalse(instance instanceof NativeBytesStore);
+            assertThrowsBufferException(() -> instance.nativeRead(0, 1, 1));
+            assertThrowsAny(IllegalArgumentException.class, () -> instance.nativeRead(-1, 1, 0));
+            assertThrowsAny(IllegalArgumentException.class, () -> instance.nativeRead(0, 1, -1));
+        } finally {
+            IOTools.unmonitor(instance);
+        }
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("data")
+    public void compareAndSwapInt(String type, BytesStore<?, ?> instance) {
+        try {
+            assumeFalse(instance instanceof NativeBytesStore);
+            assertThrowsBufferException(() -> ((RandomDataOutput<?>) instance).compareAndSwapInt(0, 1, 1));
+        } finally {
+            IOTools.unmonitor(instance);
+        }
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("data")
+    public void compareAndSwapLong(String type, BytesStore<?, ?> instance) {
+        try {
+            assumeFalse(instance instanceof NativeBytesStore);
+            assertThrowsBufferException(() -> ((RandomDataOutput<?>) instance).compareAndSwapLong(0, 1L, 1L));
+        } finally {
+            IOTools.unmonitor(instance);
+        }
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("data")
+    public void compareAndSwapDouble(String type, BytesStore<?, ?> instance) {
+        try {
+            assumeFalse(instance instanceof NativeBytesStore);
+            assertThrowsBufferException(() -> ((RandomDataOutput<?>) instance).compareAndSwapDouble(0, 1d, 1d));
+        } finally {
+            IOTools.unmonitor(instance);
+        }
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("data")
+    public void compareAndSwapFloat(String type, BytesStore<?, ?> instance) {
+        try {
+            assumeFalse(instance instanceof NativeBytesStore);
+            assertThrowsBufferException(() -> ((RandomDataOutput<?>) instance).compareAndSwapFloat(0, 1f, 1f));
+        } finally {
+            IOTools.unmonitor(instance);
+        }
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("data")
+    public void testAndSetInt(String type, BytesStore<?, ?> instance) {
+        try {
+            assumeFalse(instance instanceof NativeBytesStore);
+            assertThrowsBufferException(() -> ((RandomDataOutput<?>) instance).testAndSetInt(0, 1, 1));
+        } finally {
+            IOTools.unmonitor(instance);
+        }
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("data")
+    public void equalBytes(String type, BytesStore<?, ?> instance) {
         final BytesStore<?, ?> bs = BytesStore.from("A");
         final BytesStore<?, ?> emptyBs = BytesStore.from("");
         try {
@@ -384,124 +605,192 @@ public class EmptyBytesStoreTest extends BytesTestCommon {
             assertFalse(instance.equalBytes(emptyBs, 1));
             assertTrue(instance.equalBytes(emptyBs, 0));
             assumeFalse(instance instanceof NativeBytesStore);
-            assertThrows(IllegalArgumentException.class, () -> instance.equalBytes(bs, -1));
+            assertThrowsAny(IllegalArgumentException.class, () -> instance.equalBytes(bs, -1));
         } finally {
             bs.releaseLast();
             emptyBs.releaseLast();
+            IOTools.unmonitor(instance);
         }
     }
 
-    @Test
-    public void move() {
-        assumeFalse(instance instanceof NativeBytesStore);
-        assertThrowsBufferException(() -> instance.move(0, 0, 1));
-        assertThrows(IllegalArgumentException.class, () -> instance.move(-1, 0, 0));
-        assertThrows(IllegalArgumentException.class, () -> instance.move(0, -1, 0));
-        assertThrows(IllegalArgumentException.class, () -> instance.move(0, 0, -1));
-    }
-
-    @Test
-    public void addressForRead() {
-        assertThrowsBufferException(() -> instance.addressForRead(1));
-        assertThrows(IllegalArgumentException.class, () -> instance.addressForRead(-1));
-        assumeFalse(instance.isDirectMemory());
-        assertThrowsBufferException(() -> instance.addressForRead(0));
-    }
-
-    @Test
-    public void addressForWrite() {
-        assertThrowsBufferException(() -> instance.addressForWrite(1));
-        assertThrows(IllegalArgumentException.class, () -> instance.addressForWrite(-1));
-        assumeFalse(instance.isDirectMemory());
-        assertThrowsBufferException(() -> instance.addressForWrite(0));
-    }
-
-    @Test
-    public void addressForWritePosition() {
-        assumeFalse(instance instanceof NativeBytesStore);
-        assumeFalse(instance.bytesStore() instanceof NativeBytesStore);
-        assertThrowsBufferException(instance::addressForWritePosition);
-    }
-
-    @Test
-    public void bytesForWrite() {
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("data")
+    public void move(String type, BytesStore<?, ?> instance) {
         try {
-            final Bytes<?> bytes = instance.bytesForWrite();
-            IOTools.unmonitor(bytes);
-            assertThrowsBufferException(() -> bytes.writeSkip(1));
-        } catch (UnsupportedOperationException ignored) {
-
-        }
-    }
-
-    @Test
-    public void sharedMemory() {
-        assertFalse(instance.sharedMemory());
-    }
-
-    @Test
-    public void isImmutableBytesStore() {
-        assertEquals(0, instance.capacity());
-    }
-
-    @Test
-    public void testToString() {
-        final BytesStore<?, ?> bytes = Bytes.from("");
-        final BytesStore<?, ?> bs = bytes.bytesStore();
-        assertNotNull(bs);
-        try {
-            assertEquals(bs.toString(), instance.toString());
-            assertEquals(bs.toDebugString(), instance.toDebugString());
-            assertEquals(bs.toDebugString(2), instance.toDebugString(2));
-            assertEquals(bs.to8bitString(), instance.to8bitString());
+            assumeFalse(instance instanceof NativeBytesStore);
+            assertThrowsBufferException(() -> instance.move(0, 0, 1));
+            assertThrowsAny(IllegalArgumentException.class, () -> instance.move(-1, 0, 0));
+            assertThrowsAny(IllegalArgumentException.class, () -> instance.move(0, -1, 0));
+            assertThrowsAny(IllegalArgumentException.class, () -> instance.move(0, 0, -1));
         } finally {
-            bytes.releaseLast();
+            IOTools.unmonitor(instance);
         }
     }
 
-    @Test
-    public void chars() {
-        assertEquals(0, instance.chars().count());
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("data")
+    public void addressForRead(String type, BytesStore<?, ?> instance) {
+        try {
+            assertThrowsBufferException(() -> instance.addressForRead(1));
+            assertThrowsAny(IllegalArgumentException.class, () -> instance.addressForRead(-1));
+            assumeFalse(instance.isDirectMemory());
+            assertThrowsBufferException(() -> instance.addressForRead(0));
+        } finally {
+            IOTools.unmonitor(instance);
+        }
     }
 
-    @Test
-    public void codePoints() {
-        assertEquals(0, instance.codePoints().count());
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("data")
+    public void addressForWrite(String type, BytesStore<?, ?> instance) {
+        try {
+            assertThrowsBufferException(() -> instance.addressForWrite(1));
+            assertThrowsAny(IllegalArgumentException.class, () -> instance.addressForWrite(-1));
+            assumeFalse(instance.isDirectMemory());
+            assertThrowsBufferException(() -> instance.addressForWrite(0));
+        } finally {
+            IOTools.unmonitor(instance);
+        }
     }
 
-    @Test
-    public void length() {
-        assertEquals(0, instance.length());
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("data")
+    public void addressForWritePosition(String type, BytesStore<?, ?> instance) {
+        try {
+            assumeFalse(instance instanceof NativeBytesStore);
+            assumeFalse(instance.bytesStore() instanceof NativeBytesStore);
+            assertThrowsBufferException(instance::addressForWritePosition);
+        } finally {
+            IOTools.unmonitor(instance);
+        }
     }
 
-    @Test
-    public void charAt() {
-        assumeFalse(instance instanceof NativeBytesStore);
-        assertThrows(IllegalArgumentException.class, () -> instance.charAt(-1));
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("data")
+    public void bytesForWrite(String type, BytesStore<?, ?> instance) {
+        try {
+            try {
+                final Bytes<?> bytes = instance.bytesForWrite();
+                IOTools.unmonitor(bytes);
+                assertThrowsBufferException(() -> bytes.writeSkip(1));
+            } catch (UnsupportedOperationException ignored) {
+
+            }
+        } finally {
+            IOTools.unmonitor(instance);
+        }
     }
 
-    @Test
-    public void subSequence() {
-        assertThrows(IndexOutOfBoundsException.class, () -> instance.subSequence(-1, 0));
-        assertThrows(IndexOutOfBoundsException.class, () -> instance.subSequence(2, 1));
-        assertThrows(IndexOutOfBoundsException.class, () -> instance.subSequence(1, 2));
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("data")
+    public void sharedMemory(String type, BytesStore<?, ?> instance) {
+        try {
+            assertFalse(instance.sharedMemory());
+        } finally {
+            IOTools.unmonitor(instance);
+        }
     }
 
-    @Test
-    public void zeroOut() {
-        assertDoesNotThrow(() -> instance.zeroOut(0, 0));
-        // outside bounds are ignored
-//        assertThrows(BufferOverflowException.class, () -> INSTANCE.zeroOut(0, 1));
-//        assertThrows(BufferOverflowException.class, () -> INSTANCE.zeroOut(1, 2));
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("data")
+    public void isImmutableBytesStore(String type, BytesStore<?, ?> instance) {
+        try {
+            assertEquals(0, instance.capacity());
+        } finally {
+            IOTools.unmonitor(instance);
+        }
     }
 
-    private void read(final ObjLongConsumer<BytesStore<?, ?>> getter) {
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("data")
+    public void testToString(String type, BytesStore<?, ?> instance) {
+        try {
+            final BytesStore<?, ?> bytes = Bytes.from("");
+            final BytesStore<?, ?> bs = bytes.bytesStore();
+            assertNotNull(bs);
+            try {
+                assertEquals(bs.toString(), instance.toString());
+                assertEquals(bs.toDebugString(), instance.toDebugString());
+                assertEquals(bs.toDebugString(2), instance.toDebugString(2));
+                assertEquals(bs.to8bitString(), instance.to8bitString());
+            } finally {
+                bytes.releaseLast();
+            }
+        } finally {
+            IOTools.unmonitor(instance);
+        }
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("data")
+    public void chars(String type, BytesStore<?, ?> instance) {
+        try {
+            assertEquals(0, instance.chars().count());
+        } finally {
+            IOTools.unmonitor(instance);
+        }
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("data")
+    public void codePoints(String type, BytesStore<?, ?> instance) {
+        try {
+            assertEquals(0, instance.codePoints().count());
+        } finally {
+            IOTools.unmonitor(instance);
+        }
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("data")
+    public void length(String type, BytesStore<?, ?> instance) {
+        try {
+            assertEquals(0, instance.length());
+        } finally {
+            IOTools.unmonitor(instance);
+        }
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("data")
+    public void charAt(String type, BytesStore<?, ?> instance) {
+        try {
+            assumeFalse(instance instanceof NativeBytesStore);
+            assertThrowsAny(IllegalArgumentException.class, () -> instance.charAt(-1));
+        } finally {
+            IOTools.unmonitor(instance);
+        }
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("data")
+    public void subSequence(String type, BytesStore<?, ?> instance) {
+        try {
+            assertThrowsAny(IndexOutOfBoundsException.class, () -> instance.subSequence(-1, 0));
+            assertThrowsAny(IndexOutOfBoundsException.class, () -> instance.subSequence(2, 1));
+            assertThrowsAny(IndexOutOfBoundsException.class, () -> instance.subSequence(1, 2));
+        } finally {
+            IOTools.unmonitor(instance);
+        }
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("data")
+    public void zeroOut(String type, BytesStore<?, ?> instance) {
+        try {
+            assertDoesNotThrow(() -> instance.zeroOut(0, 0));
+        } finally {
+            IOTools.unmonitor(instance);
+        }
+    }
+
+    private void read(BytesStore<?, ?> instance, final ObjLongConsumer<BytesStore<?, ?>> getter) {
         assumeFalse(instance instanceof NativeBytesStore);
         assertThrowsBufferException(() -> getter.accept(instance, 0));
-        assertThrows(IllegalArgumentException.class, () -> getter.accept(instance, -1));
+        assertThrowsAny(IllegalArgumentException.class, () -> getter.accept(instance, -1));
     }
 
-    private void assertThrows(Class<? extends Throwable> tClass, Runnable runnable) {
+    private void assertThrowsAny(Class<? extends Throwable> tClass, Runnable runnable) {
         try {
             runnable.run();
 

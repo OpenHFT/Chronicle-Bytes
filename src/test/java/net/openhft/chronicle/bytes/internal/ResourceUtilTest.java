@@ -8,8 +8,7 @@ import net.openhft.chronicle.bytes.BytesTestCommon;
 import net.openhft.chronicle.core.io.ClosedIllegalStateException;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 class ResourceUtilTest extends BytesTestCommon {
 
