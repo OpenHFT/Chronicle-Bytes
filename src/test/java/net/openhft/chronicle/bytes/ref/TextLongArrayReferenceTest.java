@@ -6,9 +6,9 @@ package net.openhft.chronicle.bytes.ref;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesTestCommon;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class TextLongArrayReferenceTest extends BytesTestCommon {
     @Test
@@ -30,8 +30,7 @@ public class TextLongArrayReferenceTest extends BytesTestCommon {
             @NotNull final String expected = "{ locked: false, capacity: 5                   , used: 00000000000000000000, " +
                     "values: [ 00000000000000000001, 00000000000000000002, 00000000000000000003, 00000000000000000004, 00000000000000000005 ] }\n";
 //            System.out.println(expected.length());
-            assertEquals(expected,
-                    bytes.toString());
+            assertEquals(expected, bytes.toString());
             bytes.releaseLast();
         }
     }

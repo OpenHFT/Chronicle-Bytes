@@ -6,9 +6,9 @@ package net.openhft.chronicle.bytes.util;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.bytes.util.AbstractInterner;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
 
 class AbstractInternerTest {
 
@@ -35,7 +35,7 @@ class AbstractInternerTest {
         Bytes<?> bytes = Bytes.from("testString");
         String firstInterned = interner.intern(bytes);
         String secondInterned = interner.intern(bytes);
-        Assertions.assertSame(firstInterned, secondInterned);
+        assertSame(firstInterned, secondInterned);
     }
 
     @Test
@@ -44,7 +44,7 @@ class AbstractInternerTest {
         Bytes<?> secondBytes = Bytes.from("secondString");
         String firstInterned = interner.intern(firstBytes);
         String secondInterned = interner.intern(secondBytes);
-        Assertions.assertNotSame(firstInterned, secondInterned);
+        assertNotSame(firstInterned, secondInterned);
     }
 
     @Test
@@ -53,7 +53,7 @@ class AbstractInternerTest {
         Bytes<?> longBytes = Bytes.from("aVeryLongStringIndeed");
         String shortInterned = interner.intern(shortBytes);
         String longInterned = interner.intern(longBytes);
-        Assertions.assertNotSame(shortInterned, longInterned);
+        assertNotSame(shortInterned, longInterned);
     }
 
     @Test
@@ -63,7 +63,7 @@ class AbstractInternerTest {
         interner.intern(firstBytes);
         interner.intern(secondBytes);
         int count = interner.valueCount();
-        Assertions.assertTrue(count >= 2);
+        assertTrue(count >= 2);
     }
 
     @Test
@@ -74,6 +74,6 @@ class AbstractInternerTest {
         interner.toggle();
         interner.intern(secondBytes);
         int count = interner.valueCount();
-        Assertions.assertTrue(count >= 2);
+        assertTrue(count >= 2);
     }
 }

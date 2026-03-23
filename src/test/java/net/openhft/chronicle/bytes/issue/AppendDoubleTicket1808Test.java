@@ -5,9 +5,9 @@ package net.openhft.chronicle.bytes.issue;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesTestCommon;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class AppendDoubleTicket1808Test extends BytesTestCommon {
     @Test

@@ -4,12 +4,11 @@
 package net.openhft.chronicle.bytes.util;
 
 import net.openhft.chronicle.bytes.BytesTestCommon;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.Properties;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class PropertyReplacerTest extends BytesTestCommon {
     @Test
@@ -35,8 +34,7 @@ public class PropertyReplacerTest extends BytesTestCommon {
             PropertyReplacer.replaceTokensWithProperties("plainText ${missingPropertyToReplace}", properties);
         } catch (IllegalArgumentException e) {
             assertEquals("Property is missing: [property=missingPropertyToReplace, " +
-                            "expression=plainText ${missingPropertyToReplace}, properties={wrongProperty=wrongValue}]",
-                    e.getMessage());
+                            "expression=plainText ${missingPropertyToReplace}, properties={wrongProperty=wrongValue}]", e.getMessage());
 
             return;
         }

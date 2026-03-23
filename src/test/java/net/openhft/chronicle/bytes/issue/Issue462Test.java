@@ -12,7 +12,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 class Issue462Test {
 
@@ -36,7 +36,7 @@ class Issue462Test {
         final long value = 0x0102030405060708L;
         bytes.writeLong(value);
         final ByteBuffer byteBuffer = bytes.underlyingObject();
-        assertEquals(ByteOrder.nativeOrder(), byteBuffer.order());
+        assertSame(ByteOrder.nativeOrder(), byteBuffer.order());
         final long aLong = byteBuffer.getLong();
         assertEquals(Long.toHexString(value), Long.toHexString(aLong));
         assertEquals(value, aLong);

@@ -6,9 +6,9 @@ package net.openhft.chronicle.bytes.util;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesTestCommon;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class StringInternerBytesTest extends BytesTestCommon {
 
