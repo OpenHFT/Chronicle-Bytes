@@ -8,14 +8,14 @@ import net.openhft.chronicle.bytes.BytesTestCommon;
 import net.openhft.chronicle.bytes.NativeBytes;
 import net.openhft.chronicle.bytes.internal.NativeBytesStore;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.security.SecureRandom;
 import java.util.Random;
 
 import static net.openhft.chronicle.bytes.algo.OptimisedBytesStoreHash.*;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SuppressWarnings("rawtypes")
 public class OptimisedBytesStoreHashTest extends BytesTestCommon {
@@ -25,16 +25,14 @@ public class OptimisedBytesStoreHashTest extends BytesTestCommon {
         @NotNull NativeBytes b = Bytes.allocateElasticDirect(128);
         b.writeLong(0x0102030405060708L);
         b.writeLong(0x1112131415161718L);
-        assertEquals(VanillaBytesStoreHash.INSTANCE.applyAsLong(b),
-                OptimisedBytesStoreHash.INSTANCE.applyAsLong(b));
+        assertEquals(VanillaBytesStoreHash.INSTANCE.applyAsLong(b), INSTANCE.applyAsLong(b));
 
         while (b.readSkip(1).readRemaining() > 0) {
             long expected = VanillaBytesStoreHash.INSTANCE.applyAsLong(b);
             long actual = OptimisedBytesStoreHash.INSTANCE.applyAsLong(b);
-            assertEquals("Rem: " + b.readRemaining(), expected, actual);
+            assertEquals(expected, actual, "Rem: " + b.readRemaining());
         }
-        assertEquals(VanillaBytesStoreHash.INSTANCE.applyAsLong(b),
-                OptimisedBytesStoreHash.INSTANCE.applyAsLong(b));
+        assertEquals(VanillaBytesStoreHash.INSTANCE.applyAsLong(b), INSTANCE.applyAsLong(b));
         b.releaseLast();
     }
 
@@ -51,14 +49,12 @@ public class OptimisedBytesStoreHashTest extends BytesTestCommon {
         assertEquals(applyAsLong8(nb), applyAsLong9to16(nb, 8));
 */
         for (int i = 1; i <= 16; i++)
-            assertEquals("i: " + i, applyAsLong9to16(nb, i), applyAsLongAny(nb, i));
+            assertEquals(applyAsLong9to16(nb, i), applyAsLongAny(nb, i), "i: " + i);
         for (int i = 17; i <= 32; i++)
-            assertEquals("i: " + i, applyAsLong17to32(nb, i), applyAsLongAny(nb, i));
+            assertEquals(applyAsLong17to32(nb, i), applyAsLongAny(nb, i), "i: " + i);
         nb.releaseLast();
     }
 
-    //@Test
-    //@Ignore("Long running, har mean score = 5436")
     public void testRandomness() {
         @NotNull SecureRandom rand = new SecureRandom();
 
@@ -102,8 +98,6 @@ public class OptimisedBytesStoreHashTest extends BytesTestCommon {
         System.out.printf("Average time %.3f us%n", time / timeCount / 1e3);
     }
 
-    //@Test
-    //@Ignore("Long running, avg score = 5414, avg time 0.043 us")
     public void testSmallRandomness()
             throws IOException {
         long time = 0, timeCount = 0;
@@ -147,8 +141,6 @@ public class OptimisedBytesStoreHashTest extends BytesTestCommon {
         System.out.printf("Average time %.3f us%n", time / timeCount / 1e3);
     }
 
-    //@Test
-    //@Ignore("Only run for comparison, avg score = 6843")
     public void testSecureRandomness() {
         long scoreSum = 0;
         for (int t = 0; t < 500; t++) {
@@ -182,8 +174,7 @@ public class OptimisedBytesStoreHashTest extends BytesTestCommon {
         @NotNull Bytes<?> bs2 = Bytes.allocateDirect(9).unchecked(true);
 
         for (int i = 0; i <= 8; i++) {
-            assertEquals("i: " + i, Long.toHexString(bs2.readLong(0)),
-                    Long.toHexString(OptimisedBytesStoreHash.readIncompleteLong(bs.addressForRead(0), i)));
+            assertEquals(Long.toHexString(bs2.readLong(0)), Long.toHexString(readIncompleteLong(bs.addressForRead(0), i)), "i: " + i);
             bs2.writeUnsignedByte(i + 1);
         }
         bs.releaseLast();
