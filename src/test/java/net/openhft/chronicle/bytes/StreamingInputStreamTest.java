@@ -5,10 +5,12 @@ package net.openhft.chronicle.bytes;
 
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.concurrent.TimeUnit;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static org.junit.jupiter.api.Assertions.*;
@@ -28,8 +30,7 @@ class StreamingInputStreamTest extends BytesTestCommon {
     }
 
     @Test
-
-    @org.junit.jupiter.api.Timeout(value = 1000, unit = java.util.concurrent.TimeUnit.MILLISECONDS)
+    @Timeout(value = 1000, unit = TimeUnit.MILLISECONDS)
     void testReadBlock()
             throws IOException {
 

@@ -90,12 +90,6 @@
         </dependency>
 
         <dependency>
-            <groupId>org.junit.vintage</groupId>
-            <artifactId>junit-vintage-engine</artifactId>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
             <groupId>net.openhft</groupId>
             <artifactId>affinity</artifactId>
             <scope>test</scope>

@@ -372,7 +372,7 @@ class BytesInternalTest extends BytesTestCommon {
     }
 
     @Test
-    @Disabled(/* peformance test */)
+    @Disabled("performance test")
     void testNoneDirectWritePerformance() {
         final int size = 64;
         Bytes<?> a = Bytes.allocateElasticOnHeap(size + 8);
