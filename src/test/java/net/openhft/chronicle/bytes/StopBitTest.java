@@ -8,12 +8,13 @@ import org.junit.jupiter.api.Test;
 import java.nio.BufferUnderflowException;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+
 import static org.junit.jupiter.api.Assertions.*;
 
-public class StopBitTest extends BytesTestCommon {
+class StopBitTest extends BytesTestCommon {
 
     @Test
-    public void testStopBit() {
+    void testStopBit() {
 
         for (int i = 0; i < (1 << 10) + 1; i++) {
             final String expected = IntStream.range(0, i)
@@ -49,7 +50,7 @@ public class StopBitTest extends BytesTestCommon {
     }
 
     @Test
-    public void testStopBitShort() {
+    void testStopBitShort() {
 
         final String s = IntStream.range(0, 1)
                 .mapToObj(Integer::toString)

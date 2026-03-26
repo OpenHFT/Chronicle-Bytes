@@ -10,10 +10,10 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class StringInternerBytesTest extends BytesTestCommon {
+class StringInternerBytesTest extends BytesTestCommon {
 
     @Test
-    public void testIntern() {
+    void testIntern() {
         @NotNull StringInternerBytes si = new StringInternerBytes(128);
         for (int i = 0; i < 100; i++) {
             Bytes<?> b = Bytes.from("key" + i);

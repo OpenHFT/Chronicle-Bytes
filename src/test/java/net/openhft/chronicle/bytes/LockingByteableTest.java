@@ -16,9 +16,9 @@ import java.nio.channels.OverlappingFileLockException;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.*;
 
-public class LockingByteableTest extends BytesTestCommon {
+class LockingByteableTest extends BytesTestCommon {
     @Test
-    public void notLockable() throws IOException {
+    void notLockable() throws IOException {
         assertThrows(UnsupportedOperationException.class, () -> {
             try (BinaryLongReference blr = new BinaryLongReference()) {
                 blr.bytesStore(Bytes.from("Hello World"), 0, 8);
@@ -28,7 +28,7 @@ public class LockingByteableTest extends BytesTestCommon {
     }
 
     @Test
-    public void lockableShared() throws IOException {
+    void lockableShared() throws IOException {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         final String tmp = IOTools.tempName("lockableShared");
@@ -49,7 +49,7 @@ public class LockingByteableTest extends BytesTestCommon {
     }
 
     @Test
-    public void tryLockableShared() throws IOException {
+    void tryLockableShared() throws IOException {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         final String tmp = IOTools.tempName("lockableShared");
@@ -70,7 +70,7 @@ public class LockingByteableTest extends BytesTestCommon {
     }
 
     @Test
-    public void doubleLockableShared() throws IOException {
+    void doubleLockableShared() throws IOException {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         assertThrows(OverlappingFileLockException.class, () -> {
@@ -90,7 +90,7 @@ public class LockingByteableTest extends BytesTestCommon {
     }
 
     @Test
-    public void lockableSharedSingle() throws IOException {
+    void lockableSharedSingle() throws IOException {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         final String tmp = IOTools.tempName("lockableShared");
@@ -111,7 +111,7 @@ public class LockingByteableTest extends BytesTestCommon {
     }
 
     @Test
-    public void tryLockableSharedSingle() throws IOException {
+    void tryLockableSharedSingle() throws IOException {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         final String tmp = IOTools.tempName("lockableShared");
@@ -132,7 +132,7 @@ public class LockingByteableTest extends BytesTestCommon {
     }
 
     @Test
-    public void doubleLockableSharedSingle() throws IOException {
+    void doubleLockableSharedSingle() throws IOException {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         assertThrows(OverlappingFileLockException.class, () -> {

@@ -11,10 +11,10 @@ import java.nio.BufferUnderflowException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class BytesInternalSubBytesErrorsTest extends BytesTestCommon {
+class BytesInternalSubBytesErrorsTest extends BytesTestCommon {
 
     @Test
-    public void subBytesThrowsWhenLengthTooLarge() {
+    void subBytesThrowsWhenLengthTooLarge() {
         assertThrows(BufferUnderflowException.class, () -> {
             Bytes<?> src = Bytes.from("abc");
             try {

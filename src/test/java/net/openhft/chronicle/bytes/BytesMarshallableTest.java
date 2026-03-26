@@ -26,7 +26,7 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.*;
 
-public class BytesMarshallableTest extends BytesTestCommon {
+class BytesMarshallableTest extends BytesTestCommon {
 
     static Stream<Arguments> data() {
         return Stream.of(
@@ -36,7 +36,7 @@ public class BytesMarshallableTest extends BytesTestCommon {
     }
 
     @AfterAll
-    public static void resetGuarded() {
+    static void resetGuarded() {
         NativeBytes.resetNewGuarded();
     }
 
@@ -46,7 +46,7 @@ public class BytesMarshallableTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void serializePrimitives(String name, boolean guarded) {
+    void serializePrimitives(String name, boolean guarded) {
         setGuarded(guarded);
         assumeFalse(NativeBytes.areNewGuarded());
         final Bytes<?> bytes = new HexDumpBytes();
@@ -94,7 +94,7 @@ public class BytesMarshallableTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void serializeScalars(String name, boolean guarded) {
+    void serializeScalars(String name, boolean guarded) {
         setGuarded(guarded);
         final Bytes<?> bytes = new HexDumpBytes();
         try {
@@ -162,7 +162,7 @@ public class BytesMarshallableTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void serializeNested(String name, boolean guarded) {
+    void serializeNested(String name, boolean guarded) {
         setGuarded(guarded);
         final Bytes<?> bytes = new HexDumpBytes();
         try {
@@ -313,7 +313,7 @@ public class BytesMarshallableTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void serializeBytes(String name, boolean guarded)
+    void serializeBytes(String name, boolean guarded)
             throws IOException {
         setGuarded(guarded);
         Bytes<?> bytes = new HexDumpBytes();
@@ -348,7 +348,7 @@ public class BytesMarshallableTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void serializeCollections(String name, boolean guarded) {
+    void serializeCollections(String name, boolean guarded) {
         setGuarded(guarded);
 //        assumeTrue(name.equals("Unguarded"));
         final Bytes<?> bytes = new HexDumpBytes();
@@ -393,7 +393,7 @@ public class BytesMarshallableTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void collectionsNotInitializedInConstructor(String name, boolean guarded) {
+    void collectionsNotInitializedInConstructor(String name, boolean guarded) {
         setGuarded(guarded);
         final Bytes<?> bytes = new HexDumpBytes();
 
@@ -486,7 +486,7 @@ public class BytesMarshallableTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void testSpecificCollections(String name, boolean guarded) {
+    void testSpecificCollections(String name, boolean guarded) {
         setGuarded(guarded);
         final Bytes<?> bytes = new HexDumpBytes();
 
@@ -527,7 +527,7 @@ public class BytesMarshallableTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void nested(String name, boolean guarded) {
+    void nested(String name, boolean guarded) {
         setGuarded(guarded);
         final Bytes<?> bytes = new HexDumpBytes();
         try {
@@ -578,7 +578,7 @@ public class BytesMarshallableTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void nullArrays(String name, boolean guarded) {
+    void nullArrays(String name, boolean guarded) {
         setGuarded(guarded);
         final Bytes<?> bytes = new HexDumpBytes();
         try {
@@ -612,7 +612,7 @@ public class BytesMarshallableTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void arrays(String name, boolean guarded) {
+    void arrays(String name, boolean guarded) {
         setGuarded(guarded);
         final Bytes<?> bytes = new HexDumpBytes();
         try {

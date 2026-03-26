@@ -12,7 +12,7 @@ import org.mockito.MockitoAnnotations;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-public class BytesRingBufferTest {
+class BytesRingBufferTest {
 
     @Mock
     private BytesRingBuffer bytesRingBuffer;
@@ -21,43 +21,43 @@ public class BytesRingBufferTest {
     private BytesStore<?, Void> mockBytesStore;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         MockitoAnnotations.openMocks(this);
     }
 
     @Test
-    public void testClear() {
+    void testClear() {
         doNothing().when(bytesRingBuffer).clear();
         bytesRingBuffer.clear();
         verify(bytesRingBuffer).clear();
     }
 
     @Test
-    public void testOffer() {
+    void testOffer() {
         when(bytesRingBuffer.offer(any())).thenReturn(true);
         assertTrue(bytesRingBuffer.offer(mockBytesStore));
     }
 
     @Test
-    public void testRead() {
+    void testRead() {
         when(bytesRingBuffer.read(any())).thenReturn(true);
         assertTrue(bytesRingBuffer.read(mock(BytesOut.class)));
     }
 
     @Test
-    public void testReadRemaining() {
+    void testReadRemaining() {
         when(bytesRingBuffer.readRemaining()).thenReturn(10L);
         assertEquals(10L, bytesRingBuffer.readRemaining());
     }
 
     @Test
-    public void testIsEmpty() {
+    void testIsEmpty() {
         when(bytesRingBuffer.isEmpty()).thenReturn(true);
         assertTrue(bytesRingBuffer.isEmpty());
     }
 
     @Test
-    public void testNewInstanceThrowsException() {
+    void testNewInstanceThrowsException() {
         assertThrows(ClassNotFoundException.class, () -> {
             BytesRingBuffer.newInstance(mockBytesStore);
         });

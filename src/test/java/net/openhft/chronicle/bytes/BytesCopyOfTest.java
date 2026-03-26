@@ -7,10 +7,10 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class BytesCopyOfTest extends BytesTestCommon {
+class BytesCopyOfTest extends BytesTestCommon {
 
     @Test
-    public void copyOfReturnsDirectBytesWithSameReadableContent() {
+    void copyOfReturnsDirectBytesWithSameReadableContent() {
         Bytes<?> src = Bytes.allocateElasticOnHeap(32);
         try {
             src.append("lorem-ipsum");

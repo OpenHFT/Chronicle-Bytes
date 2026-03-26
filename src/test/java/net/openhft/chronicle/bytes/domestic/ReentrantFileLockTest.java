@@ -40,7 +40,7 @@ class ReentrantFileLockTest extends BytesTestCommon {
     private File fileToLock;
 
     @BeforeEach
-    public void beforeEachReentrantFileLockTest() {
+    void beforeEachReentrantFileLockTest() {
         setUp();
         threadDump();
     }

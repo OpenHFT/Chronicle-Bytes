@@ -7,10 +7,10 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class VanillaBytesOpsTest extends BytesTestCommon {
+class VanillaBytesOpsTest extends BytesTestCommon {
 
     @Test
-    public void writeReadPrimitivesAndZeroOut() {
+    void writeReadPrimitivesAndZeroOut() {
         Bytes<?> b = Bytes.allocateElasticOnHeap(64);
         try {
             b.writeInt(0x11223344);

@@ -10,9 +10,9 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.*;
 
-public class BinaryLongArrayReferenceTest extends BytesTestCommon {
+class BinaryLongArrayReferenceTest extends BytesTestCommon {
     @Test
-    public void getSetValues() {
+    void getSetValues() {
         final int length = 128 * 8 + 2 * 8;
         final Bytes<?> bytes = Bytes.allocateDirect(length);
         try {
@@ -34,7 +34,7 @@ public class BinaryLongArrayReferenceTest extends BytesTestCommon {
     }
 
     @Test
-    public void marshallable() {
+    void marshallable() {
         assumeFalse(NativeBytes.areNewGuarded());
         assumeFalse(Jvm.maxDirectMemory() == 0);
 

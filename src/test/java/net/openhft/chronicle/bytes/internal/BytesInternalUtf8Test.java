@@ -11,10 +11,10 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class BytesInternalUtf8Test extends BytesTestCommon {
+class BytesInternalUtf8Test extends BytesTestCommon {
 
     @Test
-    public void appendUtf8CharSequenceVariants() {
+    void appendUtf8CharSequenceVariants() {
         Bytes<?> out = Bytes.allocateElasticOnHeap(32);
         try {
             CharSequence cs = "hello-world";
@@ -38,7 +38,7 @@ public class BytesInternalUtf8Test extends BytesTestCommon {
     }
 
     @Test
-    public void parseUtf8And8bitWithStopTesters() {
+    void parseUtf8And8bitWithStopTesters() {
         Bytes<?> a = Bytes.from("alpha");
         Bytes<?> b = Bytes.from("beta");
         try {

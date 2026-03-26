@@ -7,16 +7,16 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class BytesStoreTest extends BytesTestCommon {
+class BytesStoreTest extends BytesTestCommon {
     @Test
-    public void from() {
+    void from() {
         BytesStore<?, byte[]> from = BytesStore.from(", ");
         assertEquals(2, from.capacity());
         from.releaseLast();
     }
 
     @Test
-    public void from2() {
+    void from2() {
         Bytes<?> hello = Bytes.from("Hello").subBytes(0, 5).bytesForRead();
         assertEquals("Hello", hello.toString());
 
@@ -28,7 +28,7 @@ public class BytesStoreTest extends BytesTestCommon {
     }
 
     @Test
-    public void testSubSequenceOnHeap() {
+    void testSubSequenceOnHeap() {
         final Bytes<?> bytes = Bytes.allocateElasticOnHeap();
 
         bytes.append("Hello");
@@ -37,7 +37,7 @@ public class BytesStoreTest extends BytesTestCommon {
     }
 
     @Test
-    public void testSubSequenceDirect() {
+    void testSubSequenceDirect() {
         final Bytes<?> bytes = Bytes.allocateElasticDirect();
 
         bytes.append("Hello");

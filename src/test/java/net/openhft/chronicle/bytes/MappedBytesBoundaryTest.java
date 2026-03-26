@@ -20,15 +20,15 @@ import java.nio.file.Files;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.*;
 
-public class MappedBytesBoundaryTest extends BytesTestCommon {
+class MappedBytesBoundaryTest extends BytesTestCommon {
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         if (OS.isWindows())
             ignoreException("Unable to delete");
     }
 
     @Test
-    public void writeAcrossChunkBoundary() throws IOException {
+    void writeAcrossChunkBoundary() throws IOException {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         final int chunk = 4096;
@@ -54,7 +54,7 @@ public class MappedBytesBoundaryTest extends BytesTestCommon {
     }
 
     @Test
-    public void readOnlyMappingRejectsWritesAndReportsFlag() throws IOException {
+    void readOnlyMappingRejectsWritesAndReportsFlag() throws IOException {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         File file = new File(OS.getTarget(), "mapped-readonly-" + System.nanoTime() + ".dat");
@@ -83,7 +83,7 @@ public class MappedBytesBoundaryTest extends BytesTestCommon {
     }
 
     @Test
-    public void writeSkipReservesSpaceLikeQueueWriters() throws IOException {
+    void writeSkipReservesSpaceLikeQueueWriters() throws IOException {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         File file = new File(OS.getTarget(), "mapped-write-skip-" + System.nanoTime() + ".dat");
@@ -101,7 +101,7 @@ public class MappedBytesBoundaryTest extends BytesTestCommon {
     }
 
     @Test
-    public void write8bitUsesOptimisedPathForAsciiStrings() throws IOException {
+    void write8bitUsesOptimisedPathForAsciiStrings() throws IOException {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         File file = new File(OS.getTarget(), "mapped-write8bit-" + System.nanoTime() + ".dat");

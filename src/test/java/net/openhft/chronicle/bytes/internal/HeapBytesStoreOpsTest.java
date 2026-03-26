@@ -10,10 +10,10 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class HeapBytesStoreOpsTest extends BytesTestCommon {
+class HeapBytesStoreOpsTest extends BytesTestCommon {
 
     @Test
-    public void heapStorePrimitiveOps() {
+    void heapStorePrimitiveOps() {
         Bytes<?> heap = Bytes.allocateElasticOnHeap(32);
         try {
             BytesStore<?, ?> store = heap.bytesStore();

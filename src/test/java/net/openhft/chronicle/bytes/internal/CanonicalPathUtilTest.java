@@ -13,10 +13,10 @@ import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class CanonicalPathUtilTest extends BytesTestCommon {
+class CanonicalPathUtilTest extends BytesTestCommon {
 
     @Test
-    public void returnsInternedCanonicalPath() throws IOException {
+    void returnsInternedCanonicalPath() throws IOException {
         File dir = new File(OS.getTarget(), "canon-test");
         assertTrue(dir.mkdirs() || dir.isDirectory());
         File f1 = new File(dir, "a/.././file.txt");

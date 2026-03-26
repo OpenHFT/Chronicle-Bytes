@@ -9,19 +9,20 @@ import org.junit.jupiter.api.BeforeEach;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class EscapingStopCharsTesterTest {
+class EscapingStopCharsTesterTest {
 
     private StopCharsTester baseTester;
     private EscapingStopCharsTester tester;
+
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         // Setup the base tester with specific behavior for demonstration
         baseTester = (ch, peekNextCh) -> ch == 'x'; // Let's say 'x' is a stop character
         tester = new EscapingStopCharsTester(baseTester);
     }
 
     @Test
-    public void testIsStopCharWithEscape() {
+    void testIsStopCharWithEscape() {
         // First call with escape character
         assertFalse(tester.isStopChar('\\', 'x'), "Escaped character should not be stop char");
         // Next call with the character that would normally be a stop character
@@ -31,7 +32,7 @@ public class EscapingStopCharsTesterTest {
     }
 
     @Test
-    public void testIsStopCharWithoutEscape() {
+    void testIsStopCharWithoutEscape() {
         assertFalse(tester.isStopChar('y', ' '), "Non-stop char should not be recognized as stop char");
     }
 }

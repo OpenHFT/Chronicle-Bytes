@@ -8,10 +8,10 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class EscapingStopCharTesterTest {
+class EscapingStopCharTesterTest {
 
     @Test
-    public void testIsStopCharWithAndWithoutEscape() {
+    void testIsStopCharWithAndWithoutEscape() {
         // Setup a StopCharTester that considers 'x' as a stop character
         StopCharTester baseTester = ch -> ch == 'x';
 
@@ -29,7 +29,7 @@ public class EscapingStopCharTesterTest {
     }
 
     @Test
-    public void testEscapingStopCharTester() {
+    void testEscapingStopCharTester() {
         StopCharTester baseTester = ch -> ch == 'x'; // Let's say 'x' is a stop character
         EscapingStopCharTester tester = new EscapingStopCharTester(baseTester);
 

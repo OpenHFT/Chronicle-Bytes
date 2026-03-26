@@ -8,10 +8,10 @@ import org.junit.jupiter.api.Test;
 
 import static org.mockito.Mockito.*;
 
-public class CompressionTest {
+class CompressionTest {
 
     @Test
-    public void testCompressWithUnsupportedAlgorithm() throws IllegalArgumentException {
+    void testCompressWithUnsupportedAlgorithm() throws IllegalArgumentException {
         Bytes<?> uncompressed = mock(Bytes.class);
         Bytes<?> compressed = mock(Bytes.class);
 

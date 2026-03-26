@@ -11,7 +11,7 @@ import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class UnsafeTextBytesTest extends BytesTestCommon {
+class UnsafeTextBytesTest extends BytesTestCommon {
 
     private static void testAppendBase10(final Bytes<?> bytes, final long l) {
         final long address = bytes.clear().addressForRead(0);
@@ -48,7 +48,7 @@ public class UnsafeTextBytesTest extends BytesTestCommon {
     }
 
     @Test
-    public void appendBase10() {
+    void appendBase10() {
         final Bytes<?> bytes = Bytes.allocateDirect(32);
         try {
             for (long l = Long.MAX_VALUE; l > 0; l /= 2) {
@@ -61,7 +61,7 @@ public class UnsafeTextBytesTest extends BytesTestCommon {
     }
 
     @Test
-    public void appendDouble() {
+    void appendDouble() {
 
         final Bytes<?> bytes = Bytes.allocateDirect(32);
         // testAppendFixed(bytes, 864960913420.1180, 4);
@@ -82,7 +82,7 @@ public class UnsafeTextBytesTest extends BytesTestCommon {
     }
 
     @Test
-    public void appendDouble2() {
+    void appendDouble2() {
         final Bytes<?> bytes = Bytes.allocateDirect(32);
         try {
             for (double d : new double[]{
@@ -95,7 +95,7 @@ public class UnsafeTextBytesTest extends BytesTestCommon {
     }
 
     @Test
-    public void extraZeros() {
+    void extraZeros() {
         final Bytes<?> bytes = Bytes.allocateDirect(32);
         try {
             final double d = -0.00002;

@@ -10,9 +10,9 @@ import java.util.Properties;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class PropertyReplacerTest extends BytesTestCommon {
+class PropertyReplacerTest extends BytesTestCommon {
     @Test
-    public void testSystemPropertyMissing() {
+    void testSystemPropertyMissing() {
         try {
             PropertyReplacer.replaceTokensWithProperties("plainText ${missingPropertyToReplace}");
         } catch (IllegalArgumentException e) {
@@ -26,7 +26,7 @@ public class PropertyReplacerTest extends BytesTestCommon {
     }
 
     @Test
-    public void testPropertyMissing() {
+    void testPropertyMissing() {
         try {
             final Properties properties = new Properties();
             properties.setProperty("wrongProperty", "wrongValue");
@@ -34,7 +34,7 @@ public class PropertyReplacerTest extends BytesTestCommon {
             PropertyReplacer.replaceTokensWithProperties("plainText ${missingPropertyToReplace}", properties);
         } catch (IllegalArgumentException e) {
             assertEquals("Property is missing: [property=missingPropertyToReplace, " +
-                            "expression=plainText ${missingPropertyToReplace}, properties={wrongProperty=wrongValue}]", e.getMessage());
+                    "expression=plainText ${missingPropertyToReplace}, properties={wrongProperty=wrongValue}]", e.getMessage());
 
             return;
         }
@@ -43,7 +43,7 @@ public class PropertyReplacerTest extends BytesTestCommon {
     }
 
     @Test
-    public void testLeadingAndTrailingSpacesInsideBracketsIgnored() {
+    void testLeadingAndTrailingSpacesInsideBracketsIgnored() {
         final Properties props = new Properties();
         props.setProperty("myFancyProperty", "myFancyValue");
 

@@ -9,9 +9,9 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class AppendDoubleTicket1808Test extends BytesTestCommon {
+class AppendDoubleTicket1808Test extends BytesTestCommon {
     @Test
-    public void appendDoubleRounded08() {
+    void appendDoubleRounded08() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(64);
         for (double d : new double[]{2.01, 16777216.1, 67108864}) {
             bytes.append(d, 8);
@@ -23,7 +23,7 @@ public class AppendDoubleTicket1808Test extends BytesTestCommon {
     }
 
     @Test
-    public void appendDoubleRounded09() {
+    void appendDoubleRounded09() {
         Bytes<byte[]> bytes = Bytes.allocateElasticOnHeap(64);
         for (double d : new double[]{2.01, 2097152.2, 8388608}) {
             bytes.append(d, 9);
@@ -35,7 +35,7 @@ public class AppendDoubleTicket1808Test extends BytesTestCommon {
     }
 
     @Test
-    public void appendDoubleRounded10() {
+    void appendDoubleRounded10() {
         Bytes<byte[]> bytes = Bytes.allocateElasticOnHeap(64);
         for (double d : new double[]{0.41, 131072.14, 524288}) {
             bytes.append(d, 10);
@@ -47,7 +47,7 @@ public class AppendDoubleTicket1808Test extends BytesTestCommon {
     }
 
     @Test
-    public void appendDoubleRounded11() {
+    void appendDoubleRounded11() {
         Bytes<byte[]> bytes = Bytes.allocateElasticOnHeap(64);
         for (double d : new double[]{0.29, 16384.06, 327638.3}) {
             bytes.append(d, 11);
@@ -59,7 +59,7 @@ public class AppendDoubleTicket1808Test extends BytesTestCommon {
     }
 
     @Test
-    public void appendDoubleRounded12() {
+    void appendDoubleRounded12() {
         Bytes<byte[]> bytes = Bytes.allocateElasticOnHeap(64);
         for (double d : new double[]{2.01, 2048.01, 4096.1}) {
             bytes.append(d, 12);
@@ -71,7 +71,7 @@ public class AppendDoubleTicket1808Test extends BytesTestCommon {
     }
 
     @Test
-    public void appendDoubleRounded13() {
+    void appendDoubleRounded13() {
         Bytes<byte[]> bytes = Bytes.allocateElasticOnHeap(64);
         for (double d : new double[]{0.41, 128.08, 512.0}) {
             bytes.append(d, 13);
@@ -83,7 +83,7 @@ public class AppendDoubleTicket1808Test extends BytesTestCommon {
     }
 
     @Test
-    public void appendDoubleRounded14() {
+    void appendDoubleRounded14() {
         Bytes<byte[]> bytes = Bytes.allocateElasticOnHeap(64);
         for (double d : new double[]{0.29, 16.01, 32.2}) {
             bytes.append(d, 14);
@@ -95,7 +95,7 @@ public class AppendDoubleTicket1808Test extends BytesTestCommon {
     }
 
     @Test
-    public void appendDoubleRounded15() {
+    void appendDoubleRounded15() {
         Bytes<byte[]> bytes = Bytes.allocateElasticOnHeap(64);
         for (double d : new double[]{2.16, 4.4}) {
             bytes.append(d, 15);
@@ -107,7 +107,7 @@ public class AppendDoubleTicket1808Test extends BytesTestCommon {
     }
 
     @Test
-    public void appendDoubleRounded16() {
+    void appendDoubleRounded16() {
         Bytes<byte[]> bytes = Bytes.allocateElasticOnHeap(64);
         for (double d : new double[]{0.00014, 0.14, 0.5}) {
             bytes.append(d, 16);
@@ -119,7 +119,7 @@ public class AppendDoubleTicket1808Test extends BytesTestCommon {
     }
 
     @Test
-    public void appendDoubleRounded17() {
+    void appendDoubleRounded17() {
         Bytes<byte[]> bytes = Bytes.allocateElasticOnHeap(64);
         for (double d : new double[]{0.00014, 0.5, 2.16, 4.4, 32.2}) {
             bytes.append(d, 17);
@@ -131,7 +131,7 @@ public class AppendDoubleTicket1808Test extends BytesTestCommon {
     }
 
     @Test
-    public void appendDoubleRounded18() {
+    void appendDoubleRounded18() {
         Bytes<byte[]> bytes = Bytes.allocateElasticOnHeap(64);
         for (double d : new double[]{0.000014, 0.5, 2.16, 4.4, 32.2}) {
             bytes.append(d, 18);
@@ -143,7 +143,7 @@ public class AppendDoubleTicket1808Test extends BytesTestCommon {
     }
 
     @Test
-    public void appendDoubleRounded19Plus() {
+    void appendDoubleRounded19Plus() {
         Bytes<byte[]> bytes = Bytes.allocateElasticOnHeap(64);
         for (double d : new double[]{0.14, 0.5, 2.16, 4.4, 32.2}) {
             bytes.append(d, 19);

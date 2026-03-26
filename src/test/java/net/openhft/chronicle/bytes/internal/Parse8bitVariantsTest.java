@@ -10,10 +10,10 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class Parse8bitVariantsTest extends BytesTestCommon {
+class Parse8bitVariantsTest extends BytesTestCommon {
 
     @Test
-    public void parse8bitIntoStringBuilderAndBytes() {
+    void parse8bitIntoStringBuilderAndBytes() {
         Bytes<?> alpha = Bytes.from("alpha");
         Bytes<?> beta = Bytes.from("beta");
         try {

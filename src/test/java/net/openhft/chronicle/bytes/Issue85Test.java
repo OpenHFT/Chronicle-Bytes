@@ -16,7 +16,7 @@ import java.util.Locale;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.*;
 
-public class Issue85Test extends BytesTestCommon {
+class Issue85Test extends BytesTestCommon {
     private int different = 0;
     private int different2 = 0;
     private DecimalFormat df = new DecimalFormat();
@@ -67,7 +67,7 @@ public class Issue85Test extends BytesTestCommon {
     }
 
     @Test
-    public void bytesParseDouble_Issue85_Many0() {
+    void bytesParseDouble_Issue85_Many0() {
         Bytes<ByteBuffer> bytes = Bytes.elasticHeapByteBuffer(64);
         bytes.decimaliser(GeneralDecimaliser.GENERAL);
         assumeFalse(NativeBytes.areNewGuarded());
@@ -109,7 +109,7 @@ public class Issue85Test extends BytesTestCommon {
     }
 
     @Test
-    public void loseTrainingZeros() {
+    void loseTrainingZeros() {
         double d = -541098.2421;
         assertEquals("" + d, Bytes.allocateElasticDirect()
                 .append(d)
@@ -118,7 +118,7 @@ public class Issue85Test extends BytesTestCommon {
     }
 
     @Test
-    public void loseTrainingZerosHeap() {
+    void loseTrainingZerosHeap() {
         double d = -541098.2421;
         assertEquals("" + d, Bytes.allocateElasticOnHeap()
                 .append(d)

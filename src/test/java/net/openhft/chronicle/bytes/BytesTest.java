@@ -40,7 +40,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.*;
 
 @SuppressWarnings("rawtypes")
-public class BytesTest extends BytesTestCommon {
+class BytesTest extends BytesTestCommon {
 
     private Allocator alloc1;
     private boolean parseDouble;
@@ -64,7 +64,7 @@ public class BytesTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void readWriteLimit(String ignored, Allocator alloc1) {
+    void readWriteLimit(String ignored, Allocator alloc1) {
         this.alloc1 = alloc1;
         final Bytes<?> data = alloc1.elasticBytes(120);
         data.write8bit("Test me again");
@@ -75,7 +75,7 @@ public class BytesTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void emptyHash(String ignored, Allocator alloc1) {
+    void emptyHash(String ignored, Allocator alloc1) {
         this.alloc1 = alloc1;
         Bytes<?> bytes = alloc1.elasticBytes(2);
         try {
@@ -90,7 +90,7 @@ public class BytesTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void testElastic2(String ignored, Allocator alloc1) {
+    void testElastic2(String ignored, Allocator alloc1) {
         this.alloc1 = alloc1;
         assumeFalse(alloc1 == HEX_DUMP);
         Bytes<?> bytes = alloc1.elasticBytes(2);
@@ -109,7 +109,7 @@ public class BytesTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void throwExceptionIfReleased(String ignored, Allocator alloc1) {
+    void throwExceptionIfReleased(String ignored, Allocator alloc1) {
         this.alloc1 = alloc1;
         assumeFalse(alloc1 == HEX_DUMP);
         Bytes<?> bytes = alloc1.elasticBytes(16);
@@ -125,7 +125,7 @@ public class BytesTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void writeAdv(String ignored, Allocator alloc1) {
+    void writeAdv(String ignored, Allocator alloc1) {
         this.alloc1 = alloc1;
         Bytes<?> bytes = alloc1.fixedBytes(32);
         for (int i = 0; i < 4; i++)
@@ -137,7 +137,7 @@ public class BytesTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void writeLongAdv(String ignored, Allocator alloc1) {
+    void writeLongAdv(String ignored, Allocator alloc1) {
         this.alloc1 = alloc1;
         Bytes<?> bytes = alloc1.fixedBytes(32);
         for (int i = 0; i < 4; i++)
@@ -148,7 +148,7 @@ public class BytesTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void testName(String ignored, Allocator alloc1)
+    void testName(String ignored, Allocator alloc1)
             throws IORuntimeException {
         this.alloc1 = alloc1;
         Bytes<?> bytes = alloc1.fixedBytes(30);
@@ -166,7 +166,7 @@ public class BytesTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void readUnsignedByte(String ignored, Allocator alloc1) {
+    void readUnsignedByte(String ignored, Allocator alloc1) {
         this.alloc1 = alloc1;
         Bytes<?> bytes = alloc1.fixedBytes(30);
         try {
@@ -187,7 +187,7 @@ public class BytesTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void writeHistogram(String ignored, Allocator alloc1) {
+    void writeHistogram(String ignored, Allocator alloc1) {
         this.alloc1 = alloc1;
         assumeFalse(alloc1 == HEAP_EMBEDDED);
 
@@ -213,7 +213,7 @@ public class BytesTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void testCopy(String ignored, Allocator alloc1) {
+    void testCopy(String ignored, Allocator alloc1) {
         this.alloc1 = alloc1;
         assumeFalse(alloc1 == HEAP_EMBEDDED);
 
@@ -233,7 +233,7 @@ public class BytesTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void toHexString(String ignored, Allocator alloc1) {
+    void toHexString(String ignored, Allocator alloc1) {
         this.alloc1 = alloc1;
         assumeFalse(alloc1 == HEAP_EMBEDDED);
         assumeFalse(alloc1 == HEX_DUMP);
@@ -260,7 +260,7 @@ public class BytesTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void fromHexString(String ignored, Allocator alloc1) {
+    void fromHexString(String ignored, Allocator alloc1) {
         this.alloc1 = alloc1;
         assumeFalse(NativeBytes.areNewGuarded());
         assumeFalse(alloc1 == HEAP_EMBEDDED);
@@ -281,7 +281,7 @@ public class BytesTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void internRegressionTest(String ignored, Allocator alloc1)
+    void internRegressionTest(String ignored, Allocator alloc1)
             throws IORuntimeException {
         this.alloc1 = alloc1;
         UTF8StringInterner utf8StringInterner = new UTF8StringInterner(4096);
@@ -299,7 +299,7 @@ public class BytesTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void testEqualBytesWithSecondStoreBeingLonger(String ignored, Allocator alloc1)
+    void testEqualBytesWithSecondStoreBeingLonger(String ignored, Allocator alloc1)
             throws IORuntimeException {
         this.alloc1 = alloc1;
 
@@ -316,7 +316,7 @@ public class BytesTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void testStopBitDouble(String ignored, Allocator alloc1)
+    void testStopBitDouble(String ignored, Allocator alloc1)
             throws IORuntimeException {
         this.alloc1 = alloc1;
         assumeFalse(alloc1 == HEX_DUMP);
@@ -346,7 +346,7 @@ public class BytesTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void testParseUtf8(String ignored, Allocator alloc1) {
+    void testParseUtf8(String ignored, Allocator alloc1) {
         this.alloc1 = alloc1;
         Bytes<?> bytes = alloc1.elasticBytes(1);
         try {
@@ -365,7 +365,7 @@ public class BytesTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void testPartialWriteArray(String ignored, Allocator alloc1) {
+    void testPartialWriteArray(String ignored, Allocator alloc1) {
         this.alloc1 = alloc1;
         assumeFalse(alloc1 == HEX_DUMP);
         assertThrows(BufferOverflowException.class, () -> {
@@ -381,7 +381,7 @@ public class BytesTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void testPartialWriteBB(String ignored, Allocator alloc1) {
+    void testPartialWriteBB(String ignored, Allocator alloc1) {
         this.alloc1 = alloc1;
         assumeFalse(alloc1 == HEX_DUMP);
         ByteBuffer bb = ByteBuffer.wrap("Hello World".getBytes(ISO_8859_1));
@@ -394,7 +394,7 @@ public class BytesTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void testCompact(String ignored, Allocator alloc1) {
+    void testCompact(String ignored, Allocator alloc1) {
         this.alloc1 = alloc1;
         assumeFalse(alloc1 == HEX_DUMP);
         assumeFalse(NativeBytes.areNewGuarded());
@@ -417,7 +417,7 @@ public class BytesTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void testReadIncompleteLong(String ignored, Allocator alloc1)
+    void testReadIncompleteLong(String ignored, Allocator alloc1)
             throws IllegalStateException, BufferOverflowException, BufferUnderflowException {
         this.alloc1 = alloc1;
         assumeFalse(NativeBytes.areNewGuarded());
@@ -441,7 +441,7 @@ public class BytesTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void testUnwrite(String ignored, Allocator alloc1)
+    void testUnwrite(String ignored, Allocator alloc1)
             throws IllegalArgumentException, BufferOverflowException, IllegalStateException, BufferUnderflowException {
         this.alloc1 = alloc1;
         assumeFalse(alloc1 == HEX_DUMP);
@@ -463,7 +463,7 @@ public class BytesTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void testExpectNegativeOffsetAbsoluteWriteOnElasticBytesThrowsIllegalArgumentException(String ignored, Allocator alloc1)
+    void testExpectNegativeOffsetAbsoluteWriteOnElasticBytesThrowsIllegalArgumentException(String ignored, Allocator alloc1)
             throws BufferOverflowException, IllegalStateException {
         this.alloc1 = alloc1;
         assumeFalse(alloc1 == HEX_DUMP);
@@ -478,7 +478,7 @@ public class BytesTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void testExpectNegativeOffsetAbsoluteWriteOnElasticBytesOfInsufficientCapacityThrowsIllegalArgumentException(String ignored, Allocator alloc1)
+    void testExpectNegativeOffsetAbsoluteWriteOnElasticBytesOfInsufficientCapacityThrowsIllegalArgumentException(String ignored, Allocator alloc1)
             throws IllegalStateException, BufferOverflowException {
         this.alloc1 = alloc1;
         assumeFalse(alloc1 == HEX_DUMP);
@@ -493,7 +493,7 @@ public class BytesTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void testExpectNegativeOffsetAbsoluteWriteOnFixedBytesThrowsIllegalArgumentException(String ignored, Allocator alloc1) {
+    void testExpectNegativeOffsetAbsoluteWriteOnFixedBytesThrowsIllegalArgumentException(String ignored, Allocator alloc1) {
         this.alloc1 = alloc1;
         assumeFalse(alloc1 == HEX_DUMP);
         assertThrows(IllegalArgumentException.class, () -> {
@@ -508,7 +508,7 @@ public class BytesTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void testExpectNegativeOffsetAbsoluteWriteOnFixedBytesOfInsufficientCapacityThrowsIllegalArgumentException(String ignored, Allocator alloc1) {
+    void testExpectNegativeOffsetAbsoluteWriteOnFixedBytesOfInsufficientCapacityThrowsIllegalArgumentException(String ignored, Allocator alloc1) {
         this.alloc1 = alloc1;
         assumeFalse(alloc1 == HEX_DUMP);
         assertThrows(IllegalArgumentException.class, () -> {
@@ -523,7 +523,7 @@ public class BytesTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void testWriter(String ignored, Allocator alloc1)
+    void testWriter(String ignored, Allocator alloc1)
             throws IllegalStateException {
         this.alloc1 = alloc1;
         assumeFalse(NativeBytes.areNewGuarded());
@@ -558,7 +558,7 @@ public class BytesTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void testParseUtf8High(String ignored, Allocator alloc1)
+    void testParseUtf8High(String ignored, Allocator alloc1)
             throws BufferUnderflowException, BufferOverflowException, IllegalStateException {
         this.alloc1 = alloc1;
 
@@ -583,7 +583,7 @@ public class BytesTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void testBigDecimalBinary(String ignored, Allocator alloc1)
+    void testBigDecimalBinary(String ignored, Allocator alloc1)
             throws BufferUnderflowException, ArithmeticException {
         this.alloc1 = alloc1;
         for (double d : new double[]{1.0, 1000.0, 0.1}) {
@@ -598,7 +598,7 @@ public class BytesTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void testBigDecimalText(String ignored, Allocator alloc1) {
+    void testBigDecimalText(String ignored, Allocator alloc1) {
         this.alloc1 = alloc1;
         assumeFalse(alloc1 == HEAP_EMBEDDED);
         for (double d : new double[]{1.0, 1000.0, 0.1}) {
@@ -613,7 +613,7 @@ public class BytesTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void testWithLength(String ignored, Allocator alloc1) {
+    void testWithLength(String ignored, Allocator alloc1) {
         this.alloc1 = alloc1;
         assumeFalse(NativeBytes.areNewGuarded());
         Bytes<?> hello = Bytes.from("hello");
@@ -637,7 +637,7 @@ public class BytesTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void testAppendBase(String ignored, Allocator alloc1) {
+    void testAppendBase(String ignored, Allocator alloc1) {
         this.alloc1 = alloc1;
         assumeFalse(alloc1 == HEX_DUMP);
         @NotNull Bytes<?> b = alloc1.elasticBytes(16);
@@ -653,7 +653,7 @@ public class BytesTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void testAppendBase16(String ignored, Allocator alloc1) {
+    void testAppendBase16(String ignored, Allocator alloc1) {
         this.alloc1 = alloc1;
         assumeFalse(alloc1 == HEX_DUMP);
         @NotNull Bytes<?> b = alloc1.elasticBytes(16);
@@ -667,7 +667,7 @@ public class BytesTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void testMove(String ignored, Allocator alloc1) {
+    void testMove(String ignored, Allocator alloc1) {
         this.alloc1 = alloc1;
         assumeFalse(alloc1 == HEX_DUMP);
         @NotNull Bytes<?> b = alloc1.elasticBytes(16);
@@ -684,7 +684,7 @@ public class BytesTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void testMove2(String ignored, Allocator alloc1) {
+    void testMove2(String ignored, Allocator alloc1) {
         this.alloc1 = alloc1;
         assumeFalse(alloc1 == HEX_DUMP);
         @NotNull Bytes<?> b = alloc1.elasticBytes(16);
@@ -700,7 +700,7 @@ public class BytesTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void testMoveForward(String ignored, Allocator alloc1) {
+    void testMoveForward(String ignored, Allocator alloc1) {
         this.alloc1 = alloc1;
         assumeFalse(alloc1 == HEX_DUMP);
         @NotNull Bytes<?> b = alloc1.elasticBytes(16);
@@ -713,7 +713,7 @@ public class BytesTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void testMoveBackward(String ignored, Allocator alloc1) {
+    void testMoveBackward(String ignored, Allocator alloc1) {
         this.alloc1 = alloc1;
         assumeFalse(alloc1 == HEX_DUMP);
         @NotNull Bytes<?> b = alloc1.elasticBytes(16);
@@ -726,7 +726,7 @@ public class BytesTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void testMove2B(String ignored, Allocator alloc1) {
+    void testMove2B(String ignored, Allocator alloc1) {
         this.alloc1 = alloc1;
         @NotNull Bytes<?> b = alloc1.elasticBytes(16);
 
@@ -744,7 +744,7 @@ public class BytesTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void testReadPosition(String ignored, Allocator alloc1) {
+    void testReadPosition(String ignored, Allocator alloc1) {
         this.alloc1 = alloc1;
         @NotNull Bytes<?> b = alloc1.elasticBytes(16);
         try {
@@ -759,7 +759,7 @@ public class BytesTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void testReadPositionTooSmall(String ignored, Allocator alloc1) {
+    void testReadPositionTooSmall(String ignored, Allocator alloc1) {
         this.alloc1 = alloc1;
         @NotNull Bytes<?> b = alloc1.elasticBytes(16);
         try {
@@ -774,7 +774,7 @@ public class BytesTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void testReadLimit(String ignored, Allocator alloc1) {
+    void testReadLimit(String ignored, Allocator alloc1) {
         this.alloc1 = alloc1;
         @NotNull Bytes<?> b = alloc1.elasticBytes(16);
         try {
@@ -789,7 +789,7 @@ public class BytesTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void testReadLimitTooSmall(String ignored, Allocator alloc1) {
+    void testReadLimitTooSmall(String ignored, Allocator alloc1) {
         this.alloc1 = alloc1;
         @NotNull Bytes<?> b = alloc1.elasticBytes(16);
         try {
@@ -804,7 +804,7 @@ public class BytesTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void uncheckedSkip(String ignored, Allocator alloc1) {
+    void uncheckedSkip(String ignored, Allocator alloc1) {
         this.alloc1 = alloc1;
         assumeFalse(NativeBytes.areNewGuarded());
 
@@ -825,7 +825,7 @@ public class BytesTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void readVolatile(String ignored, Allocator alloc1) {
+    void readVolatile(String ignored, Allocator alloc1) {
         this.alloc1 = alloc1;
         assumeFalse(alloc1 == HEX_DUMP);
         @NotNull Bytes<?> b = alloc1.elasticBytes(16);
@@ -846,7 +846,7 @@ public class BytesTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void testHashCode(String ignored, Allocator alloc1) {
+    void testHashCode(String ignored, Allocator alloc1) {
         this.alloc1 = alloc1;
         assumeFalse(NativeBytes.areNewGuarded());
 
@@ -874,7 +874,7 @@ public class BytesTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void testEnum(String ignored, Allocator alloc1) {
+    void testEnum(String ignored, Allocator alloc1) {
         this.alloc1 = alloc1;
 
         @NotNull Bytes<?> b = alloc1.elasticBytes(16);
@@ -891,7 +891,7 @@ public class BytesTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void testTimeMillis(String ignored, Allocator alloc1) {
+    void testTimeMillis(String ignored, Allocator alloc1) {
         this.alloc1 = alloc1;
         @NotNull Bytes<?> b = alloc1.elasticBytes(16);
         try {
@@ -905,7 +905,7 @@ public class BytesTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void testDateTimeMillis(String ignored, Allocator alloc1) {
+    void testDateTimeMillis(String ignored, Allocator alloc1) {
         this.alloc1 = alloc1;
         @NotNull Bytes<?> b = alloc1.elasticBytes(16);
         try {
@@ -919,7 +919,7 @@ public class BytesTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void testWriteOffset(String ignored, Allocator alloc1) {
+    void testWriteOffset(String ignored, Allocator alloc1) {
         this.alloc1 = alloc1;
         int length = 127;
         Bytes<?> from = NativeBytes.nativeBytes(length).unchecked(true);
@@ -942,7 +942,7 @@ public class BytesTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void testToStringDoesNotChange(String ignored, Allocator alloc1) {
+    void testToStringDoesNotChange(String ignored, Allocator alloc1) {
         this.alloc1 = alloc1;
         @NotNull Bytes<?> a = alloc1.elasticBytes(16);
         @NotNull Bytes<?> b = alloc1.elasticBytes(16);
@@ -966,7 +966,7 @@ public class BytesTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void to8BitString(String ignored, Allocator alloc1) {
+    void to8BitString(String ignored, Allocator alloc1) {
         this.alloc1 = alloc1;
         @NotNull Bytes<?> a = alloc1.elasticBytes(16);
         try {
@@ -981,7 +981,7 @@ public class BytesTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void testParseDoubleReadLimit(String ignored, Allocator alloc1) {
+    void testParseDoubleReadLimit(String ignored, Allocator alloc1) {
         this.alloc1 = alloc1;
         Bytes<?> bytes = alloc1.fixedBytes(52);
         try {
@@ -997,7 +997,7 @@ public class BytesTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void write8BitString(String ignored, Allocator alloc1) {
+    void write8BitString(String ignored, Allocator alloc1) {
         this.alloc1 = alloc1;
         assumeFalse(alloc1 == HEAP_EMBEDDED);
 
@@ -1018,7 +1018,7 @@ public class BytesTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void write8BitNativeBytes(String ignored, Allocator alloc1) {
+    void write8BitNativeBytes(String ignored, Allocator alloc1) {
         this.alloc1 = alloc1;
         assumeFalse(alloc1 == HEAP_EMBEDDED);
 
@@ -1056,7 +1056,7 @@ public class BytesTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void write8BitHeapBytes(String ignored, Allocator alloc1) {
+    void write8BitHeapBytes(String ignored, Allocator alloc1) {
         this.alloc1 = alloc1;
         assumeFalse(alloc1 == HEAP_EMBEDDED);
 
@@ -1093,7 +1093,7 @@ public class BytesTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void write8BitCharSequence(String ignored, Allocator alloc1) {
+    void write8BitCharSequence(String ignored, Allocator alloc1) {
         this.alloc1 = alloc1;
         assumeFalse(alloc1 == HEAP_EMBEDDED);
 
@@ -1115,7 +1115,7 @@ public class BytesTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void stopBitChar(String ignored, Allocator alloc1) {
+    void stopBitChar(String ignored, Allocator alloc1) {
         this.alloc1 = alloc1;
         final Bytes<?> bytes = alloc1.fixedBytes(64);
         for (int i = Character.MIN_VALUE; i <= Character.MAX_VALUE; i++) {
@@ -1132,7 +1132,7 @@ public class BytesTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void stopBitLong(String ignored, Allocator alloc1) {
+    void stopBitLong(String ignored, Allocator alloc1) {
         this.alloc1 = alloc1;
         final Bytes<?> bytes = alloc1.fixedBytes(64);
         for (int i = 0; i <= 63; i++) {
@@ -1147,7 +1147,7 @@ public class BytesTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void stopBitNeg1(String ignored, Allocator alloc1) {
+    void stopBitNeg1(String ignored, Allocator alloc1) {
         this.alloc1 = alloc1;
         final Bytes<?> bytes = alloc1.fixedBytes(64);
         BytesInternal.writeStopBitNeg1(bytes);
@@ -1175,7 +1175,7 @@ public class BytesTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void capacityVsWriteLimitInvariant(String ignored, Allocator alloc1) {
+    void capacityVsWriteLimitInvariant(String ignored, Allocator alloc1) {
         this.alloc1 = alloc1;
         final Bytes<?> bytes = alloc1.elasticBytes(20);
         try {
@@ -1188,7 +1188,7 @@ public class BytesTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void isClear(String ignored, Allocator alloc1) {
+    void isClear(String ignored, Allocator alloc1) {
         this.alloc1 = alloc1;
         final Bytes<?> bytes = alloc1.elasticBytes(20);
         assertTrue(bytes.isClear());
@@ -1197,7 +1197,7 @@ public class BytesTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void testAppendDoubleWithoutParseDouble(String ignored, Allocator alloc1) {
+    void testAppendDoubleWithoutParseDouble(String ignored, Allocator alloc1) {
         this.alloc1 = alloc1;
 
         parseDouble = false;
@@ -1213,7 +1213,7 @@ public class BytesTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void testAppendDoubleRandom(String ignored, Allocator alloc1) {
+    void testAppendDoubleRandom(String ignored, Allocator alloc1) {
         this.alloc1 = alloc1;
 
         parseDouble = true;
@@ -1254,7 +1254,7 @@ public class BytesTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void testAppendDoublePowersOfTen(String ignored, Allocator alloc1) {
+    void testAppendDoublePowersOfTen(String ignored, Allocator alloc1) {
         this.alloc1 = alloc1;
         parseDouble = true;
         // OK
@@ -1276,7 +1276,7 @@ public class BytesTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void testAppendDoubleEdgeCases(String ignored, Allocator alloc1) {
+    void testAppendDoubleEdgeCases(String ignored, Allocator alloc1) {
         this.alloc1 = alloc1;
         parseDouble = true;
         testAppendDoubleOnce(Double.NaN, "NaN", "NaN", "NaN", "");
@@ -1298,7 +1298,7 @@ public class BytesTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void testAppendDoubleLimits(String ignored, Allocator alloc1) {
+    void testAppendDoubleLimits(String ignored, Allocator alloc1) {
         this.alloc1 = alloc1;
         // limits
         testAppendDoubleOnce(1.0E-18, "0.000000000000000001", "0.000000000000000001", "0.000000000000000001", "0");
@@ -1321,7 +1321,7 @@ public class BytesTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void testAppendReallySmallDouble(String ignored, Allocator alloc1) {
+    void testAppendReallySmallDouble(String ignored, Allocator alloc1) {
         this.alloc1 = alloc1;
         assumeFalse(alloc1 == HEAP_UNCHECKED);
         int size = 48;
@@ -1345,7 +1345,7 @@ public class BytesTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void testAppendReallyBigDouble(String ignored, Allocator alloc1) {
+    void testAppendReallyBigDouble(String ignored, Allocator alloc1) {
         this.alloc1 = alloc1;
         assumeFalse(alloc1 == HEAP_UNCHECKED);
         int size = 48;
@@ -1370,7 +1370,7 @@ public class BytesTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void testAppendReallySmallFloat(String ignored, Allocator alloc1) {
+    void testAppendReallySmallFloat(String ignored, Allocator alloc1) {
         this.alloc1 = alloc1;
         assumeFalse(alloc1 == HEAP_UNCHECKED);
         int size = 48;
@@ -1392,7 +1392,7 @@ public class BytesTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void testAppendReallyBigFloat(String ignored, Allocator alloc1) {
+    void testAppendReallyBigFloat(String ignored, Allocator alloc1) {
         this.alloc1 = alloc1;
         int size = 48;
         Bytes<?> bytes = alloc1.elasticBytes(size + 8);
@@ -1409,7 +1409,7 @@ public class BytesTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void testReadWithOffset(String ignored, Allocator alloc1) {
+    void testReadWithOffset(String ignored, Allocator alloc1) {
         this.alloc1 = alloc1;
         Bytes<?> bytes = alloc1.elasticBytes(32);
         bytes.append("Hello");
@@ -1425,7 +1425,7 @@ public class BytesTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void writeSkipNegative(String ignored, Allocator alloc1) {
+    void writeSkipNegative(String ignored, Allocator alloc1) {
         this.alloc1 = alloc1;
         @NotNull Bytes<?> a = alloc1.elasticBytes(16);
         try {
@@ -1443,7 +1443,7 @@ public class BytesTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void testCopyToStream(String ignored, Allocator alloc1) throws IOException {
+    void testCopyToStream(String ignored, Allocator alloc1) throws IOException {
         this.alloc1 = alloc1;
         @NotNull Bytes<?> a = alloc1.elasticBytes(16);
         String text = "Hello World";
@@ -1505,14 +1505,14 @@ public class BytesTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void testWriteOnHeap(String ignored, Allocator alloc1) throws Exception {
+    void testWriteOnHeap(String ignored, Allocator alloc1) throws Exception {
         this.alloc1 = alloc1;
         doTestWrite(() -> ByteBuffer.allocate(128));
     }
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void testWriteDirect(String ignored, Allocator alloc1) throws Exception {
+    void testWriteDirect(String ignored, Allocator alloc1) throws Exception {
         this.alloc1 = alloc1;
         assumeFalse(Jvm.maxDirectMemory() == 0);
 

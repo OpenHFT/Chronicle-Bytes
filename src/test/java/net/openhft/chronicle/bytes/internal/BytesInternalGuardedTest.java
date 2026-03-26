@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.*;
 
 @SuppressWarnings("rawtypes")
-public class BytesInternalGuardedTest extends BytesTestCommon {
+class BytesInternalGuardedTest extends BytesTestCommon {
 
     static Stream<Arguments> data() {
         return Stream.of(
@@ -32,7 +32,7 @@ public class BytesInternalGuardedTest extends BytesTestCommon {
     }
 
     @AfterAll
-    public static void resetGuarded() {
+    static void resetGuarded() {
         NativeBytes.resetNewGuarded();
     }
 
@@ -42,7 +42,7 @@ public class BytesInternalGuardedTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void testParse8bitAndStringBuilderWithUtf16Coder(String name, boolean guarded)
+    void testParse8bitAndStringBuilderWithUtf16Coder(String name, boolean guarded)
             throws BufferUnderflowException, IOException {
         setGuarded(guarded);
         assumeFalse(Jvm.maxDirectMemory() == 0);
@@ -63,7 +63,7 @@ public class BytesInternalGuardedTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void testCompareUTF(String name, boolean guarded)
+    void testCompareUTF(String name, boolean guarded)
             throws IORuntimeException {
         setGuarded(guarded);
         @NotNull BytesStore<?, ?> bs = BytesStore.nativeStore(32);
@@ -87,7 +87,7 @@ public class BytesInternalGuardedTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void shouldHandleDifferentSizedStores(String name, boolean guarded) {
+    void shouldHandleDifferentSizedStores(String name, boolean guarded) {
         setGuarded(guarded);
         Bytes<ByteBuffer> bytes = Bytes.elasticHeapByteBuffer(32);
         final BytesStore<?, ?> storeOfThirtyTwoBytes = bytes.bytesStore();
@@ -104,7 +104,7 @@ public class BytesInternalGuardedTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void testWritingDecimalVsJava(String name, boolean guarded) {
+    void testWritingDecimalVsJava(String name, boolean guarded) {
         setGuarded(guarded);
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(32);
         bytes.clear();
@@ -121,7 +121,7 @@ public class BytesInternalGuardedTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void contentsEqual(String name, boolean guarded) {
+    void contentsEqual(String name, boolean guarded) {
         setGuarded(guarded);
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
@@ -150,7 +150,7 @@ public class BytesInternalGuardedTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void testStopBits(String name, boolean guarded) {
+    void testStopBits(String name, boolean guarded) {
         setGuarded(guarded);
         final VanillaBytes<Void> bytes = Bytes.allocateDirect(10);
 

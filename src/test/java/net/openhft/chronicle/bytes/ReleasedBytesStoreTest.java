@@ -8,10 +8,10 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class ReleasedBytesStoreTest extends BytesTestCommon {
+class ReleasedBytesStoreTest extends BytesTestCommon {
 
     @Test
-    public void release() {
+    void release() {
         Bytes<?> bytes = Bytes.allocateElasticDirect();
         assertNull(bytes.bytesStore().underlyingObject());
         bytes.writeLong(0, 0);

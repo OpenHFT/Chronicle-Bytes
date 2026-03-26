@@ -9,10 +9,10 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class NativeBytesStoreOpsTest extends BytesTestCommon {
+class NativeBytesStoreOpsTest extends BytesTestCommon {
 
     @Test
-    public void readWriteAndVolatileOrderedOps() {
+    void readWriteAndVolatileOrderedOps() {
         BytesStore<?, ?> store = BytesStore.nativeStore(32);
         try {
             long off = 0;

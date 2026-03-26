@@ -7,15 +7,15 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class BytesWrite8bitRoundTripTest extends BytesTestCommon {
+class BytesWrite8bitRoundTripTest extends BytesTestCommon {
 
     @Test
-    public void roundTripOnHeap() {
+    void roundTripOnHeap() {
         roundTrip(Bytes.allocateElasticOnHeap());
     }
 
     @Test
-    public void roundTripDirect() {
+    void roundTripDirect() {
         roundTrip(Bytes.allocateElasticDirect());
     }
 

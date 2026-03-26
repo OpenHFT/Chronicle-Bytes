@@ -17,7 +17,7 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class WriteLimitTest extends BytesTestCommon {
+class WriteLimitTest extends BytesTestCommon {
     private static final Allocator[] ALLOCATORS = {Allocator.HEAP, Allocator.HEAP_EMBEDDED, Allocator.HEAP_UNCHECKED};
     static Random random = new Random();
 
@@ -48,7 +48,7 @@ public class WriteLimitTest extends BytesTestCommon {
     @SuppressWarnings("RedundantCast")
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void writeLimit(String name, Allocator allocator, Consumer<Bytes<?>> action, int length) {
+    void writeLimit(String name, Allocator allocator, Consumer<Bytes<?>> action, int length) {
         Bytes<?> bytes = allocator.elasticBytes(64);
         for (int i = 0; i < 16; i++) {
             int position = (int) (bytes.realCapacity() - length - i);

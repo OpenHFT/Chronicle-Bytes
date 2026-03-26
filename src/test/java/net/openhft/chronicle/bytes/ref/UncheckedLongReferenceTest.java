@@ -10,9 +10,9 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class UncheckedLongReferenceTest extends BytesTestCommon {
+class UncheckedLongReferenceTest extends BytesTestCommon {
     @Test
-    public void test() {
+    void test() {
         @NotNull NativeBytesStore<Void> nbs = NativeBytesStore.nativeStoreWithFixedCapacity(32);
         try (@NotNull UncheckedLongReference ref = new UncheckedLongReference()) {
             ref.bytesStore(nbs, 16, 8);

@@ -53,7 +53,7 @@ class BytesMarshallerTest {
     }
 
     @BeforeEach
-    public void beforeEachBytesMarshallerTest() throws Exception {
+    void beforeEachBytesMarshallerTest() throws Exception {
         setup();
         setUp();
     }

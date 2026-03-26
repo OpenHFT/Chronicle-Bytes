@@ -10,10 +10,10 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class BytesInternalParsingTest extends BytesTestCommon {
+class BytesInternalParsingTest extends BytesTestCommon {
 
     @Test
-    public void parseBooleanTokens() {
+    void parseBooleanTokens() {
         Bytes<?> t = Bytes.from("true");
         Bytes<?> f = Bytes.from("false");
         Bytes<?> y = Bytes.from("yes");
@@ -41,7 +41,7 @@ public class BytesInternalParsingTest extends BytesTestCommon {
     }
 
     @Test
-    public void parseUtf8IntoBuilder() {
+    void parseUtf8IntoBuilder() {
         Bytes<?> alpha = Bytes.from("alpha");
         Bytes<?> beta = Bytes.from("beta");
         try {

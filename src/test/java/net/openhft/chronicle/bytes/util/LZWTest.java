@@ -16,10 +16,10 @@ import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static net.openhft.chronicle.bytes.util.Compressions.LZW;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class LZWTest extends BytesTestCommon {
+class LZWTest extends BytesTestCommon {
 
     @Test
-    public void testCompress()
+    void testCompress()
             throws IORuntimeException {
         @NotNull byte[] bytes = "hello world".getBytes(ISO_8859_1);
         byte[] bytes2 = LZW.uncompress(LZW.compress(bytes));
@@ -27,7 +27,7 @@ public class LZWTest extends BytesTestCommon {
     }
 
     @Test
-    public void testCompressionRatio()
+    void testCompressionRatio()
             throws IORuntimeException {
         @NotNull byte[] bytes = new byte[1 << 20];
         Arrays.fill(bytes, (byte) 'X');

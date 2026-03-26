@@ -7,10 +7,10 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class UncheckedBytesBehaviourTest extends BytesTestCommon {
+class UncheckedBytesBehaviourTest extends BytesTestCommon {
 
     @Test
-    public void uncheckedOnDirectAndNoopWhenFalse() {
+    void uncheckedOnDirectAndNoopWhenFalse() {
         Bytes<?> d = Bytes.allocateDirect(16);
         Bytes<?> u = d.unchecked(true);
         try {

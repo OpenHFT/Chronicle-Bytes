@@ -23,7 +23,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.*;
 
-public class MappedFileMultiThreadTest extends BytesTestCommon {
+class MappedFileMultiThreadTest extends BytesTestCommon {
     private static final int CORES = Integer.getInteger("cores", Runtime.getRuntime().availableProcessors());
     private static final int RUNTIME_MS = Integer.getInteger("runtimems", 2_000);
     private static final String TMP_FILE = System.getProperty("file", IOTools.createTempFile("testMultiThreadLock").getAbsolutePath());
@@ -35,7 +35,7 @@ public class MappedFileMultiThreadTest extends BytesTestCommon {
     }
 
     @Test
-    public void testMultiThreadLock() throws Exception {
+    void testMultiThreadLock() throws Exception {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         final List<String> garbage = Collections.synchronizedList(new ArrayList<>());

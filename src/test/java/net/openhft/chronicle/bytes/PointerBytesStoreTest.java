@@ -9,10 +9,10 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class PointerBytesStoreTest extends BytesTestCommon {
+class PointerBytesStoreTest extends BytesTestCommon {
 
     @Test
-    public void testWriteSetLimitRead() {
+    void testWriteSetLimitRead() {
         final Bytes<?> data = Bytes.allocateDirect(14);
         data.write8bit("Test me again");
         data.writeLimit(data.readLimit()); // this breaks the check
@@ -21,7 +21,7 @@ public class PointerBytesStoreTest extends BytesTestCommon {
     }
 
     @Test
-    public void testWrap() {
+    void testWrap() {
         final NativeBytesStore<Void> nbs = NativeBytesStore.nativeStore(10000);
         final PointerBytesStore pbs = BytesStore.nativePointer();
         try {
@@ -37,7 +37,7 @@ public class PointerBytesStoreTest extends BytesTestCommon {
     }
 
     @Test
-    public void testWriteLimit() {
+    void testWriteLimit() {
         final PointerBytesStore pbs = new PointerBytesStore();
         final Bytes<Void> wrapper = pbs.bytesForRead();
         pbs.set(NoBytesStore.NO_PAGE, 200);
@@ -47,7 +47,7 @@ public class PointerBytesStoreTest extends BytesTestCommon {
     }
 
     @Test
-    public void testRead8BitString() {
+    void testRead8BitString() {
         final Bytes<Void> bytesFixed = Bytes.allocateDirect(32);
 
         try {
@@ -65,7 +65,7 @@ public class PointerBytesStoreTest extends BytesTestCommon {
     }
 
     @Test
-    public void testUnderlyingCapacityAndType() {
+    void testUnderlyingCapacityAndType() {
         final Bytes<Void> bytesFixed = Bytes.allocateDirect(32);
         final Bytes<Void> bytesElastic = Bytes.allocateElasticDirect();
         final PointerBytesStore pbs = new PointerBytesStore();

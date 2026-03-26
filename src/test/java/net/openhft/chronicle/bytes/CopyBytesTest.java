@@ -15,7 +15,7 @@ import java.nio.file.Files;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.*;
 
-public class CopyBytesTest extends BytesTestCommon {
+class CopyBytesTest extends BytesTestCommon {
 
     private static void doTest(Bytes<?> toTest, int from) {
         Bytes<?> toCopy = Bytes.allocateDirect(32);
@@ -45,17 +45,17 @@ public class CopyBytesTest extends BytesTestCommon {
     }
 
     @BeforeEach
-    public void directEnabled() {
+    void directEnabled() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
     }
 
     @Test
-    public void testCanCopyBytesFromBytes() {
+    void testCanCopyBytesFromBytes() {
         doTest(Bytes.allocateElasticDirect(), 0);
     }
 
     @Test
-    public void testCanCopyBytesFromMappedBytes1()
+    void testCanCopyBytesFromMappedBytes1()
             throws Exception {
         File bytes = Files.createTempFile("mapped-test", "bytes").toFile();
         bytes.deleteOnExit();
@@ -63,7 +63,7 @@ public class CopyBytesTest extends BytesTestCommon {
     }
 
     @Test
-    public void testCanCopyBytesFromMappedBytesSingle1()
+    void testCanCopyBytesFromMappedBytesSingle1()
             throws Exception {
         File bytes = Files.createTempFile("mapped-test", "bytes").toFile();
         bytes.deleteOnExit();
@@ -71,7 +71,7 @@ public class CopyBytesTest extends BytesTestCommon {
     }
 
     @Test
-    public void testCanCopyBytesFromMappedBytes2()
+    void testCanCopyBytesFromMappedBytes2()
             throws Exception {
         File bytes = Files.createTempFile("mapped-test", "bytes").toFile();
         bytes.deleteOnExit();
@@ -79,7 +79,7 @@ public class CopyBytesTest extends BytesTestCommon {
     }
 
     @Test
-    public void testCanCopyBytesFromMappedBytesSingle2()
+    void testCanCopyBytesFromMappedBytesSingle2()
             throws Exception {
         File bytes = Files.createTempFile("mapped-test", "bytes").toFile();
         bytes.deleteOnExit();
@@ -87,7 +87,7 @@ public class CopyBytesTest extends BytesTestCommon {
     }
 
     @Test
-    public void testCanCopyBytesFromMappedBytes3()
+    void testCanCopyBytesFromMappedBytes3()
             throws Exception {
         File bytes = Files.createTempFile("mapped-test", "bytes").toFile();
         bytes.deleteOnExit();
@@ -95,12 +95,12 @@ public class CopyBytesTest extends BytesTestCommon {
     }
 
     @Test
-    public void testCanCopyBytesFromMappedBytesSingle3()
+    void testCanCopyBytesFromMappedBytesSingle3()
             throws Exception {
-                assertThrows(BufferOverflowException.class, () -> {
+        assertThrows(BufferOverflowException.class, () -> {
             File bytes = Files.createTempFile("mapped-test", "bytes").toFile();
             bytes.deleteOnExit();
             doTest(MappedBytes.singleMappedBytes(bytes, 32 << 10), (64 << 10) - 8);
-                });
-            }
+        });
+    }
 }

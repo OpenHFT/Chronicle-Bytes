@@ -18,7 +18,7 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.*;
 
-public class BinaryLengthLengthTest extends BytesTestCommon {
+class BinaryLengthLengthTest extends BytesTestCommon {
 
     static Stream<Arguments> data() {
         return Stream.of(
@@ -30,7 +30,7 @@ public class BinaryLengthLengthTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "binaryLengthLength {0} binaryWireCode {1}")
     @MethodSource("data")
-    public void testInvalidLengthFor8Bit(BinaryLengthLength binaryLengthLength, int binaryWireCode) {
+    void testInvalidLengthFor8Bit(BinaryLengthLength binaryLengthLength, int binaryWireCode) {
         assumeFalse(Jvm.maxDirectMemory() == 0);
         BytesOut<?> bytes = Bytes.allocateDirect(512);
         long pos = BinaryLengthLength.LENGTH_8BIT.initialise(bytes);
@@ -41,7 +41,7 @@ public class BinaryLengthLengthTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "binaryLengthLength {0} binaryWireCode {1}")
     @MethodSource("data")
-    public void testInvalidLengthFor16Bit(BinaryLengthLength binaryLengthLength, int binaryWireCode) {
+    void testInvalidLengthFor16Bit(BinaryLengthLength binaryLengthLength, int binaryWireCode) {
         assumeFalse(Jvm.maxDirectMemory() == 0);
         BytesOut<?> bytes = Bytes.allocateDirect(65539);
         long pos = BinaryLengthLength.LENGTH_16BIT.initialise(bytes);
@@ -52,14 +52,14 @@ public class BinaryLengthLengthTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "binaryLengthLength {0} binaryWireCode {1}")
     @MethodSource("data")
-    public void checkCodeMatches(BinaryLengthLength binaryLengthLength, int binaryWireCode) {
+    void checkCodeMatches(BinaryLengthLength binaryLengthLength, int binaryWireCode) {
         assumeFalse(Jvm.maxDirectMemory() == 0);
         assertEquals(binaryWireCode, binaryLengthLength.code());
     }
 
     @ParameterizedTest(name = "binaryLengthLength {0} binaryWireCode {1}")
     @MethodSource("data")
-    public void checkCodeIsWritten(BinaryLengthLength binaryLengthLength, int binaryWireCode) {
+    void checkCodeIsWritten(BinaryLengthLength binaryLengthLength, int binaryWireCode) {
         assumeFalse(Jvm.maxDirectMemory() == 0);
         Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer(128);
         binaryLengthLength.initialise(bytes);

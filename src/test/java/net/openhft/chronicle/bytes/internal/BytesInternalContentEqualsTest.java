@@ -17,7 +17,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
-public class BytesInternalContentEqualsTest extends BytesTestCommon {
+class BytesInternalContentEqualsTest extends BytesTestCommon {
 
     static Stream<Arguments> data() {
         List<Arguments> tests = new ArrayList<>(Arrays.asList(
@@ -38,7 +38,7 @@ public class BytesInternalContentEqualsTest extends BytesTestCommon {
 
     @ParameterizedTest
     @MethodSource("data")
-    public void testContentEqual(Bytes<?> a, Bytes<?> b) {
+    void testContentEqual(Bytes<?> a, Bytes<?> b) {
         a.clear();
         b.clear();
         a.append("hello world");
@@ -48,7 +48,7 @@ public class BytesInternalContentEqualsTest extends BytesTestCommon {
 
     @ParameterizedTest
     @MethodSource("data")
-    public void testContentNotEqualButSameLen(Bytes<?> a, Bytes<?> b) {
+    void testContentNotEqualButSameLen(Bytes<?> a, Bytes<?> b) {
         a.clear();
         b.clear();
         a.append("hello world1");
@@ -58,7 +58,7 @@ public class BytesInternalContentEqualsTest extends BytesTestCommon {
 
     @ParameterizedTest
     @MethodSource("data")
-    public void testContentNotEqualButDiffLen(Bytes<?> a, Bytes<?> b) {
+    void testContentNotEqualButDiffLen(Bytes<?> a, Bytes<?> b) {
         a.clear();
         b.clear();
         a.append("hello world");

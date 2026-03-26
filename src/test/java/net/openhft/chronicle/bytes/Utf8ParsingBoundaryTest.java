@@ -12,10 +12,10 @@ import static org.junit.jupiter.api.Assertions.*;
  * Consolidates UTF-8 parsing boundary tests (explicit length, stop-char parsing,
  * null sequences and over-length failures).
  */
-public class Utf8ParsingBoundaryTest extends BytesTestCommon {
+class Utf8ParsingBoundaryTest extends BytesTestCommon {
 
     @Test
-    public void parsesExplicitLengthAtBoundaries() {
+    void parsesExplicitLengthAtBoundaries() {
         Bytes<?> b = Bytes.allocateElasticOnHeap(32);
         String ascii = "A";
         String multi = "£€"; // euro escaped; pound is ISO-8859-1
@@ -38,7 +38,7 @@ public class Utf8ParsingBoundaryTest extends BytesTestCommon {
     }
 
     @Test
-    public void parsesWithCommonStopChars() {
+    void parsesWithCommonStopChars() {
         Bytes<?> b = Bytes.from("alpha,beta gamma");
         try {
             StringBuilder sb = new StringBuilder();
@@ -50,7 +50,7 @@ public class Utf8ParsingBoundaryTest extends BytesTestCommon {
     }
 
     @Test
-    public void nullSequenceEncodesAsMinusOneAndReturnsNegativeOffset() {
+    void nullSequenceEncodesAsMinusOneAndReturnsNegativeOffset() {
         Bytes<?> b = Bytes.allocateElasticOnHeap(32);
         try {
             b.writeStopBit(-1);
@@ -62,7 +62,7 @@ public class Utf8ParsingBoundaryTest extends BytesTestCommon {
     }
 
     @Test
-    public void throwsWhenUtf8LengthExceedsMax() {
+    void throwsWhenUtf8LengthExceedsMax() {
         assertThrows(net.openhft.chronicle.core.io.ClosedIllegalStateException.class, () -> {
             Bytes<?> b = Bytes.allocateElasticOnHeap(32);
             try {

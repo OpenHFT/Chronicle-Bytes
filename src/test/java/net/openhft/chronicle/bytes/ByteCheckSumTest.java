@@ -7,16 +7,16 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class ByteCheckSumTest extends BytesTestCommon {
+class ByteCheckSumTest extends BytesTestCommon {
     @Test
-    public void test() {
+    void test() {
         Bytes<?> bytes = Bytes.allocateDirect(32);
         doTest(bytes);
         bytes.releaseLast();
     }
 
     @Test
-    public void testHeap() {
+    void testHeap() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(32);
         doTest(bytes);
         bytes.releaseLast();

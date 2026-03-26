@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Tests for the compact behavior of Bytes.
  */
-public class BytesCompactTest {
+class BytesCompactTest {
 
     /**
      * Provides test data for parameterized tests.
@@ -35,7 +35,7 @@ public class BytesCompactTest {
      */
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void compact(String name, Bytes<?> bytes) {
+    void compact(String name, Bytes<?> bytes) {
         // Initialize buffer with a sample string
         bytes.clear().append("Hello World");
 
@@ -77,7 +77,7 @@ public class BytesCompactTest {
      */
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void skipCompact(String name, Bytes<?> bytes) {
+    void skipCompact(String name, Bytes<?> bytes) {
         // Clear and move the write position 64 bytes ahead
         bytes.clear().writeSkip(64);
 

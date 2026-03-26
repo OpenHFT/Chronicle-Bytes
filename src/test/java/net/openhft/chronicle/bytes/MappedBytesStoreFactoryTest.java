@@ -15,7 +15,7 @@ import java.io.File;
 import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class MappedBytesStoreFactoryTest {
+class MappedBytesStoreFactoryTest {
 
     @Mock
     private MappedBytesStoreFactory factory;
@@ -27,7 +27,7 @@ public class MappedBytesStoreFactoryTest {
     private MappedFile mappedFile;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         MockitoAnnotations.openMocks(this);
         when(mappedFile.file()).thenReturn(new File("test"));
         when(factory.create(eq(owner), eq(mappedFile), anyLong(), anyLong(), anyLong(), anyLong(), anyInt()))
@@ -35,7 +35,7 @@ public class MappedBytesStoreFactoryTest {
     }
 
     @Test
-    public void createMappedBytesStoreWithValidParameters() throws ClosedIllegalStateException {
+    void createMappedBytesStoreWithValidParameters() throws ClosedIllegalStateException {
         long start = 0L;
         long address = 1024L;
         long capacity = 4096L;
@@ -48,7 +48,7 @@ public class MappedBytesStoreFactoryTest {
     }
 
     @Test
-    public void createMappedBytesStoreWhenFileClosed() throws ClosedIllegalStateException {
+    void createMappedBytesStoreWhenFileClosed() throws ClosedIllegalStateException {
         assertThrows(ClosedIllegalStateException.class, () -> {
             when(factory.create(any(), any(), anyLong(), anyLong(), anyLong(), anyLong(), anyInt()))
                     .thenThrow(new ClosedIllegalStateException("MappedFile has been released"));

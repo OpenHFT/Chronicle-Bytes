@@ -7,17 +7,18 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-public class ByteableTest {
+class ByteableTest {
 
     private Byteable byteable;
     private BytesStore<?, ?> bytesStore;
 
     @SuppressWarnings("unchecked")
     @BeforeEach
-    public void setUp() throws IOException {
+    void setUp() throws IOException {
         byteable = mock(Byteable.class);
         bytesStore = mock(BytesStore.class);
         doThrow(UnsupportedOperationException.class).when(byteable).address();
@@ -26,7 +27,7 @@ public class ByteableTest {
     }
 
     @Test
-    public void testOffset() {
+    void testOffset() {
         long expectedOffset = 5L;
         when(byteable.offset()).thenReturn(expectedOffset);
 
@@ -34,7 +35,7 @@ public class ByteableTest {
     }
 
     @Test
-    public void testAddressThrowsUnsupportedOperationException() {
+    void testAddressThrowsUnsupportedOperationException() {
         assertThrows(UnsupportedOperationException.class, () -> {
             when(byteable.address()).thenCallRealMethod();
             byteable.address();
@@ -42,7 +43,7 @@ public class ByteableTest {
     }
 
     @Test
-    public void testMaxSize() {
+    void testMaxSize() {
         long expectedSize = 1024L;
         when(byteable.maxSize()).thenReturn(expectedSize);
 
@@ -50,14 +51,14 @@ public class ByteableTest {
     }
 
     @Test
-    public void testLockThrowsUnsupportedOperationException() throws IOException {
+    void testLockThrowsUnsupportedOperationException() throws IOException {
         assertThrows(UnsupportedOperationException.class, () -> {
             byteable.lock(true);
         });
     }
 
     @Test
-    public void testTryLockThrowsUnsupportedOperationException() throws IOException {
+    void testTryLockThrowsUnsupportedOperationException() throws IOException {
         assertThrows(UnsupportedOperationException.class, () -> {
             byteable.tryLock(true);
         });

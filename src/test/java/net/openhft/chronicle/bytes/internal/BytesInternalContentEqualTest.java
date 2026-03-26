@@ -9,10 +9,10 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class BytesInternalContentEqualTest extends BytesTestCommon {
+class BytesInternalContentEqualTest extends BytesTestCommon {
 
     @Test
-    public void heapVsDirectEqualContent() {
+    void heapVsDirectEqualContent() {
         Bytes<?> heap = Bytes.from("abcdef");
         Bytes<?> direct = Bytes.allocateDirect(6);
         try {
@@ -29,7 +29,7 @@ public class BytesInternalContentEqualTest extends BytesTestCommon {
     }
 
     @Test
-    public void differentLengthsAreNotEqual() {
+    void differentLengthsAreNotEqual() {
         Bytes<?> left = Bytes.from("abc");
         Bytes<?> right = Bytes.from("abcd");
         try {
@@ -41,7 +41,7 @@ public class BytesInternalContentEqualTest extends BytesTestCommon {
     }
 
     @Test
-    public void singleByteMismatchDetected() {
+    void singleByteMismatchDetected() {
         Bytes<?> left = Bytes.from("abcde");
         Bytes<?> right = Bytes.from("abXde");
         try {

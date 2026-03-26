@@ -10,9 +10,9 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class BinaryTwoLongReferenceTest extends BytesTestCommon {
+class BinaryTwoLongReferenceTest extends BytesTestCommon {
     @Test
-    public void test() {
+    void test() {
         BytesStore<?, Void> nbs = BytesStore.nativeStoreWithFixedCapacity(32);
         try (@NotNull BinaryTwoLongReference ref = new BinaryTwoLongReference()) {
             ref.bytesStore(nbs, 16, 16);

@@ -16,7 +16,7 @@ import static net.openhft.chronicle.bytes.StopCharTesters.SPACE_STOP;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.*;
 
-public class ByteStringParserTest extends BytesTestCommon {
+class ByteStringParserTest extends BytesTestCommon {
     @NotNull
     private
     Bytes<?> bytes = Bytes.allocateElastic();
@@ -29,7 +29,7 @@ public class ByteStringParserTest extends BytesTestCommon {
     }
 
     @Test
-    public void testParseLong() {
+    void testParseLong() {
         long expected = 123456789012345678L;
         bytes.append(expected);
         Bytes<?> bytes2 = Bytes.allocateElasticOnHeap((int) bytes.readRemaining());
@@ -45,7 +45,7 @@ public class ByteStringParserTest extends BytesTestCommon {
     }
 
     @Test
-    public void testParseInt() {
+    void testParseInt() {
         int expected = 123;
         bytes.append(expected);
 
@@ -53,7 +53,7 @@ public class ByteStringParserTest extends BytesTestCommon {
     }
 
     @Test
-    public void testParseDouble() {
+    void testParseDouble() {
         assumeFalse(GuardedNativeBytes.areNewGuarded());
         double expected = 123.1234;
         bytes.append(expected);
@@ -62,7 +62,7 @@ public class ByteStringParserTest extends BytesTestCommon {
     }
 
     @Test
-    public void testParseFloat() {
+    void testParseFloat() {
         assumeFalse(GuardedNativeBytes.areNewGuarded());
         float expected = 123;
         bytes.append(expected);
@@ -71,7 +71,7 @@ public class ByteStringParserTest extends BytesTestCommon {
     }
 
     @Test
-    public void testParseShort() {
+    void testParseShort() {
         short expected = 123;
         bytes.append(expected);
 
@@ -79,7 +79,7 @@ public class ByteStringParserTest extends BytesTestCommon {
     }
 
     @Test
-    public void testAppendParse()
+    void testAppendParse()
             throws IORuntimeException {
         assumeFalse(GuardedNativeBytes.areNewGuarded());
         bytes.write("word£€) ".getBytes(StandardCharsets.UTF_8));
@@ -98,7 +98,7 @@ public class ByteStringParserTest extends BytesTestCommon {
     }
 
     @Test
-    public void testLastDecimalPlacesLong() throws IORuntimeException {
+    void testLastDecimalPlacesLong() throws IORuntimeException {
         assumeFalse(GuardedNativeBytes.areNewGuarded());
         appendVariousNumbers();
         assertEquals(1, bytes.parseLongDecimal());
@@ -127,7 +127,7 @@ public class ByteStringParserTest extends BytesTestCommon {
     }
 
     @Test
-    public void testLastDecimalPlacesDouble() throws IORuntimeException {
+    void testLastDecimalPlacesDouble() throws IORuntimeException {
         assumeFalse(GuardedNativeBytes.areNewGuarded());
         appendVariousNumbers();
 
@@ -177,7 +177,7 @@ public class ByteStringParserTest extends BytesTestCommon {
     }
 
     @Test
-    public void testAppendParseUTF() {
+    void testAppendParseUTF() {
         assumeFalse(GuardedNativeBytes.areNewGuarded());
         @NotNull String[] words = "Hello,World!,Bye£€!".split(",");
         for (@NotNull String word : words) {
@@ -212,14 +212,14 @@ public class ByteStringParserTest extends BytesTestCommon {
     }
 
     @Test
-    public void testAppendSubstring() {
+    void testAppendSubstring() {
         bytes.append("Hello World", 2, 7).append("\n");
 
         assertEquals("Hello World".substring(2, 7), bytes.parseUtf8(CONTROL_STOP));
     }
 
     @Test
-    public void testWriteBytes() {
+    void testWriteBytes() {
         bytes.write("Hello World\n".getBytes(ISO_8859_1), 0, 10);
         bytes.write("good bye\n".getBytes(ISO_8859_1), 4, 4);
         bytes.write(4, "0 w".getBytes(ISO_8859_1));
@@ -228,7 +228,7 @@ public class ByteStringParserTest extends BytesTestCommon {
     }
 
     @Test
-    public void testFlexibleLong() {
+    void testFlexibleLong() {
         // Test regular longs
         bytes.append("0").append(' ');
         assertEquals(0L, bytes.parseFlexibleLong());
@@ -300,7 +300,7 @@ public class ByteStringParserTest extends BytesTestCommon {
     }
 
     @Test
-    public void testFlexibleLong2() {
+    void testFlexibleLong2() {
 
         bytes.append(String.valueOf(Long.MAX_VALUE)).append(".0").append(' ');
         assertEquals(Long.MAX_VALUE, bytes.parseFlexibleLong());
@@ -374,7 +374,7 @@ public class ByteStringParserTest extends BytesTestCommon {
     }
 
     @Test
-    public void testFlexibleLong3() {
+    void testFlexibleLong3() {
 
         bytes.append("0.9").append(' ');
         assertThrows(IORuntimeException.class, () -> bytes.parseFlexibleLong());

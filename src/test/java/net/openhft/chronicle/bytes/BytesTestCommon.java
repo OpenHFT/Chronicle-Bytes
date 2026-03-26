@@ -42,7 +42,7 @@ public class BytesTestCommon {
     }
 
     @BeforeEach
-    public void beforeEachBytesTestCommon() {
+    void beforeEachBytesTestCommon() {
         enableReferenceTracing();
         recordExceptions();
         assumeFinishedNormally();
@@ -107,7 +107,7 @@ public class BytesTestCommon {
     }
 
     @AfterEach
-    public void afterChecks() {
+    void afterChecks() {
         cleanResources();
 
         if (finishedNormally) {

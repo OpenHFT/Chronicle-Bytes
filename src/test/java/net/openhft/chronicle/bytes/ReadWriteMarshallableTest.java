@@ -12,9 +12,9 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.*;
 
 @SuppressWarnings("rawtypes")
-public class ReadWriteMarshallableTest extends BytesTestCommon {
+class ReadWriteMarshallableTest extends BytesTestCommon {
     @Test
-    public void test()
+    void test()
             throws BufferUnderflowException, IllegalStateException {
         // TODO Make guarded safe
         assumeFalse(NativeBytes.areNewGuarded());

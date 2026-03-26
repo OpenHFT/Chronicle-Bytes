@@ -19,48 +19,48 @@ import java.util.Arrays;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.*;
 
-public class BytesUtilTest extends BytesTestCommon {
+class BytesUtilTest extends BytesTestCommon {
 
     File testFile;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         testFile = new File(OS.getTarget(), "testFile-" + System.nanoTime() + ".bin");
     }
 
     @AfterEach
-    public void tearDown() throws IOException {
+    void tearDown() throws IOException {
         BackgroundResourceReleaser.releasePendingResources();
         Files.deleteIfExists(testFile.toPath());
     }
 
     @Test
-    public void testStopBitLength() {
+    void testStopBitLength() {
         int length = BytesUtil.stopBitLength(128);
         assertEquals(2, length);
     }
 
     @Test
-    public void testAsString() {
+    void testAsString() {
         Exception exception = new Exception("Test exception");
         String result = BytesUtil.asString("Error occurred", exception);
         assertTrue(result.startsWith("Error occurred\njava.lang.Exception: Test exception"));
     }
 
     @Test
-    public void testRoundUpTo64ByteAlign() {
+    void testRoundUpTo64ByteAlign() {
         long result = BytesUtil.roundUpTo64ByteAlign(65);
         assertEquals(128, result);
     }
 
     @Test
-    public void testIsControlSpace() {
+    void testIsControlSpace() {
         assertTrue(BytesUtil.isControlSpace(' '));
         assertFalse(BytesUtil.isControlSpace('A'));
     }
 
     @Test
-    public void fromFileInJar()
+    void fromFileInJar()
             throws IOException {
         Bytes<?> bytes = BytesUtil.readFile("/net/openhft/chronicle/core/onoes/Google.properties");
         Bytes<?> apache_license = Bytes.from("Apache License");
@@ -70,7 +70,7 @@ public class BytesUtilTest extends BytesTestCommon {
     }
 
     @Test
-    public void findFile()
+    void findFile()
             throws FileNotFoundException {
         String file = BytesUtil.findFile("file-to-find.txt");
         assertTrue(new File(file).exists());
@@ -78,7 +78,7 @@ public class BytesUtilTest extends BytesTestCommon {
     }
 
     @Test
-    public void triviallyCopyable() {
+    void triviallyCopyable() {
         assumeTrue(Jvm.is64bit());
 
         int start = BytesUtil.triviallyCopyableStart(Nested.class);
@@ -99,7 +99,7 @@ public class BytesUtilTest extends BytesTestCommon {
     }
 
     @Test
-    public void triviallyCopyableB() {
+    void triviallyCopyableB() {
         assumeTrue(Jvm.is64bit());
 
         int start = BytesUtil.triviallyCopyableStart(Nested.class);
@@ -130,7 +130,7 @@ public class BytesUtilTest extends BytesTestCommon {
     }
 
     @Test
-    public void triviallyCopyable2() {
+    void triviallyCopyable2() {
         assertFalse(BytesUtil.isTriviallyCopyable(D.class));
         assertTrue(BytesUtil.isTriviallyCopyable(E.class));
         int size2 = 20;
@@ -139,7 +139,7 @@ public class BytesUtilTest extends BytesTestCommon {
     }
 
     @Test
-    public void contentsEqualBytesNull() {
+    void contentsEqualBytesNull() {
         final Bytes<?> bytes = Bytes.from("A");
         try {
             assertFalse(bytes.contentEquals(null));
@@ -149,7 +149,7 @@ public class BytesUtilTest extends BytesTestCommon {
     }
 
     @Test
-    public void contentsEqual() {
+    void contentsEqual() {
         final Bytes<?> a = Bytes.from("A");
         final Bytes<?> b = Bytes.from("A");
         try {
@@ -161,13 +161,13 @@ public class BytesUtilTest extends BytesTestCommon {
     }
 
     @Test
-    public void equals_reference() {
+    void equals_reference() {
         String a = "a";
         assertTrue(BytesUtil.equals(a, a));
     }
 
     @Test
-    public void equals_equivalentCharSequences() {
+    void equals_equivalentCharSequences() {
         Bytes<byte[]> a = Bytes.from("a");
         Bytes<byte[]> aa = Bytes.from("a");
         assertTrue(BytesUtil.equals(a, aa));
@@ -175,13 +175,13 @@ public class BytesUtilTest extends BytesTestCommon {
 
     @SuppressWarnings({"deprecation", "removal"})
     @Test
-    public void equals_equivalentObjects() {
+    void equals_equivalentObjects() {
         // Intentional boxing to create two equivalent but distinct objects
         assertTrue(BytesUtil.equals(new Integer(1), new Integer(1)));
     }
 
     @Test
-    public void toCharArray() {
+    void toCharArray() {
         Bytes<byte[]> bytes = Bytes.from("test");
         char[] charArray = BytesUtil.toCharArray(bytes);
         for (char c : charArray) {
@@ -190,14 +190,14 @@ public class BytesUtilTest extends BytesTestCommon {
     }
 
     @Test
-    public void reverse() {
+    void reverse() {
         Bytes<byte[]> test = Bytes.from("test");
         BytesUtil.reverse(test, 0);
         assertEquals(Bytes.from("tset"), test);
     }
 
     @Test
-    public void combineDoubleNewline() {
+    void combineDoubleNewline() {
         doTestCombineDoubleNewline("\n", "\n");
         doTestCombineDoubleNewline("\r\n", "\r\n");
         doTestCombineDoubleNewline("\n ", "\n ");
@@ -214,7 +214,7 @@ public class BytesUtilTest extends BytesTestCommon {
     }
 
     @Test
-    public void bytesEqualAndCharsEqual() {
+    void bytesEqualAndCharsEqual() {
         Bytes<?> a = Bytes.from("abcdef");
         Bytes<?> b = Bytes.from("abCdef");
         Bytes<?> c = Bytes.from("abcdef");
@@ -233,7 +233,7 @@ public class BytesUtilTest extends BytesTestCommon {
     }
 
     @Test
-    public void asIntStopBitAndPadding() {
+    void asIntStopBitAndPadding() {
         // Validate against native-endian view used by BytesUtil.asInt
         int expected = java.nio.ByteBuffer.wrap("1234".getBytes(java.nio.charset.StandardCharsets.ISO_8859_1))
                 .order(java.nio.ByteOrder.nativeOrder())
@@ -252,7 +252,7 @@ public class BytesUtilTest extends BytesTestCommon {
     }
 
     @Test
-    public void readWrite8ByteAlignPaddingAndReverseAndCombineNewline() {
+    void readWrite8ByteAlignPaddingAndReverseAndCombineNewline() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(64);
         try {
             bytes.append("hello");
@@ -290,7 +290,7 @@ public class BytesUtilTest extends BytesTestCommon {
     }
 
     @Test
-    public void findAndReadFileLiteral() throws Exception {
+    void findAndReadFileLiteral() throws Exception {
         // exercise literal path in readFile
         Bytes<?> literal = BytesUtil.readFile("=XYZ");
         try {
@@ -301,7 +301,7 @@ public class BytesUtilTest extends BytesTestCommon {
     }
 
     @Test
-    public void findFileThrowsWhenMissing() {
+    void findFileThrowsWhenMissing() {
         assertThrows(FileNotFoundException.class, () ->
                 BytesUtil.findFile("this-file-should-not-exist-chronicle-bytes"));
     }

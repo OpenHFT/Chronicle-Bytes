@@ -13,11 +13,11 @@ import java.io.InputStream;
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class StreamingInputStreamTest extends BytesTestCommon {
+class StreamingInputStreamTest extends BytesTestCommon {
 
     // https://github.com/OpenHFT/Chronicle-Bytes/issues/48
     @Test
-    public void readOfZeroShouldReturnZero()
+    void readOfZeroShouldReturnZero()
             throws IOException {
         @NotNull Bytes<?> b = Bytes.allocateElasticDirect();
         prepareBytes(b);
@@ -30,7 +30,7 @@ public class StreamingInputStreamTest extends BytesTestCommon {
     @Test
 
     @org.junit.jupiter.api.Timeout(value = 1000, unit = java.util.concurrent.TimeUnit.MILLISECONDS)
-    public void testReadBlock()
+    void testReadBlock()
             throws IOException {
 
         @NotNull Bytes<?> b = Bytes.allocateElasticDirect();

@@ -15,7 +15,7 @@ import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class Issue523Test extends BytesTestCommon {
+class Issue523Test extends BytesTestCommon {
 
     @SuppressWarnings("EmptyMethod")
     @BeforeEach
@@ -24,17 +24,17 @@ public class Issue523Test extends BytesTestCommon {
     }
 
     @Test
-    public void testAppendDoublesHeap() {
+    void testAppendDoublesHeap() {
         doTestAppendDoubles(Bytes::allocateElasticOnHeap);
     }
 
     @Test
-    public void testAppendDoublesHeapByteBuffer() {
+    void testAppendDoublesHeapByteBuffer() {
         doTestAppendDoubles(Bytes::elasticHeapByteBuffer);
     }
 
     @Test
-    public void testAppendDoublesDirect() {
+    void testAppendDoublesDirect() {
         doTestAppendDoubles(Bytes::allocateElasticDirect);
     }
 

@@ -33,6 +33,7 @@ final class BytesFactoryUtil {
     private static final int SIZE = 128;
     private static final int CHUNK_SIZE = 64 << 10;
     private static final AtomicInteger CNT = new AtomicInteger();
+
     private BytesFactoryUtil() {
     }
 
@@ -60,7 +61,7 @@ final class BytesFactoryUtil {
 
                     Arguments.of(new HexDumpBytes(), true, "new HexDumpBytes()")
             ));
-            if (Jvm.maxDirectMemory()>0) {
+            if (Jvm.maxDirectMemory() > 0) {
                 arguments.addAll(Arrays.asList(
                         Arguments.of(Bytes.wrapForWrite(heapByteBuffer), true, "Bytes.wrapForWrite(heapByteBuffer)"),
                         Arguments.of(Bytes.wrapForWrite(directByteBuffer), true, "Bytes.wrapForWrite(directByteBuffer)"),

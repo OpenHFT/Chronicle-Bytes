@@ -8,10 +8,10 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class VanillaBytesUsageTest extends BytesTestCommon {
+class VanillaBytesUsageTest extends BytesTestCommon {
 
     @Test
-    public void wrapNativeStoreMaintainsOffsets() {
+    void wrapNativeStoreMaintainsOffsets() {
         NativeBytesStore<Void> store = NativeBytesStore.nativeStoreWithFixedCapacity(64);
         try {
             store.writeLong(0, 0x1122334455667788L);
@@ -30,7 +30,7 @@ public class VanillaBytesUsageTest extends BytesTestCommon {
     }
 
     @Test
-    public void vanillaBytesCanSwapUnderlyingStore() {
+    void vanillaBytesCanSwapUnderlyingStore() {
         NativeBytesStore<Void> storeA = NativeBytesStore.nativeStoreWithFixedCapacity(32);
         NativeBytesStore<Void> storeB = NativeBytesStore.nativeStoreWithFixedCapacity(32);
         try {

@@ -17,7 +17,7 @@ import static net.openhft.chronicle.core.Jvm.uncheckedCast;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.*;
 
-public class SyncModeTest extends BytesTestCommon {
+class SyncModeTest extends BytesTestCommon {
 
     static Stream<Arguments> parameters() {
         return Stream.of(SyncMode.values()).map(Arguments::of);
@@ -25,7 +25,7 @@ public class SyncModeTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("parameters")
-    public void largeFile(SyncMode syncMode) throws FileNotFoundException {
+    void largeFile(SyncMode syncMode) throws FileNotFoundException {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         File tmpfile = IOTools.createTempFile("sync.dat");

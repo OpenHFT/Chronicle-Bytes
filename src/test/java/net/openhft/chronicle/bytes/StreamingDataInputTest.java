@@ -16,7 +16,7 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.*;
 
-public class StreamingDataInputTest extends BytesTestCommon {
+class StreamingDataInputTest extends BytesTestCommon {
 
     static Stream<Arguments> params() {
         return Arrays.stream(Allocator.values()).map(Arguments::of);
@@ -24,7 +24,7 @@ public class StreamingDataInputTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "allocator={0}")
     @MethodSource("params")
-    public void read(Allocator allocator) {
+    void read(Allocator allocator) {
         assumeFalse(allocator.name().startsWith("NATIVE") && Jvm.maxDirectMemory() == 0);
         Bytes<?> b = allocator.elasticBytes(32);
         b.append("0123456789");
@@ -37,7 +37,7 @@ public class StreamingDataInputTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "allocator={0}")
     @MethodSource("params")
-    public void readOffset(Allocator allocator) {
+    void readOffset(Allocator allocator) {
         assumeFalse(allocator.name().startsWith("NATIVE") && Jvm.maxDirectMemory() == 0);
         Bytes<?> b = allocator.elasticBytes(32);
         b.append("0123456789");
@@ -50,7 +50,7 @@ public class StreamingDataInputTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "allocator={0}")
     @MethodSource("params")
-    public void roundTripWorksOnHeap(Allocator allocator) {
+    void roundTripWorksOnHeap(Allocator allocator) {
         assumeFalse(allocator.name().startsWith("NATIVE") && Jvm.maxDirectMemory() == 0);
         Bytes<?> b = allocator.elasticBytes(32);
         TestObject source = new TestObject(123L, 123, false);
@@ -64,7 +64,7 @@ public class StreamingDataInputTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "allocator={0}")
     @MethodSource("params")
-    public void readWithLength(Allocator allocator) {
+    void readWithLength(Allocator allocator) {
         assumeFalse(allocator.name().startsWith("NATIVE") && Jvm.maxDirectMemory() == 0);
         int max = 130; // two bytes of length for a stop bit encoded length
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(max + 2);

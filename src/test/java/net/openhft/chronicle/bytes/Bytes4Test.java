@@ -97,7 +97,7 @@ class Bytes4Test extends BytesTestCommon {
 
     }
 
-    private static void print(String name, BytesStore<?,?> bs) {
+    private static void print(String name, BytesStore<?, ?> bs) {
         System.out.println("** " + name + " **");
         System.out.println("readlimit  " + bs.readLimit());
         System.out.println("writelimit " + bs.writeLimit());

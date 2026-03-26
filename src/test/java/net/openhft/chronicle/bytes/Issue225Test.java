@@ -7,9 +7,9 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class Issue225Test extends BytesTestCommon {
+class Issue225Test extends BytesTestCommon {
     @Test
-    public void testTrailingZeros() {
+    void testTrailingZeros() {
         for (int i = 1000; i < 10_000; i++) {
             double value = i / 1000.0;
             final String valueStr;

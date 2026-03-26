@@ -13,9 +13,9 @@ import java.nio.ByteBuffer;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.*;
 
-public class ReadLenientTest extends BytesTestCommon {
+class ReadLenientTest extends BytesTestCommon {
     @Test
-    public void testLenient() {
+    void testLenient() {
         assumeFalse(NativeBytes.areNewGuarded());
         doTest(Bytes.allocateDirect(64));
         doTest(Bytes.allocateElasticOnHeap(64));

@@ -7,10 +7,10 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class HexDumpBytesAdvancedTest extends BytesTestCommon {
+class HexDumpBytesAdvancedTest extends BytesTestCommon {
 
     @Test
-    public void numberWrapAndIndentation() {
+    void numberWrapAndIndentation() {
         HexDumpBytes hdb = new HexDumpBytes();
         try {
             hdb.numberWrap(16).offsetFormat((o, b) -> b.appendBase16(o, 2));

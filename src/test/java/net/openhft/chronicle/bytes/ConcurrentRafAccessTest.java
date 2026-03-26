@@ -38,7 +38,7 @@ import static org.junit.jupiter.api.Assertions.*;
 */
 
 @Disabled("This is a performance test and should not be run as a part of the normal build")
-public class ConcurrentRafAccessTest extends BytesTestCommon {
+class ConcurrentRafAccessTest extends BytesTestCommon {
 
     private static final String MODE = "rw";
     private static final String BASE_DIR = "rafs";
@@ -58,7 +58,7 @@ public class ConcurrentRafAccessTest extends BytesTestCommon {
     }
 
     @BeforeEach
-    public void setup()
+    void setup()
             throws IOException {
         Files.createDirectories(Paths.get(BASE_DIR));
 
@@ -80,12 +80,12 @@ public class ConcurrentRafAccessTest extends BytesTestCommon {
     }
 
     @AfterEach
-    public void cleanup() {
+    void cleanup() {
         IOTools.deleteDirWithFiles(BASE_DIR);
     }
 
     @Test
-    public void testParallel2() {
+    void testParallel2() {
         final LongSummaryStatistics summaryStatistics = IntStream.range(0, RUNS)
                 .mapToLong(i -> test("testParallel2 " + i, ForkJoinPool.commonPool()))
                 .skip(4)
@@ -95,7 +95,7 @@ public class ConcurrentRafAccessTest extends BytesTestCommon {
     }
 
     @Test
-    public void testSequential() {
+    void testSequential() {
         final LongSummaryStatistics summaryStatistics = IntStream.range(0, RUNS)
                 .mapToLong(i -> test("testSequential " + i, Executors.newSingleThreadExecutor()))
                 .skip(4)
@@ -106,7 +106,7 @@ public class ConcurrentRafAccessTest extends BytesTestCommon {
     }
 
     @Test
-    public void testParallel() {
+    void testParallel() {
         final LongSummaryStatistics summaryStatistics = IntStream.range(0, RUNS)
                 .mapToLong(i -> test("testParallel " + i, ForkJoinPool.commonPool()))
                 .skip(4)
@@ -116,7 +116,7 @@ public class ConcurrentRafAccessTest extends BytesTestCommon {
     }
 
     @Test
-    public void testSequential2() {
+    void testSequential2() {
         final LongSummaryStatistics summaryStatistics = IntStream.range(0, RUNS)
                 .mapToLong(i -> test("testSequential2 " + i, Executors.newSingleThreadExecutor()))
                 .skip(4)

@@ -13,12 +13,12 @@ import java.nio.file.Files;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.*;
 
-public class UTF8BytesTest extends BytesTestCommon {
+class UTF8BytesTest extends BytesTestCommon {
 
     private static final String MESSAGE = "awésome-message-1";
 
     @Test
-    public void testUtfEncoding() throws IOException {
+    void testUtfEncoding() throws IOException {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         File f = Files.createTempFile("testUtfEncoding", "data").toFile();

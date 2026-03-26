@@ -10,10 +10,10 @@ import java.nio.BufferUnderflowException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class XxHashTest {
+class XxHashTest {
 
     @Test
-    public void testHashEmptyBytesStore() {
+    void testHashEmptyBytesStore() {
         BytesStore<?, ?> emptyBytesStore = BytesStore.empty();
         long hash = XxHash.INSTANCE.applyAsLong(emptyBytesStore);
         // Assert not throwing an exception and returns a deterministic value
@@ -21,7 +21,7 @@ public class XxHashTest {
     }
 
     @Test
-    public void testHashConsistency() {
+    void testHashConsistency() {
         byte[] data = "test data".getBytes();
         BytesStore<?, ?> bytesStore1 = BytesStore.wrap(data);
         BytesStore<?, ?> bytesStore2 = BytesStore.wrap(data.clone());
@@ -34,7 +34,7 @@ public class XxHashTest {
     }
 
     @Test
-    public void testHashWithDifferentLengths() {
+    void testHashWithDifferentLengths() {
         BytesStore<?, ?> bytesStore = BytesStore.from("some test data");
         long fullHash = XxHash.INSTANCE.applyAsLong(bytesStore, bytesStore.readRemaining());
         long partialHash = XxHash.INSTANCE.applyAsLong(bytesStore, bytesStore.readRemaining() - 1);
@@ -44,7 +44,7 @@ public class XxHashTest {
     }
 
     @Test
-    public void testHashBeyondLengthThrowsException() {
+    void testHashBeyondLengthThrowsException() {
         assertThrows(BufferUnderflowException.class, () -> {
             BytesStore<?, ?> bytesStore = BytesStore.from("short");
             // Attempt to hash beyond the available length

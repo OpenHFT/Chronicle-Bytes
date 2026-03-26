@@ -17,7 +17,7 @@ import java.util.Arrays;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.*;
 
-public class CheckOverSizedMessagesTest extends BytesTestCommon {
+class CheckOverSizedMessagesTest extends BytesTestCommon {
 
     private static final byte[] BYTE6K = new byte[6000];
 
@@ -32,13 +32,13 @@ public class CheckOverSizedMessagesTest extends BytesTestCommon {
     }
 
     @BeforeEach
-    public void checkPageSize() {
+    void checkPageSize() {
         assumeTrue(OS.isLinux());
         assumeFalse(Jvm.maxDirectMemory() == 0);
     }
 
     @Test
-    public void writeRDI() {
+    void writeRDI() {
         try (MappedBytes mb = mbNoOverlap()) {
             mb.writePosition(3 << 10);
             Bytes<?> rdi = Bytes.allocateDirect(BYTE6K);
@@ -51,7 +51,7 @@ public class CheckOverSizedMessagesTest extends BytesTestCommon {
     }
 
     @Test
-    public void writeByteArray2() {
+    void writeByteArray2() {
         try (MappedBytes mb = mbNoOverlap()) {
             byte[] arr = new byte[6 << 10];
             final BytesStore<?, Void> bs0 = mb.bytesStore();
@@ -62,7 +62,7 @@ public class CheckOverSizedMessagesTest extends BytesTestCommon {
     }
 
     @Test
-    public void writeByteArray4() {
+    void writeByteArray4() {
         try (MappedBytes mb = mbNoOverlap()) {
             byte[] arr = new byte[6 << 10];
             final BytesStore<?, Void> bs0 = mb.bytesStore();
@@ -73,7 +73,7 @@ public class CheckOverSizedMessagesTest extends BytesTestCommon {
     }
 
     @Test
-    public void writeBB4() {
+    void writeBB4() {
         try (MappedBytes mb = mbNoOverlap()) {
             ByteBuffer bb = ByteBuffer.allocate(6000);
             final BytesStore<?, Void> bs0 = mb.bytesStore();
@@ -84,7 +84,7 @@ public class CheckOverSizedMessagesTest extends BytesTestCommon {
     }
 
     @Test
-    public void writeBB4B() {
+    void writeBB4B() {
         try (MappedBytes mb = mbNoOverlap()) {
             assumeFalse(PageUtil.isHugePage(mb.mappedFile().file().getAbsolutePath()));
             ByteBuffer bb = ByteBuffer.allocate(6000);
@@ -104,7 +104,7 @@ public class CheckOverSizedMessagesTest extends BytesTestCommon {
     }
 
     @Test
-    public void writeRDI4() {
+    void writeRDI4() {
         try (MappedBytes mb = mbNoOverlap()) {
             RandomDataInput rdi = Bytes.allocateDirect(BYTE6K);
             final BytesStore<?, Void> bs0 = mb.bytesStore();
@@ -116,7 +116,7 @@ public class CheckOverSizedMessagesTest extends BytesTestCommon {
     }
 
     @Test
-    public void writeByteArray3() {
+    void writeByteArray3() {
         try (MappedBytes mb = mbNoOverlap()) {
             mb.writePosition(4000);
             byte[] arr = new byte[6 << 10];
@@ -128,7 +128,7 @@ public class CheckOverSizedMessagesTest extends BytesTestCommon {
     }
 
     @Test
-    public void writeIS() throws IOException {
+    void writeIS() throws IOException {
         try (MappedBytes mb = mbNoOverlap()) {
             mb.writePosition(3 << 10);
             InputStream is = new ByteArrayInputStream(BYTE6K);
@@ -140,7 +140,7 @@ public class CheckOverSizedMessagesTest extends BytesTestCommon {
     }
 
     @Test
-    public void writeBytes2() {
+    void writeBytes2() {
         try (MappedBytes mb = mbNoOverlap()) {
             final BytesStore<?, Void> bs0 = mb.bytesStore();
             mb.write(4000, Bytes.wrapForRead(BYTE6K));
@@ -150,7 +150,7 @@ public class CheckOverSizedMessagesTest extends BytesTestCommon {
     }
 
     @Test
-    public void writeCS() {
+    void writeCS() {
         try (MappedBytes mb = mbNoOverlap()) {
             mb.writePosition(3 << 10);
             final BytesStore<?, Void> bs0 = mb.bytesStore();
@@ -161,7 +161,7 @@ public class CheckOverSizedMessagesTest extends BytesTestCommon {
     }
 
     @Test
-    public void writeBytes() {
+    void writeBytes() {
         try (MappedBytes mb = mbNoOverlap()) {
             mb.writePosition(4000);
             final BytesStore<?, Void> bs0 = mb.bytesStore();
@@ -172,7 +172,7 @@ public class CheckOverSizedMessagesTest extends BytesTestCommon {
     }
 
     @Test
-    public void writeByteStore3() {
+    void writeByteStore3() {
         try (MappedBytes mb = mbNoOverlap()) {
             mb.writePosition(3 << 10);
             final BytesStore<Bytes<byte[]>, byte[]> bytes = Bytes.wrapForRead(BYTE6K);
@@ -184,7 +184,7 @@ public class CheckOverSizedMessagesTest extends BytesTestCommon {
     }
 
     @Test
-    public void writeByteArray() {
+    void writeByteArray() {
         try (MappedBytes mb = mbNoOverlap()) {
             mb.writePosition(3 << 10);
             final BytesStore<?, Void> bs0 = mb.bytesStore();
@@ -195,7 +195,7 @@ public class CheckOverSizedMessagesTest extends BytesTestCommon {
     }
 
     @Test
-    public void appendCS() {
+    void appendCS() {
         try (MappedBytes mb = mbNoOverlap()) {
             mb.writePosition(3 << 10);
             final BytesStore<?, Void> bs0 = mb.bytesStore();
@@ -206,7 +206,7 @@ public class CheckOverSizedMessagesTest extends BytesTestCommon {
     }
 
     @Test
-    public void appendCS3() {
+    void appendCS3() {
         try (MappedBytes mb = mbNoOverlap()) {
             mb.writePosition(3 << 10);
             final BytesStore<?, Void> bs0 = mb.bytesStore();
@@ -217,7 +217,7 @@ public class CheckOverSizedMessagesTest extends BytesTestCommon {
     }
 
     @Test
-    public void appendBigDecimal() {
+    void appendBigDecimal() {
         try (MappedBytes mb = mbNoOverlap()) {
             mb.writePosition(3 << 10);
             final byte[] bytes = BYTE6K;
@@ -231,7 +231,7 @@ public class CheckOverSizedMessagesTest extends BytesTestCommon {
     }
 
     @Test
-    public void read() {
+    void read() {
         Bytes<?> in = Bytes.wrapForRead(BYTE6K);
         try (MappedBytes mb = mbNoOverlap()) {
             mb.writePosition(3 << 10);
@@ -243,7 +243,7 @@ public class CheckOverSizedMessagesTest extends BytesTestCommon {
     }
 
     @Test
-    public void read2() {
+    void read2() {
         Bytes<?> in = Bytes.wrapForRead(BYTE6K);
         try (MappedBytes mb = mbNoOverlap()) {
             mb.writePosition(3 << 10);

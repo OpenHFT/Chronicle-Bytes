@@ -13,9 +13,9 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.*;
 
-public class BinaryIntArrayReferenceTest extends BytesTestCommon {
+class BinaryIntArrayReferenceTest extends BytesTestCommon {
     @Test
-    public void getSetValues() {
+    void getSetValues() {
         final int length = 128 * 4 + 2 * 8;
         final Bytes<?> bytes = Bytes.allocateDirect(length);
         try {
@@ -37,7 +37,7 @@ public class BinaryIntArrayReferenceTest extends BytesTestCommon {
     }
 
     @Test
-    public void marshallable() {
+    void marshallable() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
         assumeFalse(NativeBytes.areNewGuarded());
         final Bytes<?> bytes = Bytes.allocateElasticDirect(256);

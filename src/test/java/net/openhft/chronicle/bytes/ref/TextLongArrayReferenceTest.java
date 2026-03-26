@@ -10,9 +10,9 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class TextLongArrayReferenceTest extends BytesTestCommon {
+class TextLongArrayReferenceTest extends BytesTestCommon {
     @Test
-    public void getSetValues() {
+    void getSetValues() {
         int length = 5 * 22 + 90;
         Bytes<?> bytes = Bytes.allocateElastic(length);
         TextLongArrayReference.write(bytes, 5);

@@ -7,10 +7,10 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class BytesUtilEqualityTest extends BytesTestCommon {
+class BytesUtilEqualityTest extends BytesTestCommon {
 
     @Test
-    public void bytesEqualCoversLongIntShortBytePaths() {
+    void bytesEqualCoversLongIntShortBytePaths() {
         // length 15 => 8 (long) + 4 (int) + 2 (short) + 1 (byte)
         Bytes<?> a = Bytes.from("ABCDEFGHIJKLMNO");
         Bytes<?> b = Bytes.from("ABCDEFGHIJKLMNO");

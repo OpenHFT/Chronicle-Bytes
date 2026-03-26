@@ -16,7 +16,7 @@ import java.util.stream.IntStream;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.*;
 
-public class MappedUniqueTimeProviderTest extends BytesTestCommon {
+class MappedUniqueTimeProviderTest extends BytesTestCommon {
 
     @SuppressWarnings("EmptyMethod")
     @BeforeEach
@@ -27,7 +27,7 @@ public class MappedUniqueTimeProviderTest extends BytesTestCommon {
     }
 
     @BeforeAll
-    public static void checks() throws IOException {
+    static void checks() throws IOException {
         try {
             DistributedUniqueTimeProviderTest.checks();
         } catch (FileNotFoundException e) {
@@ -37,7 +37,7 @@ public class MappedUniqueTimeProviderTest extends BytesTestCommon {
     }
 
     @Test
-    public void currentTimeMicros() {
+    void currentTimeMicros() {
         TimeProvider tp = MappedUniqueTimeProvider.INSTANCE;
         long last = 0;
         for (int i = 0; i < 100_000; i++) {
@@ -51,7 +51,7 @@ public class MappedUniqueTimeProviderTest extends BytesTestCommon {
     private static volatile long blackHole;
 
     @Test
-    public void currentTimeMillisPerf() {
+    void currentTimeMillisPerf() {
         long start = System.currentTimeMillis();
         int count = 0;
         do {
@@ -64,7 +64,7 @@ public class MappedUniqueTimeProviderTest extends BytesTestCommon {
     }
 
     @Test
-    public void nanoTimePerf() {
+    void nanoTimePerf() {
         long start = System.currentTimeMillis();
         int count = 0;
         do {
@@ -77,7 +77,7 @@ public class MappedUniqueTimeProviderTest extends BytesTestCommon {
     }
 
     @Test
-    public void currentTimeMicrosPerf() {
+    void currentTimeMicrosPerf() {
         TimeProvider tp = MappedUniqueTimeProvider.INSTANCE;
         long start = System.currentTimeMillis();
         int count = 0;
@@ -91,7 +91,7 @@ public class MappedUniqueTimeProviderTest extends BytesTestCommon {
     }
 
     @Test
-    public void currentTimeNanosPerf() {
+    void currentTimeNanosPerf() {
         TimeProvider tp = MappedUniqueTimeProvider.INSTANCE;
         long start = System.currentTimeMillis();
         int count = 0;
@@ -105,7 +105,7 @@ public class MappedUniqueTimeProviderTest extends BytesTestCommon {
     }
 
     @Test
-    public void currentTimeNanos() {
+    void currentTimeNanos() {
         TimeProvider tp = MappedUniqueTimeProvider.INSTANCE;
         long start = tp.currentTimeNanos();
         long last = start;
@@ -128,7 +128,7 @@ public class MappedUniqueTimeProviderTest extends BytesTestCommon {
     }
 
     @Test
-    public void concurrentTimeNanos() {
+    void concurrentTimeNanos() {
         long start0 = System.nanoTime();
         final int runTimeUS = 5_000_000;
         final int threads = Jvm.isArm() ? 4 : 16;

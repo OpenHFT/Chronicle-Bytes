@@ -11,10 +11,10 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.*;
 
-public class BytesFieldInfoTest extends BytesTestCommon {
+class BytesFieldInfoTest extends BytesTestCommon {
 
     @Test
-    public void lookup() {
+    void lookup() {
         assumeFalse(Jvm.isArm() || Jvm.isAzulZing());
         final BytesFieldInfo lookup = BytesFieldInfo.lookup(Groups1.class);
         assertEquals("type: BytesFieldInfo, groups: { header: 12 to 16, pad: 16 to 48, other: 64 to 96, hi: 96 to 100, add: 104 to 120 }", lookup.dump());

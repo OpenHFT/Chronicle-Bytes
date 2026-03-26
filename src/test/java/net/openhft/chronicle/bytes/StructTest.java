@@ -20,7 +20,7 @@ import static net.openhft.chronicle.core.Jvm.uncheckedCast;
 import static net.openhft.chronicle.core.UnsafeMemory.MEMORY;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class StructTest extends BytesTestCommon {
+class StructTest extends BytesTestCommon {
 
     /**
      * Common base for structs to take care of initialisation and other boilerplating
@@ -202,7 +202,7 @@ public class StructTest extends BytesTestCommon {
     }
 
     @Test
-    public void createStudents() {
+    void createStudents() {
         Student s3 = new Student()
                 .gender(Gender.FEMALE)
                 .name("Wonder Woman")
@@ -288,9 +288,9 @@ public class StructTest extends BytesTestCommon {
 
         System.out.print(sb);
         assertEquals("" +
-                        "The Phantom MALE, born 1936-2-17\n" +
-                        "Superman MALE, born 1938-4-18\n" +
-                        "Wonder Woman FEMALE, born 1942-1-1\n", sb.toString());
+                "The Phantom MALE, born 1936-2-17\n" +
+                "Superman MALE, born 1938-4-18\n" +
+                "Wonder Woman FEMALE, born 1942-1-1\n", sb.toString());
     }
     /*
      *enum Gender{MALE, FEMALE};
@@ -577,7 +577,7 @@ public class StructTest extends BytesTestCommon {
     }
 
     @Test
-    public void testCopyingVsSharing() {
+    void testCopyingVsSharing() {
         Date d1 = new Date((short) 1970, (byte) 1, (byte) 1);
         Date d2 = d1.copy();
         Date d3 = d1.share();

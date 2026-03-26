@@ -12,10 +12,10 @@ import java.nio.charset.StandardCharsets;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class BytesInternalUtf8MoreTest extends BytesTestCommon {
+class BytesInternalUtf8MoreTest extends BytesTestCommon {
 
     @Test
-    public void appendUtf8WithLatin1MultibyteChars() {
+    void appendUtf8WithLatin1MultibyteChars() {
         Bytes<?> out = Bytes.allocateElasticOnHeap(64);
         try {
             String s = "ab£écd"; // contains '£' and 'é'
@@ -30,7 +30,7 @@ public class BytesInternalUtf8MoreTest extends BytesTestCommon {
     }
 
     @Test
-    public void appendUtf8ToRandomDataOutputHandlesSupplementaryChars() {
+    void appendUtf8ToRandomDataOutputHandlesSupplementaryChars() {
         Bytes<?> out = Bytes.allocateElasticOnHeap(64);
         try {
             String text = "ascii £ €";
@@ -47,7 +47,7 @@ public class BytesInternalUtf8MoreTest extends BytesTestCommon {
     }
 
     @Test
-    public void parseUtf8WithExplicitLengthHonoursUtfFlag() {
+    void parseUtf8WithExplicitLengthHonoursUtfFlag() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(64);
         try {
             String text = "£elastic";
@@ -69,7 +69,7 @@ public class BytesInternalUtf8MoreTest extends BytesTestCommon {
     }
 
     @Test
-    public void parseUtf8StopsAtTesterBoundary() {
+    void parseUtf8StopsAtTesterBoundary() {
         Bytes<?> source = Bytes.allocateElasticOnHeap(64);
         try {
             String payload = "token1,token2";
@@ -87,7 +87,7 @@ public class BytesInternalUtf8MoreTest extends BytesTestCommon {
     }
 
     @Test
-    public void parseUtf8IntoBytesBuilder() {
+    void parseUtf8IntoBytesBuilder() {
         Bytes<?> t1 = Bytes.from("token1");
         Bytes<?> t2 = Bytes.from("token2");
         Bytes<?> builder = Bytes.allocateElasticOnHeap(32);

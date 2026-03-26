@@ -18,10 +18,10 @@ import static net.openhft.chronicle.bytes.util.Compressions.GZIP;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.*;
 
-public class GzipTest extends BytesTestCommon {
+class GzipTest extends BytesTestCommon {
 
     @Test
-    public void testCompress()
+    void testCompress()
             throws IORuntimeException {
         @NotNull byte[] bytes = "hello world".getBytes(ISO_8859_1);
         byte[] bytes2 = GZIP.uncompress(GZIP.compress(bytes));
@@ -29,7 +29,7 @@ public class GzipTest extends BytesTestCommon {
     }
 
     @Test
-    public void testCompressionRatio()
+    void testCompressionRatio()
             throws IORuntimeException {
         assumeFalse(NativeBytes.areNewGuarded());
         @NotNull byte[] bytes = new byte[1 << 20];

@@ -7,9 +7,9 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class PrewriteTest extends BytesTestCommon {
+class PrewriteTest extends BytesTestCommon {
     @Test
-    public void test() {
+    void test() {
         Bytes<?> bytes = Bytes.allocateDirect(64);
         bytes.clearAndPad(64);
         bytes.prepend(1234);

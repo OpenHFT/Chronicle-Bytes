@@ -11,10 +11,10 @@ import static org.junit.jupiter.api.Assertions.*;
  * Consolidated layout tests for HexDumpBytes covering wrap widths,
  * offset formatting and description handling without data.
  */
-public class HexDumpBytesLayoutTest extends BytesTestCommon {
+class HexDumpBytesLayoutTest extends BytesTestCommon {
 
     @Test
-    public void zeroLengthDescriptionIsEmitted() {
+    void zeroLengthDescriptionIsEmitted() {
         HexDumpBytes hdb = new HexDumpBytes();
         try {
             hdb.numberWrap(8).offsetFormat((o, b) -> b.appendBase16(o, 2));
@@ -29,7 +29,7 @@ public class HexDumpBytesLayoutTest extends BytesTestCommon {
     }
 
     @Test
-    public void formattingWithNestedBlocksAndOffsets() {
+    void formattingWithNestedBlocksAndOffsets() {
         HexDumpBytes hdb = new HexDumpBytes();
         try {
             hdb.numberWrap(8).offsetFormat((o, b) -> b.appendBase16(o, 2));
@@ -48,7 +48,7 @@ public class HexDumpBytesLayoutTest extends BytesTestCommon {
     }
 
     @Test
-    public void wrapWidthOneProducesPerByteLines() {
+    void wrapWidthOneProducesPerByteLines() {
         HexDumpBytes hdb = new HexDumpBytes();
         try {
             hdb.numberWrap(1).offsetFormat((o, b) -> b.appendBase16(o, 2));

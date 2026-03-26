@@ -20,16 +20,17 @@ import java.io.OutputStreamWriter;
 import java.nio.BufferUnderflowException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.*;
 
-public class MappedFileTest extends BytesTestCommon {
+class MappedFileTest extends BytesTestCommon {
 
     @TempDir
     Path tmpDir;
 
     @BeforeEach
-    public void ignoreCouldntDisable() {
+    void ignoreCouldntDisable() {
         if (Jvm.maxDirectMemory() == 0) {
             ignoreException("Couldn't disable close on interrupt");
             ignoreException("class is not public");
@@ -47,7 +48,7 @@ public class MappedFileTest extends BytesTestCommon {
     }
 
     @Test
-    public void shouldReleaseReferenceWhenNewStoreIsAcquired()
+    void shouldReleaseReferenceWhenNewStoreIsAcquired()
             throws IOException {
         assumeFalse(Jvm.maxDirectMemory() == 0);
         final File file = Files.createTempFile(tmpDir, "mapped-file", ".bin").toFile();
@@ -78,7 +79,7 @@ public class MappedFileTest extends BytesTestCommon {
     }
 
     @Test
-    public void testReferenceCounts()
+    void testReferenceCounts()
             throws IOException {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
@@ -135,7 +136,7 @@ public class MappedFileTest extends BytesTestCommon {
     }
 
     @Test
-    public void largeReadOnlyFile() throws IOException {
+    void largeReadOnlyFile() throws IOException {
         assumeFalse(Runtime.getRuntime().maxMemory() < Integer.MAX_VALUE || OS.isWindows());
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
@@ -151,7 +152,7 @@ public class MappedFileTest extends BytesTestCommon {
     }
 
     @Test
-    public void largeReadOnlyFileSingle() throws IOException {
+    void largeReadOnlyFileSingle() throws IOException {
         assumeFalse(OS.isWindows());
         assumeFalse(Runtime.getRuntime().maxMemory() < Integer.MAX_VALUE);
         assumeFalse(Jvm.maxDirectMemory() == 0);
@@ -168,7 +169,7 @@ public class MappedFileTest extends BytesTestCommon {
     }
 
     @Test
-    public void interrupted() throws Exception {
+    void interrupted() throws Exception {
         ignoreException("/proc/self/mountinfo");
         Thread.currentThread().interrupt();
         final String filename = IOTools.createTempFile("interrupted").getAbsolutePath();
@@ -179,7 +180,7 @@ public class MappedFileTest extends BytesTestCommon {
     }
 
     @Test
-    public void testCreateMappedFile() throws Exception {
+    void testCreateMappedFile() throws Exception {
         final File file = IOTools.createTempFile("mappedFile");
 
         final MappedFile mappedFile = MappedFile.mappedFile(file, 1024, 256, 256, false);
@@ -194,7 +195,7 @@ public class MappedFileTest extends BytesTestCommon {
     }
 
     @Test
-    public void testReadOnlyOpen()
+    void testReadOnlyOpen()
             throws IOException {
         assumeFalse(OS.isWindows());
         assumeFalse(Jvm.maxDirectMemory() == 0);
@@ -233,7 +234,7 @@ public class MappedFileTest extends BytesTestCommon {
     }
 
     @AfterEach
-    public void clearInterrupt() {
+    void clearInterrupt() {
         Thread.interrupted();
     }
 }

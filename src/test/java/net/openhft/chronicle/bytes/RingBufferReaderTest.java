@@ -5,37 +5,38 @@ package net.openhft.chronicle.bytes;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
 import static org.mockito.Mockito.*;
 
-public class RingBufferReaderTest {
+class RingBufferReaderTest {
 
     private RingBufferReader reader;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         reader = mock(RingBufferReader.class);
     }
 
     @Test
-    public void testIsEmpty() {
+    void testIsEmpty() {
         when(reader.isEmpty()).thenReturn(true);
 
-        assert(reader.isEmpty());
+        assert (reader.isEmpty());
 
         verify(reader, times(1)).isEmpty();
     }
 
     @Test
-    public void testIsStopped() {
+    void testIsStopped() {
         when(reader.isStopped()).thenReturn(false);
 
-        assert(!reader.isStopped());
+        assert (!reader.isStopped());
 
         verify(reader, times(1)).isStopped();
     }
 
     @Test
-    public void testStop() {
+    void testStop() {
         reader.stop();
 
         verify(reader, times(1)).stop();

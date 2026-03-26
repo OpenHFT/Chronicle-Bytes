@@ -13,21 +13,21 @@ import java.io.IOException;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.*;
 
-public class BytesTextMethodTesterTest extends BytesTestCommon {
+class BytesTextMethodTesterTest extends BytesTestCommon {
     @BeforeEach
-    public void directEnabled() {
+    void directEnabled() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
     }
 
     @Test
-    public void run()
+    void run()
             throws IOException {
         assumeFalse(NativeBytes.areNewGuarded());
         btmttTest("btmtt/prim-input.txt", "btmtt/prim-output.txt");
     }
 
     @Test
-    public void runInvalid()
+    void runInvalid()
             throws IOException {
         // invalid on read
         expectException(ek -> ek.throwable instanceof InvalidMarshallableException, "InvalidMarshallableException");

@@ -13,9 +13,9 @@ import java.nio.charset.StandardCharsets;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class BooleanReferenceTest extends BytesTestCommon {
+class BooleanReferenceTest extends BytesTestCommon {
     @Test
-    public void testBinary() {
+    void testBinary() {
         BytesStore<?, Void> nbs = BytesStore.nativeStoreWithFixedCapacity(2);
         try (@NotNull BinaryBooleanReference ref = new BinaryBooleanReference()) {
             // First value
@@ -40,7 +40,7 @@ public class BooleanReferenceTest extends BytesTestCommon {
     }
 
     @Test
-    public void testText() {
+    void testText() {
         BytesStore<?, Void> nbs = BytesStore.nativeStoreWithFixedCapacity(5);
         try (@NotNull TextBooleanReference ref = new TextBooleanReference()) {
 

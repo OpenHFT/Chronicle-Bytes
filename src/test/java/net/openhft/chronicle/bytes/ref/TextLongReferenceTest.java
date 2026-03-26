@@ -12,10 +12,10 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class TextLongReferenceTest extends BytesTestCommon {
+class TextLongReferenceTest extends BytesTestCommon {
 
     @Test
-    public void testSetValue() {
+    void testSetValue() {
         @NotNull NativeBytesStore<Void> bytesStore = NativeBytesStore.nativeStoreWithFixedCapacity(64);
         bytesStore.zeroOut(0, 64);
         try (@NotNull final TextLongReference value = new TextLongReference()) {

@@ -27,12 +27,12 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.*;
 
-public class NativeBytesStoreTest extends BytesTestCommon {
+class NativeBytesStoreTest extends BytesTestCommon {
 
     private volatile int bcs;
 
     @BeforeEach
-    public void hasDirectMemory() {
+    void hasDirectMemory() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
     }
 
@@ -44,7 +44,7 @@ public class NativeBytesStoreTest extends BytesTestCommon {
     }
 
     @Test
-    public void issue176StopBits() {
+    void issue176StopBits() {
         final int stepLength = 23; // A prime of reasonable size (lagom) so we save some time stepping through the iterations
         final int maxLen = (1 << (7 * 2)) + stepLength;
 
@@ -68,7 +68,7 @@ public class NativeBytesStoreTest extends BytesTestCommon {
     }
 
     @Test
-    public void testCipherPerf()
+    void testCipherPerf()
             throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
         final byte[] keyBytes = new SecureRandom().generateSeed(16);
         final SecretKeySpec key = new SecretKeySpec(keyBytes, "AES");
@@ -108,7 +108,7 @@ public class NativeBytesStoreTest extends BytesTestCommon {
     }
 
     @Test
-    public void testCipher()
+    void testCipher()
             throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
         assumeFalse(NativeBytes.areNewGuarded());
         final byte[] keyBytes = new SecureRandom().generateSeed(16);
@@ -154,7 +154,7 @@ public class NativeBytesStoreTest extends BytesTestCommon {
     }
 
     @Test
-    public void testElasticByteBuffer()
+    void testElasticByteBuffer()
             throws IORuntimeException, BufferOverflowException {
 
         final Bytes<ByteBuffer> bbb = Bytes.elasticByteBuffer();
@@ -181,7 +181,7 @@ public class NativeBytesStoreTest extends BytesTestCommon {
     }
 
     @Test
-    public void testAppendUtf8() {
+    void testAppendUtf8() {
         final String hi = "Hello World";
         final char[] chars = hi.toCharArray();
         final NativeBytesStore<Void> nbs = NativeBytesStore.nativeStore(chars.length);
@@ -194,7 +194,7 @@ public class NativeBytesStoreTest extends BytesTestCommon {
     }
 
     @Test
-    public void testToTempByteBuf() {
+    void testToTempByteBuf() {
         final String hi = "Hello World";
         final char[] chars = hi.toCharArray();
         final NativeBytesStore<Void> bs = NativeBytesStore.lazyNativeBytesStoreWithFixedCapacity(128);
@@ -211,7 +211,7 @@ public class NativeBytesStoreTest extends BytesTestCommon {
 
     @SuppressWarnings({"rawtypes", "unchecked"})
     @Test
-    public void perfCheckSum()
+    void perfCheckSum()
             throws IORuntimeException {
         final NativeBytesStore[] nbs = {
                 NativeBytesStore.nativeStoreWithFixedCapacity(140),
@@ -248,7 +248,7 @@ public class NativeBytesStoreTest extends BytesTestCommon {
     }
 
     @Test
-    public void testCopyTo() {
+    void testCopyTo() {
         final Bytes<ByteBuffer> src = Bytes.elasticByteBuffer().writeUtf8("hello");
         final Bytes<ByteBuffer> dst = Bytes.elasticByteBuffer();
         try {
@@ -262,7 +262,7 @@ public class NativeBytesStoreTest extends BytesTestCommon {
 
     @SuppressWarnings("rawtypes")
     @Test
-    public void testEquals() {
+    void testEquals() {
         @NotNull NativeBytesStore hbs = NativeBytesStore.from("Hello".getBytes());
         @NotNull NativeBytesStore hbs2 = NativeBytesStore.from("Hello".getBytes());
         @NotNull NativeBytesStore hbs3 = NativeBytesStore.from("He!!o".getBytes());

@@ -24,7 +24,7 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
-public class Bytes3Test extends BytesTestCommon {
+class Bytes3Test extends BytesTestCommon {
 
     private static final String TMP_FILE = OS.getTarget() + "/Bytes3Test-deleteme";
 
@@ -68,7 +68,7 @@ public class Bytes3Test extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void readPositionAt0(String testName, Supplier<Bytes<?>> supplier) {
+    void readPositionAt0(String testName, Supplier<Bytes<?>> supplier) {
         Bytes<?> bytes = supplier.get();
         try {
             assertEquals(0L, bytes.readPosition());
@@ -79,7 +79,7 @@ public class Bytes3Test extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void writePositionAt0(String testName, Supplier<Bytes<?>> supplier) {
+    void writePositionAt0(String testName, Supplier<Bytes<?>> supplier) {
         boolean forRead = testName.contains("ForRead");
         if (forRead) return;
         Bytes<?> bytes = supplier.get();
@@ -92,7 +92,7 @@ public class Bytes3Test extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void isClear(String testName, Supplier<Bytes<?>> supplier) {
+    void isClear(String testName, Supplier<Bytes<?>> supplier) {
         Bytes<?> bytes = supplier.get();
         try {
             assertTrue(bytes.isClear());
@@ -103,7 +103,7 @@ public class Bytes3Test extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void byteOrder(String testName, Supplier<Bytes<?>> supplier) {
+    void byteOrder(String testName, Supplier<Bytes<?>> supplier) {
         Bytes<?> bytes = supplier.get();
         try {
             assertSame(ByteOrder.nativeOrder(), bytes.byteOrder());
@@ -114,7 +114,7 @@ public class Bytes3Test extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void writeLimit(String testName, Supplier<Bytes<?>> supplier) {
+    void writeLimit(String testName, Supplier<Bytes<?>> supplier) {
         Bytes<?> bytes = supplier.get();
         try {
             assertTrue(bytes.writeLimit() >= 260);
@@ -125,7 +125,7 @@ public class Bytes3Test extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void write(String testName, Supplier<Bytes<?>> supplier) {
+    void write(String testName, Supplier<Bytes<?>> supplier) {
         boolean forRead = testName.contains("ForRead");
         if (forRead) return;
         Bytes<?> bytes = supplier.get();
@@ -165,146 +165,146 @@ public class Bytes3Test extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void appendSubstring(String testName, Supplier<Bytes<?>> supplier) {
+    void appendSubstring(String testName, Supplier<Bytes<?>> supplier) {
         doAppend(testName, supplier, ByteStringAppender::append);
     }
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void appendBytesBounded(String testName, Supplier<Bytes<?>> supplier) {
+    void appendBytesBounded(String testName, Supplier<Bytes<?>> supplier) {
         doAppend(testName, supplier, (b, s) -> b.append(Bytes.from("[" + s + "]"), 1, s.length() + 1));
     }
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void appendStringBounded(String testName, Supplier<Bytes<?>> supplier) {
+    void appendStringBounded(String testName, Supplier<Bytes<?>> supplier) {
         doAppend(testName, supplier, (b, s) -> b.append("[" + s + "]", 1, s.length() + 1));
     }
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void append8bitSubstring(String testName, Supplier<Bytes<?>> supplier) {
+    void append8bitSubstring(String testName, Supplier<Bytes<?>> supplier) {
         doAppend(testName, supplier, ByteStringAppender::append8bit);
     }
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void append8bitString(String testName, Supplier<Bytes<?>> supplier) {
+    void append8bitString(String testName, Supplier<Bytes<?>> supplier) {
         doAppend(testName, supplier, (b, s) -> b.append8bit(s.toString()));
     }
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void append8bitFromBytes(String testName, Supplier<Bytes<?>> supplier) {
+    void append8bitFromBytes(String testName, Supplier<Bytes<?>> supplier) {
         doAppend(testName, supplier, (b, s) -> b.append8bit(Bytes.from(s)));
     }
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void append8bitFromBytesBounded(String testName, Supplier<Bytes<?>> supplier) {
+    void append8bitFromBytesBounded(String testName, Supplier<Bytes<?>> supplier) {
         doAppend(testName, supplier, (b, s) -> b.append8bit(Bytes.from("[" + s + "]"), 1L, s.length() + 1));
     }
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void append8bitStringBounded(String testName, Supplier<Bytes<?>> supplier) {
+    void append8bitStringBounded(String testName, Supplier<Bytes<?>> supplier) {
         doAppend(testName, supplier, (b, s) -> b.append8bit("[" + s + "]", 1, s.length() + 1));
     }
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void writeSubstring(String testName, Supplier<Bytes<?>> supplier) {
+    void writeSubstring(String testName, Supplier<Bytes<?>> supplier) {
         doAppend(testName, supplier, ByteStringAppender::write);
     }
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void writeFromBytes(String testName, Supplier<Bytes<?>> supplier) {
+    void writeFromBytes(String testName, Supplier<Bytes<?>> supplier) {
         doAppend(testName, supplier, (b, s) -> b.write(Bytes.from(s)));
     }
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void writeByteArray(String testName, Supplier<Bytes<?>> supplier) {
+    void writeByteArray(String testName, Supplier<Bytes<?>> supplier) {
         doAppend(testName, supplier, (b, s) -> b.write(s.toString().getBytes(StandardCharsets.US_ASCII)));
     }
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void writeFromBytesBounded(String testName, Supplier<Bytes<?>> supplier) {
+    void writeFromBytesBounded(String testName, Supplier<Bytes<?>> supplier) {
         doAppend(testName, supplier, (b, s) -> b.write(Bytes.from("[" + s + "]"), 1L, s.length()));
     }
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void writeFromBytes2(String testName, Supplier<Bytes<?>> supplier) {
+    void writeFromBytes2(String testName, Supplier<Bytes<?>> supplier) {
         doAppend(testName, supplier, (b, s) -> b.write((CharSequence) Bytes.from("[" + s + "]"), 1, s.length()));
     }
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void appendUtf8Substring(String testName, Supplier<Bytes<?>> supplier) {
+    void appendUtf8Substring(String testName, Supplier<Bytes<?>> supplier) {
         doAppend(testName, supplier, ByteStringAppender::appendUtf8);
     }
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void write8bitSubstring(String testName, Supplier<Bytes<?>> supplier) {
+    void write8bitSubstring(String testName, Supplier<Bytes<?>> supplier) {
         doAppend(testName, supplier, ByteStringAppender::write8bit);
     }
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void write8bitSubstring2(String testName, Supplier<Bytes<?>> supplier) {
+    void write8bitSubstring2(String testName, Supplier<Bytes<?>> supplier) {
         doAppend(testName, supplier, (b, s) -> b.write8bit(s.toString()));
     }
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void write8bitSubstringBounded(String testName, Supplier<Bytes<?>> supplier) {
+    void write8bitSubstringBounded(String testName, Supplier<Bytes<?>> supplier) {
         doAppend(testName, supplier, (b, s) -> b.write8bit(s, 0, s.length()));
     }
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void write8bitFromBytes(String testName, Supplier<Bytes<?>> supplier) {
+    void write8bitFromBytes(String testName, Supplier<Bytes<?>> supplier) {
         doAppend(testName, supplier, (b, s) -> b.write8bit(Bytes.from(s)));
     }
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void write8bitFromBytesBounded(String testName, Supplier<Bytes<?>> supplier) {
+    void write8bitFromBytesBounded(String testName, Supplier<Bytes<?>> supplier) {
         doAppend(testName, supplier, (b, s) -> b.write8bit(Bytes.from("[" + s + "]"), 1, s.length()));
     }
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void write8bitStringBounded(String testName, Supplier<Bytes<?>> supplier) {
+    void write8bitStringBounded(String testName, Supplier<Bytes<?>> supplier) {
         doAppend(testName, supplier, (b, s) -> b.write8bit("[" + s + "]", 1, s.length()));
     }
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void writeUtf8Substring(String testName, Supplier<Bytes<?>> supplier) {
+    void writeUtf8Substring(String testName, Supplier<Bytes<?>> supplier) {
         doAppend(testName, supplier, ByteStringAppender::writeUtf8);
     }
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void writeUtf8Substring2(String testName, Supplier<Bytes<?>> supplier) {
+    void writeUtf8Substring2(String testName, Supplier<Bytes<?>> supplier) {
         doAppend(testName, supplier, (b, s) -> b.writeUtf8(s.toString()));
     }
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void writeUtf8FromBytes(String testName, Supplier<Bytes<?>> supplier) {
+    void writeUtf8FromBytes(String testName, Supplier<Bytes<?>> supplier) {
         doAppend(testName, supplier, (b, s) -> b.writeUtf8(Bytes.from(s)));
     }
 
     @SuppressWarnings("rawtypes")
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void toString8bit(String testName, Supplier<Bytes<?>> supplier) {
+    void toString8bit(String testName, Supplier<Bytes<?>> supplier) {
         boolean forRead = testName.contains("ForRead");
         if (forRead) return;
         Bytes<?> bytes = supplier.get();

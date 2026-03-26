@@ -13,10 +13,10 @@ import java.io.Writer;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class ByteStringReaderWriterTest extends BytesTestCommon {
+class ByteStringReaderWriterTest extends BytesTestCommon {
 
     @Test
-    public void readerReadsAllAndSkipHonoured() throws IOException {
+    void readerReadsAllAndSkipHonoured() throws IOException {
         final Bytes<?> bytes = Bytes.allocateElasticOnHeap(64);
         try {
             bytes.append("abc123XYZ");
@@ -41,7 +41,7 @@ public class ByteStringReaderWriterTest extends BytesTestCommon {
     }
 
     @Test
-    public void writerAppendsVariousOverloads() throws IOException {
+    void writerAppendsVariousOverloads() throws IOException {
         final Bytes<?> bytes = Bytes.allocateElasticOnHeap(64);
         try {
             final ByteStringWriter writer = new ByteStringWriter(bytes);

@@ -9,11 +9,11 @@ import org.junit.jupiter.api.Test;
 import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class MultiReaderBytesRingBufferTest {
+class MultiReaderBytesRingBufferTest {
     private MultiReaderBytesRingBuffer ringBuffer;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         // Mock the MultiReaderBytesRingBuffer
         ringBuffer = mock(MultiReaderBytesRingBuffer.class);
 
@@ -24,7 +24,7 @@ public class MultiReaderBytesRingBufferTest {
     }
 
     @Test
-    public void testReadersReadIndependently() {
+    void testReadersReadIndependently() {
         // Setup data in the ring buffer (this step will depend on your implementation)
 
         RingBufferReader reader1 = ringBuffer.createReader();
@@ -48,7 +48,7 @@ public class MultiReaderBytesRingBufferTest {
     }
 
     @Test
-    public void testReaderToEnd() {
+    void testReaderToEnd() {
         // Setup data in the ring buffer
 
         RingBufferReader reader = ringBuffer.createReader();

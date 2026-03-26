@@ -28,7 +28,7 @@ class UnsafeRWObjectTest extends BytesTestCommon {
 
         BB bb2 = new BB(0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L);
 
-        directElastic.unsafeReadObject(bb2, offset,8 * 8);
+        directElastic.unsafeReadObject(bb2, offset, 8 * 8);
 
         assertEquals(bb1.l0, bb2.l0);
         assertEquals(bb1.l1, bb2.l1);

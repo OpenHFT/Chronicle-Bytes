@@ -10,10 +10,10 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class BytesInternalWireUsageTest extends BytesTestCommon {
+class BytesInternalWireUsageTest extends BytesTestCommon {
 
     @Test
-    public void parseUtf8UsingNativeStoreOptimisation() {
+    void parseUtf8UsingNativeStoreOptimisation() {
         Bytes<?> direct = Bytes.allocateElasticDirect(64);
         try {
             String text = "wire-field-name";
@@ -32,7 +32,7 @@ public class BytesInternalWireUsageTest extends BytesTestCommon {
     }
 
     @Test
-    public void parseUtf8WithEqualsDelimiterMimicsQueryParsers() {
+    void parseUtf8WithEqualsDelimiterMimicsQueryParsers() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(64);
         try {
             String payload = "exchange=EUREX,side=SELL";
@@ -63,7 +63,7 @@ public class BytesInternalWireUsageTest extends BytesTestCommon {
     }
 
     @Test
-    public void parseUtf8StopsAtQuotesForEscapedFields() {
+    void parseUtf8StopsAtQuotesForEscapedFields() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(64);
         try {
             String payload = "\"Best,Trader\" remainder";

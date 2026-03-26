@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class StringRWPerfTest extends BytesTestCommon {
+class StringRWPerfTest extends BytesTestCommon {
 
     private static final String UTF8 = "0123456789£123456789€123456789";
     private static final String ASCII = "012345678901234567890123456789";
@@ -21,7 +21,7 @@ public class StringRWPerfTest extends BytesTestCommon {
     }
 
     @Test
-    public void test8bit() {
+    void test8bit() {
         final NativeBytes<Void> bytes = Bytes.allocateElasticDirect(32);
         final String s0 = ASCII;
         bytes.write8bit(s0);
@@ -31,7 +31,7 @@ public class StringRWPerfTest extends BytesTestCommon {
     }
 
     @Test
-    public void testUtf8() {
+    void testUtf8() {
         final NativeBytes<Void> bytes = Bytes.allocateElasticDirect(40);
         final String s0 = UTF8;
         bytes.writeUtf8(s0);
@@ -41,13 +41,13 @@ public class StringRWPerfTest extends BytesTestCommon {
     }
 
     @Test
-    public void testOnHeapPerf() {
+    void testOnHeapPerf() {
         bytes = Bytes.allocateElasticOnHeap(40);
         doTestPerf(bytes);
     }
 
     @Test
-    public void testDirectPerf() {
+    void testDirectPerf() {
         bytes = Bytes.allocateElasticDirect(40);
         doTestPerf(bytes);
     }

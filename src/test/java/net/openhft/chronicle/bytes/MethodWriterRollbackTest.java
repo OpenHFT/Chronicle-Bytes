@@ -14,14 +14,14 @@ import java.util.function.Function;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class MethodWriterRollbackTest extends BytesTestCommon {
+class MethodWriterRollbackTest extends BytesTestCommon {
 
     interface Failer {
         void go() throws Throwable; // declare Throwable to test non-Exception path
     }
 
     @Test
-    public void writePositionIsRolledBackOnThrowable() {
+    void writePositionIsRolledBackOnThrowable() {
         Bytes<?> out = Bytes.allocateElasticOnHeap(64);
         try {
             Function<Method, MethodEncoder> failing = m -> new MethodEncoder() {

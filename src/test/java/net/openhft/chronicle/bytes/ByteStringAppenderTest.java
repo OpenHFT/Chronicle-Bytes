@@ -17,7 +17,7 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.*;
 
-public class ByteStringAppenderTest extends BytesTestCommon {
+class ByteStringAppenderTest extends BytesTestCommon {
 
     static Stream<Arguments> data() {
         return Stream.of(
@@ -32,7 +32,7 @@ public class ByteStringAppenderTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void testConvertTo(String name, boolean direct) {
+    void testConvertTo(String name, boolean direct) {
         Bytes<?> bytes = createBytes(direct);
         try {
             Bytes<?> hello = Bytes.from("hello");
@@ -52,7 +52,7 @@ public class ByteStringAppenderTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void testAppendInt(String name, boolean direct)
+    void testAppendInt(String name, boolean direct)
             throws IORuntimeException {
         Bytes<?> bytes = createBytes(direct);
         try {
@@ -72,7 +72,7 @@ public class ByteStringAppenderTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void testAppend(String name, boolean direct)
+    void testAppend(String name, boolean direct)
             throws IORuntimeException {
         Bytes<?> bytes = createBytes(direct);
         try {
@@ -93,7 +93,7 @@ public class ByteStringAppenderTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void testAppendWithOffset(String name, boolean direct) {
+    void testAppendWithOffset(String name, boolean direct) {
         Bytes<?> bytes = createBytes(direct);
         try {
             bytes.readLimit(20);
@@ -109,7 +109,7 @@ public class ByteStringAppenderTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void testAppendWithOffsetNeg(String name, boolean direct) {
+    void testAppendWithOffsetNeg(String name, boolean direct) {
         Bytes<?> bytes = createBytes(direct);
         try {
             bytes.readLimit(20);
@@ -125,7 +125,7 @@ public class ByteStringAppenderTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void testAppendDouble(String name, boolean direct)
+    void testAppendDouble(String name, boolean direct)
             throws IORuntimeException {
         Bytes<?> bytes = createBytes(direct);
         try {
@@ -147,7 +147,7 @@ public class ByteStringAppenderTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void testAppendLongDecimal(String name, boolean direct) {
+    void testAppendLongDecimal(String name, boolean direct) {
         Bytes<?> bytes = createBytes(direct);
         try {
             assumeFalse(GuardedNativeBytes.areNewGuarded());
@@ -186,7 +186,7 @@ public class ByteStringAppenderTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void testAppendDoublePrecision(String name, boolean direct) {
+    void testAppendDoublePrecision(String name, boolean direct) {
         Bytes<?> bytes = createBytes(direct);
         try {
             assumeFalse(GuardedNativeBytes.areNewGuarded());
@@ -229,7 +229,7 @@ public class ByteStringAppenderTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void tens(String name, boolean direct) {
+    void tens(String name, boolean direct) {
         Bytes<?> bytes = createBytes(direct);
         try {
             bytes.decimaliser(GeneralDecimaliser.GENERAL);
@@ -258,7 +258,7 @@ public class ByteStringAppenderTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void testAppend8bit(String name, boolean direct) {
+    void testAppend8bit(String name, boolean direct) {
         Bytes<?> bytes = createBytes(direct);
         try {
             assumeFalse(Jvm.maxDirectMemory() == 0);
@@ -267,8 +267,8 @@ public class ByteStringAppenderTest extends BytesTestCommon {
             bs.write(0, " -\n".getBytes());
 
             bytes.append8bit((CharSequence) bs, 1, 2);
-            bytes.append8bit(bs, (long)0, 1);
-            bytes.append8bit(bs, (long)2, 3);
+            bytes.append8bit(bs, (long) 0, 1);
+            bytes.append8bit(bs, (long) 2, 3);
 
             assertEquals("- \n", bytes.toString());
             bs.releaseLast();

@@ -8,20 +8,21 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
+
 import org.mockito.Mockito;
 
 import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assumptions.*;
 
-public class MethodReaderBuilderTest {
+class MethodReaderBuilderTest {
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         assumeFalse(Jvm.isJava21Plus());
     }
 
     @Test
-    public void testWarnMissing() {
+    void testWarnMissing() {
         MethodReaderBuilder builder = mock(MethodReaderBuilder.class, Mockito.CALLS_REAL_METHODS);
 
         when(builder.exceptionHandlerOnUnknownMethod(any())).thenReturn(builder);

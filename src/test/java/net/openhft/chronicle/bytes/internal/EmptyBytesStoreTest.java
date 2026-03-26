@@ -26,7 +26,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.*;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
-public class EmptyBytesStoreTest extends BytesTestCommon {
+class EmptyBytesStoreTest extends BytesTestCommon {
 
     static Stream<Arguments> data() {
         return Stream.of(
@@ -40,7 +40,7 @@ public class EmptyBytesStoreTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void notSameAsEmpty(String type, BytesStore<?, ?> instance) {
+    void notSameAsEmpty(String type, BytesStore<?, ?> instance) {
         try {
             // a case which should produce a different instance. Wire depends on this
             assertNotSame(BytesStore.wrap(new byte[0]), instance);
@@ -51,7 +51,7 @@ public class EmptyBytesStoreTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void refCount(String type, BytesStore<?, ?> instance) {
+    void refCount(String type, BytesStore<?, ?> instance) {
         try {
             assertNotEquals(0, instance.refCount());
         } finally {
@@ -61,7 +61,7 @@ public class EmptyBytesStoreTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void writeByteInt(String type, BytesStore<?, ?> instance) {
+    void writeByteInt(String type, BytesStore<?, ?> instance) {
         try {
             assumeFalse(instance instanceof NativeBytesStore);
             assertThrowsBufferException(() -> instance.writeByte(0, 0));
@@ -72,7 +72,7 @@ public class EmptyBytesStoreTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void writeByte(String type, BytesStore<?, ?> instance) {
+    void writeByte(String type, BytesStore<?, ?> instance) {
         try {
             assumeFalse(instance instanceof NativeBytesStore);
             assertThrowsBufferException(() -> instance.writeByte(0, (byte) 0));
@@ -83,7 +83,7 @@ public class EmptyBytesStoreTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void writeShort(String type, BytesStore<?, ?> instance) {
+    void writeShort(String type, BytesStore<?, ?> instance) {
         try {
             assumeFalse(instance instanceof NativeBytesStore);
             assertThrowsBufferException(() -> instance.writeShort(0, (short) 0));
@@ -94,7 +94,7 @@ public class EmptyBytesStoreTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void writeInt(String type, BytesStore<?, ?> instance) {
+    void writeInt(String type, BytesStore<?, ?> instance) {
         try {
             assumeFalse(instance instanceof NativeBytesStore);
             assertThrowsBufferException(() -> instance.writeInt(0, 0));
@@ -105,7 +105,7 @@ public class EmptyBytesStoreTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void writeOrderedInt(String type, BytesStore<?, ?> instance) {
+    void writeOrderedInt(String type, BytesStore<?, ?> instance) {
         try {
             assumeFalse(instance instanceof NativeBytesStore);
             assertThrowsBufferException(() -> instance.writeOrderedInt(0, 0));
@@ -116,7 +116,7 @@ public class EmptyBytesStoreTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void writeLong(String type, BytesStore<?, ?> instance) {
+    void writeLong(String type, BytesStore<?, ?> instance) {
         try {
             assumeFalse(instance instanceof NativeBytesStore);
             assertThrowsBufferException(() -> instance.writeLong(0, 0));
@@ -127,7 +127,7 @@ public class EmptyBytesStoreTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void writeOrderedLong(String type, BytesStore<?, ?> instance) {
+    void writeOrderedLong(String type, BytesStore<?, ?> instance) {
         try {
             assumeFalse(instance instanceof NativeBytesStore);
             assertThrowsBufferException(() -> instance.writeOrderedLong(0, 0L));
@@ -138,7 +138,7 @@ public class EmptyBytesStoreTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void writeFloat(String type, BytesStore<?, ?> instance) {
+    void writeFloat(String type, BytesStore<?, ?> instance) {
         try {
             assumeFalse(instance instanceof NativeBytesStore);
             assertThrowsBufferException(() -> instance.writeFloat(0, 0.0f));
@@ -149,7 +149,7 @@ public class EmptyBytesStoreTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void writeDouble(String type, BytesStore<?, ?> instance) {
+    void writeDouble(String type, BytesStore<?, ?> instance) {
         try {
             assumeFalse(instance instanceof NativeBytesStore);
             assertThrowsBufferException(() -> instance.writeDouble(0, 0.0d));
@@ -160,7 +160,7 @@ public class EmptyBytesStoreTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void writeVolatileByte(String type, BytesStore<?, ?> instance) {
+    void writeVolatileByte(String type, BytesStore<?, ?> instance) {
         try {
             assumeFalse(instance instanceof NativeBytesStore);
             assertThrowsBufferException(() -> instance.writeVolatileByte(0, (byte) 0));
@@ -171,7 +171,7 @@ public class EmptyBytesStoreTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void writeVolatileShort(String type, BytesStore<?, ?> instance) {
+    void writeVolatileShort(String type, BytesStore<?, ?> instance) {
         try {
             assumeFalse(instance instanceof NativeBytesStore);
             assertThrowsBufferException(() -> instance.writeVolatileShort(0, (short) 0));
@@ -182,7 +182,7 @@ public class EmptyBytesStoreTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void writeVolatileInt(String type, BytesStore<?, ?> instance) {
+    void writeVolatileInt(String type, BytesStore<?, ?> instance) {
         try {
             assumeFalse(instance instanceof NativeBytesStore);
             assertThrowsBufferException(() -> instance.writeVolatileInt(0, 0));
@@ -193,7 +193,7 @@ public class EmptyBytesStoreTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void writeVolatileLong(String type, BytesStore<?, ?> instance) {
+    void writeVolatileLong(String type, BytesStore<?, ?> instance) {
         try {
             assumeFalse(instance instanceof NativeBytesStore);
             assertThrowsBufferException(() -> instance.writeVolatileLong(0, 0L));
@@ -204,7 +204,7 @@ public class EmptyBytesStoreTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void write(String type, BytesStore<?, ?> instance) {
+    void write(String type, BytesStore<?, ?> instance) {
         try {
             assertDoesNotThrow(() -> instance.write(0, new byte[1], 0, 0));
             assumeFalse(instance instanceof NativeBytesStore);
@@ -216,7 +216,7 @@ public class EmptyBytesStoreTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void write2(String type, BytesStore<?, ?> instance) {
+    void write2(String type, BytesStore<?, ?> instance) {
         final Bytes<ByteBuffer> bytes = elasticHeapByteBuffer();
         bytes.append("Hello");
         try {
@@ -231,7 +231,7 @@ public class EmptyBytesStoreTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void write3(String type, BytesStore<?, ?> instance) {
+    void write3(String type, BytesStore<?, ?> instance) {
         try {
             assumeFalse(instance instanceof NativeBytesStore);
             assertThrowsBufferException(() -> instance.write(0, new byte[1]));
@@ -242,7 +242,7 @@ public class EmptyBytesStoreTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void write4(String type, BytesStore<?, ?> instance) {
+    void write4(String type, BytesStore<?, ?> instance) {
         final Bytes<ByteBuffer> bytes = elasticHeapByteBuffer();
         try {
             assertDoesNotThrow(() -> instance.write(0, bytes));
@@ -258,7 +258,7 @@ public class EmptyBytesStoreTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void readByte(String type, BytesStore<?, ?> instance) {
+    void readByte(String type, BytesStore<?, ?> instance) {
         try {
             read(instance, BytesStore::readByte);
         } finally {
@@ -268,7 +268,7 @@ public class EmptyBytesStoreTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void peekUnsignedByte(String type, BytesStore<?, ?> instance) {
+    void peekUnsignedByte(String type, BytesStore<?, ?> instance) {
         try {
             assertEquals(-1, instance.peekUnsignedByte(0));
         } finally {
@@ -278,7 +278,7 @@ public class EmptyBytesStoreTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void readShort(String type, BytesStore<?, ?> instance) {
+    void readShort(String type, BytesStore<?, ?> instance) {
         try {
             read(instance, BytesStore::readShort);
         } finally {
@@ -288,7 +288,7 @@ public class EmptyBytesStoreTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void readInt(String type, BytesStore<?, ?> instance) {
+    void readInt(String type, BytesStore<?, ?> instance) {
         try {
             read(instance, BytesStore::readLong);
         } finally {
@@ -298,7 +298,7 @@ public class EmptyBytesStoreTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void readLong(String type, BytesStore<?, ?> instance) {
+    void readLong(String type, BytesStore<?, ?> instance) {
         try {
             read(instance, BytesStore::readLong);
         } finally {
@@ -308,7 +308,7 @@ public class EmptyBytesStoreTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void readFloat(String type, BytesStore<?, ?> instance) {
+    void readFloat(String type, BytesStore<?, ?> instance) {
         try {
             read(instance, BytesStore::readFloat);
         } finally {
@@ -318,7 +318,7 @@ public class EmptyBytesStoreTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void readDouble(String type, BytesStore<?, ?> instance) {
+    void readDouble(String type, BytesStore<?, ?> instance) {
         try {
             read(instance, BytesStore::readDouble);
         } finally {
@@ -328,7 +328,7 @@ public class EmptyBytesStoreTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void readVolatileByte(String type, BytesStore<?, ?> instance) {
+    void readVolatileByte(String type, BytesStore<?, ?> instance) {
         try {
             read(instance, BytesStore::readVolatileByte);
         } finally {
@@ -338,7 +338,7 @@ public class EmptyBytesStoreTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void readVolatileShort(String type, BytesStore<?, ?> instance) {
+    void readVolatileShort(String type, BytesStore<?, ?> instance) {
         try {
             read(instance, BytesStore::readVolatileShort);
         } finally {
@@ -348,7 +348,7 @@ public class EmptyBytesStoreTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void readVolatileInt(String type, BytesStore<?, ?> instance) {
+    void readVolatileInt(String type, BytesStore<?, ?> instance) {
         try {
             read(instance, BytesStore::readVolatileInt);
         } finally {
@@ -358,7 +358,7 @@ public class EmptyBytesStoreTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void readVolatileLong(String type, BytesStore<?, ?> instance) {
+    void readVolatileLong(String type, BytesStore<?, ?> instance) {
         try {
             read(instance, BytesStore::readVolatileLong);
         } finally {
@@ -368,7 +368,7 @@ public class EmptyBytesStoreTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void hashCodeTest(String type, BytesStore<?, ?> instance) {
+    void hashCodeTest(String type, BytesStore<?, ?> instance) {
         try {
             int actual = instance.hashCode();
             int expected = NativeBytesStore.from("").hashCode();
@@ -380,7 +380,7 @@ public class EmptyBytesStoreTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void equalsTest(String type, BytesStore<?, ?> instance) {
+    void equalsTest(String type, BytesStore<?, ?> instance) {
         try {
             assertNotEquals(null, instance);
             assertNotEquals(instance, null);
@@ -393,7 +393,7 @@ public class EmptyBytesStoreTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void copy(String type, BytesStore<?, ?> instance) {
+    void copy(String type, BytesStore<?, ?> instance) {
         try {
             final BytesStore<?, Void> copy = uncheckedCast(instance.copy());
             assertEquals(instance, copy);
@@ -405,7 +405,7 @@ public class EmptyBytesStoreTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void bytesForRead(String type, BytesStore<?, ?> instance) {
+    void bytesForRead(String type, BytesStore<?, ?> instance) {
         try {
             final Bytes<Void> bytes = uncheckedCast(instance.bytesForRead());
             try {
@@ -421,7 +421,7 @@ public class EmptyBytesStoreTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void capacity(String type, BytesStore<?, ?> instance) {
+    void capacity(String type, BytesStore<?, ?> instance) {
         try {
             assertEquals(0, instance.capacity());
         } finally {
@@ -431,7 +431,7 @@ public class EmptyBytesStoreTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void underlyingObject(String type, BytesStore<?, ?> instance) {
+    void underlyingObject(String type, BytesStore<?, ?> instance) {
         try {
             assertNull(instance.underlyingObject());
         } finally {
@@ -441,7 +441,7 @@ public class EmptyBytesStoreTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void inside(String type, BytesStore<?, ?> instance) {
+    void inside(String type, BytesStore<?, ?> instance) {
         try {
             assertTrue(instance.inside(0, 0));  // Nothing at index zero is in the empty store
             assertFalse(instance.inside(0, 1));
@@ -453,7 +453,7 @@ public class EmptyBytesStoreTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void testInside(String type, BytesStore<?, ?> instance) {
+    void testInside(String type, BytesStore<?, ?> instance) {
         try {
             assertFalse(instance.inside(0));
         } finally {
@@ -463,7 +463,7 @@ public class EmptyBytesStoreTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void copyTo(String type, BytesStore<?, ?> instance) {
+    void copyTo(String type, BytesStore<?, ?> instance) {
         try {
             final Bytes<ByteBuffer> bytes = elasticHeapByteBuffer();
             try {
@@ -492,7 +492,7 @@ public class EmptyBytesStoreTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void nativeWrite(String type, BytesStore<?, ?> instance) {
+    void nativeWrite(String type, BytesStore<?, ?> instance) {
         try {
             assertThrowsAny(IllegalArgumentException.class, () -> instance.nativeWrite(34, -1, 0));
             assertThrowsAny(IllegalArgumentException.class, () -> instance.nativeWrite(34, 0, -1));
@@ -504,7 +504,7 @@ public class EmptyBytesStoreTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void write8bit(String type, BytesStore<?, ?> instance) {
+    void write8bit(String type, BytesStore<?, ?> instance) {
         try {
             final BytesStore<?, ?> bs = BytesStore.from("A");
             assertThrowsAny(IllegalArgumentException.class, () -> instance.write8bit(-1, bs));
@@ -517,7 +517,7 @@ public class EmptyBytesStoreTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void testWrite8bit(String type, BytesStore<?, ?> instance) {
+    void testWrite8bit(String type, BytesStore<?, ?> instance) {
         try {
             assertThrowsBufferException(() -> instance.write8bit(0, "A", 0, 1));
             assertThrowsAny(IllegalArgumentException.class, () -> instance.write8bit(-1, "A", -1, 0));
@@ -529,7 +529,7 @@ public class EmptyBytesStoreTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void nativeRead(String type, BytesStore<?, ?> instance) {
+    void nativeRead(String type, BytesStore<?, ?> instance) {
         try {
             assumeFalse(instance instanceof NativeBytesStore);
             assertThrowsBufferException(() -> instance.nativeRead(0, 1, 1));
@@ -542,7 +542,7 @@ public class EmptyBytesStoreTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void compareAndSwapInt(String type, BytesStore<?, ?> instance) {
+    void compareAndSwapInt(String type, BytesStore<?, ?> instance) {
         try {
             assumeFalse(instance instanceof NativeBytesStore);
             assertThrowsBufferException(() -> ((RandomDataOutput<?>) instance).compareAndSwapInt(0, 1, 1));
@@ -553,7 +553,7 @@ public class EmptyBytesStoreTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void compareAndSwapLong(String type, BytesStore<?, ?> instance) {
+    void compareAndSwapLong(String type, BytesStore<?, ?> instance) {
         try {
             assumeFalse(instance instanceof NativeBytesStore);
             assertThrowsBufferException(() -> ((RandomDataOutput<?>) instance).compareAndSwapLong(0, 1L, 1L));
@@ -564,7 +564,7 @@ public class EmptyBytesStoreTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void compareAndSwapDouble(String type, BytesStore<?, ?> instance) {
+    void compareAndSwapDouble(String type, BytesStore<?, ?> instance) {
         try {
             assumeFalse(instance instanceof NativeBytesStore);
             assertThrowsBufferException(() -> ((RandomDataOutput<?>) instance).compareAndSwapDouble(0, 1d, 1d));
@@ -575,7 +575,7 @@ public class EmptyBytesStoreTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void compareAndSwapFloat(String type, BytesStore<?, ?> instance) {
+    void compareAndSwapFloat(String type, BytesStore<?, ?> instance) {
         try {
             assumeFalse(instance instanceof NativeBytesStore);
             assertThrowsBufferException(() -> ((RandomDataOutput<?>) instance).compareAndSwapFloat(0, 1f, 1f));
@@ -586,7 +586,7 @@ public class EmptyBytesStoreTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void testAndSetInt(String type, BytesStore<?, ?> instance) {
+    void testAndSetInt(String type, BytesStore<?, ?> instance) {
         try {
             assumeFalse(instance instanceof NativeBytesStore);
             assertThrowsBufferException(() -> ((RandomDataOutput<?>) instance).testAndSetInt(0, 1, 1));
@@ -597,7 +597,7 @@ public class EmptyBytesStoreTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void equalBytes(String type, BytesStore<?, ?> instance) {
+    void equalBytes(String type, BytesStore<?, ?> instance) {
         final BytesStore<?, ?> bs = BytesStore.from("A");
         final BytesStore<?, ?> emptyBs = BytesStore.from("");
         try {
@@ -615,7 +615,7 @@ public class EmptyBytesStoreTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void move(String type, BytesStore<?, ?> instance) {
+    void move(String type, BytesStore<?, ?> instance) {
         try {
             assumeFalse(instance instanceof NativeBytesStore);
             assertThrowsBufferException(() -> instance.move(0, 0, 1));
@@ -629,7 +629,7 @@ public class EmptyBytesStoreTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void addressForRead(String type, BytesStore<?, ?> instance) {
+    void addressForRead(String type, BytesStore<?, ?> instance) {
         try {
             assertThrowsBufferException(() -> instance.addressForRead(1));
             assertThrowsAny(IllegalArgumentException.class, () -> instance.addressForRead(-1));
@@ -642,7 +642,7 @@ public class EmptyBytesStoreTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void addressForWrite(String type, BytesStore<?, ?> instance) {
+    void addressForWrite(String type, BytesStore<?, ?> instance) {
         try {
             assertThrowsBufferException(() -> instance.addressForWrite(1));
             assertThrowsAny(IllegalArgumentException.class, () -> instance.addressForWrite(-1));
@@ -655,7 +655,7 @@ public class EmptyBytesStoreTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void addressForWritePosition(String type, BytesStore<?, ?> instance) {
+    void addressForWritePosition(String type, BytesStore<?, ?> instance) {
         try {
             assumeFalse(instance instanceof NativeBytesStore);
             assumeFalse(instance.bytesStore() instanceof NativeBytesStore);
@@ -667,7 +667,7 @@ public class EmptyBytesStoreTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void bytesForWrite(String type, BytesStore<?, ?> instance) {
+    void bytesForWrite(String type, BytesStore<?, ?> instance) {
         try {
             try {
                 final Bytes<?> bytes = instance.bytesForWrite();
@@ -683,7 +683,7 @@ public class EmptyBytesStoreTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void sharedMemory(String type, BytesStore<?, ?> instance) {
+    void sharedMemory(String type, BytesStore<?, ?> instance) {
         try {
             assertFalse(instance.sharedMemory());
         } finally {
@@ -693,7 +693,7 @@ public class EmptyBytesStoreTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void isImmutableBytesStore(String type, BytesStore<?, ?> instance) {
+    void isImmutableBytesStore(String type, BytesStore<?, ?> instance) {
         try {
             assertEquals(0, instance.capacity());
         } finally {
@@ -703,7 +703,7 @@ public class EmptyBytesStoreTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void testToString(String type, BytesStore<?, ?> instance) {
+    void testToString(String type, BytesStore<?, ?> instance) {
         try {
             final BytesStore<?, ?> bytes = Bytes.from("");
             final BytesStore<?, ?> bs = bytes.bytesStore();
@@ -723,7 +723,7 @@ public class EmptyBytesStoreTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void chars(String type, BytesStore<?, ?> instance) {
+    void chars(String type, BytesStore<?, ?> instance) {
         try {
             assertEquals(0, instance.chars().count());
         } finally {
@@ -733,7 +733,7 @@ public class EmptyBytesStoreTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void codePoints(String type, BytesStore<?, ?> instance) {
+    void codePoints(String type, BytesStore<?, ?> instance) {
         try {
             assertEquals(0, instance.codePoints().count());
         } finally {
@@ -743,7 +743,7 @@ public class EmptyBytesStoreTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void length(String type, BytesStore<?, ?> instance) {
+    void length(String type, BytesStore<?, ?> instance) {
         try {
             assertEquals(0, instance.length());
         } finally {
@@ -753,7 +753,7 @@ public class EmptyBytesStoreTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void charAt(String type, BytesStore<?, ?> instance) {
+    void charAt(String type, BytesStore<?, ?> instance) {
         try {
             assumeFalse(instance instanceof NativeBytesStore);
             assertThrowsAny(IllegalArgumentException.class, () -> instance.charAt(-1));
@@ -764,7 +764,7 @@ public class EmptyBytesStoreTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void subSequence(String type, BytesStore<?, ?> instance) {
+    void subSequence(String type, BytesStore<?, ?> instance) {
         try {
             assertThrowsAny(IndexOutOfBoundsException.class, () -> instance.subSequence(-1, 0));
             assertThrowsAny(IndexOutOfBoundsException.class, () -> instance.subSequence(2, 1));
@@ -776,7 +776,7 @@ public class EmptyBytesStoreTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    public void zeroOut(String type, BytesStore<?, ?> instance) {
+    void zeroOut(String type, BytesStore<?, ?> instance) {
         try {
             assertDoesNotThrow(() -> instance.zeroOut(0, 0));
         } finally {

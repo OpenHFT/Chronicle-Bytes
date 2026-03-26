@@ -16,10 +16,10 @@ import java.nio.file.Files;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.*;
 
-public class MappedBytesWrite8bitBoundaryTest extends BytesTestCommon {
+class MappedBytesWrite8bitBoundaryTest extends BytesTestCommon {
 
     @Test
-    public void write8bitAcrossChunkBoundary() throws IOException {
+    void write8bitAcrossChunkBoundary() throws IOException {
         assumeFalse(Jvm.maxDirectMemory() == 0);
         // Use page size as chunk to make boundary deterministic
         final int chunk = OS.pageSize();

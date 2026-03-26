@@ -17,10 +17,10 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Consolidated IO and copy tests for BytesInternal.
  */
-public class BytesInternalIOCopyTest extends BytesTestCommon {
+class BytesInternalIOCopyTest extends BytesTestCommon {
 
     @Test
-    public void copyFromRandomDataInputToOutputStreamAndToByteArray() throws IOException {
+    void copyFromRandomDataInputToOutputStreamAndToByteArray() throws IOException {
         final Bytes<?> src = Bytes.from("abcdef");
         final ByteArrayOutputStream bos = new ByteArrayOutputStream();
         try {
@@ -42,7 +42,7 @@ public class BytesInternalIOCopyTest extends BytesTestCommon {
     }
 
     @Test
-    public void copyInputStreamLargeAndDirectToArray() throws Exception {
+    void copyInputStreamLargeAndDirectToArray() throws Exception {
         byte[] data = new byte[2000];
         for (int i = 0; i < data.length; i++) data[i] = (byte) (i & 0x7F);
         ByteArrayInputStream bis = new ByteArrayInputStream(data);

@@ -13,10 +13,10 @@ import java.nio.file.Path;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class TempDirectoryIntegrationTest extends BytesTestCommon {
+class TempDirectoryIntegrationTest extends BytesTestCommon {
 
     @Test
-    public void createTempDirectoryUnderTargetAndCleanup() throws Exception {
+    void createTempDirectoryUnderTargetAndCleanup() throws Exception {
         final Path tempDir = IOTools.createTempDirectory("bytes-temp");
         final Path targetRoot = new File(OS.getTarget()).getAbsoluteFile().toPath().normalize();
         assertTrue(tempDir.toAbsolutePath().normalize().startsWith(targetRoot), "Temp directory should live under OS target");

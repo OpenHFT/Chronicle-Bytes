@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * It aims to test various primitive data types and their conversions
  * using the GuardedNativeBytes class.
  */
-public class GuardedNativeBytesTest {
+class GuardedNativeBytesTest {
 
     /**
      * Tests the reading and writing of various binary primitives.
@@ -25,9 +25,9 @@ public class GuardedNativeBytesTest {
      *   <li>Checks the generated hexadecimal string against an expected value.</li>
      *   <li>Reads the binary data back and checks that it matches the original input.</li>
      * </ul>
-         */
+     */
     @Test
-    public void testBinaryPrimitive() {
+    void testBinaryPrimitive() {
         final GuardedNativeBytes<?> bytes = new GuardedNativeBytes<>(new HexDumpBytes(), 256);
         try {
             bytes.writeHexDumpDescription("flag").writeBoolean(true);

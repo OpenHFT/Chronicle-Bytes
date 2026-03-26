@@ -11,10 +11,10 @@ import java.nio.charset.StandardCharsets;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class BytesCopyMatrixTest extends BytesTestCommon {
+class BytesCopyMatrixTest extends BytesTestCommon {
 
     @Test
-    public void heapToNativeStoreCopiesReadablePortion() {
+    void heapToNativeStoreCopiesReadablePortion() {
         Bytes<?> source = Bytes.allocateElasticOnHeap();
         source.append("alpha-beta");
         source.readPosition(6); // start at beta
@@ -39,7 +39,7 @@ public class BytesCopyMatrixTest extends BytesTestCommon {
     }
 
     @Test
-    public void directBytesCopyToOutputStream() throws IOException {
+    void directBytesCopyToOutputStream() throws IOException {
         Bytes<?> source = Bytes.allocateDirect(32);
         try {
             source.append("payload");

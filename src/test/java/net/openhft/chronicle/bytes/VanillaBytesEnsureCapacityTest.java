@@ -7,10 +7,10 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class VanillaBytesEnsureCapacityTest extends BytesTestCommon {
+class VanillaBytesEnsureCapacityTest extends BytesTestCommon {
 
     @Test
-    public void elasticEnsureCapacityGrows() {
+    void elasticEnsureCapacityGrows() {
         Bytes<?> b = Bytes.allocateElasticOnHeap(8);
         try {
             long rc = b.realCapacity();

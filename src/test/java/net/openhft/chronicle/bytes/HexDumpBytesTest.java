@@ -13,16 +13,16 @@ import java.io.FileNotFoundException;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.*;
 
-public class HexDumpBytesTest extends BytesTestCommon {
+class HexDumpBytesTest extends BytesTestCommon {
 
     @Test
-    public void offsetFormat() {
+    void offsetFormat() {
         doTest(new HexDumpBytes());
     }
 
     private static void doTest(HexDumpBytes bytes) {
         bytes.numberWrap(8)
-        .offsetFormat((o, b) -> b.appendBase16(o, 4));
+                .offsetFormat((o, b) -> b.appendBase16(o, 4));
         bytes.writeHexDumpDescription("hi").write(new byte[18]);
         bytes.adjustHexDumpIndentation(1);
         bytes.writeHexDumpDescription("nest").write(new byte[18]);
@@ -37,7 +37,7 @@ public class HexDumpBytesTest extends BytesTestCommon {
     }
 
     @Test
-    public void memoryMapped() throws FileNotFoundException {
+    void memoryMapped() throws FileNotFoundException {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         File file = new File(OS.getTarget(), "HexDumpBytesTest-" + System.nanoTime() + ".dat");

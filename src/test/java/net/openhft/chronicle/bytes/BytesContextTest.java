@@ -9,19 +9,19 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-public class BytesContextTest {
+class BytesContextTest {
 
     private BytesContext context;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         // Mock the BytesContext interface
         context = mock(BytesContext.class);
         doThrow(UnsupportedOperationException.class).when(context).isClosed();
     }
 
     @Test
-    public void testKey() {
+    void testKey() {
         // Setup a specific key to return
         final int expectedKey = 42;
         when(context.key()).thenReturn(expectedKey);
@@ -31,14 +31,14 @@ public class BytesContextTest {
     }
 
     @Test
-    public void testIsClosedThrowsUnsupportedOperationException() {
+    void testIsClosedThrowsUnsupportedOperationException() {
         assertThrows(UnsupportedOperationException.class, () -> {
             context.isClosed();
         });
     }
 
     @Test
-    public void testRollbackOnClose() {
+    void testRollbackOnClose() {
         try {
             context.rollbackOnClose();
         } catch (Exception e) {

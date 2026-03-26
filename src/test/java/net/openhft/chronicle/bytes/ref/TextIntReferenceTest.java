@@ -12,9 +12,9 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class TextIntReferenceTest extends BytesTestCommon {
+class TextIntReferenceTest extends BytesTestCommon {
     @Test
-    public void test() {
+    void test() {
         @NotNull NativeBytesStore<Void> nbs = NativeBytesStore.nativeStoreWithFixedCapacity(64);
         nbs.zeroOut(0, 64);
         try (@NotNull TextIntReference ref = new TextIntReference()) {

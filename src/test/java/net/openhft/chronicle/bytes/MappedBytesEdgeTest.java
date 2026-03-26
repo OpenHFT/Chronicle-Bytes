@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.*;
 
 @SuppressWarnings("OverlyStrongTypeCast")
-public class MappedBytesEdgeTest extends BytesTestCommon {
+class MappedBytesEdgeTest extends BytesTestCommon {
     private static final int CHUNK_SIZE = 262144;
 
     static Stream<Arguments> data() {
@@ -56,7 +56,7 @@ public class MappedBytesEdgeTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{2} size={0} rw={1}")
     @MethodSource("data")
-    public void testCorrectChunkResolved(int size, ReadWrite rw, String name, Consumer<Bytes<?>> doit) throws IOException {
+    void testCorrectChunkResolved(int size, ReadWrite rw, String name, Consumer<Bytes<?>> doit) throws IOException {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         final File tempMBFile = Files.createTempFile("mapped", "bytes").toFile();
@@ -80,7 +80,7 @@ public class MappedBytesEdgeTest extends BytesTestCommon {
                 // now try and write over the end of the chunk
                 checkWritePosition(bytes, doit, size, CHUNK_SIZE - 1, 0);
                 // and end of chunk plus offset
-                checkWritePosition(bytes, doit, size, CHUNK_SIZE + overlap - 1,  CHUNK_SIZE);
+                checkWritePosition(bytes, doit, size, CHUNK_SIZE + overlap - 1, CHUNK_SIZE);
 
                 if (size > 1) {
                     // load the first chunk

@@ -7,10 +7,10 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class VanillaBytesCapacityAndZeroOutTest extends BytesTestCommon {
+class VanillaBytesCapacityAndZeroOutTest extends BytesTestCommon {
 
     @Test
-    public void ensureCapacityGrowsAndZeroOutsRange() {
+    void ensureCapacityGrowsAndZeroOutsRange() {
         Bytes<?> b = Bytes.allocateElasticOnHeap(8);
         try {
             // Grow in small steps

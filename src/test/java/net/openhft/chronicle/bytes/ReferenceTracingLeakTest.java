@@ -8,10 +8,10 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class ReferenceTracingLeakTest extends BytesTestCommon {
+class ReferenceTracingLeakTest extends BytesTestCommon {
 
     @Test
-    public void leakDetectionReportsCreatedHere() throws Exception {
+    void leakDetectionReportsCreatedHere() throws Exception {
         final NativeBytes<Void> leaked = Bytes.allocateElasticDirect(64);
         try {
             assertNotNull(((AbstractReferenceCounted) leaked).createdHere(), "createdHere should be recorded for traced resources");

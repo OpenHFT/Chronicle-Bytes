@@ -16,7 +16,7 @@ import java.util.stream.LongStream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class UnsafeTextTest extends BytesTestCommon {
+class UnsafeTextTest extends BytesTestCommon {
 
     private static long blackhole;
 
@@ -28,7 +28,7 @@ public class UnsafeTextTest extends BytesTestCommon {
     }
 
     @Test
-    public void coolerAppendBase10quick() {
+    void coolerAppendBase10quick() {
         long address = OS.memory().allocate(32);
 
         try {
@@ -56,7 +56,7 @@ public class UnsafeTextTest extends BytesTestCommon {
     }
 
     @Test
-    public void testAppendDouble() {
+    void testAppendDouble() {
         // TODO FIX
         // Examples for https://github.com/OpenHFT/Chronicle-Core/issues/493
         testAppendDoubleOnce(5.959231521092378E-8, "5.959231521092378E-8");
@@ -153,7 +153,7 @@ public class UnsafeTextTest extends BytesTestCommon {
     private static final int max = 32;
 
     @Test
-    public void testRandom() {
+    void testRandom() {
         int runLength = 10_000;
         IntStream.range(0, runLength).parallel().forEach(t -> {
             Random r = new Random();
@@ -180,7 +180,7 @@ public class UnsafeTextTest extends BytesTestCommon {
     }
 
     @Test
-    public void testSequential() {
+    void testSequential() {
         IntStream.range(0, 300).parallel().forEach(t -> {
             // odd numbers have the most precision error
             int size = max + 8;

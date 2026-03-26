@@ -24,7 +24,7 @@ import static net.openhft.chronicle.bytes.Allocator.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.*;
 
-public class NativeBytesTest extends BytesTestCommon {
+class NativeBytesTest extends BytesTestCommon {
 
     static Stream<Arguments> data() {
         return Stream.of(
@@ -37,7 +37,7 @@ public class NativeBytesTest extends BytesTestCommon {
 
     @ParameterizedTest
     @MethodSource("data")
-    public void testWriteBytesWhereResizeNeeded0(Allocator alloc)
+    void testWriteBytesWhereResizeNeeded0(Allocator alloc)
             throws IORuntimeException, BufferUnderflowException, BufferOverflowException {
         assumeFalse(Jvm.maxDirectMemory() == 0);
         Bytes<?> b = alloc.elasticBytes(1);
@@ -54,7 +54,7 @@ public class NativeBytesTest extends BytesTestCommon {
 
     @ParameterizedTest
     @MethodSource("data")
-    public void testWriteBytesWhereResizeNeeded(Allocator alloc)
+    void testWriteBytesWhereResizeNeeded(Allocator alloc)
             throws IllegalArgumentException, IORuntimeException, BufferUnderflowException, BufferOverflowException {
         assumeFalse(Jvm.maxDirectMemory() == 0);
         Bytes<?> b = alloc.elasticBytes(1);
@@ -71,7 +71,7 @@ public class NativeBytesTest extends BytesTestCommon {
 
     @ParameterizedTest
     @MethodSource("data")
-    public void testAppendCharArrayNonAscii(Allocator alloc) {
+    void testAppendCharArrayNonAscii(Allocator alloc) {
         assumeFalse(Jvm.maxDirectMemory() == 0);
         Bytes<?> b = alloc.elasticBytes(4);
         b.appendUtf8('\u0394');
@@ -98,7 +98,7 @@ public class NativeBytesTest extends BytesTestCommon {
 
     @ParameterizedTest
     @MethodSource("data")
-    public void testAppendCharArrayNonAsciiToShort(Allocator alloc) {
+    void testAppendCharArrayNonAsciiToShort(Allocator alloc) {
         assumeFalse(Jvm.maxDirectMemory() == 0);
         Bytes<?> b = alloc.elasticBytes(4);
         try {
@@ -117,7 +117,7 @@ public class NativeBytesTest extends BytesTestCommon {
 
     @ParameterizedTest
     @MethodSource("data")
-    public void testResizeTwoPagesToThreePages(Allocator alloc) {
+    void testResizeTwoPagesToThreePages(Allocator alloc) {
         assumeFalse(Jvm.maxDirectMemory() == 0);
         assumeFalse(alloc == HEAP);
 
@@ -133,7 +133,7 @@ public class NativeBytesTest extends BytesTestCommon {
 
     @ParameterizedTest
     @MethodSource("data")
-    public void tryGrowBeyondByteBufferCapacity(Allocator alloc) {
+    void tryGrowBeyondByteBufferCapacity(Allocator alloc) {
         assumeFalse(Jvm.maxDirectMemory() == 0);
         assumeFalse(alloc == HEAP);
         long maxMemory = Runtime.getRuntime().maxMemory();
@@ -152,7 +152,7 @@ public class NativeBytesTest extends BytesTestCommon {
 
     @ParameterizedTest
     @MethodSource("data")
-    public void tryGrowBeyondCapacity(Allocator alloc) {
+    void tryGrowBeyondCapacity(Allocator alloc) {
         assumeFalse(Jvm.maxDirectMemory() == 0);
         final int maxCapacity = 1024;
         @NotNull Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer(128, maxCapacity);

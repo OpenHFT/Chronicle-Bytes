@@ -23,13 +23,13 @@ import java.util.stream.IntStream;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.*;
 
-public class DistributedUniqueTimeProviderTest extends BytesTestCommon {
+class DistributedUniqueTimeProviderTest extends BytesTestCommon {
 
     private DistributedUniqueTimeProvider timeProvider;
     private SetTimeProvider setTimeProvider;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         timeProvider = DistributedUniqueTimeProvider.instance();
@@ -40,7 +40,7 @@ public class DistributedUniqueTimeProviderTest extends BytesTestCommon {
     private static volatile long blackHole;
 
     @BeforeAll
-    public static void checks() throws IOException {
+    static void checks() throws IOException {
         System.setProperty("timestamp.dir", OS.getTarget());
         final File file = new File(BytesUtil.TIME_STAMP_PATH);
         deleteIfPossible(file);
@@ -51,7 +51,7 @@ public class DistributedUniqueTimeProviderTest extends BytesTestCommon {
     }
 
     @Test
-    public void currentTimeMicros() {
+    void currentTimeMicros() {
         long last = 0;
         for (int i = 0; i < 100_000; i++) {
             long time = timeProvider.currentTimeMicros();
@@ -62,7 +62,7 @@ public class DistributedUniqueTimeProviderTest extends BytesTestCommon {
     }
 
     @Test
-    public void currentTimeMicrosPerf() {
+    void currentTimeMicrosPerf() {
         long start = System.currentTimeMillis(), end;
         int count = 0;
         do {
@@ -76,7 +76,7 @@ public class DistributedUniqueTimeProviderTest extends BytesTestCommon {
     }
 
     @Test
-    public void currentTimeNanosPerf() {
+    void currentTimeNanosPerf() {
         long start = System.currentTimeMillis(), end;
         int count = 0;
         do {
@@ -90,7 +90,7 @@ public class DistributedUniqueTimeProviderTest extends BytesTestCommon {
     }
 
     @Test
-    public void currentTimeNanos() {
+    void currentTimeNanos() {
         long start = ((TimeProvider) timeProvider).currentTimeNanos();
         long last = start;
         int count = 0;
@@ -112,7 +112,7 @@ public class DistributedUniqueTimeProviderTest extends BytesTestCommon {
     }
 
     @Test
-    public void concurrentTimeNanos() {
+    void concurrentTimeNanos() {
         finishedNormally = false;
         long start0 = System.nanoTime();
         final int runTimeUS = 5_000_000;
@@ -139,7 +139,7 @@ public class DistributedUniqueTimeProviderTest extends BytesTestCommon {
     }
 
     @Test
-    public void testMonotonicallyIncreasing() {
+    void testMonotonicallyIncreasing() {
         long last = 0;
         for (int i = 0; i < 10_000; i++) {
             long now = DistributedUniqueTimeProvider.timestampFor(((TimeProvider) timeProvider).currentTimeNanos());
@@ -149,7 +149,7 @@ public class DistributedUniqueTimeProviderTest extends BytesTestCommon {
     }
 
     @Test
-    public void shouldProvideUniqueTimeAcrossThreadsMicros() throws InterruptedException {
+    void shouldProvideUniqueTimeAcrossThreadsMicros() throws InterruptedException {
         final Set<Long> allGeneratedTimestamps = ConcurrentHashMap.newKeySet();
         final int numberOfThreads = 50;
         final int factor = 50;
@@ -186,7 +186,7 @@ public class DistributedUniqueTimeProviderTest extends BytesTestCommon {
     }
 
     @Test
-    public void shouldProvideUniqueTimeAcrossThreadsNanos() throws InterruptedException {
+    void shouldProvideUniqueTimeAcrossThreadsNanos() throws InterruptedException {
         final Set<Long> allGeneratedTimestamps = ConcurrentHashMap.newKeySet();
         final int numberOfThreads = 50;
         final int factor = 50;
@@ -223,7 +223,7 @@ public class DistributedUniqueTimeProviderTest extends BytesTestCommon {
     }
 
     @Test
-    public void shouldAdvanceTimeWhenExceedingCallsPerSecond() {
+    void shouldAdvanceTimeWhenExceedingCallsPerSecond() {
         final int iterations = 1_000_001;
         long lastTimeMicros = 0;
 
@@ -236,7 +236,7 @@ public class DistributedUniqueTimeProviderTest extends BytesTestCommon {
     }
 
     @Test
-    public void currentTimeMillisShouldBeCorrect() {
+    void currentTimeMillisShouldBeCorrect() {
         int iterations = 1_000;
         long lastTimeMillis = 0;
         final long startTimeMillis = setTimeProvider.currentTimeMillis();
@@ -252,7 +252,7 @@ public class DistributedUniqueTimeProviderTest extends BytesTestCommon {
     }
 
     @Test
-    public void currentTimeMicrosShouldBeCorrect() {
+    void currentTimeMicrosShouldBeCorrect() {
         long lastTimeMicros = 0;
 
         for (int i = 0; i < 4_000; i++) {
@@ -264,7 +264,7 @@ public class DistributedUniqueTimeProviderTest extends BytesTestCommon {
     }
 
     @Test
-    public void currentTimeMicrosShouldBeCorrectBackwards() {
+    void currentTimeMicrosShouldBeCorrectBackwards() {
         long lastTimeMicros = 0;
 
         for (int i = 0; i < 4_000; i++) {
@@ -276,7 +276,7 @@ public class DistributedUniqueTimeProviderTest extends BytesTestCommon {
     }
 
     @Test
-    public void currentTimeNanosShouldBeCorrect() {
+    void currentTimeNanosShouldBeCorrect() {
         long lastTimeNanos = 0;
 
         for (int i = 0; i < 4_000; i++) {

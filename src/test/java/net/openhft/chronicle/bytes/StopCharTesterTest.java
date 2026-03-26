@@ -4,12 +4,13 @@
 package net.openhft.chronicle.bytes;
 
 import org.junit.jupiter.api.Test;
+
 import static org.junit.jupiter.api.Assertions.*;
 
-public class StopCharTesterTest {
+class StopCharTesterTest {
 
     @Test
-    public void testIsStopChar() {
+    void testIsStopChar() {
         StopCharTester tester = ch -> ch == ';' || ch == ',';
 
         assertTrue(tester.isStopChar(';'), "Semicolon should be a stop char");
@@ -18,7 +19,7 @@ public class StopCharTesterTest {
     }
 
     @Test
-    public void testEscaping() {
+    void testEscaping() {
         StopCharTester baseTester = ch -> ch == ';';
         StopCharTester escapingTester = baseTester.escaping();
 

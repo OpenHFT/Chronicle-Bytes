@@ -16,10 +16,10 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.*;
 
-public class BytesMethodWriterBuilderTest extends BytesTestCommon {
+class BytesMethodWriterBuilderTest extends BytesTestCommon {
 
     @Test
-    public void testPrimitives() {
+    void testPrimitives() {
         assumeFalse(NativeBytes.areNewGuarded());
         final Bytes<?> bytes = new HexDumpBytes();
         try {

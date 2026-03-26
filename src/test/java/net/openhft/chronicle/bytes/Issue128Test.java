@@ -10,7 +10,7 @@ import java.text.DecimalFormat;
 import static net.openhft.chronicle.bytes.UnsafeTextBytesTest.testAppendDouble;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class Issue128Test extends BytesTestCommon {
+class Issue128Test extends BytesTestCommon {
     private static final DecimalFormat DF;
 
     static {
@@ -21,7 +21,7 @@ public class Issue128Test extends BytesTestCommon {
     }
 
     @Test
-    public void testCorrect() {
+    void testCorrect() {
         Bytes<?> bytes = Bytes.allocateDirect(32);
         try {
             // odd ones are trouble.

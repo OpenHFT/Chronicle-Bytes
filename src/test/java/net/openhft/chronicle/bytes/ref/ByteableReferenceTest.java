@@ -18,7 +18,7 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SuppressWarnings("rawtypes")
-public class ByteableReferenceTest extends BytesTestCommon {
+class ByteableReferenceTest extends BytesTestCommon {
 
     static {
         AbstractCloseable.disableCloseableTracing();
@@ -43,7 +43,7 @@ public class ByteableReferenceTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("testData")
-    public void shouldMakeReservationOnCurrentStore(String className, Supplier<AbstractReference> byteableCtor) {
+    void shouldMakeReservationOnCurrentStore(String className, Supplier<AbstractReference> byteableCtor) {
         final BytesStore<?, ?> firstStore = BytesStore.nativeStore(64);
         try {
             firstStore.writeLong(0, 17);

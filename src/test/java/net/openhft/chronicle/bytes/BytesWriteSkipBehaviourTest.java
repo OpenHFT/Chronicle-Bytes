@@ -9,10 +9,10 @@ import java.nio.BufferOverflowException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class BytesWriteSkipBehaviourTest extends BytesTestCommon {
+class BytesWriteSkipBehaviourTest extends BytesTestCommon {
 
     @Test
-    public void reserveThenFillHeader() {
+    void reserveThenFillHeader() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(64);
         try {
             long start = bytes.writePosition();
@@ -34,7 +34,7 @@ public class BytesWriteSkipBehaviourTest extends BytesTestCommon {
     }
 
     @Test
-    public void backtrackOneRemovesTrailingSeparator() {
+    void backtrackOneRemovesTrailingSeparator() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(32);
         try {
             // Use length-prefixed UTF-8 so readUtf8() is valid
@@ -50,13 +50,13 @@ public class BytesWriteSkipBehaviourTest extends BytesTestCommon {
     }
 
     @Test
-    public void excessiveNegativeSkipThrows() {
+    void excessiveNegativeSkipThrows() {
         assertThrows(BufferOverflowException.class, () -> {
             Bytes<?> bytes = Bytes.allocateElasticOnHeap(16);
             try {
                 bytes.append("xx");
                 // attempt to backtrack beyond start
-                bytes.writeSkip(- (bytes.writePosition() + 2));
+                bytes.writeSkip(-(bytes.writePosition() + 2));
             } finally {
                 bytes.releaseLast();
             }

@@ -9,10 +9,10 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.*;
 
-public class UnicodeToStringTest {
+class UnicodeToStringTest {
 
     @Test
-    public void testUtfStringInAndOut() {
+    void testUtfStringInAndOut() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         Bytes<?> bytes = Bytes.elasticByteBuffer();
@@ -21,7 +21,7 @@ public class UnicodeToStringTest {
     }
 
     @Test
-    public void testUtfStringInAndOutOnHeap() {
+    void testUtfStringInAndOutOnHeap() {
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         bytes.appendUtf8("óaóó");
         assertEquals("óaóó", bytes.toUtf8String());

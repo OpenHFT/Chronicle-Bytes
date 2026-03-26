@@ -9,10 +9,10 @@ import java.nio.BufferUnderflowException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class RandomDataInputUtf8LimitedMoreTest extends BytesTestCommon {
+class RandomDataInputUtf8LimitedMoreTest extends BytesTestCommon {
 
     @Test
-    public void bufferUnderflowWhenDeclaredLengthExceedsRemaining() {
+    void bufferUnderflowWhenDeclaredLengthExceedsRemaining() {
         Bytes<?> b = Bytes.allocateElasticOnHeap(16);
         try {
             // Write stop-bit length larger than the following data

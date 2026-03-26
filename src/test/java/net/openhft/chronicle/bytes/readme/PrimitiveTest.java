@@ -11,10 +11,10 @@ import java.nio.ByteBuffer;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.*;
 
-public class PrimitiveTest extends BytesTestCommon {
+class PrimitiveTest extends BytesTestCommon {
 
     @Test
-    public void testBinaryNestedDTO() {
+    void testBinaryNestedDTO() {
         final Outer outer = new Outer("name", new Inner("key1", 1.1), new Inner("key2", 2.2));
 
         final HexDumpBytes bytes = new HexDumpBytes();
@@ -45,7 +45,7 @@ public class PrimitiveTest extends BytesTestCommon {
     }
 
     @Test
-    public void testBinaryPrimitiveDTO() {
+    void testBinaryPrimitiveDTO() {
         final PrimitiveDTO dto = new PrimitiveDTO(true,
                 (byte) 0x11,
                 (short) 0x2222,
@@ -83,7 +83,7 @@ public class PrimitiveTest extends BytesTestCommon {
     }
 
     @Test
-    public void testBinaryPrimitive() {
+    void testBinaryPrimitive() {
         final HexDumpBytes bytes = new HexDumpBytes();
         try {
             bytes.writeHexDumpDescription("flag").writeBoolean(true);
@@ -154,7 +154,7 @@ public class PrimitiveTest extends BytesTestCommon {
     }
 
     @Test
-    public void testBinaryPrimitiveOffset() {
+    void testBinaryPrimitiveOffset() {
         final Bytes<ByteBuffer> bytes = Bytes.elasticHeapByteBuffer(64);
         try {
 
@@ -206,17 +206,17 @@ public class PrimitiveTest extends BytesTestCommon {
     }
 
     @Test
-    public void testTextPrimitiveByteBuffer() {
+    void testTextPrimitiveByteBuffer() {
         doTestTextPrimitive(Bytes.elasticHeapByteBuffer(64));
     }
 
     @Test
-    public void testTextPrimitiveDirect() {
+    void testTextPrimitiveDirect() {
         doTestTextPrimitive(Bytes.allocateDirect(64));
     }
 
     @Test
-    public void testTextPrimitiveHeap() {
+    void testTextPrimitiveHeap() {
         doTestTextPrimitive(Bytes.allocateElasticOnHeap(64));
     }
 
@@ -284,7 +284,7 @@ public class PrimitiveTest extends BytesTestCommon {
         }
     }
 
-    public static final class Inner implements BytesMarshallable {
+    static final class Inner implements BytesMarshallable {
 
         String key;
         double value;

@@ -7,10 +7,10 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class DecoratedBufferOverflowExceptionTest {
+class DecoratedBufferOverflowExceptionTest {
 
     @Test
-    public void testMessage() {
+    void testMessage() {
         String expectedMessage = "Custom message describing the overflow";
         DecoratedBufferOverflowException exception = new DecoratedBufferOverflowException(expectedMessage);
 

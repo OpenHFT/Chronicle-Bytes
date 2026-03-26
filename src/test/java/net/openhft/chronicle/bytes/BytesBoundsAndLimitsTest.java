@@ -10,10 +10,10 @@ import java.nio.BufferUnderflowException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class BytesBoundsAndLimitsTest extends BytesTestCommon {
+class BytesBoundsAndLimitsTest extends BytesTestCommon {
 
     @Test
-    public void writeBeyondWriteLimitThrows() {
+    void writeBeyondWriteLimitThrows() {
         assertThrows(BufferOverflowException.class, () -> {
             Bytes<?> b = Bytes.allocateElasticOnHeap(8);
             try {
@@ -26,7 +26,7 @@ public class BytesBoundsAndLimitsTest extends BytesTestCommon {
     }
 
     @Test
-    public void readBeyondReadLimitThrows() {
+    void readBeyondReadLimitThrows() {
         assertThrows(BufferUnderflowException.class, () -> {
             Bytes<?> b = Bytes.allocateElasticOnHeap(8);
             try {
@@ -40,7 +40,7 @@ public class BytesBoundsAndLimitsTest extends BytesTestCommon {
     }
 
     @Test
-    public void clearIsClearAndZeroOut() {
+    void clearIsClearAndZeroOut() {
         Bytes<?> b = Bytes.allocateElasticOnHeap(16);
         try {
             assertTrue(b.isClear());

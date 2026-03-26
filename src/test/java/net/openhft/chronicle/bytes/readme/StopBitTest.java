@@ -9,10 +9,10 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class StopBitTest extends BytesTestCommon {
+class StopBitTest extends BytesTestCommon {
 
     @Test
-    public void testString() {
+    void testString() {
         final HexDumpBytes bytes = new HexDumpBytes();
         try {
             for (long i : new long[]{

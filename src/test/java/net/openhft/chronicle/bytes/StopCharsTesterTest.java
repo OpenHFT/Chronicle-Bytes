@@ -4,12 +4,13 @@
 package net.openhft.chronicle.bytes;
 
 import org.junit.jupiter.api.Test;
+
 import static org.junit.jupiter.api.Assertions.*;
 
-public class StopCharsTesterTest {
+class StopCharsTesterTest {
 
     @Test
-    public void testCustomStopCharsTester() {
+    void testCustomStopCharsTester() {
         StopCharsTester tester = (ch, peekNextCh) -> ch == ',' || ch == ';';
 
         assertTrue(tester.isStopChar(',', 0));

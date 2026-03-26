@@ -11,44 +11,44 @@ import java.util.function.Supplier;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class Issue464BytesStoreEmptyTest extends BytesTestCommon {
+class Issue464BytesStoreEmptyTest extends BytesTestCommon {
     @Test
-    public void emptyShouldNotAllocate() {
+    void emptyShouldNotAllocate() {
         doTest(BytesStore::empty);
     }
 
     @Test
-    public void nullByteArrayShouldNotAllocate() {
+    void nullByteArrayShouldNotAllocate() {
         assertThrows(NullPointerException.class, () -> BytesStore.wrap((byte[]) null));
     }
 
     @Test
-    public void allocateEmptyStringShouldNotAllocate() {
+    void allocateEmptyStringShouldNotAllocate() {
         doTest(() -> BytesStore.from(""));
     }
 
     @Test
-    public void emptyBytesStoreShouldNotAllocate() {
+    void emptyBytesStoreShouldNotAllocate() {
         doTest(() -> BytesStore.from(BytesStore.empty()));
     }
 
     @Test
-    public void emptyStringBuilderShouldNotAllocate() {
+    void emptyStringBuilderShouldNotAllocate() {
         doTest(() -> BytesStore.from(new StringBuilder()));
     }
 
     @Test
-    public void nullNativeStoreFromShouldNotAllocate() {
+    void nullNativeStoreFromShouldNotAllocate() {
         assertThrows(NullPointerException.class, () -> doTest(() -> BytesStore.nativeStoreFrom(null)));
     }
 
     @Test
-    public void emptyCopyFromShouldNotAllocate() {
+    void emptyCopyFromShouldNotAllocate() {
         doTest(() -> BytesStore.empty().copy());
     }
 
     @Test
-    public void emptyByteArrayShouldHaveDifferentUnderlying() {
+    void emptyByteArrayShouldHaveDifferentUnderlying() {
         BytesStore<?, byte[]> a = BytesStore.wrap(new byte[0]);
         BytesStore<?, byte[]> b = BytesStore.wrap(new byte[0]);
         assertNotSame(a, b);

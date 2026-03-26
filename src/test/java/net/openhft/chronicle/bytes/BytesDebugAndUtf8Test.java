@@ -7,10 +7,10 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class BytesDebugAndUtf8Test extends BytesTestCommon {
+class BytesDebugAndUtf8Test extends BytesTestCommon {
 
     @Test
-    public void appendAndParseUtf8AndDebugString() {
+    void appendAndParseUtf8AndDebugString() {
         Bytes<?> b = Bytes.allocateElasticOnHeap(64);
         try {
             BytesUtil.appendUtf8(b, "hello");

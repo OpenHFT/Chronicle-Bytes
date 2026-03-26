@@ -21,19 +21,19 @@ import static net.openhft.chronicle.bytes.MappedFile.mappedFile;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.*;
 
-public class MappedMemoryTest extends BytesTestCommon {
+class MappedMemoryTest extends BytesTestCommon {
 
     private static final long SHIFT = 27L;
     private static final long BLOCK_SIZE = 1L << SHIFT;
 
     @BeforeEach
-    public void directEnabled() {
+    void directEnabled() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
     }
 
     // on i7-3970X ~ 3.3 ns
     @Test
-    public void testRawMemoryMapped()
+    void testRawMemoryMapped()
             throws IOException {
 
         final ReferenceOwner test = ReferenceOwner.temporary("test");
@@ -66,7 +66,7 @@ public class MappedMemoryTest extends BytesTestCommon {
 
     // on i7-3970X ~ 6.9 ns
     @Test
-    public void withMappedNativeBytesTest()
+    void withMappedNativeBytesTest()
             throws IOException {
 
         for (int t = 0; t < 3; t++) {
@@ -90,7 +90,7 @@ public class MappedMemoryTest extends BytesTestCommon {
 
     // on i7-3970X ~ 6.0 ns
     @Test
-    public void withRawNativeBytesTess()
+    void withRawNativeBytesTess()
             throws IOException {
         final ReferenceOwner test = ReferenceOwner.temporary("test");
 
@@ -124,7 +124,7 @@ public class MappedMemoryTest extends BytesTestCommon {
     }
 
     @Test
-    public void mappedMemoryTest()
+    void mappedMemoryTest()
             throws IOException, IORuntimeException {
 
         final File tempFile = Files.createTempFile("chronicle", "q").toFile();
@@ -164,7 +164,7 @@ public class MappedMemoryTest extends BytesTestCommon {
     }
 
     @Test
-    public void mappedMemoryTestSingle()
+    void mappedMemoryTestSingle()
             throws IOException, IORuntimeException {
 
         final File tempFile = Files.createTempFile("chronicle", "q").toFile();

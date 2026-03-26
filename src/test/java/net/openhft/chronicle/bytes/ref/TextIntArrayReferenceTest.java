@@ -13,10 +13,10 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.*;
 
-public class TextIntArrayReferenceTest extends BytesTestCommon {
+class TextIntArrayReferenceTest extends BytesTestCommon {
 
     @Test
-    public void testWriteAndReadArray() {
+    void testWriteAndReadArray() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         Bytes<?> bytes = Bytes.allocateDirect(256);
@@ -37,7 +37,7 @@ public class TextIntArrayReferenceTest extends BytesTestCommon {
     }
 
     @Test
-    public void testPeakLength() {
+    void testPeakLength() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         Bytes<?> bytes = Bytes.allocateDirect(256);
@@ -49,7 +49,7 @@ public class TextIntArrayReferenceTest extends BytesTestCommon {
     }
 
     @Test
-    public void testSetValueAt() {
+    void testSetValueAt() {
         Bytes<?> bytes = Bytes.allocateDirect(256);
         try (TextIntArrayReference ref = new TextIntArrayReference()) {
             ref.bytesStore(bytes, 0, 70); // Example length, adjust based on actual implementation
@@ -60,7 +60,7 @@ public class TextIntArrayReferenceTest extends BytesTestCommon {
     }
 
     @Test
-    public void testCompareAndSetIndex1() {
+    void testCompareAndSetIndex1() {
         assumeFalse(Jvm.isArm());
         Bytes<?> bytes = Bytes.allocateDirect(256);
         try (TextIntArrayReference ref = new TextIntArrayReference()) {
@@ -75,7 +75,7 @@ public class TextIntArrayReferenceTest extends BytesTestCommon {
     }
 
     @Test
-    public void testBindValueAt() {
+    void testBindValueAt() {
         assertThrows(UnsupportedOperationException.class, () -> {
             try (TextIntArrayReference ref = new TextIntArrayReference()) {
                 IntValue value = null; // Placeholder for actual IntValue implementation
@@ -86,7 +86,7 @@ public class TextIntArrayReferenceTest extends BytesTestCommon {
     }
 
     @Test
-    public void testIsNotNullAfterBytesStore() {
+    void testIsNotNullAfterBytesStore() {
         Bytes<?> bytes = Bytes.allocateDirect(256);
         try (TextIntArrayReference ref = new TextIntArrayReference()) {
             ref.bytesStore(bytes, 0, 70); // Example length, adjust based on actual implementation
@@ -96,7 +96,7 @@ public class TextIntArrayReferenceTest extends BytesTestCommon {
     }
 
     @Test
-    public void testReset() {
+    void testReset() {
         Bytes<?> bytes = Bytes.allocateDirect(256);
         try (TextIntArrayReference ref = new TextIntArrayReference()) {
             ref.bytesStore(bytes, 0, 70); // Example length, adjust based on actual implementation
@@ -107,7 +107,7 @@ public class TextIntArrayReferenceTest extends BytesTestCommon {
     }
 
     @Test
-    public void testMaxSize() {
+    void testMaxSize() {
         Bytes<?> bytes = Bytes.allocateDirect(256);
         try (TextIntArrayReference ref = new TextIntArrayReference()) {
             ref.bytesStore(bytes, 0, 70); // Example length, adjust based on actual implementation
@@ -118,7 +118,7 @@ public class TextIntArrayReferenceTest extends BytesTestCommon {
 
     @SuppressWarnings("rawtypes")
     @Test
-    public void getSetValues() {
+    void getSetValues() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         int length = 5 * 12 + 70;

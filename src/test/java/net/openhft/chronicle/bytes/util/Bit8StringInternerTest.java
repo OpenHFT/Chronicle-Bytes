@@ -8,10 +8,10 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class Bit8StringInternerTest {
+class Bit8StringInternerTest {
 
     @Test
-    public void testGetValue() {
+    void testGetValue() {
         Bytes<byte[]> bytesStore = Bytes.from("Hello World");
         int length = (int) bytesStore.readRemaining();
 

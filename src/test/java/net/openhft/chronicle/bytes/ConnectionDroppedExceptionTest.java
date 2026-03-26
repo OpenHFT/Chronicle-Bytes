@@ -4,12 +4,13 @@
 package net.openhft.chronicle.bytes;
 
 import org.junit.jupiter.api.Test;
+
 import static org.junit.jupiter.api.Assertions.*;
 
-public class ConnectionDroppedExceptionTest {
+class ConnectionDroppedExceptionTest {
 
     @Test
-    public void testMessageConstructor() {
+    void testMessageConstructor() {
         String expectedMessage = "Connection dropped unexpectedly.";
         ConnectionDroppedException exception = new ConnectionDroppedException(expectedMessage);
 
@@ -17,7 +18,7 @@ public class ConnectionDroppedExceptionTest {
     }
 
     @Test
-    public void testCauseConstructor() {
+    void testCauseConstructor() {
         Throwable expectedCause = new RuntimeException("Underlying cause");
         ConnectionDroppedException exception = new ConnectionDroppedException(expectedCause);
 
@@ -25,7 +26,7 @@ public class ConnectionDroppedExceptionTest {
     }
 
     @Test
-    public void testMessageAndCauseConstructor() {
+    void testMessageAndCauseConstructor() {
         String expectedMessage = "Connection dropped with details.";
         Throwable expectedCause = new RuntimeException("Specific cause");
         ConnectionDroppedException exception = new ConnectionDroppedException(expectedMessage, expectedCause);

@@ -23,9 +23,9 @@ import static net.openhft.chronicle.bytes.internal.BytesInternalTest.Nested.LENG
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.*;
 
-public class BytesInternalTest extends BytesTestCommon {
+class BytesInternalTest extends BytesTestCommon {
     @Test
-    public void testParseUTF_SB1()
+    void testParseUTF_SB1()
             throws UTFDataFormatRuntimeException {
         assumeFalse(GuardedNativeBytes.areNewGuarded());
         @NotNull VanillaBytes<Void> bytes = Bytes.allocateElasticDirect();
@@ -47,7 +47,7 @@ public class BytesInternalTest extends BytesTestCommon {
     }
 
     @Test
-    public void testParseUTF8_LongString()
+    void testParseUTF8_LongString()
             throws UTFDataFormatRuntimeException {
         assumeFalse(GuardedNativeBytes.areNewGuarded());
         VanillaBytes<Void> bytes = Bytes.allocateElasticDirect();
@@ -68,7 +68,7 @@ public class BytesInternalTest extends BytesTestCommon {
     }
 
     @Test
-    public void parseLongEmpty() {
+    void parseLongEmpty() {
         for (String s : ", , .,-,x, .e".split(",")) {
             final Bytes<byte[]> from = Bytes.from(s);
             assertEquals(0, from.parseLong(), s);
@@ -77,7 +77,7 @@ public class BytesInternalTest extends BytesTestCommon {
     }
 
     @Test
-    public void parseLongNonEmpty() {
+    void parseLongNonEmpty() {
         for (String s : "0, 0, 0..,0-, 0e".split(",")) {
             final Bytes<byte[]> from = Bytes.from(s);
             assertEquals(0, from.parseLong(), s);
@@ -86,7 +86,7 @@ public class BytesInternalTest extends BytesTestCommon {
     }
 
     @Test
-    public void parseLongDecimalEmpty() {
+    void parseLongDecimalEmpty() {
         for (String s : ", , .,-,x, .e".split(",")) {
             final Bytes<byte[]> from = Bytes.from(s);
             assertEquals(0, from.parseLongDecimal(), s);
@@ -95,7 +95,7 @@ public class BytesInternalTest extends BytesTestCommon {
     }
 
     @Test
-    public void parseLongDecimalNonEmpty() {
+    void parseLongDecimalNonEmpty() {
         for (String s : "0, 0, .0,0-,0x, .0e".split(",")) {
             final Bytes<byte[]> from = Bytes.from(s);
             assertEquals(0, from.parseLongDecimal(), s);
@@ -104,7 +104,7 @@ public class BytesInternalTest extends BytesTestCommon {
     }
 
     @Test
-    public void parseDoubleEmpty() {
+    void parseDoubleEmpty() {
         for (String s : ", , .,-,x, .e".split(",")) {
             final Bytes<byte[]> from = Bytes.from(s);
             assertEquals(0, Double.compare(-0.0, from.parseDouble()), s);
@@ -113,7 +113,7 @@ public class BytesInternalTest extends BytesTestCommon {
     }
 
     @Test
-    public void parseDoubleEmptyZero() {
+    void parseDoubleEmptyZero() {
         for (String s : "0, 0, .0,0-,0x, .0e".split(",")) {
             final Bytes<byte[]> from = Bytes.from(s);
             assertEquals(0, Double.compare(0.0, from.parseDouble()), s);
@@ -122,17 +122,17 @@ public class BytesInternalTest extends BytesTestCommon {
     }
 
     @Test
-    public void parseDoubleScientificNegative() {
+    void parseDoubleScientificNegative() {
         parseDoubleScientific("6.1E-4", 6.1E-4, 5  /*0.00061 needs dp 5*/);
     }
 
     @Test
-    public void parseDoubleScientificNegative1() {
+    void parseDoubleScientificNegative1() {
         parseDoubleScientific("6.123E-4", 6.123E-4, 7 /* 0.0006123 needs dp 7 */);
     }
 
     @Test
-    public void parseDoubleScientificPositive1() {
+    void parseDoubleScientificPositive1() {
         parseDoubleScientific("6.12345E4", 6.12345E4, 1 /* 6.12345 x 10^4 = 61234.5 needs 1 */);
     }
 
@@ -149,7 +149,7 @@ public class BytesInternalTest extends BytesTestCommon {
     }
 
     @Test
-    public void testParseUTF81_LongString()
+    void testParseUTF81_LongString()
             throws UTFDataFormatRuntimeException {
         assumeFalse(GuardedNativeBytes.areNewGuarded());
         VanillaBytes<Void> bytes = Bytes.allocateElasticDirect();
@@ -175,7 +175,7 @@ public class BytesInternalTest extends BytesTestCommon {
     }
 
     @Test
-    public void testParseUTF_SB1_LongString()
+    void testParseUTF_SB1_LongString()
             throws UTFDataFormatRuntimeException {
         assumeFalse(GuardedNativeBytes.areNewGuarded());
         VanillaBytes<Void> bytes = Bytes.allocateElasticDirect();
@@ -203,7 +203,7 @@ public class BytesInternalTest extends BytesTestCommon {
     }
 
     @Test
-    public void testParse8bit_LongString()
+    void testParse8bit_LongString()
             throws Exception {
         assumeFalse(GuardedNativeBytes.areNewGuarded());
         VanillaBytes<Void> bytes = Bytes.allocateElasticDirect();
@@ -222,7 +222,7 @@ public class BytesInternalTest extends BytesTestCommon {
     }
 
     @Test
-    public void testAllParseDouble() {
+    void testAllParseDouble() {
         assumeFalse(GuardedNativeBytes.areNewGuarded());
         for (String s : "0.,1.,9.".split(",")) {
             // todo FIX for i == 7 && d == 8
@@ -239,7 +239,7 @@ public class BytesInternalTest extends BytesTestCommon {
     }
 
     @Test
-    public void testWriteUtf8LongString()
+    void testWriteUtf8LongString()
             throws IORuntimeException, BufferUnderflowException {
         assumeFalse(GuardedNativeBytes.areNewGuarded());
         VanillaBytes<Void> bytes = Bytes.allocateElasticDirect();
@@ -259,7 +259,7 @@ public class BytesInternalTest extends BytesTestCommon {
     }
 
     @Test
-    public void testAppendUtf8LongString()
+    void testAppendUtf8LongString()
             throws Exception {
         assumeFalse(GuardedNativeBytes.areNewGuarded());
         VanillaBytes<Void> bytes = Bytes.allocateElasticDirect();
@@ -280,7 +280,7 @@ public class BytesInternalTest extends BytesTestCommon {
     }
 
     @Test
-    public void testAppend8bitLongString()
+    void testAppend8bitLongString()
             throws Exception {
         assumeFalse(GuardedNativeBytes.areNewGuarded());
         VanillaBytes<Void> bytes = Bytes.allocateElasticDirect();
@@ -301,7 +301,7 @@ public class BytesInternalTest extends BytesTestCommon {
     }
 
     @Test
-    public void testParseDouble() {
+    void testParseDouble() {
         assumeFalse(GuardedNativeBytes.areNewGuarded());
         @NotNull Object[][] tests = {
                 {"0e0 ", 0.0},
@@ -325,7 +325,7 @@ public class BytesInternalTest extends BytesTestCommon {
     }
 
     @Test
-    public void testCopyAfterSkip() {
+    void testCopyAfterSkip() {
         final Bytes<byte[]> src = Bytes.from("hello again");
 
         src.readSkip(7);
@@ -336,7 +336,7 @@ public class BytesInternalTest extends BytesTestCommon {
     }
 
     @Test
-    public void testCopyToArrayAfterSkip() {
+    void testCopyToArrayAfterSkip() {
         final Bytes<byte[]> src = Bytes.from("hello again");
         src.readSkip(7);
 
@@ -358,7 +358,7 @@ public class BytesInternalTest extends BytesTestCommon {
     }
 
     @Test
-    public void bytesParseDouble_Issue85_SeededRandom() {
+    void bytesParseDouble_Issue85_SeededRandom() {
         assumeFalse(GuardedNativeBytes.areNewGuarded());
         Random random = new Random(1);
         int different = 0;
@@ -373,7 +373,7 @@ public class BytesInternalTest extends BytesTestCommon {
 
     @Test
     @Disabled(/* peformance test */)
-    public void testNoneDirectWritePerformance() {
+    void testNoneDirectWritePerformance() {
         final int size = 64;
         Bytes<?> a = Bytes.allocateElasticOnHeap(size + 8);
         Bytes<?> b = Bytes.allocateElasticOnHeap(size + 8);

@@ -11,9 +11,9 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.*;
 
-public class CASTest extends BytesTestCommon {
+class CASTest extends BytesTestCommon {
     @Test
-    public void testCAS() {
+    void testCAS() {
         assumeFalse(NativeBytes.areNewGuarded());
 
         final HexDumpBytes bytes = new HexDumpBytes()

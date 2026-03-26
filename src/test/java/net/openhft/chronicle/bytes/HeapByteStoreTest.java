@@ -9,10 +9,10 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class HeapByteStoreTest extends BytesTestCommon {
+class HeapByteStoreTest extends BytesTestCommon {
     @SuppressWarnings("rawtypes")
     @Test
-    public void testEquals() {
+    void testEquals() {
         @NotNull HeapBytesStore hbs = HeapBytesStore.wrap("Hello".getBytes());
         @NotNull HeapBytesStore hbs2 = HeapBytesStore.wrap("Hello".getBytes());
         @NotNull HeapBytesStore hbs3 = HeapBytesStore.wrap("He!!o".getBytes());
@@ -26,12 +26,12 @@ public class HeapByteStoreTest extends BytesTestCommon {
     }
 
     @Test
-    public void testElasticBytesEnsuringCapacity() {
+    void testElasticBytesEnsuringCapacity() {
         Bytes<?> bytes = Bytes.elasticHeapByteBuffer();
         long initialCapacity = bytes.realCapacity();
         bytes.clearAndPad(bytes.realCapacity() + 128);
         // ensure this succeeds even though we are above the real capacity - this should trigger resize
         bytes.prewriteInt(1);
-        assertTrue(bytes.realCapacity()> initialCapacity);
+        assertTrue(bytes.realCapacity() > initialCapacity);
     }
 }

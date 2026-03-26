@@ -10,9 +10,9 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class BinaryIntReferenceTest extends BytesTestCommon {
+class BinaryIntReferenceTest extends BytesTestCommon {
     @Test
-    public void test() {
+    void test() {
         BytesStore<?, Void> nbs = BytesStore.nativeStoreWithFixedCapacity(32);
         try (@NotNull BinaryIntReference ref = new BinaryIntReference()) {
             ref.bytesStore(nbs, 16, 4);

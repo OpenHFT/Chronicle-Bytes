@@ -19,14 +19,14 @@ import static org.junit.jupiter.api.Assumptions.*;
  * of the string pooling when the same text is written and read in different
  * ways.</p>
  */
-public class StringsTest extends BytesTestCommon {
+class StringsTest extends BytesTestCommon {
 
     /**
      * Demonstrates writing the same text in two encodings and
      * validating that the pooled instances are reused when read back.
      */
     @Test
-    public void testString() {
+    void testString() {
         assumeFalse(NativeBytes.areNewGuarded());
 
         final HexDumpBytes bytes = new HexDumpBytes();
@@ -66,7 +66,7 @@ public class StringsTest extends BytesTestCommon {
      * an exception. Both encodings are handled in the same manner.
      */
     @Test
-    public void testNull() {
+    void testNull() {
         final HexDumpBytes bytes = new HexDumpBytes();
         try {
             bytes.writeHexDumpDescription("write8bit").write8bit((String) null);

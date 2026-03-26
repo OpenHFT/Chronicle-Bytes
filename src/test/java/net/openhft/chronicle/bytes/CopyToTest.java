@@ -11,10 +11,10 @@ import java.nio.ByteBuffer;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.*;
 
-public class CopyToTest {
+class CopyToTest {
 
     @Test
-    public void testCopyFromDirectBytesIntoByteBuffer() {
+    void testCopyFromDirectBytesIntoByteBuffer() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         Bytes<?> bytesToTest = Bytes.fromDirect("THIS IS A TEST STRING");
@@ -25,7 +25,7 @@ public class CopyToTest {
     }
 
     @Test
-    public void testCopyFromHeapBytesIntoByteBuffer() {
+    void testCopyFromHeapBytesIntoByteBuffer() {
         Bytes<?> bytesToTest = Bytes.from("THIS IS A TEST STRING");
         ByteBuffer copyToDestination = ByteBuffer.allocate(128);
         copyToDestination.limit((int) bytesToTest.readLimit());

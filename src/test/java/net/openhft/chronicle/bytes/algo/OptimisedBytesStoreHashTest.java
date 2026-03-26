@@ -18,10 +18,10 @@ import static net.openhft.chronicle.bytes.algo.OptimisedBytesStoreHash.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SuppressWarnings("rawtypes")
-public class OptimisedBytesStoreHashTest extends BytesTestCommon {
+class OptimisedBytesStoreHashTest extends BytesTestCommon {
 
     @Test
-    public void testApplyAsLong() {
+    void testApplyAsLong() {
         @NotNull NativeBytes b = Bytes.allocateElasticDirect(128);
         b.writeLong(0x0102030405060708L);
         b.writeLong(0x1112131415161718L);
@@ -37,7 +37,7 @@ public class OptimisedBytesStoreHashTest extends BytesTestCommon {
     }
 
     @Test
-    public void sizeMatch() {
+    void sizeMatch() {
         @NotNull NativeBytesStore nb = NativeBytesStore.nativeStore(64);
         for (int i = 1; i <= 64; i++)
             nb.writeUnsignedByte(i - 1, i);
@@ -167,7 +167,7 @@ public class OptimisedBytesStoreHashTest extends BytesTestCommon {
     }
 
     @Test
-    public void testReadIncompleteLong() {
+    void testReadIncompleteLong() {
         Bytes<?> bs = Bytes.allocateDirect(8);
         for (int i = 1; i <= 8; i++)
             bs.writeUnsignedByte(i);

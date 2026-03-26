@@ -17,7 +17,7 @@ import static net.openhft.chronicle.bytes.Allocator.NATIVE;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.*;
 
-public class Bytes2Test extends BytesTestCommon {
+class Bytes2Test extends BytesTestCommon {
 
     static Stream<Arguments> data() {
         if (Jvm.maxDirectMemory() == 0)
@@ -32,7 +32,7 @@ public class Bytes2Test extends BytesTestCommon {
 
     @ParameterizedTest
     @MethodSource("data")
-    public void testPartialWrite(Allocator alloc1, Allocator alloc2) {
+    void testPartialWrite(Allocator alloc1, Allocator alloc2) {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         Bytes<?> from = alloc1.elasticBytes(1);
@@ -53,7 +53,7 @@ public class Bytes2Test extends BytesTestCommon {
 
     @ParameterizedTest
     @MethodSource("data")
-    public void testPartialWrite64plus(Allocator alloc1, Allocator alloc2) {
+    void testPartialWrite64plus(Allocator alloc1, Allocator alloc2) {
         assumeFalse(Jvm.maxDirectMemory() == 0);
         Bytes<?> from = alloc1.elasticBytes(1);
         Bytes<?> to = alloc2.fixedBytes(6);
@@ -71,7 +71,7 @@ public class Bytes2Test extends BytesTestCommon {
 
     @ParameterizedTest
     @MethodSource("data")
-    public void testWrite64plus(Allocator alloc1, Allocator alloc2) {
+    void testWrite64plus(Allocator alloc1, Allocator alloc2) {
         Bytes<?> from = alloc1.fixedBytes(128);
         Bytes<?> to = alloc2.fixedBytes(128);
 
@@ -88,7 +88,7 @@ public class Bytes2Test extends BytesTestCommon {
 
     @ParameterizedTest
     @MethodSource("data")
-    public void testParseToBytes(Allocator alloc1, Allocator alloc2)
+    void testParseToBytes(Allocator alloc1, Allocator alloc2)
             throws IORuntimeException {
         Bytes<?> from = alloc1.fixedBytes(64);
         Bytes<?> to = alloc2.fixedBytes(32);

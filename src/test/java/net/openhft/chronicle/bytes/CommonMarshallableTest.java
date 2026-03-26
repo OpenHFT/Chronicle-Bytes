@@ -7,10 +7,10 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class CommonMarshallableTest extends BytesTestCommon {
+class CommonMarshallableTest extends BytesTestCommon {
 
     @Test
-    public void usesSelfDescribingMessage() {
+    void usesSelfDescribingMessage() {
         assertTrue(new CommonMarshallable() {
         }.usesSelfDescribingMessage());
     }

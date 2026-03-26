@@ -23,7 +23,7 @@ import java.util.List;
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class MoreBytesTest extends BytesTestCommon {
+class MoreBytesTest extends BytesTestCommon {
 
     private static void testIndexOf(@NotNull final String sourceStr, @NotNull final String subStr) {
         final Bytes<?> source = Bytes.wrapForRead(sourceStr.getBytes(StandardCharsets.ISO_8859_1));
@@ -33,7 +33,7 @@ public class MoreBytesTest extends BytesTestCommon {
 
     @SuppressWarnings("rawtypes")
     @Test
-    public void testOneRelease() {
+    void testOneRelease() {
         int count = 0;
         List<Bytes> bytesArray = new ArrayList<>(Arrays.asList(
                 Bytes.allocateDirect(10),
@@ -64,7 +64,7 @@ public class MoreBytesTest extends BytesTestCommon {
     }
 
     @Test
-    public void testAppendLongRandomPosition() {
+    void testAppendLongRandomPosition() {
         final byte[] bytes = "00000".getBytes(ISO_8859_1);
         final ByteBuffer bb = ByteBuffer.wrap(bytes);
         final Bytes<?> to = Bytes.wrapForWrite(bb);
@@ -77,7 +77,7 @@ public class MoreBytesTest extends BytesTestCommon {
     }
 
     @Test
-    public void testAppendLongRandomPosition2() {
+    void testAppendLongRandomPosition2() {
         final byte[] bytes = "WWWWW00000".getBytes(ISO_8859_1);
         final ByteBuffer bb = ByteBuffer.wrap(bytes);
         final Bytes<?> to = Bytes.wrapForWrite(bb);
@@ -92,7 +92,7 @@ public class MoreBytesTest extends BytesTestCommon {
     }
 
     @Test
-    public void testAppendLongRandomPositionShouldThrowBufferOverflowException() {
+    void testAppendLongRandomPositionShouldThrowBufferOverflowException() {
         try {
             final byte[] bytes = "000".getBytes(ISO_8859_1);
             final ByteBuffer bb = ByteBuffer.wrap(bytes);
@@ -108,7 +108,7 @@ public class MoreBytesTest extends BytesTestCommon {
     }
 
     @Test
-    public void testAppendLongRandomPositionShouldThrowIllegalArgumentException() {
+    void testAppendLongRandomPositionShouldThrowIllegalArgumentException() {
         assertThrows(IllegalArgumentException.class, () -> {
             final byte[] bytes = "000".getBytes(ISO_8859_1);
             final ByteBuffer bb = ByteBuffer.wrap(bytes);
@@ -125,7 +125,7 @@ public class MoreBytesTest extends BytesTestCommon {
     }
 
     @Test
-    public void testAppendDoubleRandomPosition() {
+    void testAppendDoubleRandomPosition() {
         final byte[] bytes = "000000".getBytes(ISO_8859_1);
         final Bytes<?> to = Bytes.wrapForWrite(bytes);
         try {
@@ -137,7 +137,7 @@ public class MoreBytesTest extends BytesTestCommon {
     }
 
     @Test
-    public void testAppendDoubleRandomPositionShouldThrowBufferOverflowException() {
+    void testAppendDoubleRandomPositionShouldThrowBufferOverflowException() {
         final byte[] bytes = "000000".getBytes(ISO_8859_1);
         final Bytes<?> to = Bytes.wrapForWrite(bytes);
         try {
@@ -151,7 +151,7 @@ public class MoreBytesTest extends BytesTestCommon {
     }
 
     @Test
-    public void testAppendDoubleRandomPositionShouldThrowIllegalArgumentException() {
+    void testAppendDoubleRandomPositionShouldThrowIllegalArgumentException() {
         assertThrows(IllegalArgumentException.class, () -> {
             final byte[] bytes = "000000".getBytes(ISO_8859_1);
             final Bytes<?> to = Bytes.wrapForWrite(bytes);
@@ -164,7 +164,7 @@ public class MoreBytesTest extends BytesTestCommon {
     }
 
     @Test
-    public void testInvalidUTF8Scan() {
+    void testInvalidUTF8Scan() {
         int expected = 0;
         for (int i = 0x80; i <= 0xFF; i++)
             for (int j = 0x80; j <= 0xFF; j++) {
@@ -188,7 +188,7 @@ public class MoreBytesTest extends BytesTestCommon {
     }
 
     @Test
-    public void internBytes()
+    void internBytes()
             throws IORuntimeException {
         final Bytes<?> b = Bytes.from("Hello World");
         try {
@@ -213,7 +213,7 @@ public class MoreBytesTest extends BytesTestCommon {
     }
 
     @Test
-    public void testIndexOfExactMatchAfterReadSkip() {
+    void testIndexOfExactMatchAfterReadSkip() {
         final String sourceStr = " some";
         final String subStr = "some";
         final Bytes<?> source = Bytes.wrapForRead(sourceStr.getBytes(StandardCharsets.ISO_8859_1));
@@ -223,7 +223,7 @@ public class MoreBytesTest extends BytesTestCommon {
     }
 
     @Test
-    public void testIndexOfExactMatchAfterReadSkipOnSubStr() {
+    void testIndexOfExactMatchAfterReadSkipOnSubStr() {
         final String sourceStr = "some";
         final String subStr = " some";
         final Bytes<?> source = Bytes.wrapForRead(sourceStr.getBytes(StandardCharsets.ISO_8859_1));
@@ -236,47 +236,47 @@ public class MoreBytesTest extends BytesTestCommon {
     }
 
     @Test
-    public void testIndexOfAtEnd() {
+    void testIndexOfAtEnd() {
         testIndexOf("A string of some data", "ta");
     }
 
     @Test
-    public void testIndexOfEmptySubStr() {
+    void testIndexOfEmptySubStr() {
         testIndexOf("A string of some data", "");
     }
 
     @Test
-    public void testIndexOfEmptySubStrAndSource() {
+    void testIndexOfEmptySubStrAndSource() {
         testIndexOf("", "");
     }
 
     @Test
-    public void testIndexOfEmptySource() {
+    void testIndexOfEmptySource() {
         testIndexOf("", "some");
     }
 
     @Test
-    public void testIndexOfExactMatch() {
+    void testIndexOfExactMatch() {
         testIndexOf("some", "some");
     }
 
     @Test
-    public void testIndexOfIncorrectExactMatch() {
+    void testIndexOfIncorrectExactMatch() {
         testIndexOf("some", " some");
     }
 
     @Test
-    public void testIndexOfExactMatchAtChar1() {
+    void testIndexOfExactMatchAtChar1() {
         testIndexOf(" some", "some");
     }
 
     @Test
-    public void testIndexOfLastChar() {
+    void testIndexOfLastChar() {
         testIndexOf(" some", "e");
     }
 
     @Test
-    public void testCharAt() {
+    void testCharAt() {
         final Bytes<?> b = Bytes.from("Hello World");
         try {
             b.readSkip(6);
@@ -288,7 +288,7 @@ public class MoreBytesTest extends BytesTestCommon {
 
     @SuppressWarnings("rawtypes")
     @Test
-    public void testReadWithLength()
+    void testReadWithLength()
             throws BufferUnderflowException, IllegalStateException {
         final Bytes<?> b = Bytes.from("Hello World");
         final Bytes<ByteBuffer> bytesOut = Bytes.elasticHeapByteBuffer();
@@ -302,7 +302,7 @@ public class MoreBytesTest extends BytesTestCommon {
     }
 
     @Test
-    public void testStartsWith() {
+    void testStartsWith() {
         final Bytes<?> aaa = Bytes.from("aaa");
         final Bytes<?> a = Bytes.from("a");
         assertTrue(aaa.startsWith(a));
@@ -321,7 +321,7 @@ public class MoreBytesTest extends BytesTestCommon {
     }
 
     @Test
-    public void testDoesNotRequire3xCapacity() {
+    void testDoesNotRequire3xCapacity() {
         final String symbolStr = "LCOM1";
         final Bytes<?> symbol = Bytes.allocateDirect(symbolStr.length());
         symbol.clear();

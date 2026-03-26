@@ -10,10 +10,10 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class ReferenceTypesTest extends BytesTestCommon {
+class ReferenceTypesTest extends BytesTestCommon {
 
     @Test
-    public void textIntReferenceRoundTrip() {
+    void textIntReferenceRoundTrip() {
         Bytes<?> b = Bytes.allocateElasticOnHeap(128);
         TextIntReference ref = null;
         try {
@@ -43,7 +43,7 @@ public class ReferenceTypesTest extends BytesTestCommon {
     }
 
     @Test
-    public void binaryLongReferenceOps() {
+    void binaryLongReferenceOps() {
         Bytes<?> b = Bytes.allocateElasticOnHeap(16);
         try {
             BinaryLongReference ref = new BinaryLongReference();

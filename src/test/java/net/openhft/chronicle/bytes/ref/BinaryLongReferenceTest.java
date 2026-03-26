@@ -19,9 +19,9 @@ import java.io.IOException;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.*;
 
-public class BinaryLongReferenceTest extends BytesTestCommon {
+class BinaryLongReferenceTest extends BytesTestCommon {
     @Test
-    public void test() {
+    void test() {
         BytesStore<?, Void> nbs = BytesStore.nativeStoreWithFixedCapacity(32);
         try (@NotNull BinaryLongReference ref = new BinaryLongReference()) {
             ref.bytesStore(nbs, 16, 8);
@@ -50,7 +50,7 @@ public class BinaryLongReferenceTest extends BytesTestCommon {
     }
 
     @Test
-    public void testCanAssignByteStoreWithExistingOffsetNotInRange() throws IOException {
+    void testCanAssignByteStoreWithExistingOffsetNotInRange() throws IOException {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         final File tempFile = IOTools.createTempFile("testCanAssignByteStoreWithExistingOffsetNotInRange");

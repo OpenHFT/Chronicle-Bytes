@@ -14,9 +14,9 @@ import java.util.Random;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.*;
 
-public class StopBitDecimalTest extends BytesTestCommon {
+class StopBitDecimalTest extends BytesTestCommon {
     @Test
-    public void testDecimals() {
+    void testDecimals() {
         assumeFalse(NativeBytes.areNewGuarded());
 
         Bytes<ByteBuffer> bytes = Bytes.elasticHeapByteBuffer(16);

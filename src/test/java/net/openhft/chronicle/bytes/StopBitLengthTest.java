@@ -7,10 +7,10 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class StopBitLengthTest extends BytesTestCommon {
+class StopBitLengthTest extends BytesTestCommon {
 
     @Test
-    public void boundaries() {
+    void boundaries() {
         assertEquals(1, BytesUtil.stopBitLength(0));
         assertEquals(1, BytesUtil.stopBitLength(0x7F));
         assertEquals(2, BytesUtil.stopBitLength(0x80));

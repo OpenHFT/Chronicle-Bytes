@@ -10,10 +10,10 @@ import java.nio.charset.StandardCharsets;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class BytesLifecycleTest extends BytesTestCommon {
+class BytesLifecycleTest extends BytesTestCommon {
 
     @Test
-    public void slicesRespectReferenceCounts() {
+    void slicesRespectReferenceCounts() {
         Bytes<?> parent = Bytes.allocateElasticDirect();
         boolean parentReleased = false;
         try {
@@ -48,7 +48,7 @@ public class BytesLifecycleTest extends BytesTestCommon {
     }
 
     @Test
-    public void elasticHeapBytesGrowMonotonically() {
+    void elasticHeapBytesGrowMonotonically() {
         Bytes<ByteBuffer> elastic = Bytes.elasticByteBuffer(8);
         boolean expanded = false;
         try {
@@ -71,7 +71,7 @@ public class BytesLifecycleTest extends BytesTestCommon {
     }
 
     @Test
-    public void copyToCopiesReadableBytesOnly() {
+    void copyToCopiesReadableBytesOnly() {
         Bytes<?> source = Bytes.allocateElasticOnHeap();
         source.append("header-body");
         source.readPosition(7); // skip "header-"
