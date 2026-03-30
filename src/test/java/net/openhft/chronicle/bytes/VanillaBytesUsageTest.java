@@ -54,5 +54,4 @@ class VanillaBytesUsageTest extends BytesTestCommon {
             storeB.releaseLast();
         }
     }
-
 }

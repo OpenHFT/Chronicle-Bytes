@@ -37,5 +37,4 @@ class EscapingStopCharTesterTest {
         assertFalse(tester.isStopChar('\\'), "Second escape character should not be stop char");
         assertTrue(tester.isStopChar('x'), "Non-escaped character following escapes should be considered stop char if it matches baseTester");
     }
-
 }
