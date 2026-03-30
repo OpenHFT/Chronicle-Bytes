@@ -15,15 +15,11 @@ class BytesInternalSubBytesErrorsTest extends BytesTestCommon {
 
     @Test
     void subBytesThrowsWhenLengthTooLarge() {
-        assertThrows(BufferUnderflowException.class, () -> {
-            Bytes<?> src = Bytes.from("abc");
-            try {
-                // request a sub view longer than remaining
-                BytesInternal.subBytes(src, 0, 10);
-            } finally {
-                src.releaseLast();
-            }
-        });
+        Bytes<?> src = Bytes.from("abc");
+        try {
+            assertThrows(BufferUnderflowException.class, () -> BytesInternal.subBytes(src, 0, 10));
+        } finally {
+            src.releaseLast();
+        }
     }
 }
-

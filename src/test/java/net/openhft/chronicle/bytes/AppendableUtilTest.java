@@ -126,8 +126,8 @@ class AppendableUtilTest extends BytesTestCommon {
         assertEquals("test", sb.toString());
     }
 
-    @SuppressWarnings("rawtypes")
     @Test
+    @SuppressWarnings("rawtypes")
     void setLength() {
         StringBuilder sb = new StringBuilder("hello world");
         AppendableUtil.setLength(sb, 5);

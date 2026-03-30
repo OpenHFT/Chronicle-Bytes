@@ -14,29 +14,25 @@ class BytesBoundsAndLimitsTest extends BytesTestCommon {
 
     @Test
     void writeBeyondWriteLimitThrows() {
-        assertThrows(BufferOverflowException.class, () -> {
-            Bytes<?> b = Bytes.allocateElasticOnHeap(8);
-            try {
-                b.writeLimit(4);
-                b.writeLong(1L); // 8 bytes > writeLimit
-            } finally {
-                b.releaseLast();
-            }
-        });
+        Bytes<?> b = Bytes.allocateElasticOnHeap(8);
+        try {
+            b.writeLimit(4);
+            assertThrows(BufferOverflowException.class, () -> b.writeLong(1L));
+        } finally {
+            b.releaseLast();
+        }
     }
 
     @Test
     void readBeyondReadLimitThrows() {
-        assertThrows(BufferUnderflowException.class, () -> {
-            Bytes<?> b = Bytes.allocateElasticOnHeap(8);
-            try {
-                b.writeInt(123);
-                b.readPosition(0);
-                b.readLong(); // 8 bytes > available 4
-            } finally {
-                b.releaseLast();
-            }
-        });
+        Bytes<?> b = Bytes.allocateElasticOnHeap(8);
+        try {
+            b.writeInt(123);
+            b.readPosition(0);
+            assertThrows(BufferUnderflowException.class, b::readLong);
+        } finally {
+            b.releaseLast();
+        }
     }
 
     @Test

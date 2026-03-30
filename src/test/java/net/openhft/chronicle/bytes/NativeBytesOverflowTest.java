@@ -17,44 +17,38 @@ class NativeBytesOverflowTest extends BytesTestCommon {
 
     @Test
     void testExceedWriteLimitNativeWriteBytes() {
-        assertThrows(BufferOverflowException.class, () -> {
-            BytesStore<?, ByteBuffer> store = wrap(ByteBuffer.allocate(128));
-            Bytes<?> nb = new NativeBytes<>(store);
-            try {
-                nb.writeLimit(2).writePosition(0);
-                nb.writeLong(10L);
-            } finally {
-                nb.releaseLast();
-            }
-        });
+        BytesStore<?, ByteBuffer> store = wrap(ByteBuffer.allocate(128));
+        Bytes<?> nb = new NativeBytes<>(store);
+        try {
+            nb.writeLimit(2).writePosition(0);
+            assertThrows(BufferOverflowException.class, () -> nb.writeLong(10L));
+        } finally {
+            nb.releaseLast();
+        }
     }
 
     @Test
     void testExceedWriteLimitGuardedBytes() {
-        assertThrows(BufferOverflowException.class, () -> {
-            Bytes<?> guardedNativeBytes = new GuardedNativeBytes<>(wrap(ByteBuffer.allocate(128)), 128);
-            try {
-                guardedNativeBytes.writeLimit(2).writePosition(0);
-                guardedNativeBytes.writeLong(10L);
-            } finally {
-                guardedNativeBytes.releaseLast();
-            }
-        });
+        Bytes<?> guardedNativeBytes = new GuardedNativeBytes<>(wrap(ByteBuffer.allocate(128)), 128);
+        try {
+            guardedNativeBytes.writeLimit(2).writePosition(0);
+            assertThrows(BufferOverflowException.class, () -> guardedNativeBytes.writeLong(10L));
+        } finally {
+            guardedNativeBytes.releaseLast();
+        }
     }
 
     @Test
     void testElastic() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
-        assertThrows(BufferOverflowException.class, () -> {
-            Bytes<?> bytes = Bytes.elasticByteBuffer();
-            try {
-                bytes.writeLimit(2).writePosition(0);
-                bytes.writeLong(10L);
-            } finally {
-                bytes.releaseLast();
-            }
-        });
+        Bytes<?> bytes = Bytes.elasticByteBuffer();
+        try {
+            bytes.writeLimit(2).writePosition(0);
+            assertThrows(BufferOverflowException.class, () -> bytes.writeLong(10L));
+        } finally {
+            bytes.releaseLast();
+        }
     }
 
     @Test

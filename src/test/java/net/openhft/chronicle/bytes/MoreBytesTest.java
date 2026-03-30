@@ -31,8 +31,8 @@ class MoreBytesTest extends BytesTestCommon {
         assertEquals(sourceStr.indexOf(subStr), source.indexOf(subBytes));
     }
 
-    @SuppressWarnings("rawtypes")
     @Test
+    @SuppressWarnings("rawtypes")
     void testOneRelease() {
         int count = 0;
         List<Bytes> bytesArray = new ArrayList<>(Arrays.asList(
@@ -152,15 +152,13 @@ class MoreBytesTest extends BytesTestCommon {
 
     @Test
     void testAppendDoubleRandomPositionShouldThrowIllegalArgumentException() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            final byte[] bytes = "000000".getBytes(ISO_8859_1);
-            final Bytes<?> to = Bytes.wrapForWrite(bytes);
-            try {
-                to.append(0, 33333.14, 2, 6);
-            } finally {
-                to.releaseLast();
-            }
-        });
+        final byte[] bytes = "000000".getBytes(ISO_8859_1);
+        final Bytes<?> to = Bytes.wrapForWrite(bytes);
+        try {
+            assertThrows(IllegalArgumentException.class, () -> to.append(0, 33333.14, 2, 6));
+        } finally {
+            to.releaseLast();
+        }
     }
 
     @Test
@@ -286,8 +284,8 @@ class MoreBytesTest extends BytesTestCommon {
         }
     }
 
-    @SuppressWarnings("rawtypes")
     @Test
+    @SuppressWarnings("rawtypes")
     void testReadWithLength()
             throws BufferUnderflowException, IllegalStateException {
         final Bytes<?> b = Bytes.from("Hello World");

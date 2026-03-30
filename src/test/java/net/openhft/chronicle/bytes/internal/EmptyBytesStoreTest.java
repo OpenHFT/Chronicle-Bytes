@@ -24,7 +24,6 @@ import static net.openhft.chronicle.bytes.Bytes.elasticHeapByteBuffer;
 import static net.openhft.chronicle.core.Jvm.uncheckedCast;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.*;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 class EmptyBytesStoreTest extends BytesTestCommon {
 

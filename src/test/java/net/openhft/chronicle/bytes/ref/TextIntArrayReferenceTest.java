@@ -116,8 +116,8 @@ class TextIntArrayReferenceTest extends BytesTestCommon {
         bytes.releaseLast();
     }
 
-    @SuppressWarnings("rawtypes")
     @Test
+    @SuppressWarnings("rawtypes")
     void getSetValues() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 

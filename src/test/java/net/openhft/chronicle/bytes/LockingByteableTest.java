@@ -19,12 +19,10 @@ import static org.junit.jupiter.api.Assumptions.*;
 class LockingByteableTest extends BytesTestCommon {
     @Test
     void notLockable() throws IOException {
-        assertThrows(UnsupportedOperationException.class, () -> {
-            try (BinaryLongReference blr = new BinaryLongReference()) {
-                blr.bytesStore(Bytes.from("Hello World"), 0, 8);
-                blr.lock(false);
-            }
-        });
+        try (BinaryLongReference blr = new BinaryLongReference()) {
+            blr.bytesStore(Bytes.from("Hello World"), 0, 8);
+            assertThrows(UnsupportedOperationException.class, () -> blr.lock(false));
+        }
     }
 
     @Test

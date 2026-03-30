@@ -173,8 +173,8 @@ class BytesUtilTest extends BytesTestCommon {
         assertTrue(BytesUtil.equals(a, aa));
     }
 
-    @SuppressWarnings({"deprecation", "removal"})
     @Test
+    @SuppressWarnings({"deprecation", "removal"})
     void equals_equivalentObjects() {
         // Intentional boxing to create two equivalent but distinct objects
         assertTrue(BytesUtil.equals(new Integer(1), new Integer(1)));

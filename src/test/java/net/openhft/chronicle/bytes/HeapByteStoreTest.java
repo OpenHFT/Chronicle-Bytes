@@ -10,8 +10,8 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 class HeapByteStoreTest extends BytesTestCommon {
-    @SuppressWarnings("rawtypes")
     @Test
+    @SuppressWarnings("rawtypes")
     void testEquals() {
         @NotNull HeapBytesStore hbs = HeapBytesStore.wrap("Hello".getBytes());
         @NotNull HeapBytesStore hbs2 = HeapBytesStore.wrap("Hello".getBytes());

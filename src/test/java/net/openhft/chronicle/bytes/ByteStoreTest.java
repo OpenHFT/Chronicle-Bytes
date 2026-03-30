@@ -657,14 +657,12 @@ class ByteStoreTest extends BytesTestCommon {
 
     @Test
     void testClearAndPadTooMuch() {
-        assertThrows(DecoratedBufferOverflowException.class, () -> {
-            final Bytes<?> b = bytesStore.bytesForWrite();
-            try {
-                b.clearAndPad(SIZE + 1);
-            } finally {
-                b.releaseLast();
-            }
-        });
+        final Bytes<?> b = bytesStore.bytesForWrite();
+        try {
+            assertThrows(DecoratedBufferOverflowException.class, () -> b.clearAndPad(SIZE + 1));
+        } finally {
+            b.releaseLast();
+        }
     }
 
     @Test

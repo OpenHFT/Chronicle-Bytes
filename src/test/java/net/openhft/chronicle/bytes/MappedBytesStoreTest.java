@@ -52,15 +52,12 @@ class MappedBytesStoreTest extends BytesTestCommon implements ReferenceOwner {
 
     @Test
     void testWriteAfterClose() {
-        assertThrows(IllegalStateException.class, () -> {
-            try {
-                mappedBytesStore.release(this);
-                mappedBytesStore.release(ReferenceOwner.INIT);
-                mappedBytesStore.writeByte(0, (byte) 1);
-            } finally {
-                mappedBytesStore = null;
-            }
-        });
+        mappedBytesStore.release(this);
+        try {
+            assertThrows(IllegalStateException.class, () -> mappedBytesStore.release(ReferenceOwner.INIT));
+        } finally {
+            mappedBytesStore = null;
+        }
     }
 
     @Test

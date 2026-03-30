@@ -368,15 +368,13 @@ class BytesTest extends BytesTestCommon {
     void testPartialWriteArray(String ignored, Allocator alloc1) {
         this.alloc1 = alloc1;
         assumeFalse(alloc1 == HEX_DUMP);
-        assertThrows(BufferOverflowException.class, () -> {
-            @NotNull byte[] array = "Hello World".getBytes(ISO_8859_1);
-            Bytes<?> to = alloc1.fixedBytes(6);
-            try {
-                to.write(array);
-            } finally {
-                postTest(to);
-            }
-        });
+        @NotNull byte[] array = "Hello World".getBytes(ISO_8859_1);
+        Bytes<?> to = alloc1.fixedBytes(6);
+        try {
+            assertThrows(BufferOverflowException.class, () -> to.write(array));
+        } finally {
+            postTest(to);
+        }
     }
 
     @ParameterizedTest(name = "{0}")
@@ -496,14 +494,12 @@ class BytesTest extends BytesTestCommon {
     void testExpectNegativeOffsetAbsoluteWriteOnFixedBytesThrowsIllegalArgumentException(String ignored, Allocator alloc1) {
         this.alloc1 = alloc1;
         assumeFalse(alloc1 == HEX_DUMP);
-        assertThrows(IllegalArgumentException.class, () -> {
-            Bytes<?> bytes = alloc1.fixedBytes(4);
-            try {
-                bytes.writeInt(-1, 1);
-            } finally {
-                postTest(bytes);
-            }
-        });
+        Bytes<?> bytes = alloc1.fixedBytes(4);
+        try {
+            assertThrows(IllegalArgumentException.class, () -> bytes.writeInt(-1, 1));
+        } finally {
+            postTest(bytes);
+        }
     }
 
     @ParameterizedTest(name = "{0}")
@@ -511,14 +507,12 @@ class BytesTest extends BytesTestCommon {
     void testExpectNegativeOffsetAbsoluteWriteOnFixedBytesOfInsufficientCapacityThrowsIllegalArgumentException(String ignored, Allocator alloc1) {
         this.alloc1 = alloc1;
         assumeFalse(alloc1 == HEX_DUMP);
-        assertThrows(IllegalArgumentException.class, () -> {
-            Bytes<?> bytes = alloc1.fixedBytes(1);
-            try {
-                bytes.writeInt(-1, 1);
-            } finally {
-                postTest(bytes);
-            }
-        });
+        Bytes<?> bytes = alloc1.fixedBytes(1);
+        try {
+            assertThrows(IllegalArgumentException.class, () -> bytes.writeInt(-1, 1));
+        } finally {
+            postTest(bytes);
+        }
     }
 
     @ParameterizedTest(name = "{0}")

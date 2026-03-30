@@ -146,11 +146,10 @@ class AbstractBytesTest {
 
     @Test
     void readLong_WithInsufficientDataThrowsException() {
-        assertThrows(BufferUnderflowException.class, () -> {
-            doThrow(new BufferUnderflowException()).when(mockBytesStore).readLong(anyLong());
-            bytes.lenient(false);
-            bytes.readLong();
-        });
+        doThrow(new BufferUnderflowException()).when(mockBytesStore).readLong(anyLong());
+        bytes.lenient(false);
+
+        assertThrows(BufferUnderflowException.class, bytes::readLong);
     }
 
     @Test

@@ -209,8 +209,8 @@ class NativeBytesStoreTest extends BytesTestCommon {
         }
     }
 
-    @SuppressWarnings({"rawtypes", "unchecked"})
     @Test
+    @SuppressWarnings({"rawtypes", "unchecked"})
     void perfCheckSum()
             throws IORuntimeException {
         final NativeBytesStore[] nbs = {
@@ -260,8 +260,8 @@ class NativeBytesStoreTest extends BytesTestCommon {
         }
     }
 
-    @SuppressWarnings("rawtypes")
     @Test
+    @SuppressWarnings("rawtypes")
     void testEquals() {
         @NotNull NativeBytesStore hbs = NativeBytesStore.from("Hello".getBytes());
         @NotNull NativeBytesStore hbs2 = NativeBytesStore.from("Hello".getBytes());

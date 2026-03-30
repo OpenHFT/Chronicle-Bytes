@@ -97,10 +97,10 @@ class CopyBytesTest extends BytesTestCommon {
     @Test
     void testCanCopyBytesFromMappedBytesSingle3()
             throws Exception {
-        assertThrows(BufferOverflowException.class, () -> {
-            File bytes = Files.createTempFile("mapped-test", "bytes").toFile();
-            bytes.deleteOnExit();
-            doTest(MappedBytes.singleMappedBytes(bytes, 32 << 10), (64 << 10) - 8);
-        });
+        File bytes = Files.createTempFile("mapped-test", "bytes").toFile();
+        bytes.deleteOnExit();
+
+        assertThrows(BufferOverflowException.class,
+                () -> doTest(MappedBytes.singleMappedBytes(bytes, 32 << 10), (64 << 10) - 8));
     }
 }

@@ -12,8 +12,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class Bytes4Test extends BytesTestCommon {
 
-    @Disabled("https://github.com/OpenHFT/Chronicle-Bytes/issues/186")
     @Test
+    @Disabled("https://github.com/OpenHFT/Chronicle-Bytes/issues/186")
     void segFault() {
         {
             byte[] arr = new byte[4];
