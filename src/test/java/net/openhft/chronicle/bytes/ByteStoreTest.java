@@ -8,9 +8,10 @@ import net.openhft.chronicle.bytes.util.DecoratedBufferOverflowException;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,8 +27,8 @@ import java.util.zip.GZIPOutputStream;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static net.openhft.chronicle.core.io.ReferenceOwner.INIT;
-import static org.junit.Assert.*;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 public class ByteStoreTest extends BytesTestCommon {
 
@@ -35,13 +36,14 @@ public class ByteStoreTest extends BytesTestCommon {
     private Bytes<?> bytes;
     private BytesStore<?, ?> bytesStore;
 
+    @AfterEach
     @Override
     public void afterChecks() {
         bytes.releaseLast();
         super.afterChecks();
     }
 
-    @Before
+    @BeforeEach
     public void beforeTest() {
         bytesStore = BytesStore.wrap(ByteBuffer.allocate(SIZE).order(ByteOrder.nativeOrder()));
         bytes = bytesStore.bytesForWrite();
@@ -65,7 +67,7 @@ public class ByteStoreTest extends BytesTestCommon {
 
     @Test
     public void testCAS() {
-        assumeFalse("TODO FIX", Jvm.isArm());
+        assumeFalse(Jvm.isArm(), "TODO FIX");
         final BytesStore<?, ?> bytes = BytesStore.wrap(ByteBuffer.allocate(100));
         bytes.compareAndSwapLong(0, 0L, 1L);
         assertEquals(1L, bytes.readLong(0));
@@ -92,25 +94,25 @@ public class ByteStoreTest extends BytesTestCommon {
         @NotNull byte[] bytes = new byte[(int) this.bytes.capacity()];
         this.bytes.read(bytes);
         for (int i = 0; i < this.bytes.capacity(); i++)
-            Assert.assertEquals((byte) i, bytes[i]);
+            Assertions.assertEquals((byte) i, bytes[i]);
     }
 
     @Test
     public void testCompareAndSetInt() {
-        Assert.assertTrue(bytes.compareAndSwapInt(0, 0, 1));
-        Assert.assertFalse(bytes.compareAndSwapInt(0, 0, 1));
-        Assert.assertTrue(bytes.compareAndSwapInt(8, 0, 1));
-        Assert.assertTrue(bytes.compareAndSwapInt(0, 1, 2));
+        Assertions.assertTrue(bytes.compareAndSwapInt(0, 0, 1));
+        Assertions.assertFalse(bytes.compareAndSwapInt(0, 0, 1));
+        Assertions.assertTrue(bytes.compareAndSwapInt(8, 0, 1));
+        Assertions.assertTrue(bytes.compareAndSwapInt(0, 1, 2));
     }
 
     @Test
     public void testCompareAndSetLong() {
-        assumeFalse("TODO FIX", Jvm.isArm());
+        assumeFalse(Jvm.isArm(), "TODO FIX");
 
-        Assert.assertTrue(bytes.compareAndSwapLong(0L, 0L, 1L));
-        Assert.assertFalse(bytes.compareAndSwapLong(0L, 0L, 1L));
-        Assert.assertTrue(bytes.compareAndSwapLong(8L, 0L, 1L));
-        Assert.assertTrue(bytes.compareAndSwapLong(0L, 1L, 2L));
+        Assertions.assertTrue(bytes.compareAndSwapLong(0L, 0L, 1L));
+        Assertions.assertFalse(bytes.compareAndSwapLong(0L, 0L, 1L));
+        Assertions.assertTrue(bytes.compareAndSwapLong(8L, 0L, 1L));
+        Assertions.assertTrue(bytes.compareAndSwapLong(0L, 1L, 2L));
     }
 
     @Test
@@ -183,13 +185,13 @@ public class ByteStoreTest extends BytesTestCommon {
 
         bytes.readPosition(0);
         final StringBuilder sb = new StringBuilder();
-        Assert.assertFalse(bytes.readUtf8(sb));
+        Assertions.assertFalse(bytes.readUtf8(sb));
         for (String word : words) {
-            Assert.assertTrue(bytes.readUtf8(sb));
-            Assert.assertEquals(word, sb.toString());
+            Assertions.assertTrue(bytes.readUtf8(sb));
+            Assertions.assertEquals(word, sb.toString());
         }
         assertTrue(bytes.readUtf8(sb));
-        Assert.assertEquals("", sb.toString());
+        Assertions.assertEquals("", sb.toString());
     }
 
     @Test
@@ -218,9 +220,9 @@ public class ByteStoreTest extends BytesTestCommon {
         final ByteBuffer bb2 = ByteBuffer.wrap(bytes2);
         this.bytes.read(bb2);
 
-        Assert.assertEquals(bytes.length, bb2.position());
+        Assertions.assertEquals(bytes.length, bb2.position());
         final byte[] bytes2b = Arrays.copyOf(bytes2, bytes.length);
-        Assert.assertArrayEquals(bytes, bytes2b);
+        Assertions.assertArrayEquals(bytes, bytes2b);
     }
 
     @Test
@@ -357,7 +359,7 @@ public class ByteStoreTest extends BytesTestCommon {
 
     @Test
     public void testReadWriteThreadSafeLong() {
-        assumeFalse("TODO FIX", Jvm.isArm());
+        assumeFalse(Jvm.isArm(), "TODO FIX");
         for (long i = 0; i < 32; i += 8)
             bytes.writeOrderedLong(i, i);
         bytes.writePosition(32);
@@ -428,8 +430,8 @@ public class ByteStoreTest extends BytesTestCommon {
                 final byte[] bytes = new byte[12];
                 for (int i = 0; i < 12; i++)
                     bytes[i] = (byte) in.read();
-                Assert.assertEquals(-1, in.read());
-                Assert.assertEquals("Hello world\n", new String(bytes));
+                Assertions.assertEquals(-1, in.read());
+                Assertions.assertEquals("Hello world\n", new String(bytes));
             }
         } finally {
             bytes2.releaseLast();
@@ -484,7 +486,7 @@ public class ByteStoreTest extends BytesTestCommon {
 
     @Test
     public void testAddAndGetLongNative() {
-        assumeFalse("TODO FIX", Jvm.isArm());
+        assumeFalse(Jvm.isArm(), "TODO FIX");
         final BytesStore<?, ?> bytesStore2 = BytesStore.nativeStore(128);
         try {
             checkAddAndGetLong();
@@ -495,7 +497,7 @@ public class ByteStoreTest extends BytesTestCommon {
 
     @Test
     public void testAddAndGetLong() {
-        assumeFalse("TODO FIX", Jvm.isArm());
+        assumeFalse(Jvm.isArm(), "TODO FIX");
         final BytesStore<?, ?> bytesStore2 = BytesStore.wrap(new byte[128]);
         try {
             checkAddAndGetLong();
@@ -640,7 +642,7 @@ public class ByteStoreTest extends BytesTestCommon {
             bytesStoreCopy.writePosition(destOffset);
             try {
                 long bytesCopied = bytesStoreOriginal.copyTo(bytesStoreCopy);
-                assertEquals("Unexpected number of bytes copied", SIZE - destOffset, bytesCopied);
+                assertEquals(SIZE - destOffset, bytesCopied, "Unexpected number of bytes copied");
                 for (int i = 0; i < bytesCopied; i++)
                     assertEquals(bytesStoreOriginal.readByte(i), bytesStoreCopy.readByte(i + destOffset));
             } finally {
@@ -656,14 +658,16 @@ public class ByteStoreTest extends BytesTestCommon {
         assertEquals(0, BytesStore.empty().realCapacity());
     }
 
-    @Test(expected = DecoratedBufferOverflowException.class)
+    @Test
     public void testClearAndPadTooMuch() {
-        final Bytes<?> b = bytesStore.bytesForWrite();
-        try {
-            b.clearAndPad(SIZE + 1);
-        } finally {
-            b.releaseLast();
-        }
+        assertThrows(DecoratedBufferOverflowException.class, () -> {
+            final Bytes<?> b = bytesStore.bytesForWrite();
+            try {
+                b.clearAndPad(SIZE + 1);
+            } finally {
+                b.releaseLast();
+            }
+        });
     }
 
     @Test

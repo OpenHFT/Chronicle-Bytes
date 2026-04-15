@@ -7,9 +7,8 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.annotation.UsedViaReflection;
 import net.openhft.chronicle.core.io.IOTools;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.File;
 import java.io.IOException;
@@ -19,25 +18,23 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.function.Consumer;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 @SuppressWarnings("OverlyStrongTypeCast")
-@RunWith(Parameterized.class)
 public class MappedBytesEdgeTest extends BytesTestCommon {
     private static final int CHUNK_SIZE = 262144;
-    private final int size;
-    private final ReadWrite rw;
-    private final Consumer<Bytes<?>> doit;
+    private int size;
+    private ReadWrite rw;
+    private Consumer<Bytes<?>> doit;
 
     @UsedViaReflection
-    public MappedBytesEdgeTest(int size, ReadWrite rw, String name, Consumer<Bytes<?>> doit) {
+    public void initMappedBytesEdgeTest(int size, ReadWrite rw, String name, Consumer<Bytes<?>> doit) {
         this.size = size;
         this.rw = rw;
         this.doit = doit;
     }
 
-    @Parameterized.Parameters(name = "{2} size={0} rw={1}")
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][]{
                 {1, ReadWrite.PEEK, "peekUnsignedByte", (Consumer<Bytes<?>>) (StreamingDataInput::peekUnsignedByte)},
@@ -68,8 +65,10 @@ public class MappedBytesEdgeTest extends BytesTestCommon {
         return bytes;
     }
 
-    @Test
-    public void testCorrectChunkResolved() throws IOException {
+    @MethodSource("data")
+    @ParameterizedTest(name = "{2} size={0} rw={1}")
+    public void testCorrectChunkResolved(int size, ReadWrite rw, String name, Consumer<Bytes<?>> doit) throws IOException {
+        initMappedBytesEdgeTest(size, rw, name, doit);
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         final File tempMBFile = Files.createTempFile("mapped", "bytes").toFile();

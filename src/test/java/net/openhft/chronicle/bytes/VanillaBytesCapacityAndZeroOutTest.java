@@ -3,9 +3,11 @@
  */
 package net.openhft.chronicle.bytes;
 
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import static org.junit.Assert.*;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class VanillaBytesCapacityAndZeroOutTest extends BytesTestCommon {
 
@@ -18,7 +20,7 @@ public class VanillaBytesCapacityAndZeroOutTest extends BytesTestCommon {
                 b.append('X');
             }
             long capAfter = b.capacity();
-            assertTrue("Expected capacity to grow beyond initial", capAfter >= 10);
+            assertTrue(capAfter >= 10, "Expected capacity to grow beyond initial");
 
             // zeroOut a large range including unwritten tail
             long start = 2;

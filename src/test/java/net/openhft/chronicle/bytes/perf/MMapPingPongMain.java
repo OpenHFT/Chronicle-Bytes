@@ -11,7 +11,7 @@ import net.openhft.chronicle.core.OS;
 import java.io.File;
 import java.io.FileNotFoundException;
 
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /*
 on the same Ryzen 9 5950X

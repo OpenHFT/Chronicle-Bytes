@@ -7,23 +7,21 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.time.LongTime;
 import net.openhft.chronicle.core.time.TimeProvider;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.stream.IntStream;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 public class MappedUniqueTimeProviderTest extends BytesTestCommon {
 
     @SuppressWarnings("EmptyMethod")
-    @Before
     @BeforeEach
     public void threadDump() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
@@ -31,7 +29,7 @@ public class MappedUniqueTimeProviderTest extends BytesTestCommon {
         super.threadDump();
     }
 
-    @BeforeClass
+    @BeforeAll
     public static void checks() throws IOException {
         try {
             DistributedUniqueTimeProviderTest.checks();
@@ -159,8 +157,8 @@ public class MappedUniqueTimeProviderTest extends BytesTestCommon {
                 });
         long time0 = System.nanoTime() - start0;
         System.out.printf("Time: %,d ms%n", time0 / 1_000_000);
-        assertTrue("Jvm.isCodeCoverage() = " + Jvm.isCodeCoverage(),
-                Jvm.isArm() || Jvm.isCodeCoverage()
-                        || time0 < runTimeUS * 1000L);
+        assertTrue(Jvm.isArm() || Jvm.isCodeCoverage()
+                        || time0 < runTimeUS * 1000L,
+                "Jvm.isCodeCoverage() = " + Jvm.isCodeCoverage());
     }
 }

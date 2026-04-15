@@ -4,12 +4,13 @@
 package net.openhft.chronicle.bytes.algo;
 
 import net.openhft.chronicle.bytes.BytesStore;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.nio.BufferUnderflowException;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class XxHashTest {
 
@@ -18,7 +19,7 @@ public class XxHashTest {
         BytesStore<?, ?> emptyBytesStore = BytesStore.empty();
         long hash = XxHash.INSTANCE.applyAsLong(emptyBytesStore);
         // Assert not throwing an exception and returns a deterministic value
-        Assert.assertNotNull(hash);
+        Assertions.assertNotNull(hash);
     }
 
     @Test
@@ -41,13 +42,15 @@ public class XxHashTest {
         long partialHash = XxHash.INSTANCE.applyAsLong(bytesStore, bytesStore.readRemaining() - 1);
 
         // Assert that changing the length results in different hashes
-        Assert.assertNotEquals(fullHash, partialHash);
+        Assertions.assertNotEquals(fullHash, partialHash);
     }
 
-    @Test(expected = BufferUnderflowException.class)
+    @Test
     public void testHashBeyondLengthThrowsException() {
-        BytesStore<?, ?> bytesStore = BytesStore.from("short");
-        // Attempt to hash beyond the available length
-        XxHash.INSTANCE.applyAsLong(bytesStore, bytesStore.readRemaining() + 1);
+        assertThrows(BufferUnderflowException.class, () -> {
+            BytesStore<?, ?> bytesStore = BytesStore.from("short");
+            // Attempt to hash beyond the available length
+            XxHash.INSTANCE.applyAsLong(bytesStore, bytesStore.readRemaining() + 1);
+        });
     }
 }

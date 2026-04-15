@@ -8,14 +8,14 @@ import net.openhft.chronicle.bytes.BytesTestCommon;
 import net.openhft.chronicle.bytes.NativeBytes;
 import net.openhft.chronicle.bytes.internal.NativeBytesStore;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.security.SecureRandom;
 import java.util.Random;
 
 import static net.openhft.chronicle.bytes.algo.OptimisedBytesStoreHash.*;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SuppressWarnings("rawtypes")
 public class OptimisedBytesStoreHashTest extends BytesTestCommon {
@@ -31,7 +31,7 @@ public class OptimisedBytesStoreHashTest extends BytesTestCommon {
         while (b.readSkip(1).readRemaining() > 0) {
             long expected = VanillaBytesStoreHash.INSTANCE.applyAsLong(b);
             long actual = OptimisedBytesStoreHash.INSTANCE.applyAsLong(b);
-            assertEquals("Rem: " + b.readRemaining(), expected, actual);
+            assertEquals(expected, actual, "Rem: " + b.readRemaining());
         }
         assertEquals(VanillaBytesStoreHash.INSTANCE.applyAsLong(b),
                 OptimisedBytesStoreHash.INSTANCE.applyAsLong(b));
@@ -51,9 +51,9 @@ public class OptimisedBytesStoreHashTest extends BytesTestCommon {
         assertEquals(applyAsLong8(nb), applyAsLong9to16(nb, 8));
 */
         for (int i = 1; i <= 16; i++)
-            assertEquals("i: " + i, applyAsLong9to16(nb, i), applyAsLongAny(nb, i));
+            assertEquals(applyAsLong9to16(nb, i), applyAsLongAny(nb, i), "i: " + i);
         for (int i = 17; i <= 32; i++)
-            assertEquals("i: " + i, applyAsLong17to32(nb, i), applyAsLongAny(nb, i));
+            assertEquals(applyAsLong17to32(nb, i), applyAsLongAny(nb, i), "i: " + i);
         nb.releaseLast();
     }
 
@@ -182,8 +182,8 @@ public class OptimisedBytesStoreHashTest extends BytesTestCommon {
         @NotNull Bytes<?> bs2 = Bytes.allocateDirect(9).unchecked(true);
 
         for (int i = 0; i <= 8; i++) {
-            assertEquals("i: " + i, Long.toHexString(bs2.readLong(0)),
-                    Long.toHexString(OptimisedBytesStoreHash.readIncompleteLong(bs.addressForRead(0), i)));
+            assertEquals(Long.toHexString(bs2.readLong(0)), Long.toHexString(OptimisedBytesStoreHash.readIncompleteLong(bs.addressForRead(0), i)),
+                    "i: " + i);
             bs2.writeUnsignedByte(i + 1);
         }
         bs.releaseLast();

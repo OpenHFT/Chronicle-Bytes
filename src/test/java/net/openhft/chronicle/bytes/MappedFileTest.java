@@ -8,8 +8,10 @@ import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.IOTools;
 import net.openhft.chronicle.core.io.ReferenceOwner;
 import org.jetbrains.annotations.NotNull;
-import org.junit.*;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.io.TempDir;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -17,17 +19,16 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.nio.BufferUnderflowException;
 import java.nio.file.Files;
-
-import static org.junit.Assert.*;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 public class MappedFileTest extends BytesTestCommon {
 
-    @Rule
-    public final TemporaryFolder tmpDir = new TemporaryFolder();
+    @TempDir
+    public File tmpDir;
 
     @SuppressWarnings("java:S5826") // JUnit 4 lifecycle retained; class mixes Vintage and Jupiter
-    @Before
+    @BeforeEach
     public void ignoreCouldntDisable() {
         if (Jvm.maxDirectMemory() == 0) {
             ignoreException("Couldn't disable close on interrupt");
@@ -45,11 +46,11 @@ public class MappedFileTest extends BytesTestCommon {
         }
     }
 
-    @Test
+    @org.junit.jupiter.api.Test
     public void shouldReleaseReferenceWhenNewStoreIsAcquired()
             throws IOException {
         assumeFalse(Jvm.maxDirectMemory() == 0);
-        final File file = tmpDir.newFile();
+        final File file = File.createTempFile("junit", null, tmpDir);
         // this is what it will end up as
         final long chunkSize = OS.mapAlign(64);
         final ReferenceOwner test = ReferenceOwner.temporary("test");
@@ -76,7 +77,7 @@ public class MappedFileTest extends BytesTestCommon {
         }
     }
 
-    @Test
+    @org.junit.jupiter.api.Test
     public void testReferenceCounts()
             throws IOException {
         assumeFalse(Jvm.maxDirectMemory() == 0);
@@ -107,20 +108,20 @@ public class MappedFileTest extends BytesTestCommon {
                 assertEquals(chunkSize, bytes.start());
                 assertEquals(0L, bs.readLong(chunkSize + (1 << 10)));
                 assertEquals(0L, bytes.readLong(chunkSize + (1 << 10)));
-                Assert.assertFalse(bs.inside(chunkSize - (1 << 10)));
-                Assert.assertFalse(bs.inside(chunkSize - 1));
-                Assert.assertTrue(bs.inside(chunkSize));
-                Assert.assertTrue(bs.inside(chunkSize * 2L - 1));
-                Assert.assertFalse(bs.inside(chunkSize * 2L));
+                Assertions.assertFalse(bs.inside(chunkSize - (1 << 10)));
+                Assertions.assertFalse(bs.inside(chunkSize - 1));
+                Assertions.assertTrue(bs.inside(chunkSize));
+                Assertions.assertTrue(bs.inside(chunkSize * 2L - 1));
+                Assertions.assertFalse(bs.inside(chunkSize * 2L));
                 try {
                     bytes.readLong(chunkSize - (1 << 10));
-                    Assert.fail();
+                    Assertions.fail();
                 } catch (BufferUnderflowException e) {
                     // expected
                 }
                 try {
                     bytes.readLong(chunkSize * 2L + (1 << 10));
-                    Assert.fail();
+                    Assertions.fail();
                 } catch (BufferUnderflowException e) {
                     // expected
                 }
@@ -142,7 +143,7 @@ public class MappedFileTest extends BytesTestCommon {
         }
     }
 
-    @Test
+    @org.junit.jupiter.api.Test
     public void largeReadOnlyFile() throws IOException {
         assumeFalse(Runtime.getRuntime().maxMemory() < Integer.MAX_VALUE || OS.isWindows());
         assumeFalse(Jvm.maxDirectMemory() == 0);
@@ -154,11 +155,11 @@ public class MappedFileTest extends BytesTestCommon {
         }
 
         try (MappedBytes bytes = MappedBytes.readOnly(file)) {
-            Assert.assertEquals(0x12345678L, bytes.readLong(3L << 30));
+            Assertions.assertEquals(0x12345678L, bytes.readLong(3L << 30));
         }
     }
 
-    @Test
+    @org.junit.jupiter.api.Test
     public void largeReadOnlyFileSingle() throws IOException {
         assumeFalse(OS.isWindows());
         assumeFalse(Runtime.getRuntime().maxMemory() < Integer.MAX_VALUE);
@@ -171,11 +172,11 @@ public class MappedFileTest extends BytesTestCommon {
         }
 
         try (MappedBytes bytes = MappedBytes.singleMappedBytes(file, 4L << 30, false)) {
-            Assert.assertEquals(0x12345678L, bytes.readLong(3L << 30));
+            Assertions.assertEquals(0x12345678L, bytes.readLong(3L << 30));
         }
     }
 
-    @Test
+    @org.junit.jupiter.api.Test
     public void interrupted() throws Exception {
         ignoreException("/proc/self/mountinfo");
         Thread.currentThread().interrupt();
@@ -186,7 +187,7 @@ public class MappedFileTest extends BytesTestCommon {
         }
     }
 
-    @Test
+    @org.junit.jupiter.api.Test
     public void testCreateMappedFile() throws Exception {
         final File file = IOTools.createTempFile("mappedFile");
 
@@ -201,7 +202,7 @@ public class MappedFileTest extends BytesTestCommon {
         assertTrue(mappedFile.isClosed());
     }
 
-    @Test
+    @org.junit.jupiter.api.Test
     public void testReadOnlyOpen()
             throws IOException {
         assumeFalse(OS.isWindows());
@@ -240,7 +241,7 @@ public class MappedFileTest extends BytesTestCommon {
         file.deleteOnExit();
     }
 
-    @After
+    @AfterEach
     public void clearInterrupt() {
         Thread.interrupted();
     }

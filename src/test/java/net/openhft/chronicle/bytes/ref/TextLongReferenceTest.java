@@ -8,10 +8,10 @@ import net.openhft.chronicle.bytes.BytesTestCommon;
 import net.openhft.chronicle.bytes.StopCharTesters;
 import net.openhft.chronicle.bytes.internal.NativeBytesStore;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class TextLongReferenceTest extends BytesTestCommon {
 
@@ -27,8 +27,8 @@ public class TextLongReferenceTest extends BytesTestCommon {
 
             long l = bytesStore.parseLong(TextLongReference.VALUE);
 
-            Assert.assertEquals(expected, value.getValue());
-            Assert.assertEquals(expected, l);
+            Assertions.assertEquals(expected, value.getValue());
+            Assertions.assertEquals(expected, l);
 
             assertFalse(value.compareAndSwapValue(0, 1));
             assertTrue(value.compareAndSwapValue(10, 2));

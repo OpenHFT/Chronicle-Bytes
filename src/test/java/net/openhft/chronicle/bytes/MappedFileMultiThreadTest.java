@@ -7,9 +7,8 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.IOTools;
 import net.openhft.chronicle.core.io.ReferenceOwner;
-import org.junit.Before;
-import org.junit.Test;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -21,9 +20,9 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 public class MappedFileMultiThreadTest extends BytesTestCommon {
     private static final int CORES = Integer.getInteger("cores", Runtime.getRuntime().availableProcessors());
@@ -31,7 +30,6 @@ public class MappedFileMultiThreadTest extends BytesTestCommon {
     private static final String TMP_FILE = System.getProperty("file", IOTools.createTempFile("testMultiThreadLock").getAbsolutePath());
 
     @SuppressWarnings("EmptyMethod")
-    @Before
     @BeforeEach
     public void threadDump() {
         super.threadDump();

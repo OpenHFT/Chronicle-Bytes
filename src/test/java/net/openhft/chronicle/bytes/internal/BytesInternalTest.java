@@ -8,9 +8,9 @@ import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Assert;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
@@ -20,8 +20,8 @@ import java.util.Random;
 
 import static java.nio.charset.StandardCharsets.US_ASCII;
 import static net.openhft.chronicle.bytes.internal.BytesInternalTest.Nested.LENGTH;
-import static org.junit.Assert.*;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 public class BytesInternalTest extends BytesTestCommon {
     @Test
@@ -71,8 +71,8 @@ public class BytesInternalTest extends BytesTestCommon {
     public void parseLongEmpty() {
         for (String s : ", , .,-,x, .e".split(",")) {
             final Bytes<byte[]> from = Bytes.from(s);
-            assertEquals(s, 0, from.parseLong());
-            assertFalse(s, from.lastNumberHadDigits());
+            assertEquals(0, from.parseLong(), s);
+            assertFalse(from.lastNumberHadDigits(), s);
         }
     }
 
@@ -80,8 +80,8 @@ public class BytesInternalTest extends BytesTestCommon {
     public void parseLongNonEmpty() {
         for (String s : "0, 0, 0..,0-, 0e".split(",")) {
             final Bytes<byte[]> from = Bytes.from(s);
-            assertEquals(s, 0, from.parseLong());
-            assertTrue(s, from.lastNumberHadDigits());
+            assertEquals(0, from.parseLong(), s);
+            assertTrue(from.lastNumberHadDigits(), s);
         }
     }
 
@@ -89,8 +89,8 @@ public class BytesInternalTest extends BytesTestCommon {
     public void parseLongDecimalEmpty() {
         for (String s : ", , .,-,x, .e".split(",")) {
             final Bytes<byte[]> from = Bytes.from(s);
-            assertEquals(s, 0, from.parseLongDecimal());
-            assertFalse(s, from.lastNumberHadDigits());
+            assertEquals(0, from.parseLongDecimal(), s);
+            assertFalse(from.lastNumberHadDigits(), s);
         }
     }
 
@@ -98,8 +98,8 @@ public class BytesInternalTest extends BytesTestCommon {
     public void parseLongDecimalNonEmpty() {
         for (String s : "0, 0, .0,0-,0x, .0e".split(",")) {
             final Bytes<byte[]> from = Bytes.from(s);
-            assertEquals(s, 0, from.parseLongDecimal());
-            assertTrue(s, from.lastNumberHadDigits());
+            assertEquals(0, from.parseLongDecimal(), s);
+            assertTrue(from.lastNumberHadDigits(), s);
         }
     }
 
@@ -107,8 +107,8 @@ public class BytesInternalTest extends BytesTestCommon {
     public void parseDoubleEmpty() {
         for (String s : ", , .,-,x, .e".split(",")) {
             final Bytes<byte[]> from = Bytes.from(s);
-            assertEquals(s, 0, Double.compare(-0.0, from.parseDouble()));
-            assertFalse(s, from.lastNumberHadDigits());
+            assertEquals(0, Double.compare(-0.0, from.parseDouble()), s);
+            assertFalse(from.lastNumberHadDigits(), s);
         }
     }
 
@@ -116,8 +116,8 @@ public class BytesInternalTest extends BytesTestCommon {
     public void parseDoubleEmptyZero() {
         for (String s : "0, 0, .0,0-,0x, .0e".split(",")) {
             final Bytes<byte[]> from = Bytes.from(s);
-            assertEquals(s, 0, Double.compare(0.0, from.parseDouble()));
-            assertTrue(s, from.lastNumberHadDigits());
+            assertEquals(0, Double.compare(0.0, from.parseDouble()), s);
+            assertTrue(from.lastNumberHadDigits(), s);
         }
     }
 
@@ -231,9 +231,9 @@ public class BytesInternalTest extends BytesTestCommon {
                 for (int i = 1; i < 10; i += 2) {
                     String si = s + i;
                     Bytes<?> from = Bytes.from(si);
-                    assertEquals(si,
-                            Double.parseDouble(si),
-                            from.parseDouble(), 0.0);
+                    assertEquals(Double.parseDouble(si),
+                            from.parseDouble(),
+                            0.0, si);
                     from.releaseLast();
                 }
             }
@@ -370,11 +370,11 @@ public class BytesInternalTest extends BytesTestCommon {
             String s = String.format(Locale.UK, "%.9f", num);
             different = checkParse(different, s);
         }
-        Assert.assertEquals("Different " + (100.0 * different) / max + "%", 0, different);
+        Assertions.assertEquals(0, different, "Different " + (100.0 * different) / max + "%");
     }
 
     @Test
-    @Ignore(/* peformance test */)
+    @Disabled(/* peformance test */)
     public void testNoneDirectWritePerformance() {
         final int size = 64;
         Bytes<?> a = Bytes.allocateElasticOnHeap(size + 8);

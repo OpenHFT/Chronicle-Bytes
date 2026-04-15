@@ -5,13 +5,13 @@ package net.openhft.chronicle.bytes.internal;
 
 import net.openhft.chronicle.bytes.BytesTestCommon;
 import net.openhft.chronicle.core.OS;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class CanonicalPathUtilTest extends BytesTestCommon {
 
@@ -33,8 +33,8 @@ public class CanonicalPathUtilTest extends BytesTestCommon {
         String p2 = CanonicalPathUtil.of(f2);
 
         assertEquals(p1, p2);
-        assertSame("String must be interned", p1, p1.intern());
-        assertSame("Same canonical path must be same instance", p1, p2);
+        assertSame(p1, p1.intern(), "String must be interned");
+        assertSame(p1, p2, "Same canonical path must be same instance");
     }
 }
 

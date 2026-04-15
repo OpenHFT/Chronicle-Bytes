@@ -4,12 +4,12 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Maths;
+import org.junit.jupiter.api.Test;
 import net.openhft.chronicle.bytes.internal.UnsafeText;
-import org.junit.Test;
 
 import java.util.Random;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class UnsafeTextBytesTest extends BytesTestCommon {
 
@@ -18,7 +18,7 @@ public class UnsafeTextBytesTest extends BytesTestCommon {
         final long end = UnsafeText.appendFixed(address, l);
         bytes.readLimit(end - address);
         String message = bytes.toString();
-        assertEquals(message, l, bytes.parseLong());
+        assertEquals(l, bytes.parseLong(), message);
     }
 
     static String testAppendDouble(final Bytes<?> bytes, final double l) {
@@ -26,7 +26,7 @@ public class UnsafeTextBytesTest extends BytesTestCommon {
         final long end = UnsafeText.appendDouble(address, l);
         bytes.readLimit(end - address);
         final String message = bytes.toString();
-        assertEquals(message, l, bytes.parseDouble(), Math.ulp(l));
+        assertEquals(l, bytes.parseDouble(), Double.isNaN(l) ? 0.0 : Math.ulp(l), message);
         return message;
     }
 
@@ -39,7 +39,7 @@ public class UnsafeTextBytesTest extends BytesTestCommon {
         final String message = bytes.toString();
         final double expected = Maths.round4(l);
         final double actual = bytes.parseDouble();
-        assertEquals(message, expected, actual, 0.0);
+        assertEquals(expected, actual, 0.0, message);
     }
 
     @Test

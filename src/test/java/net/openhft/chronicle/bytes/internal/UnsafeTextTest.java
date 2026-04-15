@@ -7,15 +7,15 @@ import net.openhft.chronicle.bytes.BytesTestCommon;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.cooler.CoolerTester;
 import net.openhft.chronicle.core.cooler.CpuCoolers;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.Random;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class UnsafeTextTest extends BytesTestCommon {
 
@@ -23,7 +23,7 @@ public class UnsafeTextTest extends BytesTestCommon {
 
     @SuppressWarnings("EmptyMethod")
     @Override
-    @Before
+    @BeforeEach
     public void threadDump() {
         super.threadDump();
     }
@@ -145,7 +145,7 @@ public class UnsafeTextTest extends BytesTestCommon {
         long address = OS.memory().allocate(size);
         try {
             final String memVal = appendDoubleToString(value, address);
-            assertEquals("value; " + value, expectedValue, memVal);
+            assertEquals(expectedValue, memVal, "value; " + value);
         } finally {
             OS.memory().freeMemory(address, size);
         }
@@ -172,7 +172,7 @@ public class UnsafeTextTest extends BytesTestCommon {
                 double d2 = Double.parseDouble(s);
                 if (d != d2) {
                     String message = "" + (d - d2);
-                    assertEquals(message, d, d2, 0);
+                    assertEquals(d, d2, 0, message);
                 }
             }
             // this is called unless the test is about to die
@@ -195,7 +195,7 @@ public class UnsafeTextTest extends BytesTestCommon {
                 String s = appendDoubleToString(d, address);
                 double d2 = Double.parseDouble(s);
                 if (d != d2)
-                    assertEquals("" + (d - d2), d, d2, 0);
+                    assertEquals(d, d2, 0, "" + (d - d2));
             }
             // this is called unless the test is about to die
             OS.memory().freeMemory(address, size);

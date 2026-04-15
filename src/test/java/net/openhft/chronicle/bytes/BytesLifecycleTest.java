@@ -3,11 +3,11 @@
  */
 package net.openhft.chronicle.bytes;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.nio.ByteBuffer;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class BytesLifecycleTest extends BytesTestCommon {
 
@@ -22,13 +22,13 @@ public class BytesLifecycleTest extends BytesTestCommon {
 
             Bytes<?> slice = parent.bytesForRead();
             try {
-                assertEquals("bytesForRead should reserve the bytes store",
-                        initialRefCount + 1, store.refCount());
+                assertEquals(initialRefCount + 1,
+                        store.refCount(), "bytesForRead should reserve the bytes store");
             } finally {
                 slice.releaseLast();
             }
-            assertEquals("Releasing the slice should decrement the ref-count",
-                    initialRefCount, store.refCount());
+            assertEquals(initialRefCount,
+                    store.refCount(), "Releasing the slice should decrement the ref-count");
 
             Bytes<?> orphan = parent.bytesForRead();
             try {
@@ -39,10 +39,10 @@ public class BytesLifecycleTest extends BytesTestCommon {
             } finally {
                 orphan.releaseLast();
             }
-            assertEquals("Releasing the final slice should drop ref-count to zero",
-                    0, store.refCount());
-            assertThrows("Once both parent and slices are released, access must fail",
-                    NullPointerException.class, () -> parent.peekUnsignedByte(0));
+            assertEquals(0,
+                    store.refCount(), "Releasing the final slice should drop ref-count to zero");
+            assertThrows(NullPointerException.class,
+                    () -> parent.peekUnsignedByte(0), "Once both parent and slices are released, access must fail");
         } finally {
             if (!parentReleased) {
                 parent.releaseLast();
@@ -63,15 +63,15 @@ public class BytesLifecycleTest extends BytesTestCommon {
                 if (currentCapacity > previousCapacity) {
                     expanded = true;
                 }
-                assertTrue("Capacity must not shrink during elastic growth",
-                        currentCapacity >= previousCapacity);
+                assertTrue(currentCapacity >= previousCapacity,
+                        "Capacity must not shrink during elastic growth");
                 previousCapacity = currentCapacity;
                 elastic.clear();
             }
         } finally {
             elastic.releaseLast();
         }
-        assertTrue("Elastic buffer should expand at least once", expanded);
+        assertTrue(expanded, "Elastic buffer should expand at least once");
     }
 
     @Test
@@ -84,7 +84,7 @@ public class BytesLifecycleTest extends BytesTestCommon {
             long expectedRemaining = source.readRemaining();
             long copied = source.copyTo(target);
             assertEquals(expectedRemaining, copied);
-            assertEquals("copyTo should not mutate readPosition", 7, source.readPosition());
+            assertEquals(7, source.readPosition(), "copyTo should not mutate readPosition");
             Bytes<?> view = target.bytesForRead();
             try {
                 view.readPositionRemaining(0, copied);

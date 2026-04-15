@@ -5,16 +5,22 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.io.ClosedIllegalStateException;
 import net.openhft.chronicle.core.io.ReferenceOwner;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import java.io.File;
 
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class MappedBytesStoreFactoryTest {
 
     @Mock
@@ -26,9 +32,8 @@ public class MappedBytesStoreFactoryTest {
     @Mock
     private MappedFile mappedFile;
 
-    @Before
+    @BeforeEach
     public void setUp() {
-        MockitoAnnotations.openMocks(this);
         when(mappedFile.file()).thenReturn(new File("test"));
         when(factory.create(eq(owner), eq(mappedFile), anyLong(), anyLong(), anyLong(), anyLong(), anyInt()))
                 .thenReturn(mock(MappedBytesStore.class));
@@ -47,11 +52,13 @@ public class MappedBytesStoreFactoryTest {
         verify(factory, times(1)).create(owner, mappedFile, start, address, capacity, safeCapacity, pageSize);
     }
 
-    @Test(expected = ClosedIllegalStateException.class)
-    public void createMappedBytesStoreWhenFileClosed() throws ClosedIllegalStateException {
-        when(factory.create(any(), any(), anyLong(), anyLong(), anyLong(), anyLong(), anyInt()))
-                .thenThrow(new ClosedIllegalStateException("MappedFile has been released"));
+    @Test
+    public void createMappedBytesStoreWhenFileClosed() {
+        assertThrows(ClosedIllegalStateException.class, () -> {
+            when(factory.create(any(), any(), anyLong(), anyLong(), anyLong(), anyLong(), anyInt()))
+                    .thenThrow(new ClosedIllegalStateException("MappedFile has been released"));
 
-        factory.create(owner, mappedFile, 0, 0, 0, 0, PageUtil.getPageSize("test"));
+            factory.create(owner, mappedFile, 0, 0, 0, 0, PageUtil.getPageSize("test"));
+        });
     }
 }

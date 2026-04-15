@@ -6,23 +6,19 @@ package net.openhft.chronicle.bytes.internal;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesTestCommon;
 import net.openhft.chronicle.core.Jvm;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-@RunWith(Parameterized.class)
 public class BytesInternalContentEqualsTest extends BytesTestCommon {
-    private final Bytes<?> a;
-    private final Bytes<?> b;
+    private Bytes<?> a;
+    private Bytes<?> b;
 
-    @Parameterized.Parameters
     public static Collection<Object[]> data() {
         List<Object[]> tests = new ArrayList<>(Arrays.asList(new Object[][]{
                 {Bytes.allocateElasticOnHeap(), Bytes.allocateElasticOnHeap()}
@@ -40,36 +36,37 @@ public class BytesInternalContentEqualsTest extends BytesTestCommon {
         return tests;
     }
 
-    public BytesInternalContentEqualsTest(Bytes<?> left, Bytes<?> right) {
+    public void initBytesInternalContentEqualsTest(Bytes<?> left, Bytes<?> right) {
         this.a = left;
         this.b = right;
-    }
-
-    @Before
-    public void before() {
         a.clear();
         b.clear();
-
     }
 
-    @Test
-    public void testContentEqual() {
+    @MethodSource("data")
+    @ParameterizedTest
+    public void testContentEqual(Bytes<?> left, Bytes<?> right) {
+        initBytesInternalContentEqualsTest(left, right);
         a.append("hello world");
         b.append("hello world");
-        Assert.assertTrue(a.contentEquals(b));
+        Assertions.assertTrue(a.contentEquals(b));
     }
 
-    @Test
-    public void testContentNotEqualButSameLen() {
+    @MethodSource("data")
+    @ParameterizedTest
+    public void testContentNotEqualButSameLen(Bytes<?> left, Bytes<?> right) {
+        initBytesInternalContentEqualsTest(left, right);
         a.append("hello world1");
         b.append("hello world2");
-        Assert.assertFalse(a.contentEquals(b));
+        Assertions.assertFalse(a.contentEquals(b));
     }
 
-    @Test
-    public void testContentNotEqualButDiffLen() {
+    @MethodSource("data")
+    @ParameterizedTest
+    public void testContentNotEqualButDiffLen(Bytes<?> left, Bytes<?> right) {
+        initBytesInternalContentEqualsTest(left, right);
         a.append("hello world");
         b.append("hello world2");
-        Assert.assertFalse(a.contentEquals(b));
+        Assertions.assertFalse(a.contentEquals(b));
     }
 }

@@ -5,11 +5,9 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Jvm;
 import org.jetbrains.annotations.NotNull;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.IOException;
 import java.lang.annotation.RetentionPolicy;
@@ -23,22 +21,21 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListSet;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
-@RunWith(Parameterized.class)
 public class BytesMarshallableTest extends BytesTestCommon {
 
-    private final String name;
-    private final boolean guarded;
+    private String name;
+    private boolean guarded;
 
-    public BytesMarshallableTest(String name, boolean guarded) {
+    public void initBytesMarshallableTest(String name, boolean guarded) {
         this.name = name;
         this.guarded = guarded;
+        NativeBytes.setNewGuarded(guarded);
     }
 
-    @Parameterized.Parameters(name = "{0}")
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][]{
                 {"Unguarded", false},
@@ -46,18 +43,15 @@ public class BytesMarshallableTest extends BytesTestCommon {
         });
     }
 
-    @AfterClass
+    @AfterAll
     public static void resetGuarded() {
         NativeBytes.resetNewGuarded();
     }
 
-    @Before
-    public void setGuarded() {
-        NativeBytes.setNewGuarded(guarded);
-    }
-
-    @Test
-    public void serializePrimitives() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void serializePrimitives(String name, boolean guarded) {
+        initBytesMarshallableTest(name, guarded);
         assumeFalse(NativeBytes.areNewGuarded());
         final Bytes<?> bytes = new HexDumpBytes();
         try {
@@ -102,8 +96,10 @@ public class BytesMarshallableTest extends BytesTestCommon {
         }
     }
 
-    @Test
-    public void serializeScalars() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void serializeScalars(String name, boolean guarded) {
+        initBytesMarshallableTest(name, guarded);
         final Bytes<?> bytes = new HexDumpBytes();
         try {
             final MyScalars mb1 = new MyScalars("Hello", BigInteger.ONE, BigDecimal.TEN, LocalDate.now(), LocalTime.now(), LocalDateTime.now(), ZonedDateTime.now(), UUID.randomUUID());
@@ -168,8 +164,10 @@ public class BytesMarshallableTest extends BytesTestCommon {
         assertEquals(mb2.toString(), mb4.toString());
     }
 
-    @Test
-    public void serializeNested() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void serializeNested(String name, boolean guarded) {
+        initBytesMarshallableTest(name, guarded);
         final Bytes<?> bytes = new HexDumpBytes();
         try {
 
@@ -317,9 +315,11 @@ public class BytesMarshallableTest extends BytesTestCommon {
         }
     }
 
-    @Test
-    public void serializeBytes()
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void serializeBytes(String name, boolean guarded)
             throws IOException {
+        initBytesMarshallableTest(name, guarded);
         Bytes<?> bytes = new HexDumpBytes();
         final Bytes<?> hello = Bytes.from("hello");
         final Bytes<?> byeee = Bytes.from("byeee");
@@ -350,8 +350,10 @@ public class BytesMarshallableTest extends BytesTestCommon {
         }
     }
 
-    @Test
-    public void serializeCollections() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void serializeCollections(String name, boolean guarded) {
+        initBytesMarshallableTest(name, guarded);
 //        assumeTrue(name.equals("Unguarded"));
         final Bytes<?> bytes = new HexDumpBytes();
         try {
@@ -393,8 +395,10 @@ public class BytesMarshallableTest extends BytesTestCommon {
         }
     }
 
-    @Test
-    public void collectionsNotInitializedInConstructor() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void collectionsNotInitializedInConstructor(String name, boolean guarded) {
+        initBytesMarshallableTest(name, guarded);
         final Bytes<?> bytes = new HexDumpBytes();
 
         try {
@@ -484,8 +488,10 @@ public class BytesMarshallableTest extends BytesTestCommon {
         }
     }
 
-    @Test
-    public void testSpecificCollections() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void testSpecificCollections(String name, boolean guarded) {
+        initBytesMarshallableTest(name, guarded);
         final Bytes<?> bytes = new HexDumpBytes();
 
         try {
@@ -523,8 +529,10 @@ public class BytesMarshallableTest extends BytesTestCommon {
         }
     }
 
-    @Test
-    public void nested() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void nested(String name, boolean guarded) {
+        initBytesMarshallableTest(name, guarded);
         final Bytes<?> bytes = new HexDumpBytes();
         try {
             final BM1 bm1 = new BM1();
@@ -572,8 +580,10 @@ public class BytesMarshallableTest extends BytesTestCommon {
         }
     }
 
-    @Test
-    public void nullArrays() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void nullArrays(String name, boolean guarded) {
+        initBytesMarshallableTest(name, guarded);
         final Bytes<?> bytes = new HexDumpBytes();
         try {
             final BMA bma = new BMA();
@@ -604,8 +614,10 @@ public class BytesMarshallableTest extends BytesTestCommon {
         }
     }
 
-    @Test
-    public void arrays() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void arrays(String name, boolean guarded) {
+        initBytesMarshallableTest(name, guarded);
         final Bytes<?> bytes = new HexDumpBytes();
         try {
             final BMA bma = new BMA();

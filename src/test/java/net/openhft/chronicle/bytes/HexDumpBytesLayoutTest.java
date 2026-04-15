@@ -3,9 +3,9 @@
  */
 package net.openhft.chronicle.bytes;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Consolidated layout tests for HexDumpBytes covering wrap widths,
@@ -57,7 +57,7 @@ public class HexDumpBytesLayoutTest extends BytesTestCommon {
             String s = hdb.toHexString();
             String[] lines = s.split("\\R");
             // 1 header + 5 data lines (wrapping every byte) + possibly a trailing empty line
-            assertTrue("Expected multiple wrapped lines", lines.length >= 5);
+            assertTrue(lines.length >= 5, "Expected multiple wrapped lines");
             assertTrue(s.contains("wrap1"));
         } finally {
             hdb.releaseLast();

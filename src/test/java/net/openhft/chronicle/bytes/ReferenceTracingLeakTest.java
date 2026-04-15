@@ -4,9 +4,9 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.io.AbstractReferenceCounted;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ReferenceTracingLeakTest extends BytesTestCommon {
 
@@ -14,11 +14,11 @@ public class ReferenceTracingLeakTest extends BytesTestCommon {
     public void leakDetectionReportsCreatedHere() throws Exception {
         final NativeBytes<Void> leaked = Bytes.allocateElasticDirect(64);
         try {
-            assertNotNull("createdHere should be recorded for traced resources",
-                    ((AbstractReferenceCounted) leaked).createdHere());
+            assertNotNull(((AbstractReferenceCounted) leaked).createdHere(),
+                    "createdHere should be recorded for traced resources");
 
             final AssertionError leak = assertThrows(AssertionError.class, AbstractReferenceCounted::assertReferencesReleased);
-            assertTrue("Expect suppressed entries describing the leak", leak.getSuppressed().length > 0);
+            assertTrue(leak.getSuppressed().length > 0, "Expect suppressed entries describing the leak");
         } finally {
             leaked.releaseLast();
         }

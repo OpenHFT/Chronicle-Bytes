@@ -7,27 +7,25 @@ import net.openhft.chronicle.bytes.render.GeneralDecimaliser;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.util.ObjectUtils;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Collection;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
-@RunWith(Parameterized.class)
 public class ByteStringAppenderTest extends BytesTestCommon {
-    private final Bytes<?> bytes;
+    private Bytes<?> bytes;
 
-    public ByteStringAppenderTest(String name, boolean direct) {
+    public void initByteStringAppenderTest(String name, boolean direct) {
         bytes = direct ? Bytes.allocateElasticDirect() : Bytes.elasticByteBuffer();
     }
 
-    @Parameterized.Parameters(name = "{0}")
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][]{
 //                {"heap", false},
@@ -35,14 +33,17 @@ public class ByteStringAppenderTest extends BytesTestCommon {
         });
     }
 
+    @AfterEach
     @Override
     public void afterChecks() {
         bytes.releaseLast();
         super.afterChecks();
     }
 
-    @Test
-    public void testConvertTo() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void testConvertTo(String name, boolean direct) {
+        initByteStringAppenderTest(name, direct);
         Bytes<?> hello = Bytes.from("hello");
         Bytes<?> hello1 = ObjectUtils.convertTo(Bytes.class, "hello");
         assertTrue(hello.contentEquals(hello1));
@@ -55,9 +56,11 @@ public class ByteStringAppenderTest extends BytesTestCommon {
         bytes.releaseLast();
     }
 
-    @Test
-    public void testAppendInt()
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void testAppendInt(String name, boolean direct)
             throws IORuntimeException {
+        initByteStringAppenderTest(name, direct);
         for (int expected = 1; expected != 0; expected *= 2) {
             bytes.append(expected);
             bytes.append(",");
@@ -69,9 +72,11 @@ public class ByteStringAppenderTest extends BytesTestCommon {
         }
     }
 
-    @Test
-    public void testAppend()
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void testAppend(String name, boolean direct)
             throws IORuntimeException {
+        initByteStringAppenderTest(name, direct);
         for (long expected = 1; expected != 0; expected *= 2) {
             bytes.clear();
             bytes.append(expected);
@@ -84,8 +89,10 @@ public class ByteStringAppenderTest extends BytesTestCommon {
         }
     }
 
-    @Test
-    public void testAppendWithOffset() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void testAppendWithOffset(String name, boolean direct) {
+        initByteStringAppenderTest(name, direct);
         bytes.readLimit(20);
         bytes.writeLimit(20);
         for (long expected : new long[]{123456, 12345, 1234, 123, 12, 1, 0}) {
@@ -94,8 +101,10 @@ public class ByteStringAppenderTest extends BytesTestCommon {
         }
     }
 
-    @Test
-    public void testAppendWithOffsetNeg() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void testAppendWithOffsetNeg(String name, boolean direct) {
+        initByteStringAppenderTest(name, direct);
         bytes.readLimit(20);
         bytes.writeLimit(20);
         for (long expected : new long[]{-123456, 12345, -1234, 123, -12, 1, 0}) {
@@ -104,9 +113,11 @@ public class ByteStringAppenderTest extends BytesTestCommon {
         }
     }
 
-    @Test
-    public void testAppendDouble()
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void testAppendDouble(String name, boolean direct)
             throws IORuntimeException {
+        initByteStringAppenderTest(name, direct);
         assumeFalse(GuardedNativeBytes.areNewGuarded());
         testAppendDouble0(-1.42278619425894E11);
 /*
@@ -136,8 +147,10 @@ public class ByteStringAppenderTest extends BytesTestCommon {
 */
     }
 
-    @Test
-    public void testAppendLongDecimal() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void testAppendLongDecimal(String name, boolean direct) {
+        initByteStringAppenderTest(name, direct);
         assumeFalse(GuardedNativeBytes.areNewGuarded());
         bytes.appendDecimal(128, 0).append('\n');
         bytes.appendDecimal(128, 1).append('\n');
@@ -169,8 +182,10 @@ public class ByteStringAppenderTest extends BytesTestCommon {
                 "0.0001\n", bytes.toString());
     }
 
-    @Test
-    public void testAppendDoublePrecision() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void testAppendDoublePrecision(String name, boolean direct) {
+        initByteStringAppenderTest(name, direct);
         assumeFalse(GuardedNativeBytes.areNewGuarded());
 
         bytes.append(1.28, 0).append('\n');
@@ -206,8 +221,10 @@ public class ByteStringAppenderTest extends BytesTestCommon {
                 "64.550199\n", bytes.toString());
     }
 
-    @Test
-    public void tens() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void tens(String name, boolean direct) {
+        initByteStringAppenderTest(name, direct);
         bytes.decimaliser(GeneralDecimaliser.GENERAL);
         for (int i = 0; i <= (int) Math.log10(Double.MAX_VALUE); i++) {
             bytes.clear();
@@ -217,20 +234,22 @@ public class ByteStringAppenderTest extends BytesTestCommon {
                 String s = bytes.toString();
                 double d2 = bytes.parseDouble();
                 double ulp = i < 23 ? 0 : i < 235 ? Math.ulp(d) : Math.ulp(d) * 2;
-                assertEquals(s, d, d2, ulp);
+                assertEquals(d, d2, ulp, s);
             }
             {
                 double d = Math.pow(10, -i);
                 bytes.append(d).append(' ');
                 String s = bytes.toString();
                 double d2 = bytes.parseDouble();
-                assertEquals(s, d, d2, Jvm.isArm() ? 2E-27 : 2e-40);
+                assertEquals(d, d2, Jvm.isArm() ? 2E-27 : 2e-40, s);
             }
         }
     }
 
-    @Test
-    public void testAppend8bit() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void testAppend8bit(String name, boolean direct) {
+        initByteStringAppenderTest(name, direct);
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         BytesStore<?, ByteBuffer> bs = BytesStore.elasticByteBuffer(4, 16);

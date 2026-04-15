@@ -5,8 +5,8 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.*;
 import java.math.BigDecimal;
@@ -14,9 +14,9 @@ import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
-import static org.junit.Assert.*;
-import static org.junit.Assume.assumeFalse;
-import static org.junit.Assume.assumeTrue;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 public class CheckOverSizedMessagesTest extends BytesTestCommon {
 
@@ -32,7 +32,7 @@ public class CheckOverSizedMessagesTest extends BytesTestCommon {
         }
     }
 
-    @Before
+    @BeforeEach
     public void checkPageSize() {
         assumeTrue(OS.isLinux());
         assumeFalse(Jvm.maxDirectMemory() == 0);

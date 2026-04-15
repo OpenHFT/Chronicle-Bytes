@@ -3,9 +3,8 @@
  */
 package net.openhft.chronicle.bytes;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -15,11 +14,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 /**
  * Tests for the compact behavior of Bytes.
  */
-@RunWith(Parameterized.class)
 public class BytesCompactTest {
 
-    private final String name;
-    private final Bytes<?> bytes;
+    private String name;
+    private Bytes<?> bytes;
 
     /**
      * Constructor for parameterized test with name and bytes.
@@ -27,7 +25,7 @@ public class BytesCompactTest {
      * @param name  the name of the test scenario.
      * @param bytes the Bytes instance under test.
      */
-    public BytesCompactTest(String name, Bytes<?> bytes) {
+    public void initBytesCompactTest(String name, Bytes<?> bytes) {
         this.name = name;
         this.bytes = bytes;
     }
@@ -37,7 +35,6 @@ public class BytesCompactTest {
      *
      * @return a collection of test scenarios with name and Bytes instances.
      */
-    @Parameterized.Parameters(name = "{0}")
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][]{
                 {"native", Bytes.allocateElasticDirect(128)},
@@ -50,8 +47,10 @@ public class BytesCompactTest {
     /**
      * Test compact behavior of Bytes after various write and read operations.
      */
-    @Test
-    public void compact() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void compact(String name, Bytes<?> bytes) {
+        initBytesCompactTest(name, bytes);
         // Initialize buffer with a sample string
         bytes.clear().append("Hello World");
 
@@ -91,8 +90,10 @@ public class BytesCompactTest {
     /**
      * Test compact behavior of Bytes when skipping bytes.
      */
-    @Test
-    public void skipCompact() {
+    @MethodSource("data")
+    @ParameterizedTest(name = "{0}")
+    public void skipCompact(String name, Bytes<?> bytes) {
+        initBytesCompactTest(name, bytes);
         // Clear and move the write position 64 bytes ahead
         bytes.clear().writeSkip(64);
 

@@ -5,16 +5,16 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.io.ClosedIllegalStateException;
 import net.openhft.chronicle.core.io.ThreadingIllegalStateException;
-import org.junit.Test;
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.MockitoAnnotations;
 
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
-import static org.junit.Assert.*;
 
 @SuppressWarnings("unchecked")
 public class AbstractBytesTest {
@@ -42,7 +42,7 @@ public class AbstractBytesTest {
         }
     }
 
-    @Before
+    @BeforeEach
     public void setUp() {
         MockitoAnnotations.openMocks(this); // Initialize mocks annotated with @Mock
         mockBytesStore = mock(BytesStore.class);
@@ -63,7 +63,7 @@ public class AbstractBytesTest {
         when(mockBytesStore.isDirectMemory()).thenReturn(true);
 
         ConcreteBytes bytes = new ConcreteBytes(mockBytesStore, 0, 100);
-        assertTrue("Expected isDirectMemory to return true", bytes.isDirectMemory());
+        assertTrue(bytes.isDirectMemory(), "Expected isDirectMemory to return true");
     }
 
     @Test
@@ -74,7 +74,7 @@ public class AbstractBytesTest {
         ConcreteBytes bytes = new ConcreteBytes(mockBytesStore, 0, 100);
         bytes.writePosition(50); // Simulate that we have written some data
 
-        assertTrue("Expected canReadDirect to return true for length <= remaining", bytes.canReadDirect(10));
+        assertTrue(bytes.canReadDirect(10), "Expected canReadDirect to return true for length <= remaining");
     }
 
     @Test
@@ -85,7 +85,7 @@ public class AbstractBytesTest {
         ConcreteBytes bytes = new ConcreteBytes(mockBytesStore, 0, 100);
         bytes.writePosition(50); // Simulate that we have written some data
 
-        assertFalse("Expected canReadDirect to return false for length > remaining", bytes.canReadDirect(51));
+        assertFalse(bytes.canReadDirect(51), "Expected canReadDirect to return false for length > remaining");
     }
 
     @Test
@@ -96,9 +96,9 @@ public class AbstractBytesTest {
         ConcreteBytes bytes = new ConcreteBytes(mockBytesStore, 10, 90);
         bytes.clear();
 
-        assertEquals("Expected readPosition to reset", 0, bytes.readPosition());
-        assertEquals("Expected writePosition to reset", 0, bytes.writePosition());
-        assertEquals("Expected writeLimit to match capacity", 100, bytes.writeLimit());
+        assertEquals(0, bytes.readPosition(), "Expected readPosition to reset");
+        assertEquals(0, bytes.writePosition(), "Expected writePosition to reset");
+        assertEquals(100, bytes.writeLimit(), "Expected writeLimit to match capacity");
     }
 
     @Test
@@ -109,9 +109,9 @@ public class AbstractBytesTest {
         ConcreteBytes bytes = new ConcreteBytes(mockBytesStore, 0, 100);
         bytes.clearAndPad(20);
 
-        assertEquals("Expected readPosition to be set correctly after padding", 20, bytes.readPosition());
-        assertEquals("Expected writePosition to be set correctly after padding", 20, bytes.writePosition());
-        assertEquals("Expected writeLimit to match capacity", 100, bytes.writeLimit());
+        assertEquals(20, bytes.readPosition(), "Expected readPosition to be set correctly after padding");
+        assertEquals(20, bytes.writePosition(), "Expected writePosition to be set correctly after padding");
+        assertEquals(100, bytes.writeLimit(), "Expected writeLimit to match capacity");
     }
 
     @Test
@@ -143,11 +143,13 @@ public class AbstractBytesTest {
         verify(mockBytesStore).release(bytes);
     }
 
-    @Test(expected = BufferUnderflowException.class)
+    @Test
     public void readLong_WithInsufficientDataThrowsException() {
-        doThrow(new BufferUnderflowException()).when(mockBytesStore).readLong(anyLong());
-        bytes.lenient(false);
-        bytes.readLong();
+        assertThrows(BufferUnderflowException.class, () -> {
+            doThrow(new BufferUnderflowException()).when(mockBytesStore).readLong(anyLong());
+            bytes.lenient(false);
+            bytes.readLong();
+        });
     }
 
     @Test
@@ -158,9 +160,10 @@ public class AbstractBytesTest {
         verify(mockBytesStore).write8bit(anyLong(), eq(mockToWrite));
     }
 
-    @Test(expected = BufferOverflowException.class)
+    @Test
     public void prewriteCheckOffset_WithInvalidOffsetThrowsException() {
-        bytes.prewriteCheckOffset(150, 10);
+        assertThrows(BufferOverflowException.class, () ->
+            bytes.prewriteCheckOffset(150, 10));
     }
 
     @Test

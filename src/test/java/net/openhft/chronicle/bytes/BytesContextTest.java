@@ -3,17 +3,17 @@
  */
 package net.openhft.chronicle.bytes;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 public class BytesContextTest {
 
     private BytesContext context;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         // Mock the BytesContext interface
         context = mock(BytesContext.class);
@@ -27,12 +27,13 @@ public class BytesContextTest {
         when(context.key()).thenReturn(expectedKey);
 
         int actualKey = context.key();
-        assertEquals("Key should match the expected value", expectedKey, actualKey);
+        assertEquals(expectedKey, actualKey, "Key should match the expected value");
     }
 
-    @Test(expected = UnsupportedOperationException.class)
+    @Test
     public void testIsClosedThrowsUnsupportedOperationException() {
-        context.isClosed();
+        assertThrows(UnsupportedOperationException.class, () ->
+            context.isClosed());
     }
 
     @Test

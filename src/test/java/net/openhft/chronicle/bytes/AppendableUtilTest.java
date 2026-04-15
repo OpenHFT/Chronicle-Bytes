@@ -3,14 +3,12 @@
  */
 package net.openhft.chronicle.bytes;
 
-import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class AppendableUtilTest extends BytesTestCommon {

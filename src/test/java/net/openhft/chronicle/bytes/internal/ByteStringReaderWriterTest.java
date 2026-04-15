@@ -5,14 +5,14 @@ package net.openhft.chronicle.bytes.internal;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesTestCommon;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ByteStringReaderWriterTest extends BytesTestCommon {
 
@@ -56,7 +56,7 @@ public class ByteStringReaderWriterTest extends BytesTestCommon {
             w.flush();
 
             final String out = bytes.toString();
-            assertTrue(out, out.contains("ABC123XYZHELLO"));
+            assertTrue(out.contains("ABC123XYZHELLO"), out);
             assertEquals("ABC123XYZHELLO", out);
 
         } finally {

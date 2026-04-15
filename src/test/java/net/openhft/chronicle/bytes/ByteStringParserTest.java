@@ -6,23 +6,25 @@ package net.openhft.chronicle.bytes;
 import net.openhft.chronicle.bytes.internal.BytesInternal;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static net.openhft.chronicle.bytes.StopCharTesters.CONTROL_STOP;
 import static net.openhft.chronicle.bytes.StopCharTesters.SPACE_STOP;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThrows;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 public class ByteStringParserTest extends BytesTestCommon {
     @NotNull
     private
     Bytes<?> bytes = Bytes.allocateElastic();
 
+    @AfterEach
     @Override
     public void afterChecks() {
         bytes.releaseLast();
@@ -36,12 +38,12 @@ public class ByteStringParserTest extends BytesTestCommon {
         bytes.append(expected);
         Bytes<?> bytes2 = Bytes.allocateElasticOnHeap((int) bytes.readRemaining());
 
-        Assert.assertEquals(expected, bytes.parseLong(0));
-        Assert.assertEquals(expected, BytesInternal.parseLong(bytes));
+        Assertions.assertEquals(expected, bytes.parseLong(0));
+        Assertions.assertEquals(expected, BytesInternal.parseLong(bytes));
 
         bytes2.append(expected);
-        Assert.assertEquals(expected, bytes2.parseLong(0));
-        Assert.assertEquals(expected, BytesInternal.parseLong(bytes2));
+        Assertions.assertEquals(expected, bytes2.parseLong(0));
+        Assertions.assertEquals(expected, BytesInternal.parseLong(bytes2));
         bytes2.releaseLast();
 
     }
@@ -51,7 +53,7 @@ public class ByteStringParserTest extends BytesTestCommon {
         int expected = 123;
         bytes.append(expected);
 
-        Assert.assertEquals(expected, BytesInternal.parseLong(bytes));
+        Assertions.assertEquals(expected, BytesInternal.parseLong(bytes));
     }
 
     @Test
@@ -60,7 +62,7 @@ public class ByteStringParserTest extends BytesTestCommon {
         double expected = 123.1234;
         bytes.append(expected);
 
-        Assert.assertEquals(expected, BytesInternal.parseDouble(bytes), 0);
+        Assertions.assertEquals(expected, BytesInternal.parseDouble(bytes), 0);
     }
 
     @Test
@@ -69,7 +71,7 @@ public class ByteStringParserTest extends BytesTestCommon {
         float expected = 123;
         bytes.append(expected);
 
-        Assert.assertEquals(expected, BytesInternal.parseDouble(bytes), 0);
+        Assertions.assertEquals(expected, BytesInternal.parseDouble(bytes), 0);
     }
 
     @Test
@@ -77,7 +79,7 @@ public class ByteStringParserTest extends BytesTestCommon {
         short expected = 123;
         bytes.append(expected);
 
-        Assert.assertEquals(expected, BytesInternal.parseLong(bytes));
+        Assertions.assertEquals(expected, BytesInternal.parseLong(bytes));
     }
 
     @Test
@@ -196,21 +198,21 @@ public class ByteStringParserTest extends BytesTestCommon {
         @NotNull StringBuilder sb = new StringBuilder();
         for (String word : words) {
             bytes.parseUtf8(sb, CONTROL_STOP);
-            Assert.assertEquals(word, sb.toString());
+            Assertions.assertEquals(word, sb.toString());
         }
         bytes.parseUtf8(sb, CONTROL_STOP);
-        Assert.assertEquals("", sb.toString());
+        Assertions.assertEquals("", sb.toString());
 
         bytes.readPosition(0);
         bytes.skipTo(CONTROL_STOP);
         assertEquals(6, bytes.readPosition());
         bytes.skipTo(CONTROL_STOP);
         assertEquals(13, bytes.readPosition());
-        Assert.assertTrue(bytes.skipTo(CONTROL_STOP));
+        Assertions.assertTrue(bytes.skipTo(CONTROL_STOP));
         assertEquals(23, bytes.readPosition());
-        Assert.assertTrue(bytes.skipTo(CONTROL_STOP));
+        Assertions.assertTrue(bytes.skipTo(CONTROL_STOP));
         assertEquals(24, bytes.readPosition());
-        Assert.assertFalse(bytes.skipTo(CONTROL_STOP));
+        Assertions.assertFalse(bytes.skipTo(CONTROL_STOP));
     }
 
     @Test

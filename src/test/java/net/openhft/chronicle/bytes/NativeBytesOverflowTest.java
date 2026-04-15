@@ -4,51 +4,58 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Jvm;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 
 import static net.openhft.chronicle.bytes.BytesStore.wrap;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 public class NativeBytesOverflowTest extends BytesTestCommon {
 
-    @Test(expected = BufferOverflowException.class)
+    @Test
     public void testExceedWriteLimitNativeWriteBytes() {
-        BytesStore<?, ByteBuffer> store = wrap(ByteBuffer.allocate(128));
-        Bytes<?> nb = new NativeBytes<>(store);
-        try {
-            nb.writeLimit(2).writePosition(0);
-            nb.writeLong(10L);
-        } finally {
-            nb.releaseLast();
-        }
+        assertThrows(BufferOverflowException.class, () -> {
+            BytesStore<?, ByteBuffer> store = wrap(ByteBuffer.allocate(128));
+            Bytes<?> nb = new NativeBytes<>(store);
+            try {
+                nb.writeLimit(2).writePosition(0);
+                nb.writeLong(10L);
+            } finally {
+                nb.releaseLast();
+            }
+        });
     }
 
-    @Test(expected = BufferOverflowException.class)
+    @Test
     public void testExceedWriteLimitGuardedBytes() {
-        Bytes<?> guardedNativeBytes = new GuardedNativeBytes<>(wrap(ByteBuffer.allocate(128)), 128);
-        try {
-            guardedNativeBytes.writeLimit(2).writePosition(0);
-            guardedNativeBytes.writeLong(10L);
-        } finally {
-            guardedNativeBytes.releaseLast();
-        }
+        assertThrows(BufferOverflowException.class, () -> {
+            Bytes<?> guardedNativeBytes = new GuardedNativeBytes<>(wrap(ByteBuffer.allocate(128)), 128);
+            try {
+                guardedNativeBytes.writeLimit(2).writePosition(0);
+                guardedNativeBytes.writeLong(10L);
+            } finally {
+                guardedNativeBytes.releaseLast();
+            }
+        });
     }
 
-    @Test(expected = BufferOverflowException.class)
+    @Test
     public void testElastic() {
-        assumeFalse(Jvm.maxDirectMemory() == 0);
+        assertThrows(BufferOverflowException.class, () -> {
+            assumeFalse(Jvm.maxDirectMemory() == 0);
 
-        Bytes<?> bytes = Bytes.elasticByteBuffer();
-        try {
-            bytes.writeLimit(2).writePosition(0);
-            bytes.writeLong(10L);
-        } finally {
-            bytes.releaseLast();
-        }
+            Bytes<?> bytes = Bytes.elasticByteBuffer();
+            try {
+                bytes.writeLimit(2).writePosition(0);
+                bytes.writeLong(10L);
+            } finally {
+                bytes.releaseLast();
+            }
+        });
     }
 
     @Test

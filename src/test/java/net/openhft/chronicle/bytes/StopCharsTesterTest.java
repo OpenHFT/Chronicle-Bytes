@@ -3,8 +3,8 @@
  */
 package net.openhft.chronicle.bytes;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class StopCharsTesterTest {
 
@@ -12,8 +12,8 @@ public class StopCharsTesterTest {
     public void testCustomStopCharsTester() {
         StopCharsTester tester = (ch, peekNextCh) -> ch == ',' || ch == ';';
 
-        Assert.assertTrue(tester.isStopChar(',', 0));
-        Assert.assertTrue(tester.isStopChar(';', 0));
-        Assert.assertFalse(tester.isStopChar('a', 0));
+        Assertions.assertTrue(tester.isStopChar(',', 0));
+        Assertions.assertTrue(tester.isStopChar(';', 0));
+        Assertions.assertFalse(tester.isStopChar('a', 0));
     }
 }

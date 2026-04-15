@@ -3,8 +3,8 @@
  */
 package net.openhft.chronicle.bytes;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.nio.BufferUnderflowException;
 import java.util.stream.Collectors;
@@ -39,7 +39,7 @@ public class StopBitTest extends BytesTestCommon {
 
                 // System.out.printf("0x%04x : %02x %02x %02x%n", i, b.readByte(0), b.readByte(1), b.readByte(3));
 
-                Assert.assertEquals("failed at " + i, expected, b.read8bit());
+                Assertions.assertEquals(expected, b.read8bit(), "failed at " + i);
 
             } finally {
                 b.releaseLast();
@@ -72,7 +72,7 @@ public class StopBitTest extends BytesTestCommon {
                 }
             }
 
-            Assert.assertEquals(s, b.read8bit());
+            Assertions.assertEquals(s, b.read8bit());
         } finally {
             bytes.releaseLast();
             b.releaseLast();

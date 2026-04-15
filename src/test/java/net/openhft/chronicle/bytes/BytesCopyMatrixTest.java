@@ -3,14 +3,14 @@
  */
 package net.openhft.chronicle.bytes;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class BytesCopyMatrixTest extends BytesTestCommon {
 
@@ -48,7 +48,7 @@ public class BytesCopyMatrixTest extends BytesTestCommon {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             source.copyTo(baos);
             assertEquals("payload", baos.toString(StandardCharsets.ISO_8859_1.name()));
-            assertEquals("copyTo(OutputStream) must not move readPosition", 0, source.readPosition());
+            assertEquals(0, source.readPosition(), "copyTo(OutputStream) must not move readPosition");
         } finally {
             source.releaseLast();
         }

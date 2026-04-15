@@ -4,12 +4,12 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.io.IORuntimeException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.nio.BufferUnderflowException;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 @SuppressWarnings("rawtypes")
 public class ReadWriteMarshallableTest extends BytesTestCommon {

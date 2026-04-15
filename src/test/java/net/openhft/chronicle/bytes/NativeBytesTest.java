@@ -9,11 +9,10 @@ import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.Assume;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.Assumptions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
@@ -24,33 +23,33 @@ import java.util.Collection;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static net.openhft.chronicle.bytes.Allocator.*;
-import static org.junit.Assert.*;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
-@RunWith(Parameterized.class)
 public class NativeBytesTest extends BytesTestCommon {
 
-    private final Allocator alloc;
+    private Allocator alloc;
 
-    public NativeBytesTest(Allocator alloc) {
+    public void initNativeBytesTest(Allocator alloc) {
         this.alloc = alloc;
     }
 
-    @Parameterized.Parameters
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][]{
                 {NATIVE}, {NATIVE_ADDRESS}, {HEAP}, {BYTE_BUFFER}
         });
     }
 
-    @Before
+    @BeforeEach
     public void hasDirectMemory() {
         assumeFalse(Jvm.maxDirectMemory() == 0);
     }
 
-    @Test
-    public void testWriteBytesWhereResizeNeeded0()
+    @MethodSource("data")
+    @ParameterizedTest
+    public void testWriteBytesWhereResizeNeeded0(Allocator alloc)
             throws IORuntimeException, BufferUnderflowException, BufferOverflowException {
+        initNativeBytesTest(alloc);
         Bytes<?> b = alloc.elasticBytes(1);
         assertEquals(b.start(), b.readLimit());
         assertEquals(b.capacity(), b.writeLimit());
@@ -63,9 +62,11 @@ public class NativeBytesTest extends BytesTestCommon {
         b.releaseLast();
     }
 
-    @Test
-    public void testWriteBytesWhereResizeNeeded()
+    @MethodSource("data")
+    @ParameterizedTest
+    public void testWriteBytesWhereResizeNeeded(Allocator alloc)
             throws IllegalArgumentException, IORuntimeException, BufferUnderflowException, BufferOverflowException {
+        initNativeBytesTest(alloc);
         Bytes<?> b = alloc.elasticBytes(1);
         assertEquals(b.start(), b.readLimit());
         assertEquals(b.capacity(), b.writeLimit());
@@ -78,8 +79,10 @@ public class NativeBytesTest extends BytesTestCommon {
         b.releaseLast();
     }
 
-    @Test
-    public void testAppendCharArrayNonAscii() {
+    @MethodSource("data")
+    @ParameterizedTest
+    public void testAppendCharArrayNonAscii(Allocator alloc) {
+        initNativeBytesTest(alloc);
         Bytes<?> b = alloc.elasticBytes(4);
         b.appendUtf8('\u0394');
         final byte[] bytes = "\u0394".getBytes(StandardCharsets.UTF_8);
@@ -103,8 +106,10 @@ public class NativeBytesTest extends BytesTestCommon {
         b.releaseLast();
     }
 
-    @Test
-    public void testAppendCharArrayNonAsciiToShort() {
+    @MethodSource("data")
+    @ParameterizedTest
+    public void testAppendCharArrayNonAsciiToShort(Allocator alloc) {
+        initNativeBytesTest(alloc);
         Bytes<?> b = alloc.elasticBytes(4);
         try {
             b.appendUtf8('\u0394');
@@ -120,8 +125,10 @@ public class NativeBytesTest extends BytesTestCommon {
         }
     }
 
-    @Test
-    public void testResizeTwoPagesToThreePages() {
+    @MethodSource("data")
+    @ParameterizedTest
+    public void testResizeTwoPagesToThreePages(Allocator alloc) {
+        initNativeBytesTest(alloc);
         assumeFalse(alloc == HEAP);
 
         long pageSize = OS.pageSize();
@@ -134,11 +141,13 @@ public class NativeBytesTest extends BytesTestCommon {
         nativeBytes.releaseLast();
     }
 
-    @Test
-    public void tryGrowBeyondByteBufferCapacity() {
+    @MethodSource("data")
+    @ParameterizedTest
+    public void tryGrowBeyondByteBufferCapacity(Allocator alloc) {
+        initNativeBytesTest(alloc);
         assumeFalse(alloc == HEAP);
         long maxMemory = Runtime.getRuntime().maxMemory();
-        Assume.assumeTrue(maxMemory >= Bytes.MAX_HEAP_CAPACITY * 3L / 2);
+        Assumptions.assumeTrue(maxMemory >= Bytes.MAX_HEAP_CAPACITY * 3L / 2);
 
         @NotNull Bytes<ByteBuffer> bytes = Bytes.elasticHeapByteBuffer(Bytes.MAX_HEAP_CAPACITY);
         @Nullable ByteBuffer byteBuffer = bytes.underlyingObject();
@@ -151,8 +160,10 @@ public class NativeBytesTest extends BytesTestCommon {
         );
     }
 
-    @Test
-    public void tryGrowBeyondCapacity() {
+    @MethodSource("data")
+    @ParameterizedTest
+    public void tryGrowBeyondCapacity(Allocator alloc) {
+        initNativeBytesTest(alloc);
         final int maxCapacity = 1024;
         @NotNull Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer(128, maxCapacity);
         assertEquals(128, bytes.realCapacity());

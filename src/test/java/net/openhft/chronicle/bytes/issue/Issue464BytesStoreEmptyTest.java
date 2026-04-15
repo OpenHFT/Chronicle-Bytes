@@ -5,11 +5,11 @@ package net.openhft.chronicle.bytes.issue;
 
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.bytes.BytesTestCommon;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.function.Supplier;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class Issue464BytesStoreEmptyTest extends BytesTestCommon {
     @Test
@@ -37,9 +37,10 @@ public class Issue464BytesStoreEmptyTest extends BytesTestCommon {
         doTest(() -> BytesStore.from(new StringBuilder()));
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test
     public void nullNativeStoreFromShouldNotAllocate() {
-        doTest(() -> BytesStore.nativeStoreFrom(null));
+        assertThrows(NullPointerException.class, () ->
+            doTest(() -> BytesStore.nativeStoreFrom(null)));
     }
 
     @Test

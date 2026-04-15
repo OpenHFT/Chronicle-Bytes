@@ -11,9 +11,8 @@ import org.junit.jupiter.api.Test;
 
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
-
-import static org.junit.Assert.*;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 @SuppressWarnings({"squid:S2699", "squid:S5786"})
 class DecimaliserFloatTest extends BytesTestCommon {
@@ -137,15 +136,15 @@ class DecimaliserFloatTest extends BytesTestCommon {
     void toFloatLarge() {
         DecimalAppender check = (negative, mantissa, exponent) -> {
             assertTrue(0 <= exponent);
-            assertTrue("exponent: " + exponent, exponent <= 18);
+            assertTrue(exponent <= 18, "exponent: " + exponent);
         };
         LongStream.range(-46, 39)
                 .forEach(x -> {
                     float f = (float) Math.pow(10, x);
                     float lower = 1e-18f;
-                    assertEquals("x: " + x,
-                            f == 0 || (lower <= f && f < 1e18),
-                            SimpleDecimaliser.SIMPLE.toDecimal(f, check));
+                    assertEquals(f == 0 || (lower <= f && f < 1e18),
+                            SimpleDecimaliser.SIMPLE.toDecimal(f, check),
+                            "x: " + x);
                 });
     }
 

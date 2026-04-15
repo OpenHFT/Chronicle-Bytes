@@ -4,16 +4,17 @@
 package net.openhft.chronicle.bytes.util;
 
 import net.openhft.chronicle.bytes.StopCharsTester;
-import org.junit.Test;
-import org.junit.Before;
-import static org.mockito.Mockito.*;
-import static org.junit.Assert.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class EscapingStopCharsTesterTest {
 
     private StopCharsTester baseTester;
     private EscapingStopCharsTester tester;
-    @Before
+    @BeforeEach
     public void setUp() {
         // Setup the base tester with specific behavior for demonstration
         baseTester = (ch, peekNextCh) -> ch == 'x'; // Let's say 'x' is a stop character
@@ -23,15 +24,15 @@ public class EscapingStopCharsTesterTest {
     @Test
     public void testIsStopCharWithEscape() {
         // First call with escape character
-        assertFalse("Escaped character should not be stop char", tester.isStopChar('\\', 'x'));
+        assertFalse(tester.isStopChar('\\', 'x'), "Escaped character should not be stop char");
         // Next call with the character that would normally be a stop character
-        assertFalse("Character following an escape should not be treated as stop char", tester.isStopChar('x', ' '));
+        assertFalse(tester.isStopChar('x', ' '), "Character following an escape should not be treated as stop char");
         // Subsequent call with a stop character not preceded by an escape
-        assertTrue("Non-escaped stop char should be recognized as stop char", tester.isStopChar('x', ' '));
+        assertTrue(tester.isStopChar('x', ' '), "Non-escaped stop char should be recognized as stop char");
     }
 
     @Test
     public void testIsStopCharWithoutEscape() {
-        assertFalse("Non-stop char should not be recognized as stop char", tester.isStopChar('y', ' '));
+        assertFalse(tester.isStopChar('y', ' '), "Non-stop char should not be recognized as stop char");
     }
 }
