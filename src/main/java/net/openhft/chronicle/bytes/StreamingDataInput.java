@@ -6,6 +6,8 @@ package net.openhft.chronicle.bytes;
 import net.openhft.chronicle.bytes.internal.BytesInternal;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.UnsafeMemory;
+import net.openhft.chronicle.core.annotation.CallerCheckedCopyBounds;
+import net.openhft.chronicle.core.annotation.CallerCheckedRangeBounds;
 import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.io.ClosedIllegalStateException;
 import net.openhft.chronicle.core.io.IORuntimeException;
@@ -711,6 +713,8 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
+    // CSCallerCheckedBounds delegate to caller because read(byte[],off,len) clamps len2 locally via Math.min but the destination slice (off,len) is caller-owned.
+    @SuppressWarnings("CSCallerCheckedBounds")
     default int read(byte[] bytes, @NonNegative int off, @NonNegative int len)
             throws BufferUnderflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
         requireNonNull(bytes);
@@ -807,6 +811,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
+    @CallerCheckedCopyBounds(dstAddress = "offset", length = "length")
     default void unsafeReadObject(@NotNull Object o, @NonNegative int offset, @NonNegative int length)
             throws BufferUnderflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
         requireNonNull(o);
@@ -839,6 +844,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
+    @CallerCheckedRangeBounds(address = "address", length = "length")
     default S unsafeRead(long address, @NonNegative int length) throws ClosedIllegalStateException, ThreadingIllegalStateException {
         if (isDirectMemory()) {
             long src = addressForRead(readPosition());

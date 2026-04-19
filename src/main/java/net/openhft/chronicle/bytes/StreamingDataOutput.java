@@ -7,6 +7,7 @@ import net.openhft.chronicle.bytes.internal.BytesInternal;
 import net.openhft.chronicle.bytes.util.DecoratedBufferOverflowException;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.UnsafeMemory;
+import net.openhft.chronicle.core.annotation.CallerCheckedRangeBounds;
 import net.openhft.chronicle.core.annotation.DontChain;
 import net.openhft.chronicle.core.annotation.Java9;
 import net.openhft.chronicle.core.annotation.NonNegative;
@@ -805,6 +806,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
+    @CallerCheckedRangeBounds(address = "address", length = "length")
     default S unsafeWrite(long address, @NonNegative int length) throws ClosedIllegalStateException, ThreadingIllegalStateException {
         if (isDirectMemory()) {
             writeSkip(length); // blow up if there isn't that much space left

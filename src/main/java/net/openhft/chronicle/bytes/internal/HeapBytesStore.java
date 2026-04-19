@@ -104,6 +104,8 @@ public class HeapBytesStore<U>
         return false;
     }
 
+    // CSCallerCheckedBounds delegate to caller because move validates from/to/length non-negativity locally but the source/destination ranges within realUnderlyingObject are caller-owned.
+    @SuppressWarnings("CSCallerCheckedBounds")
     @Override
     public void move(@NonNegative long from, @NonNegative long to, @NonNegative long length)
             throws BufferUnderflowException, ArithmeticException {
@@ -184,6 +186,8 @@ public class HeapBytesStore<U>
         }
     }
 
+    // CSCallerCheckedBounds delegate to caller because read(offsetInRDI, byte[], offset, length) clamps len locally via Math.min against readLimit but the destination slice (offset,length) in bytes is caller-owned.
+    @SuppressWarnings("CSCallerCheckedBounds")
     @Override
     public long read(@NonNegative long offsetInRDI, byte[] bytes, @NonNegative int offset, @NonNegative int length) {
         requireNonNegative(offsetInRDI);
@@ -327,6 +331,8 @@ public class HeapBytesStore<U>
     }
 
     @Override
+    // CSCallerCheckedBounds delegate to caller because write8bit(position, s, start, length) forwards the source string slice (start,length) into the native write; caller owns the slice proof.
+    @SuppressWarnings("CSCallerCheckedBounds")
     public long write8bit(@NonNegative long position, @NotNull String s, @NonNegative int start, @NonNegative int length) {
         requireNonNegative(position);
         requireNonNull(s);
@@ -525,7 +531,8 @@ public class HeapBytesStore<U>
         }
     }
 
-    @SuppressWarnings("deprecation")
+    // CSCallerCheckedBounds delegate to caller because write(offsetInRDO, ByteBuffer, offset, length) forwards (offset,length) into the destination object; caller owns the slice proof.
+    @SuppressWarnings({"deprecation", "CSCallerCheckedBounds"})
     @Override
     public void write(
             @NonNegative long offsetInRDO, @NotNull ByteBuffer bytes, @NonNegative int offset, @NonNegative int length)
@@ -547,6 +554,8 @@ public class HeapBytesStore<U>
         }
     }
 
+    // CSCallerCheckedBounds delegate to caller because this private helper is only called from write(..., ByteBuffer, offset, length) which already delegates bounds proof.
+    @SuppressWarnings("CSCallerCheckedBounds")
     private void copyMemory0(long offsetInRDO, int offset, int length, byte[] src) {
         if (realUnderlyingObject instanceof byte[]) {
             memory.copyMemory(src, offset, (byte[]) realUnderlyingObject, Math.toIntExact(this.dataOffset + offsetInRDO - memory.arrayBaseOffset(byte[].class)), length);

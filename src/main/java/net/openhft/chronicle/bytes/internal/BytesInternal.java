@@ -11,6 +11,7 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.Memory;
 import net.openhft.chronicle.core.UnsafeMemory;
+import net.openhft.chronicle.core.annotation.CallerCheckedCopyBounds;
 import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.io.*;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
@@ -304,6 +305,8 @@ enum BytesInternal {
         return true;
     }
 
+    // CSCallerCheckedBounds delegate to caller because the Unchecked variant relies on caller-proven aLength >= bLength and capacity invariants established before entry.
+    @SuppressWarnings("CSCallerCheckedBounds")
     // a >= b here and we also know it is safe to read bLength
     static <U extends BytesStore<?, ?> & HasUncheckedRandomDataInput>
     boolean contentEqualIntUnchecked(@NotNull final U a,
@@ -389,6 +392,8 @@ enum BytesInternal {
         return true;
     }
 
+    // CSCallerCheckedBounds delegate to caller because this private Unchecked variant relies on caller-proven aLength >= bLength and capacity invariants.
+    @SuppressWarnings("CSCallerCheckedBounds")
     // a >= b here and we also know it is safe to read bLength
     private static <U extends BytesStore<?, ?> & HasUncheckedRandomDataInput>
     boolean contentEqualsLongUnchecked(@NotNull final U a,
@@ -458,6 +463,8 @@ enum BytesInternal {
         }
     }
 
+    // CSCallerCheckedBounds delegate to caller because Unchecked variant relies on caller-proven length fitting both ua and ub readable ranges from the given positions.
+    @SuppressWarnings("CSCallerCheckedBounds")
     private static boolean startsWithUnchecked(@NotNull final UncheckedRandomDataInput ua,
                                                @NotNull final UncheckedRandomDataInput ub,
                                                @NonNegative final long aPos,
@@ -3316,6 +3323,8 @@ enum BytesInternal {
         }
     }
 
+    // CSCallerCheckedBounds delegate to caller because writeFully validates length + offset <= bytes.capacity() locally on the unchecked path but the slice tuple (offset,length) is caller-owned.
+    @SuppressWarnings("CSCallerCheckedBounds")
     public static void writeFully(@NotNull final RandomDataInput bytes,
                                   @NonNegative final long offset,
                                   @NonNegative final long length,
@@ -3349,6 +3358,7 @@ enum BytesInternal {
         }
     }
 
+    @CallerCheckedCopyBounds(srcAddress = "from", dstAddress = "to", length = "length")
     public static void copyMemory(long from, long to, int length) {
         UnsafeMemory.copyMemory(from, to, length);
     }

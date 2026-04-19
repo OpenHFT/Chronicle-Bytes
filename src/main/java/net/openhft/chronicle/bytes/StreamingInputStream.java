@@ -67,6 +67,8 @@ public class StreamingInputStream extends InputStream {
         return (int) Math.min(Integer.MAX_VALUE, in.readRemaining());
     }
 
+    // CSCallerCheckedBounds delegate to caller because InputStream.read(b,off,len) inherits the caller-owned slice contract from java.io.InputStream; indices are forwarded unchanged.
+    @SuppressWarnings("CSCallerCheckedBounds")
     @Override
     public int read(byte[] b, @NonNegative int off, @NonNegative int len)
             throws IOException {

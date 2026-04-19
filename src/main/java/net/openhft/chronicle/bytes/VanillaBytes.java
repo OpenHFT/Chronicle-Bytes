@@ -438,6 +438,8 @@ public class VanillaBytes<U>
         return write0(bytes, offset, length);
     }
 
+    // CSCallerCheckedBounds delegate to caller because write0 relies on canReadDirect/canWriteDirect and ensureCapacity to establish the ranges before UnsafeMemory.copyMemory.
+    @SuppressWarnings("CSCallerCheckedBounds")
     @NotNull
     private VanillaBytes<U> write0(@NotNull BytesStore<?, ?> bytes, @NonNegative long offset, long length) throws ClosedIllegalStateException, ThreadingIllegalStateException {
         ensureCapacity(writePosition() + length);
