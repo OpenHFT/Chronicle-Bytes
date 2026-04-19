@@ -603,7 +603,9 @@ public interface Bytes<U> extends
                 buffer.readLimit(limit);
                 buffer.readPosition(pos);
             }
-        } catch (Exception e) {
+        }
+        // CSCatchBroadException REVIEW keep catch (Exception e) here because this toString path degrades to exception text instead of throwing while reporting state.
+        catch (Exception e) {
             return e.toString();
         }
     }

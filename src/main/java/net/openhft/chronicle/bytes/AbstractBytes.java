@@ -581,7 +581,9 @@ public abstract class AbstractBytes<U>
     protected void performRelease() throws ClosedIllegalStateException {
         try {
             this.bytesStore.release(this);
-        } catch (ClosedIllegalStateException e) {
+        }
+        // CSWarnAndContinue REVIEW keep catch (ClosedIllegalStateException e) here because release is best-effort and only logs an already-closed bytes store.
+        catch (ClosedIllegalStateException e) {
             Jvm.warn().on(getClass(), e);
         }
     }
@@ -1446,7 +1448,9 @@ public abstract class AbstractBytes<U>
         reserve(toStringOwner);
         try {
             return BytesInternal.toString(this);
-        } catch (Exception e) {
+        }
+        // CSCatchBroadException REVIEW keep catch (Exception e) here because this toString path degrades to exception text instead of throwing while reporting state.
+        catch (Exception e) {
             return e.toString();
         } finally {
             release(toStringOwner);

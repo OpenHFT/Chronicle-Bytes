@@ -558,7 +558,9 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
     default String toDebugString(@NonNegative long maxLength) {
         try {
             return BytesInternal.toDebugString(this, maxLength);
-        } catch (Exception e) {
+        }
+        // CSCatchBroadException REVIEW keep catch (Exception e) here because this debug-string path degrades to exception text instead of throwing.
+        catch (Exception e) {
             return e.toString();
         }
     }

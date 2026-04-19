@@ -63,6 +63,7 @@ public class BytesMethodReader extends SimpleCloseable implements MethodReader {
      * {@code object}.
      */
     private void addEncoder(Object object, Method method, MethodEncoder encoder) {
+        // CSSetAccessibleEscalation REVIEW keep Jvm.setAccessible(method) here because method-reader dispatch invokes methods discovered reflectively on the target object.
         Jvm.setAccessible(method);
         Class<?>[] parameterTypes = method.getParameterTypes();
         int count = parameterTypes.length;
@@ -74,8 +75,10 @@ public class BytesMethodReader extends SimpleCloseable implements MethodReader {
             try {
                 array[0] = (BytesMarshallable[]) encoder.decode(array[0], bytesIn);
                 method.invoke(object, (Object[]) array[0]);
-            } catch (IllegalAccessException | InvocationTargetException | BufferUnderflowException |
-                     IllegalArgumentException | IllegalStateException | InvalidMarshallableException e) {
+            }
+            // CSWarnAndContinue REVIEW keep this multi-catch here because the reader logs one bad message, skips to the read limit, and continues.
+            catch (IllegalAccessException | InvocationTargetException | BufferUnderflowException |
+                    IllegalArgumentException | IllegalStateException | InvalidMarshallableException e) {
                 Jvm.warn().on(getClass(), "Exception calling " + method + " " + Arrays.toString(array[0]), e);
                 bytesIn.readPosition(bytesIn.readLimit());
             }

@@ -167,7 +167,9 @@ public class HexDumpBytes
             throwExceptionIfReleased(this);
             if (lineLength() > 0) newLine();
             return text.toString();
-        } catch (Throwable e) {
+        }
+        // CSCatchThrowable REVIEW keep catch (Throwable e) here because this hex-dump path must not throw while reporting released state.
+        catch (Throwable e) {
             return e.toString();
         }
     }

@@ -159,7 +159,9 @@ public class TextLongReference extends AbstractReference implements LongReferenc
     public String toString() {
         try {
             return "value: " + getValue();
-        } catch (Exception e) {
+        }
+        // CSCatchBroadException REVIEW keep catch (Exception e) here because this value dump degrades to exception text instead of throwing.
+        catch (Exception e) {
             return e.toString();
         }
     }

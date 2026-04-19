@@ -27,9 +27,13 @@ public final class ByteBuffers {
         Field address = null;
         Field capacity = null;
         try {
+            // CSReflectiveFieldLookup REVIEW keep Jvm.getField(direct.getClass(), "address") here because the direct-ByteBuffer fast path reads JDK internals and warns before falling back when blocked.
             address = Jvm.getField(direct.getClass(), "address");
+            // CSReflectiveFieldLookup REVIEW keep Jvm.getField(direct.getClass(), "capacity") here because the direct-ByteBuffer fast path reads JDK internals and warns before falling back when blocked.
             capacity = Jvm.getField(direct.getClass(), "capacity");
-        } catch (Throwable t) {
+        }
+        // CSCatchThrowable REVIEW keep catch (Throwable t) here because the reflective direct-ByteBuffer fast path must fall back cleanly when JVM internals are unavailable.
+        catch (Throwable t) {
             Jvm.warn().on(ByteBuffers.class, "Unable to access direct ByteBuffer fields", t);
         }
         ADDRESS = address;

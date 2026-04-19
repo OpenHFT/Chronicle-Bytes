@@ -89,7 +89,9 @@ public class BinaryIntReference extends AbstractReference implements IntValue {
             return "bytes is null";
         try {
             return "value: " + getValue();
-        } catch (Throwable e) {
+        }
+        // CSCatchThrowable REVIEW keep catch (Throwable e) here because this value dump must not throw while reporting broken state.
+        catch (Throwable e) {
             return "value: " + e;
         }
     }

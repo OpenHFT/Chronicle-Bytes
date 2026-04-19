@@ -40,6 +40,7 @@ public interface BytesOut<U> extends
         Class[] interfaces = ObjectUtils.addAll(tClass, additional);
 
         //noinspection unchecked
+        // CSProxyAdmission REVIEW keep Proxy.newProxyInstance(...) here because method-writer interfaces are bound from declared Chronicle API types.
         return (T) Proxy.newProxyInstance(tClass.getClassLoader(), interfaces,
                 new BinaryBytesMethodWriterInvocationHandler(tClass, MethodEncoderLookup.BY_ANNOTATION, this));
     }

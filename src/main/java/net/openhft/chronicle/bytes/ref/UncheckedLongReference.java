@@ -106,7 +106,9 @@ public class UncheckedLongReference extends UnsafeCloseable implements LongRefer
             return "addressForRead is 0";
         try {
             return "value: " + getValue();
-        } catch (Throwable e) {
+        }
+        // CSCatchThrowable REVIEW keep catch (Throwable e) here because this unchecked value dump must not throw while reporting broken state.
+        catch (Throwable e) {
             return "value: " + e;
         }
     }

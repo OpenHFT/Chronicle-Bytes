@@ -120,7 +120,9 @@ public abstract class AbstractReference extends AbstractCloseable implements Byt
         this.bytesStore = null;
         try {
             bytes0.release(this);
-        } catch (ClosedIllegalStateException e) {
+        }
+        // CSWarnAndContinue REVIEW keep catch (ClosedIllegalStateException e) here because reference release after close is tolerated during teardown and only emits debug logging.
+        catch (ClosedIllegalStateException e) {
             Jvm.debug().on(AbstractReference.class, "release after close", e);
         }
     }

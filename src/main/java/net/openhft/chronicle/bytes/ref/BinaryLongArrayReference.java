@@ -411,7 +411,9 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
             if (i < getCapacity())
                 sb.append(" ...");
 
-        } catch (Throwable e) {
+        }
+        // CSCatchThrowable REVIEW keep catch (Throwable e) here because this partial array dump must not throw while reporting broken state.
+        catch (Throwable e) {
             sb.append(" ").append(e);
         }
         return sb.toString();

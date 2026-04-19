@@ -485,7 +485,9 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
             sb.append(", value: ");
             appendContents(sb, used);
             return sb.toString();
-        } catch (Exception e) {
+        }
+        // CSCatchBroadException REVIEW keep catch (Exception e) here because this array dump degrades to exception text instead of throwing.
+        catch (Exception e) {
             return e.toString();
         }
     }

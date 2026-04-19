@@ -50,7 +50,9 @@ public class BinaryTwoLongReference extends BinaryLongReference implements TwoLo
     public String toString() {
         try {
             return bytesStore == null ? "bytes is null" : "value: " + getValue() + ", value2: " + getValue2();
-        } catch (Exception e) {
+        }
+        // CSCatchBroadException REVIEW keep catch (Exception e) here because this value dump degrades to exception text instead of throwing.
+        catch (Exception e) {
             return e.toString();
         }
     }

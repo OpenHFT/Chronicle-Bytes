@@ -55,12 +55,14 @@ public final class PageUtil {
 
     static int parsePageSize(String mount) {
         Matcher matcher = PAGE_SIZE_PATTERN.matcher(mount);
-        if (matcher.find())
+        if (matcher.find()) {
             try {
                 return Integer.parseInt(matcher.group(1)) * mult(matcher.group(2));
             }
-        catch (Exception e) {
-            Jvm.warn().on(PageUtil.class, format("Error parsing pageSize={0}: {1}", matcher.group(1), e.getMessage()));
+            // CSCatchBroadException REVIEW keep catch (Exception e) here because page-size parsing falls back to the default huge-page size when the mount entry is malformed.
+            catch (Exception e) {
+                Jvm.warn().on(PageUtil.class, format("Error parsing pageSize={0}: {1}", matcher.group(1), e.getMessage()));
+            }
         }
         return DEFAULT_HUGE_PAGE_SIZE;
     }

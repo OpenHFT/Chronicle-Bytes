@@ -52,10 +52,15 @@ public class NativeBytesStore<U>
         Field capacity = null;
         Field att = null;
         try {
+            // CSReflectiveFieldLookup REVIEW keep Jvm.getField(directBB, "address") here because the direct-ByteBuffer fast path reads JDK internals and warns before falling back when blocked.
             address = Jvm.getField(directBB, "address");
+            // CSReflectiveFieldLookup REVIEW keep Jvm.getField(directBB, "capacity") here because the direct-ByteBuffer fast path reads JDK internals and warns before falling back when blocked.
             capacity = Jvm.getField(directBB, "capacity");
+            // CSReflectiveFieldLookup REVIEW keep Jvm.getField(directBB, "att") here because the direct-ByteBuffer fast path reads JDK internals and warns before falling back when blocked.
             att = Jvm.getField(directBB, "att");
-        } catch (Throwable t) {
+        }
+        // CSCatchThrowable REVIEW keep catch (Throwable t) here because the reflective direct-ByteBuffer fast path must fall back cleanly when JVM internals are unavailable.
+        catch (Throwable t) {
             Jvm.warn().on(NativeBytesStore.class, "Unable to access ByteBuffer fields", t);
         }
         BB_ADDRESS = address;

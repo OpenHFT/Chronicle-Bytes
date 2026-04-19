@@ -45,7 +45,9 @@ public final class Unmapper implements Runnable {
             OS.unmap(address, size, pageSize);
             address = 0;
 
-        } catch (@NotNull IOException e) {
+        }
+        // CSWarnAndContinue REVIEW keep catch (IOException e) here because OS unmap cleanup is best-effort and only warns when release fails.
+        catch (@NotNull IOException e) {
             Jvm.warn().on(OS.class, "Error on unmap and release", e);
         }
     }

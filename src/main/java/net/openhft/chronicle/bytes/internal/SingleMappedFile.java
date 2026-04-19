@@ -211,7 +211,9 @@ public class SingleMappedFile extends MappedFile {
                 // so ensure that it is released
                 try {
                     mbs.release(this);
-                } catch (ClosedIllegalStateException e) {
+                }
+                // CSWarnAndContinue REVIEW keep catch (ClosedIllegalStateException e) here because mapped-store release is best-effort during close when retain mode is enabled.
+                catch (ClosedIllegalStateException e) {
                     Jvm.debug().on(getClass(), e);
                 }
             }

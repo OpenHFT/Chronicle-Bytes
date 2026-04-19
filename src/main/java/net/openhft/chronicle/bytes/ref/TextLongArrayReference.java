@@ -287,7 +287,9 @@ public class TextLongArrayReference extends AbstractReference implements Byteabl
 
         try {
             return "value: " + getValueAt(0) + " ...";
-        } catch (Exception e) {
+        }
+        // CSCatchBroadException REVIEW keep catch (Exception e) here because this text-array dump degrades to exception text instead of throwing.
+        catch (Exception e) {
             return e.toString();
         }
     }

@@ -47,7 +47,9 @@ public interface BytesRingBuffer extends BytesRingBufferStats, BytesConsumer, Cl
         try {
             @NotNull final Class<MultiReaderBytesRingBuffer> aClass = clazz();
             final Constructor<MultiReaderBytesRingBuffer> constructor = aClass
+                    // CSReflectiveConstructorLookup REVIEW keep getDeclaredConstructor(...) here because the optional multi-reader ring-buffer implementation is selected reflectively.
                     .getDeclaredConstructor(BytesStore.class, int.class);
+            // CSReflectiveConstructorInvoke REVIEW keep constructor.newInstance(...) here because the selected ring-buffer implementation is instantiated reflectively.
             return constructor.newInstance(bytesStore, numReaders);
 
         } catch (Exception e) {

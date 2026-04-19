@@ -262,7 +262,9 @@ public class TextIntArrayReference extends AbstractReference implements Byteable
 
         try {
             return "value: " + getValueAt(0) + " ...";
-        } catch (Exception e) {
+        }
+        // CSCatchBroadException REVIEW keep catch (Exception e) here because this text-array dump degrades to exception text instead of throwing.
+        catch (Exception e) {
             return e.toString();
         }
     }

@@ -57,7 +57,9 @@ public interface BytesMarshallable extends ReadBytesMarshallable, WriteBytesMars
             String s = "# " + getClass().getName() + "\n" + bytes.toHexString();
             bytes.releaseLast();
             return s;
-        } catch (Throwable e) {
+        }
+        // CSCatchThrowable REVIEW keep catch (Throwable e) here because this marshalling debug string must not throw while reporting broken state.
+        catch (Throwable e) {
             return e.toString();
         } finally {
             ValidatableUtil.endValidateDisabled();

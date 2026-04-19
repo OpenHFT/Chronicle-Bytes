@@ -307,7 +307,9 @@ public class NativeBytes<U>
         this.bytesStore(bytesStore2);
         try {
             tempStore.release(this);
-        } catch (IllegalStateException e) {
+        }
+        // CSWarnAndContinue REVIEW keep catch (IllegalStateException e) here because temp-store release is best-effort after the store swap and only emits debug logging on failure.
+        catch (IllegalStateException e) {
             Jvm.debug().on(getClass(), e);
         }
 

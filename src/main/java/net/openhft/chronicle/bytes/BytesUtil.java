@@ -524,6 +524,7 @@ public enum BytesUtil {
     static String asString(String s, Throwable t) {
         StringWriter sw = new StringWriter();
         sw.append(s).append("\n");
+        // CSPrintStackTrace REVIEW keep t.printStackTrace(new PrintWriter(sw)) here because this helper deliberately renders a full stack trace into a StringWriter.
         t.printStackTrace(new PrintWriter(sw));
         return sw.toString();
     }

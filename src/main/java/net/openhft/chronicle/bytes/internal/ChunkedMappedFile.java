@@ -115,7 +115,9 @@ public class ChunkedMappedFile extends MappedFile {
             }
             Thread.yield();
             IOTools.deleteDirWithFiles(path.toFile());
-        } catch (IOException e) {
+        }
+        // CSWarnAndContinue REVIEW keep catch (IOException e) here because warmup cleanup restores the exception handlers and only warns before startup continues.
+        catch (IOException e) {
             Jvm.setExceptionHandlers(error, warn, debug, perf);
             Jvm.warn().on(ChunkedMappedFile.class, "Error during warmup", e);
         } finally {
@@ -136,7 +138,9 @@ public class ChunkedMappedFile extends MappedFile {
                 }
             }
             Thread.yield();
-        } catch (Exception e) {
+        }
+        // CSCatchBroadException REVIEW keep catch (Exception e) here because warmup collects failures for later reporting instead of aborting the loop immediately.
+        catch (Exception e) {
             errorsDuringWarmup.add(e);
         }
     }
@@ -299,7 +303,9 @@ public class ChunkedMappedFile extends MappedFile {
                         // so ensure that it is released
                         try {
                             mbs.release(this);
-                        } catch (ClosedIllegalStateException e) {
+                        }
+                        // CSWarnAndContinue REVIEW keep catch (ClosedIllegalStateException e) here because mapped-store release is best-effort during close when retain mode is enabled.
+                        catch (ClosedIllegalStateException e) {
                             Jvm.debug().on(getClass(), e);
                         }
                     }

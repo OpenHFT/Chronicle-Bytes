@@ -151,7 +151,9 @@ public abstract class CommonMappedBytes extends MappedBytes {
             lastActualSize = mappedFile.actualSize();
             return lastActualSize;
 
-        } catch (Exception e) {
+        }
+        // CSCatchBroadException REVIEW keep catch (Exception e) here because actual-size probing is best-effort and falls back to zero after warning.
+        catch (Exception e) {
             Jvm.warn().on(getClass(), "Unable to obtain the real size for " + mappedFile.file(), e);
             lastActualSize = 0;
             return lastActualSize;
@@ -376,7 +378,9 @@ public abstract class CommonMappedBytes extends MappedBytes {
             throws ClosedIllegalStateException {
         try {
             super.release(id);
-        } catch (ClosedIllegalStateException e) {
+        }
+        // CSWarnAndContinue REVIEW keep catch (ClosedIllegalStateException e) here because release after close is tolerated during teardown and only emits debug logging.
+        catch (ClosedIllegalStateException e) {
             Jvm.debug().on(CommonMappedBytes.class, "release called on closed resource", e);
         }
         initReleased |= id == INIT;
@@ -565,6 +569,7 @@ public abstract class CommonMappedBytes extends MappedBytes {
                 "mappedFile=" + mappedFile.file().getAbsolutePath() + ",\n" +
                 "mappedFileRefCount=" + mappedFile.refCount() + ",\n" +
                 "mappedFileIsClosed=" + mappedFile.isClosed() + ",\n" +
+                // CSReflectiveFieldLookup REVIEW keep Jvm.getValue(mappedFile.raf(), "closed") here because this TRACE diagnostic inspects RAF state reflectively and tolerates JVM differences.
                 "mappedFileRafIsClosed=" + Jvm.getValue(mappedFile.raf(), "closed") + ",\n" +
                 "mappedFileRafChannelIsClosed=" + !mappedFile.raf().getChannel().isOpen() + ",\n" +
                 "isClosed=" + isClosed() +

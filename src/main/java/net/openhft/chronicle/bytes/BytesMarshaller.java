@@ -63,6 +63,7 @@ public class BytesMarshaller<T> {
         for (@NotNull Field field : clazz.getDeclaredFields()) {
             if ((field.getModifiers() & (Modifier.STATIC | Modifier.TRANSIENT)) != 0)
                 continue;
+            // CSSetAccessibleEscalation REVIEW keep Jvm.setAccessible(field) here because field marshalling walks declared instance fields across the class hierarchy.
             Jvm.setAccessible(field);
             map.put(field.getName(), field);
         }
