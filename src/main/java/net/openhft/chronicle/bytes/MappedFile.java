@@ -188,6 +188,7 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
                                         @NonNegative final long chunkSize,
                                         @NonNegative final long overlapSize)
             throws FileNotFoundException {
+        // CSPathFromInput REVIEW keep File here because this filesystem boundary in MappedFile#mappedFile still needs an explicit reviewed path-handling contract.
         final File rawFile = new File(filename);
         final String canonical = CanonicalPathUtil.of(rawFile);
         final File canonicalFile = new File(canonical);
@@ -537,6 +538,7 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
     /**
      * This finalize() is used to detect when a component is not released deterministically. It is not required to be run, but provides a warning
      */
+    // CSFinalizerOverride REVIEW keep SuppressWarnings here because this runtime execution boundary in MappedFile#finalize still needs an explicit reviewed runtime-admission contract.
     @SuppressWarnings({"deprecation", "removal"})
     @Override
     protected void finalize()
@@ -606,6 +608,7 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
      *
      * @param chunkCount The array to be populated with detailed chunk count information.
      */
+    // CQNumericalConstraint REVIEW keep this API parameter unconstrained because the numeric contract still needs explicit review.
     public abstract void chunkCount(long[] chunkCount);
 
     /**

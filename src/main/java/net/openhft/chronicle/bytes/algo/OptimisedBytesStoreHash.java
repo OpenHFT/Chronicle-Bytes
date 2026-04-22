@@ -352,6 +352,7 @@ public enum OptimisedBytesStoreHash implements BytesStoreHash<BytesStore<?,?>> {
         try {
             return applyAsLong(store, remaining);
         } catch (IllegalStateException | BufferUnderflowException e) {
+            // CSCheckedSwallowThroughRethrow REVIEW throw Jvm.rethrow(e) because this rethrow in OptimisedBytesStoreHash#applyAsLong converts a checked cause into an unchecked wrapper and still needs either a declared `throws` at the enclosing method or an explicit reviewed note on why no local cleanup is performed.
             throw Jvm.rethrow(e);
         }
     }

@@ -200,9 +200,15 @@ public class SingleMappedBytes extends CommonMappedBytes {
         // are we inside a cache line?
         if ((address & 63) <= 60) {
             ObjectUtils.requireNonNull(memory);
+            // REVIEW TASK CSRawAddressAccess: move this concern behind the suggested reviewed aegis helper or another explicit boundary.
+            // REVIEW TASK CSRawAddressAccess: move UnsafeMemory.unsafeLoadFence behind a reviewed aegis helper or another explicit unsafe-boundary contract.
             UnsafeMemory.unsafeLoadFence();
+            // REVIEW TASK CSRawAddressAccess: move this concern behind the suggested reviewed aegis helper or another explicit boundary.
+            // REVIEW TASK CSRawAddressAccess: move UnsafeMemory.unsafeGetInt behind a reviewed aegis helper or another explicit unsafe-boundary contract.
             return UnsafeMemory.unsafeGetInt(address);
         } else {
+            // REVIEW TASK CSRawAddressAccess: move this concern behind the suggested reviewed aegis helper or another explicit boundary.
+            // REVIEW TASK CSRawAddressAccess: move memory.readVolatileInt behind a reviewed aegis helper or another explicit unsafe-boundary contract.
             return memory.readVolatileInt(address);
         }
     }

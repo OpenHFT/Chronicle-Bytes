@@ -86,10 +86,13 @@ public class TextIntArrayReference extends AbstractReference implements Byteable
     public static long peakLength(@NotNull BytesStore<?, ?> bytes, @NonNegative long offset)
             throws IllegalStateException {
         //todo check this, I think there could be a bug here
+        // REVIEW TASK CQRuntimeTodoPlaceholder: replace this runtime placeholder with a concrete implementation decision or remove it.
+        // REVIEW TASK CQRuntimeTodoPlaceholder: replace runtime placeholder (return (bytes.parseLong(offset + CAPACITY) * VALUE_SIZE) - SEP.length) with a concrete implementation decision or remove it.
         return (bytes.parseLong(offset + CAPACITY) * VALUE_SIZE) - SEP.length
                 + VALUES + SECTION4.length;
     }
 
+    // CQNumericalConstraint REVIEW keep setMaxUsed(long usedAtLeast) here because this API boundary in TextIntArrayReference#setMaxUsed leaves numeric inputs unconstrained and still needs either validated range checks or an explicit reviewed caller contract.
     @Override
     public long getUsed()
             throws IllegalStateException {
@@ -174,6 +177,8 @@ public class TextIntArrayReference extends AbstractReference implements Byteable
 
     @Override
     public void bindValueAt(@NonNegative long index, IntValue value) {
+        // REVIEW TASK CQRuntimeTodoPlaceholder: replace this runtime placeholder with a concrete implementation decision or remove it.
+        // REVIEW TASK CQRuntimeTodoPlaceholder: replace runtime placeholder (throw new UnsupportedOperationException("todo");) with a concrete implementation decision or remove it.
         throw new UnsupportedOperationException("todo");
     }
 

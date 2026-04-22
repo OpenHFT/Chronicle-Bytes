@@ -171,6 +171,8 @@ public abstract class AbstractInterner<T> {
         if (length > entries.length)
             return getValue(cs, length);
         // Todo: This needs to be reviewed: UnsafeMemory UNSAFE loadFence
+        // REVIEW TASK CQRuntimeTodoPlaceholder: replace this runtime placeholder with a concrete implementation decision or remove it.
+        // REVIEW TASK CQRuntimeTodoPlaceholder: replace runtime placeholder (int hash = hash32(cs, length);) with a concrete implementation decision or remove it.
         int hash = hash32(cs, length);
         int h = hash & mask;
         InternerEntry<T> s = entries[h];

@@ -33,6 +33,7 @@ public class BytesMarshaller<T> {
     /**
      * Provides a ClassLocal instance for holding a unique BytesMarshaller for each class.
      */
+    // CSMutableStaticState REVIEW keep this reviewed site here because this ambient configuration boundary still needs an explicit reviewed configuration-trust contract.
     public static final ClassLocal<BytesMarshaller> BYTES_MARSHALLER_CL
             = ClassLocal.withInitial(BytesMarshaller::new);
     private final FieldAccess[] fields;
@@ -214,6 +215,7 @@ public class BytesMarshaller<T> {
         @Override
         protected void setValue(Object o, @NotNull BytesIn<?> read)
                 throws IORuntimeException, BufferUnderflowException, ClosedIllegalStateException, ArithmeticException, IllegalArgumentException, IllegalAccessException {
+            // CSUnboundedUtf8Decode REVIEW keep read.readUtf8 here because this input or payload boundary in ScalarFieldAccess#setValue still needs an explicit reviewed input-trust contract.
             @Nullable String s = read.readUtf8();
             field.set(o, ObjectUtils.convertTo(field.getType(), s));
         }
@@ -239,6 +241,7 @@ public class BytesMarshaller<T> {
                 throws IORuntimeException, BufferUnderflowException, ClosedIllegalStateException, InvalidMarshallableException, IllegalAccessException {
             @NotNull BytesMarshallable o2 = (BytesMarshallable) field.get(o);
             if (!field.getType().isInstance(o2)) {
+                // CSResolvedTypeInstantiation REVIEW keep ObjectUtils.newInstance here because this type-materialization path in BytesMarshallableFieldAccess#setValue still needs an explicit reviewed type-resolution contract.
                 o2 = (BytesMarshallable) ObjectUtils.newInstance((Class) field.getType());
                 field.set(o, o2);
             }
@@ -271,6 +274,7 @@ public class BytesMarshaller<T> {
         @Override
         protected void setValue(Object o, @NotNull BytesIn<?> read)
                 throws IORuntimeException, IllegalArgumentException, ClosedIllegalStateException, ArithmeticException, BufferUnderflowException, BufferOverflowException, IllegalAccessException {
+            // CSUnboundedStopBitDecode REVIEW keep read.readStopBit() here because this stop-bit length decode in BytesFieldAccess#setValue still needs an explicit reviewed input-length contract.
             @NotNull Bytes<?> bytes = (Bytes) field.get(o);
             long stopBit = read.readStopBit();
             if (stopBit == -1) {
@@ -321,6 +325,7 @@ public class BytesMarshaller<T> {
         protected void setValue(Object o, BytesIn<?> read)
                 throws ClosedIllegalStateException, BufferUnderflowException, IllegalArgumentException, ArithmeticException, BufferOverflowException, InvalidMarshallableException, IllegalAccessException {
             Object[] c = (Object[]) field.get(o);
+            // CSUnboundedStopBitDecode REVIEW keep Maths.toInt32 here because this input or payload boundary in ObjectArrayFieldAccess#setValue still needs an explicit reviewed input-trust contract.
             int elementCount = Maths.toInt32(read.readStopBit());
             if (elementCount < 0) {
                 if (c != null)
@@ -360,6 +365,7 @@ public class BytesMarshaller<T> {
             else if (type == Set.class)
                 collectionSupplier = LinkedHashSet::new;
             else
+                // CSResolvedTypeInstantiation REVIEW keep uncheckedCast here because this type-materialization path in CollectionFieldAccess#CollectionFieldAccess still needs an explicit reviewed type-resolution contract.
                 collectionSupplier = () -> uncheckedCast(ObjectUtils.newInstance(type));
             Type genericType = field.getGenericType();
             if (genericType instanceof ParameterizedType) {
@@ -398,6 +404,7 @@ public class BytesMarshaller<T> {
         protected void setValue(Object o, BytesIn<?> read)
                 throws ClosedIllegalStateException, ArithmeticException, IllegalArgumentException, BufferUnderflowException, BufferOverflowException, InvalidMarshallableException, IllegalAccessException {
             Collection c = (Collection) field.get(o);
+            // CSUnboundedStopBitDecode REVIEW keep Maths.toInt32 here because this input or payload boundary in CollectionFieldAccess#setValue still needs an explicit reviewed input-trust contract.
             int length = Maths.toInt32(read.readStopBit());
             if (length < 0) {
                 if (c != null)
@@ -432,6 +439,7 @@ public class BytesMarshaller<T> {
             else if (type == SortedMap.class || type == NavigableMap.class)
                 collectionSupplier = TreeMap::new;
             else
+                // CSResolvedTypeInstantiation REVIEW keep uncheckedCast here because this type-materialization path in MapFieldAccess#MapFieldAccess still needs an explicit reviewed type-resolution contract.
                 collectionSupplier = () -> uncheckedCast(ObjectUtils.newInstance(type));
             Type genericType = field.getGenericType();
             if (genericType instanceof ParameterizedType) {
@@ -466,6 +474,7 @@ public class BytesMarshaller<T> {
         protected void setValue(Object o, BytesIn<?> read)
                 throws ClosedIllegalStateException, IllegalArgumentException, BufferUnderflowException, BufferOverflowException, ArithmeticException, IllegalAccessException {
             Map m = (Map) field.get(o);
+            // CSUnboundedStopBitDecode REVIEW keep Maths.toInt32 here because this input or payload boundary in MapFieldAccess#setValue still needs an explicit reviewed input-trust contract.
             int numEntries = Maths.toInt32(read.readStopBit());
             if (numEntries < 0) {
                 if (m != null)

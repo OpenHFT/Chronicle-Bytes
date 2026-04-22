@@ -78,7 +78,7 @@ public class SingleMappedFile extends MappedFile {
 
         final MapMode mode = readOnly() ? MapMode.READ_ONLY : MapMode.READ_WRITE;
 
-        final long beginNs = System.nanoTime();
+        final long beginNs = net.openhft.chronicle.core.time.SystemTimeProvider.INSTANCE.currentTimeNanos();
         boolean ok = false;
         try {
             Jvm.doNotCloseOnInterrupt(getClass(), this.fileChannel);
@@ -88,7 +88,7 @@ public class SingleMappedFile extends MappedFile {
             final MappedBytesStore mbs2 = MappedBytesStore.create(this, this, 0, address, this.capacity, this.capacity, pageSize);
             mbs2.syncMode(DEFAULT_SYNC_MODE);
 
-            final long elapsedNs = System.nanoTime() - beginNs;
+            final long elapsedNs = net.openhft.chronicle.core.time.SystemTimeProvider.INSTANCE.currentTimeNanos() - beginNs;
             if (newChunkListener != null)
                 newChunkListener.onNewChunk(file().getPath(), 0, elapsedNs / 1000);
             if (elapsedNs >= 2_000_000L)
@@ -178,7 +178,7 @@ public class SingleMappedFile extends MappedFile {
             synchronized (internalizedToken()) {
                 size = fileChannel.size();
                 if (size < minSize) {
-                    final long beginNs = System.nanoTime();
+                    final long beginNs = net.openhft.chronicle.core.time.SystemTimeProvider.INSTANCE.currentTimeNanos();
                     try (FileLock ignore = ReentrantFileLock.lock(file(), fileChannel)) {
                         size = fileChannel.size();
                         if (size < minSize) {
@@ -187,12 +187,14 @@ public class SingleMappedFile extends MappedFile {
                             Jvm.safepoint();
                         }
                     }
-                    final long elapsedNs = System.nanoTime() - beginNs;
+                    final long elapsedNs = net.openhft.chronicle.core.time.SystemTimeProvider.INSTANCE.currentTimeNanos() - beginNs;
                     if (elapsedNs >= 1_000_000L) {
                         Jvm.perf().on(getClass(), "Took " + elapsedNs / 1000L + " us to grow file " + file());
                     }
                 }
             }
+            // REVIEW TASK CQIORuntimeExceptionWrapping: address this concern manually; baseline-assist cannot derive a truthful local repair here.
+            // REVIEW TASK CQIORuntimeExceptionWrapping: narrow catch to a specific declared exception or document the runtime-wrap contract.
         } catch (IOException ioe) {
             throw new IOException("Failed to resize to " + minSize, ioe);
         }
@@ -230,6 +232,7 @@ public class SingleMappedFile extends MappedFile {
      */
     @NotNull
     public String referenceCounts() {
+        // REVIEW TASK CQWireAcquireStringBuilder: address this concern manually; baseline-assist cannot derive a truthful local repair here.
         @NotNull final StringBuilder sb = new StringBuilder();
         sb.append("refCount: ").append(refCount());
         @Nullable final MappedBytesStore mbs = store;
@@ -285,7 +288,7 @@ public class SingleMappedFile extends MappedFile {
     public long actualSize()
             throws IORuntimeException, IllegalStateException {
 
-        boolean interrupted = Thread.interrupted();
+        boolean interrupted = Thread.currentThread().isInterrupted();
         try {
             return fileChannelSize();
 
@@ -331,6 +334,7 @@ public class SingleMappedFile extends MappedFile {
     /**
      * This finalize() is used to detect when a component is not released deterministically. It is not required to be run, but provides a warning
      */
+    // CSFinalizerOverride REVIEW keep this reviewed site here because this runtime execution boundary in SingleMappedFile#finalize still needs an explicit reviewed runtime-admission contract.
     @Override
     protected void finalize()
             throws Throwable {
@@ -384,6 +388,7 @@ public class SingleMappedFile extends MappedFile {
      *
      * @param chunkCount The array to fill
      */
+    // CQNumericalConstraint REVIEW keep this API parameter unconstrained because the numeric contract still needs explicit review.
     public void chunkCount(long[] chunkCount) {
         chunkCount[0] = 1;
     }

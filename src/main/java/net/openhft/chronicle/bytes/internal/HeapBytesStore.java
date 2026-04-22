@@ -99,6 +99,7 @@ public class HeapBytesStore<U>
         return dataOffset;
     }
 
+    // CQNumericalConstraint REVIEW keep appendAndReturnLength(final long writePosition, boolean negative, long mantissa, int exponent, boolean append0) here because this API boundary in HeapBytesStore#appendAndReturnLength leaves numeric inputs unconstrained and still needs either validated range checks or an explicit reviewed caller contract.
     @Override
     public boolean isDirectMemory() {
         return false;
@@ -132,6 +133,8 @@ public class HeapBytesStore<U>
         if (capacity == 0) {
             return uncheckedCast(NoBytesStore.NO_BYTES_STORE);
         }
+        // REVIEW TASK CQRuntimeTodoPlaceholder: replace this runtime placeholder with a concrete implementation decision or remove it.
+        // REVIEW TASK CQRuntimeTodoPlaceholder: replace runtime placeholder (throw new UnsupportedOperationException("todo");) with a concrete implementation decision or remove it.
         throw new UnsupportedOperationException("todo");
     }
 
@@ -642,6 +645,8 @@ public class HeapBytesStore<U>
         if (size < 0)
             throw new IllegalArgumentException();
         if (size > 0)
+            // REVIEW TASK CQRuntimeTodoPlaceholder: replace this runtime placeholder with a concrete implementation decision or remove it.
+            // REVIEW TASK CQRuntimeTodoPlaceholder: replace runtime placeholder (throw new UnsupportedOperationException("todo");) with a concrete implementation decision or remove it.
             throw new UnsupportedOperationException("todo");
     }
 
@@ -654,6 +659,8 @@ public class HeapBytesStore<U>
         if (size < 0)
             throw new IllegalArgumentException();
         if (size > 0)
+            // REVIEW TASK CQRuntimeTodoPlaceholder: replace this runtime placeholder with a concrete implementation decision or remove it.
+            // REVIEW TASK CQRuntimeTodoPlaceholder: replace runtime placeholder (throw new UnsupportedOperationException("todo");) with a concrete implementation decision or remove it.
             throw new UnsupportedOperationException("todo");
     }
 

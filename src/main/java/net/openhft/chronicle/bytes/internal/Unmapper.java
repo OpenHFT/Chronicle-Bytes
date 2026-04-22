@@ -25,6 +25,7 @@ public final class Unmapper implements Runnable {
      * @param size    size of the region
      * @param pageSize operating system page size
      */
+    // CQNumericalConstraint REVIEW keep this API parameter unconstrained because the numeric contract still needs explicit review.
     public Unmapper(long address, long size, int pageSize) throws IllegalStateException {
 
         assert (address != 0);

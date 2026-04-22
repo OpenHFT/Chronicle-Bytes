@@ -59,6 +59,8 @@ public class BinaryBytesMethodWriterInvocationHandler extends AbstractInvocation
                 throw t;
             }
         }
+        // REVIEW TASK CQNullabilityReturns: add the explicit annotation or return contract this rule expects here.
+        // REVIEW TASK CQNullabilityReturns: annotate the return value of doInvoke(...) with @Nullable or @NotNull.
         return null;
     }
 }

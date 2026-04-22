@@ -54,6 +54,7 @@ public class StreamingInputStream extends InputStream {
             throws IOException {
         try {
             long len = Math.min(in.readRemaining(), n);
+            // CSDynamicReadSkip REVIEW keep in.readSkip here because this input or payload boundary in StreamingInputStream#skip still needs an explicit reviewed input-trust contract.
             in.readSkip(len);
             return len;
         } catch (BufferUnderflowException | IllegalStateException e) {

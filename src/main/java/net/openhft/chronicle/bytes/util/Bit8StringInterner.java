@@ -39,6 +39,7 @@ public class Bit8StringInterner extends AbstractInterner<String> {
      *
      * @param capacity the initial capacity for the interner
      */
+    // CQNumericalConstraint REVIEW keep this API parameter unconstrained because the numeric contract still needs explicit review.
     public Bit8StringInterner(int capacity) {
         super(capacity);
     }

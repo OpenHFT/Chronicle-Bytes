@@ -70,6 +70,7 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
     @SuppressWarnings("this-escape")
     public BinaryLongArrayReference(@NonNegative long defaultCapacity) {
         this.length = (defaultCapacity << SHIFT) + VALUES;
+        // CSOwnershipCheckDisable REVIEW keep singleThreadedCheckDisabled here because this lifecycle or ownership exception in BinaryLongArrayReference#BinaryLongArrayReference still needs an explicit reviewed lifecycle contract.
         singleThreadedCheckDisabled(true);
     }
 
@@ -105,6 +106,8 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
         binaryLongArrayReferences = null;
     }
 
+    // CQNumericalConstraint REVIEW keep setMaxUsed(long usedAtLeast) here because this API boundary in BinaryLongArrayReference#setMaxUsed leaves numeric inputs unconstrained and still needs either validated range checks or an explicit reviewed caller contract.
+    // CQNumericalConstraint REVIEW keep getVolatileValueAt(long index) here because this API boundary in BinaryLongArrayReference#getVolatileValueAt leaves numeric inputs unconstrained and still needs either validated range checks or an explicit reviewed caller contract.
     @Override
     protected void acceptNewBytesStore(@NotNull final BytesStore<?, ?> bytes)
             throws IllegalStateException {
@@ -139,6 +142,7 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
         long start = bytes.writePosition();
         long sizeToSkip = capacity << SHIFT;
         bytes.zeroOut(start, start + sizeToSkip);
+        // CSDynamicReadSkip REVIEW keep bytes.writeSkip here because this input or payload boundary in BinaryLongArrayReference#write still needs an explicit reviewed input-trust contract.
         bytes.writeSkip(sizeToSkip);
     }
 
@@ -169,6 +173,7 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
         bytes.writeLong(capacity);
         bytes.writeLong(0L); // used
         long sizeToSkip = capacity << SHIFT;
+        // CSDynamicReadSkip REVIEW keep bytes.writeSkip here because this input or payload boundary in BinaryLongArrayReference#lazyWrite still needs an explicit reviewed input-trust contract.
         bytes.writeSkip(sizeToSkip);
     }
 
@@ -204,6 +209,7 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
+    // CQNumericalConstraint REVIEW keep this API parameter unconstrained because the numeric contract still needs explicit review.
     public static long peakLength(@NotNull BytesStore<?, ?> bytes, @NonNegative long offset, long capacityHint)
             throws BufferUnderflowException, IllegalStateException {
         long capacity = bytes.readLong(offset + CAPACITY);
@@ -327,6 +333,7 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
         checkCapacity(capacity);
 
         long sizeToSkip = capacity << SHIFT;
+        // CSDynamicReadSkip REVIEW keep bytes.readSkip here because this input or payload boundary in BinaryLongArrayReference#readMarshallable still needs an explicit reviewed input-trust contract.
         bytes.readSkip(sizeToSkip);
         long len = bytes.readPosition() - position;
         bytesStore((Bytes) bytes, position, len);
@@ -349,6 +356,7 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
             bytes.writeLong(0);
             if (retainsComments)
                 bytes.writeHexDumpDescription("values");
+            // CSDynamicReadSkip REVIEW keep bytes.writeSkip here because this input or payload boundary in BinaryLongArrayReference#writeMarshallable still needs an explicit reviewed input-trust contract.
             bytes.writeSkip(capacity << SHIFT);
         } else {
             bytes.write(bytesStore, offset, length);
@@ -394,6 +402,7 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
     public String toString() {
         if (bytesStore == null)
             return "not set";
+        // REVIEW TASK CQWireAcquireStringBuilder: address this concern manually; baseline-assist cannot derive a truthful local repair here.
         @NotNull StringBuilder sb = new StringBuilder();
         sb.append("used: ");
         try {

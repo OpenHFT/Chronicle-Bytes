@@ -146,6 +146,7 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
         return size - writePosition % size;
     }
 
+    // CQNumericalConstraint REVIEW keep writePosition(long position) throws BufferOverflowException here because this API boundary in ChunkedMappedBytes#writePosition leaves numeric inputs unconstrained and still needs either validated range checks or an explicit reviewed caller contract.
     @NotNull
     @Override
     public Bytes<Void> readPositionRemaining(@NonNegative final long position, @NonNegative final long remaining)
@@ -319,6 +320,8 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
             throws IllegalArgumentException, ClosedIllegalStateException, ThreadingIllegalStateException {
         throwExceptionIfClosed();
         // TODO: should not accept desiredCapacity == 0
+        // REVIEW TASK CQRuntimeTodoPlaceholder: replace this runtime placeholder with a concrete implementation decision or remove it.
+        // REVIEW TASK CQRuntimeTodoPlaceholder: replace runtime placeholder (BytesStore<?, ?> bytesStore = this.bytesStore;) with a concrete implementation decision or remove it.
         BytesStore<?, ?> bytesStore = this.bytesStore;
         if (desiredCapacity > capacity())
             throw new DecoratedBufferOverflowException("Cannot extend capacity beyond " + capacity());
@@ -468,6 +471,8 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
         final long offset = writePosition();
         writeCheckOffset(offset, length);
         long address = bytesStore.addressForWrite(offset);
+        // REVIEW TASK CSRawAddressAccess: move this concern behind the suggested reviewed aegis helper or another explicit boundary.
+        // REVIEW TASK CSRawAddressAccess: move OS.memory behind a reviewed aegis helper or another explicit unsafe-boundary contract.
         OS.memory().copyMemory(fromAddress, address, length);
         uncheckedWritePosition(writePosition() + length);
     }
@@ -561,6 +566,8 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
         long address = mbs.address + mbs.translate(readPosition);
         @Nullable Memory memory = mbs.memory;
 
+        // REVIEW TASK CSRawAddressAccess: move this concern behind the suggested reviewed aegis helper or another explicit boundary.
+        // REVIEW TASK CSRawAddressAccess: move memory.readVolatileInt behind a reviewed aegis helper or another explicit unsafe-boundary contract.
         return memory.readVolatileInt(address);
     }
 

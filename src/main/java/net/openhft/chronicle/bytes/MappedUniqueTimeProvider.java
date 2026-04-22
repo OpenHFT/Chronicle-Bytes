@@ -32,6 +32,7 @@ public enum MappedUniqueTimeProvider implements TimeProvider, ReferenceOwner {
         try {
             String user = Jvm.getProperty("user.name", "unknown");
             String timeStampDir = Jvm.getProperty("timestamp.dir", OS.TMP);
+            // CSPathFromInput REVIEW keep File here because this filesystem boundary in MappedUniqueTimeProvider#MappedUniqueTimeProvider still needs an explicit reviewed path-handling contract.
             final File timeStampPath = new File(timeStampDir, ".time-stamp." + user + ".dat");
             MappedFile file = MappedFile.ofSingle(timeStampPath, PageUtil.getPageSize(timeStampPath.getAbsolutePath()), false);
             final Bytes<?> bytes = file.acquireBytesForWrite(this, 0);

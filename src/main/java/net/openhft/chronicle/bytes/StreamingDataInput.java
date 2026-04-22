@@ -143,6 +143,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
     default long readPositionForHeader(boolean skipPadding) throws ClosedIllegalStateException, ThreadingIllegalStateException {
         long position = readPosition();
         if (skipPadding)
+            // CSDynamicReadSkip REVIEW keep readSkip here because this input or payload boundary in StreamingDataInput#readPositionForHeader still needs an explicit reviewed input-trust contract.
             return readSkip(BytesUtil.padOffset(position)).readPosition();
         return position;
     }
@@ -283,6 +284,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
      */
     default double readStopBitDecimal()
             throws ClosedIllegalStateException, BufferUnderflowException {
+        // CSUnboundedStopBitDecode REVIEW keep readStopBit here because this input or payload boundary in StreamingDataInput#readStopBitDecimal still needs an explicit reviewed input-trust contract.
         long value = readStopBit();
         int scale = (int) (Math.abs(value) % 10);
         value /= 10;
@@ -566,6 +568,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
 
         if (readRemaining() <= 0)
             return true;
+        // CSUnboundedStopBitDecode REVIEW keep readStopBit here because this input or payload boundary in StreamingDataInput#readUtf8 still needs an explicit reviewed input-trust contract.
         long len0 = readStopBit();
         if (len0 == -1)
             return false;
@@ -592,6 +595,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
         sb.readPositionRemaining(0, 0);
         if (readRemaining() <= 0)
             return true;
+        // CSUnboundedStopBitDecode REVIEW keep readStopBit here because this input or payload boundary in StreamingDataInput#readUtf8 still needs an explicit reviewed input-trust contract.
         long len0 = readStopBit();
         if (len0 == -1)
             return false;
@@ -618,6 +622,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
         sb.setLength(0);
         if (readRemaining() <= 0)
             return true;
+        // CSUnboundedStopBitDecode REVIEW keep readStopBit here because this input or payload boundary in StreamingDataInput#readUtf8 still needs an explicit reviewed input-trust contract.
         long len0 = readStopBit();
         if (len0 == -1)
             return false;
@@ -656,6 +661,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
 
         int len = Maths.toUInt31(len0);
         b.write((BytesStore) this, readPosition(), len);
+        // CSDynamicReadSkip REVIEW keep readSkip here because this input or payload boundary in StreamingDataInput#read8bit still needs an explicit reviewed input-trust contract.
         readSkip(len);
         return true;
     }
@@ -724,6 +730,8 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
         int len2 = (int) Math.min(len, remaining);
         int i = 0;
         for (; i < len2 - 7; i += 8)
+            // REVIEW TASK CSRawAddressAccess: move this concern behind the suggested reviewed aegis helper or another explicit boundary.
+            // REVIEW TASK CSRawAddressAccess: move UnsafeMemory.unsafePutLong behind a reviewed aegis helper or another explicit unsafe-boundary contract.
             UnsafeMemory.unsafePutLong(bytes, i + off, rawReadLong());
         for (; i < len2; i++)
             bytes[off + i] = rawReadByte();
@@ -820,18 +828,27 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
             throw new BufferUnderflowException();
         if (isDirectMemory()) {
             final long src = addressForRead(readPosition());
+            // CSDynamicReadSkip REVIEW keep readSkip here because this input or payload boundary in StreamingDataInput#unsafeReadObject still needs an explicit reviewed input-trust contract.
             readSkip(length); // blow up here first
+            // REVIEW TASK CSRawAddressAccess: move this concern behind the suggested reviewed aegis helper or another explicit boundary.
+            // REVIEW TASK CSRawAddressAccess: move MEMORY.copyMemory behind a reviewed aegis helper or another explicit unsafe-boundary contract.
             MEMORY.copyMemory(src, o, offset, length);
             return;
         }
         int i = 0;
         for (; i < length - 7; i += 8)
+            // REVIEW TASK CSRawAddressAccess: move this concern behind the suggested reviewed aegis helper or another explicit boundary.
+            // REVIEW TASK CSRawAddressAccess: move UnsafeMemory.unsafePutLong behind a reviewed aegis helper or another explicit unsafe-boundary contract.
             UnsafeMemory.unsafePutLong(o, (long) offset + i, rawReadLong());
         if (i < length - 3) {
+            // REVIEW TASK CSRawAddressAccess: move this concern behind the suggested reviewed aegis helper or another explicit boundary.
+            // REVIEW TASK CSRawAddressAccess: move UnsafeMemory.unsafePutInt behind a reviewed aegis helper or another explicit unsafe-boundary contract.
             UnsafeMemory.unsafePutInt(o, (long) offset + i, rawReadInt());
             i += 4;
         }
         for (; i < length; i++)
+            // REVIEW TASK CSRawAddressAccess: move this concern behind the suggested reviewed aegis helper or another explicit boundary.
+            // REVIEW TASK CSRawAddressAccess: move UnsafeMemory.unsafePutByte behind a reviewed aegis helper or another explicit unsafe-boundary contract.
             UnsafeMemory.unsafePutByte(o, (long) offset + i, rawReadByte());
     }
 
@@ -848,13 +865,20 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
     default S unsafeRead(long address, @NonNegative int length) throws ClosedIllegalStateException, ThreadingIllegalStateException {
         if (isDirectMemory()) {
             long src = addressForRead(readPosition());
+            // CSDynamicReadSkip REVIEW keep readSkip here because this input or payload boundary in StreamingDataInput#unsafeRead still needs an explicit reviewed input-trust contract.
             readSkip(length);
+            // REVIEW TASK CSRawAddressAccess: move this concern behind the suggested reviewed aegis helper or another explicit boundary.
+            // REVIEW TASK CSRawAddressAccess: move UnsafeMemory.copyMemory behind a reviewed aegis helper or another explicit unsafe-boundary contract.
             UnsafeMemory.copyMemory(src, address, length);
         } else {
             int i = 0;
             for (; i < length - 7; i += 8)
+                // REVIEW TASK CSRawAddressAccess: move this concern behind the suggested reviewed aegis helper or another explicit boundary.
+                // REVIEW TASK CSRawAddressAccess: move MEMORY.writeLong behind a reviewed aegis helper or another explicit unsafe-boundary contract.
                 MEMORY.writeLong(address + i, readLong());
             for (; i < length; ++i)
+                // REVIEW TASK CSRawAddressAccess: move this concern behind the suggested reviewed aegis helper or another explicit boundary.
+                // REVIEW TASK CSRawAddressAccess: move MEMORY.writeByte behind a reviewed aegis helper or another explicit unsafe-boundary contract.
                 MEMORY.writeByte(address + i, readByte());
         }
 
@@ -1005,6 +1029,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
     default void readWithLength(@NotNull final Bytes<?> bytes)
             throws ArithmeticException, BufferUnderflowException, BufferOverflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
         bytes.clear();
+        // CSUnboundedStopBitDecode REVIEW keep Maths.toUInt31 here because this input or payload boundary in StreamingDataInput#readWithLength still needs an explicit reviewed input-trust contract.
         int length = Maths.toUInt31(readStopBit());
         int i;
         for (i = 0; i < length - 7; i += 8)
@@ -1037,6 +1062,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
     default BigDecimal readBigDecimal()
             throws ArithmeticException, BufferUnderflowException, IllegalStateException, ClosedIllegalStateException {
         throwExceptionIfReleased(this);
+        // CSUnboundedStopBitDecode REVIEW keep BigDecimal here because this input or payload boundary in StreamingDataInput#readBigDecimal still needs an explicit reviewed input-trust contract.
         return new BigDecimal(readBigInteger(), Maths.toUInt31(readStopBit()));
     }
 
@@ -1054,6 +1080,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
     default BigInteger readBigInteger()
             throws ArithmeticException, BufferUnderflowException, ClosedIllegalStateException {
         throwExceptionIfReleased(this);
+        // CSUnboundedStopBitDecode REVIEW keep Maths.toUInt31 here because this input or payload boundary in StreamingDataInput#readBigInteger still needs an explicit reviewed input-trust contract.
         int length = Maths.toUInt31(readStopBit());
         if (length == 0) {
             if (lenient()) {

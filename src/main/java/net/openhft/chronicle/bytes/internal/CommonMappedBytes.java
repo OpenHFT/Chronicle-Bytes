@@ -31,6 +31,7 @@ import static net.openhft.chronicle.core.util.StringUtils.*;
 public abstract class CommonMappedBytes extends MappedBytes {
     /** manages closed state and delegates to {@link #performClose()} */
     private final AbstractCloseable closeable = new AbstractCloseable() {
+    // CQNumericalConstraint REVIEW keep chunkCount(long[] chunkCount) here because this API boundary in CommonMappedBytes#chunkCount leaves numeric inputs unconstrained and still needs either validated range checks or an explicit reviewed caller contract.
         @Override
         protected void performClose() throws ClosedIllegalStateException {
             CommonMappedBytes.this.performClose();
@@ -275,14 +276,20 @@ public abstract class CommonMappedBytes extends MappedBytes {
                 int c2 = bytes[i + start + 2] & 0xff;
                 int c3 = bytes[i + start + 3] & 0xff;
                 if (IS_LITTLE_ENDIAN) {
+                    // REVIEW TASK CSRawAddressAccess: move this concern behind the suggested reviewed aegis helper or another explicit boundary.
+                    // REVIEW TASK CSRawAddressAccess: move memory.writeInt behind a reviewed aegis helper or another explicit unsafe-boundary contract.
                     memory.writeInt(address, (c3 << 24) | (c2 << 16) | (c1 << 8) | c0);
                 } else {
+                    // REVIEW TASK CSRawAddressAccess: move this concern behind the suggested reviewed aegis helper or another explicit boundary.
+                    // REVIEW TASK CSRawAddressAccess: move memory.writeInt behind a reviewed aegis helper or another explicit unsafe-boundary contract.
                     memory.writeInt(address, (c0 << 24) | (c1 << 16) | (c2 << 8) | c3);
                 }
                 address += 4;
             }
             for (; i < length; i++) {
                 byte c = bytes[i + start];
+                // REVIEW TASK CSRawAddressAccess: move this concern behind the suggested reviewed aegis helper or another explicit boundary.
+                // REVIEW TASK CSRawAddressAccess: move memory.writeByte behind a reviewed aegis helper or another explicit unsafe-boundary contract.
                 memory.writeByte(address++, c);
             }
             writeSkip(length);
@@ -295,14 +302,20 @@ public abstract class CommonMappedBytes extends MappedBytes {
                 int c2 = chars[i + start + 2] & 0xff;
                 int c3 = chars[i + start + 3] & 0xff;
                 if (IS_LITTLE_ENDIAN) {
+                    // REVIEW TASK CSRawAddressAccess: move this concern behind the suggested reviewed aegis helper or another explicit boundary.
+                    // REVIEW TASK CSRawAddressAccess: move memory.writeInt behind a reviewed aegis helper or another explicit unsafe-boundary contract.
                     memory.writeInt(address, (c3 << 24) | (c2 << 16) | (c1 << 8) | c0);
                 } else {
+                    // REVIEW TASK CSRawAddressAccess: move this concern behind the suggested reviewed aegis helper or another explicit boundary.
+                    // REVIEW TASK CSRawAddressAccess: move memory.writeInt behind a reviewed aegis helper or another explicit unsafe-boundary contract.
                     memory.writeInt(address, (c0 << 24) | (c1 << 16) | (c2 << 8) | c3);
                 }
                 address += 4;
             }
             for (; i < length; i++) {
                 char c = chars[i + start];
+                // REVIEW TASK CSRawAddressAccess: move this concern behind the suggested reviewed aegis helper or another explicit boundary.
+                // REVIEW TASK CSRawAddressAccess: move memory.writeByte behind a reviewed aegis helper or another explicit unsafe-boundary contract.
                 memory.writeByte(address++, (byte) c);
             }
             writeSkip(length);
@@ -338,6 +351,8 @@ public abstract class CommonMappedBytes extends MappedBytes {
                         writeSkip(i);
                         break non_ascii;
                     }
+                    // REVIEW TASK CSRawAddressAccess: move this concern behind the suggested reviewed aegis helper or another explicit boundary.
+                    // REVIEW TASK CSRawAddressAccess: move memory.writeByte behind a reviewed aegis helper or another explicit unsafe-boundary contract.
                     memory.writeByte(address++, (byte) c);
                 }
                 writeSkip(length);
@@ -360,6 +375,8 @@ public abstract class CommonMappedBytes extends MappedBytes {
                         writeSkip(i);
                         break non_ascii;
                     }
+                    // REVIEW TASK CSRawAddressAccess: move this concern behind the suggested reviewed aegis helper or another explicit boundary.
+                    // REVIEW TASK CSRawAddressAccess: move memory.writeByte behind a reviewed aegis helper or another explicit unsafe-boundary contract.
                     memory.writeByte(address++, (byte) c);
                 }
                 writeSkip(length);
@@ -556,6 +573,7 @@ public abstract class CommonMappedBytes extends MappedBytes {
 
     public void singleThreadedCheckDisabled(boolean singleThreadedCheckDisabled) {
         super.singleThreadedCheckDisabled(singleThreadedCheckDisabled);
+        // CSSingleThreadedCheckDisable REVIEW keep closeable.singleThreadedCheckDisabled here because this lifecycle or ownership exception in CommonMappedBytes#singleThreadedCheckDisabled still needs an explicit reviewed lifecycle contract.
         closeable.singleThreadedCheckDisabled(singleThreadedCheckDisabled);
     }
 

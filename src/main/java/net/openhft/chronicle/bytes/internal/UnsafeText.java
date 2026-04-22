@@ -24,6 +24,7 @@ public final class UnsafeText {
     private static final String MIN_VALUE_STR = "" + Long.MIN_VALUE;
     private static final long ARRAY_BYTE_BASE_OFFSET = Jvm.arrayByteBaseOffset();
 
+    // CQNumericalConstraint REVIEW keep appendFixed(long address, long num) here because this API boundary in UnsafeText#appendFixed leaves parameter address unconstrained and still needs an @Address, @NonNegative, @Positive, or @Range annotation, a validated range check, or an explicit reviewed caller contract.
     /**
      * Writes the decimal representation of {@code num} to {@code address}.
      * The caller must ensure enough writable bytes are available.
@@ -64,6 +65,7 @@ public final class UnsafeText {
         }
     }
 
+    // CQNumericalConstraint REVIEW keep appendFixed(long address, double num, int digits) here because this API boundary in UnsafeText#appendFixed leaves parameter address unconstrained and.
     public static long appendFixed(long address, double num, int digits) {
         long tens = Maths.tens(digits);
         double mag = num * tens;
@@ -75,6 +77,7 @@ public final class UnsafeText {
         }
     }
 
+    // CQNumericalConstraint REVIEW keep appendBase10d(long address, long num, int decimal) here because this API boundary in UnsafeText#appendBase10d leaves parameter address unconstrained and.
     /**
      * Appends {@code num} with the decimal point placed {@code decimal} digits
      * from the end.
@@ -103,6 +106,7 @@ public final class UnsafeText {
         return address;
     }
 
+    // CQNumericalConstraint REVIEW keep appendDouble(long address, double d) here because this API boundary in UnsafeText#appendDouble leaves parameter address unconstrained and.
     /**
      * Writes the decimal form of {@code d} to {@code address}. Numbers outside
      * a safe range fall back to {@link Double#toString(double)}.
@@ -284,6 +288,7 @@ public final class UnsafeText {
     }
 
     /** writes a byte array at {@code address} */
+    // CQNumericalConstraint REVIEW keep append8bit(long address, byte[] bytes) here because this API boundary in UnsafeText#append8bit leaves parameter address unconstrained and.
     public static long append8bit(long address, byte[] bytes) {
         final int len = bytes.length;
         int i;
@@ -295,6 +300,7 @@ public final class UnsafeText {
     }
 
     /** writes the lower 8 bits of each char into memory */
+    // CQNumericalConstraint REVIEW keep append8bit(long address, char[] chars) here because this API boundary in UnsafeText#append8bit leaves parameter address unconstrained and.
     public static long append8bit(long address, char[] chars) {
         final int len = chars.length;
         int i;

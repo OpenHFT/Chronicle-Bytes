@@ -61,6 +61,7 @@ public class VanillaBytes<U>
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
+    // CQNumericalConstraint REVIEW keep this API parameter unconstrained because the numeric contract still needs explicit review.
     protected VanillaBytes(@NotNull BytesStore<?, ?> bytesStore, long writePosition, long writeLimit)
             throws ClosedIllegalStateException, IllegalArgumentException, ThreadingIllegalStateException {
         super(uncheckedCast(bytesStore), writePosition, writeLimit);
@@ -171,6 +172,7 @@ public class VanillaBytes<U>
         return true;
     }
 
+    // CQNumericalConstraint REVIEW keep equalBytes(@NotNull BytesStore<?, ?> bytesStore, long length) here because this API boundary in VanillaBytes#equalBytes leaves numeric inputs unconstrained and still needs either validated range checks or an explicit reviewed caller contract.
     @Override
     public long readVolatileLong(@NonNegative long offset)
             throws BufferUnderflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
@@ -224,6 +226,7 @@ public class VanillaBytes<U>
             throws ClosedIllegalStateException, ThreadingIllegalStateException {
         throwExceptionIfReleased();
         return isClear()
+                // REVIEW TASK CQFactoryOverConstructor: address this concern manually; baseline-assist cannot derive a truthful local repair here.
                 ? new VanillaBytes<>(bytesStore, writePosition(), bytesStore.writeLimit())
                 : new SubBytes<>(bytesStore, readPosition(), readLimit());
     }
@@ -315,6 +318,7 @@ public class VanillaBytes<U>
         }
     }
 
+    // CQNumericalConstraint REVIEW keep this API parameter unconstrained because the numeric contract still needs explicit review.
     public void write(long position, @NotNull CharSequence str, @NonNegative int offset, @NonNegative int length)
             throws BufferOverflowException, IllegalArgumentException, ArithmeticException, ClosedIllegalStateException, BufferUnderflowException, ThreadingIllegalStateException {
         requireNonNull(str);
@@ -523,10 +527,12 @@ public class VanillaBytes<U>
                         ? toString2((NativeBytesStore) bytesStore)
                         : toString0();
             } catch (IllegalStateException e) {
+                // CSCheckedSwallowThroughRethrow REVIEW throw Jvm.rethrow(e) because this rethrow in VanillaBytes#toString converts a checked cause into an unchecked wrapper and still needs either a declared `throws` at the enclosing method or an explicit reviewed note on why no local cleanup is performed.
                 throw Jvm.rethrow(e);
             } finally {
                 release(this);
             }
+            // CSCatchBroadException REVIEW catch (Exception e) because the local fallback still begins with returning e.toString() and needs either narrower handling or an explicit reviewed recovery contract.
         } catch (Exception e) {
             return e.toString();
         }

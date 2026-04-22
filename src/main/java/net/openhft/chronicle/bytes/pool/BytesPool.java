@@ -38,6 +38,7 @@ public final class BytesPool {
      * @param instancesPerThread The maximum number of instances to retain per thread
      * @return The pool
      */
+    // CQNumericalConstraint REVIEW keep this API parameter unconstrained because the numeric contract still needs explicit review.
     public static ScopedResourcePool<Bytes<?>> createThreadLocal(int instancesPerThread) {
         return new ScopedThreadLocal<>(
                 BytesPool::createBytes,

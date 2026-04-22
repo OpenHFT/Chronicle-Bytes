@@ -51,6 +51,7 @@ public final class NoBytesStore implements BytesStore<NoBytesStore, Void> {
         return new BufferUnderflowException();
     }
 
+    // CQNumericalConstraint REVIEW keep equalBytes(@NotNull BytesStore<?, ?> bytesStore, long length) here because this API boundary in NoBytesStore#equalBytes leaves numeric inputs unconstrained and still needs either validated range checks or an explicit reviewed caller contract.
     @Override
     public void reserve(ReferenceOwner owner)
             throws IllegalStateException {
@@ -279,6 +280,8 @@ public final class NoBytesStore implements BytesStore<NoBytesStore, Void> {
     /** @return always {@code null} */
     @Override
     public Void underlyingObject() {
+        // REVIEW TASK CQNullabilityReturns: add the explicit annotation or return contract this rule expects here.
+        // REVIEW TASK CQNullabilityReturns: annotate the return value of underlyingObject(...) with @Nullable or @NotNull.
         return null;
     }
 
@@ -374,6 +377,8 @@ public final class NoBytesStore implements BytesStore<NoBytesStore, Void> {
     @NotNull
     @Override
     public Bytes<Void> bytesForWrite() {
+        // REVIEW TASK CQRuntimeTodoPlaceholder: replace this runtime placeholder with a concrete implementation decision or remove it.
+        // REVIEW TASK CQRuntimeTodoPlaceholder: replace runtime placeholder (throw new UnsupportedOperationException("todo");) with a concrete implementation decision or remove it.
         throw new UnsupportedOperationException("todo");
     }
 

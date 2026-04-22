@@ -47,6 +47,7 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
     /** length already synced */
     private long syncLength = 0;
 
+    // CQNumericalConstraint REVIEW keep MappedBytesStore(ReferenceOwner owner, MappedFile mappedFile, @NonNegative long start, long address, @NonNegative lon... here because this API boundary in MappedBytesStore constructor leaves parameter address unconstrained and still needs an @Address, @NonNegative, @Positive, or @Range annotation, a validated range check, or an explicit reviewed caller contract.
     /**
      * Constructs a {@code MappedBytesStore} for a mapped region.
      *
@@ -73,6 +74,7 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
         this.pageSize = pageSize;
     }
 
+    // CQNumericalConstraint REVIEW keep create(ReferenceOwner owner, MappedFile mappedFile, @NonNegative long start, long address, @NonNegative long capacity... here because this API boundary in MappedBytesStore#create leaves parameter address unconstrained and.
     /**
      * Factory method mirroring the protected constructor.
      */
@@ -141,6 +143,8 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
 
     @Override
     public byte readByte(@NonNegative long offset) {
+        // REVIEW TASK CSRawAddressAccess: move this concern behind the suggested reviewed aegis helper or another explicit boundary.
+        // REVIEW TASK CSRawAddressAccess: move memory.readByte behind a reviewed aegis helper or another explicit unsafe-boundary contract.
         return memory.readByte(address - start + offset);
     }
 
@@ -150,6 +154,8 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
             throws IllegalStateException {
         writeCheck.run();
 
+        // REVIEW TASK CSRawAddressAccess: move this concern behind the suggested reviewed aegis helper or another explicit boundary.
+        // REVIEW TASK CSRawAddressAccess: move memory.writeOrderedInt behind a reviewed aegis helper or another explicit unsafe-boundary contract.
         memory.writeOrderedInt(address - start + offset, i);
         return this;
     }
@@ -406,12 +412,12 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
     private void performMsync(@NonNegative long offset, long length, SyncMode syncMode) {
         if (syncMode == SyncMode.NONE)
             return;
-        long start0 = System.currentTimeMillis();
+        long start0 = net.openhft.chronicle.core.time.SystemTimeProvider.INSTANCE.currentTimeMillis();
         boolean full = offset == 0;
         int ret = PosixAPI.posix().msync(address + offset, length, syncMode.mSyncFlag());
         if (ret != 0)
             Jvm.error().on(MappedBytesStore.class, "msync failed, " + PosixAPI.posix().lastErrorStr() + ", ret=" + ret + " " + mappedFile.file() + " " + Long.toHexString(offset) + " " + Long.toHexString(length));
-        long time0 = System.currentTimeMillis() - start0;
+        long time0 = net.openhft.chronicle.core.time.SystemTimeProvider.INSTANCE.currentTimeMillis() - start0;
         if (time0 >= 200)
             Jvm.perf().on(getClass(), "Took " + time0 + " ms to " + syncMode + " " + mappedFile.file() + (full ? " (full)" : ""));
     }
@@ -437,6 +443,7 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
      *
      * @param position to sync with the syncMode()
      */
+    // CQNumericalConstraint REVIEW keep this API parameter unconstrained because the numeric contract still needs explicit review.
     public void syncUpTo(long position) {
         syncUpTo(position, this.syncMode);
     }
@@ -447,6 +454,7 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
      * @param position to sync with the syncMode()
      * @param syncMode to use
      */
+    // CQNumericalConstraint REVIEW keep this API parameter unconstrained because the numeric contract still needs explicit review.
     public void syncUpTo(long position, SyncMode syncMode) {
         if (syncMode == SyncMode.NONE || address == 0 || refCount() <= 0)
             return;

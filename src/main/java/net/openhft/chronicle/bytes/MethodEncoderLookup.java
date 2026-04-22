@@ -27,6 +27,8 @@ public enum MethodEncoderLookup implements Function<Method, MethodEncoder> {
     @Override
     public MethodEncoder apply(Method method) {
         MethodId methodId = Jvm.findAnnotation(method, MethodId.class);
+        // REVIEW TASK CQNullabilityReturns: add the explicit annotation or return contract this rule expects here.
+        // REVIEW TASK CQNullabilityReturns: annotate return type methodId == null on apply(...) with @Nullable or @NotNull.
         if (methodId == null) return null;
         long messageId = methodId.value();
         return new MethodEncoder() {

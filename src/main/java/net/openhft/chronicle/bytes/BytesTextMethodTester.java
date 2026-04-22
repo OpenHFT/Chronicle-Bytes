@@ -109,6 +109,8 @@ public class BytesTextMethodTester<T> {
         if (setup != null) {
             Bytes<?> bytes0 = HexDumpBytes.fromText(BytesUtil.readFile(setup));
 
+            // REVIEW TASK CQTryWithResourcesMissing: rework this resource lifecycle manually; baseline-assist will not guess close order or control flow here.
+            // REVIEW TASK CQTryWithResourcesMissing: wrap BytesMethodReader reader0 in try-with-resources or document explicit close ownership.
             BytesMethodReader reader0 = bytes0.bytesMethodReaderBuilder()
                     .defaultParselet(this::unknownMessageId)
                     .build(components);
@@ -127,6 +129,8 @@ public class BytesTextMethodTester<T> {
                 continue;
             Bytes<?> bytes = HexDumpBytes.fromText(text2);
 
+            // REVIEW TASK CQTryWithResourcesMissing: rework this resource lifecycle manually; baseline-assist will not guess close order or control flow here.
+            // REVIEW TASK CQTryWithResourcesMissing: wrap BytesMethodReader reader in try-with-resources or document explicit close ownership.
             BytesMethodReader reader = bytes.bytesMethodReaderBuilder()
                     .defaultParselet(this::unknownMessageId)
                     .build(components);

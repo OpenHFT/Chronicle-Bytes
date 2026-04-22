@@ -30,12 +30,14 @@ public class BytesFieldInfo {
 
     static {
         try {
+            // CSReflectiveFieldLookup REVIEW $END$ = BytesFieldInfo.class.getDeclaredField("$END$") because this reflective or runtime-loading boundary still needs either an allowlisted wrapper or an explicit reviewed runtime-loading contract.
             $END$ = BytesFieldInfo.class.getDeclaredField("$END$");
         } catch (NoSuchFieldException e) {
             throw new AssertionError(e);
         }
     }
 
+    // CSUnboundedInternCache REVIEW keep this reviewed site here because this lifecycle or ownership exception still needs an explicit reviewed lifecycle contract.
     private final Map<String, BFIEntry> groups = new LinkedHashMap<>();
     private final Class<?> aClass;
     private final int description;
@@ -188,6 +190,7 @@ public class BytesFieldInfo {
      * @return a human readable dump of the discovered groups and their offsets
      */
     public String dump() {
+        // REVIEW TASK CQWireAcquireStringBuilder: address this concern manually; baseline-assist cannot derive a truthful local repair here.
         final StringBuilder sb = new StringBuilder().append("type: ").append(getClass().getSimpleName()).append(", groups: { ");
         sb.append(groups.entrySet().stream()
                 .map(e -> e.getKey() + ": " + e.getValue().start + " to " + e.getValue().end)

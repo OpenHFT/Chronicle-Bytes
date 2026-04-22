@@ -69,6 +69,7 @@ public class BytesMethodReader extends SimpleCloseable implements MethodReader {
         int count = parameterTypes.length;
         BytesMarshallable[][] array = new BytesMarshallable[1][count];
         for (int i = 0; i < count; i++) {
+            // CSResolvedTypeInstantiation REVIEW keep ObjectUtils.newInstance here because this type-materialization path in BytesMethodReader#addEncoder still needs an explicit reviewed type-resolution contract.
             array[0][i] = (BytesMarshallable) ObjectUtils.newInstance(parameterTypes[i]);
         }
         Consumer<BytesIn> reader = bytesIn -> {
@@ -125,6 +126,7 @@ public class BytesMethodReader extends SimpleCloseable implements MethodReader {
 
         if (in.readRemaining() < 1)
             return false;
+        // CSUnboundedStopBitDecode REVIEW keep in.readStopBit here because this input or payload boundary in BytesMethodReader#readOne still needs an explicit reviewed input-trust contract.
         long messageId = in.readStopBit();
         Consumer<BytesIn> consumer;
         if (messageId >= 0 && messageId < methodEncoders.size())

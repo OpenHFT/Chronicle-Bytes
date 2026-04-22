@@ -46,6 +46,7 @@ public final class PageUtil {
 
     static List<String> readMountInfo(String path) {
         try {
+            // CSPathFromInput REVIEW keep Files.readAllLines here because this filesystem boundary in PageUtil#readMountInfo still needs an explicit reviewed path-handling contract.
             return Files.readAllLines(Paths.get(path));
         } catch (IOException e) {
             Jvm.warn().on(PageUtil.class, format("Error reading ''{0}'': {1}", path, e.getMessage()), e);

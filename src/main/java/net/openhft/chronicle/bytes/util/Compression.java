@@ -133,10 +133,14 @@ public interface Compression {
      * @throws AssertionError if an unexpected {@link IOException} occurs
      */
     default byte[] compress(byte[] bytes) {
+        // REVIEW TASK CQTryWithResourcesMissing: rework this resource lifecycle manually; baseline-assist will not guess close order or control flow here.
+        // REVIEW TASK CQTryWithResourcesMissing: wrap @NotNull ByteArrayOutputStream baos in try-with-resources or document explicit close ownership.
         @NotNull ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try (OutputStream output = compressingStream(baos)) {
             output.write(bytes);
 
+            // REVIEW TASK CQIORuntimeExceptionWrapping: address this concern manually; baseline-assist cannot derive a truthful local repair here.
+            // REVIEW TASK CQIORuntimeExceptionWrapping: narrow catch to a specific declared exception or document the runtime-wrap contract.
         } catch (IOException e) {
             throw new AssertionError(e); // compressing in memory
         }
@@ -159,6 +163,8 @@ public interface Compression {
         try (OutputStream output = compressingStream(to.outputStream())) {
             from.copyTo(output);
 
+            // REVIEW TASK CQIORuntimeExceptionWrapping: address this concern manually; baseline-assist cannot derive a truthful local repair here.
+            // REVIEW TASK CQIORuntimeExceptionWrapping: narrow catch to a specific declared exception or document the runtime-wrap contract.
         } catch (IOException e) {
             throw new AssertionError(e); // compressing in memory
         }
@@ -174,6 +180,8 @@ public interface Compression {
      */
     default byte[] uncompress(byte[] bytes)
             throws IORuntimeException {
+        // REVIEW TASK CQTryWithResourcesMissing: rework this resource lifecycle manually; baseline-assist will not guess close order or control flow here.
+        // REVIEW TASK CQTryWithResourcesMissing: wrap @NotNull ByteArrayOutputStream baos in try-with-resources or document explicit close ownership.
         @NotNull ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try (InputStream input = decompressingStream(new ByteArrayInputStream(bytes))) {
             byte[] buf = new byte[512];

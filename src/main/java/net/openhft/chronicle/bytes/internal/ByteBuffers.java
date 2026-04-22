@@ -53,6 +53,7 @@ public final class ByteBuffers {
      * @param capacity new capacity value (truncated to {@code int})
      * @throws AssertionError if reflective access fails
      */
+    // CQNumericalConstraint REVIEW keep this API parameter unconstrained because the numeric contract still needs explicit review.
     public static void setAddressCapacity(ByteBuffer buffer, long address, long capacity) {
         if (ADDRESS == null || CAPACITY == null)
             throw new UnsupportedOperationException("Direct ByteBuffer fields not accessible");

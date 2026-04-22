@@ -69,6 +69,7 @@ public abstract class MappedBytes extends AbstractBytes<Void> implements Closeab
     @NotNull
     public static MappedBytes singleMappedBytes(@NotNull final String filename, @NonNegative final long capacity)
             throws FileNotFoundException, IllegalStateException {
+        // CSPathFromInput REVIEW keep singleMappedBytes here because this filesystem boundary in MappedBytes#singleMappedBytes still needs an explicit reviewed path-handling contract.
         return singleMappedBytes(new File(filename), capacity);
     }
 
@@ -115,6 +116,7 @@ public abstract class MappedBytes extends AbstractBytes<Void> implements Closeab
     @NotNull
     public static MappedBytes mappedBytes(@NotNull final String filename, @NonNegative final long chunkSize)
             throws FileNotFoundException, ClosedIllegalStateException {
+        // CSPathFromInput REVIEW keep mappedBytes here because this filesystem boundary in MappedBytes#mappedBytes still needs an explicit reviewed path-handling contract.
         return mappedBytes(new File(filename), chunkSize);
     }
 
@@ -248,6 +250,7 @@ public abstract class MappedBytes extends AbstractBytes<Void> implements Closeab
     /**
      * Populates the supplied array with the number of chunks held by the underlying {@link MappedFile}.
      */
+    // CQNumericalConstraint REVIEW keep this API parameter unconstrained because the numeric contract still needs explicit review.
     public abstract void chunkCount(long[] chunkCount);
 
     /**
@@ -276,6 +279,7 @@ public abstract class MappedBytes extends AbstractBytes<Void> implements Closeab
 
         // MappedBytes don't have a backing BytesStore so we have to give out bytesForRead|Write backed by this
         return isClear()
+                // REVIEW TASK CQFactoryOverConstructor: address this concern manually; baseline-assist cannot derive a truthful local repair here.
                 ? new VanillaBytes<>(this, writePosition(), bytesStore.writeLimit())
                 : new SubBytes<>(this, readPosition(), readLimit() + start());
     }
@@ -288,6 +292,7 @@ public abstract class MappedBytes extends AbstractBytes<Void> implements Closeab
         throwExceptionIfReleased();
 
         // MappedBytes don't have a backing BytesStore so we have to give out bytesForRead|Write backed by this
+        // REVIEW TASK CQFactoryOverConstructor: address this concern manually; baseline-assist cannot derive a truthful local repair here.
         return new VanillaBytes<>(this, writePosition(), writeLimit());
     }
 }

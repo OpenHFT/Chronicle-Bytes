@@ -29,6 +29,7 @@ public class UsesBigDecimal implements Decimaliser {
      * Access may fail on some JVMs, in which case a slower fallback is used.
      */
     private static final java.lang.reflect.Field INT_COMPACT =
+            // CSReflectiveFieldLookup REVIEW Jvm.getFieldOrNull(BigDecimal.class, "intCompact") because this reflective or runtime-loading boundary still needs either an allowlisted wrapper or an explicit reviewed runtime-loading contract.
             Jvm.getFieldOrNull(BigDecimal.class, "intCompact");
 
     /**

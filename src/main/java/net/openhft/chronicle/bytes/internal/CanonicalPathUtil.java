@@ -31,6 +31,7 @@ public final class CanonicalPathUtil {
         try {
             return file.getCanonicalPath().intern();
         } catch (IOException ioe) {
+            // CSRawHeaderOrPathMessage REVIEW emit IORuntimeException here because this operator-facing diagnostic in CanonicalPathUtil#of still needs an explicit reviewed operator-diagnostic contract.
             throw new IORuntimeException("Unable to obtain the canonical path for " + file.getAbsolutePath(), ioe);
         }
     }

@@ -97,6 +97,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     default long writePositionForHeader(boolean skipPadding) throws ClosedIllegalStateException {
         long position = writePosition();
         if (skipPadding)
+            // CSDynamicReadSkip REVIEW keep writeSkip here because this input or payload boundary in StreamingDataOutput#writePositionForHeader still needs an explicit reviewed input-trust contract.
             return writeSkip(BytesUtil.padOffset(position)).writePosition();
         return position;
     }
@@ -783,15 +784,22 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     default S unsafeWriteObject(Object o, @NonNegative int offset, @NonNegative int length)
             throws BufferOverflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
         if (this.isDirectMemory()) {
+            // CSDynamicReadSkip REVIEW keep writeSkip here because this input or payload boundary in StreamingDataOutput#unsafeWriteObject still needs an explicit reviewed input-trust contract.
             writeSkip(length); // blow up here if this isn't going to work
             final long dest = addressForWrite(writePosition() - length);
+            // REVIEW TASK CSRawAddressAccess: move this concern behind the suggested reviewed aegis helper or another explicit boundary.
+            // REVIEW TASK CSRawAddressAccess: move UnsafeMemory.MEMORY.copyMemory behind a reviewed aegis helper or another explicit unsafe-boundary contract.
             UnsafeMemory.MEMORY.copyMemory(o, offset, dest, length);
             return (S) this;
         }
         int i = 0;
         for (; i < length - 7; i += 8)
+            // REVIEW TASK CSRawAddressAccess: move this concern behind the suggested reviewed aegis helper or another explicit boundary.
+            // REVIEW TASK CSRawAddressAccess: move writeLong behind a reviewed aegis helper or another explicit unsafe-boundary contract.
             writeLong(UnsafeMemory.unsafeGetLong(o, (long) offset + i));
         for (; i < length; i++)
+            // REVIEW TASK CSRawAddressAccess: move this concern behind the suggested reviewed aegis helper or another explicit boundary.
+            // REVIEW TASK CSRawAddressAccess: move writeByte behind a reviewed aegis helper or another explicit unsafe-boundary contract.
             writeByte(UnsafeMemory.unsafeGetByte(o, (long) offset + i));
         return (S) this;
     }
@@ -809,14 +817,21 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     @CallerCheckedRangeBounds(address = "address", length = "length")
     default S unsafeWrite(long address, @NonNegative int length) throws ClosedIllegalStateException, ThreadingIllegalStateException {
         if (isDirectMemory()) {
+            // CSDynamicReadSkip REVIEW keep writeSkip here because this input or payload boundary in StreamingDataOutput#unsafeWrite still needs an explicit reviewed input-trust contract.
             writeSkip(length); // blow up if there isn't that much space left
             long destAddress = addressForWrite(writePosition() - length);
+            // REVIEW TASK CSRawAddressAccess: move this concern behind the suggested reviewed aegis helper or another explicit boundary.
+            // REVIEW TASK CSRawAddressAccess: move UnsafeMemory.copyMemory behind a reviewed aegis helper or another explicit unsafe-boundary contract.
             UnsafeMemory.copyMemory(address, destAddress, length);
         } else {
             int i = 0;
             for (; i < length - 7; i += 8)
+                // REVIEW TASK CSRawAddressAccess: move this concern behind the suggested reviewed aegis helper or another explicit boundary.
+                // REVIEW TASK CSRawAddressAccess: move writeLong behind a reviewed aegis helper or another explicit unsafe-boundary contract.
                 writeLong(UnsafeMemory.unsafeGetLong(address + i));
             for (; i < length; i++)
+                // REVIEW TASK CSRawAddressAccess: move this concern behind the suggested reviewed aegis helper or another explicit boundary.
+                // REVIEW TASK CSRawAddressAccess: move writeByte behind a reviewed aegis helper or another explicit unsafe-boundary contract.
                 writeByte(UnsafeMemory.unsafeGetByte(address + i));
         }
         return (S) this;
@@ -1164,6 +1179,8 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
+    // REVIEW TASK CQDeprecationJavadoc: add the missing Javadoc guidance this governance rule expects here.
+    // REVIEW TASK CQDeprecationJavadoc: add a @deprecated Javadoc tag to writeWithLength explaining the replacement and removal plan.
     @Deprecated(/* to be removed in x.29 */)
     default void writeWithLength(@NotNull RandomDataInput bytes)
             throws BufferOverflowException, ClosedIllegalStateException, ThreadingIllegalStateException {

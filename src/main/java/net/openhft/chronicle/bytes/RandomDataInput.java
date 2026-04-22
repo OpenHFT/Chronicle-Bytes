@@ -361,6 +361,8 @@ public interface RandomDataInput extends RandomCommon {
 
         int i = 0;
         for (; i < len - 7; i += 8)
+            // REVIEW TASK CSRawAddressAccess: move this concern behind the suggested reviewed aegis helper or another explicit boundary.
+            // REVIEW TASK CSRawAddressAccess: move UnsafeMemory.unsafePutLong behind a reviewed aegis helper or another explicit unsafe-boundary contract.
             UnsafeMemory.unsafePutLong(bytes, i, readLong(readPosition + i));
         for (; i < len; i++)
             bytes[i] = readByte(readPosition + i);

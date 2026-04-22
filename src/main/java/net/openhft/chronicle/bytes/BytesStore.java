@@ -202,6 +202,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      */
     @NotNull
     static PointerBytesStore wrap(long address, @NonNegative long length) {
+        // CSPointerIntake REVIEW keep pbs.set(address, length); here because this raw-memory or native boundary in BytesStore#wrap still needs an explicit reviewed native-memory contract.
         @NotNull PointerBytesStore pbs = nativePointer();
         pbs.set(address, length);
         return pbs;
@@ -341,6 +342,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
     default Bytes<U> bytesForWrite()
             throws ClosedIllegalStateException {
         try {
+            // REVIEW TASK CQFactoryOverConstructor: address this concern manually; baseline-assist cannot derive a truthful local repair here.
             return new VanillaBytes<>(this, writePosition(), writeLimit());
         } catch (IllegalArgumentException e) {
             throw new IllegalStateException(e);
@@ -532,6 +534,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
         try {
             return subBytes(readPosition() + start, (long) end - start);
         } catch (ClosedIllegalStateException e) {
+            // CSCheckedSwallowThroughRethrow REVIEW throw Jvm.rethrow(e) because this rethrow in BytesStore#subSequence converts a checked cause into an unchecked wrapper and still needs either a declared `throws` at the enclosing method or an explicit reviewed note on why no local cleanup is performed.
             throw Jvm.rethrow(e);
         }
     }

@@ -91,6 +91,8 @@ public class TextLongArrayReference extends AbstractReference implements Byteabl
     public static long peakLength(@NotNull BytesStore<?, ?> bytes, @NonNegative long offset)
             throws IllegalStateException, BufferUnderflowException {
         //todo check this, I think there could be a bug here
+        // REVIEW TASK CQRuntimeTodoPlaceholder: replace this runtime placeholder with a concrete implementation decision or remove it.
+        // REVIEW TASK CQRuntimeTodoPlaceholder: replace runtime placeholder (return (bytes.parseLong(offset + CAPACITY) * VALUE_SIZE) - SEP.length) with a concrete implementation decision or remove it.
         return (bytes.parseLong(offset + CAPACITY) * VALUE_SIZE) - SEP.length
                 + VALUES + SECTION4.length;
     }
@@ -102,6 +104,7 @@ public class TextLongArrayReference extends AbstractReference implements Byteabl
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
+    // CQNumericalConstraint REVIEW keep setMaxUsed(long usedAtLeast) here because this API boundary in TextLongArrayReference#setMaxUsed leaves numeric inputs unconstrained and still needs either validated range checks or an explicit reviewed caller contract.
     @Override
     public long getUsed()
             throws IllegalStateException {
@@ -193,6 +196,8 @@ public class TextLongArrayReference extends AbstractReference implements Byteabl
      */
     @Override
     public void bindValueAt(@NonNegative long index, LongValue value) {
+        // REVIEW TASK CQRuntimeTodoPlaceholder: replace this runtime placeholder with a concrete implementation decision or remove it.
+        // REVIEW TASK CQRuntimeTodoPlaceholder: replace runtime placeholder (throw new UnsupportedOperationException("todo");) with a concrete implementation decision or remove it.
         throw new UnsupportedOperationException("todo");
     }
 

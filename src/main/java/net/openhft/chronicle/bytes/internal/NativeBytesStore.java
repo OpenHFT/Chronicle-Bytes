@@ -95,6 +95,8 @@ public class NativeBytesStore<U>
         this(bb, elastic, Bytes.MAX_HEAP_CAPACITY);
     }
 
+    // REVIEW TASK CQDeprecationJavadoc: add the missing Javadoc guidance this governance rule expects here.
+    // REVIEW TASK CQDeprecationJavadoc: add a @deprecated Javadoc tag to NativeBytesStore explaining the replacement and removal plan.
     @Deprecated(/* remove in x.29 */)
     public NativeBytesStore(@NotNull ByteBuffer bb, boolean elastic, int maximumLimit) {
         this(bb, elastic, (long) maximumLimit);
@@ -107,19 +109,23 @@ public class NativeBytesStore<U>
         this.maximumLimit = elastic ? maximumLimit : Math.min(limit, maximumLimit);
     }
 
+    // CQNumericalConstraint REVIEW keep NativeBytesStore(long address, long limit) here because this API boundary in NativeBytesStore constructor leaves parameter address unconstrained and still needs an @Address, @NonNegative, @Positive, or @Range annotation, a validated range check, or an explicit reviewed caller contract.
     public NativeBytesStore(long address, long limit) {
         this(address, limit, null, false);
     }
 
+    // CQNumericalConstraint REVIEW keep NativeBytesStore(long address, @NonNegative long limit, @Nullable Runnable deallocator, boolean elastic) here because this API boundary in NativeBytesStore constructor leaves parameter address unconstrained and.
     public NativeBytesStore(
             long address, @NonNegative long limit, @Nullable Runnable deallocator, boolean elastic) {
         this(address, limit, deallocator, elastic, false);
     }
 
+    // CQNumericalConstraint REVIEW keep NativeBytesStore(long address, @NonNegative long limit, @Nullable Runnable deallocator, boolean elastic, boolean moni... here because this API boundary in NativeBytesStore constructor leaves parameter address unconstrained and.
     @SuppressWarnings("this-escape")
     protected NativeBytesStore(
             long address, @NonNegative long limit, @Nullable Runnable deallocator, boolean elastic, boolean monitored) {
         super(monitored);
+        // CSPointerIntake REVIEW keep setAddress here because this raw-memory or native boundary in NativeBytesStore#NativeBytesStore still needs an explicit reviewed native-memory contract.
         setAddress(address);
         this.limit = limit;
         this.maximumLimit = elastic ? MAX_CAPACITY : limit;
@@ -159,6 +165,7 @@ public class NativeBytesStore<U>
 
     @NotNull
     public static <T> NativeBytesStore<T> uninitialized() {
+        // REVIEW TASK CQFactoryOverConstructor: address this concern manually; baseline-assist cannot derive a truthful local repair here.
         return new NativeBytesStore<>();
     }
 
@@ -227,6 +234,7 @@ public class NativeBytesStore<U>
         return nbs;
     }
 
+    // CQNumericalConstraint REVIEW keep appendAndReturnLength(long writePosition, boolean negative, long mantissa, int exponent, boolean append0) here because this API boundary in NativeBytesStore#appendAndReturnLength leaves numeric inputs unconstrained and still needs either validated range checks or an explicit reviewed caller contract.
     @Override
     public boolean isDirectMemory() {
         return true;
@@ -241,6 +249,7 @@ public class NativeBytesStore<U>
         this.elastic = elastic;
         underlyingObject = uncheckedCast(bb);
         bb.order(ByteOrder.nativeOrder());
+        // CSPointerIntake REVIEW keep setAddress here because this raw-memory or native boundary in NativeBytesStore#init still needs an explicit reviewed native-memory contract.
         setAddress(Jvm.address(bb));
         this.limit = bb.capacity();
     }
@@ -461,6 +470,7 @@ public class NativeBytesStore<U>
     @NotNull
     @Override
     public NativeBytesStore<U> writeOrderedInt(@NonNegative long offset, int i) {
+        // CSLazyOrderingAmbiguity REVIEW keep memory.writeOrderedInt here because this raw-memory or native boundary in NativeBytesStore#writeOrderedInt still needs an explicit reviewed native-memory contract.
         memory.writeOrderedInt(address + translate(offset), i);
         return this;
     }
@@ -475,6 +485,7 @@ public class NativeBytesStore<U>
     @NotNull
     @Override
     public NativeBytesStore<U> writeOrderedLong(@NonNegative long offset, long i) throws ClosedIllegalStateException, ThreadingIllegalStateException {
+        // CSLazyOrderingAmbiguity REVIEW keep memory.writeOrderedLong here because this raw-memory or native boundary in NativeBytesStore#writeOrderedLong still needs an explicit reviewed native-memory contract.
         memory.writeOrderedLong(address + translate(offset), i);
         return this;
     }
@@ -708,8 +719,10 @@ public class NativeBytesStore<U>
         return l;
     }
 
+    // CQNumericalConstraint REVIEW keep setAddress(long address) here because this API boundary in NativeBytesStore#setAddress leaves parameter address unconstrained and.
     public void setAddress(long address) {
         if ((address & ~0x3FFF) == 0)
+            // CSRawHeaderOrPathMessage REVIEW emit AssertionError here because this operator-facing diagnostic in NativeBytesStore#setAddress still needs an explicit reviewed operator-diagnostic contract.
             throw new AssertionError("Invalid addressForRead " + Long.toHexString(address));
         this.address = address;
     }
@@ -986,6 +999,7 @@ public class NativeBytesStore<U>
         /*
          * This finalize() is used to detect when a component is not released deterministically. It is not required to be run, but provides a warning
          */
+        // CSFinalizerOverride REVIEW keep this reviewed site here because this runtime execution boundary in Finalizer#finalize still needs an explicit reviewed runtime-admission contract.
         @Override
         @SuppressWarnings({"deprecation", "removal"})
         protected void finalize()

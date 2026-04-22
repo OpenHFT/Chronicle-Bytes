@@ -63,6 +63,8 @@ public abstract class AbstractBytes<U>
      * Deprecated flag (<em>bytes.append.0</em>) controlling whether whole
      * floating point numbers were suffixed with ".0". Removal planned in x.28.
      */
+    // REVIEW TASK CQDeprecationJavadoc: add the missing Javadoc guidance this governance rule expects here.
+    // REVIEW TASK CQDeprecationJavadoc: add a @deprecated Javadoc tag to AbstractBytes explaining the replacement and removal plan.
     @Deprecated(/* to remove in x.28 */)
     private static final boolean APPEND_0 = Jvm.getBoolean("bytes.append.0", true);
 
@@ -126,6 +128,7 @@ public abstract class AbstractBytes<U>
         this.name = name;
     }
 
+    // CQNumericalConstraint REVIEW keep appendAndReturnLength(long writePosition, boolean negative, long mantissa, int exponent, boolean append0) here because this API boundary in AbstractBytes#appendAndReturnLength leaves numeric inputs unconstrained and still needs either validated range checks or an explicit reviewed caller contract.
     @Override
     public boolean isDirectMemory() {
         // delegate to the underlying store

@@ -112,6 +112,8 @@ public enum AppendableUtil {
     public static <C extends Appendable & CharSequence> void append(@NotNull C sb, String str) {
         try {
             sb.append(str);
+            // REVIEW TASK CQIORuntimeExceptionWrapping: address this concern manually; baseline-assist cannot derive a truthful local repair here.
+            // REVIEW TASK CQIORuntimeExceptionWrapping: narrow catch to a specific declared exception or document the runtime-wrap contract.
         } catch (IOException e) {
             throw new AssertionError(e);
         }
@@ -145,6 +147,8 @@ public enum AppendableUtil {
             throws BufferUnderflowException, ClosedIllegalStateException {
         try {
             readUtf8AndAppend(bytes, appendable, tester);
+            // REVIEW TASK CQIORuntimeExceptionWrapping: address this concern manually; baseline-assist cannot derive a truthful local repair here.
+            // REVIEW TASK CQIORuntimeExceptionWrapping: narrow catch to a specific declared exception or document the runtime-wrap contract.
         } catch (IOException e) {
             throw new AssertionError(e);
         }
@@ -162,6 +166,7 @@ public enum AppendableUtil {
             int c = bytes.readUnsignedByte();
             // If the character read is a multi-byte UTF-8 character, rewind and break the loop.
             if (c >= 128) {
+                // CSBacktrackSkip REVIEW keep bytes.readSkip here because this input or payload boundary in AppendableUtil#readUtf8AndAppend still needs an explicit reviewed input-trust contract.
                 bytes.readSkip(-1);
                 break;
             }
@@ -244,6 +249,7 @@ public enum AppendableUtil {
     }
 
     private static UTFDataFormatException newUTFDataFormatException(final int c) {
+        // CSRawHeaderOrPathMessage REVIEW emit UTFDataFormatException here because this operator-facing diagnostic in AppendableUtil#newUTFDataFormatException still needs an explicit reviewed operator-diagnostic contract.
         return new UTFDataFormatException(MALFORMED_INPUT_AROUND_BYTE + Integer.toHexString(c));
     }
 
@@ -263,6 +269,7 @@ public enum AppendableUtil {
         @Nullable NativeBytesStore nbs = (NativeBytesStore) bytes.bytesStore();
         long offset = bytes.readPosition();
         int count = BytesInternal.parse8bit_SB1(offset, nbs, sb, length);
+        // CSDynamicReadSkip REVIEW keep bytes.readSkip here because this input or payload boundary in AppendableUtil#parse8bit_SB1 still needs an explicit reviewed input-trust contract.
         bytes.readSkip(count);
     }
 

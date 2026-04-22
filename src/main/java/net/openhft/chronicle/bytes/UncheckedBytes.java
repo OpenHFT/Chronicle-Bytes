@@ -172,6 +172,8 @@ public class UncheckedBytes<U>
     @Override
     public BytesStore<Bytes<U>, U> copy() {
         throwExceptionIfReleased();
+        // REVIEW TASK CQRuntimeTodoPlaceholder: replace this runtime placeholder with a concrete implementation decision or remove it.
+        // REVIEW TASK CQRuntimeTodoPlaceholder: replace runtime placeholder (throw new UnsupportedOperationException("todo");) with a concrete implementation decision or remove it.
         throw new UnsupportedOperationException("todo");
     }
 
@@ -244,6 +246,8 @@ public class UncheckedBytes<U>
         if (len > 0) {
             writeCheckOffset(writePosition(), len);
             this.throwExceptionIfReleased();
+            // REVIEW TASK CSRawAddressAccess: move this concern behind the suggested reviewed aegis helper or another explicit boundary.
+            // REVIEW TASK CSRawAddressAccess: move OS.memory behind a reviewed aegis helper or another explicit unsafe-boundary contract.
             OS.memory().copyMemory(bytes.addressForRead(offset), addressForWritePosition(), len);
             writeSkip(len);
         }

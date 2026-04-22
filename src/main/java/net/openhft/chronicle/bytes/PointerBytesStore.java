@@ -24,6 +24,7 @@ public class PointerBytesStore extends NativeBytesStore<Void> {
         super(NoBytesStore.NO_PAGE, 0, null, false, false);
     }
 
+    // CQNumericalConstraint REVIEW keep set(long address, @NonNegative long capacity) throws IllegalArgumentException here because this API boundary in PointerBytesStore#set leaves parameter address unconstrained and still needs an @Address, @NonNegative, @Positive, or @Range annotation, a validated range check, or an explicit reviewed caller contract.
     /**
      * Points this store at a new memory region.
      */
@@ -47,6 +48,7 @@ public class PointerBytesStore extends NativeBytesStore<Void> {
     @Override
     public VanillaBytes<Void> bytesForWrite()
             throws IllegalStateException {
+        // REVIEW TASK CQFactoryOverConstructor: address this concern manually; baseline-assist cannot derive a truthful local repair here.
         return new VanillaBytes<>(this, 0, Bytes.MAX_CAPACITY);
     }
 

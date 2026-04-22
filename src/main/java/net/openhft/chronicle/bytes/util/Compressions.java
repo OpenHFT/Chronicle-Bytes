@@ -93,6 +93,7 @@ public enum Compressions implements Compression {
          */
         private void copy(@NotNull BytesIn<?> from, @NotNull BytesOut<?> to) throws IllegalStateException, BufferOverflowException {
             long copied = from.copyTo((BytesStore) to);
+            // CSDynamicReadSkip REVIEW keep to.writeSkip here because this input or payload boundary in Compressions#copy still needs an explicit reviewed input-trust contract.
             to.writeSkip(copied);
         }
 
@@ -136,6 +137,7 @@ public enum Compressions implements Compression {
         @NotNull
         @Override
         public InputStream decompressingStream(@NotNull InputStream input) {
+            // CSCompressionUncompress REVIEW keep InflaterInputStream here because this input or payload boundary in Compressions#decompressingStream still needs an explicit reviewed input-trust contract.
             return new InflaterInputStream(input);
         }
 
@@ -172,7 +174,10 @@ public enum Compressions implements Compression {
         public InputStream decompressingStream(@NotNull InputStream input)
                 throws IORuntimeException {
             try {
+                // CSCompressionUncompress REVIEW keep input here because this input or payload boundary in Compressions#decompressingStream still needs an explicit reviewed input-trust contract.
                 return new GZIPInputStream(input);
+                // REVIEW TASK CQIORuntimeExceptionWrapping: address this concern manually; baseline-assist cannot derive a truthful local repair here.
+                // REVIEW TASK CQIORuntimeExceptionWrapping: narrow catch to a specific declared exception or document the runtime-wrap contract.
             } catch (IOException e) {
                 throw new AssertionError(e);
             }
@@ -189,6 +194,8 @@ public enum Compressions implements Compression {
         public OutputStream compressingStream(@NotNull OutputStream output) {
             try {
                 return new GZIPOutputStream(output);
+                // REVIEW TASK CQIORuntimeExceptionWrapping: address this concern manually; baseline-assist cannot derive a truthful local repair here.
+                // REVIEW TASK CQIORuntimeExceptionWrapping: narrow catch to a specific declared exception or document the runtime-wrap contract.
             } catch (IOException e) {
                 throw new AssertionError(e);
             }

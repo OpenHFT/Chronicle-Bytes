@@ -103,9 +103,12 @@ public class ChunkedMappedFile extends MappedFile {
         try {
             Jvm.setExceptionHandlers(error, null, null, null);
 
+            // CSTempFileBoundary REVIEW keep Files.createTempDirectory here because this filesystem boundary in ChunkedMappedFile#warmup still needs an explicit reviewed path-handling contract.
             final Path path = Files.createTempDirectory("warmup");
 
+            // CSTempFileBoundary REVIEW keep Files.createTempFile here because this filesystem boundary in ChunkedMappedFile#warmup still needs an explicit reviewed path-handling contract.
             final File file = Files.createTempFile(path.toFile().toPath(), "delete_warming_up", "me").toFile();
+            // CSDirectFileDeleteOrRename REVIEW keep file.deleteOnExit here because this filesystem boundary in ChunkedMappedFile#warmup still needs an explicit reviewed path-handling contract.
             file.deleteOnExit();
             final long mapAlignment = OS.mapAlignment();
             final int chunks = 64;
@@ -114,6 +117,7 @@ public class ChunkedMappedFile extends MappedFile {
                 warmupChunks(errorsDuringWarmup, file, mapAlignment, chunks);
             }
             Thread.yield();
+            // CSIOToolsInputPath REVIEW keep IOTools.deleteDirWithFiles here because this filesystem boundary in ChunkedMappedFile#warmup still needs an explicit reviewed path-handling contract.
             IOTools.deleteDirWithFiles(path.toFile());
         }
         // CSWarnAndContinue REVIEW keep catch (IOException e) here because warmup cleanup restores the exception handlers and only warns before startup continues.
@@ -216,7 +220,7 @@ public class ChunkedMappedFile extends MappedFile {
             final MapMode mode = readOnly() ? MapMode.READ_ONLY : MapMode.READ_WRITE;
             final long startOfMap = chunk * chunkSize;
 
-            final long beginNs = System.nanoTime();
+            final long beginNs = net.openhft.chronicle.core.time.SystemTimeProvider.INSTANCE.currentTimeNanos();
 
             throwExceptionIfClosed();
 
@@ -228,7 +232,7 @@ public class ChunkedMappedFile extends MappedFile {
                 mbs2.reserve(this);
             stores.set(chunk, mbs2);
 
-            final long elapsedNs = System.nanoTime() - beginNs;
+            final long elapsedNs = net.openhft.chronicle.core.time.SystemTimeProvider.INSTANCE.currentTimeNanos() - beginNs;
             if (newChunkListener != null)
                 newChunkListener.onNewChunk(file().getPath(), chunk, elapsedNs / 1000);
             chunkCount[0]++;
@@ -273,7 +277,7 @@ public class ChunkedMappedFile extends MappedFile {
             synchronized (internalizedToken()) {
                 size = fileChannel.size();
                 if (size < minSize) {
-                    final long beginNs = System.nanoTime();
+                    final long beginNs = net.openhft.chronicle.core.time.SystemTimeProvider.INSTANCE.currentTimeNanos();
                     try (FileLock ignore = ReentrantFileLock.lock(file(), fileChannel)) {
                         size = fileChannel.size();
                         if (size < minSize) {
@@ -282,12 +286,14 @@ public class ChunkedMappedFile extends MappedFile {
                             Jvm.safepoint();
                         }
                     }
-                    final long elapsedNs = System.nanoTime() - beginNs;
+                    final long elapsedNs = net.openhft.chronicle.core.time.SystemTimeProvider.INSTANCE.currentTimeNanos() - beginNs;
                     if (elapsedNs >= 1_000_000L) {
                         Jvm.perf().on(getClass(), "Took " + elapsedNs / 1000L + " us to grow file " + file());
                     }
                 }
             }
+            // REVIEW TASK CQIORuntimeExceptionWrapping: address this concern manually; baseline-assist cannot derive a truthful local repair here.
+            // REVIEW TASK CQIORuntimeExceptionWrapping: narrow catch to a specific declared exception or document the runtime-wrap contract.
         } catch (IOException ioe) {
             throw new IOException("Failed to resize to " + minSize, ioe);
         }
@@ -321,6 +327,7 @@ public class ChunkedMappedFile extends MappedFile {
 
     @NotNull
     public String referenceCounts() {
+        // REVIEW TASK CQWireAcquireStringBuilder: address this concern manually; baseline-assist cannot derive a truthful local repair here.
         @NotNull final StringBuilder sb = new StringBuilder();
         sb.append("refCount: ").append(refCount());
         for (@Nullable final MappedBytesStore mbs : stores) {
@@ -357,7 +364,7 @@ public class ChunkedMappedFile extends MappedFile {
     public long actualSize()
             throws IORuntimeException, IllegalStateException {
 
-        boolean interrupted = Thread.interrupted();
+        boolean interrupted = Thread.currentThread().isInterrupted();
         try {
             return fileChannelSize();
 
@@ -398,6 +405,7 @@ public class ChunkedMappedFile extends MappedFile {
     /**
      * This finalize() is used to detect when a component is not released deterministically. It is not required to be run, but provides a warning
      */
+    // CSFinalizerOverride REVIEW keep this reviewed site here because this runtime execution boundary in ChunkedMappedFile#finalize still needs an explicit reviewed runtime-admission contract.
     @Override
     protected void finalize()
             throws Throwable {
@@ -414,6 +422,7 @@ public class ChunkedMappedFile extends MappedFile {
     /**
      * Calls lock on the underlying file channel
      */
+    // CQNumericalConstraint REVIEW keep lock(long position, @NonNegative long size, boolean shared) throws IOException here because this API boundary in ChunkedMappedFile#lock leaves numeric inputs unconstrained and still needs either validated range checks or an explicit reviewed caller contract.
     public FileLock lock(long position, @NonNegative long size, boolean shared) throws IOException {
         return fileChannel.lock(position, size, shared);
     }
@@ -429,6 +438,7 @@ public class ChunkedMappedFile extends MappedFile {
         return chunkCount[0];
     }
 
+    // CQNumericalConstraint REVIEW keep this API parameter unconstrained because the numeric contract still needs explicit review.
     public void chunkCount(long[] chunkCount) {
         this.chunkCount = chunkCount;
     }

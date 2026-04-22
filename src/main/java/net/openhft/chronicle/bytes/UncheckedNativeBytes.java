@@ -39,6 +39,8 @@ public class UncheckedNativeBytes<U>
         extends AbstractReferenceCounted
         implements Bytes<U>, HasUncheckedRandomDataInput, DecimalAppender {
     private static final byte[] MIN_VALUE_TEXT = ("" + Long.MIN_VALUE).getBytes(ISO_8859_1);
+    // REVIEW TASK CQDeprecationJavadoc: add the missing Javadoc guidance this governance rule expects here.
+    // REVIEW TASK CQDeprecationJavadoc: add a @deprecated Javadoc tag to UncheckedNativeBytes explaining the replacement and removal plan.
     @Deprecated(/* to remove in x.28 */)
     private static final boolean APPEND_0 = Jvm.getBoolean("bytes.append.0", true);
 
@@ -91,6 +93,7 @@ public class UncheckedNativeBytes<U>
      * Delegates capacity expansion to the wrapped bytes and updates this view
      * if the underlying store changes.
      */
+    // CQNumericalConstraint REVIEW keep appendAndReturnLength(long writePosition, boolean negative, long mantissa, int exponent, boolean append0) here because this API boundary in UncheckedNativeBytes#appendAndReturnLength leaves numeric inputs unconstrained and still needs either validated range checks or an explicit reviewed caller contract.
     @Override
     public void ensureCapacity(@NonNegative long desiredCapacity)
             throws IllegalArgumentException, IllegalStateException {
@@ -245,6 +248,8 @@ public class UncheckedNativeBytes<U>
     @Override
     public BytesStore<Bytes<U>, U> copy() {
         throwExceptionIfReleased();
+        // REVIEW TASK CQRuntimeTodoPlaceholder: replace this runtime placeholder with a concrete implementation decision or remove it.
+        // REVIEW TASK CQRuntimeTodoPlaceholder: replace runtime placeholder (throw new UnsupportedOperationException("todo");) with a concrete implementation decision or remove it.
         throw new UnsupportedOperationException("todo");
     }
 
@@ -364,7 +369,7 @@ public class UncheckedNativeBytes<U>
     protected void performRelease()
             throws IllegalStateException {
         this.underlyingBytes.release(this);
-        final boolean interrupted = Thread.interrupted();
+        final boolean interrupted = Thread.currentThread().isInterrupted();
         try {
             // need to wait as checks rely on this completing.
             BackgroundResourceReleaser.releasePendingResources();

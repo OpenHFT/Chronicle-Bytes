@@ -48,6 +48,7 @@ public abstract class AbstractReference extends AbstractCloseable implements Byt
     @SuppressWarnings("this-escape")
     protected AbstractReference() {
         // assume thread safe.
+        // CSOwnershipCheckDisable REVIEW keep singleThreadedCheckDisabled here because this lifecycle or ownership exception in AbstractReference#AbstractReference still needs an explicit reviewed lifecycle contract.
         singleThreadedCheckDisabled(true);
     }
 

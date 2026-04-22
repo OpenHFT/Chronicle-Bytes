@@ -65,6 +65,7 @@ public enum BytesUtil {
     /**
      * The path for timestamp file, defaults to a file named .time-stamp.username.dat in timestamp directory.
      */
+    // CSPathFromInput REVIEW keep Jvm.getProperty here because this filesystem boundary still needs an explicit reviewed path-handling contract.
     static final String TIME_STAMP_PATH = Jvm.getProperty("timestamp.path", new File(TIME_STAMP_DIR, ".time-stamp." + USER_NAME + ".dat").getAbsolutePath());
 
     /**
@@ -201,12 +202,14 @@ public enum BytesUtil {
      */
     public static String findFile(@NotNull String name)
             throws FileNotFoundException {
+        // CSPathFromInput REVIEW keep File here because this filesystem boundary in BytesUtil#findFile still needs an explicit reviewed path-handling contract.
         File file = new File(name);
         URL url = null;
         if (!file.exists()) {
             url = urlFor(Thread.currentThread().getContextClassLoader(), name);
             String file2 = url.getFile().replace("%20", " ")
                     .replace("target/test-classes", "src/test/resources");
+            // CSPathFromInput REVIEW keep File here because this filesystem boundary in BytesUtil#findFile still needs an explicit reviewed path-handling contract.
             file = new File(file2);
         }
         if (!file.exists())
@@ -223,6 +226,7 @@ public enum BytesUtil {
         if (name.startsWith("=")) {
             return Bytes.from(name.substring(1));
         }
+        // CSPathFromInput REVIEW keep File here because this filesystem boundary in BytesUtil#readFile still needs an explicit reviewed path-handling contract.
         File file = new File(name);
         URL url = null;
         if (!file.exists()) {
@@ -256,6 +260,7 @@ public enum BytesUtil {
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
+    // CQNumericalConstraint REVIEW keep this API parameter unconstrained because the numeric contract still needs explicit review.
     public static boolean bytesEqual(
             @NotNull RandomDataInput a, @NonNegative long offset,
             @NotNull RandomDataInput second, long secondOffset, long len)
@@ -522,6 +527,8 @@ public enum BytesUtil {
      * @return The string representation of the throwable's stack trace.
      */
     static String asString(String s, Throwable t) {
+        // REVIEW TASK CQTryWithResourcesMissing: rework this resource lifecycle manually; baseline-assist will not guess close order or control flow here.
+        // REVIEW TASK CQTryWithResourcesMissing: wrap StringWriter sw in try-with-resources or document explicit close ownership.
         StringWriter sw = new StringWriter();
         sw.append(s).append("\n");
         // CSPrintStackTrace REVIEW keep t.printStackTrace(new PrintWriter(sw)) here because this helper deliberately renders a full stack trace into a StringWriter.
@@ -604,6 +611,7 @@ public enum BytesUtil {
         return bytes2.toDebugString(maxLength);
     }
 
+    // CQNumericalConstraint REVIEW keep copy8bit(BytesStore<?, ?> bs, long addressForWrite, @NonNegative long length) throws ClosedIllegalStateException here because this API boundary in BytesUtil#copy8bit leaves parameter addressForWrite unconstrained and still needs an @Address, @NonNegative, @Positive, or @Range annotation, a validated range check, or an explicit reviewed caller contract.
     /**
      * Copies 8-bit data from a BytesStore object to a specified address.
      *

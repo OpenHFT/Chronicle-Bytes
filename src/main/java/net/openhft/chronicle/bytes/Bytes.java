@@ -592,6 +592,7 @@ public interface Bytes<U> extends
             buffer.readPositionRemaining(position, length);
 
             try {
+                // REVIEW TASK CQWireAcquireStringBuilder: address this concern manually; baseline-assist cannot derive a truthful local repair here.
                 @NotNull final StringBuilder builder = new StringBuilder();
                 while (buffer.readRemaining() > 0) {
                     builder.append((char) buffer.readUnsignedByte());
@@ -676,6 +677,7 @@ public interface Bytes<U> extends
         if (unchecked) {
             if (isElastic())
                 BytesUtil.WarnUncheckedElasticBytes.warn();
+            // REVIEW TASK CSUncheckedNativeBytes: move this concern behind the suggested reviewed aegis helper or another explicit boundary.
             Bytes<U> underlyingBytes = start() == 0 && bytesStore().isDirectMemory()
                     ? new UncheckedNativeBytes<>(this)
                     : new UncheckedBytes<>(this);
@@ -876,6 +878,7 @@ public interface Bytes<U> extends
 
         BytesStore<?, U> bytesStore = bytesStore();
         assert bytesStore != null : "bytesStore is null";
+        // REVIEW TASK CQFactoryOverConstructor: address this concern manually; baseline-assist cannot derive a truthful local repair here.
         return new VanillaBytes<>(bytesStore, writePosition(), writeLimit());
     }
 
@@ -1018,6 +1021,8 @@ public interface Bytes<U> extends
     default long indexOf(@NotNull Bytes source)
             throws ClosedIllegalStateException {
         // TODO use indexOf(Bytes, long);
+        // REVIEW TASK CQRuntimeTodoPlaceholder: replace this runtime placeholder with a concrete implementation decision or remove it.
+        // REVIEW TASK CQRuntimeTodoPlaceholder: replace runtime placeholder (throwExceptionIfReleased(this);) with a concrete implementation decision or remove it.
         throwExceptionIfReleased(this);
         throwExceptionIfReleased(source);
         long sourceOffset = readPosition();
@@ -1079,6 +1084,8 @@ public interface Bytes<U> extends
     default int indexOf(@NotNull BytesStore<?, ?> source, @NonNegative int fromIndex)
             throws ClosedIllegalStateException {
         // TODO shouldn't fromIndex be absolute instead of relative
+        // REVIEW TASK CQRuntimeTodoPlaceholder: replace this runtime placeholder with a concrete implementation decision or remove it.
+        // REVIEW TASK CQRuntimeTodoPlaceholder: replace runtime placeholder (throwExceptionIfReleased(this);) with a concrete implementation decision or remove it.
         throwExceptionIfReleased(this);
         throwExceptionIfReleased(source);
         long sourceOffset = readPosition();
@@ -1200,6 +1207,7 @@ public interface Bytes<U> extends
                                                                          @Nullable final T using)
             throws BufferUnderflowException, ClosedIllegalStateException, InvalidMarshallableException, ThreadingIllegalStateException {
 
+        // CSResolvedTypeInstantiation REVIEW keep ObjectUtils.newInstance(clazz) here because this unchecked type materialisation in Bytes#readMarshallableLength16 still needs either a closed type map or an explicit reviewed instantiation contract.
         final T object = (using == null)
                 ? ObjectUtils.newInstance(clazz)
                 : using;

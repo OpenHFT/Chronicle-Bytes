@@ -57,6 +57,7 @@ public interface BytesRingBuffer extends BytesRingBufferStats, BytesConsumer, Cl
                     "This is a a commercial feature, please contact " +
                             "sales@chronicle.software to unlock this feature.");
 
+            // CSCheckedSwallowThroughRethrow REVIEW throw Jvm.rethrow(e) because this rethrow in BytesRingBuffer#newInstance converts a checked cause into an unchecked wrapper and still needs either a declared `throws` at the enclosing method or an explicit reviewed note on why no local cleanup is performed.
             throw Jvm.rethrow(e);
         }
     }
@@ -96,6 +97,7 @@ public interface BytesRingBuffer extends BytesRingBufferStats, BytesConsumer, Cl
                     "This is a a commercial feature, please contact " +
                             "sales@chronicle.software to unlock this feature.");
 
+            // CSCheckedSwallowThroughRethrow REVIEW throw Jvm.rethrow(e) because this rethrow in BytesRingBuffer#sizeFor converts a checked cause into an unchecked wrapper and still needs either a declared `throws` at the enclosing method or an explicit reviewed note on why no local cleanup is performed.
             throw Jvm.rethrow(e);
         }
     }

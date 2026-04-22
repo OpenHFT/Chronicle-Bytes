@@ -64,6 +64,7 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
      *
      * @param defaultCapacity the default capacity of the array.
      */
+    // CQNumericalConstraint REVIEW keep this API parameter unconstrained because the numeric contract still needs explicit review.
     public BinaryIntArrayReference(long defaultCapacity) {
         this.length = (defaultCapacity << SHIFT) + VALUES;
     }
@@ -118,6 +119,7 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
         long start = bytes.writePosition();
         long sizeToSkip = capacity << SHIFT;
         bytes.zeroOut(start, start + sizeToSkip);
+        // CSDynamicReadSkip REVIEW keep bytes.writeSkip here because this input or payload boundary in BinaryIntArrayReference#write still needs an explicit reviewed input-trust contract.
         bytes.writeSkip(sizeToSkip);
     }
 
@@ -144,6 +146,7 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
         bytes.writeLong(capacity);
         bytes.writeLong(0L); // used
         long sizeToSkip = capacity << SHIFT;
+        // CSDynamicReadSkip REVIEW keep bytes.writeSkip here because this input or payload boundary in BinaryIntArrayReference#lazyWrite still needs an explicit reviewed input-trust contract.
         bytes.writeSkip(sizeToSkip);
     }
 
@@ -172,6 +175,8 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException if this resource was accessed by multiple threads in an unsafe way
      */
+    // CQNumericalConstraint REVIEW keep setMaxUsed(long usedAtLeast) here because this API boundary in BinaryIntArrayReference#setMaxUsed leaves numeric inputs unconstrained and still needs either validated range checks or an explicit reviewed caller contract.
+    // CQNumericalConstraint REVIEW keep capacity(long arrayLength) here because this API boundary in BinaryIntArrayReference#capacity leaves numeric inputs unconstrained and still needs either validated range checks or an explicit reviewed caller contract.
     @Override
     protected void acceptNewBytesStore(@NotNull final BytesStore<?, ?> bytes)
             throws IllegalStateException {
@@ -368,6 +373,7 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
         checkCapacity(capacity);
 
         long sizeToSkip = capacity << SHIFT;
+        // CSDynamicReadSkip REVIEW keep bytes.readSkip here because this input or payload boundary in BinaryIntArrayReference#readMarshallable still needs an explicit reviewed input-trust contract.
         bytes.readSkip(sizeToSkip);
         long len = bytes.readPosition() - position;
         bytesStore((Bytes) bytes, position, len);
@@ -398,6 +404,7 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
             bytes.writeLong(0);
             if (retainsComments)
                 bytes.writeHexDumpDescription("values");
+            // CSDynamicReadSkip REVIEW keep bytes.writeSkip here because this input or payload boundary in BinaryIntArrayReference#writeMarshallable still needs an explicit reviewed input-trust contract.
             bytes.writeSkip(capacity << SHIFT);
         } else {
             bytes.write(bytesStore, offset, length);
@@ -477,6 +484,7 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
         if (bytesStore == null) {
             return "not set";
         }
+        // REVIEW TASK CQWireAcquireStringBuilder: address this concern manually; baseline-assist cannot derive a truthful local repair here.
         StringBuilder sb = new StringBuilder();
         sb.append("used: ");
         try {

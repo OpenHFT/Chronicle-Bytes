@@ -45,6 +45,7 @@ public class GuardedNativeBytes<U> extends NativeBytes<U> {
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
+    // CQNumericalConstraint REVIEW keep this API parameter unconstrained because the numeric contract still needs explicit review.
     public GuardedNativeBytes(@NotNull BytesStore<?, ?> store, long capacity)
             throws IllegalStateException, IllegalArgumentException {
         super(store, capacity);

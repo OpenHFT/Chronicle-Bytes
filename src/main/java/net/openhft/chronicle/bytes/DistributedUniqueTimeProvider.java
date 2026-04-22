@@ -48,6 +48,7 @@ public class DistributedUniqueTimeProvider extends SimpleCloseable implements Ti
     private DistributedUniqueTimeProvider(@NonNegative int hostId, boolean unmonitor) {
         hostId(hostId);
         try {
+            // CSPathFromInput REVIEW keep MappedFile.ofSingle here because this filesystem boundary in DistributedUniqueTimeProvider#DistributedUniqueTimeProvider still needs an explicit reviewed path-handling contract.
             file = MappedFile.ofSingle(new File(BytesUtil.TIME_STAMP_PATH), OS.pageSize(), false);
             bytes = file.acquireBytesForWrite(this, 0);
             bytes.append8bit("&TSF\nTime stamp file used for sharing a unique id\n");

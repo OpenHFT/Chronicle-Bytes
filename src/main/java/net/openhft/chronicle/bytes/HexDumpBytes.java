@@ -88,6 +88,8 @@ public class HexDumpBytes
      */
     public static HexDumpBytes fromText(@NotNull Reader reader) throws NumberFormatException {
         HexDumpBytes tb = new HexDumpBytes();
+        // REVIEW TASK CQTryWithResourcesMissing: rework this resource lifecycle manually; baseline-assist will not guess close order or control flow here.
+        // REVIEW TASK CQTryWithResourcesMissing: wrap Reader reader2 in try-with-resources or document explicit close ownership.
         Reader reader2 = new TextBytesReader(reader, tb.text);
         try (Scanner sc = new Scanner(reader2)) {
             while (sc.hasNext()) {
@@ -140,6 +142,10 @@ public class HexDumpBytes
         return this;
     }
 
+    // CQNumericalConstraint REVIEW keep read(char[] bytes, int off, @NonNegative int len) throws IllegalStateException here because this API boundary in HexDumpBytes#read leaves numeric inputs unconstrained and still needs either validated range checks or an explicit reviewed caller contract.
+    // CQNumericalConstraint REVIEW keep write(byte[] byteArray, int offset, int length) throws BufferOverflowException, IllegalArgumentException, IllegalStat... here because this API boundary in HexDumpBytes#write leaves numeric inputs unconstrained and still needs either validated range checks or an explicit reviewed caller contract.
+    // CQNumericalConstraint REVIEW keep appendAndReturnLength(long writePosition, boolean negative, long mantissa, int exponent, boolean append0) here because this API boundary in HexDumpBytes#appendAndReturnLength leaves numeric inputs unconstrained and still needs either validated range checks or an explicit reviewed caller contract.
+        // CQNumericalConstraint REVIEW keep read(char[] cbuf, int off, int len) throws IOException here because this API boundary in TextBytesReader#read leaves numeric inputs unconstrained and still needs either validated range checks or an explicit reviewed caller contract.
     @Override
     public long readRemaining() {
         return base.readRemaining();
@@ -571,6 +577,7 @@ public class HexDumpBytes
     @Override
     @NotNull
     public Bytes<Void> readSkip(long bytesToSkip) throws BufferUnderflowException, IllegalStateException {
+        // CSDynamicReadSkip REVIEW keep base.readSkip here because this input or payload boundary in HexDumpBytes#readSkip still needs an explicit reviewed input-trust contract.
         base.readSkip(bytesToSkip);
         return this;
     }
@@ -587,6 +594,7 @@ public class HexDumpBytes
 
     @Override
     public long readStopBit() throws IORuntimeException, IllegalStateException, BufferUnderflowException {
+        // CSUnboundedStopBitDecode REVIEW keep base.readStopBit here because this input or payload boundary in HexDumpBytes#readStopBit still needs an explicit reviewed input-trust contract.
         return base.readStopBit();
     }
 
@@ -757,6 +765,7 @@ public class HexDumpBytes
     @Nullable
     @Override
     public String readUtf8() throws BufferUnderflowException, IORuntimeException, IllegalStateException, ArithmeticException {
+        // CSUnboundedUtf8Decode REVIEW keep base.readUtf8 here because this input or payload boundary in HexDumpBytes#readUtf8 still needs an explicit reviewed input-trust contract.
         return base.readUtf8();
 
     }
@@ -770,6 +779,7 @@ public class HexDumpBytes
 
     @Override
     public <C extends Appendable & CharSequence> boolean readUtf8(@NotNull final C sb) throws IORuntimeException, IllegalArgumentException, BufferUnderflowException, IllegalStateException, ArithmeticException {
+        // CSUnboundedUtf8Decode REVIEW keep base.readUtf8 here because this input or payload boundary in HexDumpBytes#readUtf8 still needs an explicit reviewed input-trust contract.
         return base.readUtf8(sb);
     }
 
@@ -866,6 +876,7 @@ public class HexDumpBytes
     public Bytes<Void> writeSkip(long bytesToSkip) throws BufferOverflowException, IllegalStateException {
         long pos = base.writePosition();
         try {
+            // CSDynamicReadSkip REVIEW keep base.writeSkip here because this input or payload boundary in HexDumpBytes#writeSkip still needs an explicit reviewed input-trust contract.
             base.writeSkip(bytesToSkip);
             return this;
         } finally {
@@ -1873,7 +1884,9 @@ public class HexDumpBytes
 
     @Override
     public void singleThreadedCheckDisabled(boolean singleThreadedCheckDisabled) {
+        // CSSingleThreadedCheckDisable REVIEW keep base.singleThreadedCheckDisabled here because this lifecycle or ownership exception in HexDumpBytes#singleThreadedCheckDisabled still needs an explicit reviewed lifecycle contract.
         base.singleThreadedCheckDisabled(singleThreadedCheckDisabled);
+        // CSSingleThreadedCheckDisable REVIEW keep text.singleThreadedCheckDisabled here because this lifecycle or ownership exception in HexDumpBytes#singleThreadedCheckDisabled still needs an explicit reviewed lifecycle contract.
         text.singleThreadedCheckDisabled(singleThreadedCheckDisabled);
     }
 

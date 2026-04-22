@@ -69,6 +69,7 @@ public interface BytesIn<U> extends
             throws BufferUnderflowException, ArithmeticException, BufferOverflowException, InvalidMarshallableException, ClosedIllegalStateException, ThreadingIllegalStateException {
         Class<T> componentType = ObjectUtils.implementationToUse(componentType0);
         if (BytesMarshallable.class.isAssignableFrom(componentType)) {
+            // CSResolvedTypeInstantiation REVIEW keep ObjectUtils.newInstance here because this type-materialization path in BytesIn#readObject still needs an explicit reviewed type-resolution contract.
             BytesMarshallable bm = (BytesMarshallable) ObjectUtils.newInstance(componentType);
             bm.readMarshallable(this);
 
@@ -79,6 +80,7 @@ public interface BytesIn<U> extends
         }
         switch (componentType.getName()) {
             case "java.lang.String":
+                // CSUnboundedUtf8Decode REVIEW keep T) readUtf8( here because this input or payload boundary in BytesIn#readObject still needs an explicit reviewed input-trust contract.
                 return (T) readUtf8();
             case "java.lang.Double":
                 return (T) (Double) readDouble();

@@ -108,6 +108,7 @@ enum BytesInternal {
         try {
             if (Jvm.isJava9Plus() && !Jvm.getBoolean("disable.vectorized.content_equals")) {
                 final Class<?> arraysSupportClass = Class.forName("jdk.internal.util.ArraysSupport");
+                // CSReflectiveMethodLookup REVIEW final Method vectorizedMismatch = Jvm.getMethod(arraysSupportClass, "vectorizedMismatch", Object.class, long.class, Object.class, long.class, int.class, because this reflective or runtime-loading boundary still needs either an allowlisted wrapper or an explicit reviewed runtime-loading contract.
                 final Method vectorizedMismatch = Jvm.getMethod(arraysSupportClass, "vectorizedMismatch",
                         Object.class,
                         long.class,
@@ -116,9 +117,11 @@ enum BytesInternal {
                         int.class,
                         int.class);
 
+                // CSSetAccessibleEscalation REVIEW vectorizedMismatch.setAccessible(true) because this access override still needs either encapsulation-preserving access or an explicit reviewed runtime-access contract.
                 vectorizedMismatch.setAccessible(true);
                 vectorizedMismatchMethodHandle = MethodHandles.lookup().unreflect(vectorizedMismatch);
             }
+            // CSCatchBroadException REVIEW catch (Exception e) because the local fallback still begins with entering a conditional fallback branch and needs either narrower handling or an explicit reviewed recovery contract.
         } catch (Exception e) {
             if (e.getClass().getName().equals("java.lang.reflect.InaccessibleObjectException"))
                 Jvm.debug().on(BytesInternal.class, "Cannot get access to vectorizedMismatch. The following command line args are required: " +
@@ -167,6 +170,7 @@ enum BytesInternal {
                 Boolean vectorizedResult = java11ContentEqualUsingVectorizedMismatch(a, b);
                 if (vectorizedResult != null)
                     return vectorizedResult;
+                    // CSWarnAndContinue REVIEW catch (UnsupportedOperationException e) because the local fallback still begins with logging or printing a diagnostic and then continues execution, and needs either fail-closed handling or an explicit reviewed degraded-mode contract.
             } catch (UnsupportedOperationException e) {
                 Jvm.warn().on(BytesInternal.class, e);
             }
@@ -245,6 +249,7 @@ enum BytesInternal {
             }
 
             return Boolean.TRUE;
+            // CSCatchThrowable REVIEW catch (Throwable e) because the local fallback still begins with logging or printing a diagnostic and needs either a narrower terminal boundary or an explicit reviewed last-resort contract.
         } catch (Throwable e) {
             Jvm.warn().on(BytesInternal.class, e);
             return null;
@@ -543,6 +548,8 @@ enum BytesInternal {
                 && length < 1 << 20
                 && utf) {
             // todo fix, a problem with very long sequences. #35
+            // REVIEW TASK CQRuntimeTodoPlaceholder: replace this runtime placeholder with a concrete implementation decision or remove it.
+            // REVIEW TASK CQRuntimeTodoPlaceholder: replace runtime placeholder (parseUtf8_SB1((Bytes) bytes, (StringBuilder) appendable, utf, length);) with a concrete implementation decision or remove it.
             parseUtf8_SB1((Bytes) bytes, (StringBuilder) appendable, utf, length);
         } else {
             parseUtf81(bytes, appendable, utf, length);
@@ -729,6 +736,7 @@ enum BytesInternal {
             while (count < length) {
                 int c = bytes.rawReadByte();
                 if (c < 0) {
+                    // CSBacktrackSkip REVIEW keep bytes.readSkip here because this input or payload boundary in BytesInternal#parseUtf81 still needs an explicit reviewed input-trust contract.
                     bytes.readSkip(-1);
                     break;
                 }
@@ -739,10 +747,12 @@ enum BytesInternal {
             if (length > count)
                 parseUtf82(bytes, appendable, utf, length, count);
         } catch (IOException e) {
+            // CSCheckedSwallowThroughRethrow REVIEW throw Jvm.rethrow(e) because this rethrow in BytesInternal#parseUtf81 converts a checked cause into an unchecked wrapper and still needs either a declared `throws` at the enclosing method or an explicit reviewed note on why no local cleanup is performed.
             throw Jvm.rethrow(e);
         }
     }
 
+    // CQNumericalConstraint REVIEW keep this API parameter unconstrained because the numeric contract still needs explicit review.
     public static void parseUtf81(@NotNull RandomDataInput input, @NonNegative long offset,
                                   @NotNull Appendable appendable, int utflen)
             throws UTFDataFormatRuntimeException, BufferUnderflowException, ClosedIllegalStateException {
@@ -766,6 +776,7 @@ enum BytesInternal {
             if (limit > offset)
                 parseUtf82(input, offset, limit, appendable, utflen);
         } catch (IOException e) {
+            // CSCheckedSwallowThroughRethrow REVIEW throw Jvm.rethrow(e) because this rethrow in BytesInternal#parseUtf81 converts a checked cause into an unchecked wrapper and still needs either a declared `throws` at the enclosing method or an explicit reviewed note on why no local cleanup is performed.
             throw Jvm.rethrow(e);
         }
     }
@@ -832,6 +843,7 @@ enum BytesInternal {
 
             int count = calculateCount(bytes, sb, utflen, readPosition);
 
+            // CSDynamicReadSkip REVIEW keep bytes.readSkip here because this input or payload boundary in BytesInternal#parseUtf8_SB1 still needs an explicit reviewed input-trust contract.
             bytes.readSkip(count);
             setCount(sb, count);
             if (count < utflen) {
@@ -839,6 +851,7 @@ enum BytesInternal {
                 parseUtf82Guarded(bytes, sb, utf, utflen, count, rp0);
             }
         } catch (IOException | ClosedIllegalStateException e) {
+            // CSCheckedSwallowThroughRethrow REVIEW throw Jvm.rethrow(e) because this rethrow in BytesInternal#parseUtf8_SB1 converts a checked cause into an unchecked wrapper and still needs either a declared `throws` at the enclosing method or an explicit reviewed note on why no local cleanup is performed.
             throw Jvm.rethrow(e);
         }
     }
@@ -848,6 +861,7 @@ enum BytesInternal {
             parseUtf82(bytes, sb, utf, utflen, count);
         } catch (UTFDataFormatRuntimeException e) {
             long rp = Math.max(rp0 - 128, 0);
+            // CSRawHeaderOrPathMessage REVIEW emit UTFDataFormatRuntimeException here because this operator-facing diagnostic in BytesInternal#parseUtf82Guarded still needs an explicit reviewed operator-diagnostic contract.
             throw new UTFDataFormatRuntimeException(Long.toHexString(rp0) + "\n" + bytes.toHexString(rp, 200), e);
         }
     }
@@ -890,6 +904,8 @@ enum BytesInternal {
             if (Jvm.isJava9Plus()) {
                 sb.setLength(utflen);
                 while (count < utflen) {
+                    // REVIEW TASK CSRawAddressAccess: move this concern behind the suggested reviewed aegis helper or another explicit boundary.
+                    // REVIEW TASK CSRawAddressAccess: move memory.readByte behind a reviewed aegis helper or another explicit unsafe-boundary contract.
                     byte c = memory.readByte(address + count);
                     if (c < 0)
                         break;
@@ -898,6 +914,8 @@ enum BytesInternal {
             } else {
                 char[] chars = extractChars(sb);
                 while (count < utflen) {
+                    // REVIEW TASK CSRawAddressAccess: move this concern behind the suggested reviewed aegis helper or another explicit boundary.
+                    // REVIEW TASK CSRawAddressAccess: move memory.readByte behind a reviewed aegis helper or another explicit unsafe-boundary contract.
                     int c = memory.readByte(address + count);
                     if (c < 0)
                         break;
@@ -909,6 +927,7 @@ enum BytesInternal {
                 parseUtf82(bytes, offset + count, offset + utflen, sb, utflen);
             assert bytes.memory != null;
         } catch (IOException e) {
+            // CSCheckedSwallowThroughRethrow REVIEW throw Jvm.rethrow(e) because this rethrow in BytesInternal#parseUtf8_SB1 converts a checked cause into an unchecked wrapper and still needs either a declared `throws` at the enclosing method or an explicit reviewed note on why no local cleanup is performed.
             throw Jvm.rethrow(e);
         }
     }
@@ -938,6 +957,8 @@ enum BytesInternal {
             if (coder == JAVA9_STRING_CODER_LATIN) {
                 byte[] bytes = extractBytes(sb);
                 while (count < length) {
+                    // REVIEW TASK CSRawAddressAccess: move this concern behind the suggested reviewed aegis helper or another explicit boundary.
+                    // REVIEW TASK CSRawAddressAccess: move memory.readByte behind a reviewed aegis helper or another explicit unsafe-boundary contract.
                     byte b = memory.readByte(address + count);
                     bytes[count++] = b;
                 }
@@ -945,6 +966,8 @@ enum BytesInternal {
                 assert coder == JAVA9_STRING_CODER_UTF16;
                 sb.setLength(length);
                 while (count < length) {
+                    // REVIEW TASK CSRawAddressAccess: move this concern behind the suggested reviewed aegis helper or another explicit boundary.
+                    // REVIEW TASK CSRawAddressAccess: move memory.readByte behind a reviewed aegis helper or another explicit unsafe-boundary contract.
                     byte b = memory.readByte(address + count);
                     sb.setCharAt(count++, (char) b);
                 }
@@ -952,6 +975,8 @@ enum BytesInternal {
         } else {
             char[] chars = extractChars(sb);
             while (count < length) {
+                // REVIEW TASK CSRawAddressAccess: move this concern behind the suggested reviewed aegis helper or another explicit boundary.
+                // REVIEW TASK CSRawAddressAccess: move memory.readByte behind a reviewed aegis helper or another explicit unsafe-boundary contract.
                 int c = memory.readByte(address + count) & 0xFF;
                 chars[count++] = (char) c;
             }
@@ -1216,6 +1241,7 @@ enum BytesInternal {
             }
             appendUtf82(bytes, str, offset, length, i);
         } catch (BufferOverflowException | ClosedIllegalStateException e) {
+            // CSCheckedSwallowThroughRethrow REVIEW throw Jvm.rethrow(e) because this rethrow in BytesInternal#appendUtf8 converts a checked cause into an unchecked wrapper and still needs either a declared `throws` at the enclosing method or an explicit reviewed note on why no local cleanup is performed.
             throw Jvm.rethrow(e);
         }
     }
@@ -1373,13 +1399,19 @@ enum BytesInternal {
     public static long writeStopBit(final long addr, final long n)
             throws BufferOverflowException {
         if ((n & ~0x7F) == 0) {
+            // REVIEW TASK CSRawAddressAccess: move this concern behind the suggested reviewed aegis helper or another explicit boundary.
+            // REVIEW TASK CSRawAddressAccess: move UnsafeMemory.INSTANCE.writeByte behind a reviewed aegis helper or another explicit unsafe-boundary contract.
             UnsafeMemory.INSTANCE.writeByte(addr, (byte) n);
             return addr + 1;
         }
         if ((n & ~0x3FFF) == 0) {
             final int lo = (int) ((n & 0x7f) | 0x80);
             final int hi = (int) (n >> 7);
+            // REVIEW TASK CSRawAddressAccess: move this concern behind the suggested reviewed aegis helper or another explicit boundary.
+            // REVIEW TASK CSRawAddressAccess: move UnsafeMemory.INSTANCE.writeByte behind a reviewed aegis helper or another explicit unsafe-boundary contract.
             UnsafeMemory.INSTANCE.writeByte(addr, (byte) lo);
+            // REVIEW TASK CSRawAddressAccess: move this concern behind the suggested reviewed aegis helper or another explicit boundary.
+            // REVIEW TASK CSRawAddressAccess: move UnsafeMemory.INSTANCE.writeByte behind a reviewed aegis helper or another explicit unsafe-boundary contract.
             UnsafeMemory.INSTANCE.writeByte(addr + 1, (byte) hi);
             // Note: Refrain from using writeShort as this assumes a certain endian
             return addr + 2;
@@ -1481,15 +1513,23 @@ enum BytesInternal {
 
         long n2;
         while ((n2 = n >>> 7) != 0) {
+            // REVIEW TASK CSRawAddressAccess: move this concern behind the suggested reviewed aegis helper or another explicit boundary.
+            // REVIEW TASK CSRawAddressAccess: move MEMORY.writeByte behind a reviewed aegis helper or another explicit unsafe-boundary contract.
             MEMORY.writeByte(addr + i++, (byte) (0x80L | n));
             n = n2;
         }
         // final byte
         if (!neg) {
+            // REVIEW TASK CSRawAddressAccess: move this concern behind the suggested reviewed aegis helper or another explicit boundary.
+            // REVIEW TASK CSRawAddressAccess: move MEMORY.writeByte behind a reviewed aegis helper or another explicit unsafe-boundary contract.
             MEMORY.writeByte(addr + i++, (byte) n);
 
         } else {
+            // REVIEW TASK CSRawAddressAccess: move this concern behind the suggested reviewed aegis helper or another explicit boundary.
+            // REVIEW TASK CSRawAddressAccess: move MEMORY.writeByte behind a reviewed aegis helper or another explicit unsafe-boundary contract.
             MEMORY.writeByte(addr + i++, (byte) (0x80L | n));
+            // REVIEW TASK CSRawAddressAccess: move this concern behind the suggested reviewed aegis helper or another explicit boundary.
+            // REVIEW TASK CSRawAddressAccess: move MEMORY.writeByte behind a reviewed aegis helper or another explicit unsafe-boundary contract.
             MEMORY.writeByte(addr + i++, (byte) 0);
         }
         return addr + i;
@@ -1540,6 +1580,7 @@ enum BytesInternal {
         bytes.reserve(toDebugString);
         try {
             int len = Maths.toUInt31(maxLength + 40);
+            // REVIEW TASK CQWireAcquireStringBuilder: address this concern manually; baseline-assist cannot derive a truthful local repair here.
             @NotNull StringBuilder sb = new StringBuilder(len);
             long readPosition = bytes.readPosition();
             long readLimit = bytes.readLimit();
@@ -1576,12 +1617,14 @@ enum BytesInternal {
                     if (bytes.readLong(end - 8) != 0)
                         break;
                 }
+                // CSWarnAndContinue REVIEW catch (@NotNull UnsupportedOperationException | BufferUnderflowException e) because the local fallback still begins with executing Jvm.debug().on(BytesInternal.class, "vectorized toString check failed", e) and then continues execution, and needs either fail-closed handling or an explicit reviewed degraded-mode contract.
             } catch (@NotNull UnsupportedOperationException | BufferUnderflowException e) {
                 Jvm.debug().on(BytesInternal.class, "vectorized toString check failed", e);
             }
             toString(bytes, sb, start, readPosition, readLimit, end);
             if (end < bytes.readLimit())
                 sb.append("...");
+                // CSCatchBroadException REVIEW catch (Exception e) because the local fallback still begins with executing sb.append(' ').append(e) and needs either narrower handling or an explicit reviewed recovery contract.
         } catch (Exception e) {
             sb.append(' ').append(e);
         }
@@ -1601,12 +1644,14 @@ enum BytesInternal {
             try {
                 ((VanillaBytes) bytes).read8Bit(chars, len);
             } catch (BufferUnderflowException | ClosedIllegalStateException e) {
+                // CSCheckedSwallowThroughRethrow REVIEW throw Jvm.rethrow(e) because this rethrow in BytesInternal#to8bitString converts a checked cause into an unchecked wrapper and still needs either a declared `throws` at the enclosing method or an explicit reviewed note on why no local cleanup is performed.
                 throw Jvm.rethrow(e);
             }
         } else {
             for (int i = 0; i < len; i++)
                 try {
                     chars[i] = (char) bytes.readUnsignedByte(pos + i);
+                    // CSCatchBroadException REVIEW catch (Exception e) because the local fallback still begins with returning new String(chars, 0, len) + ' ' + e and needs either narrower handling or an explicit reviewed recovery contract.
                 } catch (Exception e) {
                     return new String(chars, 0, len) + ' ' + e;
                 }
@@ -1627,8 +1672,10 @@ enum BytesInternal {
                         ? toUtf8StringNativeBytes((NativeBytesStore<?>) bytesStore)
                         : toUtf8StringBytesStore(bytesStore);
             } catch (IllegalStateException e) {
+                // CSCheckedSwallowThroughRethrow REVIEW throw Jvm.rethrow(e) because this rethrow in BytesInternal#toUtf8String converts a checked cause into an unchecked wrapper and still needs either a declared `throws` at the enclosing method or an explicit reviewed note on why no local cleanup is performed.
                 throw Jvm.rethrow(e);
             }
+            // CSCatchBroadException REVIEW catch (Exception e) because the local fallback still begins with returning e.toString() and needs either narrower handling or an explicit reviewed recovery contract.
         } catch (Exception e) {
             return e.toString();
         }
@@ -1641,6 +1688,8 @@ enum BytesInternal {
         byte[] bytes = new byte[length];
         final long address = bytesStore.address + bytesStore.translate(bytesStore.readPosition());
         for (int i = 0; i < length && i < bytesStore.realCapacity(); i++) {
+            // REVIEW TASK CSRawAddressAccess: move this concern behind the suggested reviewed aegis helper or another explicit boundary.
+            // REVIEW TASK CSRawAddressAccess: move memory.readByte behind a reviewed aegis helper or another explicit unsafe-boundary contract.
             bytes[i] = memory.readByte(address + i);
         }
         return new String(bytes, StandardCharsets.UTF_8);
@@ -1675,6 +1724,7 @@ enum BytesInternal {
             // the output will be no larger than this
             final long available = bytes.realReadRemaining();
             final int size = (int) Math.min(available, MAX_STRING_LEN - 3L);
+            // REVIEW TASK CQWireAcquireStringBuilder: address this concern manually; baseline-assist cannot derive a truthful local repair here.
             @NotNull final StringBuilder sb = new StringBuilder(size);
 
             if (bytes.readRemaining() > size) {
@@ -2329,6 +2379,7 @@ enum BytesInternal {
         }
         try (ScopedResource<StringBuilder> stlSb = acquireStringBuilderScoped()) {
             StringBuilder sb = stlSb.get();
+            // CSUnboundedUtf8Decode REVIEW keep in.readUtf8 here because this input or payload boundary in BytesInternal#readUtf8 still needs an explicit reviewed input-trust contract.
             return in.readUtf8(sb) ? SI.intern(sb) : null;
         }
     }
@@ -2408,6 +2459,7 @@ enum BytesInternal {
             throw e2;
 
         } catch (IOException | IllegalArgumentException e) {
+            // CSCheckedSwallowThroughRethrow REVIEW throw Jvm.rethrow(e) because this rethrow in BytesInternal#parseUtf8 converts a checked cause into an unchecked wrapper and.
             throw Jvm.rethrow(e);
         }
     }
@@ -2425,10 +2477,13 @@ enum BytesInternal {
         if (Jvm.isJava9Plus() && Jvm.maxDirectMemory() > 0) {
             final int appendableLength = appendable.capacity();
             for (; i < len && i < appendableLength; i++) {
+                // REVIEW TASK CSRawAddressAccess: move this concern behind the suggested reviewed aegis helper or another explicit boundary.
+                // REVIEW TASK CSRawAddressAccess: move memory.readByte behind a reviewed aegis helper or another explicit unsafe-boundary contract.
                 int c = memory.readByte(address + i);
                 if (c < 0) // we have hit a non-ASCII character.
                     break;
                 if (tester.isStopChar(c)) {
+                    // CSDynamicReadSkip REVIEW keep bytes.readSkip here because this input or payload boundary in BytesInternal#readUtf8_SB1 still needs an explicit reviewed input-trust contract.
                     bytes.readSkip(i + 1L);
                     StringUtils.setCount(appendable, i);
                     return;
@@ -2438,10 +2493,13 @@ enum BytesInternal {
         } else {
             final char[] chars = StringUtils.extractChars(appendable);
             for (; i < len && i < chars.length; i++) {
+                // REVIEW TASK CSRawAddressAccess: move this concern behind the suggested reviewed aegis helper or another explicit boundary.
+                // REVIEW TASK CSRawAddressAccess: move memory.readByte behind a reviewed aegis helper or another explicit unsafe-boundary contract.
                 int c = memory.readByte(address + i);
                 if (c < 0) // we have hit a non-ASCII character.
                     break;
                 if (tester.isStopChar(c)) {
+                    // CSDynamicReadSkip REVIEW keep i + 1L here because this input or payload boundary in BytesInternal#readUtf8_SB1 still needs an explicit reviewed input-trust contract.
                     bytes.readSkip(i + 1L);
                     StringUtils.setCount(appendable, i);
                     return;
@@ -2450,6 +2508,7 @@ enum BytesInternal {
             }
         }
         StringUtils.setCount(appendable, i);
+        // CSDynamicReadSkip REVIEW keep bytes.readSkip here because this input or payload boundary in BytesInternal#readUtf8_SB1 still needs an explicit reviewed input-trust contract.
         bytes.readSkip(i);
         if (i < len) {
             readUtf8_SB2(bytes, appendable, tester);
@@ -2526,6 +2585,7 @@ enum BytesInternal {
         while (len-- > 0) {
             int c = bytes.rawReadByte() & 0xff;
             if (c >= 128) {
+                // CSBacktrackSkip REVIEW keep bytes.readSkip here because this input or payload boundary in BytesInternal#readUtf81 still needs an explicit reviewed input-trust contract.
                 bytes.readSkip(-1);
                 break;
             }
@@ -2683,6 +2743,7 @@ enum BytesInternal {
         do {
             int next = bytes.readUnsignedByte();
             if (tester.isStopChar(ch, next)) {
+                // CSBacktrackSkip REVIEW keep bytes.readSkip here because this input or payload boundary in BytesInternal#read8bitAndAppend still needs an explicit reviewed input-trust contract.
                 bytes.readSkip(-1);
                 return;
             }
@@ -2691,6 +2752,7 @@ enum BytesInternal {
         } while (bytes.readRemaining() > 0);
 
         if (tester.isStopChar(ch, -1)) {
+            // CSBacktrackSkip REVIEW keep -1 here because this input or payload boundary in BytesInternal#read8bitAndAppend still needs an explicit reviewed input-trust contract.
             bytes.readSkip(-1);
             return;
         }
@@ -2713,6 +2775,7 @@ enum BytesInternal {
                 case 'N':
                     if (compareRest(in, "aN"))
                         throw new IORuntimeException("Expected flexible long, but got: NaN");
+                    // CSBacktrackSkip REVIEW keep in.readSkip here because this input or payload boundary in BytesInternal#parseFlexibleLong still needs an explicit reviewed input-trust contract.
                     in.readSkip(-1);
 
                     throw new IORuntimeException("Expected flexible long, but got: N");
@@ -2720,6 +2783,7 @@ enum BytesInternal {
                     //noinspection SpellCheckingInspection
                     if (compareRest(in, "nfinity"))
                         throw new IORuntimeException("Expected flexible long, but got: Infinity");
+                    // CSBacktrackSkip REVIEW keep in.readSkip here because this input or payload boundary in BytesInternal#parseFlexibleLong still needs an explicit reviewed input-trust contract.
                     in.readSkip(-1);
                     throw new IORuntimeException("Expected flexible long, but got: I");
                 case '-':
@@ -2952,6 +3016,7 @@ enum BytesInternal {
             } else if (b == '-') {
                 negative = true;
             } else if (b == ']' || b == '}') {
+                // CSBacktrackSkip REVIEW keep in.readSkip here because this input or payload boundary in BytesInternal#parseLong still needs an explicit reviewed input-trust contract.
                 in.readSkip(-1);
                 break;
             } else if (b == '.') {
@@ -2979,6 +3044,7 @@ enum BytesInternal {
             } else if ((b - ('a' + Integer.MIN_VALUE)) < 6 + Integer.MIN_VALUE) {
                 num = (num << 4) + b - ('a' - 10);
             } else if (b == ']' || b == '}') {
+                // CSBacktrackSkip REVIEW keep in.readSkip here because this input or payload boundary in BytesInternal#parseLongHexaDecimal still needs an explicit reviewed input-trust contract.
                 in.readSkip(-1);
                 break;
             } else if (b == '.') {
@@ -3025,6 +3091,7 @@ enum BytesInternal {
                 negative = true;
                 first = false;
             } else if (b == ']' || b == '}') {
+                // CSBacktrackSkip REVIEW keep in.readSkip here because this input or payload boundary in BytesInternal#parseLongDecimal still needs an explicit reviewed input-trust contract.
                 in.readSkip(-1);
                 break;
             } else if (b == '_' || b == '+') {
@@ -3054,6 +3121,7 @@ enum BytesInternal {
             } else if ((b - ('a' + Integer.MIN_VALUE)) <= 6 + Integer.MIN_VALUE) {
                 num = num * 16 + b - 'a' + 10;
             } else if (b == ']' || b == '}') {
+                // CSBacktrackSkip REVIEW keep in.readSkip here because this input or payload boundary in BytesInternal#parseHexLong still needs an explicit reviewed input-trust contract.
                 in.readSkip(-1);
                 break;
             } else if (b == '_') {
@@ -3179,6 +3247,7 @@ enum BytesInternal {
         try {
             bytes.readPositionRemaining(offset, maxLength);
 
+            // REVIEW TASK CQWireAcquireStringBuilder: address this concern manually; baseline-assist cannot derive a truthful local repair here.
             @NotNull final StringBuilder builder = new StringBuilder();
             long start = offset / width * width;
             long end = (offset + maxLength + width - 1) / width * width;
@@ -3358,8 +3427,11 @@ enum BytesInternal {
         }
     }
 
+    // CQNumericalConstraint REVIEW keep copyMemory(long from, long to, int length) here because this API boundary in BytesInternal#copyMemory leaves numeric inputs unconstrained and still needs either validated range checks or an explicit reviewed caller contract.
     @CallerCheckedCopyBounds(srcAddress = "from", dstAddress = "to", length = "length")
     public static void copyMemory(long from, long to, int length) {
+        // REVIEW TASK CSRawAddressAccess: move this concern behind the suggested reviewed aegis helper or another explicit boundary.
+        // REVIEW TASK CSRawAddressAccess: move UnsafeMemory.copyMemory behind a reviewed aegis helper or another explicit unsafe-boundary contract.
         UnsafeMemory.copyMemory(from, to, length);
     }
 
@@ -3416,6 +3488,8 @@ enum BytesInternal {
             Bytes<?> sb = stlBytes.get();
             parseUtf8(parser, sb, tester);
             if (sb.length() == 0)
+                // REVIEW TASK CQNullabilityReturns: add the explicit annotation or return contract this rule expects here.
+                // REVIEW TASK CQNullabilityReturns: annotate the return value of parseBoolean(...) with @Nullable or @NotNull.
                 return null;
             switch (sb.charAt(0)) {
                 case 't':
@@ -3482,6 +3556,7 @@ enum BytesInternal {
                     out.rawWriteByte((byte) value);
                 }
                 if (in.readByte(in.readPosition() - 1) <= ' ')
+                    // CSBacktrackSkip REVIEW keep -1 here because this input or payload boundary in BytesInternal#fromHexString.
                     in.readSkip(-1);
                 in.skipTo(StopCharTesters.CONTROL_STOP);
             }
@@ -3495,7 +3570,9 @@ enum BytesInternal {
             throws ClosedIllegalStateException, BufferUnderflowException, ArithmeticException {
         requireNonNull(histogram);
         throwExceptionIfReleased(in);
+        // CSUnboundedStopBitDecode REVIEW keep Maths.toUInt31 here because this input or payload boundary in BytesInternal#readHistogram still needs an explicit reviewed input-trust contract.
         int powersOf2 = Maths.toUInt31(in.readStopBit());
+        // CSUnboundedStopBitDecode REVIEW keep in.readStopBit() here because this stop-bit length decode in BytesInternal#readHistogram still needs an explicit reviewed input-length contract.
         int fractionBits = Maths.toUInt31(in.readStopBit());
         long overRange = in.readStopBit();
         long totalCount = in.readStopBit();
@@ -3561,13 +3638,18 @@ enum BytesInternal {
         }
     }
 
+    // CQNumericalConstraint REVIEW keep copy8bit(BytesStore<?, ?> bs, long addressForWrite, @NonNegative long length) throws ClosedIllegalStateException here because this API boundary in BytesInternal#copy8bit leaves parameter addressForWrite unconstrained and still needs an @Address, @NonNegative, @Positive, or @Range annotation, a validated range check, or an explicit reviewed caller contract.
     public static void copy8bit(BytesStore<?, ?> bs, long addressForWrite, @NonNegative long length) throws ClosedIllegalStateException {
         throwExceptionIfReleased(bs);
         int length0 = Math.toIntExact(length);
         int i = 0;
         for (; i < length0 - 7; i += 8)
+            // REVIEW TASK CSRawAddressAccess: move this concern behind the suggested reviewed aegis helper or another explicit boundary.
+            // REVIEW TASK CSRawAddressAccess: move MEMORY.writeLong behind a reviewed aegis helper or another explicit unsafe-boundary contract.
             MEMORY.writeLong(addressForWrite + i, bs.readLong(i));
         for (; i < length0; i++)
+            // REVIEW TASK CSRawAddressAccess: move this concern behind the suggested reviewed aegis helper or another explicit boundary.
+            // REVIEW TASK CSRawAddressAccess: move MEMORY.writeByte behind a reviewed aegis helper or another explicit unsafe-boundary contract.
             MEMORY.writeByte(addressForWrite + i, bs.readByte(i));
     }
 

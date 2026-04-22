@@ -33,6 +33,7 @@ public enum PropertyReplacer {
      * @throws NullPointerException if {@code expression} is null
      */
     public static String replaceTokensWithProperties(String expression) throws IllegalArgumentException {
+        // REVIEW TASK CQWireAcquireStringBuilder: address this concern manually; baseline-assist cannot derive a truthful local repair here.
         StringBuilder result = new StringBuilder(expression.length());
         int i = 0;
         Matcher matcher = EXPRESSION_PATTERN.matcher(expression);
@@ -69,6 +70,7 @@ public enum PropertyReplacer {
      * @throws NullPointerException if {@code expression} or {@code properties} is null
      */
     public static String replaceTokensWithProperties(String expression, Properties properties) throws IllegalArgumentException {
+        // REVIEW TASK CQWireAcquireStringBuilder: address this concern manually; baseline-assist cannot derive a truthful local repair here.
         StringBuilder result = new StringBuilder(expression.length());
         int i = 0;
         Matcher matcher = EXPRESSION_PATTERN.matcher(expression);

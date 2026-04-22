@@ -110,6 +110,7 @@ public class StringInternerBytes extends StringInterner {
 
         } finally {
             // Skip read position by length
+            // CSDynamicReadSkip REVIEW keep bytes.readSkip here because this input or payload boundary in StringInternerBytes#intern still needs an explicit reviewed input-trust contract.
             bytes.readSkip(length);
         }
     }
