@@ -57,7 +57,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
             throws BufferOverflowException, ClosedIllegalStateException, ThreadingIllegalStateException;
 
     /**
-     * Sets the maximum writeable offset. Attempts to write beyond this limit
+     * Sets the maximum writable offset. Attempts to write beyond this limit
      * result in {@link BufferOverflowException}.
      *
      * @param limit The new write limit. It must be a non-negative number.
@@ -112,7 +112,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     }
 
     /**
-     * Writes a stop bit encoded long to the data stream. Stop bit encoding is a form of variable-length
+     * Writes a stop-bit encoded long to the data stream. Stop-bit encoding is a form of variable-length
      * integer encoding that uses the continuation bit to indicate if there are more bytes to be processed.
      *
      * @param x The long value to be written to the data stream.
@@ -129,7 +129,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     }
 
     /**
-     * Writes a stop bit encoded char to the data stream. Stop bit encoding is a form of variable-length
+     * Writes a stop-bit encoded char to the data stream. Stop-bit encoding is a form of variable-length
      * integer encoding that uses the continuation bit to indicate if there are more bytes to be processed.
      *
      * @param x The char value to be written to the data stream.
@@ -146,8 +146,8 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     }
 
     /**
-     * Writes a stop bit encoded double value to the data stream.
-     * Stop bit encoding is a form of variable-length integer encoding
+     * Writes a stop-bit encoded double value to the data stream.
+     * Stop-bit encoding is a form of variable-length integer encoding
      * that uses the continuation bit to indicate if there are more bytes to be processed.
      *
      * @param d The double value to be written to the data stream.
@@ -164,7 +164,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     }
 
     /**
-     * Writes a double value to the data stream with a stop bit encoded decimal. The encoding used
+     * Writes a double value to the data stream with a stop-bit encoded decimal. The encoding used
      * aims to efficiently store values with a small number of significant digits.
      *
      * @param d The double value to be written to the data stream.
@@ -207,7 +207,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
 
     /**
      * Writes a UTF-8 encoded string to the data stream, similar to writeUTF, but with a few differences.
-     * Firstly, the length is stop bit encoded, meaning that the length encoding may be one byte longer
+     * Firstly, the length is stop-bit encoded, meaning that the length encoding may be one byte longer
      * for short strings, but the string's length is not limited. Secondly, the string can be null.
      *
      * @param text The string to be written. Can be null.
@@ -242,7 +242,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
 
     /**
      * Writes a CharSequence as an 8-bit string to the data stream. If the CharSequence is null,
-     * a stop bit encoded -1 is written. If the CharSequence is an instance of BytesStore, the contents
+     * a stop-bit encoded -1 is written. If the CharSequence is an instance of BytesStore, the contents
      * are written directly from the BytesStore. Otherwise, the method delegates to the
      * write8bit(String) or write8bit(CharSequence, int, int) as appropriate.
      *
@@ -365,7 +365,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
 
     /**
      * Writes a String as an 8-bit string to the data stream. If the string is null,
-     * a stop bit encoded -1 is written. Otherwise, the method delegates to the
+     * a stop-bit encoded -1 is written. Otherwise, the method delegates to the
      * write8bit(String, int, int) method.
      *
      * @param s The String to be written. Can be null.
@@ -432,7 +432,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     }
 
     /**
-     * Writes a char to the data stream as a stop bit encoded value.
+     * Writes a char to the data stream as a stop-bit encoded value.
      *
      * @param ch The char to be written.
      * @return The current StreamingDataOutput instance.

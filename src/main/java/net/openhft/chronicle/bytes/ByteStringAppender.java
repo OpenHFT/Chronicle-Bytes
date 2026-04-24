@@ -234,12 +234,12 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
     }
 
     /**
-     * Returns the strategy used to convert floating point values to text.
+     * Returns the strategy used to convert floating-point values to text.
      */
     Decimaliser decimaliser();
 
     /**
-     * Sets the {@link Decimaliser} controlling how floating point numbers are rendered.
+     * Sets the {@link Decimaliser} controlling how floating-point numbers are rendered.
      *
      * @param decimaliser implementation to use
      * @return this appender
@@ -247,7 +247,7 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
     B decimaliser(Decimaliser decimaliser);
 
     /**
-     * Whether a trailing {@code .0} is appended to whole floating point values.
+     * Whether a trailing {@code .0} is appended to whole floating-point values.
      *
      * @deprecated to be removed in x.28.  Use {@link #decimaliser(Decimaliser)} to control formatting.
      */
@@ -255,7 +255,7 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
     boolean fpAppend0();
 
     /**
-     * Controls whether a trailing {@code .0} is appended to whole floating point values.
+     * Controls whether a trailing {@code .0} is appended to whole floating-point values.
      *
      * @deprecated to be removed in x.28.  Use {@link #decimaliser(Decimaliser)} instead.
      */

@@ -227,7 +227,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
     }
 
     /**
-     * Reads a variable-length integer encoded using the stop bit encoding.
+     * Reads a variable-length integer encoded using the stop-bit encoding.
      * This method is equivalent to calling {@code BytesInternal.readStopBit(this)}.
      *
      * @return the decoded integer
@@ -242,7 +242,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
     }
 
     /**
-     * Reads a variable-length character encoded using the stop bit encoding.
+     * Reads a variable-length character encoded using the stop-bit encoding.
      * This method is equivalent to calling {@code BytesInternal.readStopBitChar(this)}.
      *
      * @return the decoded character
@@ -257,7 +257,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
     }
 
     /**
-     * Reads a variable-length double encoded using the stop bit encoding.
+     * Reads a variable-length double encoded using the stop-bit encoding.
      * This method is equivalent to calling {@code BytesInternal.readStopBitDouble(this)}.
      *
      * @return the decoded double
@@ -270,7 +270,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
     }
 
     /**
-     * Reads a decimal number represented as a variable-length double and scale encoded using the stop bit encoding.
+     * Reads a decimal number represented as a variable-length double and scale encoded using the stop-bit encoding.
      * The absolute value of the returned double represents the value of the decimal,
      * and the sign represents the sign of the decimal.
      *
@@ -326,7 +326,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
 
     /**
      * Reads a character value from the input stream.
-     * The character is read using the stop bit encoding.
+     * The character is read using the stop-bit encoding.
      *
      * @return the character value
      * @throws ClosedIllegalStateException If the resource has been released or closed.
@@ -517,7 +517,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
 
     /**
      * Reads a UTF-8 encoded string from the input stream. This method supports {@code null} values and
-     * utilizes stop bit encoding for length, saving one byte for strings shorter than 128 characters.
+     * utilizes stop-bit encoding for length, saving one byte for strings shorter than 128 characters.
      *
      * @return a Unicode string or {@code null} if {@code writeUtf8(null)} was called
      * @throws BufferUnderflowException    If there's not enough data to read
