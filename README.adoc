@@ -79,27 +79,27 @@ Here is an explanation for each operation supported by Chronicle Bytes:
 
 This section provides examples of how to create `Bytes` instances with different types of underlying data structures.
 
-* Creating a `Bytes` instance which wraps an on heap byte array:
+* Creating a `Bytes` instance which wraps an on-heap byte array:
 
-.Bytes which wraps an on heap byte[]
+.Bytes which wraps an on-heap byte[]
 [source,Java]
 ----
 Bytes<byte[]> bytes = Bytes.allocateElasticOnHeap();
 byte[] underlyingBytes = bytes.underlyingObject();
 ----
 
-* Creating a `Bytes` instance which wraps a pre-sized on heap byte array:
+* Creating a `Bytes` instance which wraps a pre-sized on-heap byte array:
 
-.Bytes which wraps an on heap byte[] pre-sized
+.Bytes which wraps an on-heap byte[] pre-sized
 [source,Java]
 ----
 Bytes<byte[]> bytes = Bytes.allocateElasticOnHeap(64);
 byte[] underlyingBytes = bytes.underlyingObject();
 ----
 
-* Creating a `Bytes` instance which wraps an on heap ByteBuffer:
+* Creating a `Bytes` instance which wraps an on-heap ByteBuffer:
 
-.Bytes which wraps an on heap ByteBuffer
+.Bytes which wraps an on-heap ByteBuffer
 [source,Java]
 ----
 Bytes<ByteBuffer> bytes = Bytes.elasticHeapByteBuffer(64);
@@ -951,7 +951,7 @@ static class IBMImpl implements IBytesMethod {
 
 ----
 
-Once we have interfaces, DTOs, and an implementation we can setup a test harness
+Once we have interfaces, DTOs, and an implementation we can set up a test harness
 
 .Setup a test harness for a Lambda function
 [source,Java]
@@ -1154,9 +1154,9 @@ As `Bytes` supports encoding of string data in both ISO-8859-1 and UTF-8, you wi
 * `to8bitString` renders the bytes as if they were ISO-8859-1 encoded.
 * `toUtf8String` renders the bytes as if they were UTF-8 encoded.
 
-== Utilizing Memory Mapped Files
+== Utilizing Memory-Mapped Files
 
-Memory mapped files function like Bytes instances, expanding as required.
+Memory-mapped files function like Bytes instances, expanding as required.
 A specific chunk size determines the growth rate as more Bytes are employed.
 A `syncMode` can be set to ensure data is flushed as each chunk is released.
 
@@ -1172,7 +1172,7 @@ try (MappedBytes bytesW = MappedBytes.mappedBytes(file, 64 << 10, 16 << 10);
     }
 ----
 
-Memory mapped files are commonly used by Chronicle Map and Chronicle Queue.
+Memory-mapped files are commonly used by Chronicle Map and Chronicle Queue.
 
 == Debugging Chronicle-Bytes
 

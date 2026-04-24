@@ -50,7 +50,7 @@ If `Unsafe` is unavailable or restricted (e.g., by JVM flags or future Java vers
 However, for high-performance scenarios, common patterns are to allocate one `Bytes` buffer per thread (using `ThreadLocal` and resetting it via `clear()`) or to use try-with-resources for short-lived, method-local `Bytes` instances to ensure timely release.
 (See `api-guide.adoc` Performance Tips).
 
-. **What is the relationship between `Bytes`, `BytesStore`, and the memory backing them?** `BytesStore` represents the actual block of memory (e.g., a `byte[]` on heap, a region of direct native memory, or a memory-mapped file).
+. **What is the relationship between `Bytes`, `BytesStore`, and the memory backing them?** `BytesStore` represents the actual block of memory (e.g., a `byte[]` on-heap, a region of direct native memory, or a memory-mapped file).
 `Bytes` is a view or handle to a `BytesStore`, providing methods to read and write data using cursors and limits.
 Multiple `Bytes` instances can view the same or overlapping regions of a `BytesStore`.
 
@@ -67,7 +67,7 @@ If you need to interoperate with a system of different endianness, you must hand
 
 . **How large can a direct (off-heap) or memory-mapped buffer grow?** * **Direct off-heap (`allocateDirect`, `allocateElasticDirect`):** Limited by the available native process memory and the `-XX:MaxDirectMemorySize` JVM parameter.
 * **Memory-mapped files (`MappedBytes`):** Can address up to 256 TB on modern operating systems, and up to 2^63 bytes theoretically (Java `long` for size/offset).
-Practically limited by available disk space, OS virtual address space limits (very large on 64-bit OSes), and file system limits.
+Practically limited by available disk space, OS virtual address space limits (very large on 64-bit OSes), and file-system limits.
 
 . **Is stop-bit encoding (`readStopBitLong`, `writeStopBitLong`) slower than fixed 8-byte longs?** * For small integer values (e.g., fitting in 1-3 bytes with stop-bit encoding), it's often faster due to fewer bytes being written/read, leading to better cache utilization and reduced I/O.
 * For large integer values that would require 5 or more bytes with stop-bit encoding (especially those needing all 8 or 9 bytes), a fixed-width `writeLong`/`readLong` is generally faster.
