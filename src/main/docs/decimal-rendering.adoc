@@ -5,7 +5,7 @@
 :lang: en-GB
 
 This page summarises the options in the `net.openhft.chronicle.bytes.render` package.
-It accompanies the Javadoc and shows how to render floating point values into
+It accompanies the Javadoc and shows how to render floating-point values into
 textual form suitable for Chronicle's wire formats.
 
 == Choosing a Decimaliser
