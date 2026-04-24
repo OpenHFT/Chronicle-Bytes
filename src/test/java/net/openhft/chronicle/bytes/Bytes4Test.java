@@ -27,7 +27,7 @@ class Bytes4Test extends BytesTestCommon {
         bs.append(14, 16, 12);
         bs.isClear();
 
-        assertThrows(RuntimeException.class, () -> bs.writeUtf8(14, "this is a another text it should over write the other"));
+        assertThrows(RuntimeException.class, () -> bs.writeUtf8(14, "this is another text it should over write the other"));
     }
 
     @Test
@@ -71,7 +71,7 @@ class Bytes4Test extends BytesTestCommon {
         BytesStore<?, byte[]> bs = BytesStore.from("this is a test          ");
         bs.append(14, 16, 12);
         bs.isClear();
-        bs.writeUtf8(14, "this is a another text it should over write the other");
+        bs.writeUtf8(14, "this is another text it should over write the other");
         print("ByteStore", bs);
 
         Bytes<ByteBuffer> by = Bytes.elasticByteBuffer();

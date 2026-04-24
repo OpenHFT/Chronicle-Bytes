@@ -185,7 +185,7 @@ public class BytesFieldInfo {
     }
 
     /**
-     * @return a human readable dump of the discovered groups and their offsets
+     * @return a human-readable dump of the discovered groups and their offsets
      */
     public String dump() {
         final StringBuilder sb = new StringBuilder().append("type: ").append(getClass().getSimpleName()).append(", groups: { ");

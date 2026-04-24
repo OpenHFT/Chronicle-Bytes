@@ -71,7 +71,7 @@ public class StreamingDataInputTest extends BytesTestCommon {
 
     @Test
     public void readWithLength() {
-        int max = 130; // two bytes of length for a stop bit encoded length
+        int max = 130; // two bytes of length for a stop-bit encoded length
         Bytes<?> bytes = Bytes.allocateElasticOnHeap(max + 2);
         Bytes<?> from = Bytes.wrapForRead(new byte[max]);
         Bytes<?> to = Bytes.wrapForRead(new byte[max]);

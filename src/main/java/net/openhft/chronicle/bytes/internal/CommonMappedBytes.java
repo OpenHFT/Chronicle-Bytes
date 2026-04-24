@@ -39,7 +39,7 @@ public abstract class CommonMappedBytes extends MappedBytes {
 
     /** underlying file that owns the mapping */
     protected final MappedFile mappedFile;
-    /** whether the file is read only */
+    /** whether the file is read-only */
     private final boolean backingFileIsReadOnly;
     /** capacity of the mapped region */
     private final long capacity;
@@ -538,7 +538,7 @@ public abstract class CommonMappedBytes extends MappedBytes {
     }
 
     /**
-     * @return whether the underlying mapped file was opened read only
+     * @return whether the underlying mapped file was opened read-only
      */
     @Override
     public boolean isBackingFileReadOnly() {

@@ -67,7 +67,7 @@ public class NativeBytesStore<U>
     private final Finalizer finalizer;
     /** Base address of the allocated native memory. */
     public long address;
-    /** Memory accessor for low level operations. Cleared on release. */
+    /** Memory accessor for low-level operations. Cleared on release. */
     public Memory memory = OS.memory();
     /** Maximum capacity that this store can represent. */
     public long maximumLimit;
