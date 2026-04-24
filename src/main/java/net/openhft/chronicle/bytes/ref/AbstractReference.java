@@ -47,7 +47,7 @@ public abstract class AbstractReference extends AbstractCloseable implements Byt
      */
     @SuppressWarnings("this-escape")
     protected AbstractReference() {
-        // assume thread safe.
+        // assume thread-safe.
         singleThreadedCheckDisabled(true);
     }
 

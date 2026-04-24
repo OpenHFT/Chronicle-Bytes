@@ -32,7 +32,7 @@ public class UsesBigDecimal implements Decimaliser {
             Jvm.getFieldOrNull(BigDecimal.class, "intCompact");
 
     /**
-     * Constant representing the bits of negative zero in floating point representation.
+     * Constant representing the bits of negative zero in floating-point representation.
      */
     private static final long NEGATIVE_ZERO_BITS = Long.MIN_VALUE;
 

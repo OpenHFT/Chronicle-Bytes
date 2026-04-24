@@ -86,7 +86,7 @@ final class BytesJavaDocComplianceTest extends BytesTestCommon {
     }
 
     /**
-     * Checks that ByteBuffers that are read only cannot be wrapped.
+     * Checks that ByteBuffers that are read-only cannot be wrapped.
      */
     @Test
     void wrapForReadCannotTakeReadOnlyByteBuffers() {
@@ -97,7 +97,7 @@ final class BytesJavaDocComplianceTest extends BytesTestCommon {
     }
 
     /**
-     * Checks that ByteBuffers that are read only cannot be wrapped
+     * Checks that ByteBuffers that are read-only cannot be wrapped
      */
     @Test
     void wrapForWriteCannotTakeReadOnlyByteBuffers() {
