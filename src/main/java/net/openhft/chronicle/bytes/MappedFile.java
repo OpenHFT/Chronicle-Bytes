@@ -50,7 +50,7 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
     @NotNull
     private final File file;
 
-    /** read only mapping flag */
+    /** read-only mapping flag */
     private final boolean readOnly;
 
     /** invoked when a new chunk is allocated */
@@ -553,7 +553,7 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
      */
     @Override
     protected boolean threadSafetyCheck(boolean isUsed) {
-        // component is thread safe
+        // component is thread-safe
         return true;
     }
 
@@ -562,7 +562,7 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
      * underlying file's canonical path and some other factors including a
      * per JVM random string.
      * <p>
-     * The canonical path is pre-pended with static and random data to reduce the probability of
+     * The canonical path is prepended with static and random data to reduce the probability of
      * unrelated synchronization on internalized Strings.
      *
      * @return internalized token.

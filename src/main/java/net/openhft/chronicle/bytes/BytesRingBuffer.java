@@ -52,7 +52,7 @@ public interface BytesRingBuffer extends BytesRingBufferStats, BytesConsumer, Cl
 
         } catch (Exception e) {
             Jvm.error().on(BytesRingBuffer.class,
-                    "This is a a commercial feature, please contact " +
+                    "This is a commercial feature, please contact " +
                             "sales@chronicle.software to unlock this feature.");
 
             throw Jvm.rethrow(e);
@@ -91,7 +91,7 @@ public interface BytesRingBuffer extends BytesRingBufferStats, BytesConsumer, Cl
 
         } catch (Exception e) {
             Jvm.error().on(BytesRingBuffer.class,
-                    "This is a a commercial feature, please contact " +
+                    "This is a commercial feature, please contact " +
                             "sales@chronicle.software to unlock this feature.");
 
             throw Jvm.rethrow(e);

@@ -16,7 +16,7 @@ import java.io.File;
 
 /**
  * {@link TimeProvider} implementation producing timestamps that remain unique across JVMs by embedding
- * a host identifier in the lower bits.  A memory mapped file coordinates monotonicity between processes.
+ * a host identifier in the lower bits.  A memory-mapped file coordinates monotonicity between processes.
  *
  * {@link #currentTimeMillis()} simply delegates to the underlying provider and is therefore not unique.
  */
