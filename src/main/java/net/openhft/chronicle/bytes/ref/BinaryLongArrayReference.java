@@ -299,6 +299,7 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
         bytesStore.writeOrderedLong(VALUES + offset + (index << SHIFT), value);
     }
 
+    // CPD-OFF
     @Override
     public void bytesStore(@NotNull BytesStore bytes, @NonNegative long offset, @NonNegative long length)
             throws IllegalArgumentException, IllegalStateException, BufferOverflowException {
@@ -383,6 +384,7 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
         offset = 0;
         length = 0;
     }
+    // CPD-ON
 
     @Nullable
     @Override
@@ -405,12 +407,12 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
     public String toString() {
         if (bytesStore == null)
             return "not set";
-        @NotNull StringBuilder sb = new StringBuilder();
+        @NotNull StringBuilder sb = new StringBuilder(32);
         sb.append("used: ");
         try {
             long used = getUsed();
-            sb.append(used);
-            sb.append(", value: ");
+            sb.append(used)
+                    .append(", value: ");
             @NotNull String sep = "";
             int i;
             int max = (int) Math.min(used, Math.min(getCapacity(), MAX_TO_STRING));
@@ -423,7 +425,7 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
                 sb.append(" ...");
 
         } catch (Throwable e) {
-            sb.append(" ").append(e);
+            sb.append(' ').append(e);
         }
         return sb.toString();
     }

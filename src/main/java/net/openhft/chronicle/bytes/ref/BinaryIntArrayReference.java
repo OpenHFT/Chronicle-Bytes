@@ -493,8 +493,8 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
         sb.append("used: ");
         try {
             long used = getUsed();
-            sb.append(used);
-            sb.append(", value: ");
+            sb.append(used)
+                    .append(", value: ");
             appendContents(sb, used);
             return sb.toString();
         } catch (Exception e) {
@@ -522,7 +522,7 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
                 sb.append(" ...");
 
         } catch (BufferUnderflowException e) {
-            sb.append(" ").append(e);
+            sb.append(' ').append(e);
         }
     }
 

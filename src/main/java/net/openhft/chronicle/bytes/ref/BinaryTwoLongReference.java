@@ -72,13 +72,7 @@ public class BinaryTwoLongReference extends BinaryLongReference implements TwoLo
     @Override
     public long getValue2()
             throws IllegalStateException {
-        try {
-            return bytesStore.readLong(offset + Long.BYTES);
-        } catch (NullPointerException e) {
-            throwExceptionIfClosed();
-            // bytesStore was null but reference is not closed
-            throw e;
-        }
+        return readLongAt(offset + Long.BYTES);
     }
 
     /**
@@ -91,13 +85,7 @@ public class BinaryTwoLongReference extends BinaryLongReference implements TwoLo
     @Override
     public void setValue2(long value)
             throws IllegalStateException {
-        try {
-            bytesStore.writeLong(offset + Long.BYTES, value);
-        } catch (NullPointerException e) {
-            throwExceptionIfClosed();
-            // bytesStore was null but reference is not closed
-            throw e;
-        }
+        writeLongAt(offset + Long.BYTES, value);
     }
 
     /**
@@ -109,13 +97,7 @@ public class BinaryTwoLongReference extends BinaryLongReference implements TwoLo
     @Override
     public long getVolatileValue2()
             throws IllegalStateException {
-        try {
-            return bytesStore.readVolatileLong(offset + Long.BYTES);
-        } catch (NullPointerException e) {
-            throwExceptionIfClosed();
-            // bytesStore was null but reference is not closed
-            throw e;
-        }
+        return readVolatileLongAt(offset + Long.BYTES);
     }
 
     /**
@@ -128,13 +110,7 @@ public class BinaryTwoLongReference extends BinaryLongReference implements TwoLo
     @Override
     public void setVolatileValue2(long value)
             throws IllegalStateException {
-        try {
-            bytesStore.writeVolatileLong(offset + Long.BYTES, value);
-        } catch (NullPointerException e) {
-            throwExceptionIfClosed();
-            // bytesStore was null but reference is not closed
-            throw e;
-        }
+        writeVolatileLongAt(offset + Long.BYTES, value);
     }
 
     /**
@@ -147,12 +123,56 @@ public class BinaryTwoLongReference extends BinaryLongReference implements TwoLo
     @Override
     public void setOrderedValue2(long value)
             throws IllegalStateException {
+        writeOrderedLongAt(offset + Long.BYTES, value);
+    }
+
+    private long readLongAt(long address) {
         try {
-            bytesStore.writeOrderedLong(offset + Long.BYTES, value);
+            return bytesStore.readLong(address);
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
-            // bytesStore was null but reference is not closed
-            throw e;
+            // Message is supplied via helper to keep the cause for diagnostics.
+            throw bytesStoreNull("bytesStore is null while reading value", e);
+        }
+    }
+
+    private void writeLongAt(long address, long value) {
+        try {
+            bytesStore.writeLong(address, value);
+        } catch (NullPointerException e) {
+            throwExceptionIfClosed();
+            // Message is supplied via helper to keep the cause for diagnostics.
+            throw bytesStoreNull("bytesStore is null while writing value", e);
+        }
+    }
+
+    private long readVolatileLongAt(long address) {
+        try {
+            return bytesStore.readVolatileLong(address);
+        } catch (NullPointerException e) {
+            throwExceptionIfClosed();
+            // Message is supplied via helper to keep the cause for diagnostics.
+            throw bytesStoreNull("bytesStore is null while reading volatile value", e);
+        }
+    }
+
+    private void writeVolatileLongAt(long address, long value) {
+        try {
+            bytesStore.writeVolatileLong(address, value);
+        } catch (NullPointerException e) {
+            throwExceptionIfClosed();
+            // Message is supplied via helper to keep the cause for diagnostics.
+            throw bytesStoreNull("bytesStore is null while writing volatile value", e);
+        }
+    }
+
+    private void writeOrderedLongAt(long address, long value) {
+        try {
+            bytesStore.writeOrderedLong(address, value);
+        } catch (NullPointerException e) {
+            throwExceptionIfClosed();
+            // Message is supplied via helper to keep the cause for diagnostics.
+            throw bytesStoreNull("bytesStore is null while writing ordered value", e);
         }
     }
 
@@ -172,8 +192,15 @@ public class BinaryTwoLongReference extends BinaryLongReference implements TwoLo
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
             // bytesStore was null but reference is not closed
-            throw e;
+            // Message is supplied via helper to keep the cause for diagnostics.
+            throw bytesStoreNull("bytesStore is null while adding value", e);
         }
+    }
+
+    private static NullPointerException bytesStoreNull(String message, NullPointerException cause) {
+        NullPointerException npe = new NullPointerException(message);
+        npe.initCause(cause);
+        return npe;
     }
 
     /**
