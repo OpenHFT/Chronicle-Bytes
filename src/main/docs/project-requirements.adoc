@@ -174,7 +174,6 @@ reference build container `Dockerfile.build`. |CI.
 
 == Glossary
 
-ASCII-7 ::  American Standard Code for Information Interchange, 7-bit subset commonly used within ISO-8859-1.
 atomic operations ::  Operations that complete in a single, indivisible step, often used for thread-safe updates to shared memory.
 direct memory ::  Off-heap memory managed by the JVM, not part of the Java heap, accessed via `java.nio.ByteBuffer.allocateDirect` or `Unsafe`.
 elastic buffer ::  A buffer that grows automatically when additional capacity is

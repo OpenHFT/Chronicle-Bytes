@@ -146,7 +146,7 @@ At a high level:
 * *Aligned access and atomics* – Aligned reads from hot-cache mapped regions and contended atomic operations on off-heap memory are constrained by nanosecond-level targets <<CB-NF-P-004>>, <<CB-NF-P-005>>.
 * *String encoding throughput* – UTF-8 and related encodings must sustain hundreds of megabytes per second per core under JMH benchmarks <<CB-NF-P-006>>.
 
-These targets are verified via the benchmark and soak tests described in `project-requirements.adoc` and `testing-strategy.adoc`.
+These targets are verified via the benchmark and soak tests described in `project-requirements.adoc`.
 Where benchmarks cannot run in every CI job, they are treated as release and regression gates.
 
 == Container Diagram (C4 Level 2)

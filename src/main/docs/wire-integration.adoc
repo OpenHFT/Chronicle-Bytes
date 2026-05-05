@@ -17,6 +17,7 @@ _Chronicle Wire_ is a high-performance serialization framework meticulously laye
 Chronicle Wire then intelligently formats Java objects, data types, or method calls into a stream of bytes onto this `Bytes` buffer, and reconstructs them upon reading.
 
 The core design philosophy emphasizes:
+
 Zero Garbage Creation ::
 On critical paths, Wire aims to avoid generating Java heap garbage during serialization and deserialization.
 High Speed ::
@@ -348,26 +349,19 @@ Fields (`SelfDescribingMarshallable`) ::
 Append new fields in `writeMarshallable`.
 Older readers will ignore these new fields if using `BINARY_LIGHT`, `YAML_ONLY`, `JSON`, or `TEXT`.
 Newer readers can handle missing optional fields from older data (e.g., by checking `valueIn.isNull()` or providing defaults).
-Methods (`MethodWriter`) ::
-Add new methods to the _end_ of the interface.
+Methods (`MethodWriter`) :: Add new methods to the _end_ of the interface.
 Older readers/listeners will ignore these new method calls.
-Renaming Fields/Methods ::
-Fields ::
-A common strategy is to add the new field and keep the old field for a transition period.
+Fields :: A common strategy is to add the new field and keep the old field for a transition period.
 Write both, or write the new and have `readMarshallable` check for either the old or new field name.
 Use `@Deprecated` on the old field's accessor/mutator.
 Consider providing a utility to upgrade older data.
-Methods ::
-Similar to fields, you might introduce a new method and deprecate the old one, forwarding calls if necessary.
-Removing Fields/Methods ::
-This is a breaking change.
+Methods :: Similar to fields, you might introduce a new method and deprecate the old one, forwarding calls if necessary.
+Removing Fields/Methods :: This is a breaking change.
 Only do this after all producers and consumers have been upgraded to no longer use or expect the removed element.
 Otherwise, readers might throw exceptions or fail to deserialize.
-Changing Field Types ::
-Generally a breaking change unless the new type is "wider" and compatible (e.g., `int` to `long`).
+Changing Field Types :: Generally a breaking change unless the new type is "wider" and compatible (e.g., `int` to `long`).
 Handle with care, often requiring a new field name.
-Versioning with `RAW` or `FIELDLESS_BINARY` ::
-Since these formats lack field names, schema evolution is more rigid.
+Versioning with `RAW` or `FIELDLESS_BINARY` :: Since these formats lack field names, schema evolution is more rigid.
 * Embed a version number (e.g., as a stop-bit encoded `int` or a `short`) at the beginning of your `RAW` message or `BytesMarshallable` payload.
 * Your `readMarshallable` logic would then switch based on this version to correctly interpret the subsequent bytes.
 * Example for `BytesMarshallable`:
