@@ -271,17 +271,13 @@ public final class NoBytesStore implements BytesStore<NoBytesStore, Void> {
         return VanillaBytes.wrap(this);
     }
 
-    /**
-     * @return always {@code 0}
-     */
+    /** @return always {@code 0} */
     @Override
     public @NonNegative long capacity() {
         return 0;
     }
 
-    /**
-     * @return always {@code null}
-     */
+    /** @return always {@code null} */
     @Override
     public Void underlyingObject() {
         return null;
