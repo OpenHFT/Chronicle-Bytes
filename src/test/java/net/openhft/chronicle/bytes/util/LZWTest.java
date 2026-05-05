@@ -23,9 +23,9 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
  * Tests LZW compression because correct round-trip behaviour and
  * consistent output are essential for reliable data storage and transfer.
  */
-@SuppressWarnings("deprecation")
+@SuppressWarnings({"deprecation", "PMD.JUnit5TestShouldBePackagePrivate"})
 @DisplayName("LZW - validates LZW compression round-trip behaviour")
-public class LZWTest extends BytesTestCommon {
+class LZWTest extends BytesTestCommon {
 
     @Test
     @DisplayName("lzw round trip preserves the original bytes")

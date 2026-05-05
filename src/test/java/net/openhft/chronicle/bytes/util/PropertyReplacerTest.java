@@ -19,7 +19,8 @@ import static org.junit.jupiter.api.Assumptions.assumeFalse;
  * to avoid configuration failures when placeholders reference missing keys.
  */
 @DisplayName("PropertyReplacer - validates token replacement for system properties")
-public class PropertyReplacerTest extends BytesTestCommon {
+@SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate")
+class PropertyReplacerTest extends BytesTestCommon {
 
     @Test
     @DisplayName("missing system property fails with a detailed message")

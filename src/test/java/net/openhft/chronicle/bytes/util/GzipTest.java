@@ -25,9 +25,9 @@ import static org.junit.jupiter.api.Assumptions.assumeFalse;
  * Tests GZIP compression because correct round-trip behaviour and
  * consistent output are essential for reliable data storage and transfer.
  */
-@SuppressWarnings("deprecation")
+@SuppressWarnings({"deprecation", "PMD.JUnit5TestShouldBePackagePrivate"})
 @DisplayName("Gzip - validates GZIP compression round-trip behaviour")
-public class GzipTest extends BytesTestCommon {
+class GzipTest extends BytesTestCommon {
 
     @Test
     @DisplayName("gzip round trip preserves the original bytes")

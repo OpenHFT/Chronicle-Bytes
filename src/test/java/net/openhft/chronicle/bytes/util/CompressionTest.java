@@ -27,9 +27,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
  * handled gracefully, and verifies that LZW, GZIP and binary modes
  * preserve payload integrity.
  */
-@SuppressWarnings({"deprecation", "checkstyle:MMOverusedWord"})
+@SuppressWarnings({"deprecation", "checkstyle:MMOverusedWord", "PMD.JUnit5TestShouldBePackagePrivate"})
 @DisplayName("Compression - validates algorithm fallback and round-trip behaviour")
-public class CompressionTest {
+class CompressionTest {
 
     @Test
     @DisplayName("unsupported algorithm falls back to binary compression")

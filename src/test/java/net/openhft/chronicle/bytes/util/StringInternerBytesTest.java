@@ -16,7 +16,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * to verify that repeated interns do not inflate the cache.
  */
 @DisplayName("StringInternerBytes - validates string intern value counting")
-public class StringInternerBytesTest extends BytesTestCommon {
+@SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate")
+class StringInternerBytesTest extends BytesTestCommon {
 
     @Test
     @DisplayName("interner tracks expected unique value count")

@@ -21,7 +21,7 @@ import static java.nio.charset.StandardCharsets.ISO_8859_1;
  * Tests abstract interner operations because correct hash slot management
  * and toggle behaviour are essential to avoid duplicate cached entries.
  */
-@SuppressWarnings("deprecation")
+@SuppressWarnings({"deprecation", "PMD.ReturnEmptyCollectionRatherThanNull"})
 @DisplayName("AbstractInterner - validates hash slot caching and toggle behaviour")
 class AbstractInternerTest {
 

@@ -14,7 +14,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * essential to cache single-byte character strings efficiently.
  */
 @DisplayName("Bit8StringInterner - validates 8-bit string caching")
-public class Bit8StringInternerTest {
+@SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate")
+class Bit8StringInternerTest {
 
     @Test
     @DisplayName("interner returns stored string for 8-bit bytes")

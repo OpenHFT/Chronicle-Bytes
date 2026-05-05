@@ -26,9 +26,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
  * Tests binary length encoding because correct bit-width selection is
  * essential to avoid truncation when serialising large payloads.
  */
-@SuppressWarnings("checkstyle:MMOverusedWord")
+@SuppressWarnings({"checkstyle:MMOverusedWord", "PMD.JUnit5TestShouldBePackagePrivate"})
 @DisplayName("BinaryLengthLength - validates 8/16/32-bit length wire codes")
-public class BinaryLengthLengthTest extends BytesTestCommon {
+class BinaryLengthLengthTest extends BytesTestCommon {
 
     private static Stream<Arguments> lengthAndCode() {
         return Stream.of(

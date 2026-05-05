@@ -15,7 +15,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * essential to allow delimiter characters within quoted values.
  */
 @DisplayName("EscapingStopCharTester - validates single-char escape handling")
-public class EscapingStopCharTesterTest {
+@SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate")
+class EscapingStopCharTesterTest {
 
     @Test
     @DisplayName("escape character suppresses a single stop character")
