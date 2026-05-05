@@ -22,6 +22,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 /*
@@ -45,7 +46,7 @@ public class ConcurrentRafAccessTest extends BytesTestCommon {
     private List<Worker> workers;
 
     @Rule
-    public TemporaryFolder tmpDir = new TemporaryFolder();
+    public final TemporaryFolder tmpDir = new TemporaryFolder();
 
     private static void bumpSize(File file, final RandomAccessFile raf, final FileChannel fc)
             throws IOException {
@@ -87,7 +88,7 @@ public class ConcurrentRafAccessTest extends BytesTestCommon {
                 .skip(4)
                 .summaryStatistics();
 
-//        System.out.println("testParallel2: " + summaryStatistics);
+        assertTrue(summaryStatistics.getCount() > 0);
     }
 
     @Test
@@ -97,8 +98,7 @@ public class ConcurrentRafAccessTest extends BytesTestCommon {
                 .skip(4)
                 .summaryStatistics();
 
-//        System.out.println("testSequential: " + summaryStatistics);
-
+        assertTrue(summaryStatistics.getCount() > 0);
     }
 
     @Test
@@ -108,7 +108,7 @@ public class ConcurrentRafAccessTest extends BytesTestCommon {
                 .skip(4)
                 .summaryStatistics();
 
-//        System.out.println("testParallel: " + summaryStatistics);
+        assertTrue(summaryStatistics.getCount() > 0);
     }
 
     @Test
@@ -118,8 +118,7 @@ public class ConcurrentRafAccessTest extends BytesTestCommon {
                 .skip(4)
                 .summaryStatistics();
 
-//        System.out.println("testSequential2: " + summaryStatistics);
-
+        assertTrue(summaryStatistics.getCount() > 0);
     }
 
     private long test(final String name, final ExecutorService executor) {
@@ -133,9 +132,8 @@ public class ConcurrentRafAccessTest extends BytesTestCommon {
             ie.printStackTrace();
         }
 
-        final long elapsedNs = System.nanoTime() - beginNs;
-//        System.out.format("%s: elapsedNs = %,d%n", name, elapsedNs);
-        return elapsedNs;
+        //        System.out.format("%s: elapsedNs = %,d%n", name, elapsedNs);
+        return System.nanoTime() - beginNs;
     }
 
     private File fileFromInt(int i)
@@ -167,7 +165,7 @@ public class ConcurrentRafAccessTest extends BytesTestCommon {
                 }
             }
             final long elapsedNs = System.nanoTime() - beginNs;
-//            System.out.format("%s: elapsedNs = %,d%n", Thread.currentThread().getName(), elapsedNs);
+            assertTrue(elapsedNs >= 0);
         }
     }
 }

@@ -54,6 +54,7 @@ public class BytesMethodReaderBuilder implements MethodReaderBuilder {
      * Returns the currently configured {@link MethodEncoderLookup} strategy used
      * to find decoders for method calls.
      */
+    @Deprecated(/* to be removed in 2027 */)
     public MethodEncoderLookup methodEncoderLookup() {
         return methodEncoderLookup;
     }
@@ -64,6 +65,7 @@ public class BytesMethodReaderBuilder implements MethodReaderBuilder {
      * @param methodEncoderLookup the MethodEncoderLookup function
      * @return this builder for chained invocation
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public BytesMethodReaderBuilder methodEncoderLookup(MethodEncoderLookup methodEncoderLookup) {
         this.methodEncoderLookup = methodEncoderLookup;
         return this;

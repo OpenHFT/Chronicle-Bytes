@@ -8,6 +8,8 @@ import net.openhft.chronicle.bytes.BytesTestCommon;
 import net.openhft.chronicle.bytes.NativeBytes;
 import net.openhft.chronicle.bytes.internal.NativeBytesStore;
 import org.jetbrains.annotations.NotNull;
+import org.junit.Ignore;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -99,13 +101,12 @@ public class OptimisedBytesStoreHashTest extends BytesTestCommon {
 //                System.out.println(t + " - Score: " + score);
         }
         System.out.println("Average score: " + (long) (runs / scoreSum));
-        System.out.printf("Average time %.3f us%n", time / timeCount / 1e3);
+        System.out.printf("Average time %.3f us%n", (double) time / (double) timeCount / 1e3);
     }
 
-    //@Test
-    //@Ignore("Long running, avg score = 5414, avg time 0.043 us")
-    public void testSmallRandomness()
-            throws IOException {
+    @Test
+    @Ignore("Long running, avg score = 5414, avg time 0.043 us")
+    public void testSmallRandomness() {
         long time = 0, timeCount = 0;
         long scoreSum = 0;
 //        StringBuilder sb = new StringBuilder();
@@ -144,7 +145,7 @@ public class OptimisedBytesStoreHashTest extends BytesTestCommon {
                 System.out.println(t + " - Score: " + score);
         }
         System.out.println("Average score: " + scoreSum / 500);
-        System.out.printf("Average time %.3f us%n", time / timeCount / 1e3);
+        System.out.printf("Average time %.3f us%n", (double) time / (double) timeCount / 1e3);
     }
 
     //@Test

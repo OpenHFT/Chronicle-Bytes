@@ -8,16 +8,14 @@ import net.openhft.chronicle.bytes.internal.migration.HashCodeEqualsUtil;
 import net.openhft.chronicle.bytes.render.DecimalAppender;
 import net.openhft.chronicle.bytes.render.Decimaliser;
 import net.openhft.chronicle.bytes.render.StandardDecimaliser;
+import net.openhft.chronicle.bytes.util.BufferUtil;
 import net.openhft.chronicle.bytes.util.DecoratedBufferOverflowException;
 import net.openhft.chronicle.bytes.util.DecoratedBufferUnderflowException;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.UnsafeMemory;
 import net.openhft.chronicle.core.annotation.NonNegative;
-import net.openhft.chronicle.core.annotation.UsedViaReflection;
-import net.openhft.chronicle.bytes.internal.UnsafeText;
 import net.openhft.chronicle.core.io.*;
-import net.openhft.chronicle.core.scoped.ScopedResource;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -38,7 +36,7 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
  *
  * @param <U> underlying memory type
  */
-@SuppressWarnings("rawtypes")
+@SuppressWarnings({"rawtypes", "deprecation"})
 public abstract class AbstractBytes<U>
         extends AbstractReferenceCounted
         implements Bytes<U>,
@@ -66,36 +64,51 @@ public abstract class AbstractBytes<U>
     @Deprecated(/* to remove in x.28 */)
     private static final boolean APPEND_0 = Jvm.getBoolean("bytes.append.0", true);
 
-    /** Optional name for debugging only. */
-    @UsedViaReflection
-    private final String name;
-
     private final UncheckedRandomDataInput uncheckedRandomDataInput = new UncheckedRandomDataInputHolder();
     @NotNull
-    protected BytesStore<?, U> bytesStore;
-    /** Offset, from {@link #start()}, of the next byte to read. */
+    protected BytesStore<?, U> bytesStore = NoBytesStore.noBytesStore();
+    /**
+     * Offset, from {@link #start()}, of the next byte to read.
+     */
     protected long readPosition;
-    /** Highest byte index that may be written. */
+    /**
+     * Highest byte index that may be written.
+     */
     protected long writeLimit;
-    /** Whether the underlying store is open. */
+    /**
+     * Whether the underlying store is open.
+     */
+    @Deprecated(/* to be removed in 2027 */)
     protected boolean isPresent;
-    /** Offset for the next byte to write. */
+    /**
+     * Offset for the next byte to write.
+     */
     private long writePosition;
-    /** Number of decimal places of the last appended floating point value. */
+    /**
+     * Number of decimal places of the last appended floating point value.
+     */
     private int lastDecimalPlaces = 0;
-    /** Lenient mode suppresses {@link BufferUnderflowException} on some reads. */
+    /**
+     * Lenient mode suppresses {@link BufferUnderflowException} on some reads.
+     */
     private boolean lenient = false;
-    /** Tracks whether the last parsed number contained digits. */
+    /**
+     * Tracks whether the last parsed number contained digits.
+     */
     private boolean lastNumberHadDigits = false;
-    /** Strategy used when appending decimal numbers. */
+    /**
+     * Strategy used when appending decimal numbers.
+     */
     private Decimaliser decimaliser = StandardDecimaliser.STANDARD;
-    /** Whether to append the ".0" suffix for whole numbers. */
+    /**
+     * Whether to append the ".0" suffix for whole numbers.
+     */
     private boolean append0 = APPEND_0;
 
     /**
      * Creates a bytes view over the provided store.
      *
-     * @param bytesStore   the underlying store
+     * @param bytesStore    the underlying store
      * @param writePosition initial {@link #writePosition()} relative to {@link #start()}
      * @param writeLimit    initial {@link #writeLimit()}
      * @throws ClosedIllegalStateException    if the store is closed
@@ -105,25 +118,21 @@ public abstract class AbstractBytes<U>
                   @NonNegative long writePosition,
                   @NonNegative long writeLimit)
             throws ClosedIllegalStateException, ThreadingIllegalStateException {
-        this(bytesStore, writePosition, writeLimit, "");
-    }
-
-    /**
-     * Implementation detail constructor allowing a debug name.
-     */
-    AbstractBytes(@NotNull BytesStore<Bytes<U>, U> bytesStore,
-                  @NonNegative long writePosition,
-                  @NonNegative long writeLimit,
-                  String name)
-            throws ClosedIllegalStateException, ThreadingIllegalStateException {
         super(bytesStore.isDirectMemory());
         this.bytesStore(bytesStore);
         bytesStore.reserve(this);
         readPosition = bytesStore.readPosition();
         this.uncheckedWritePosition(writePosition);
         this.writeLimit = writeLimit;
-        // used for debugging
-        this.name = name;
+    }
+
+    @SuppressWarnings("PMD.UnusedFormalParameter")
+    AbstractBytes(@NotNull BytesStore<Bytes<U>, U> bytesStore,
+                  @NonNegative long writePosition,
+                  @NonNegative long writeLimit,
+                  String name)
+            throws ClosedIllegalStateException, ThreadingIllegalStateException {
+        this(bytesStore, writePosition, writeLimit);
     }
 
     @Override
@@ -323,24 +332,6 @@ public abstract class AbstractBytes<U>
         return this;
     }
 
-    @NotNull
-    private AbstractBytes<U> appendX23(double d) throws ClosedIllegalStateException, ThreadingIllegalStateException {
-        boolean fits = canWriteDirect(32);
-        if (fits) {
-            long address = addressForWrite(writePosition());
-            long address2 = UnsafeText.appendDouble(address, d);
-            writeSkip(address2 - address);
-            return this;
-        } else {
-            try (ScopedResource<Bytes<?>> stlBytes = BytesInternal.acquireBytesScoped()) {
-                Bytes<?> bytes = stlBytes.get();
-                bytes.append(d);
-                append(bytes);
-            }
-        }
-        return this;
-    }
-
     /**
      * Appends the string representation of the given float value to the bytes.
      * First, it tries to convert the float value using the Decimalizer instance. If that fails,
@@ -383,6 +374,7 @@ public abstract class AbstractBytes<U>
     }
 
     @Override
+    @SuppressWarnings("deprecation")
     public Decimaliser decimaliser() {
         return decimaliser;
     }
@@ -975,6 +967,7 @@ public abstract class AbstractBytes<U>
         return this;
     }
 
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public @NotNull Bytes<U> write8bit(@Nullable BytesStore<?, ?> bs)
             throws BufferOverflowException, ClosedIllegalStateException, BufferUnderflowException, ThreadingIllegalStateException {
         if (bs == null) {
@@ -1379,7 +1372,7 @@ public abstract class AbstractBytes<U>
         ensureCapacity(writePosition() + length);
         bytesStore.write(writePosition(), buffer, buffer.position(), length);
         uncheckedWritePosition(writePosition() + length);
-        buffer.position(buffer.position() + length);
+        BufferUtil.setPosition(buffer, buffer.position() + length);
         return this;
     }
 
@@ -1488,6 +1481,7 @@ public abstract class AbstractBytes<U>
     }
 
     @Override
+    @SuppressWarnings("deprecation")
     public boolean lastNumberHadDigits() {
         return lastNumberHadDigits;
     }

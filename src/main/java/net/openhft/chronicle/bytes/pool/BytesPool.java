@@ -46,12 +46,6 @@ public final class BytesPool {
     }
 
     /**
-     * Thread-local variable that holds the {@link Bytes} instance for each thread.
-     * Used by legacy code paths that do not employ {@link ScopedResourcePool}.
-     */
-    final ThreadLocal<Bytes<?>> bytesTL = new ThreadLocal<>();
-
-    /**
      * Creates a new {@link Bytes} instance for use by the pool.
      * Invoked when no cached instance is available for the current thread.
      *

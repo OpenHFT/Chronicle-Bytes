@@ -16,11 +16,11 @@ import java.util.concurrent.atomic.AtomicLong;
 public class MemoryReadJitterMain {
     private static final String PROFILE_OF_THE_THREAD = "profile of the thread";
 
-    private static int runTime = Integer.getInteger("runTime", 600); // seconds
-    private static int size = Integer.getInteger("size", 128); // bytes
-    private static int padTo = Integer.getInteger("pad", 0); // bytes
-    private static int sampleTime = Integer.getInteger("sampleTime", 2); // micro-seconds
-    private static int throughput = Integer.getInteger("throughput", 20_000); // per second
+    private static final int runTime = Integer.getInteger("runTime", 600); // seconds
+    private static final int size = Integer.getInteger("size", 128); // bytes
+    private static final int padTo = Integer.getInteger("pad", 0); // bytes
+    private static final int sampleTime = Integer.getInteger("sampleTime", 2); // micro-seconds
+    private static final int throughput = Integer.getInteger("throughput", 20_000); // per second
     private static volatile boolean running = true;
 
     static {
@@ -63,17 +63,10 @@ public class MemoryReadJitterMain {
                             continue;
                         }
                     }
-                    long startTimeNs = System.nanoTime();
-                    Jvm.safepoint();
-                    long last = mm.consumeBytes();
-                    if (found)
-                        Jvm.safepoint();
-                    else
-                        Jvm.safepoint();
+                    long readDurationNs = consumeAndMeasure(mm, lastRead);
                     long now = System.nanoTime();
-                    histoRead.sampleNanos(now - startTimeNs);
+                    histoRead.sampleNanos(readDurationNs);
                     histoReadWrite.sampleNanos(now - mm.firstLong());
-                    lastRead.lazySet(last);
                     if (found)
                         Jvm.safepoint();
                     else
@@ -102,7 +95,7 @@ public class MemoryReadJitterMain {
             histoWrite.sampleNanos(System.nanoTime() - startTimeNs);
             long start1 = System.nanoTime();
             while (System.nanoTime() < start1 + sampleNS) {
-                // wait one micro-second.
+                Jvm.safepoint();
             }
             if (lastRead.get() != count) {
                 StackTraceElement[] stes = reader.getStackTrace();
@@ -117,7 +110,7 @@ public class MemoryReadJitterMain {
             while (System.nanoTime() < start1 + intervalNS) {
                 Thread.yield();
             }
-        } while (System.currentTimeMillis() < start0 + runTime * 1_000);
+        } while (System.currentTimeMillis() < start0 + runTime * 1_000L);
         running = false;
         mf.releaseLast();
         System.gc();// give it time to release the file so the delete on exit will work on windows.
@@ -126,5 +119,13 @@ public class MemoryReadJitterMain {
         System.out.println("histoRead     =" + histoRead.toMicrosFormat());
         System.out.println("histoWrite    =" + histoWrite.toMicrosFormat());
         System.out.println("histoReadWrite=" + histoReadWrite.toMicrosFormat());
+    }
+
+    private static long consumeAndMeasure(MemoryMessager mm, java.util.concurrent.atomic.AtomicLong lastRead) {
+        long start = System.nanoTime();
+        Jvm.safepoint();
+        long value = mm.consumeBytes();
+        lastRead.lazySet(value);
+        return System.nanoTime() - start;
     }
 }

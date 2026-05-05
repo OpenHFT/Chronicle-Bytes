@@ -13,7 +13,6 @@ import java.util.function.Supplier;
  *
  * @param <T> the type of the MethodWriter that will be built by this builder
  */
-
 public interface MethodWriterBuilder<T> extends Supplier<T> {
 
     /**

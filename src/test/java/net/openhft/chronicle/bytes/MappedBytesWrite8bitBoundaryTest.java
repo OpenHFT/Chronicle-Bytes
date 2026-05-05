@@ -10,10 +10,10 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.FileSystemException;
 import java.nio.file.Files;
+import java.util.Arrays;
 
+import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assume.assumeFalse;
 
@@ -44,7 +44,7 @@ public class MappedBytesWrite8bitBoundaryTest extends BytesTestCommon {
 
     private static String repeat(char c, int n) {
         byte[] b = new byte[n];
-        for (int i = 0; i < n; i++) b[i] = (byte) c;
-        return new String(b, StandardCharsets.ISO_8859_1);
+        Arrays.fill(b, (byte) c);
+        return new String(b, ISO_8859_1);
     }
 }

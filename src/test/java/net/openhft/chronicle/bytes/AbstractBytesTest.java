@@ -5,22 +5,23 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.io.ClosedIllegalStateException;
 import net.openhft.chronicle.core.io.ThreadingIllegalStateException;
-import org.junit.Test;
 import org.junit.Before;
+import org.junit.Test;
 import org.mockito.MockitoAnnotations;
 
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 
-import static org.mockito.Mockito.*;
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
-@SuppressWarnings("unchecked")
+@SuppressWarnings({"unchecked", "deprecation"})
 public class AbstractBytesTest {
 
     private ConcreteBytes bytes;
     private BytesStore<Bytes<ByteBuffer>, ByteBuffer> mockBytesStore;
+
     static class ConcreteBytes extends AbstractBytes<ByteBuffer> {
         ConcreteBytes(BytesStore<Bytes<ByteBuffer>, ByteBuffer> bytesStore, long writePosition, long writeLimit) throws ClosedIllegalStateException, ThreadingIllegalStateException {
             super(bytesStore, writePosition, writeLimit);
@@ -37,7 +38,7 @@ public class AbstractBytesTest {
         }
 
         @Override
-        public BytesStore<Bytes<ByteBuffer>, ByteBuffer> copy() throws IllegalStateException, ClosedIllegalStateException, ThreadingIllegalStateException {
+        public BytesStore<Bytes<ByteBuffer>, ByteBuffer> copy() throws IllegalStateException {
             return null;
         }
     }
@@ -58,7 +59,7 @@ public class AbstractBytesTest {
     }
 
     @Test
-    public void isDirectMemory_ReturnsExpectedValue() {
+    public void isDirectMemoryReturnsExpectedValue() {
         BytesStore<Bytes<ByteBuffer>, ByteBuffer> mockBytesStore = mock(BytesStore.class);
         when(mockBytesStore.isDirectMemory()).thenReturn(true);
 
@@ -67,7 +68,7 @@ public class AbstractBytesTest {
     }
 
     @Test
-    public void canReadDirect_WithSufficientRemaining_ReturnsTrue() throws Exception {
+    public void canReadDirectWithSufficientRemainingReturnsTrue() {
         BytesStore<Bytes<ByteBuffer>, ByteBuffer> mockBytesStore = mock(BytesStore.class);
         when(mockBytesStore.isDirectMemory()).thenReturn(true);
 
@@ -78,7 +79,7 @@ public class AbstractBytesTest {
     }
 
     @Test
-    public void canReadDirect_WithInsufficientRemaining_ReturnsFalse() throws Exception {
+    public void canReadDirectWithInsufficientRemainingReturnsFalse() {
         BytesStore<Bytes<ByteBuffer>, ByteBuffer> mockBytesStore = mock(BytesStore.class);
         when(mockBytesStore.isDirectMemory()).thenReturn(true);
 
@@ -89,7 +90,7 @@ public class AbstractBytesTest {
     }
 
     @Test
-    public void clear_ResetsPositionsAndLimits() throws Exception {
+    public void clearResetsPositionsAndLimits() {
         BytesStore<Bytes<ByteBuffer>, ByteBuffer> mockBytesStore = mock(BytesStore.class);
         when(mockBytesStore.capacity()).thenReturn(100L);
 
@@ -102,7 +103,7 @@ public class AbstractBytesTest {
     }
 
     @Test
-    public void clearAndPad_SetsPositionsAndLimitsCorrectly() throws Exception {
+    public void clearAndPadSetsPositionsAndLimitsCorrectly() {
         BytesStore<Bytes<ByteBuffer>, ByteBuffer> mockBytesStore = mock(BytesStore.class);
         when(mockBytesStore.capacity()).thenReturn(100L);
 
@@ -115,13 +116,13 @@ public class AbstractBytesTest {
     }
 
     @Test
-    public void move_ValidParameters_MovesDataCorrectly() {
+    public void moveValidParametersMovesDataCorrectly() {
         bytes.move(0, 10, 20);
         verify(mockBytesStore).move(0, 10, 20);
     }
 
     @Test
-    public void appendAndReturnLength_CallsBytesStore() {
+    public void appendAndReturnLengthCallsBytesStore() {
         long expectedLength = 10L;
         when(mockBytesStore.appendAndReturnLength(anyLong(), anyBoolean(), anyLong(), anyInt(), anyBoolean())).thenReturn(expectedLength);
 
@@ -131,27 +132,27 @@ public class AbstractBytesTest {
     }
 
     @Test
-    public void readPositionForHeader_WithSkipPadding() throws Exception {
+    public void readPositionForHeaderWithSkipPadding() {
         long newPosition = bytes.readPositionForHeader(true);
         assertEquals(0, newPosition);
     }
 
     @Test
-    public void performRelease_CallsReleaseOnBytesStore() {
+    public void performReleaseCallsReleaseOnBytesStore() {
         doNothing().when(mockBytesStore).release(any());
         bytes.performRelease();
         verify(mockBytesStore).release(bytes);
     }
 
     @Test(expected = BufferUnderflowException.class)
-    public void readLong_WithInsufficientDataThrowsException() {
+    public void readLongWithInsufficientDataThrowsException() {
         doThrow(new BufferUnderflowException()).when(mockBytesStore).readLong(anyLong());
         bytes.lenient(false);
         bytes.readLong();
     }
 
     @Test
-    public void write8bit_WithNonNullBytesStoreWritesData() {
+    public void write8bitWithNonNullBytesStoreWritesData() {
         BytesStore<?, ?> mockToWrite = mock(BytesStore.class);
         when(mockToWrite.readRemaining()).thenReturn(10L);
         bytes.write8bit(mockToWrite);
@@ -159,12 +160,12 @@ public class AbstractBytesTest {
     }
 
     @Test(expected = BufferOverflowException.class)
-    public void prewriteCheckOffset_WithInvalidOffsetThrowsException() {
+    public void prewriteCheckOffsetWithInvalidOffsetThrowsException() {
         bytes.prewriteCheckOffset(150, 10);
     }
 
     @Test
-    public void toString_ReturnsExpectedString() {
+    public void toStringReturnsExpectedString() {
         when(mockBytesStore.toString()).thenReturn("MockBytesStore");
         String result = bytes.toString();
         assertNotNull(result);
@@ -172,8 +173,8 @@ public class AbstractBytesTest {
     }
 
     @Test
-    public void byteCheckSum_CalculatesCorrectSum() {
-        when(mockBytesStore.readByte(anyLong())).thenReturn((byte)1);
+    public void byteCheckSumCalculatesCorrectSum() {
+        when(mockBytesStore.readByte(anyLong())).thenReturn((byte) 1);
         int sum = bytes.byteCheckSum(0, 10);
         assertEquals(10, sum);
     }

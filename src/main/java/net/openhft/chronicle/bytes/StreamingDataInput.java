@@ -31,10 +31,11 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
 /**
  * Provides sequential, cursor based reading of binary and textual data from a
- * stream or buffer. Methods typically advance the {@link #readPosition()} by
- * the number of bytes consumed. Implementations may also offer lenient mode in
- * which reads beyond a limit return default values rather than throwing.
- * This interface extends {@link StreamingCommon} and {@link ByteStringParser}.
+ * stream or buffer. Methods advance the {@link #readPosition()} by the number
+ * of bytes consumed and can interleave bulk reads with text parsing helpers.
+ * Implementations may also offer lenient mode in which reads beyond a limit
+ * return defaults instead of throwing, which is useful when peeking at headers
+ * on potentially truncated buffers.
  *
  * @param <S> the concrete type
  */
@@ -390,6 +391,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     default int readInt24()
             throws BufferUnderflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
         return readUnsignedShort() | (readUnsignedByte() << 24 >> 8);
@@ -405,6 +407,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     default int readUnsignedInt24()
             throws BufferUnderflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
         return readUnsignedShort() | (readUnsignedByte() << 16);
@@ -478,6 +481,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     default long readIncompleteLong()
             throws ClosedIllegalStateException, ThreadingIllegalStateException {
         long left = readRemaining();
@@ -630,9 +634,9 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
      *
      * @param b the Bytes instance to which the read string will be appended
      * @return {@code true} if there was a String, or {@code false} if it was {@code null}
-     * @throws BufferUnderflowException    If there's not enough data to read
-     * @throws ArithmeticException         If numeric overflow or underflow occurs
-     * @throws BufferOverflowException     If the buffer is full
+     * @throws BufferUnderflowException       If there's not enough data to read
+     * @throws ArithmeticException            If numeric overflow or underflow occurs
+     * @throws BufferOverflowException        If the buffer is full
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
@@ -766,9 +770,9 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
      * Transfers as many bytes as possible from the input stream into the provided Bytes object.
      *
      * @param bytes the Bytes object to fill with the read data
-     * @see StreamingDataOutput#write(BytesStore)
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
+     * @see StreamingDataOutput#write(BytesStore)
      */
     default void read(@NotNull final Bytes<?> bytes) throws ClosedIllegalStateException, ThreadingIllegalStateException {
         int length = Math.toIntExact(Math.min(readRemaining(), bytes.writeRemaining()));
@@ -839,6 +843,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     default S unsafeRead(long address, @NonNegative int length) throws ClosedIllegalStateException, ThreadingIllegalStateException {
         if (isDirectMemory()) {
             long src = addressForRead(readPosition());
@@ -981,6 +986,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
      * @throws ClosedIllegalStateException If the resource has been released or closed.
      * @throws ArithmeticException         If the number format is invalid
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     default void readHistogram(@NotNull Histogram histogram)
             throws BufferUnderflowException, IllegalStateException, ArithmeticException, ClosedIllegalStateException {
         BytesInternal.readHistogram(this, histogram);
@@ -1028,6 +1034,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     @NotNull
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     default BigDecimal readBigDecimal()
             throws ArithmeticException, BufferUnderflowException, IllegalStateException, ClosedIllegalStateException {
         throwExceptionIfReleased(this);

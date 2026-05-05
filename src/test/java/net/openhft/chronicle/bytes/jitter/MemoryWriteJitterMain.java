@@ -15,11 +15,11 @@ import java.io.IOException;
 public class MemoryWriteJitterMain {
     private static final String PROFILE_OF_THE_THREAD = "profile of the thread";
 
-    private static int runTime = Integer.getInteger("runTime", 600); // seconds
-    private static int size = Integer.getInteger("size", 128); // bytes
-    private static int padTo = Integer.getInteger("pad", 0); // bytes
-    private static int sampleTime = Integer.getInteger("sampleTime", 2); // micro-seconds
-    private static int throughput = Integer.getInteger("throughput", 20_000); // per second
+    private static final int runTime = Integer.getInteger("runTime", 600); // seconds
+    private static final int size = Integer.getInteger("size", 128); // bytes
+    private static final int padTo = Integer.getInteger("pad", 0); // bytes
+    private static final int sampleTime = Integer.getInteger("sampleTime", 2); // micro-seconds
+    private static final int throughput = Integer.getInteger("throughput", 20_000); // per second
     private static volatile boolean running = true;
     private static volatile boolean writing = false;
     private static volatile int count = 0;
@@ -60,7 +60,7 @@ public class MemoryWriteJitterMain {
                     long start = System.nanoTime();
                     Thread.yield();
                     //noinspection StatementWithEmptyBody
-                    while (System.nanoTime() < start + intervalNS) ;
+                    while (System.nanoTime() < start + intervalNS);
                 }
                 mf.releaseLast();
             } catch (Throwable t) {
@@ -81,7 +81,7 @@ public class MemoryWriteJitterMain {
             if (writing) {
                 long start1 = System.nanoTime();
                 while (System.nanoTime() < start1 + sampleNS) {
-                    // wait one micro-second.
+                    Jvm.safepoint();
                 }
                 if (writing) {
                     StackTraceElement[] stes = writer.getStackTrace();
@@ -104,7 +104,7 @@ public class MemoryWriteJitterMain {
                 histoRead.sampleNanos(now - startTimeNs);
                 histoReadWrite.sampleNanos(now - mm.firstLong());
             }
-        } while (System.currentTimeMillis() < start0 + runTime * 1_000);
+        } while (System.currentTimeMillis() < start0 + runTime * 1_000L);
         running = false;
         mf.releaseLast();
         System.gc();// give it time to release the file so the delete on exit will work on windows.

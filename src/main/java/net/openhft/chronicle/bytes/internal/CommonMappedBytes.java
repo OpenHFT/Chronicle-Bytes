@@ -28,6 +28,7 @@ import static net.openhft.chronicle.core.util.StringUtils.*;
  * {@link net.openhft.chronicle.bytes.MappedFile}. Instances are intended for use
  * by a single thread.
  */
+@SuppressWarnings("deprecation")
 public abstract class CommonMappedBytes extends MappedBytes {
     /** manages closed state and delegates to {@link #performClose()} */
     private final AbstractCloseable closeable = new AbstractCloseable() {
@@ -96,6 +97,7 @@ public abstract class CommonMappedBytes extends MappedBytes {
     }
 
     @NotNull
+    @Deprecated(/* to be removed in 2027 */)
     public CommonMappedBytes write(@NonNegative final long offsetInRDO, @NotNull final RandomDataInput bytes)
             throws BufferOverflowException, ClosedIllegalStateException {
         requireNonNegative(offsetInRDO);

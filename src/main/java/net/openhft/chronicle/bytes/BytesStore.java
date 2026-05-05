@@ -21,16 +21,23 @@ import java.io.OutputStream;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
 import static java.lang.Math.min;
+import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static net.openhft.chronicle.bytes.internal.ReferenceCountedUtil.throwExceptionIfReleased;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
 /**
  * Reference to a fixed-capacity region of memory. The bounds are immutable but
- * the content may be mutable. The instance itself is {@link ReferenceCounted}.
+ * the content may be mutable. A {@code BytesStore} exposes both random access
+ * operations and cursor based views via {@link Bytes} wrappers. Implementations
+ * may wrap on-heap arrays, direct native memory or memory-mapped files, but all
+ * are {@link ReferenceCounted} and must be released when no longer needed to
+ * avoid leaks.
+ *
+ * <p>Thread safety is implementation specific; callers must obey any documented
+ * single-writer or single-reader constraints when sharing instances.
  *
  * @param <B> concrete subtype
  * @param <U> backing buffer type
@@ -49,6 +56,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
     @SuppressWarnings("java:S1452")
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     static BytesStore<?, ?> from(@NotNull CharSequence cs) throws ClosedIllegalStateException, ThreadingIllegalStateException {
         if (cs.length() == 0)
             return empty();
@@ -77,7 +85,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      * @return a BytesStore which contains the bytes from the String
      */
     static BytesStore<?,byte[]> from(@NotNull String cs) {
-        return cs.length() == 0 ? empty() : BytesStore.wrap(cs.getBytes(StandardCharsets.ISO_8859_1));
+        return cs.isEmpty() ? empty() : BytesStore.wrap(cs.getBytes(ISO_8859_1));
     }
 
     /**
@@ -178,6 +186,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      * @return a new BytesStore that resides in native memory whereby the contents and
      * size of the native memory is determined by the provided {@code bytes} array
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     static BytesStore<?, Void> nativeStoreFrom(byte[] bytes) {
         Objects.requireNonNull(bytes);
         return NativeBytesStore.from(bytes);
@@ -229,6 +238,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      * @throws ClosedIllegalStateException If the resource has been released or closed.
      */
     @Override
+    @SuppressWarnings("deprecation")
     default boolean compareAndSwapFloat(@NonNegative long offset, float expected, float value)
             throws BufferOverflowException, ClosedIllegalStateException {
         return compareAndSwapInt(offset, Float.floatToRawIntBits(expected), Float.floatToRawIntBits(value));
@@ -238,6 +248,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      * Similar to {@link #compareAndSwapFloat(long, float, float)} but operates on a double value.
      */
     @Override
+    @SuppressWarnings("deprecation")
     default boolean compareAndSwapDouble(@NonNegative long offset, double expected, double value)
             throws BufferOverflowException, ClosedIllegalStateException {
         return compareAndSwapLong(offset, Double.doubleToRawLongBits(expected), Double.doubleToRawLongBits(value));
@@ -356,6 +367,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      * @return if the {@code readPosition} is at the {@code start} and
      * the {@code writeLimit} is at the {@code end}
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     default boolean isClear() {
         return true;
     }
@@ -551,6 +563,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
     /**
      * <p>
      * This is assumed to be used to print the contents on a best effort basis. If an Error occurs it will be returned in the String.
+     *
      * @param maxLength the maximum length of the output
      * @return this BytesStore as a DebugString.
      */
@@ -721,6 +734,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
+    @Deprecated(/* to be removed in 2027 */)
     default int addAndGetUnsignedByteNotAtomic(@NonNegative long offset, int adding)
             throws BufferUnderflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
         try {
@@ -742,6 +756,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
+    @Deprecated(/* to be removed in 2027 */)
     default short addAndGetShortNotAtomic(@NonNegative long offset, short adding)
             throws BufferUnderflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
         try {
@@ -763,6 +778,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
+    @Deprecated(/* to be removed in 2027 */)
     default int addAndGetIntNotAtomic(@NonNegative long offset, int adding)
             throws BufferUnderflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
         try {
@@ -784,6 +800,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
+    @Deprecated(/* to be removed in 2027 */)
     default double addAndGetDoubleNotAtomic(@NonNegative long offset, double adding)
             throws BufferUnderflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
         try {
@@ -805,6 +822,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
+    @Deprecated(/* to be removed in 2027 */)
     default float addAndGetFloatNotAtomic(@NonNegative long offset, float adding)
             throws BufferUnderflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
         try {
@@ -864,6 +882,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
+    @Deprecated(/* to be removed in 2027 */)
     default void writeMaxInt(@NonNegative long offset, int atLeast)
             throws BufferUnderflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
         try {
@@ -940,6 +959,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     default void cipher(@NotNull Cipher cipher, @NotNull Bytes<?> outBytes)
             throws ClosedIllegalStateException, ThreadingIllegalStateException {
         cipher(cipher, outBytes, BytesInternal.BYTE_BUFFER_TL.get(), BytesInternal.BYTE_BUFFER2_TL.get());
@@ -964,6 +984,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
+    @Deprecated(/* to be removed in 2027 */)
     default long hash(long length) {
         return bytesStore() instanceof NativeBytesStore
                 ? OptimisedBytesStoreHash.INSTANCE.applyAsLong(this, length)

@@ -4,6 +4,7 @@
 package net.openhft.chronicle.bytes.internal;
 
 import net.openhft.chronicle.bytes.*;
+import net.openhft.chronicle.bytes.util.BufferUtil;
 import net.openhft.chronicle.core.*;
 import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.cleaner.CleanerServiceLocator;
@@ -33,10 +34,14 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 /**
  * A {@link net.openhft.chronicle.bytes.BytesStore} backed by off-heap native
  * memory. Instances are reference counted and must be released to free the
- * underlying memory. The store may be elastic or fixed in size depending on
- * how it was created.
+ * underlying memory. Depending on construction the store can grow elastically
+ * or stay fixed in size. All access honours Chronicle's alignment and padding
+ * rules to reduce false sharing. The implementation coordinates with
+ * {@link CleanerServiceLocator} to unmap or free native resources and exposes
+ * ordered/atomic primitives for concurrent access patterns, but overall thread
+ * safety still depends on how the instance is shared.
  */
-@SuppressWarnings({"restriction", "rawtypes"})
+@SuppressWarnings({"restriction", "rawtypes", "deprecation"})
 public class NativeBytesStore<U>
         extends AbstractBytesStore<NativeBytesStore<U>, U> {
     private static final SimpleCleaner NO_DEALLOCATOR = new NoDeallocator();
@@ -64,6 +69,7 @@ public class NativeBytesStore<U>
     }
 
     /** Finalizer used to warn about unreleased native memory when resource tracing is enabled. */
+    @SuppressWarnings("unused")
     private final Finalizer finalizer;
     /** Base address of the allocated native memory. */
     public long address;
@@ -153,6 +159,7 @@ public class NativeBytesStore<U>
     }
 
     @NotNull
+    @Deprecated(/* to be removed in 2027 */)
     public static <T> NativeBytesStore<T> uninitialized() {
         return new NativeBytesStore<>();
     }
@@ -197,6 +204,7 @@ public class NativeBytesStore<U>
     }
 
     @NotNull
+    @Deprecated(/* to be removed in 2027 */)
     public static NativeBytesStore<ByteBuffer> elasticByteBuffer() {
         return elasticByteBuffer(OS.pageSize(), MAX_CAPACITY);
     }
@@ -211,6 +219,7 @@ public class NativeBytesStore<U>
     }
 
     @NotNull
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public static NativeBytesStore from(@NotNull String text) {
         return from(text.getBytes(StandardCharsets.ISO_8859_1));
     }
@@ -277,7 +286,7 @@ public class NativeBytesStore<U>
         } else if (underlyingObject instanceof ByteBuffer) {
             ByteBuffer bb = ByteBuffer.allocateDirect(Maths.toInt32(capacity()));
             bb.put((ByteBuffer) underlyingObject);
-            bb.clear();
+            BufferUtil.clear(bb);
             return uncheckedCast(wrap(bb));
 
         } else {
@@ -635,6 +644,7 @@ public class NativeBytesStore<U>
         memoryCopyMemory(address, addressForWrite(position), size);
     }
 
+    @Deprecated(/* to be removed in 2027 */)
     void write8bit(@NonNegative long position, char[] chars, @NonNegative int offset, @NonNegative int length)
             throws ClosedIllegalStateException {
         long addr = address + translate(position);
@@ -796,7 +806,7 @@ public class NativeBytesStore<U>
         } catch (Exception e) {
             throw new AssertionError(e);
         }
-        bb.clear();
+        BufferUtil.clear(bb);
         return bb;
     }
 

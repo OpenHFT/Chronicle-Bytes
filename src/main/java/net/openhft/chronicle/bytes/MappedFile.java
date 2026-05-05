@@ -404,6 +404,7 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
+    @Deprecated(/* to be removed in 2027 */)
     public void acquireBytesForRead(ReferenceOwner owner, @NonNegative final long position, @NotNull final VanillaBytes<?> bytes)
             throws IOException, IllegalStateException, IllegalArgumentException, BufferUnderflowException, BufferOverflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
         throwExceptionIfClosed();
@@ -450,6 +451,7 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
+    @Deprecated(/* to be removed in 2027 */)
     public void acquireBytesForWrite(ReferenceOwner owner, @NonNegative final long position, @NotNull final VanillaBytes<?> bytes)
             throws IOException, ClosedIllegalStateException, IllegalArgumentException, BufferUnderflowException, BufferOverflowException, ThreadingIllegalStateException {
         throwExceptionIfClosed();
@@ -476,6 +478,7 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
      * @return A string representing the reference counts.
      */
     @NotNull
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public abstract String referenceCounts();
 
     /**
@@ -504,6 +507,7 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
      *
      * @return The listener for new chunks.
      */
+    @Deprecated(/* to be removed in 2027 */)
     public NewChunkListener getNewChunkListener() {
         return newChunkListener;
     }
@@ -598,6 +602,7 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
      *
      * @return The number of chunks.
      */
+    @Deprecated(/* to be removed in 2027 */)
     public abstract long chunkCount();
 
     /**

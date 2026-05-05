@@ -23,8 +23,8 @@ import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.ReadOnlyBufferException;
-import java.nio.charset.StandardCharsets;
 
+import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static net.openhft.chronicle.bytes.internal.ReferenceCountedUtil.throwExceptionIfReleased;
 import static net.openhft.chronicle.core.util.Longs.requireNonNegative;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
@@ -33,7 +33,12 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
  * Mutable buffer for raw byte data with separate 63-bit read and write cursors.
  * A {@code Bytes} wraps a {@link BytesStore} which may reside on-heap, in
  * native memory or in a memory-mapped file. Instances may be elastic and are
- * {@link ReferenceCounted}. They are not thread-safe.
+ * {@link ReferenceCounted}; callers must invoke {@link #releaseLast()} to free
+ * off-heap resources. Position movement is explicit via
+ * {@link #readPosition(long)} and {@link #writePosition(long)}, which allows
+ * interleaving random access with streaming reads/writes. Bytes objects are
+ * not thread-safe and should be confined to a single thread unless guarded by
+ * higher-level coordination.
  *
  * @param <U> underlying store type
  */
@@ -375,7 +380,7 @@ public interface Bytes<U> extends
      */
     @NotNull
     static Bytes<byte[]> from(@NotNull String text) {
-        return wrapForRead(text.getBytes(StandardCharsets.ISO_8859_1));
+        return wrapForRead(text.getBytes(ISO_8859_1));
     }
 
     /**
@@ -479,6 +484,7 @@ public interface Bytes<U> extends
      * {@link #allocateElasticDirect()} or {@link #allocateElasticOnHeap()} for a concrete type.
      */
     @SuppressWarnings("java:S1452")
+    // TODO Make sure used as intended
     static Bytes<?> allocateElastic() {
         return Jvm.maxDirectMemory() == 0 ? allocateElasticOnHeap() : allocateElasticDirect();
     }
@@ -512,6 +518,7 @@ public interface Bytes<U> extends
      * {@link #allocateElasticDirect(long)} or {@link #allocateElasticOnHeap(int)} for a concrete type.
      */
     @SuppressWarnings("java:S1452")
+    // TODO Make sure used as intended
     static Bytes<?> allocateElastic(@NonNegative int initialCapacity) {
         return Jvm.maxDirectMemory() == 0 ? allocateElasticOnHeap(initialCapacity) : allocateElasticDirect(initialCapacity);
     }
@@ -701,6 +708,7 @@ public interface Bytes<U> extends
     }
 
     @Override
+    @SuppressWarnings("deprecation")
     default boolean isClear() {
         return start() == readPosition() && writeLimit() == capacity();
     }
@@ -852,7 +860,7 @@ public interface Bytes<U> extends
     @NotNull
     @Override
     default Bytes<U> bytesForRead()
-            throws IllegalStateException, ClosedIllegalStateException, ThreadingIllegalStateException {
+            throws IllegalStateException {
         throwExceptionIfReleased(this);
 
         BytesStore<?, U> bytesStore = bytesStore();
@@ -869,7 +877,7 @@ public interface Bytes<U> extends
     @Override
     @NotNull
     default Bytes<U> bytesForWrite()
-            throws IllegalStateException, ClosedIllegalStateException {
+            throws IllegalStateException {
         throwExceptionIfReleased(this);
 
         BytesStore<?, U> bytesStore = bytesStore();
@@ -1018,8 +1026,6 @@ public interface Bytes<U> extends
         // TODO use indexOf(Bytes, long);
         throwExceptionIfReleased(this);
         throwExceptionIfReleased(source);
-        long sourceOffset = readPosition();
-        long otherOffset = source.readPosition();
         long sourceCount = readRemaining();
         long otherCount = source.readRemaining();
 
@@ -1029,13 +1035,15 @@ public interface Bytes<U> extends
         if (otherCount == 0) {
             return 0;
         }
+        long sourceOffset = readPosition();
+        long otherOffset = source.readPosition();
         byte firstByte = source.readByte(otherOffset);
         long max = sourceOffset + (sourceCount - otherCount);
 
         for (long i = sourceOffset; i <= max; i++) {
             /* Look for first character. */
             if (readByte(i) != firstByte) {
-                while (++i <= max && readByte(i) != firstByte) ;
+                while (++i <= max && readByte(i) != firstByte);
             }
 
             /* Found first character, now look at the rest of v2 */
@@ -1080,16 +1088,16 @@ public interface Bytes<U> extends
         throwExceptionIfReleased(this);
         throwExceptionIfReleased(source);
         long sourceOffset = readPosition();
-        long otherOffset = source.readPosition();
         long sourceCount = readRemaining();
-        long otherCount = source.readRemaining();
 
         if (fromIndex < 0) {
             fromIndex = 0;
         }
+        long otherCount = source.readRemaining();
         if (fromIndex >= sourceCount) {
             return Math.toIntExact(otherCount == 0 ? sourceCount : -1);
         }
+        long otherOffset = source.readPosition();
         if (otherCount == 0) {
             return fromIndex;
         }
@@ -1100,7 +1108,7 @@ public interface Bytes<U> extends
         for (long i = sourceOffset + fromIndex; i <= max; i++) {
             /* Look for first character. */
             if (readByte(i) != firstByte) {
-                while (++i <= max && readByte(i) != firstByte) ;
+                while (++i <= max && readByte(i) != firstByte);
             }
 
             /* Found first character, now look at the rest of v2 */
@@ -1194,6 +1202,7 @@ public interface Bytes<U> extends
      * @throws NullPointerException         If the provided {@code clazz} is null.
      * @see #writeMarshallableLength16(WriteBytesMarshallable)
      */
+    @SuppressWarnings("deprecation")
     default <T extends ReadBytesMarshallable> T readMarshallableLength16(@NotNull final Class<T> clazz,
                                                                          @Nullable final T using)
             throws BufferUnderflowException, ClosedIllegalStateException, InvalidMarshallableException, ThreadingIllegalStateException {
@@ -1232,6 +1241,7 @@ public interface Bytes<U> extends
      * @throws NullPointerException        If the provided {@code marshallable} is null.
      * @see #readMarshallableLength16(Class, ReadBytesMarshallable)
      */
+    @SuppressWarnings("deprecation")
     default void writeMarshallableLength16(@NotNull final WriteBytesMarshallable marshallable)
             throws BufferOverflowException, ClosedIllegalStateException, BufferUnderflowException, InvalidMarshallableException, ThreadingIllegalStateException {
         requireNonNull(marshallable);

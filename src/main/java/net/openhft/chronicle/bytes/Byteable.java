@@ -67,6 +67,7 @@ public interface Byteable {
      * @throws IOException                   If an error occurs while locking the file
      * @throws UnsupportedOperationException If the underlying implementation does not support file locking
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     default FileLock lock(boolean shared) throws IOException {
         throw new UnsupportedOperationException();
     }
@@ -79,6 +80,7 @@ public interface Byteable {
      * @throws IOException                   If an error occurs while trying to lock the file
      * @throws UnsupportedOperationException If the underlying implementation does not support file locking
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     default FileLock tryLock(boolean shared) throws IOException {
         throw new UnsupportedOperationException();
     }

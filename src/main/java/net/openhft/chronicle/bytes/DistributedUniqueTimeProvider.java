@@ -17,9 +17,10 @@ import java.io.File;
 /**
  * {@link TimeProvider} implementation producing timestamps that remain unique across JVMs by embedding
  * a host identifier in the lower bits.  A memory mapped file coordinates monotonicity between processes.
- *
+ * <p>
  * {@link #currentTimeMillis()} simply delegates to the underlying provider and is therefore not unique.
  */
+@SuppressWarnings("deprecation")
 public class DistributedUniqueTimeProvider extends SimpleCloseable implements TimeProvider, Monitorable {
 
     /** maximum supported host identifiers */
@@ -131,12 +132,23 @@ public class DistributedUniqueTimeProvider extends SimpleCloseable implements Ti
     /**
      * Replaces the underlying time source used for wall-clock time.
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public DistributedUniqueTimeProvider provider(TimeProvider provider) {
         // Assign the provided TimeProvider to the instance variable
         this.provider = provider;
 
         // Return the current instance with the updated TimeProvider
         return this;
+    }
+
+    /**
+     * Exposes the deduplicator used to co-ordinate timestamps across hosts.
+     *
+     * @return the deduplicator for this instance
+     */
+    @Deprecated(/* to be removed in 2027 */)
+    DistributedUniqueTimeDeduplicator deduplicator() {
+        return deduplicator;
     }
 
     /**

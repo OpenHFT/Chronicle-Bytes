@@ -36,8 +36,7 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
  * {@link Bytes} implementation that records all writes and produces a formatted hexadecimal dump of the data.
  * Primarily intended for diagnostics and testing.
  */
-
-@SuppressWarnings("rawtypes")
+@SuppressWarnings({"rawtypes", "deprecation"})
 public class HexDumpBytes
         implements Bytes<Void>, DecimalAppender {
 
@@ -125,6 +124,7 @@ public class HexDumpBytes
      *
      * @return The current number wrap.
      */
+    @Deprecated(/* to be removed in 2027 */)
     public int numberWrap() {
         return numberWrap;
     }

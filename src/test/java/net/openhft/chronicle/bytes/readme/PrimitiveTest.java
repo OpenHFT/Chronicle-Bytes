@@ -12,6 +12,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeFalse;
 
+@SuppressWarnings("deprecation")
 public class PrimitiveTest extends BytesTestCommon {
 
     @Test
@@ -180,16 +181,16 @@ public class PrimitiveTest extends BytesTestCommon {
 
             assertEquals(expected, actual);
 
-            boolean flag = bytes.readBoolean(0);
-            byte s8 = bytes.readByte(1);
-            int u8 = bytes.readUnsignedByte(2);
-            short s16 = bytes.readShort(3);
-            int u16 = bytes.readUnsignedShort(5);
-            int s32 = bytes.readInt(7);
-            long u32 = bytes.readUnsignedInt(11);
-            long s64 = bytes.readLong(15);
-            float f32 = bytes.readFloat(23);
-            double f64 = bytes.readDouble(27);
+            final boolean flag = bytes.readBoolean(0);
+            final byte s8 = bytes.readByte(1);
+            final int u8 = bytes.readUnsignedByte(2);
+            final short s16 = bytes.readShort(3);
+            final int u16 = bytes.readUnsignedShort(5);
+            final int s32 = bytes.readInt(7);
+            final long u32 = bytes.readUnsignedInt(11);
+            final long s64 = bytes.readLong(15);
+            final float f32 = bytes.readFloat(23);
+            final double f64 = bytes.readDouble(27);
 
             assertTrue(flag);
             assertEquals(1, s8);
@@ -268,9 +269,9 @@ public class PrimitiveTest extends BytesTestCommon {
 
     static final class Outer implements BytesMarshallable {
 
-        String name;
-        Inner innerA;
-        Inner innerB;
+        final String name;
+        final Inner innerA;
+        final Inner innerB;
 
         Outer(final String name,
               final Inner innerA,

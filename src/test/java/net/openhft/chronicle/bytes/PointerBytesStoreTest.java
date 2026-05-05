@@ -18,7 +18,7 @@ public class PointerBytesStoreTest extends BytesTestCommon {
         final Bytes<?> data = Bytes.allocateDirect(14);
         data.write8bit("Test me again");
         data.writeLimit(data.readLimit()); // this breaks the check
-        assertEquals(data.read8bit(), "Test me again");
+        assertEquals("Test me again", data.read8bit());
         data.releaseLast();
     }
 
@@ -59,7 +59,7 @@ public class PointerBytesStoreTest extends BytesTestCommon {
             final PointerBytesStore pbs = new PointerBytesStore();
             pbs.set(addr, len);
             Bytes<Void> voidBytes = pbs.bytesForRead();
-            Assertions.assertEquals(voidBytes.read8bit(), "some data");
+            Assertions.assertEquals("some data", voidBytes.read8bit());
             voidBytes.releaseLast();
         } finally {
             bytesFixed.releaseLast();

@@ -1,8 +1,9 @@
 = Decimal Rendering Strategies
-:doctype: book
 :toc:
-:toclevels: 2
 :lang: en-GB
+:toclevels: 2
+:doctype: book
+:source-highlighter: rouge
 
 This page summarises the options in the `net.openhft.chronicle.bytes.render` package.
 It accompanies the Javadoc and shows how to render floating point values into
@@ -36,5 +37,19 @@ boolean ok = d.toDecimal(1.2345, (neg, m, e) -> bytes.append(neg ? '-' : '')
 System.out.println(bytes.toString());
 ----
 
-See the <<wire-integration.adoc,Wire Integration>> guide for details on using
+See the <<chronicle-wire-integration-guide,Wire Integration>> guide for details on using
 these renderers within wire formats.
+
+== Trade-offs and Alternatives
+
+When choosing a decimal rendering strategy you balance speed, range and allocation:
+
+* `SimpleDecimaliser` is extremely fast and allocation-free but only handles a bounded range and precision.
+* `MaximumPrecision` gives fixed decimal places with rounding and modest overhead.
+* `UsesBigDecimal` supports the widest range and exactness at the cost of allocations and CPU.
+* `GeneralDecimaliser` and `StandardDecimaliser` provide pragmatic defaults that fall back to `BigDecimal` only when necessary.
+
+Callers should:
+
+* prefer the simpler strategies on hot paths where inputs are known to be well behaved;
+* reserve `UsesBigDecimal` for financial or audit-grade output where exact representation outweighs latency.

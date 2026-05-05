@@ -24,13 +24,16 @@ import java.nio.channels.FileLock;
 import static net.openhft.chronicle.core.io.Closeable.closeQuietly;
 
 /**
- * Maps an entire file into a single contiguous region. No chunking or overlap is
- * used, making it suitable for relatively small files that fit comfortably in
- * process address space.
  * {@link MappedFile} implementation that maps the entire file as one contiguous
- * region. Suitable when the full capacity fits into the process address space.
+ * region with no chunking or overlap. This keeps address arithmetic simple and
+ * avoids remapping costs, making it suitable for smaller files that fit
+ * comfortably in process address space. The class owns the backing
+ * {@link RandomAccessFile} and {@link FileChannel}, applies platform-aware
+ * page sizing, and coordinates locking via {@link ReentrantFileLock} when
+ * required. Instances are {@link ReferenceCounted} through their
+ * {@link MappedBytesStore} and must be closed to unmap native resources.
  */
-@SuppressWarnings({"rawtypes", "restriction"})
+@SuppressWarnings({"rawtypes", "restriction", "deprecation"})
 public class SingleMappedFile extends MappedFile {
     /**
      * The RandomAccessFile for this mapped file

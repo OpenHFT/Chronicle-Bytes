@@ -15,7 +15,13 @@ import java.nio.BufferUnderflowException;
 
 /**
  * Reads data from a byte stream or buffer. Combines random access, sequential
- * streaming, and text parsing capabilities.
+ * streaming, and text parsing capabilities while maintaining an independent
+ * read cursor. Implementations are typically paired with a {@link BytesOut}
+ * for request/response flows and may offer lenient mode so parsers can inspect
+ * headers without throwing on short buffers. Implementations are not thread
+ * safe unless documented otherwise; most are single-reader and rely on
+ * {@link RandomDataInput} fence methods for visibility when off-heap memory is
+ * shared.
  *
  * @param <U> underlying buffer type
  */
@@ -33,6 +39,7 @@ public interface BytesIn<U> extends
      *         {@link MethodReader#readOne()}
      */
     @NotNull
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     default MethodReader bytesMethodReader(@NotNull Object... objects) {
         return new BytesMethodReaderBuilder(this).build(objects);
     }
@@ -54,6 +61,7 @@ public interface BytesIn<U> extends
      * @param using  optional instance to reuse
      * @return the populated instance
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     <T extends ReadBytesMarshallable> T readMarshallableLength16(@NotNull Class<T> tClass, @Nullable T using)
             throws BufferUnderflowException, InvalidMarshallableException, ClosedIllegalStateException, ThreadingIllegalStateException;
 

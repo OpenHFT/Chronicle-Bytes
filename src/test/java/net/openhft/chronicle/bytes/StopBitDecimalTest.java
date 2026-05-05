@@ -14,13 +14,14 @@ import java.util.Random;
 import static junit.framework.TestCase.assertEquals;
 import static org.junit.Assume.assumeFalse;
 
+@SuppressWarnings("deprecation")
 public class StopBitDecimalTest extends BytesTestCommon {
     @Test
     public void testDecimals() {
         assumeFalse(NativeBytes.areNewGuarded());
 
         Bytes<ByteBuffer> bytes = Bytes.elasticHeapByteBuffer(16);
-        Random rand = new Random();
+        Random rand = new Random(1L);
         for (int i = 0; i < 10_000; i++) {
             rand.setSeed(i);
             bytes.clear();

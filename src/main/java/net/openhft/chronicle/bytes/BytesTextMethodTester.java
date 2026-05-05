@@ -50,6 +50,7 @@ public class BytesTextMethodTester<T> {
     /**
      * Returns the path to the optional setup file.
      */
+    @Deprecated(/* to be removed in 2027 */)
     public String setup() {
         return setup;
     }
@@ -61,6 +62,7 @@ public class BytesTextMethodTester<T> {
      * @return this tester for chaining
      */
     @NotNull
+    @Deprecated(/* to be removed in 2027 */)
     public BytesTextMethodTester setup(String setup) {
         this.setup = setup;
         return this;
@@ -69,6 +71,7 @@ public class BytesTextMethodTester<T> {
     /**
      * Returns the post-processing function applied to actual and expected output.
      */
+    @Deprecated(/* to be removed in 2027 */)
     public Function<String, String> afterRun() {
         return afterRun;
     }
@@ -80,6 +83,7 @@ public class BytesTextMethodTester<T> {
      * @return this tester for chaining
      */
     @NotNull
+    @Deprecated(/* to be removed in 2027 */)
     public BytesTextMethodTester afterRun(UnaryOperator<String> afterRun) {
         this.afterRun = afterRun;
         return this;

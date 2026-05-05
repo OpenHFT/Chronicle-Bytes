@@ -36,7 +36,7 @@ import static net.openhft.chronicle.core.util.Longs.*;
  * potentially overlapping memory mapped chunks. Only a subset of chunks may be
  * mapped at once allowing access to files larger than a single mapping.
  */
-@SuppressWarnings("restriction")
+@SuppressWarnings({"restriction", "deprecation"})
 public class ChunkedMappedFile extends MappedFile {
     @NotNull
     private final RandomAccessFile raf;

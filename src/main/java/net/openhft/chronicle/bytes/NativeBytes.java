@@ -15,10 +15,10 @@ import net.openhft.chronicle.core.io.ThreadingIllegalStateException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.nio.Buffer;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
+import net.openhft.chronicle.bytes.util.BufferUtil;
 
 import static net.openhft.chronicle.bytes.BytesStore.nativeStoreWithFixedCapacity;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
@@ -70,6 +70,7 @@ public class NativeBytes<U>
      *
      * @return true if new NativeBytes instances will be guarded, false otherwise
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public static boolean areNewGuarded() {
         return newGuarded;
     }
@@ -80,6 +81,7 @@ public class NativeBytes<U>
      * @param guarded true to turn on guarding for new NativeBytes instances, false to turn it off
      * @return true if the operation is successful, false otherwise
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public static boolean setNewGuarded(final boolean guarded) {
         newGuarded = guarded;
         return true;
@@ -88,6 +90,7 @@ public class NativeBytes<U>
     /**
      * Resets the guarded state for new NativeBytes instances to its default value.
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public static void resetNewGuarded() {
         newGuarded = BYTES_GUARDED;
     }
@@ -153,6 +156,7 @@ public class NativeBytes<U>
                 : new NativeBytes<>(bs, capacity);
     }
 
+    @Deprecated(/* to be removed in 2027 */)
     protected static <T> long maxCapacityFor(@NotNull BytesStore<?, T> bs) {
         return bs.underlyingObject() instanceof ByteBuffer
                 || bs.underlyingObject() instanceof byte[]
@@ -313,11 +317,9 @@ public class NativeBytes<U>
 
         if (this.bytesStore.underlyingObject() instanceof ByteBuffer) {
             @Nullable final ByteBuffer byteBuffer = (ByteBuffer) this.bytesStore.underlyingObject();
-            //noinspection RedundantCast
-            Buffer buffer = byteBuffer;
-            buffer.position(0);
-            buffer.limit(byteBuffer.capacity());
-            buffer.position(position);
+            BufferUtil.setPosition(byteBuffer, 0);
+            BufferUtil.limit(byteBuffer, byteBuffer.capacity());
+            BufferUtil.setPosition(byteBuffer, position);
         }
     }
 

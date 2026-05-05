@@ -43,7 +43,7 @@ import static net.openhft.chronicle.bytes.ref.BinaryLongReference.LONG_NOT_COMPL
  * @see BytesStore
  * @see BinaryLongReference
  */
-@SuppressWarnings("rawtypes")
+@SuppressWarnings({"rawtypes", "deprecation"})
 public class BinaryLongArrayReference extends AbstractReference implements ByteableLongArrayValues, BytesMarshallable {
     public static final int SHIFT = 3;
     private static final long CAPACITY = 0;
@@ -78,6 +78,7 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
      * <p>
      * This method is used for debugging and monitoring. It should not be used in production environments.
      */
+    @Deprecated(/* to be removed in 2027 */)
     public static void startCollecting() {
         binaryLongArrayReferences = Collections.newSetFromMap(new IdentityHashMap<>());
     }
@@ -91,6 +92,7 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
+    @Deprecated(/* to be removed in 2027 */)
     public static void forceAllToNotCompleteState()
             throws IllegalStateException, BufferOverflowException {
         if (binaryLongArrayReferences == null)
@@ -128,6 +130,7 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public static void write(@NotNull Bytes<?> bytes, @NonNegative long capacity)
             throws BufferOverflowException, IllegalArgumentException, IllegalStateException {
         assert (bytes.writePosition() & 0x7) == 0;
@@ -277,7 +280,11 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
             throws IllegalStateException, BufferOverflowException {
         throwExceptionIfClosed();
 
-        ((BinaryLongReference) value).bytesStore(bytesStore, VALUES + offset + (index << SHIFT), 8);
+        if (!(value instanceof BinaryLongReference)) {
+            throw new IllegalArgumentException("Expected BinaryLongReference but got " + value.getClass().getName());
+        }
+        BinaryLongReference longRef = (BinaryLongReference) value;
+        longRef.bytesStore(bytesStore, VALUES + offset + (index << SHIFT), 8);
     }
 
     @Override

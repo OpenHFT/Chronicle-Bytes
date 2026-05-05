@@ -19,6 +19,7 @@ import java.util.function.Function;
  * {@link BytesOut} using a {@link MethodEncoder} per method. Intended for proxy
  * based one-way messaging.
  */
+@SuppressWarnings("deprecation")
 public class BinaryBytesMethodWriterInvocationHandler extends AbstractInvocationHandler implements BytesMethodWriterInvocationHandler {
     private final Function<Method, MethodEncoder> methodToId;
     private final BytesOut<?> out;

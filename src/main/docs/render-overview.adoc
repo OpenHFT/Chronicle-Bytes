@@ -1,12 +1,13 @@
 = Chronicle Bytes Decimal Rendering (`net.openhft.chronicle.bytes.render`)
-:doctype: book
 :toc:
-:toclevels: 2
 :lang: en-GB
+:toclevels: 2
+:doctype: book
+:source-highlighter: rouge
 
 This guide explains how Chronicle Bytes converts JVM floating-point values into textual decimal form.
-The package supplies a pluggable **strategy (`Decimaliser`) + consumer (`DecimalAppender`)** model that lets you trade raw speed for accuracy, choose fixed-precision rounding, or fall back to `BigDecimal` when an exact string is required.
-All implementations are stateless singletons (and therefore thread-safe) except **`MaximumPrecision`**, whose per-instance _precision_ field makes it non-thread-safe.
+The package supplies a pluggable *strategy (`Decimaliser`) + consumer (`DecimalAppender`)* model that lets you trade raw speed for accuracy, choose fixed-precision rounding, or fall back to `BigDecimal` when an exact string is required.
+All implementations are stateless singletons (and therefore thread-safe) except *`MaximumPrecision`*, whose per-instance _precision_ field makes it non-thread-safe.
 
 == Core concepts
 
@@ -15,20 +16,20 @@ All implementations are stateless singletons (and therefore thread-safe) except 
 |Concept |Summary
 
 |`Decimaliser`
-|Strategy that **decomposes** a `double`/`float` into **sign (boolean)**, **mantissa (long)** and **exponent (int)** so that callers can format the number without allocating intermediate `String` objects.  Two overloads are supplied: `toDecimal(double, …)` and `toDecimal(float, …)`; each returns `false` when the value is NaN, ∞, −0.0 or outside the implementation’s supported range.
+|Strategy that *decomposes* a `double`/`float` into *sign (boolean)*, *mantissa (long)* and *exponent (int)* so that callers can format the number without allocating intermediate `String` objects.  Two overloads are supplied: `toDecimal(double, …)` and `toDecimal(float, …)`; each returns `false` when the value is NaN, ∞, −0.0 or outside the implementation’s supported range.
 
 |`DecimalAppender`
-|Functional interface that **re-assembles** those three parts into the desired textual form (plain-decimal, scientific, JSON, etc.).  A `Bytes` instance can act as its own `DecimalAppender` via `Bytes.append(double)` after you call `bytes.decimaliser(myStrategy)`.
+|Functional interface that *re-assembles* those three parts into the desired textual form (plain-decimal, scientific, JSON, etc.).  A `Bytes` instance can act as its own `DecimalAppender` via `Bytes.append(double)` after you call `bytes.decimaliser(myStrategy)`.
 |===
 
 == Special-value handling
 
-* **NaN / Infinity / −0.0** – All implementations return `false`; callers must decide what to emit.
-* **Overflow** – Strategies return `false` instead of throwing when the numeric range is exceeded, so you can quickly fall back to a different strategy without paying exception cost.
+* *NaN / Infinity / −0.0* – All implementations return `false`; callers must decide what to emit.
+* *Overflow* – Strategies return `false` instead of throwing when the numeric range is exceeded, so you can quickly fall back to a different strategy without paying exception cost.
 
 == Integration workflow
 
-[source,java]
+[source,java,opts=novalidate]
 ----
 Bytes<?> out = Bytes.allocateElasticOnHeap(64);
 Decimaliser fast18 = StandardDecimaliser.STANDARD;   // pick your strategy
@@ -44,7 +45,7 @@ out.releaseLast();
 
 When you need full control – for example, to emit scientific notation – implement `DecimalAppender` yourself:
 
-[source,java]
+[source,java,opts=novalidate]
 ----
 DecimalAppender sci = (neg,m,e) -> {
     if (neg) out.writeByte('-');
@@ -56,15 +57,14 @@ fast18.toDecimal(Math.PI, sci);
 
 == Performance notes
 
-* **Heap vs. direct** – The cost is dominated by the chosen strategy, not the backing memory.
-* **Garbage-free** – All but `UsesBigDecimal` avoid allocations.
-* **Thread-safety** – Singletons are immutable ⇒ safe; `MaximumPrecision` is _not_.
+* *Heap vs. direct* – The cost is dominated by the chosen strategy, not the backing memory.
+* *Garbage-free* – All but `UsesBigDecimal` avoid allocations.
+* *Thread-safety* – Singletons are immutable ⇒ safe; `MaximumPrecision` is _not_.
 
 == Choosing a strategy
 
-* **Throughput above all, bounded range** → `SimpleDecimaliser`.
-* **Bounded precision (human-readable, 2–18 dp)** → `MaximumPrecision`.
-* **Financial/exact output** → `UsesBigDecimal`.
-* **Auto-fallback & wide range** → `GeneralDecimaliser`.
-* **Default for wire formats** → `StandardDecimaliser`.
-
+* *Throughput above all, bounded range* → `SimpleDecimaliser`.
+* *Bounded precision (human-readable, 2–18 dp)* → `MaximumPrecision`.
+* *Financial/exact output* → `UsesBigDecimal`.
+* *Auto-fallback & wide range* → `GeneralDecimaliser`.
+* *Default for wire formats* → `StandardDecimaliser`.

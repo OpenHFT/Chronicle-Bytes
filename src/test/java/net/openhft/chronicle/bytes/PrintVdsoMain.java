@@ -6,6 +6,10 @@ package net.openhft.chronicle.bytes;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
+import static java.nio.charset.StandardCharsets.ISO_8859_1;
 
 public class PrintVdsoMain {
     public static void main(String[] args)
@@ -14,7 +18,7 @@ public class PrintVdsoMain {
         long end = 0;
         @NotNull String maps = "/proc/self/maps";
         if (!new File(maps).exists()) return;
-        try (@NotNull BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(maps)))) {
+        try (@NotNull BufferedReader br = new BufferedReader(new InputStreamReader(Files.newInputStream(Paths.get(maps)), ISO_8859_1))) {
             for (String line; (line = br.readLine()) != null; ) {
                 if (line.endsWith("[vdso]")) {
                     @NotNull String[] parts = line.split("[- ]");

@@ -13,6 +13,7 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assume.assumeFalse;
 
+@SuppressWarnings("deprecation")
 public class BinaryIntArrayReferenceTest extends BytesTestCommon {
     @Test
     public void getSetValues() {
@@ -70,8 +71,8 @@ public class BinaryIntArrayReferenceTest extends BytesTestCommon {
     }
 
     private static final class IntArrays implements BytesMarshallable {
-        BinaryIntArrayReference first = new BinaryIntArrayReference();
-        BinaryIntArrayReference second = new BinaryIntArrayReference();
+        final BinaryIntArrayReference first = new BinaryIntArrayReference();
+        final BinaryIntArrayReference second = new BinaryIntArrayReference();
 
         IntArrays(int firstLength, int secondLength) {
             first.capacity(firstLength);

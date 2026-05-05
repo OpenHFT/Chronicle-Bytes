@@ -8,6 +8,7 @@ import net.openhft.chronicle.core.annotation.NonNegative;
  * Strategy for formatting offsets when dumping bytes.
  */
 @FunctionalInterface
+@Deprecated(/* to be removed in 2027, as it is only used in tests */)
 public interface OffsetFormat {
 
     /**

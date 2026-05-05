@@ -5,6 +5,7 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.bytes.internal.BytesInternal;
 import net.openhft.chronicle.bytes.internal.NativeBytesStore;
+import net.openhft.chronicle.bytes.util.BufferUtil;
 import net.openhft.chronicle.core.*;
 import net.openhft.chronicle.core.annotation.Java9;
 import net.openhft.chronicle.core.annotation.NonNegative;
@@ -31,7 +32,7 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
  *
  * @param <U> type of the object representation
  */
-@SuppressWarnings("rawtypes")
+@SuppressWarnings({"rawtypes", "deprecation"})
 public class VanillaBytes<U>
         extends AbstractBytes<U>
         implements Byteable, Comparable<CharSequence> {
@@ -285,10 +286,10 @@ public class VanillaBytes<U>
             ByteBuffer bb = ByteBuffer.allocateDirect(Maths.toInt32(readRemaining()));
             @NotNull ByteBuffer bbu = (ByteBuffer) bytesStore.underlyingObject();
             ByteBuffer slice = bbu.slice();
-            slice.position((int) readPosition());
-            slice.limit((int) readLimit());
+            BufferUtil.setPosition(slice, (int) readPosition());
+            BufferUtil.limit(slice, (int) readLimit());
             bb.put(slice);
-            bb.clear();
+            BufferUtil.clear(bb);
             return uncheckedCast(BytesStore.wrap(bb));
         } else {
             return uncheckedCast(BytesUtil.copyOf(this));
@@ -296,6 +297,7 @@ public class VanillaBytes<U>
     }
 
     @SuppressWarnings("deprecation")
+    @Deprecated(/* to be removed in 2027 */)
     protected void optimisedWrite(@NotNull RandomDataInput bytes, @NonNegative long offset, @NonNegative long length)
             throws BufferOverflowException, BufferUnderflowException, ClosedIllegalStateException, IllegalArgumentException, ThreadingIllegalStateException {
         requireNonNull(bytes);

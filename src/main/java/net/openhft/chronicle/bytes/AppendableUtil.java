@@ -24,6 +24,10 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
  * Utility methods for manipulating {@link Appendable} implementations such as
  * {@link StringBuilder} and {@link Bytes}. These helpers are used throughout
  * the text parsing and formatting code paths.
+ * <p>
+ * The operations are intentionally minimal and non-allocating where possible to preserve
+ * Chronicle's zero-GC expectations. Most methods accept either {@code StringBuilder} or
+ * {@link Bytes} to simplify call sites that work with both heap and off-heap buffers.
  */
 @SuppressWarnings("rawtypes")
 public enum AppendableUtil {
@@ -302,6 +306,7 @@ public enum AppendableUtil {
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws BufferOverflowException     If the Appendable cannot accept more characters
      */
+    @Deprecated(/* to be removed in 2027 */)
     public static <C extends Appendable & CharSequence> void append(C a, CharSequence cs, @NonNegative long start, @NonNegative long len)
             throws ArithmeticException, BufferUnderflowException, ClosedIllegalStateException, BufferOverflowException {
         if (a instanceof StringBuilder) {
@@ -378,6 +383,7 @@ public enum AppendableUtil {
      * Computes the UTF-8 byte length of the provided 8-bit encoded character array.
      */
     @Java9
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public static long findUtf8Length(byte[] chars) {
         int strlen = chars.length;
         long utflen = strlen; /* use charAt instead of copying String to char array */

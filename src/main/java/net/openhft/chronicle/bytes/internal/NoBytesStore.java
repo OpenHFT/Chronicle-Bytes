@@ -21,7 +21,7 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
  * Immutable {@link BytesStore} with zero capacity used as a placeholder for
  * elastic {@link net.openhft.chronicle.bytes.Bytes} before any data is written.
  */
-@SuppressWarnings({"rawtypes", "unchecked"})
+@SuppressWarnings({"rawtypes", "unchecked", "deprecation"})
 public final class NoBytesStore implements BytesStore<NoBytesStore, Void> {
     /** singleton instance */
     public static final BytesStore<?, ?> NO_BYTES_STORE = new NoBytesStore();
@@ -30,6 +30,7 @@ public final class NoBytesStore implements BytesStore<NoBytesStore, Void> {
     /** empty Bytes backed by {@link #NO_BYTES_STORE} */
     @NotNull
     public static final Bytes<?> NO_BYTES;
+    @Deprecated(/* to be removed in 2027 */)
     private static final ByteBuffer BYTE_BUFFER = ByteBuffer.allocate(4 << 10);
 
     static {
@@ -389,7 +390,7 @@ public final class NoBytesStore implements BytesStore<NoBytesStore, Void> {
 
     @Override
     public boolean equals(Object obj) {
-        return obj instanceof BytesStore && ((BytesStore) obj).length() == 0;
+        return obj instanceof BytesStore && ((BytesStore) obj).isEmpty();
     }
 
     @Override

@@ -3,16 +3,22 @@
  */
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.bytes.util.DecoratedBufferOverflowException;
 import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.core.io.AbstractReferenceCounted;
 import org.junit.Test;
 
 import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 
 import static net.openhft.chronicle.bytes.BytesStore.wrap;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.junit.Assume.assumeFalse;
 
+/**
+ * Validates that {@link NativeBytes} enforces write limits and reports buffer
+ * overflows with enriched exceptions.
+ */
 public class NativeBytesOverflowTest extends BytesTestCommon {
 
     @Test(expected = BufferOverflowException.class)
@@ -60,5 +66,25 @@ public class NativeBytesOverflowTest extends BytesTestCommon {
 
         // this is OK as we are unchecked !
         assertTrue(nb.writePosition() > nb.writeLimit());
+    }
+
+    @Test
+    public void overflowWithoutTracingKeepsCauseNull() {
+        AbstractReferenceCounted.disableReferenceTracing();
+        try {
+            BytesStore<?, ByteBuffer> store = wrap(ByteBuffer.allocate(128));
+            Bytes<?> nb = new NativeBytes<>(store);
+            try {
+                nb.writeLimit(2).writePosition(0);
+                DecoratedBufferOverflowException ex = assertThrows(
+                        DecoratedBufferOverflowException.class,
+                        () -> nb.writeLong(10L));
+                assertNull(ex.getCause());
+            } finally {
+                nb.releaseLast();
+            }
+        } finally {
+            AbstractReferenceCounted.enableReferenceTracing();
+        }
     }
 }

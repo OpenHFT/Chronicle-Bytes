@@ -10,6 +10,7 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assume.assumeFalse;
 
+@SuppressWarnings("deprecation")
 public class BinaryLongArrayReferenceTest extends BytesTestCommon {
     @Test
     public void getSetValues() {
@@ -76,8 +77,8 @@ public class BinaryLongArrayReferenceTest extends BytesTestCommon {
     }
 
     private static final class LongArrays implements BytesMarshallable {
-        BinaryLongArrayReference first = new BinaryLongArrayReference();
-        BinaryLongArrayReference second = new BinaryLongArrayReference();
+        final BinaryLongArrayReference first = new BinaryLongArrayReference();
+        final BinaryLongArrayReference second = new BinaryLongArrayReference();
 
         LongArrays(int firstLength, int secondLength) {
             first.capacity(firstLength);

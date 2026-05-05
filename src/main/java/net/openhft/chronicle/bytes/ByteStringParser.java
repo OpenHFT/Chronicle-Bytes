@@ -12,6 +12,7 @@ import net.openhft.chronicle.core.io.ThreadingIllegalStateException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.IOException;
 import java.io.Reader;
 import java.math.BigDecimal;
 import java.nio.BufferOverflowException;
@@ -44,6 +45,7 @@ public interface ByteStringParser<B extends ByteStringParser<B>> extends Streami
      * @return parsed value or {@code null} if no recognised token was found
      */
     @Nullable
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     default Boolean parseBoolean(@NotNull StopCharTester tester)
             throws BufferUnderflowException, ArithmeticException, ClosedIllegalStateException, ThreadingIllegalStateException {
         return BytesInternal.parseBoolean(this, tester);
@@ -54,6 +56,7 @@ public interface ByteStringParser<B extends ByteStringParser<B>> extends Streami
      * {@link StopCharTesters#NON_ALPHA_DIGIT}.
      */
     @Nullable
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     default Boolean parseBoolean()
             throws BufferUnderflowException, ArithmeticException, ClosedIllegalStateException, ThreadingIllegalStateException {
         return BytesInternal.parseBoolean(this, StopCharTesters.NON_ALPHA_DIGIT);
@@ -121,10 +124,15 @@ public interface ByteStringParser<B extends ByteStringParser<B>> extends Streami
      */
     default void parse8bit(Appendable buffer, @NotNull StopCharTester stopCharTester)
             throws BufferUnderflowException, BufferOverflowException, ArithmeticException, ClosedIllegalStateException, ThreadingIllegalStateException {
-        if (buffer instanceof StringBuilder)
+        if (buffer instanceof StringBuilder) {
             BytesInternal.parse8bit(this, (StringBuilder) buffer, stopCharTester);
-        else
+        } else if (buffer instanceof Bytes) {
             BytesInternal.parse8bit(this, (Bytes<?>) buffer, stopCharTester);
+        } else {
+            StringBuilder tmp = new StringBuilder();
+            BytesInternal.parse8bit(this, tmp, stopCharTester);
+            appendTo(buffer, tmp);
+        }
     }
 
     /**
@@ -154,12 +162,18 @@ public interface ByteStringParser<B extends ByteStringParser<B>> extends Streami
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
+    @Deprecated(/* to be removed in 2027 */)
     default void parse8bit(Appendable buffer, @NotNull StopCharsTester stopCharsTester)
             throws BufferUnderflowException, BufferOverflowException, ArithmeticException, ClosedIllegalStateException, ThreadingIllegalStateException {
-        if (buffer instanceof StringBuilder)
+        if (buffer instanceof StringBuilder) {
             BytesInternal.parse8bit(this, (StringBuilder) buffer, stopCharsTester);
-        else
+        } else if (buffer instanceof Bytes) {
             BytesInternal.parse8bit(this, (Bytes<?>) buffer, stopCharsTester);
+        } else {
+            StringBuilder tmp = new StringBuilder();
+            BytesInternal.parse8bit(this, tmp, stopCharsTester);
+            appendTo(buffer, tmp);
+        }
     }
 
     /**
@@ -245,6 +259,7 @@ public interface ByteStringParser<B extends ByteStringParser<B>> extends Streami
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     default float parseFloat()
             throws BufferUnderflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
         return (float) BytesInternal.parseDouble(this);
@@ -273,6 +288,7 @@ public interface ByteStringParser<B extends ByteStringParser<B>> extends Streami
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     default long parseLongDecimal()
             throws BufferUnderflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
         return BytesInternal.parseLongDecimal(this);
@@ -299,6 +315,7 @@ public interface ByteStringParser<B extends ByteStringParser<B>> extends Streami
      *
      * @return true if the last parsed number had digits, false otherwise.
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     boolean lastNumberHadDigits();
 
     /**
@@ -326,8 +343,17 @@ public interface ByteStringParser<B extends ByteStringParser<B>> extends Streami
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
     @NotNull
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     default BigDecimal parseBigDecimal()
             throws ArithmeticException, ClosedIllegalStateException, ThreadingIllegalStateException {
         return new BigDecimal(parseUtf8(StopCharTesters.NUMBER_END));
+    }
+
+    static void appendTo(Appendable appendable, CharSequence text) {
+        try {
+            appendable.append(text);
+        } catch (IOException e) {
+            throw new IORuntimeException(e);
+        }
     }
 }

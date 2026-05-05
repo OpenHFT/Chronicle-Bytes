@@ -16,10 +16,12 @@ import java.util.Locale;
 
 import static org.junit.Assume.assumeFalse;
 
+@SuppressWarnings("deprecation")
 public class Issue85Test extends BytesTestCommon {
     private int different = 0;
     private int different2 = 0;
-    private DecimalFormat df = new DecimalFormat();
+    private final DecimalFormat df = new DecimalFormat();
+    private static final SecureRandom SECURE_RANDOM = new SecureRandom();
 
     {
         df.setMaximumIntegerDigits(99);
@@ -62,8 +64,7 @@ public class Issue85Test extends BytesTestCommon {
         long whole = value / fives;
         long rem = value % fives;
         double d = whole + (double) rem / fives;
-        double scalb = Math.scalb(d, -deci - scale2);
-        return scalb;
+        return Math.scalb(d, -deci - scale2);
     }
 
     @Test
@@ -80,9 +81,8 @@ public class Issue85Test extends BytesTestCommon {
             }
             count += max + 1;
         }
-        SecureRandom rand = new SecureRandom();
         for (int i = 0; i < max * 1000; i++) {
-            double d = Math.pow(1e12, rand.nextDouble()) / 1e3;
+            double d = Math.pow(1e12, SECURE_RANDOM.nextDouble()) / 1e3;
             doTest(bytes, 0, d);
             count++;
         }

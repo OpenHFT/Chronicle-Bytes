@@ -9,7 +9,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import static net.openhft.chronicle.bytes.BytesFactoryUtil.releaseAndAssertReleased;
-import static net.openhft.chronicle.bytes.BytesFactoryUtil.wipe;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -67,25 +66,5 @@ final class BytesReleaseInvariantObjectTest extends BytesTestCommon {
         if (!hexString.startsWith("net.openhft.chronicle.core.io.ClosedIllegalStateException")) {
             assertEquals("net.openhft.chronicle.core.io.ClosedIllegalStateException: net.openhft.chronicle.bytes.NativeBytes already released INIT location ", hexString);
         }
-    }
-
-    //@Test
-    void manualTest() {
-/*        provideBytesObjects()
-                .map(BytesFactoryUtil::bytes)
-                .filter(bytes -> bytes.getClass().getSimpleName().contains("Unchecked"))
-                .forEach(bytes -> {
-                    bytes.append("Arne");
-                    releaseAndAssertReleased(bytes);
-                    bytes.toString();
-                });*/
-
-        //Bytes bytes = wipe(Bytes.allocateDirect(SIZE).unchecked(true));
-        HexDumpBytes bytes = wipe(new HexDumpBytes());
-        // bytes.contentDependentHashcodeAndEquals(false);
-        bytes.append("Arne");
-        releaseAndAssertReleased(bytes);
-        final int hash = bytes.hashCode();
-        final int expected = System.identityHashCode(bytes);
     }
 }

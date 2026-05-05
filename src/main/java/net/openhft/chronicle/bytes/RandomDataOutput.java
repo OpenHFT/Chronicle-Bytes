@@ -18,8 +18,11 @@ import java.nio.ByteBuffer;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
 /**
- * Provides methods for writing data to a byte sequence or buffer at arbitrary offsets.
- * Implementations extend {@link RandomCommon}. Use atomic or ordered methods for thread safety.
+ * Random-access write API for {@link BytesStore}-backed buffers.
+ * <p>
+ * Writes primitives and arrays at arbitrary offsets without advancing a cursor; ordered/atomic
+ * variants support concurrent writers when the underlying store allows. Caller is responsible for
+ * respecting capacity and thread-safety guarantees of the backing store.
  *
  * @see RandomDataInput
  */
@@ -149,6 +152,7 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     @NotNull
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     default R writeInt24(@NonNegative long offset, int i)
             throws BufferOverflowException, ClosedIllegalStateException {
         writeShort(offset, (short) i);
@@ -196,6 +200,7 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     @NotNull
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     default R writeOrderedFloat(@NonNegative long offset, float f)
             throws BufferOverflowException, ClosedIllegalStateException {
         return writeOrderedInt(offset, Float.floatToRawIntBits(f));
@@ -242,6 +247,7 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     @NotNull
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     default R writeOrderedDouble(@NonNegative long offset, double d)
             throws BufferOverflowException, ClosedIllegalStateException {
         return writeOrderedLong(offset, Double.doubleToRawLongBits(d));
@@ -286,6 +292,7 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     @NotNull
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     R writeVolatileByte(@NonNegative long offset, byte i8)
             throws BufferOverflowException, ClosedIllegalStateException;
 
@@ -300,6 +307,7 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     @NotNull
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     R writeVolatileShort(@NonNegative long offset, short i16)
             throws BufferOverflowException, ClosedIllegalStateException;
 
@@ -342,6 +350,7 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     @NotNull
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     default R writeVolatileFloat(@NonNegative long offset, float f)
             throws BufferOverflowException, ClosedIllegalStateException {
         return writeVolatileInt(offset, Float.floatToRawIntBits(f));
@@ -358,6 +367,7 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     @NotNull
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     default R writeVolatileDouble(@NonNegative long offset, double d)
             throws BufferOverflowException, ClosedIllegalStateException {
         return writeVolatileLong(offset, Double.doubleToRawLongBits(d));
@@ -502,6 +512,7 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     @NotNull
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     default R append(@NonNegative long offset, double value, int decimalPlaces, int digits)
             throws BufferOverflowException, IllegalArgumentException, ClosedIllegalStateException, ArithmeticException, ThreadingIllegalStateException {
         if (decimalPlaces < 20) {
@@ -525,6 +536,7 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     void nativeWrite(long address, @NonNegative long position, @NonNegative long size)
             throws BufferOverflowException, ClosedIllegalStateException, ThreadingIllegalStateException;
 
@@ -540,6 +552,7 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @throws ArithmeticException         If errors occur during the conversion of the CharSequence to UTF-8.
      * @see RandomDataInput#readUtf8(long, Appendable)
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     default long writeUtf8(@NonNegative long writeOffset, @Nullable CharSequence text)
             throws BufferOverflowException, ClosedIllegalStateException, ArithmeticException {
         return BytesInternal.writeUtf8(this, writeOffset, text);
@@ -563,6 +576,7 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @see RandomDataInput#readUtf8Limited(long, Appendable, int)
      * @see RandomDataInput#readUtf8Limited(long, int)
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     default long writeUtf8Limited(@NonNegative long writeOffset, @Nullable CharSequence text, @NonNegative int maxUtf8Len)
             throws BufferOverflowException, ClosedIllegalStateException, ArithmeticException {
         return BytesInternal.writeUtf8(this, writeOffset, text, maxUtf8Len);
@@ -649,6 +663,7 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     boolean compareAndSwapFloat(@NonNegative long offset, float expected, float value) throws ClosedIllegalStateException;
 
     /**
@@ -663,6 +678,7 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     boolean compareAndSwapDouble(@NonNegative long offset, double expected, double value) throws ClosedIllegalStateException;
 
     /**
@@ -708,6 +724,7 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     float addAndGetFloat(@NonNegative long offset, float adding) throws ClosedIllegalStateException;
 
     /**
@@ -723,6 +740,7 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
+    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     double addAndGetDouble(@NonNegative long offset, double adding) throws ClosedIllegalStateException;
 
     default long appendAndReturnLength(long writePosition, boolean negative, long mantissa, int exponent, boolean append0) {

@@ -18,11 +18,13 @@ import java.util.Arrays;
 import java.util.Locale;
 import java.util.Random;
 
+import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static java.nio.charset.StandardCharsets.US_ASCII;
 import static net.openhft.chronicle.bytes.internal.BytesInternalTest.Nested.LENGTH;
 import static org.junit.Assert.*;
 import static org.junit.Assume.assumeFalse;
 
+@SuppressWarnings("deprecation")
 public class BytesInternalTest extends BytesTestCommon {
     @Test
     public void testParseUTF_SB1()
@@ -344,7 +346,7 @@ public class BytesInternalTest extends BytesTestCommon {
 
         final byte[] buffer = new byte[100];
         final int copiedLen = src.copyTo(buffer);
-        assertEquals(new String(buffer, 0, copiedLen), src.toString());
+        assertEquals(new String(buffer, 0, copiedLen, ISO_8859_1), src.toString());
     }
 
     private int checkParse(int different, String s) {
@@ -391,62 +393,61 @@ public class BytesInternalTest extends BytesTestCommon {
             final int runs = t == 0 ? 1_000 : 5_000;
             int count = 0;
             for (int i = 0; i < runs; i++) {
-                for (int o = 0; o <= 8; o++)
+                for (int o = 0; o <= 8; o++) {
                     for (int s = 0; s <= size - o; s++) {
-                        long start1 = 0, end1 = 0, start2 = 0, end2 = 0, start3 = 0, end3 = 0;
-                        long start4 = 0, end4 = 0, start5 = 0, end5 = 0, start6 = 0, end6 = 0;
                         for (int r = 0; r < retry; r++) {
                             a.clear().writeSkip(size);
                             b.clear().writeSkip(t);
-                            start1 = System.nanoTime();
+                            long start1 = System.nanoTime();
                             BytesInternal.writeFully(a, o, s, b);
-                            end1 = System.nanoTime();
+                            long end1 = System.nanoTime();
+                            time1 += end1 - start1;
                         }
 
                         for (int r = 0; r < retry; r++) {
                             a.clear().writeSkip(size);
                             c.clear().writeSkip(t);
-                            start2 = System.nanoTime();
+                            long start2 = System.nanoTime();
                             simpleWriteFully1(a, o, s, c);
-                            end2 = System.nanoTime();
+                            long end2 = System.nanoTime();
+                            time2 += end2 - start2;
                         }
                         for (int r = 0; r < retry; r++) {
                             a.clear().writeSkip(size);
                             d.clear().writeSkip(t);
-                            start3 = System.nanoTime();
+                            long start3 = System.nanoTime();
                             oldWriteFully(a, o, s, d);
-                            end3 = System.nanoTime();
+                            long end3 = System.nanoTime();
+                            time3 += end3 - start3;
                         }
 
                         for (int r = 0; r < retry; r++) {
                             a.clear().writeSkip(size);
                             d.clear().writeSkip(t);
-                            start4 = System.nanoTime();
+                            long start4 = System.nanoTime();
                             simpleWriteFully2(a, o, s, d);
-                            end4 = System.nanoTime();
+                            long end4 = System.nanoTime();
+                            time4 += end4 - start4;
                         }
                         for (int r = 0; r < retry; r++) {
                             a.clear().writeSkip(size);
                             e.clear().writeSkip(t);
-                            start5 = System.nanoTime();
+                            long start5 = System.nanoTime();
                             simpleWriteFully3(a, o, s, e);
-                            end5 = System.nanoTime();
+                            long end5 = System.nanoTime();
+                            time5 += end5 - start5;
                         }
                         for (int r = 0; r < retry; r++) {
                             a.clear().writeSkip(size);
                             g.clear().writeSkip(t);
-                            start6 = System.nanoTime();
+                            long start6 = System.nanoTime();
                             simpleWriteFully4(a, o, s, g);
-                            end6 = System.nanoTime();
+                            long end6 = System.nanoTime();
+                            time6 += end6 - start6;
                         }
-                        time1 += end1 - start1;
-                        time2 += end2 - start2;
-                        time3 += end3 - start3;
-                        time4 += end4 - start4;
-                        time5 += end5 - start5;
-                        time6 += end6 - start6;
                         count++;
                     }
+                }
             }
             time1 /= count;
             time2 /= count;
@@ -538,4 +539,3 @@ public class BytesInternalTest extends BytesTestCommon {
             sdo.rawWriteByte(bytes.readByte(offset + i));
     }
 }
-

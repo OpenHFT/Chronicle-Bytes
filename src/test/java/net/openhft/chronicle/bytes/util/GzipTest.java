@@ -18,6 +18,7 @@ import static net.openhft.chronicle.bytes.util.Compressions.GZIP;
 import static org.junit.Assert.*;
 import static org.junit.Assume.assumeFalse;
 
+@SuppressWarnings("deprecation")
 public class GzipTest extends BytesTestCommon {
 
     @Test

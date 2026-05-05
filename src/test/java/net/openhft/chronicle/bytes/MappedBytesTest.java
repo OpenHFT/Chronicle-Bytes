@@ -32,7 +32,7 @@ import static net.openhft.chronicle.core.Jvm.uncheckedCast;
 import static org.junit.Assert.*;
 import static org.junit.Assume.assumeFalse;
 
-@SuppressWarnings("rawtypes")
+@SuppressWarnings({"rawtypes", "deprecation"})
 public class MappedBytesTest extends BytesTestCommon {
 
     private static final String
@@ -477,16 +477,10 @@ public class MappedBytesTest extends BytesTestCommon {
 
             // Print out the int in the two BytesStores.
             // This shows that the copy has the same contents of the original.
-//            System.out.println("Original(0): " + original.readInt(0));
-//            System.out.println("PBS(0): " + pbs.readInt(0));
 
             // Now modify the copy and print out the new int in the two BytesStores again.
             pbs.writeInt(0, 4321);
-//            System.out.println("Original(50): " + original.readInt(50));
-//            System.out.println("PBS(0): " + pbs.readInt(0));
             original.writeInt(54, 12345678);
-//            System.out.println("Original(54): " + original.readInt(54));
-//            System.out.println("PBS(4): " + pbs.readInt(4));
 
             int pbsInt = pbs.readInt(4);
             int originalInt = original.readInt(50);
@@ -510,20 +504,38 @@ public class MappedBytesTest extends BytesTestCommon {
 
             // Print out the int in the two BytesStores.
             // This shows that the copy has the same contents of the original.
-//            System.out.println("Original(0): " + original.readInt(0));
-//            System.out.println("PBS(0): " + pbs.readInt(0));
 
             // Now modify the copy and print out the new int in the two BytesStores again.
             pbs.writeInt(0, 4321);
-//            System.out.println("Original(50): " + original.readInt(50));
-//            System.out.println("PBS(0): " + pbs.readInt(0));
             original.writeInt(54, 12345678);
-//            System.out.println("Original(54): " + original.readInt(54));
-//            System.out.println("PBS(4): " + pbs.readInt(4));
 
             assertEquals(12345678, original.readInt(54));
             assertEquals(4321, original.readInt(50));
 
+        }
+    }
+
+    @Test
+    public void zeroOutRespectsCustomPageSize() throws Exception {
+        assumeFalse(Jvm.maxDirectMemory() == 0);
+
+        final File file = newTempBinary("zero-custom-page");
+        final int customPageSize = Math.max(OS.pageSize(), 4096) * 2;
+        final long chunkSize = customPageSize * 2L;
+        final long range = customPageSize + 256L;
+
+        try (MappedBytes bytes = MappedBytes.mappedBytes(file, chunkSize, 0, customPageSize, false)) {
+            for (long offset = 0; offset < range; offset++) {
+                bytes.writeByte(offset, (byte) 0x5A);
+            }
+
+            bytes.zeroOut(0, range);
+
+            for (long offset = 0; offset < range; offset++) {
+                assertEquals("offset " + offset + " should be cleared", 0, bytes.readUnsignedByte(offset));
+            }
+        } finally {
+            assertTrue("Failed to delete " + file, file.delete());
         }
     }
 
@@ -607,8 +619,10 @@ public class MappedBytesTest extends BytesTestCommon {
                 bytes.writeLong(-1);
             }
         } finally {
-            t.interrupt();
-            t.join(Jvm.isDebug() ? 60_000 : 1000);
+            if (t != null) {
+                t.interrupt();
+                t.join(Jvm.isDebug() ? 60_000 : 1000);
+            }
         }
     }
 
@@ -666,8 +680,20 @@ public class MappedBytesTest extends BytesTestCommon {
                 mf.writeSkip(msgSize);
             }
         } finally {
-            slice.releaseLast();
+            if (slice != null) {
+                slice.releaseLast();
+            }
         }
         assertTrue(true); // if we reach here, the test passes
+    }
+
+    private static File newTempBinary(String prefix) throws IOException {
+        File target = new File(OS.getTarget());
+        if (!target.exists() && !target.mkdirs() && !target.isDirectory()) {
+            throw new IOException("Unable to create target directory " + target);
+        }
+        File file = File.createTempFile(prefix, ".dat", target);
+        file.deleteOnExit();
+        return file;
     }
 }
