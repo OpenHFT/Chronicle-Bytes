@@ -2958,7 +2958,6 @@ enum BytesInternal {
                 break;
             } else if (b == '_' || b == '+') {
                 // ignore
-                continue;
             } else {
                 break;
             }
@@ -2986,7 +2985,6 @@ enum BytesInternal {
                 break;
             } else if (b == '_') {
                 // ignore
-                continue;
             } else {
                 break;
             }
@@ -3031,7 +3029,6 @@ enum BytesInternal {
             } else if (b == '_' || b == '+') {
                 // ignore
                 first = false;
-                continue;
             } else if (!first || b > ' ') {
                 break;
             } else if (b == 0) {
@@ -3060,7 +3057,6 @@ enum BytesInternal {
                 break;
             } else if (b == '_') {
                 // ignore
-                continue;
             } else {
                 break;
             }

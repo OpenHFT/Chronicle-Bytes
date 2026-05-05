@@ -698,7 +698,6 @@ public enum BytesUtil {
             }
             return;
             default:
-                return;
         }
     }
 

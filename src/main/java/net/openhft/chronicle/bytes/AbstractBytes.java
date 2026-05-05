@@ -118,25 +118,21 @@ public abstract class AbstractBytes<U>
                   @NonNegative long writePosition,
                   @NonNegative long writeLimit)
             throws ClosedIllegalStateException, ThreadingIllegalStateException {
-        this(bytesStore, writePosition, writeLimit, "");
-    }
-
-    /**
-     * Implementation detail constructor allowing a debug name.
-     */
-    // TODO Inline this constructor in 2026
-    AbstractBytes(@NotNull BytesStore<Bytes<U>, U> bytesStore,
-                  @NonNegative long writePosition,
-                  @NonNegative long writeLimit,
-                  String name)
-            throws ClosedIllegalStateException, ThreadingIllegalStateException {
         super(bytesStore.isDirectMemory());
         this.bytesStore(bytesStore);
         bytesStore.reserve(this);
         readPosition = bytesStore.readPosition();
         this.uncheckedWritePosition(writePosition);
         this.writeLimit = writeLimit;
-        // Optional name for debugging only.
+    }
+
+    @SuppressWarnings("PMD.UnusedFormalParameter")
+    AbstractBytes(@NotNull BytesStore<Bytes<U>, U> bytesStore,
+                  @NonNegative long writePosition,
+                  @NonNegative long writeLimit,
+                  String name)
+            throws ClosedIllegalStateException, ThreadingIllegalStateException {
+        this(bytesStore, writePosition, writeLimit);
     }
 
     @Override
