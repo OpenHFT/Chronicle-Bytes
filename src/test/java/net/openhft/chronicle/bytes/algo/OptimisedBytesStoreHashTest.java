@@ -23,9 +23,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * Tests the optimised BytesStore hashing implementation because verified consistency with
  * VanillaBytesStoreHash is required to avoid unexpected collisions in production workloads.
  */
-@SuppressWarnings("rawtypes")
+@SuppressWarnings({"rawtypes", "PMD.JUnit5TestShouldBePackagePrivate"})
 @DisplayName("OptimisedBytesStoreHash - consistency with VanillaBytesStoreHash across sizes")
-public class OptimisedBytesStoreHashTest extends BytesTestCommon {
+class OptimisedBytesStoreHashTest extends BytesTestCommon {
 
     @Test
     @DisplayName("optimised algorithm produces identical hash to vanilla implementation")

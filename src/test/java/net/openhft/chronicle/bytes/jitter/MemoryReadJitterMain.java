@@ -17,6 +17,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * Benchmark harness for measuring memory read jitter on mapped bytes, in order to
  * measure latency variance caused by memory access patterns and safepoints.
  */
+@SuppressWarnings("PMD.IdenticalConditionalBranches")
 public class MemoryReadJitterMain {
     private static final String PROFILE_OF_THE_THREAD = "profile of the thread";
 

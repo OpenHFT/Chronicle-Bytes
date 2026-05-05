@@ -20,7 +20,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
  * deterministic hashing is required for data integrity and cache lookups.
  */
 @DisplayName("XxHash - deterministic hashing for empty, short, and truncated inputs")
-public class XxHashTest {
+@SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate")
+class XxHashTest {
 
     @Test
     @DisplayName("hash for empty bytes store is deterministic")

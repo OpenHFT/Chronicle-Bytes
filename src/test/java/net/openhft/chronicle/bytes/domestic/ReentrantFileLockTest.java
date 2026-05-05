@@ -50,6 +50,7 @@ class ReentrantFileLockTest extends BytesTestCommon {
 
     @SuppressWarnings("EmptyMethod")
     @BeforeEach
+    @Override
     public void threadDump() {
         super.threadDump();
     }
