@@ -6,12 +6,12 @@ package net.openhft.chronicle.bytes.internal;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * Lookup utilities for rendering bytes as characters, used in hex dumps and
- * similar operations.
+ * Lookup table for rendering bytes as printable characters so diagnostics can
+ * show readable data for any 0-255 value.
  */
 public final class Chars {
     private Chars() { }
-    /** lookup table for byte value to String */
+    /** Lookup table covering all byte values as printable strings. */
     public static final String[] charToString = createCharToString();
 
     /**

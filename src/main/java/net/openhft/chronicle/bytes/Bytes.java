@@ -844,6 +844,7 @@ public interface Bytes<U> extends
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
+    @Override
     default void ensureCapacity(@NonNegative long desiredCapacity)
             throws DecoratedBufferOverflowException, IllegalStateException, ClosedIllegalStateException, ThreadingIllegalStateException {
         requireNonNegative(desiredCapacity);
@@ -1062,6 +1063,7 @@ public interface Bytes<U> extends
         return -1;
     }
 
+    // CPD-OFF
     /**
      * Returns the lowest index value starting from the provided {@code fromIndex} for which the contents of this
      * Bytes object equals the provided {@code source }, or -1 if no such index value exists.
@@ -1127,6 +1129,7 @@ public interface Bytes<U> extends
         }
         return -1;
     }
+    // CPD-ON
 
     /**
      * Clears the content of this Bytes object and resets its state.
@@ -1202,6 +1205,7 @@ public interface Bytes<U> extends
      * @throws NullPointerException         If the provided {@code clazz} is null.
      * @see #writeMarshallableLength16(WriteBytesMarshallable)
      */
+    @Override
     default <T extends ReadBytesMarshallable> T readMarshallableLength16(@NotNull final Class<T> clazz,
                                                                          @Nullable final T using)
             throws BufferUnderflowException, ClosedIllegalStateException, InvalidMarshallableException, ThreadingIllegalStateException {
@@ -1240,6 +1244,7 @@ public interface Bytes<U> extends
      * @throws NullPointerException        If the provided {@code marshallable} is null.
      * @see #readMarshallableLength16(Class, ReadBytesMarshallable)
      */
+    @Override
     default void writeMarshallableLength16(@NotNull final WriteBytesMarshallable marshallable)
             throws BufferOverflowException, ClosedIllegalStateException, BufferUnderflowException, InvalidMarshallableException, ThreadingIllegalStateException {
         requireNonNull(marshallable);

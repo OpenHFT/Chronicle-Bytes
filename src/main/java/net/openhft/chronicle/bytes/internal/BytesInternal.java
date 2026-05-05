@@ -337,6 +337,7 @@ enum BytesInternal {
         return true;
     }
 
+    // CPD-OFF
     @SuppressWarnings("unchecked")
     static <U extends BytesStore<?, ?> & HasUncheckedRandomDataInput>
     boolean contentEqualsLong(@NotNull final BytesStore<?, ?> a,
@@ -424,6 +425,7 @@ enum BytesInternal {
         }
         return true;
     }
+    // CPD-ON
 
     public static boolean startsWith(@NotNull BytesStore<?, ?> a, @NotNull BytesStore<?, ?> b)
             throws ClosedIllegalStateException {
@@ -1620,7 +1622,7 @@ enum BytesInternal {
                 readPosition = (int) readPosition;
                 readLimit = (int) readLimit;
             }
-            sb.append("[")
+            sb.append('[')
                     .append("pos: ").append(readPosition)
                     .append(", rlim: ").append(readLimit)
                     .append(", wlim: ").append(asSize(bytes.writeLimit()))
@@ -3302,8 +3304,8 @@ enum BytesInternal {
                     } else {
                         builder.append(' ');
                         int ch = bytes.readUnsignedByte(i + j);
-                        builder.append(HEXADECIMAL[ch >> 4]);
-                        builder.append(HEXADECIMAL[ch & 15]);
+                        builder.append(HEXADECIMAL[ch >> 4])
+                                .append(HEXADECIMAL[ch & 15]);
                     }
                 }
                 builder.append(' ');
@@ -3320,7 +3322,7 @@ enum BytesInternal {
                         builder.append((char) ch);
                     }
                 }
-                builder.append("\n");
+                builder.append('\n');
             }
             return builder.toString();
         } catch (ClosedIllegalStateException e) {

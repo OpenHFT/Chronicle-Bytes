@@ -927,6 +927,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
     /**
      * @return {@code true} if the number of readable bytes of this BytesStore is zero.
      */
+    @Override
     default boolean isEmpty() {
         return readRemaining() == 0;
     }
