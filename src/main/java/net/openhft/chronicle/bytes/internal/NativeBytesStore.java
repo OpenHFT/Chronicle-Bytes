@@ -721,6 +721,7 @@ public class NativeBytesStore<U>
         this.address = address;
     }
 
+    @SuppressWarnings("PMD.LabeledStatement")
     public long appendUtf8(@NonNegative long pos, char[] chars, @NonNegative int offset, @NonNegative int length)
             throws BufferOverflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
         requireNonNull(chars);
@@ -1011,8 +1012,8 @@ public class NativeBytesStore<U>
         @SuppressWarnings({"deprecation", "removal"})
         protected void finalize()
                 throws Throwable {
-            super.finalize();
             warnAndReleaseIfNotReleased();
+            super.finalize();
         }
     }
 
