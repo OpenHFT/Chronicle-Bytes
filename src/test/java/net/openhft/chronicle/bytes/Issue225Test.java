@@ -10,7 +10,8 @@ import java.nio.charset.StandardCharsets;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @DisplayName("Issue 225 trailing zero handling checks")
-public class Issue225Test extends BytesTestCommon {
+@SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate")
+class Issue225Test extends BytesTestCommon {
     @Test
     @DisplayName("append double preserves trailing zeros length")
     public void testTrailingZeros() {

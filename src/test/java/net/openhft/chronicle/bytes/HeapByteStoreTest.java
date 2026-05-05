@@ -14,7 +14,8 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("HeapBytesStore equality and capacity behaviour for heap stores")
-public class HeapByteStoreTest extends BytesTestCommon {
+@SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate")
+class HeapByteStoreTest extends BytesTestCommon {
     @Test
     @SuppressWarnings("rawtypes")
     @DisplayName("heap bytes store equality matches content")

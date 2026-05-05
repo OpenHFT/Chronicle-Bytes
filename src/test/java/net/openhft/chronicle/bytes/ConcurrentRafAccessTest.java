@@ -39,10 +39,10 @@ import static org.junit.jupiter.api.Assertions.fail;
  * Parallel      3.5         15              51
  * </pre>
  */
-@SuppressWarnings("checkstyle:MMOverusedWord")
+@SuppressWarnings({"checkstyle:MMOverusedWord", "PMD.JUnit5TestShouldBePackagePrivate"})
 @Disabled("This is a performance test and should not be run as a part of the normal build")
 @DisplayName("Concurrent RAF access should demonstrate parallel file expansion outperforms sequential access")
-public class ConcurrentRafAccessTest extends BytesTestCommon {
+class ConcurrentRafAccessTest extends BytesTestCommon {
 
     private static final String MODE = "rw";
     private static final long INITIAL_LENGTH = 64L;
@@ -145,8 +145,7 @@ public class ConcurrentRafAccessTest extends BytesTestCommon {
             ie.printStackTrace();
         }
 
-        final long elapsedNs = System.nanoTime() - beginNs;
-        return elapsedNs;
+        return System.nanoTime() - beginNs;
     }
 
     private File fileFromInt(int i)

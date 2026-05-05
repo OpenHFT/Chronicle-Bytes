@@ -13,7 +13,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * is essential for flexible serialisation.
  */
 @DisplayName("CommonMarshallable should default to self-describing message format for flexible serialisation")
-public class CommonMarshallableTest extends BytesTestCommon {
+@SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate")
+class CommonMarshallableTest extends BytesTestCommon {
 
     @Test
     @DisplayName("common marshallable uses self describing messages")

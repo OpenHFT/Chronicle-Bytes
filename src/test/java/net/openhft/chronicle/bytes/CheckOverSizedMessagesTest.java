@@ -27,9 +27,9 @@ import static org.junit.jupiter.api.Assumptions.assumeTrue;
  * is essential for handling messages larger than initial chunk size,
  * so that the underlying store grows dynamically to avoid buffer overflows.
  */
-@SuppressWarnings({"checkstyle:MMOverusedWord", "checkstyle:MMLacksPurpose"})
+@SuppressWarnings({"checkstyle:MMOverusedWord", "checkstyle:MMLacksPurpose", "PMD.JUnit5TestShouldBePackagePrivate"})
 @DisplayName("Large message writes trigger mapped bytes store expansion")
-public class CheckOverSizedMessagesTest extends BytesTestCommon {
+class CheckOverSizedMessagesTest extends BytesTestCommon {
 
     private static final byte[] BYTE6K = new byte[6000];
 

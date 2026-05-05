@@ -13,7 +13,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * must properly propagate message and cause to support debugging and logging.
  */
 @DisplayName("Connection dropped exception constructor and field validation")
-public class ConnectionDroppedExceptionTest {
+@SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate")
+class ConnectionDroppedExceptionTest {
 
     @Test
     @DisplayName("String constructor stores the error description for later retrieval")

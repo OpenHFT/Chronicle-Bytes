@@ -21,9 +21,9 @@ import static org.junit.jupiter.api.Assumptions.assumeFalse;
  * Tests copy operations across direct and mapped memory regions because correct data
  * transfer is required to avoid corruption when crossing chunk boundaries in mapped files.
  */
-@SuppressWarnings("checkstyle:MMOverusedWord")
+@SuppressWarnings({"checkstyle:MMOverusedWord", "PMD.JUnit5TestShouldBePackagePrivate"})
 @DisplayName("Bytes copy operations across direct and mapped memory regions")
-public class CopyBytesTest extends BytesTestCommon {
+class CopyBytesTest extends BytesTestCommon {
 
     private static void doTest(Bytes<?> toTest, int from) {
         Bytes<?> toCopy = Bytes.allocateDirect(32);

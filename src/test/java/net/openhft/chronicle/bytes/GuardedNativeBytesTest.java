@@ -16,9 +16,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * data types. This test checks type marker rejection and hex dump output
  * matching.
  */
-@SuppressWarnings({"deprecation", "MMOverusedWord"}) // round trips domain terminology
+@SuppressWarnings({"deprecation", "MMOverusedWord", "PMD.JUnit5TestShouldBePackagePrivate"})
 @DisplayName("GuardedNativeBytes primitive read and write checks")
-public class GuardedNativeBytesTest {
+class GuardedNativeBytesTest {
 
     /**
      * Tests the reading and writing of various binary primitives.
@@ -32,6 +32,7 @@ public class GuardedNativeBytesTest {
          */
     @Test
     @DisplayName("binary primitive hex dump round trip")
+    // CPD-OFF
     public void testBinaryPrimitive() {
         final GuardedNativeBytes<?> guarded = new GuardedNativeBytes<>(BytesStore.nativeStoreWithFixedCapacity(256), 256);
         final HexDumpBytes bytes = new HexDumpBytes(guarded);
@@ -104,6 +105,7 @@ public class GuardedNativeBytesTest {
             bytes.releaseLast();
         }
     }
+    // CPD-ON
 
     @Test
     @DisplayName("GuardedNativeBytes readInt rejects mismatched type markers after writeLong")

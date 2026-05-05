@@ -29,9 +29,9 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
-@SuppressWarnings("deprecation")
+@SuppressWarnings({"deprecation", "PMD.JUnit5TestShouldBePackagePrivate"})
 @DisplayName("Distributed unique time provider monotonicity and concurrency checks")
-public class DistributedUniqueTimeProviderTest extends BytesTestCommon {
+class DistributedUniqueTimeProviderTest extends BytesTestCommon {
 
     private DistributedUniqueTimeProvider timeProvider;
     private SetTimeProvider setTimeProvider;
@@ -221,6 +221,7 @@ public class DistributedUniqueTimeProviderTest extends BytesTestCommon {
 
     @Test
     @DisplayName("unique nanos across threads remain monotonic per iteration")
+    // CPD-OFF
     public void shouldProvideUniqueTimeAcrossThreadsNanos() throws InterruptedException {
         final Set<Long> allGeneratedTimestamps = ConcurrentHashMap.newKeySet();
         final int numberOfThreads = 50;
@@ -258,6 +259,7 @@ public class DistributedUniqueTimeProviderTest extends BytesTestCommon {
         assertEquals(numberOfThreads * iterationsPerThread * factor, allGeneratedTimestamps.size(),
                 "All nanosecond timestamps across threads are unique");
     }
+    // CPD-ON
 
     @Test
     @DisplayName("deduplicator compares and retains per host id")

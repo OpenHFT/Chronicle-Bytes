@@ -12,7 +12,8 @@ import static net.openhft.chronicle.bytes.UnsafeTextBytesTest.testAppendDouble;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @DisplayName("Issue 128 decimal formatting validation checks")
-public class Issue128Test extends BytesTestCommon {
+@SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate")
+class Issue128Test extends BytesTestCommon {
     private static final DecimalFormat DF;
 
     static {

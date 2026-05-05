@@ -20,12 +20,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * Tests for Issue 523 because concurrent double append operations must produce
  * accurate formatting to avoid rounding errors in financial calculations.
  */
-@SuppressWarnings("checkstyle:MMOverusedWord")
+@SuppressWarnings({"checkstyle:MMOverusedWord", "PMD.JUnit5TestShouldBePackagePrivate"})
 @DisplayName("Issue 523 double append validates concurrent formatting accuracy")
-public class Issue523Test extends BytesTestCommon {
+class Issue523Test extends BytesTestCommon {
 
     @SuppressWarnings("EmptyMethod")
     @BeforeEach
+    @Override
     public void threadDump() {
         super.threadDump();
     }

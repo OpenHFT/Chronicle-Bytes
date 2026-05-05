@@ -14,9 +14,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * display are essential for debugging binary data. Behaviour checks verify
  * nested headers in order to ensure readable diagnostic output.
  */
-@SuppressWarnings("checkstyle:MMLacksPurpose")
+@SuppressWarnings({"checkstyle:MMLacksPurpose", "PMD.JUnit5TestShouldBePackagePrivate"})
 @DisplayName("HexDumpBytes advanced formatting and indentation behaviour checks")
-public class HexDumpBytesAdvancedTest extends BytesTestCommon {
+class HexDumpBytesAdvancedTest extends BytesTestCommon {
 
     @Test
     @DisplayName("hex dump includes nested headers and offsets in output")

@@ -15,7 +15,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 @DisplayName("Issue 281 byte buffer to bytes conversion")
-public class Issue281Test extends BytesTestCommon {
+@SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate")
+class Issue281Test extends BytesTestCommon {
     private static void bufferToBytes(Bytes<?> bytes, ByteBuffer dataBuffer, int index) {
         int length = dataBuffer.get(index); // length prefix (offset)
         bytes.write(0, dataBuffer, index + 1, length);

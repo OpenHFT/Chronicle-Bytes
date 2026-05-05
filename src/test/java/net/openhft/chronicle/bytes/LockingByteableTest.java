@@ -18,9 +18,9 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
-@SuppressWarnings("checkstyle:MMOverusedWord")
+@SuppressWarnings({"checkstyle:MMOverusedWord", "PMD.JUnit5TestShouldBePackagePrivate"})
 @DisplayName("File locking behaviour for binary references")
-public class LockingByteableTest extends BytesTestCommon {
+class LockingByteableTest extends BytesTestCommon {
     @Test
     @DisplayName("non lockable store rejects lock attempt")
     public void notLockable() throws IOException {

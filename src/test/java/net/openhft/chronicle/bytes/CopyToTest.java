@@ -13,7 +13,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 @DisplayName("Bytes copyTo buffer operations for heap and direct memory")
-public class CopyToTest {
+@SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate")
+class CopyToTest {
 
     @Test
     @DisplayName("copy from direct bytes into direct buffer")

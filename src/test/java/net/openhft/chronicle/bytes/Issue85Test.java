@@ -18,20 +18,22 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
-@SuppressWarnings("deprecation")
+@SuppressWarnings({"deprecation", "PMD.JUnit5TestShouldBePackagePrivate"})
 @DisplayName("Issue 85 decimal parsing and formatting")
-public class Issue85Test extends BytesTestCommon {
+class Issue85Test extends BytesTestCommon {
     private int different = 0;
     private int different2 = 0;
-    private final DecimalFormat df = new DecimalFormat();
+    private final DecimalFormat df = createDecimalFormat();
 
-    {
+    private static DecimalFormat createDecimalFormat() {
+        DecimalFormat df = new DecimalFormat();
         df.setMaximumIntegerDigits(99);
         df.setMaximumFractionDigits(99);
         df.setMinimumFractionDigits(1);
         df.setGroupingUsed(false);
         df.setDecimalFormatSymbols(
                 DecimalFormatSymbols.getInstance(Locale.ENGLISH));
+        return df;
     }
 
     static double parseDouble(Bytes<?> bytes) {
@@ -66,8 +68,7 @@ public class Issue85Test extends BytesTestCommon {
         long whole = value / fives;
         long rem = value % fives;
         double d = whole + (double) rem / fives;
-        double scalb = Math.scalb(d, -deci - scale2);
-        return scalb;
+        return Math.scalb(d, -deci - scale2);
     }
 
     @Test

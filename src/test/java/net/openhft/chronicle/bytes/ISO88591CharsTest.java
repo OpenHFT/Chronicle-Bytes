@@ -13,9 +13,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * because 8-bit character encoding must preserve extended ASCII values to avoid
  * data corruption in legacy systems.
  */
-@SuppressWarnings("checkstyle:MMLacksPurpose")
+@SuppressWarnings({"checkstyle:MMLacksPurpose", "PMD.JUnit5TestShouldBePackagePrivate"})
 @DisplayName("ISO 8859 1 characters render to 8bit")
-public class ISO88591CharsTest {
+class ISO88591CharsTest {
 
     // String containing all standard printable characters in ISO-8859-1 (via https://en.wikipedia.org/wiki/ISO/IEC_8859-1)
     private static final String ISO_TEXT = "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{}~¡¢£¤¥¦§¨©ª«¬®¯°±²³´µ¶·¸¹º»¼½¾¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿ";
