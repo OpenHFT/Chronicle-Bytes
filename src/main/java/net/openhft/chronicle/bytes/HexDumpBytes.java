@@ -33,8 +33,8 @@ import static net.openhft.chronicle.core.util.Longs.requireNonNegative;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
 /**
- * {@link Bytes} implementation that records all writes and produces a formatted hexadecimal dump of the data.
- * Primarily intended for diagnostics and testing.
+ * {@link Bytes} implementation that records writes and produces formatted hex dumps.
+ * Includes offset columns, ASCII gutters, and comment lanes for diagnostics.
  */
 
 @SuppressWarnings({"rawtypes", "deprecation"})
@@ -57,14 +57,14 @@ public class HexDumpBytes
      */
     public HexDumpBytes() {
         base = Bytes.allocateElasticDirect(256);
-        // as it's use for diagnostics and tests rather than production.
+        // Used for diagnostics and tests rather than production.
         IOTools.unmonitor(base);
         text = Bytes.allocateElasticOnHeap(1024);
     }
 
     /**
      * Constructs a HexDumpBytes instance with the specified base bytes.
-     * THis can be used with MappedBytes or NativeBytes.
+     * This can be used with MappedBytes or NativeBytes.
      */
     @SuppressWarnings("unchecked")
     public HexDumpBytes(@NotNull Bytes<?> base) {

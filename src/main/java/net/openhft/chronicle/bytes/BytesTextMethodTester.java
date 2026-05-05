@@ -131,7 +131,7 @@ public class BytesTextMethodTester<T> {
 
         Bytes<?> text = BytesUtil.readFile(input);
         for (String text2 : text.toString().split("###[^\n]*\n")) {
-            if (text2.trim().isEmpty())
+            if (isBlank(text2))
                 continue;
             Bytes<?> bytes = HexDumpBytes.fromText(text2);
 
@@ -155,6 +155,14 @@ public class BytesTextMethodTester<T> {
         }
         bytes2.releaseLast();
         return this;
+    }
+
+    private static boolean isBlank(String value) {
+        for (int i = 0; i < value.length(); i++) {
+            if (!Character.isWhitespace(value.charAt(i)))
+                return false;
+        }
+        return true;
     }
 
     /**

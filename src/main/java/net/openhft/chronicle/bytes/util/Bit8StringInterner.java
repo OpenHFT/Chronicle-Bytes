@@ -15,45 +15,31 @@ import org.jetbrains.annotations.NotNull;
 import java.nio.BufferUnderflowException;
 
 /**
- * Implementation of {@link AbstractInterner} for interning {@link String}
- * objects whose bytes are assumed to represent 8-bit characters such as
- * ISO-8859-1.
- *
- * <p>Example usage:</p>
- * <pre>{@code
- * Bit8StringInterner interner = new Bit8StringInterner(128);
- * String s = interner.intern(bytes, length);
- * }</pre>
- *
- * @see AbstractInterner
+ * Interns strings backed by 8-bit bytes (ISO-8859-1 style).
  */
 public class Bit8StringInterner extends AbstractInterner<String> {
 
     /**
-     * A pool of StringBuilder objects used to construct the interned Strings.
+     * Pool of StringBuilder instances used during decoding.
      */
     private static final ScopedResourcePool<StringBuilder> SBP = StringBuilderPool.createThreadLocal(1);
 
     /**
-     * Constructs a new Bit8StringInterner with the specified capacity.
+     * Constructs with the given capacity to size the interning tables.
      *
-     * @param capacity the initial capacity for the interner
+     * @param capacity the initial capacity
      */
     public Bit8StringInterner(int capacity) {
         super(capacity);
     }
 
     /**
-     * Decodes an 8-bit character sequence from the provided {@link BytesStore}.
-     * Exactly {@code length} bytes are read starting from {@code cs.readPosition()}.
-     * The read position is not modified.
+     * Decodes an 8-bit sequence without advancing the read position.
      *
-     * @param cs     the bytes store containing the characters
-     * @param length the number of bytes to read
+     * @param cs     the source bytes
+     * @param length number of bytes to read
      * @return the resulting string
-     * @throws BufferUnderflowException       If the BytesStore doesn't have enough remaining capacity
-     * @throws ClosedIllegalStateException    If the resource has been released or closed.
-     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
+     * @throws BufferUnderflowException if there is not enough remaining data
      */
     @SuppressWarnings("rawtypes")
     @Override

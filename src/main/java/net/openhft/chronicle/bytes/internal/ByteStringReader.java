@@ -15,18 +15,17 @@ import java.nio.BufferUnderflowException;
 import static net.openhft.chronicle.bytes.internal.ReferenceCountedUtil.throwExceptionIfReleased;
 
 /**
- * A Reader wrapper for Bytes. This Reader moves the readPosition() of the underlying Bytes up to the readLimit().
+ * Reader adapter over {@link ByteStringParser} so APIs expecting a
+ * {@link Reader} can consume bytes while sharing the parser position.
  */
 @SuppressWarnings("rawtypes")
 public class ByteStringReader extends Reader {
     private final ByteStringParser in;
 
     /**
-     * Constructs a new ByteStringReader with the provided ByteStringParser.
+     * Constructs with the supplied parser so this reader shares its position.
      *
-     * @param in The ByteStringParser to be used.
-     * @throws ClosedIllegalStateException    If the resource has been released or closed.
-     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
+     * @param in the parser to read from
      */
     public ByteStringReader(ByteStringParser in) {
         throwExceptionIfReleased(in);
@@ -34,9 +33,9 @@ public class ByteStringReader extends Reader {
     }
 
     /**
-     * Reads a single byte from the underlying ByteStringParser.
+     * Reads one byte or -1 at end of stream.
      *
-     * @return The next byte of data, or -1 if the end of the stream is reached.
+     * @return the next byte or -1
      */
     @Override
     public int read() {
@@ -48,11 +47,11 @@ public class ByteStringReader extends Reader {
     }
 
     /**
-     * Skips over and discards n bytes of data from this input stream.
+     * Skips up to {@code n} bytes in the underlying parser.
      *
-     * @param n The number of bytes to be skipped.
-     * @return The actual number of bytes skipped.
-     * @throws IOException if an I/O error occurs.
+     * @param n number of bytes to skip
+     * @return the number of bytes skipped
+     * @throws IOException if an I/O error occurs
      */
     @Override
     public long skip(long n)
@@ -68,13 +67,13 @@ public class ByteStringReader extends Reader {
     }
 
     /**
-     * Reads characters into a portion of an array.
+     * Reads characters into a buffer slice.
      *
-     * @param cbuf Destination buffer.
-     * @param off  Offset at which to start storing characters.
-     * @param len  Maximum number of characters to read.
-     * @return The number of characters read, or -1 if the end of the stream has been reached.
-     * @throws IOException If an I/O error occurs.
+     * @param cbuf destination buffer
+     * @param off  start offset
+     * @param len  max chars to read
+     * @return chars read, or -1 at end of stream
+     * @throws IOException if an I/O error occurs
      */
     @Override
     public int read(char[] cbuf, @NonNegative int off, @NonNegative int len)
@@ -88,7 +87,7 @@ public class ByteStringReader extends Reader {
     }
 
     /**
-     * Closes the reader and releases any system resources associated with it.
+     * No-op close because the underlying parser is managed elsewhere.
      */
     @Override
     public void close() {

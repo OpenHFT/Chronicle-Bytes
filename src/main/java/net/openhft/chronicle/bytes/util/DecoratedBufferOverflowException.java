@@ -6,20 +6,19 @@ package net.openhft.chronicle.bytes.util;
 import java.nio.BufferOverflowException;
 
 /**
- * Customized {@link BufferOverflowException} with a descriptive message.
- * This exception is thrown to indicate that there is an attempt to write
- * data into a buffer beyond its capacity.
+ * {@link BufferOverflowException} with a descriptive message because the
+ * JDK exception omits context, so callers can see capacity/limit/position.
  */
 public final class DecoratedBufferOverflowException extends BufferOverflowException {
     private static final long serialVersionUID = 0L;
 
     /**
-     * The custom message describing this exception.
+     * Custom detail message because {@link BufferOverflowException} omits context.
      */
     private final String message;
 
     /**
-     * Constructs a new exception with the specified detail message.
+     * Constructs with a detail message describing the overflow context.
      *
      * @param message the detail message
      */
@@ -28,7 +27,7 @@ public final class DecoratedBufferOverflowException extends BufferOverflowExcept
     }
 
     /**
-     * Constructs a new exception with the specified detail message and cause.
+     * Constructs with a detail message and cause describing the overflow.
      *
      * @param message the detail message
      * @param cause   the cause
@@ -39,9 +38,9 @@ public final class DecoratedBufferOverflowException extends BufferOverflowExcept
     }
 
     /**
-     * Returns the detail message describing this buffer overflow exception for diagnostics.
+     * Returns the detail message with capacity/limit/position context.
      *
-     * @return the detail message string of this exception
+     * @return the detail message
      */
     @Override
     public String getMessage() {

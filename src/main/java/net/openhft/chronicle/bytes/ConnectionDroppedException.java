@@ -6,44 +6,35 @@ package net.openhft.chronicle.bytes;
 import net.openhft.chronicle.core.io.IORuntimeException;
 
 /**
- * {@link IORuntimeException} signalling an unexpected loss of connection,
- * typically used by networking components to distinguish recoverable timeouts
- * from permanent disconnects.
+ * Signals an unexpected connection drop because the remote endpoint vanished,
+ * so callers can treat network loss differently from other I/O failures.
  */
 public class ConnectionDroppedException extends IORuntimeException {
     private static final long serialVersionUID = 0L;
 
     /**
-     * Constructs a {@code ConnectionDroppedException} with the specified detail
-     * message so that callers can identify why the connection was lost.
+     * Constructs with a message describing which connection dropped.
      *
-     * @param message the detail message saved for later retrieval by the {@link #getMessage()} method.
+     * @param message the detail message
      */
     public ConnectionDroppedException(String message) {
         super(message);
     }
 
     /**
-     * Constructs a {@code ConnectionDroppedException} with the specified cause
-     * so that the original exception chain is preserved.
+     * Constructs with a cause describing the underlying failure.
      *
-     * @param e the cause (which is saved for later retrieval by the {@link #getCause()} method).
-     *          (A {@code null} value is permitted, and indicates that the cause is nonexistent or unknown.)
+     * @param e the cause
      */
     public ConnectionDroppedException(Throwable e) {
         super(e);
     }
 
     /**
-     * Constructs a {@code ConnectionDroppedException} with the specified detail
-     * message and cause so that both the description and origin are captured.
-     * <p>
-     * Note that the detail message associated with {@code cause} is <i>not</i> automatically incorporated in
-     * this runtime exception's detail message.
+     * Constructs with a detail message and cause.
      *
-     * @param message the detail message saved for later retrieval by the {@link #getMessage()} method.
-     * @param cause   the cause (which is saved for later retrieval by the {@link #getCause()} method).
-     *                (A {@code null} value is permitted, and indicates that the cause is nonexistent or unknown.)
+     * @param message the detail message
+     * @param cause   the cause
      */
     public ConnectionDroppedException(String message, Throwable cause) {
         super(message, cause);

@@ -201,9 +201,8 @@ public enum BytesUtil {
     public static String findFile(@NotNull String name)
             throws FileNotFoundException {
         File file = new File(name);
-        URL url = null;
         if (!file.exists()) {
-            url = urlFor(Thread.currentThread().getContextClassLoader(), name);
+            URL url = urlFor(Thread.currentThread().getContextClassLoader(), name);
             String file2 = url.getFile().replace("%20", " ")
                     .replace("target/test-classes", "src/test/resources");
             file = new File(file2);
@@ -311,6 +310,7 @@ public enum BytesUtil {
      * @param o2 The second object to compare.
      * @return true if the objects are equal, false otherwise.
      */
+    @SuppressWarnings("PMD.SuspiciousEqualsMethodName")
     public static boolean equals(Object o1, Object o2) {
         if (o1 == o2) return true;
         if (o1 instanceof CharSequence && o2 instanceof CharSequence)
@@ -689,7 +689,7 @@ public enum BytesUtil {
             }
 
             default:
-                return;
+                break;
         }
     }
 
