@@ -45,7 +45,7 @@ out.releaseLast();
 
 When you need full control – for example, to emit scientific notation – implement `DecimalAppender` yourself:
 
-[source,java]
+[source,java,opts=novalidate]
 ----
 DecimalAppender sci = (neg,m,e) -> {
     if (neg) out.writeByte('-');
