@@ -16,12 +16,8 @@ import static net.openhft.chronicle.bytes.microbenchmarks.jmh.ElasticByteBufferJ
 import static net.openhft.chronicle.bytes.microbenchmarks.jmh.ElasticByteBufferJmh.mappedBytes;
 
 /**
- * JMH benchmarks focusing on {@link Bytes} backed by elastic direct memory rather than
- * {@link ByteBuffer} instances.
- *
- * <p>These benchmarks mirror those in {@link ElasticByteBufferJmh} but operate on direct buffers,
- * allowing side by side comparison of append, read, write and equals operations between heap and
- * direct representations and against mapped bytes.
+ * JMH benchmarks for elastic direct memory backed by {@link Bytes}.
+ * Compares heap, direct, and mapped paths across append/read/write flows.
  */
 public class ElasticDirectJmh {
 
