@@ -37,9 +37,9 @@ import static org.junit.jupiter.api.Assumptions.assumeFalse;
  * support, histogram utilities, and reference counting edge cases for native
  * stores.
  */
-@SuppressWarnings("deprecation")
+@SuppressWarnings({"deprecation", "PMD.JUnit5TestShouldBePackagePrivate"})
 @DisplayName("Native bytes store behaviours including cipher and checksums")
-public class NativeBytesStoreTest extends BytesTestCommon {
+class NativeBytesStoreTest extends BytesTestCommon {
 
     private volatile int bcs;
 
@@ -64,7 +64,7 @@ public class NativeBytesStoreTest extends BytesTestCommon {
 
         final NativeBytesStore<Void> bytesStore = NativeBytesStore.nativeStoreWithFixedCapacity(maxLen + 5);
 
-        StringBuilder expected = new StringBuilder();
+        StringBuilder expected = new StringBuilder(32);
 
         for (int i = 0; i < maxLen; i += stepLength) {
             final String expectedText = expected.toString();

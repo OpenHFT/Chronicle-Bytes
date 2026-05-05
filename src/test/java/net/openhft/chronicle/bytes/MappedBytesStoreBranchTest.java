@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * with memory-mapped files. In order to prevent data corruption,
  * synchronisation mode transitions and atomic operations must be tested.
  */
-@SuppressWarnings("checkstyle:MMOverusedWord")
+@SuppressWarnings({"checkstyle:MMOverusedWord"})
 @DisplayName("MappedBytesStore branch coverage for sync modes and atomic operations")
 class MappedBytesStoreBranchTest extends BytesTestCommon implements ReferenceOwner {
 
@@ -237,7 +237,7 @@ class MappedBytesStoreBranchTest extends BytesTestCommon implements ReferenceOwn
     @Test
     @DisplayName("write(byte[]) copies bytes into mapped store")
     void writeFromByteArray() {
-        byte[] data = new byte[]{1, 2, 3, 4, 5};
+        byte[] data = {1, 2, 3, 4, 5};
         store.write(0, data, 0, 5);
         assertEquals(1, store.readByte(0), "byte array element 0 equals 1");
         assertEquals(5, store.readByte(4), "byte array element 4 equals 5");

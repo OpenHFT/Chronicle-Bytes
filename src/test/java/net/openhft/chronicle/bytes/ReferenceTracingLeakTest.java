@@ -17,7 +17,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * development.
  */
 @DisplayName("Reference tracing leak detection and allocation tracking")
-public class ReferenceTracingLeakTest extends BytesTestCommon {
+@SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate")
+class ReferenceTracingLeakTest extends BytesTestCommon {
 
     @Test
     @DisplayName("leak detection reports allocation site for traced bytes")

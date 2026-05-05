@@ -16,7 +16,8 @@ import static org.junit.jupiter.api.Assertions.*;
  * same buffer without interference.
  */
 @DisplayName("Multi reader bytes ring buffer independent read behaviour")
-public class MultiReaderBytesRingBufferTest {
+@SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate")
+class MultiReaderBytesRingBufferTest {
     private MultiReaderBytesRingBuffer ringBuffer;
 
     @BeforeEach

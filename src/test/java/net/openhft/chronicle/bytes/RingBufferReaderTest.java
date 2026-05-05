@@ -15,7 +15,8 @@ import static org.mockito.Mockito.*;
  * support correct buffer consumption patterns.
  */
 @DisplayName("RingBufferReader - validates mock-based state transitions")
-public class RingBufferReaderTest {
+@SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate")
+class RingBufferReaderTest {
 
     private RingBufferReader reader;
 

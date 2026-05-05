@@ -35,7 +35,7 @@ import static org.junit.jupiter.api.Assertions.fail;
  * correct string interning and substring matching are essential for
  * efficient message parsing.
  */
-@SuppressWarnings("deprecation")
+@SuppressWarnings({"deprecation", "PMD.JUnit5TestShouldBePackagePrivate"})
 @DisplayName("More bytes utilities and index operations")
 public class MoreBytesTest extends BytesTestCommon {
 

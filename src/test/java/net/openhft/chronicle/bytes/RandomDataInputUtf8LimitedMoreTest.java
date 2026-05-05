@@ -16,7 +16,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
  * binary protocols.
  */
 @DisplayName("UTF8 limited reads detect underflow when declared length exceeds remaining")
-public class RandomDataInputUtf8LimitedMoreTest extends BytesTestCommon {
+@SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate")
+class RandomDataInputUtf8LimitedMoreTest extends BytesTestCommon {
 
     @Test
     @DisplayName("buffer underflow when length exceeds remaining bytes")

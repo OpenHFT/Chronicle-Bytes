@@ -18,7 +18,8 @@ import static org.junit.jupiter.api.Assertions.assertSame;
  * unknown method invocations.
  */
 @DisplayName("MethodReaderBuilder default methods select expected handlers")
-public class MethodReaderBuilderDefaultsTest {
+@SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate")
+class MethodReaderBuilderDefaultsTest {
 
     @Test
     @DisplayName("warnMissing selects warn and debug handlers")

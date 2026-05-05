@@ -29,9 +29,9 @@ import static org.junit.jupiter.api.Assumptions.assumeFalse;
  * cleanup in high-frequency trading systems. In order to prevent memory
  * leaks, reference counts must be decremented correctly after use.
  */
-@SuppressWarnings("checkstyle:MMOverusedWord")
+@SuppressWarnings({"checkstyle:MMOverusedWord", "PMD.JUnit5TestShouldBePackagePrivate"})
 @DisplayName("Mapped memory performance and reference count tracking validation")
-public class MappedMemoryTest extends BytesTestCommon {
+class MappedMemoryTest extends BytesTestCommon {
 
     private static final long SHIFT = 27L;
     private static final long BLOCK_SIZE = 1L << SHIFT;

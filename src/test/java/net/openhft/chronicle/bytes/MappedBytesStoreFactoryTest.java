@@ -23,7 +23,8 @@ import static org.mockito.Mockito.*;
  * closed or invalid mapped files.
  */
 @DisplayName("Mapped bytes store factory creation behaviour")
-public class MappedBytesStoreFactoryTest {
+@SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate")
+class MappedBytesStoreFactoryTest {
 
     @Mock
     private MappedBytesStoreFactory factory;

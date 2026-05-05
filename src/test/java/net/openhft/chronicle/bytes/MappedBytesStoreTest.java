@@ -26,7 +26,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 @DisplayName("Mapped bytes store read write behaviour")
-public class MappedBytesStoreTest extends BytesTestCommon implements ReferenceOwner {
+@SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate")
+class MappedBytesStoreTest extends BytesTestCommon implements ReferenceOwner {
     private static final int PAGE_SIZE = OS.defaultOsPageSize();
     private MappedFile mappedFile;
     private MappedBytesStore mappedBytesStore;

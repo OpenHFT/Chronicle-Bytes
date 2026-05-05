@@ -15,7 +15,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * encoding the payload.
  */
 @DisplayName("Prewrite operations build expected string output")
-public class PrewriteTest extends BytesTestCommon {
+@SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate")
+class PrewriteTest extends BytesTestCommon {
     @Test
     @DisplayName("prewrite inserts values before write position")
     public void test() {

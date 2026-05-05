@@ -16,9 +16,9 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
  * pointer management is essential to avoid memory corruption when wrapping
  * native addresses.
  */
-@SuppressWarnings("MMOverusedWord") // bytes domain terminology
+@SuppressWarnings({"MMOverusedWord", "PMD.JUnit5TestShouldBePackagePrivate"})
 @DisplayName("Pointer bytes store operations and capacity checks")
-public class PointerBytesStoreTest extends BytesTestCommon {
+class PointerBytesStoreTest extends BytesTestCommon {
 
     @Test
     @DisplayName("pointer bytes preserve read and write limits")

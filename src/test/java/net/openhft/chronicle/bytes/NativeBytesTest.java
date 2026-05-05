@@ -33,7 +33,8 @@ import static org.junit.jupiter.api.Assumptions.assumeTrue;
  * bounds checks, reference counting, and interactions with mapped files.
  */
 @DisplayName("Native bytes allocation and resize behaviour")
-public class NativeBytesTest extends BytesTestCommon {
+@SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate")
+class NativeBytesTest extends BytesTestCommon {
 
     static Stream<Allocator> allocations() {
         return Stream.of(NATIVE, NATIVE_ADDRESS, HEAP, BYTE_BUFFER);

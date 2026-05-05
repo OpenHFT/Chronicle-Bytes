@@ -20,7 +20,8 @@ import static org.junit.jupiter.api.Assumptions.assumeFalse;
  * overflows with enriched exceptions.
  */
 @DisplayName("Native bytes overflow exceptions for write limits")
-public class NativeBytesOverflowTest extends BytesTestCommon {
+@SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate")
+class NativeBytesOverflowTest extends BytesTestCommon {
 
     @Test
     @DisplayName("native bytes write exceeds small limit")

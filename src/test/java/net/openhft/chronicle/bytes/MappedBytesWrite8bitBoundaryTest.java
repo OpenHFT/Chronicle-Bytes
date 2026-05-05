@@ -24,7 +24,8 @@ import static org.junit.jupiter.api.Assumptions.assumeFalse;
  * content span multiple memory-mapped regions.
  */
 @DisplayName("Write8bit crosses mapped chunk boundary correctly")
-public class MappedBytesWrite8bitBoundaryTest extends BytesTestCommon {
+@SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate")
+class MappedBytesWrite8bitBoundaryTest extends BytesTestCommon {
 
     @Test
     @DisplayName("write8bit reads across chunk boundary correctly")

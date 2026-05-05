@@ -16,7 +16,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
  * can cause crashes or data corruption if resource lifecycle is mismanaged.
  */
 @DisplayName("ReleasedBytesStore - validates post-release rejection of operations")
-public class ReleasedBytesStoreTest extends BytesTestCommon {
+@SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate")
+class ReleasedBytesStoreTest extends BytesTestCommon {
 
     @Test
     @DisplayName("released bytes store rejects writes after release")

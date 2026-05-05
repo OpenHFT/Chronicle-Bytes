@@ -21,9 +21,9 @@ import java.util.function.Consumer;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
-@SuppressWarnings("OverlyStrongTypeCast")
+@SuppressWarnings({"OverlyStrongTypeCast", "PMD.JUnit5TestShouldBePackagePrivate"})
 @DisplayName("Mapped bytes edge cases for chunk boundaries")
-public class MappedBytesEdgeTest extends BytesTestCommon {
+class MappedBytesEdgeTest extends BytesTestCommon {
     private static final int CHUNK_SIZE = 262144;
 
     static Stream<Arguments> data() {

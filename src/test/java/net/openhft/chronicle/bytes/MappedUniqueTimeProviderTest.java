@@ -26,10 +26,12 @@ import static org.junit.jupiter.api.Assumptions.assumeFalse;
  * sequencing in distributed systems.
  */
 @DisplayName("Mapped unique time provider performance and ordering")
-public class MappedUniqueTimeProviderTest extends BytesTestCommon {
+@SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate")
+class MappedUniqueTimeProviderTest extends BytesTestCommon {
 
     @SuppressWarnings("EmptyMethod")
     @BeforeEach
+    @Override
     public void threadDump() {
         assumeFalse(Jvm.maxDirectMemory() == 0,
                 "Direct memory must be available for time provider tests");

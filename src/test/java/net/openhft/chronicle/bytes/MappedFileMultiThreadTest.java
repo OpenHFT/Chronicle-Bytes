@@ -35,9 +35,9 @@ import static org.junit.jupiter.api.Assumptions.assumeFalse;
  * to memory-mapped files requires proper synchronisation to avoid data
  * races and memory corruption.
  */
-@SuppressWarnings("checkstyle:MMOverusedWord")
+@SuppressWarnings({"checkstyle:MMOverusedWord", "PMD.JUnit5TestShouldBePackagePrivate"})
 @DisplayName("Mapped file multi thread lock behaviour")
-public class MappedFileMultiThreadTest extends BytesTestCommon {
+class MappedFileMultiThreadTest extends BytesTestCommon {
     // Limit parallelism on WSL to reduce resource contention; use all cores on native
     private static final int DEFAULT_CORES = isWsl()
             // WSL: limit parallelism to reduce resource contention in emulated environment
@@ -63,6 +63,7 @@ public class MappedFileMultiThreadTest extends BytesTestCommon {
 
     @SuppressWarnings("EmptyMethod")
     @BeforeEach
+    @Override
     public void threadDump() {
         super.threadDump();
     }

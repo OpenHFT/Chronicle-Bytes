@@ -24,7 +24,8 @@ import static org.junit.jupiter.api.Assumptions.assumeFalse;
  * handling.
  */
 @DisplayName("MappedBytes covers view selection and sync branch scenarios")
-public class MappedBytesCoverageTest extends BytesTestCommon {
+@SuppressWarnings({"PMD.JUnit5TestShouldBePackagePrivate", "PMD.DoNotThrowExceptionInFinally"})
+class MappedBytesCoverageTest extends BytesTestCommon {
 
     @Test
     @DisplayName("bytesForRead switches view based on clear state")

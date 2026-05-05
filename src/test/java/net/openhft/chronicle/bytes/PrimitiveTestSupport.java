@@ -17,6 +17,7 @@ public final class PrimitiveTestSupport {
     private PrimitiveTestSupport() {
     }
 
+    // CPD-OFF
     public static void writeBinaryPrimitivePayload(Bytes<?> bytes) {
         bytes.writeHexDumpDescription("flag").writeBoolean(true);
         bytes.writeHexDumpDescription("s8").writeByte((byte) 1);
@@ -67,4 +68,5 @@ public final class PrimitiveTestSupport {
             assertEquals(expectedText, text, "read UTF-8 trailer text should match expected value");
         }
     }
+    // CPD-ON
 }

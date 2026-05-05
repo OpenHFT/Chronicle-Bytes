@@ -20,9 +20,9 @@ import static org.junit.jupiter.api.Assumptions.assumeFalse;
  * is essential to avoid exceptions when parsing optional fields in
  * variable-length messages.
  */
-@SuppressWarnings({"deprecation", "MMOverusedWord"}) // read domain terminology
+@SuppressWarnings({"deprecation", "MMOverusedWord", "PMD.JUnit5TestShouldBePackagePrivate"})
 @DisplayName("Lenient reads return default values on empty input")
-public class ReadLenientTest extends BytesTestCommon {
+class ReadLenientTest extends BytesTestCommon {
     @Test
     @DisplayName("lenient reads return default values for empty input")
     public void testLenient() {

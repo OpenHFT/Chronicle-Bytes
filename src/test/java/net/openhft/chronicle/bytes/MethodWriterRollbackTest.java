@@ -22,7 +22,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
  * stream.
  */
 @DisplayName("Method writer rollback restores write position")
-public class MethodWriterRollbackTest extends BytesTestCommon {
+@SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate")
+class MethodWriterRollbackTest extends BytesTestCommon {
 
     interface Failer {
         void go() throws Throwable; // declare Throwable to test non-Exception path

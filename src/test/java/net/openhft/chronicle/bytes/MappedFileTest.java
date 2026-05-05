@@ -31,9 +31,9 @@ import static org.junit.jupiter.api.Assumptions.assumeFalse;
  * resource lifecycle management is essential to avoid memory leaks and
  * file handle exhaustion.
  */
-@SuppressWarnings("deprecation")
+@SuppressWarnings({"deprecation", "PMD.JUnit5TestShouldBePackagePrivate"})
 @DisplayName("Mapped file behaviours for reference counts and IO")
-public class MappedFileTest extends BytesTestCommon {
+class MappedFileTest extends BytesTestCommon {
 
     @TempDir
     Path tmpDir;

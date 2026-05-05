@@ -44,7 +44,7 @@ import static org.junit.jupiter.api.Assumptions.assumeFalse;
  * data corruption and resource leaks in production systems.
  * In order to prevent resource exhaustion, these tests verify cleanup.
  */
-@SuppressWarnings({"rawtypes", "deprecation", "checkstyle:MMLacksPurpose", "checkstyle:MMOverusedWord"})
+@SuppressWarnings({"rawtypes", "deprecation", "checkstyle:MMLacksPurpose", "checkstyle:MMOverusedWord", "PMD.JUnit5TestShouldBePackagePrivate"})
 @DisplayName("Mapped bytes behaviours across mapping and threading cases")
 public class MappedBytesTest extends BytesTestCommon {
 
@@ -59,20 +59,19 @@ public class MappedBytesTest extends BytesTestCommon {
             "the mobile phone again like the original iPhone did, or is Apple now just playing catch-up " +
             "with the rest of the industry? (For a comparison with one rival device, see iPhone X vs LG G7.)\n";
 
-    private final StringBuilder largeTextBuilder = new StringBuilder();
+    private final String text = buildLargeText();
 
-    private final String text;
-
-    {
+    private static String buildLargeText() {
+        StringBuilder largeTextBuilder = new StringBuilder();
         for (int i = 0; i < 200; i++) {
             largeTextBuilder.append(SMALL_TEXT);
         }
-
-        text = largeTextBuilder.toString();
+        return largeTextBuilder.toString();
     }
 
     @SuppressWarnings("EmptyMethod")
     @BeforeEach
+    @Override
     public void threadDump() {
         assumeFalse(Jvm.maxDirectMemory() == 0,
                 "Direct memory must be available for mapped bytes tests");

@@ -31,7 +31,8 @@ import static org.junit.jupiter.api.Assumptions.assumeFalse;
  * memory-mapped regions.
  */
 @DisplayName("Mapped bytes boundary conditions for write and read")
-public class MappedBytesBoundaryTest extends BytesTestCommon {
+@SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate")
+class MappedBytesBoundaryTest extends BytesTestCommon {
     @BeforeEach
     public void setUp() {
         if (OS.isWindows())

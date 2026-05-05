@@ -12,9 +12,9 @@ import java.nio.BufferUnderflowException;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
-@SuppressWarnings({"rawtypes", "deprecation"})
+@SuppressWarnings({"rawtypes", "deprecation", "PMD.JUnit5TestShouldBePackagePrivate"})
 @DisplayName("Read write marshallable round trip examples")
-public class ReadWriteMarshallableTest extends BytesTestCommon {
+class ReadWriteMarshallableTest extends BytesTestCommon {
     @Test
     @DisplayName("length prefixed marshalling preserves nested data")
     public void test()
