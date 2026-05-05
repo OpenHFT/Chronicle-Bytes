@@ -22,7 +22,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * issues in text-based long stores.
  */
 @DisplayName("Text long reference update locking and alignment")
-public class TextLongReferenceTest extends BytesTestCommon {
+@SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate")
+class TextLongReferenceTest extends BytesTestCommon {
 
     @Test
     @DisplayName("text long reference updates value and string format")

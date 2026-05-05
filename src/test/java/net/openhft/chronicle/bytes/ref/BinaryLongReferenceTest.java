@@ -27,9 +27,9 @@ import static org.junit.jupiter.api.Assumptions.assumeFalse;
  * operations are essential for lock-free sequence numbers in shared memory
  * queues.
  */
-@SuppressWarnings("MMOverusedWord") // value domain terminology
+@SuppressWarnings({"MMOverusedWord", "PMD.JUnit5TestShouldBePackagePrivate"})
 @DisplayName("Binary long reference behaviour for native store updates")
-public class BinaryLongReferenceTest extends BytesTestCommon {
+class BinaryLongReferenceTest extends BytesTestCommon {
     @Test
     @DisplayName("native bytes store operations update a single long")
     public void test() {

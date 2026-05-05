@@ -19,7 +19,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * structures.
  */
 @DisplayName("Binary two long reference behaviour for paired updates")
-public class BinaryTwoLongReferenceTest extends BytesTestCommon {
+@SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate")
+class BinaryTwoLongReferenceTest extends BytesTestCommon {
     @Test
     @DisplayName("native bytes store operations update two long values")
     public void test() {

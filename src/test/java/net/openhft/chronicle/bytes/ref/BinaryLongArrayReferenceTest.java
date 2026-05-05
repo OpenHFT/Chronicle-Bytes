@@ -25,9 +25,10 @@ import static net.openhft.chronicle.bytes.ref.BinaryLongReference.LONG_NOT_COMPL
  * array storage is essential for indexed long lookups in memory-mapped
  * data structures.
  */
-@SuppressWarnings("deprecation")
+@SuppressWarnings({"deprecation", "PMD.JUnit5TestShouldBePackagePrivate"})
 @DisplayName("Binary long array reference marshalling and access")
-public class BinaryLongArrayReferenceTest extends BytesTestCommon {
+// CPD-OFF
+class BinaryLongArrayReferenceTest extends BytesTestCommon {
     @Test
     @DisplayName("direct array values round trip through reference")
     public void getSetValues() {
@@ -375,3 +376,4 @@ public class BinaryLongArrayReferenceTest extends BytesTestCommon {
         }
     }
 }
+// CPD-ON

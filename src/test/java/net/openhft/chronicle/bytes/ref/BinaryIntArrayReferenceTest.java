@@ -26,7 +26,7 @@ import static org.junit.jupiter.api.Assumptions.assumeFalse;
  * memory integer lookups. The test validates capacity enforcement, atomic
  * compareAndSet operations, and boundary condition handling.
  */
-@SuppressWarnings({"deprecation", "MMLacksPurpose"}) // Javadoc explains indexed array access purpose
+@SuppressWarnings({"deprecation", "MMLacksPurpose", "PMD.JUnit5TestShouldBePackagePrivate"}) // Javadoc explains indexed array access purpose
 @DisplayName("Binary int array reference marshalling and access")
 public class BinaryIntArrayReferenceTest extends BytesTestCommon {
     @Test

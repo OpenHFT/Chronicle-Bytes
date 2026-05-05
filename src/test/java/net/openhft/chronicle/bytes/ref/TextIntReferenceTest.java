@@ -22,7 +22,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * issues in text-based stores.
  */
 @DisplayName("Text int reference update locking and alignment")
-public class TextIntReferenceTest extends BytesTestCommon {
+@SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate")
+class TextIntReferenceTest extends BytesTestCommon {
     @Test
     @DisplayName("text int reference updates value and formats output")
     public void test() {

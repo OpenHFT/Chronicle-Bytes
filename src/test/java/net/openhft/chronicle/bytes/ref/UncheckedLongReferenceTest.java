@@ -19,7 +19,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * requires careful validation to avoid memory corruption in production systems.
  */
 @DisplayName("UncheckedLongReference - validates atomic operations on unguarded long slots")
-public class UncheckedLongReferenceTest extends BytesTestCommon {
+@SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate")
+class UncheckedLongReferenceTest extends BytesTestCommon {
     @Test
     @DisplayName("unchecked long reference updates backing store correctly")
     public void test() {

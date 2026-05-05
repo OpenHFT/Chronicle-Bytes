@@ -24,8 +24,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * backing stores.
  */
 @DisplayName("Byteable reference store reservation and release")
-@SuppressWarnings("rawtypes")
-public class ByteableReferenceTest extends BytesTestCommon {
+@SuppressWarnings({"rawtypes", "PMD.JUnit5TestShouldBePackagePrivate"})
+class ByteableReferenceTest extends BytesTestCommon {
 
     public static Stream<Arguments> testData() {
         Stream<Arguments> objects = Stream.of(

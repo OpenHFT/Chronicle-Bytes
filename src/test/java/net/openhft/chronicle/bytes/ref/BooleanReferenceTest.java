@@ -30,9 +30,9 @@ import static org.junit.jupiter.api.Assumptions.assumeFalse;
  * to avoid flag corruption in protocol state management. This test validates
  * read, write, closed-state errors, and bytesStore reassignment behaviour.
  */
-@SuppressWarnings("MMOverusedWord") // reference domain terminology
+@SuppressWarnings({"MMOverusedWord", "PMD.JUnit5TestShouldBePackagePrivate"})
 @DisplayName("Boolean reference binary and text format behaviours")
-public class BooleanReferenceTest extends BytesTestCommon {
+class BooleanReferenceTest extends BytesTestCommon {
 
     @BeforeEach
     void skipOnWindowsAndWsl() {

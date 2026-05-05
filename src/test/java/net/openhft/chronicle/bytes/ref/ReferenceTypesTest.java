@@ -17,9 +17,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * correct value storage is essential for both human-readable and compact
  * binary formats.
  */
-@SuppressWarnings("MMOverusedWord") // value domain terminology
+@SuppressWarnings({"MMOverusedWord", "PMD.JUnit5TestShouldBePackagePrivate"})
 @DisplayName("Reference type behaviours for text and binary values")
-public class ReferenceTypesTest extends BytesTestCommon {
+class ReferenceTypesTest extends BytesTestCommon {
 
     @Test
     @DisplayName("text int reference round trip updates values correctly")

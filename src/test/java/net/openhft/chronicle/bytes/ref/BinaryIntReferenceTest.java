@@ -18,9 +18,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * operations are essential for lock-free counters in shared memory
  * structures.
  */
-@SuppressWarnings("MMOverusedWord") // value domain terminology
+@SuppressWarnings({"MMOverusedWord", "PMD.JUnit5TestShouldBePackagePrivate"})
 @DisplayName("Binary int reference behaviour for native store updates")
-public class BinaryIntReferenceTest extends BytesTestCommon {
+class BinaryIntReferenceTest extends BytesTestCommon {
     @Test
     @DisplayName("native bytes store operations update a single int")
     public void test() {

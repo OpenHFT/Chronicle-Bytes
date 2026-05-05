@@ -20,7 +20,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * inspection of stored data.
  */
 @DisplayName("Text long array reference storage formatting and access")
-public class TextLongArrayReferenceTest extends BytesTestCommon {
+@SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate")
+class TextLongArrayReferenceTest extends BytesTestCommon {
     @Test
     @DisplayName("text long array reference stores values and formats output")
     public void getSetValues() {

@@ -23,8 +23,8 @@ import static org.junit.jupiter.api.Assumptions.assumeFalse;
  * in diagnostic tools.
  */
 @DisplayName("Text int array reference write read and capacity checks")
-@SuppressWarnings("deprecation")
-public class TextIntArrayReferenceTest extends BytesTestCommon {
+@SuppressWarnings({"deprecation", "PMD.JUnit5TestShouldBePackagePrivate"})
+class TextIntArrayReferenceTest extends BytesTestCommon {
 
     @Test
     @DisplayName("write and read array preserves capacity and stored values")
