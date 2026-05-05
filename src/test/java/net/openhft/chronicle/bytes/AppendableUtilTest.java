@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * Tests AppendableUtil formatting, length adjustment, and UTF-8 parsing helpers because
  * correct character handling is required for text protocols and human-readable output.
  */
-@SuppressWarnings("deprecation")
+@SuppressWarnings({"deprecation", "PMD.JUnit5TestShouldBePackagePrivate"})
 @DisplayName("AppendableUtil - formatting, length, and UTF-8 helpers for StringBuilder and Bytes")
 public class AppendableUtilTest extends BytesTestCommon {
 
@@ -309,7 +309,7 @@ public class AppendableUtilTest extends BytesTestCommon {
     @DisplayName("findUtf8Length with byte array coder 0 and high bytes")
     void findUtf8LengthByteArrayCoderZeroHighBytes() {
         // Bytes > 0x7F require 2 bytes in UTF-8
-        byte[] bytes = new byte[]{(byte) 0x80, (byte) 0xFF};
+        byte[] bytes = {(byte) 0x80, (byte) 0xFF};
         long length = AppendableUtil.findUtf8Length(bytes, (byte) 0);
         assertEquals(4, length,
                 "findUtf8Length counts extra bytes for high values");
@@ -319,7 +319,7 @@ public class AppendableUtilTest extends BytesTestCommon {
     @DisplayName("findUtf8Length with byte array coder 1 (UTF-16)")
     void findUtf8LengthByteArrayCoderOne() {
         // UTF-16 encoding of 'AB' = 0x0041, 0x0042
-        byte[] bytes = new byte[]{0x41, 0x00, 0x42, 0x00};
+        byte[] bytes = {0x41, 0x00, 0x42, 0x00};
         long length = AppendableUtil.findUtf8Length(bytes, (byte) 1);
         assertEquals(2, length,
                 "findUtf8Length with coder 1 for ASCII chars");

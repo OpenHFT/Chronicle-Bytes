@@ -10,7 +10,8 @@ import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @DisplayName("Bytes indexOf covers empty input and offset branch scenarios")
-public class BytesIndexOfTest extends BytesTestCommon {
+@SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate")
+class BytesIndexOfTest extends BytesTestCommon {
 
     @Test
     @DisplayName("indexOf handles empty source and empty target")

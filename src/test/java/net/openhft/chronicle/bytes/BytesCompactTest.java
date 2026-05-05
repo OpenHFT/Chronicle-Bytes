@@ -18,9 +18,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * Tests compact behaviour of Bytes across read, skip, append, and buffer state operations
  * because correct position reset is required to avoid buffer exhaustion during reuse.
  */
-@SuppressWarnings("checkstyle:MMOverusedWord")
+@SuppressWarnings({"checkstyle:MMOverusedWord", "PMD.JUnit5TestShouldBePackagePrivate"})
 @DisplayName("Bytes - compact behaviour across native and heap allocators")
-public class BytesCompactTest {
+class BytesCompactTest {
 
     /**
      * Provides test data for parameterized tests.

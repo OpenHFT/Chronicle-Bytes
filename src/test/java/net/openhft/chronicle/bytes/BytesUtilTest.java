@@ -27,6 +27,7 @@ import static org.junit.jupiter.api.Assumptions.assumeTrue;
  * Tests BytesUtil utility methods for stop bit encoding, alignment, and trivially copyable
  * detection because correct utility behaviour is essential for low-level byte operations.
  */
+@SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate")
 @DisplayName("BytesUtil utility methods should handle stop bit encoding, alignment, and copyable detection")
 public class BytesUtilTest extends BytesTestCommon {
 
@@ -245,11 +246,11 @@ public class BytesUtilTest extends BytesTestCommon {
     }
 
     @Test
-    @SuppressWarnings({"deprecation", "removal"})
+    @SuppressWarnings({"deprecation", "removal", "PMD.UnnecessaryBoxing"})
     @DisplayName("equals returns true for equivalent boxed integer objects")
     public void equals_equivalentObjects() {
         // Intentional boxing to create two equivalent but distinct objects
-        assertTrue(BytesUtil.equals(new Integer(1), new Integer(1)),
+        assertTrue(BytesUtil.equals(Integer.valueOf(1), Integer.valueOf(1)),
                 "equals matches equivalent boxed integers");
     }
 

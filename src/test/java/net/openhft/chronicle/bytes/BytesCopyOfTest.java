@@ -13,7 +13,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * is required to avoid data loss when copying partial buffer views.
  */
 @DisplayName("BytesUtil - copyOf preserves readable content from source position")
-public class BytesCopyOfTest extends BytesTestCommon {
+@SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate")
+class BytesCopyOfTest extends BytesTestCommon {
 
     @Test
     @DisplayName("copyOf returns direct bytes with same readable content")

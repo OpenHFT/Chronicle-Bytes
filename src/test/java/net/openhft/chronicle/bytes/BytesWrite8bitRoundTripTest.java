@@ -13,7 +13,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * 8-bit string encoding is essential for ISO-8859-1 content storage.
  */
 @DisplayName("write8bit round-trip for heap and direct bytes")
-public class BytesWrite8bitRoundTripTest extends BytesTestCommon {
+@SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate")
+class BytesWrite8bitRoundTripTest extends BytesTestCommon {
 
     @Test
     @DisplayName("round trip write8bit on heap bytes")

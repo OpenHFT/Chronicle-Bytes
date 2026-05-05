@@ -18,9 +18,9 @@ import static org.mockito.Mockito.*;
  * Tests BytesRingBuffer mock delegation behaviour because correct ring buffer operations
  * are essential for circular buffer scenarios.
  */
-@SuppressWarnings("deprecation")
+@SuppressWarnings({"deprecation", "PMD.JUnit5TestShouldBePackagePrivate"})
 @DisplayName("Bytes ring buffer mock delegation scenarios")
-public class BytesRingBufferTest {
+class BytesRingBufferTest {
 
     @Mock
     private BytesRingBuffer bytesRingBuffer;

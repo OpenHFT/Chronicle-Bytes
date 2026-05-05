@@ -15,9 +15,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * Tests BytesStore default methods for boundary checks and comparisons because correct
  * behaviour of inside, zeroOut, byteCheckSum, and equalBytes is required for data safety.
  */
-@SuppressWarnings("deprecation")
+@SuppressWarnings({"deprecation", "PMD.JUnit5TestShouldBePackagePrivate"})
 @DisplayName("BytesStore default methods cover boundary and comparison scenarios")
-public class BytesStoreAdditionalTest extends BytesTestCommon {
+class BytesStoreAdditionalTest extends BytesTestCommon {
 
     @Test
     @DisplayName("inside reports offsets within the safe limits")

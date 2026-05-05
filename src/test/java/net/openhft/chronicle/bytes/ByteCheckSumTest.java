@@ -13,7 +13,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * for data integrity verification in streaming and persistence scenarios.
  */
 @DisplayName("Bytes - byteCheckSum for direct and heap allocations")
-public class ByteCheckSumTest extends BytesTestCommon {
+@SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate")
+class ByteCheckSumTest extends BytesTestCommon {
     @Test
     @DisplayName("byteCheckSum computes checksum for direct bytes")
     public void test() {

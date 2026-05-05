@@ -17,7 +17,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
  * position manipulation is essential for variable-length message framing.
  */
 @DisplayName("writeSkip position reservation and backtracking scenarios")
-public class BytesWriteSkipBehaviourTest extends BytesTestCommon {
+@SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate")
+class BytesWriteSkipBehaviourTest extends BytesTestCommon {
 
     @Test
     @DisplayName("reserve header space then fill payload")

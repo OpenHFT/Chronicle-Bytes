@@ -16,9 +16,9 @@ import static org.mockito.Mockito.*;
  * Tests Byteable interface methods using mocks because correct offset, maxSize, and
  * lock behaviour must be verified to avoid memory access errors in production.
  */
-@SuppressWarnings("deprecation")
+@SuppressWarnings({"deprecation", "PMD.JUnit5TestShouldBePackagePrivate"})
 @DisplayName("Byteable - offset, maxSize, and lock method behaviour via mocks")
-public class ByteableTest {
+class ByteableTest {
 
     private Byteable byteable;
 

@@ -44,7 +44,7 @@ import static org.junit.jupiter.api.Assumptions.assumeTrue;
  * Tests Bytes behaviour across allocator variants and scenarios because comprehensive coverage
  * is essential for ensuring consistent behaviour across heap, direct, and mapped implementations.
  */
-@SuppressWarnings({"rawtypes", "deprecation"})
+@SuppressWarnings({"rawtypes", "deprecation", "PMD.JUnit5TestShouldBePackagePrivate", "PMD.JUnitUseExpected"})
 @DisplayName("Bytes behaviour across allocator variants and scenarios")
 public class BytesTest extends BytesTestCommon {
     private boolean parseDouble;
@@ -613,8 +613,10 @@ public class BytesTest extends BytesTestCommon {
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
     @DisplayName("Binary BigDecimal round-trips through bytes")
+    @SuppressWarnings("PMD.AvoidDecimalLiteralsInBigDecimalConstructor")
     public void testBigDecimalBinary(Allocator alloc1)
             throws BufferUnderflowException, ArithmeticException {
+        // Intentionally use BigDecimal(double) (not valueOf) to exercise constructor semantics.
         for (double d : new double[]{1.0, 1000.0, 0.1}) {
             @NotNull Bytes<?> b = alloc1.elasticBytes(16);
             b.writeBigDecimal(new BigDecimal(d));
@@ -628,8 +630,10 @@ public class BytesTest extends BytesTestCommon {
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
     @DisplayName("Text BigDecimal parsing round-trips values")
+    @SuppressWarnings("PMD.AvoidDecimalLiteralsInBigDecimalConstructor")
     public void testBigDecimalText(Allocator alloc1) {
         assumeFalse(alloc1 == HEAP_EMBEDDED, "Heap embedded allocator does not support BigDecimal text parsing");
+        // Intentionally use BigDecimal(double) (not valueOf) to exercise constructor semantics.
         for (double d : new double[]{1.0, 1000.0, 0.1}) {
             @NotNull Bytes<?> b = alloc1.elasticBytes(0xFFFF);
             b.append(new BigDecimal(d));

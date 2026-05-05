@@ -24,7 +24,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * <p>Exercises setCharAt, setLength, and parseUtf8 in order to verify all branches
  * are covered, to avoid silent failures when edge-case inputs are provided.
  */
-@SuppressWarnings("deprecation")
+@SuppressWarnings({"deprecation"})
 @DisplayName("AppendableUtilBranch - branch coverage for formatting, parsing, and UTF-8")
 class AppendableUtilBranchTest extends BytesTestCommon {
 
@@ -310,7 +310,7 @@ class AppendableUtilBranchTest extends BytesTestCommon {
     @Test
     @DisplayName("findUtf8Length(byte[], coder) with coder 0 should count bytes")
     void findUtf8LengthBytesCoderZero() {
-        byte[] bytes = new byte[]{'H', 'e', 'l', 'l', 'o'};
+        byte[] bytes = {'H', 'e', 'l', 'l', 'o'};
         assertEquals(5, AppendableUtil.findUtf8Length(bytes, (byte) 0),
                 "findUtf8Length should count ASCII bytes as 1 byte each");
     }
@@ -319,7 +319,7 @@ class AppendableUtilBranchTest extends BytesTestCommon {
     @DisplayName("findUtf8Length(byte[], coder) with coder 0 and high bytes")
     void findUtf8LengthBytesCoderZeroHighBytes() {
         // Bytes > 0x7F require 2 bytes in UTF-8
-        byte[] bytes = new byte[]{(byte) 0x80, (byte) 0x81};
+        byte[] bytes = {(byte) 0x80, (byte) 0x81};
         assertEquals(4, AppendableUtil.findUtf8Length(bytes, (byte) 0),
                 "findUtf8Length should count high bytes as 2 UTF-8 bytes");
     }
@@ -328,7 +328,7 @@ class AppendableUtilBranchTest extends BytesTestCommon {
     @DisplayName("findUtf8Length(byte[], coder) with coder 1 should decode UTF-16")
     void findUtf8LengthBytesCoderOne() {
         // UTF-16LE encoding of 'AB' (2 chars = 4 bytes: 41 00 42 00)
-        byte[] bytes = new byte[]{0x41, 0x00, 0x42, 0x00};
+        byte[] bytes = {0x41, 0x00, 0x42, 0x00};
         assertEquals(2, AppendableUtil.findUtf8Length(bytes, (byte) 1),
                 "findUtf8Length should map two ASCII chars to 2 UTF-8 bytes");
     }
@@ -337,7 +337,7 @@ class AppendableUtilBranchTest extends BytesTestCommon {
     @DisplayName("findUtf8Length(byte[], coder) with coder 1 and 2-byte chars")
     void findUtf8LengthBytesCoderOneTwoByte() {
         // UTF-16LE encoding of U+00E9 (E9 00)
-        byte[] bytes = new byte[]{(byte) 0xE9, 0x00};
+        byte[] bytes = {(byte) 0xE9, 0x00};
         assertEquals(2, AppendableUtil.findUtf8Length(bytes, (byte) 1),
                 "findUtf8Length should count U+00E9 as 2 UTF-8 bytes");
     }
@@ -346,7 +346,7 @@ class AppendableUtilBranchTest extends BytesTestCommon {
     @DisplayName("findUtf8Length(byte[], coder) with coder 1 and 3-byte chars")
     void findUtf8LengthBytesCoderOneThreeByte() {
         // UTF-16LE encoding of U+20AC (AC 20)
-        byte[] bytes = new byte[]{(byte) 0xAC, 0x20};
+        byte[] bytes = {(byte) 0xAC, 0x20};
         assertEquals(3, AppendableUtil.findUtf8Length(bytes, (byte) 1),
                 "findUtf8Length should count U+20AC as 3 UTF-8 bytes");
     }
@@ -354,7 +354,7 @@ class AppendableUtilBranchTest extends BytesTestCommon {
     @Test
     @DisplayName("findUtf8Length(byte[]) should handle ASCII bytes")
     void findUtf8LengthSingleByteArrayAscii() {
-        byte[] bytes = new byte[]{'H', 'e', 'l', 'l', 'o'};
+        byte[] bytes = {'H', 'e', 'l', 'l', 'o'};
         long length = AppendableUtil.findUtf8Length(bytes);
         assertTrue(length >= 5, "findUtf8Length(byte[]) should be >= 5, was " + length);
     }
@@ -362,7 +362,7 @@ class AppendableUtilBranchTest extends BytesTestCommon {
     @Test
     @DisplayName("findUtf8Length(byte[]) should stop at the first null byte terminator")
     void findUtf8LengthSingleByteArrayWithNull() {
-        byte[] bytes = new byte[]{'H', 'e', 0, 'l', 'o'};
+        byte[] bytes = {'H', 'e', 0, 'l', 'o'};
         long length = AppendableUtil.findUtf8Length(bytes);
         assertTrue(length >= 2, "findUtf8Length(byte[]) should count bytes before null, was " + length);
     }
@@ -371,7 +371,7 @@ class AppendableUtilBranchTest extends BytesTestCommon {
     @DisplayName("findUtf8Length(byte[]) should handle multi-byte sequences")
     void findUtf8LengthSingleByteArrayMultiByte() {
         // Simulate various UTF-8 lead bytes
-        byte[] bytes = new byte[]{(byte) 0xC0, 0x41}; // 2-byte sequence start
+        byte[] bytes = {(byte) 0xC0, 0x41}; // 2-byte sequence start
         long length = AppendableUtil.findUtf8Length(bytes);
         assertTrue(length > 0, "findUtf8Length(byte[]) should be positive for multibyte input, was " + length);
     }

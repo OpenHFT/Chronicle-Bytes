@@ -17,7 +17,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * correct resource management is required to avoid memory leaks and dangling references.
  */
 @DisplayName("Bytes lifecycle behaviour scenarios for reference counting and growth")
-public class BytesLifecycleTest extends BytesTestCommon {
+@SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate")
+class BytesLifecycleTest extends BytesTestCommon {
 
     @Test
     @DisplayName("Slices update reference counts on reserve and release")

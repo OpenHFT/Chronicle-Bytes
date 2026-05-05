@@ -24,7 +24,8 @@ import static org.junit.jupiter.api.Assumptions.assumeFalse;
  * correct cross-allocator data transfer is required for heterogeneous deployment scenarios.
  */
 @DisplayName("Bytes - partial and full write operations across NATIVE and HEAP allocators")
-public class Bytes2Test extends BytesTestCommon {
+@SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate")
+class Bytes2Test extends BytesTestCommon {
 
     static Stream<Arguments> data() {
         if (Jvm.maxDirectMemory() == 0)

@@ -14,9 +14,9 @@ import java.io.IOException;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
-@SuppressWarnings("deprecation")
+@SuppressWarnings({"deprecation", "PMD.JUnit5TestShouldBePackagePrivate"})
 @DisplayName("BytesTextMethodTester integration workflow scenarios for text IO")
-public class BytesTextMethodTesterTest extends BytesTestCommon {
+class BytesTextMethodTesterTest extends BytesTestCommon {
     @BeforeEach
     public void directEnabled() {
         assumeFalse(Jvm.maxDirectMemory() == 0, "Direct memory must be available for BytesTextMethodTester tests");

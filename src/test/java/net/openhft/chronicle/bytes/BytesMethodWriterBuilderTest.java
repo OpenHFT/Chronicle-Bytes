@@ -23,9 +23,9 @@ import static org.junit.jupiter.api.Assumptions.assumeFalse;
  * Tests BytesMethodWriterBuilder for method writing because correct writer behaviour
  * is essential for serialising method calls to bytes.
  */
-@SuppressWarnings("deprecation")
+@SuppressWarnings({"deprecation", "PMD.JUnit5TestShouldBePackagePrivate"})
 @DisplayName("BytesMethodWriterBuilder method serialisation round-trip")
-public class BytesMethodWriterBuilderTest extends BytesTestCommon {
+class BytesMethodWriterBuilderTest extends BytesTestCommon {
 
     @Test
     @DisplayName("primitive and object method writes round trip through reader")
@@ -35,6 +35,7 @@ public class BytesMethodWriterBuilderTest extends BytesTestCommon {
         try {
             final IBytesMethod m = bytes.bytesMethodWriter(IBytesMethod.class);
 
+            // CPD-OFF
             final MyByteable mb1 = new MyByteable(false, (byte) 1, (short) 2, '3', 4, 5.5f, 6, 7.7);
             final MyByteable mb2 = new MyByteable(true, (byte) 11, (short) 22, 'T', 44, 5.555f, 66, 77.77);
 
@@ -48,6 +49,7 @@ public class BytesMethodWriterBuilderTest extends BytesTestCommon {
             final MyScalars ms1 = new MyScalars("Hello", BigInteger.ONE, BigDecimal.TEN, zdt1.toLocalDate(), zdt1.toLocalTime(), zdt1.toLocalDateTime(), zdt1, uuid1);
             final MyScalars ms2 = new MyScalars("World", BigInteger.ZERO, BigDecimal.ZERO, zdt2.toLocalDate(), zdt2.toLocalTime(), zdt2.toLocalDateTime(), zdt2, uuid2);
             final MyNested mn2 = new MyNested(mb2, ms2);
+            // CPD-ON
 
             m.myScalars(ms1);
 

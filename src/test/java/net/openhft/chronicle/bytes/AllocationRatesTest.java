@@ -28,7 +28,8 @@ buffers 128 KB took an average of 8,739 ns for heap ByteBuffer, 22,684 ns for di
  * verifies reference counts are properly reset to avoid resource leaks.
  */
 @DisplayName("AllocationRates - compare heap, direct, and native store allocation timings")
-public class AllocationRatesTest extends BytesTestCommon {
+@SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate")
+class AllocationRatesTest extends BytesTestCommon {
     private static final int BATCH = 10;
     private static final int BUFFER_SIZE = 128 * 1024;
     private static final int ALLOCATIONS = 10000;

@@ -24,9 +24,9 @@ import static org.junit.jupiter.api.Assumptions.assumeFalse;
  * Tests ByteStringParser operations for parsing primitives and strings because
  * correct deserialisation is essential for reliable data retrieval.
  */
-@SuppressWarnings("deprecation")
+@SuppressWarnings({"deprecation", "PMD.JUnit5TestShouldBePackagePrivate"})
 @DisplayName("ByteStringParser primitive and string deserialisation verifies round-trip parsing of numeric and text tokens")
-public class ByteStringParserTest extends BytesTestCommon {
+class ByteStringParserTest extends BytesTestCommon {
     @NotNull
     private final
     Bytes<?> bytes = Bytes.allocateElastic();
@@ -422,7 +422,7 @@ public class ByteStringParserTest extends BytesTestCommon {
 
     private void verifyFlexibleLongRejects(String input, String reason) {
         bytes.append(input).append(' ');
-        assertThrows(IORuntimeException.class, () -> bytes.parseFlexibleLong(),
+        assertThrows(IORuntimeException.class, bytes::parseFlexibleLong,
                 "parseFlexibleLong should reject " + reason + " input \"" + input + "\"");
     }
 }

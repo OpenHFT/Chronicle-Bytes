@@ -25,9 +25,9 @@ import static org.mockito.Mockito.*;
  * Tests AbstractBytes mock interactions for position, clear, and release operations because
  * correct delegation to the underlying BytesStore is required for memory safety and correctness.
  */
-@SuppressWarnings({"unchecked", "deprecation"})
+@SuppressWarnings({"unchecked", "deprecation", "PMD.JUnit5TestShouldBePackagePrivate"})
 @DisplayName("AbstractBytes - mock-based tests for delegation and state management")
-public class AbstractBytesTest {
+class AbstractBytesTest {
 
     private ConcreteBytes bytes;
     private BytesStore<Bytes<ByteBuffer>, ByteBuffer> mockBytesStore;

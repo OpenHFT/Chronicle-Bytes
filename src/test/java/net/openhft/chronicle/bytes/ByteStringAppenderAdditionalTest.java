@@ -12,9 +12,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * Tests additional ByteStringAppender branches for append operations because complete coverage
  * of formatting paths is essential for reliable string serialisation.
  */
-@SuppressWarnings("deprecation")
+@SuppressWarnings({"deprecation", "PMD.JUnit5TestShouldBePackagePrivate"})
 @DisplayName("ByteStringAppender covers append branches and formatting paths")
-public class ByteStringAppenderAdditionalTest extends BytesTestCommon {
+class ByteStringAppenderAdditionalTest extends BytesTestCommon {
 
     @Test
     @DisplayName("append handles empty sequences and base conversions")

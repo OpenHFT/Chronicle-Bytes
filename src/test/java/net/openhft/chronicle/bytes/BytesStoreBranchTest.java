@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * Tests BytesStore interface default methods covering branch paths for creation, wrapping,
  * atomic updates, and copy operations because complete coverage ensures reliable behaviour.
  */
-@SuppressWarnings("deprecation")
+@SuppressWarnings({"deprecation"})
 @DisplayName("BytesStore interface default method branch coverage")
 class BytesStoreBranchTest extends BytesTestCommon {
 
@@ -136,7 +136,7 @@ class BytesStoreBranchTest extends BytesTestCommon {
     @Test
     @DisplayName("wrap(byte[]) should create heap store")
     void wrapByteArray() {
-        byte[] data = new byte[]{1, 2, 3, 4, 5};
+        byte[] data = {1, 2, 3, 4, 5};
         BytesStore<?, byte[]> store = BytesStore.wrap(data);
         try {
             assertEquals(5, store.capacity(), "capacity should match array length");

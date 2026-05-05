@@ -36,7 +36,7 @@ import static org.junit.jupiter.api.Assumptions.assumeFalse;
  * <p>Covers primitive reads, stop-bit encoding, compare-and-swap atomics, and stream
  * operations in order to verify correctness across position-based and indexed access.
  */
-@SuppressWarnings("deprecation")
+@SuppressWarnings({"deprecation", "PMD.JUnit5TestShouldBePackagePrivate"})
 @DisplayName("ByteStore read and write behaviour coverage tests")
 public class ByteStoreTest extends BytesTestCommon {
 
@@ -180,7 +180,7 @@ public class ByteStoreTest extends BytesTestCommon {
     public void testWriteReadUtf8()
             throws IORuntimeException {
         bytes.writeUtf8(null);
-        final String[] words = new String[]{"Hello", "World!", "Bye£€!", ""};
+        final String[] words = {"Hello", "World!", "Bye£€!", ""};
         for (String word : words) {
             bytes.writeUtf8(word);
         }

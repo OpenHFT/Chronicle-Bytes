@@ -22,9 +22,9 @@ import static org.junit.jupiter.api.Assumptions.assumeFalse;
  * Tests ByteStringAppender operations for appending primitives and strings because
  * correct serialisation is essential for reliable data storage.
  */
-@SuppressWarnings("deprecation")
+@SuppressWarnings({"deprecation", "PMD.JUnit5TestShouldBePackagePrivate"})
 @DisplayName("ByteStringAppender primitive and string serialisation verifies round-trip append and parse operations")
-public class ByteStringAppenderTest extends BytesTestCommon {
+class ByteStringAppenderTest extends BytesTestCommon {
     private Bytes<?> bytes;
 
     @BeforeEach

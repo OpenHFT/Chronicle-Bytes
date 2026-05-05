@@ -16,7 +16,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * content, to avoid off-by-one errors and data corruption.
  */
 @DisplayName("BytesStore substring and slicing scenario coverage")
-public class BytesStoreTest extends BytesTestCommon {
+@SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate")
+class BytesStoreTest extends BytesTestCommon {
     @Test
     @DisplayName("Create BytesStore from short literal bytes")
     public void from() {

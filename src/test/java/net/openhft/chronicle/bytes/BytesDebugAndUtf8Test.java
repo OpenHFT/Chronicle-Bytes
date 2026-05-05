@@ -14,7 +14,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
  * correct encoding round-trip and debug visibility are required for diagnostics.
  */
 @DisplayName("BytesUtil - UTF-8 append, parse, and debug string generation")
-public class BytesDebugAndUtf8Test extends BytesTestCommon {
+@SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate")
+class BytesDebugAndUtf8Test extends BytesTestCommon {
 
     @Test
     @DisplayName("append utf8, parse utf8, and debug string output")

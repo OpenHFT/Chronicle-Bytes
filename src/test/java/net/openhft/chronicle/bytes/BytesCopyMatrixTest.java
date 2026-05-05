@@ -18,7 +18,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * required to avoid corruption when moving bytes between different memory regions.
  */
 @DisplayName("Bytes - copyTo matrix tests for heap and native store combinations")
-public class BytesCopyMatrixTest extends BytesTestCommon {
+@SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate")
+class BytesCopyMatrixTest extends BytesTestCommon {
 
     @Test
     @DisplayName("copy heap bytes to native store preserves readable data")

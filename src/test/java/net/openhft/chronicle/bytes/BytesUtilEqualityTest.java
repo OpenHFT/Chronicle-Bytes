@@ -14,7 +14,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * because correct byte-wise equality is essential for content verification.
  */
 @DisplayName("BytesUtil equality should verify byte content across long, int, short, and byte comparison paths")
-public class BytesUtilEqualityTest extends BytesTestCommon {
+@SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate")
+class BytesUtilEqualityTest extends BytesTestCommon {
 
     @Test
     @DisplayName("bytesEqual covers long, int, short, and byte paths")

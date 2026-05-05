@@ -37,10 +37,10 @@ import static org.junit.jupiter.api.Assumptions.assumeFalse;
  * <p>Verifies primitives, scalars, nested structures, and collections in order to ensure
  * that marshalled data can be reconstructed, to avoid data loss or corruption.
  */
-@SuppressWarnings("deprecation")
+@SuppressWarnings({"deprecation", "PMD.JUnit5TestShouldBePackagePrivate"})
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @DisplayName("BytesMarshallable serialisation round-trip coverage")
-public class BytesMarshallableTest extends BytesTestCommon {
+class BytesMarshallableTest extends BytesTestCommon {
 
     private static Stream<Arguments> guardedVariants() {
         return Stream.of(
@@ -437,8 +437,7 @@ public class BytesMarshallableTest extends BytesTestCommon {
             bm3.value = 11L;
             uc.justBytesMarshallableCollection.add(bm3);
 
-            uc.justSet = new HashSet<>();
-            uc.justSet.add(RetentionPolicy.RUNTIME);
+            uc.justSet = EnumSet.of(RetentionPolicy.RUNTIME);
 
             uc.justMap = new HashMap<>();
             uc.justMap.put("i", 12L);

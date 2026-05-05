@@ -31,7 +31,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * behaviour must be verified for heap, direct, elastic, mapped, and checked variants
  * to avoid runtime failures in different deployment scenarios.
  */
-@SuppressWarnings({"rawtypes", "unchecked", "deprecation"})
+@SuppressWarnings({"rawtypes", "unchecked", "deprecation", "PMD.JUnit5TestShouldBePackagePrivate"})
 @DisplayName("Bytes - parameterised tests for read, write, append, and toString across allocators")
 public class Bytes3Test extends BytesTestCommon {
 
