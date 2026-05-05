@@ -13,6 +13,7 @@ public final class TestSampleValues {
     private TestSampleValues() {
     }
 
+    // CPD-OFF
     public static Samples samples() {
         final MyByteable mb1 = new MyByteable(false, (byte) 1, (short) 2, '3', 4, 5.5f, 6, 7.7);
         final MyByteable mb2 = new MyByteable(true, (byte) 11, (short) 22, 'T', 44, 5.555f, 66, 77.77);
@@ -27,6 +28,7 @@ public final class TestSampleValues {
 
         return new Samples(mb1, mb2, ms1, ms2, mn1, mn2);
     }
+    // CPD-ON
 
     public static final class Samples {
         private final MyByteable mb1;

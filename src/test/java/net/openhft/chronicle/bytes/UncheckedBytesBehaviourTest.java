@@ -14,7 +14,8 @@ import static org.junit.jupiter.api.Assertions.assertSame;
  * validation to ensure the correct wrapper is returned for direct memory.
  */
 @DisplayName("UncheckedBytesBehaviour - validates unchecked wrapper selection")
-public class UncheckedBytesBehaviourTest extends BytesTestCommon {
+@SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate")
+class UncheckedBytesBehaviourTest extends BytesTestCommon {
 
     @Test
     @DisplayName("unchecked direct bytes append while heap bytes return same instance when false")

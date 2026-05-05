@@ -13,9 +13,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * Tests VanillaBytes usage patterns because correct native store wrapping
  * and store swapping are essential for zero-copy data access.
  */
-@SuppressWarnings("deprecation")
+@SuppressWarnings({"deprecation", "PMD.JUnit5TestShouldBePackagePrivate"})
 @DisplayName("VanillaBytesUsage - validates native store wrapping and swapping")
-public class VanillaBytesUsageTest extends BytesTestCommon {
+class VanillaBytesUsageTest extends BytesTestCommon {
 
     @Test
     @DisplayName("wrapping a native store preserves offsets and limits")

@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assumptions.assumeTrue;
  * This test verifies that trivially copyable ranges are preserved so that
  * unsafe memory operations can be used safely in performance-critical paths.
  */
-@SuppressWarnings("checkstyle:MMOverusedWord")
+@SuppressWarnings({"checkstyle:MMOverusedWord"})
 @DisplayName("UnsafeRWObject - validates unsafe object field serialisation")
 class UnsafeRWObjectTest extends BytesTestCommon {
     @Test
@@ -190,7 +190,7 @@ class UnsafeRWObjectTest extends BytesTestCommon {
                         BytesUtil.triviallyCopyableRange(int[].class)),
                 "Trivially copyable range should match the expected int[] layout");
         Bytes<?> bytes = Bytes.allocateDirect(32);
-        int[] array = new int[]{1, 2, 4, 3};
+        int[] array = {1, 2, 4, 3};
         int offset = BytesUtil.triviallyCopyableStart(((Object) array).getClass());
         bytes.unsafeWriteObject(array, offset, 4 * 4);
         assertEquals("00000000 01 00 00 00 02 00 00 00  04 00 00 00 03 00 00 00 ········ ········\n",

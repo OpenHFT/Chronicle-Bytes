@@ -13,7 +13,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * essential to avoid BufferOverflowException during bulk writes.
  */
 @DisplayName("VanillaBytesEnsureCapacity - validates elastic growth on demand")
-public class VanillaBytesEnsureCapacityTest extends BytesTestCommon {
+@SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate")
+class VanillaBytesEnsureCapacityTest extends BytesTestCommon {
 
     @Test
     @DisplayName("elastic bytes grows capacity when writing beyond initial size")

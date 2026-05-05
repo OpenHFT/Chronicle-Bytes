@@ -19,7 +19,8 @@ import static org.junit.jupiter.api.Assumptions.assumeFalse;
  * is essential for preserving multi-byte characters via mapped files.
  */
 @DisplayName("UTF8Bytes - validates UTF-8 encoding via mapped bytes")
-public class UTF8BytesTest extends BytesTestCommon {
+@SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate")
+class UTF8BytesTest extends BytesTestCommon {
 
     private static final String MESSAGE = "awésome-message-1";
 

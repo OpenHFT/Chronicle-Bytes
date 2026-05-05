@@ -20,7 +20,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * the target directory is essential to avoid polluting the user file system.
  */
 @DisplayName("TempDirectoryIntegration - validates temp dir creation and cleanup")
-public class TempDirectoryIntegrationTest extends BytesTestCommon {
+@SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate")
+class TempDirectoryIntegrationTest extends BytesTestCommon {
 
     @Test
     @DisplayName("creates temp directory under target and cleans up")

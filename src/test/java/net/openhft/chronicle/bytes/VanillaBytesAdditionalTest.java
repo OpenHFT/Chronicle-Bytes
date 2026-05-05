@@ -17,9 +17,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * Tests VanillaBytes read and compareTo branches because correct path
  * selection is essential to optimise throughput for direct vs heap stores.
  */
-@SuppressWarnings("checkstyle:MMOverusedWord")
+@SuppressWarnings({"checkstyle:MMOverusedWord", "PMD.JUnit5TestShouldBePackagePrivate"})
 @DisplayName("VanillaBytes covers read and compareTo branch scenarios")
-public class VanillaBytesAdditionalTest extends BytesTestCommon {
+class VanillaBytesAdditionalTest extends BytesTestCommon {
 
     @Test
     @DisplayName("read uses native store fast path for direct bytes")

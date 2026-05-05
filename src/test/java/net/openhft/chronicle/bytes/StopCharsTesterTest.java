@@ -11,7 +11,8 @@ import org.junit.jupiter.api.Test;
  * delimiters so that tokenisation extracts the expected substrings.
  */
 @DisplayName("StopCharsTester - validates custom delimiter detection logic")
-public class StopCharsTesterTest {
+@SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate")
+class StopCharsTesterTest {
 
     @Test
     @DisplayName("custom stop-char tester flags comma and semicolon")

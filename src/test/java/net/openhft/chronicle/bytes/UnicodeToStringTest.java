@@ -15,7 +15,8 @@ import static org.junit.jupiter.api.Assumptions.assumeFalse;
  * to preserve multi-byte characters during round-trip serialisation.
  */
 @DisplayName("UnicodeToString - validates UTF-8 string round-trip conversion")
-public class UnicodeToStringTest {
+@SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate")
+class UnicodeToStringTest {
 
     @Test
     @DisplayName("UTF-8 string round trips using direct byte buffer")

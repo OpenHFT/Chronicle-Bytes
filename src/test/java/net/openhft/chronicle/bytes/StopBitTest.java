@@ -17,7 +17,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * must preserve payload integrity across all supported sizes.
  */
 @DisplayName("StopBit - validates round-trip encoding with variable payload sizes")
-public class StopBitTest extends BytesTestCommon {
+@SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate")
+class StopBitTest extends BytesTestCommon {
 
     @Test
     @DisplayName("stop-bit encoding round trips with variable payload sizes")

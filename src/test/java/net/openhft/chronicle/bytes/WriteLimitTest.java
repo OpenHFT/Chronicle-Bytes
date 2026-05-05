@@ -23,7 +23,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
  * enforcement is essential to avoid silent data corruption.
  */
 @DisplayName("WriteLimit - validates write limit enforcement across allocators")
-public class WriteLimitTest extends BytesTestCommon {
+@SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate")
+class WriteLimitTest extends BytesTestCommon {
     private static final Allocator[] ALLOCATORS = {Allocator.HEAP, Allocator.HEAP_EMBEDDED, Allocator.HEAP_UNCHECKED};
 
     public static Stream<Arguments> data() {

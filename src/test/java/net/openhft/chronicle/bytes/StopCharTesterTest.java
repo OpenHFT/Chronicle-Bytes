@@ -15,7 +15,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("StopCharTester validates behaviour for standard tester variants")
-public class StopCharTesterTest {
+@SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate")
+class StopCharTesterTest {
 
     private static Stream<Arguments> stopCharCases() {
         return Stream.of(

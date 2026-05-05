@@ -22,7 +22,8 @@ import static org.junit.jupiter.api.Assumptions.assumeFalse;
  * essential to ensure data reaches persistent storage as expected.
  */
 @DisplayName("SyncMode - validates mapped file sync mode propagation")
-public class SyncModeTest extends BytesTestCommon {
+@SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate")
+class SyncModeTest extends BytesTestCommon {
     public static Stream<SyncMode> parameters() {
         return Stream.of(SyncMode.values());
     }

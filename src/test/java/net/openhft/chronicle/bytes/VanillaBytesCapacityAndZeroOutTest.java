@@ -14,7 +14,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * expansion and clearing are essential to avoid stale data leaks.
  */
 @DisplayName("VanillaBytesCapacityAndZeroOut - validates growth and clearing")
-public class VanillaBytesCapacityAndZeroOutTest extends BytesTestCommon {
+@SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate")
+class VanillaBytesCapacityAndZeroOutTest extends BytesTestCommon {
 
     @Test
     @DisplayName("capacity grows and zeroOut clears the written range")

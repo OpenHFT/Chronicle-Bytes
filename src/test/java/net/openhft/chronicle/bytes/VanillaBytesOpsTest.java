@@ -13,7 +13,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * and zeroOut behaviour are essential for reliable data storage.
  */
 @DisplayName("VanillaBytesOps - validates primitive read/write and zeroOut")
-public class VanillaBytesOpsTest extends BytesTestCommon {
+@SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate")
+class VanillaBytesOpsTest extends BytesTestCommon {
 
     @Test
     @DisplayName("write and read primitives then zero out the written int")

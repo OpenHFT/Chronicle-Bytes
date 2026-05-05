@@ -25,9 +25,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * Tests struct-based memory layouts because correct field offsets and
  * linked-list traversal are essential to support C-interoperable data structures.
  */
-@SuppressWarnings("deprecation")
+@SuppressWarnings({"deprecation", "PMD.JUnit5TestShouldBePackagePrivate"})
 @DisplayName("Struct - validates native memory layouts and pointer traversal")
-public class StructTest extends BytesTestCommon {
+class StructTest extends BytesTestCommon {
 
     /**
      * Common base for structs to take care of initialisation and other boilerplating
@@ -296,7 +296,7 @@ public class StructTest extends BytesTestCommon {
         StringBuilder sb = new StringBuilder();
         for (Student s = s1; s != null; s = s.next()) {
             String line = s.name() + " " + s.gender() + ", born " + s.birth();
-            sb.append(line).append("\n");
+            sb.append(line).append('\n');
         }
 
         System.out.print(sb);
@@ -340,6 +340,7 @@ public class StructTest extends BytesTestCommon {
         static final int DAY = MONTH + 1;   // byte  day_
         static final int SIZE = DAY + 1;
 
+        @Override
         protected Date construct(long address) {
             return address == 0 ? new Date() : new Date(address);
         }
@@ -432,6 +433,7 @@ public class StructTest extends BytesTestCommon {
         Date birth;   // Date instance owned by the this Student
         Pointer<Student> next = new Pointer<>(this::construct);
 
+        @Override
         protected Student construct(long address) {
             return address == 0 ? new Student() : new Student(address);
         }

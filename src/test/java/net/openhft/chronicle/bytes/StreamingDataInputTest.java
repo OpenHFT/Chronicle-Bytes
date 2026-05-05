@@ -28,7 +28,8 @@ import static org.junit.jupiter.api.Assumptions.assumeFalse;
  * length-prefixed reads so that consumers can safely parse serialised data.
  */
 @DisplayName("StreamingDataInput - validates read operations and position management")
-public class StreamingDataInputTest extends BytesTestCommon {
+@SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate")
+class StreamingDataInputTest extends BytesTestCommon {
 
     public static Stream<Allocator> params() {
         return Arrays.stream(Allocator.values());

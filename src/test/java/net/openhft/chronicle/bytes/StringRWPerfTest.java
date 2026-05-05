@@ -13,7 +13,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * paths must preserve content while maintaining acceptable throughput.
  */
 @DisplayName("StringRWPerf - validates string encoding round-trip performance")
-public class StringRWPerfTest extends BytesTestCommon {
+@SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate")
+class StringRWPerfTest extends BytesTestCommon {
 
     private static final String UTF8 = "0123456789£123456789€123456789";
     private static final String ASCII = "012345678901234567890123456789";

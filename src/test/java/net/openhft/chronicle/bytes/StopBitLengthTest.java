@@ -14,7 +14,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * to avoid buffer overruns when reserving space for variable-length fields.
  */
 @DisplayName("StopBitLength - validates byte count boundaries for stop-bit encoding")
-public class StopBitLengthTest extends BytesTestCommon {
+@SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate")
+class StopBitLengthTest extends BytesTestCommon {
 
     @Test
     @DisplayName("stop-bit length boundaries match expected byte counts")

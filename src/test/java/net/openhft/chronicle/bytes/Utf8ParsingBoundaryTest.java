@@ -17,7 +17,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * to avoid data corruption or unexpected exceptions during deserialisation.
  */
 @DisplayName("Utf8ParsingBoundary - validates UTF-8 length and stop-char boundaries")
-public class Utf8ParsingBoundaryTest extends BytesTestCommon {
+@SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate")
+class Utf8ParsingBoundaryTest extends BytesTestCommon {
 
     @Test
     @DisplayName("parses explicit UTF-8 length boundaries for ASCII and multi-byte")

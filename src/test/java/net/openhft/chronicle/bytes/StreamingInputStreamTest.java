@@ -22,7 +22,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * standard Java I/O consumers.
  */
 @DisplayName("StreamingInputStream - validates InputStream adapter behaviour")
-public class StreamingInputStreamTest extends BytesTestCommon {
+@SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate")
+class StreamingInputStreamTest extends BytesTestCommon {
 
     // https://github.com/OpenHFT/Chronicle-Bytes/issues/48
     @Test

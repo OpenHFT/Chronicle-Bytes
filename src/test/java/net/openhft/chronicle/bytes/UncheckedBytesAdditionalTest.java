@@ -13,7 +13,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("UncheckedBytes behaviour with real backing stores")
-public class UncheckedBytesAdditionalTest {
+@SuppressWarnings({"PMD.JUnit5TestShouldBePackagePrivate"})
+class UncheckedBytesAdditionalTest {
 
     @Test
     @DisplayName("ensureCapacity grows the underlying bytes store")
@@ -144,7 +145,7 @@ public class UncheckedBytesAdditionalTest {
         try {
             source.write(new byte[] {9, 8, 7, 6});
             unchecked.write((BytesStore<?, ?>) source, 0L, 4L);
-            byte[] actual = new byte[] {
+            byte[] actual = {
                     underlying.readByte(0),
                     underlying.readByte(1),
                     underlying.readByte(2),
@@ -167,7 +168,7 @@ public class UncheckedBytesAdditionalTest {
         UncheckedBytes<?> unchecked = new UncheckedBytes<>(underlying);
         try {
             unchecked.append8bit("A\u20ACB");
-            byte[] actual = new byte[] {
+            byte[] actual = {
                     underlying.readByte(0),
                     underlying.readByte(1),
                     underlying.readByte(2)
@@ -205,7 +206,7 @@ public class UncheckedBytesAdditionalTest {
         UncheckedBytes<?> unchecked = new UncheckedBytes<>(underlying);
         try {
             char[] ascii = "abc".toCharArray();
-            char[] multi = new char[] {'\u00A3'};
+            char[] multi = {'\u00A3'};
             unchecked.appendUtf8(ascii, 0, ascii.length);
             unchecked.appendUtf8(multi, 0, 1);
             assertEquals('a',

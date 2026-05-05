@@ -12,9 +12,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * Tests streaming data output operations because correct stop-bit decimal
  * encoding is required to preserve precision in serialised numeric values.
  */
-@SuppressWarnings("deprecation")
+@SuppressWarnings({"deprecation", "PMD.JUnit5TestShouldBePackagePrivate"})
 @DisplayName("StreamingDataOutput covers decimal stop bit encoding branches")
-public class StreamingDataOutputAdditionalTest extends BytesTestCommon {
+class StreamingDataOutputAdditionalTest extends BytesTestCommon {
 
     @Test
     @DisplayName("writeStopBitDecimal encodes whole numbers with scale zero")
