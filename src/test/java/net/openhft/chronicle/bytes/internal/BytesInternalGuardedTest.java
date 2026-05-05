@@ -23,9 +23,9 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
-@SuppressWarnings({"rawtypes", "deprecation"})
+@SuppressWarnings({"rawtypes", "deprecation", "PMD.JUnit5TestShouldBePackagePrivate"})
 @DisplayName("BytesInternal guarded and unguarded mode checks")
-public class BytesInternalGuardedTest extends BytesTestCommon {
+class BytesInternalGuardedTest extends BytesTestCommon {
     static Stream<Arguments> guardedModes() {
         return Stream.of(
                 Arguments.of("Unguarded", false),

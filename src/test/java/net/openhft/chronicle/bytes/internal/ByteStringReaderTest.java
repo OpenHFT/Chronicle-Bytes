@@ -15,7 +15,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * gracefully to avoid exceptions during stream-based processing.
  */
 @DisplayName("ByteStringReader handles closed state and skip behaviour")
-public class ByteStringReaderTest extends BytesTestCommon {
+@SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate")
+class ByteStringReaderTest extends BytesTestCommon {
 
     @Test
     @DisplayName("read returns -1 when the backing parser is closed")

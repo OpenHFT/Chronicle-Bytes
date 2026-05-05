@@ -16,7 +16,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * populate both StringBuilder and Bytes output targets for downstream processing.
  */
 @DisplayName("parse8bit variants populate StringBuilder and Bytes correctly")
-public class Parse8bitVariantsTest extends BytesTestCommon {
+@SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate")
+class Parse8bitVariantsTest extends BytesTestCommon {
 
     @Test
     @DisplayName("parse8bit fills StringBuilder with 'alpha' and Bytes with 'beta' from input")

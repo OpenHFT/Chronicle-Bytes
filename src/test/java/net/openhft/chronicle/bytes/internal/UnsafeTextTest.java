@@ -23,9 +23,9 @@ import static org.junit.jupiter.api.Assertions.fail;
  * correct text output to avoid data corruption. Behaviour checks verify numeric
  * formatting in order to ensure round-trip accuracy.
  */
-@SuppressWarnings("checkstyle:MMOverusedWord")
+@SuppressWarnings({"checkstyle:MMOverusedWord", "PMD.JUnit5TestShouldBePackagePrivate"})
 @DisplayName("UnsafeText formatting and text output behaviour checks")
-public class UnsafeTextTest extends BytesTestCommon {
+class UnsafeTextTest extends BytesTestCommon {
 
     private static long blackhole;
 

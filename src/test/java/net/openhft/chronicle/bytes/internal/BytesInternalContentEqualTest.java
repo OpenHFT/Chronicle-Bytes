@@ -12,7 +12,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("BytesInternal contentEqual comparisons across store implementations")
-public class BytesInternalContentEqualTest extends BytesTestCommon {
+@SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate")
+class BytesInternalContentEqualTest extends BytesTestCommon {
 
     @Test
     @DisplayName("heap and direct stores compare equal for same content")

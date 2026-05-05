@@ -16,7 +16,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * native stores.
  */
 @DisplayName("native bytes store primitive operation coverage")
-public class NativeBytesStoreOpsTest extends BytesTestCommon {
+@SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate")
+class NativeBytesStoreOpsTest extends BytesTestCommon {
 
     @Test
     @DisplayName("native store volatile and ordered operations")

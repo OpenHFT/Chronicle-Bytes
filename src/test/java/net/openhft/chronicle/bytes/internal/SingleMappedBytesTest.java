@@ -24,7 +24,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 @DisplayName("SingleMappedBytes covers write, read, and CAS branch scenarios")
-public class SingleMappedBytesTest {
+@SuppressWarnings({"PMD.JUnit5TestShouldBePackagePrivate"})
+class SingleMappedBytesTest {
 
     @Test
     @DisplayName("write rejects array bounds when offset and length exceed data")
@@ -48,7 +49,7 @@ public class SingleMappedBytesTest {
         assumeFalse(Jvm.maxDirectMemory() == 0,
                 "Direct memory is required for mapped bytes write copy test");
         File file = newTempFile();
-        byte[] data = new byte[] {1, 2, 3, 4};
+        byte[] data = {1, 2, 3, 4};
         try (MappedBytes bytes = MappedBytes.singleMappedBytes(file, 64)) {
             bytes.write(0, data, 0, data.length);
             assertEquals(1,

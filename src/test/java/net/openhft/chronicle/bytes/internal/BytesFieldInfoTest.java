@@ -13,7 +13,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 @DisplayName("BytesFieldInfo layout and description checks for group offsets")
-public class BytesFieldInfoTest extends BytesTestCommon {
+@SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate")
+class BytesFieldInfoTest extends BytesTestCommon {
 
     @Test
     @DisplayName("lookup returns expected group layouts for fields")

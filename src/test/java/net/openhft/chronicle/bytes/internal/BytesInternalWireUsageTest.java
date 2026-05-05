@@ -13,7 +13,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("BytesInternal parse helpers used by wire formats")
-public class BytesInternalWireUsageTest extends BytesTestCommon {
+@SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate")
+class BytesInternalWireUsageTest extends BytesTestCommon {
 
     @Test
     @DisplayName("parse UTF8 using native store optimisation")

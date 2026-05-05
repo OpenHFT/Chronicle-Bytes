@@ -34,7 +34,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * in order to ensure robustness of the empty store implementations.
  * Required by the API contract to verify that empty stores do not permit operations.
  */
-@SuppressWarnings({"checkstyle:MMLacksPurpose", "deprecation", "checkstyle:MMOverusedWord"})
+@SuppressWarnings({"checkstyle:MMLacksPurpose", "deprecation", "checkstyle:MMOverusedWord", "PMD.JUnit5TestShouldBePackagePrivate"})
 @DisplayName("Empty BytesStore boundary and sentinel validation")
 public class EmptyBytesStoreTest extends BytesTestCommon {
 

@@ -29,7 +29,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
-@SuppressWarnings("deprecation")
+@SuppressWarnings({"deprecation", "PMD.JUnit5TestShouldBePackagePrivate"})
 @DisplayName("BytesInternal parsing and write behaviour checks")
 public class BytesInternalTest extends BytesTestCommon {
     @Test
@@ -78,7 +78,6 @@ public class BytesInternalTest extends BytesTestCommon {
         assertEquals(length, sb.length(),
                 "UTF8 parse length matches long buffer size");
         String actual = sb.toString();
-        sb = null; // free some memory.
         assertEquals(new String(bytes2, US_ASCII), actual,
                 "UTF8 parse content matches long ASCII buffer");
 
@@ -576,6 +575,7 @@ public class BytesInternalTest extends BytesTestCommon {
             sdo.rawWriteByte(bytes.readByte(offset + i));
     }
 
+    // CPD-OFF
     private static void simpleWriteFully3(@NotNull RandomDataInput bytes, @NonNegative long offset, long length, @NotNull StreamingDataOutput<?> sdo)
             throws BufferUnderflowException, BufferOverflowException, IllegalStateException {
         int i = 0;
@@ -601,6 +601,7 @@ public class BytesInternalTest extends BytesTestCommon {
         for (; i < length; i++)
             sdo.rawWriteByte(bytes.readByte(offset + i));
     }
+    // CPD-ON
 
     private static void oldWriteFully(@NotNull RandomDataInput bytes, @NonNegative long offset, long length, @NotNull StreamingDataOutput<?> sdo)
             throws BufferUnderflowException, BufferOverflowException, IllegalStateException {

@@ -16,7 +16,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * must maintain memory ordering guarantees for concurrent access.
  */
 @DisplayName("heap bytes store primitive operation coverage")
-public class HeapBytesStoreOpsTest extends BytesTestCommon {
+@SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate")
+class HeapBytesStoreOpsTest extends BytesTestCommon {
 
     @Test
     @DisplayName("heap store primitive read write operations")

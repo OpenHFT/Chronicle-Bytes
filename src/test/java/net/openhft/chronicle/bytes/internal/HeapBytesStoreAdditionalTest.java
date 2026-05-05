@@ -20,7 +20,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * atomic operations require explicit boundary validation to avoid memory corruption.
  */
 @DisplayName("Heap bytes store additional branch coverage")
-public class HeapBytesStoreAdditionalTest {
+@SuppressWarnings({"PMD.JUnit5TestShouldBePackagePrivate"})
+class HeapBytesStoreAdditionalTest {
 
     @Test
     @DisplayName("HeapBytesStore wrap rejects null byte array input")
@@ -59,7 +60,7 @@ public class HeapBytesStoreAdditionalTest {
     @Test
     @DisplayName("move copies bytes within the backing array")
     public void moveCopiesBytes() {
-        byte[] data = new byte[] {1, 2, 3, 4, 5, 6, 7, 8};
+        byte[] data = {1, 2, 3, 4, 5, 6, 7, 8};
         HeapBytesStore<byte[]> store = HeapBytesStore.wrap(data);
         try {
             store.move(0, 4, 4);
@@ -74,7 +75,7 @@ public class HeapBytesStoreAdditionalTest {
     @Test
     @DisplayName("move rejects invalid offsets and lengths")
     public void moveRejectsInvalidInputs() {
-        byte[] data = new byte[] {1, 2, 3, 4};
+        byte[] data = {1, 2, 3, 4};
         HeapBytesStore<byte[]> store = HeapBytesStore.wrap(data);
         try {
             assertThrows(IllegalArgumentException.class,

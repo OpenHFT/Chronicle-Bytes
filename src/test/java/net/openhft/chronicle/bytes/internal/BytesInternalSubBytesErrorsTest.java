@@ -13,7 +13,8 @@ import java.nio.BufferUnderflowException;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DisplayName("BytesInternal subBytes error handling for boundary conditions")
-public class BytesInternalSubBytesErrorsTest extends BytesTestCommon {
+@SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate")
+class BytesInternalSubBytesErrorsTest extends BytesTestCommon {
 
     @Test
     @DisplayName("subBytes throws when requested length exceeds remaining data")

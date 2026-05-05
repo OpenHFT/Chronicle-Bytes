@@ -139,7 +139,7 @@ class HeapBytesStoreBranchTest extends BytesTestCommon {
         byte[] data = new byte[16];
         HeapBytesStore<byte[]> store = HeapBytesStore.wrap(data);
         try {
-            assertThrows(UnsupportedOperationException.class, () -> store.copy(),
+            assertThrows(UnsupportedOperationException.class, store::copy,
                     "copy of non-empty store is not supported");
         } finally {
             store.releaseLast();
@@ -372,7 +372,7 @@ class HeapBytesStoreBranchTest extends BytesTestCommon {
     @Test
     @DisplayName("read(offset, byte[], ...) should copy data to array")
     void readToByteArrayCopiesData() {
-        byte[] source = new byte[]{1, 2, 3, 4, 5, 6, 7, 8};
+        byte[] source = {1, 2, 3, 4, 5, 6, 7, 8};
         HeapBytesStore<byte[]> store = HeapBytesStore.wrap(source);
         try {
             byte[] target = new byte[4];
@@ -390,7 +390,7 @@ class HeapBytesStoreBranchTest extends BytesTestCommon {
         byte[] data = new byte[16];
         HeapBytesStore<byte[]> store = HeapBytesStore.wrap(data);
         try {
-            byte[] source = new byte[]{0x10, 0x20, 0x30, 0x40};
+            byte[] source = {0x10, 0x20, 0x30, 0x40};
             store.write(4, source, 0, 4);
 
             assertEquals((byte) 0x10, store.readByte(4), "array source byte[0] should match 0x10");
@@ -570,7 +570,7 @@ class HeapBytesStoreBranchTest extends BytesTestCommon {
         byte[] data = new byte[16];
         HeapBytesStore<byte[]> store = HeapBytesStore.wrap(data);
         try {
-            assertThrows(UnsupportedOperationException.class, () -> store.addressForWritePosition(),
+            assertThrows(UnsupportedOperationException.class, store::addressForWritePosition,
                     "heap store does not support address access");
         } finally {
             store.releaseLast();
@@ -722,7 +722,7 @@ class HeapBytesStoreBranchTest extends BytesTestCommon {
     @Test
     @DisplayName("toString should return non-empty string representation for debugging")
     void toStringReturnsRepresentation() {
-        byte[] data = new byte[]{0x48, 0x65, 0x6C, 0x6C, 0x6F}; // "Hello"
+        byte[] data = {0x48, 0x65, 0x6C, 0x6C, 0x6F}; // "Hello"
         HeapBytesStore<byte[]> store = HeapBytesStore.wrap(data);
         try {
             String str = store.toString();
@@ -802,8 +802,8 @@ class HeapBytesStoreBranchTest extends BytesTestCommon {
     @Test
     @DisplayName("equals and hashCode should be consistent for store instances")
     void equalsAndHashCodeWork() {
-        byte[] data1 = new byte[]{1, 2, 3, 4};
-        byte[] data2 = new byte[]{5, 6, 7, 8};
+        byte[] data1 = {1, 2, 3, 4};
+        byte[] data2 = {5, 6, 7, 8};
         HeapBytesStore<byte[]> store1 = HeapBytesStore.wrap(data1);
         HeapBytesStore<byte[]> store2 = HeapBytesStore.wrap(data2);
         try {

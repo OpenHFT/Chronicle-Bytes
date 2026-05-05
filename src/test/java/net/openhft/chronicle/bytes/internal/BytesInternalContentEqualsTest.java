@@ -20,7 +20,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("Bytes content equality across heap and direct store variants")
-public class BytesInternalContentEqualsTest extends BytesTestCommon {
+@SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate")
+class BytesInternalContentEqualsTest extends BytesTestCommon {
 
     static Stream<Arguments> data() {
         List<Arguments> tests = new ArrayList<>(Arrays.asList(

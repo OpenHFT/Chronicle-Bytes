@@ -18,9 +18,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * Tests BytesInternal character encoding edge cases because multibyte UTF-8
  * parsing must handle boundary conditions to avoid data corruption.
  */
-@SuppressWarnings("checkstyle:MMOverusedWord")
+@SuppressWarnings({"checkstyle:MMOverusedWord", "PMD.JUnit5TestShouldBePackagePrivate"})
 @DisplayName("BytesInternal character encoding edge cases and multibyte parsing")
-public class BytesInternalUtf8MoreTest extends BytesTestCommon {
+class BytesInternalUtf8MoreTest extends BytesTestCommon {
 
     @Test
     @DisplayName("append UTF8 handles latin1 multibyte characters")

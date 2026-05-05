@@ -18,7 +18,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("ByteString reader and writer behaviour for stream style adapters")
-public class ByteStringReaderWriterTest extends BytesTestCommon {
+@SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate")
+class ByteStringReaderWriterTest extends BytesTestCommon {
 
     @Test
     @DisplayName("reader reads all characters and honours skip positions")
