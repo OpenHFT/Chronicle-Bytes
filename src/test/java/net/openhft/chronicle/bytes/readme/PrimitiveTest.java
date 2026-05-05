@@ -19,9 +19,9 @@ import static org.junit.jupiter.api.Assumptions.assumeFalse;
  * data with external systems. This test validates HexDumpBytes output
  * matching, DTO marshallable round trips, and offset-based primitive access.
  */
-@SuppressWarnings({"deprecation", "MMLacksPurpose"}) // Javadoc explains readme example verification purpose
+@SuppressWarnings({"deprecation", "MMLacksPurpose", "PMD.JUnit5TestShouldBePackagePrivate"})
 @DisplayName("Primitive readme examples for binary and text values")
-public class PrimitiveTest extends BytesTestCommon {
+class PrimitiveTest extends BytesTestCommon {
 
     @Test
     @DisplayName("nested DTO hex dump matches example")

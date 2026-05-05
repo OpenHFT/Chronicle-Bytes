@@ -18,9 +18,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
  * Regression tests for Issue 464, because creating BytesStore instances from
  * empty sources should reuse a shared singleton instance to avoid memory allocation.
  */
-@SuppressWarnings({"deprecation", "checkstyle:MMOverusedWord"})
+@SuppressWarnings({"deprecation", "checkstyle:MMOverusedWord", "PMD.JUnit5TestShouldBePackagePrivate"})
 @DisplayName("Empty BytesStore allocation avoids new backing")
-public class Issue464BytesStoreEmptyTest extends BytesTestCommon {
+class Issue464BytesStoreEmptyTest extends BytesTestCommon {
     @Test
     @DisplayName("empty bytes store uses shared empty instance")
     public void emptyShouldNotAllocate() {

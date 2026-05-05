@@ -20,9 +20,9 @@ import static org.junit.jupiter.api.Assumptions.assumeFalse;
  * encoding and pooling behaviour is essential for efficient string handling
  * across both 8-bit and UTF-8 encodings.
  */
-@SuppressWarnings({"deprecation", "MMOverusedWord"}) // string domain terminology
+@SuppressWarnings({"deprecation", "MMOverusedWord", "PMD.JUnit5TestShouldBePackagePrivate"})
 @DisplayName("String readme examples for pooled UTF8 and 8bit values")
-public class StringsTest extends BytesTestCommon {
+class StringsTest extends BytesTestCommon {
 
     /**
      * Demonstrates writing the same text in two encodings and

@@ -16,7 +16,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * value distributions.
  */
 @DisplayName("Stop bit readme examples for long and double")
-public class StopBitTest extends BytesTestCommon {
+@SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate")
+class StopBitTest extends BytesTestCommon {
 
     @Test
     @DisplayName("stop bit encodes long and double values")

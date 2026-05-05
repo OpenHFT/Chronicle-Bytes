@@ -18,9 +18,9 @@ import static org.junit.jupiter.api.Assumptions.assumeFalse;
  * are essential for lock-free coordination between concurrent readers and
  * writers.
  */
-@SuppressWarnings("deprecation")
+@SuppressWarnings({"deprecation", "PMD.JUnit5TestShouldBePackagePrivate"})
 @DisplayName("Compare and swap readme example for bytes")
-public class CASTest extends BytesTestCommon {
+class CASTest extends BytesTestCommon {
     @Test
     @DisplayName("compare and swap updates int and long")
     public void testCAS() {

@@ -10,9 +10,9 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@SuppressWarnings("checkstyle:MMOverusedWord")
+@SuppressWarnings({"checkstyle:MMOverusedWord", "PMD.JUnit5TestShouldBePackagePrivate"})
 @DisplayName("Append decimal formatting for issue 1808 cases")
-public class AppendDoubleTicket1808Test extends BytesTestCommon {
+class AppendDoubleTicket1808Test extends BytesTestCommon {
     @Test
     @DisplayName("append double rounds to 8 decimal places")
     public void appendDoubleRounded08() {
