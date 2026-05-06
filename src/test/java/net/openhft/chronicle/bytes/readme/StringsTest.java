@@ -19,7 +19,6 @@ import static org.junit.Assume.assumeFalse;
  * of the string pooling when the same text is written and read in different
  * ways.</p>
  */
-@SuppressWarnings("deprecation")
 public class StringsTest extends BytesTestCommon {
 
     /**

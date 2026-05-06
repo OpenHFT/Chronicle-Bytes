@@ -15,7 +15,6 @@ import static org.junit.Assert.assertTrue;
  * It aims to test various primitive data types and their conversions
  * using the GuardedNativeBytes class.
  */
-@SuppressWarnings("deprecation")
 public class GuardedNativeBytesTest {
 
     /**

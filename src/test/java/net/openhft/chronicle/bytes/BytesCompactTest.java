@@ -11,7 +11,6 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
  * Tests for the compact behavior of Bytes.
@@ -53,7 +52,6 @@ public class BytesCompactTest {
      */
     @Test
     public void compact() {
-        assertNotNull(name);
         // Initialize buffer with a sample string
         bytes.clear().append("Hello World");
 

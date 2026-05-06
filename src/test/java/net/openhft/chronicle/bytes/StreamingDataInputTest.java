@@ -9,10 +9,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Objects;
 
-import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assume.assumeFalse;
 
@@ -39,10 +39,10 @@ public class StreamingDataInputTest extends BytesTestCommon {
     public void read() {
         Bytes<?> b = allocator.elasticBytes(32);
         b.append("0123456789");
-        byte[] byteArr = "ABCDEFGHIJKLMNOP".getBytes(ISO_8859_1);
+        byte[] byteArr = "ABCDEFGHIJKLMNOP".getBytes();
         b.readPosition(3);
         b.read(byteArr);
-        assertEquals("3456789HIJKLMNOP", new String(byteArr, ISO_8859_1));
+        assertEquals("3456789HIJKLMNOP", new String(byteArr, StandardCharsets.ISO_8859_1));
         b.releaseLast();
     }
 
@@ -50,9 +50,9 @@ public class StreamingDataInputTest extends BytesTestCommon {
     public void readOffset() {
         Bytes<?> b = allocator.elasticBytes(32);
         b.append("0123456789");
-        byte[] byteArr = "ABCDEFGHIJKLMNOP".getBytes(ISO_8859_1);
+        byte[] byteArr = "ABCDEFGHIJKLMNOP".getBytes();
         b.read(byteArr, 2, 6);
-        assertEquals("AB012345IJKLMNOP", new String(byteArr, ISO_8859_1));
+        assertEquals("AB012345IJKLMNOP", new String(byteArr, StandardCharsets.ISO_8859_1));
         assertEquals('6', b.readByte());
         b.releaseLast();
     }

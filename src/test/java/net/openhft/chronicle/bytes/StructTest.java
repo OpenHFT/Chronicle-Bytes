@@ -20,13 +20,12 @@ import static net.openhft.chronicle.core.Jvm.uncheckedCast;
 import static net.openhft.chronicle.core.UnsafeMemory.MEMORY;
 import static org.junit.Assert.assertEquals;
 
-@SuppressWarnings("deprecation")
 public class StructTest extends BytesTestCommon {
 
     /**
      * Common base for structs to take care of initialisation and other boilerplating
      */
-    abstract static class Struct<S extends Struct<S>> {
+    static abstract class Struct<S extends Struct<S>> {
         Bytes<?> self;
         final Bytes<Void> bytes;
         private final int size;
@@ -39,7 +38,7 @@ public class StructTest extends BytesTestCommon {
         /**
          * c++ new - construct with memory owned by self
          *
-         * @param size size of the struct in bytes
+         * @param size
          */
         Struct(int size) {
             this.size = size;
@@ -51,8 +50,8 @@ public class StructTest extends BytesTestCommon {
         /**
          * c++ placement new - construct at given address
          *
-         * @param size    size of the struct in bytes
-         * @param address address where the struct is placed
+         * @param size
+         * @param address
          */
         Struct(int size, long address) {
             this.size = size;
@@ -111,7 +110,7 @@ public class StructTest extends BytesTestCommon {
          * Fully initialise self at given address
          * Override if struct contains any members which need specific initialisation
          *
-         * @param address address where the struct is initialised
+         * @param address
          */
         void initialise(final long address) {
             assert address != 0;
@@ -163,7 +162,7 @@ public class StructTest extends BytesTestCommon {
      */
     static class Pointer<T extends Struct<T>> {
         T ptr;
-        final Function<Long, T> supplier;
+        Function<Long, T> supplier;
         long address;
 
         Pointer(Function<Long, T> supplier) {
@@ -302,6 +301,7 @@ public class StructTest extends BytesTestCommon {
      *     unsigned byte day;
      * };
      */
+
     enum Gender {
         MALE(0),
         FEMALE(1);
@@ -402,6 +402,7 @@ public class StructTest extends BytesTestCommon {
      *     float       grades[10];
      *     Student*    next;
      */
+
     static class Student extends Struct<Student> implements BytesMarshallable {
         static final int LOCK = 0;
         static final int GENDER = LOCK + 4;
@@ -416,7 +417,7 @@ public class StructTest extends BytesTestCommon {
         Bytes<?> name;
         String nameStr = null;
         Date birth;   // Date instance owned by the this Student
-        final Pointer<Student> next = new Pointer<>(this::construct);
+        Pointer<Student> next = new Pointer<>(this::construct);
 
         protected Student construct(long address) {
             return address == 0 ? new Student() : new Student(address);
@@ -512,12 +513,12 @@ public class StructTest extends BytesTestCommon {
 
         public float grade(int n) {
             assert 0 <= n && n < NUM_GRADES;
-            return MEMORY.readFloat(address + GRADES + (long) Float.BYTES * n);
+            return MEMORY.readFloat(address + GRADES + Float.BYTES * n);
         }
 
         Student grade(int n, float f) {
             assert 0 <= n && n < NUM_GRADES;
-            MEMORY.writeFloat(address + GRADES + (long) Float.BYTES * n, f);
+            MEMORY.writeFloat(address + GRADES + Float.BYTES * n, f);
             return this;
         }
 

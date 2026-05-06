@@ -15,12 +15,10 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Collection;
 
-import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeFalse;
 
-@SuppressWarnings("deprecation")
 @RunWith(Parameterized.class)
 public class ByteStringAppenderTest extends BytesTestCommon {
     private final Bytes<?> bytes;
@@ -236,11 +234,11 @@ public class ByteStringAppenderTest extends BytesTestCommon {
         assumeFalse(Jvm.maxDirectMemory() == 0);
 
         BytesStore<?, ByteBuffer> bs = BytesStore.elasticByteBuffer(4, 16);
-        bs.write(0, " -\n".getBytes(ISO_8859_1));
+        bs.write(0, " -\n".getBytes());
 
         bytes.append8bit((CharSequence) bs, 1, 2);
-        bytes.append8bit(bs, (long) 0, 1);
-        bytes.append8bit(bs, (long) 2, 3);
+        bytes.append8bit(bs, (long)0, 1);
+        bytes.append8bit(bs, (long)2, 3);
 
         assertEquals("- \n", bytes.toString());
         bs.releaseLast();

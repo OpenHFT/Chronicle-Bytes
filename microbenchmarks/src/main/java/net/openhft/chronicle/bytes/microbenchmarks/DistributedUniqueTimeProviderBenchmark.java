@@ -14,13 +14,6 @@ import org.openjdk.jmh.runner.options.TimeValue;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-/**
- * JMH benchmark for {@link DistributedUniqueTimeProvider}.
- *
- * <p>The benchmark can be configured to compare the cost of generating unique timestamps against
- * alternative approaches such as {@link UUID#randomUUID()}. It is primarily intended to validate
- * that the provider remains efficient enough for use on hot paths.
- */
 @State(Scope.Benchmark)
 public class DistributedUniqueTimeProviderBenchmark {
     private DistributedUniqueTimeProvider timeProvider;

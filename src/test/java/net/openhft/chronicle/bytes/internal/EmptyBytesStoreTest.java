@@ -27,7 +27,6 @@ import static net.openhft.chronicle.core.Jvm.uncheckedCast;
 import static org.junit.Assume.assumeFalse;
 import static org.junit.jupiter.api.Assertions.*;
 
-@SuppressWarnings("deprecation")
 @RunWith(Parameterized.class)
 public class EmptyBytesStoreTest extends BytesTestCommon {
 
@@ -247,7 +246,7 @@ public class EmptyBytesStoreTest extends BytesTestCommon {
     @Test
     public void equalsTest() {
         assertNotEquals(null, instance);
-        assertNotEquals(null, instance);
+        assertNotEquals(instance, null);
         assertEquals(NativeBytesStore.from(""), instance);
         assertEquals(instance, NativeBytesStore.from(""));
     }
@@ -431,7 +430,7 @@ public class EmptyBytesStoreTest extends BytesTestCommon {
             IOTools.unmonitor(bytes);
             assertThrowsBufferException(() -> bytes.writeSkip(1));
         } catch (UnsupportedOperationException ignored) {
-            // expected for implementations that do not support writable bytes
+
         }
     }
 
@@ -462,7 +461,7 @@ public class EmptyBytesStoreTest extends BytesTestCommon {
 
     @Test
     public void chars() {
-        assertEquals(0, (long) instance.length());
+        assertEquals(0, instance.chars().count());
     }
 
     @Test

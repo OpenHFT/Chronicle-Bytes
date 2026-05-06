@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
-@SuppressWarnings({"unchecked", "rawtypes", "deprecation"})
+@SuppressWarnings({"unchecked", "rawtypes"})
 class StreamingOutputStreamTest {
 
     private StreamingDataOutput<?> sdo;
@@ -44,13 +44,13 @@ class StreamingOutputStreamTest {
     }
 
     @Test
-    void writeThrowsIOExceptionOnBufferOverflow() {
+    void writeThrowsIOExceptionOnBufferOverflow() throws IOException {
         doThrow(BufferOverflowException.class).when(sdo).writeUnsignedByte(anyInt());
         assertThrows(IOException.class, () -> sos.write(1));
     }
 
     @Test
-    void writeArrayThrowsIOExceptionOnIllegalArgument() {
+    void writeArrayThrowsIOExceptionOnIllegalArgument() throws IOException {
         byte[] bytes = new byte[]{1, 2, 3, 4, 5};
         doThrow(IllegalArgumentException.class).when(sdo).write(any(byte[].class), anyInt(), anyInt());
         assertThrows(IOException.class, () -> sos.write(bytes, 0, bytes.length));

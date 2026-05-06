@@ -9,13 +9,8 @@ import org.junit.Test;
 
 import java.nio.BufferUnderflowException;
 
-import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static org.junit.Assert.assertEquals;
 
-/**
- * Validates xxHash implementations for Chronicle Bytes, including empty inputs,
- * small payloads, and behaviour when truncating hashes.
- */
 public class XxHashTest {
 
     @Test
@@ -28,7 +23,7 @@ public class XxHashTest {
 
     @Test
     public void testHashConsistency() {
-        byte[] data = "test data".getBytes(ISO_8859_1);
+        byte[] data = "test data".getBytes();
         BytesStore<?, ?> bytesStore1 = BytesStore.wrap(data);
         BytesStore<?, ?> bytesStore2 = BytesStore.wrap(data.clone());
 

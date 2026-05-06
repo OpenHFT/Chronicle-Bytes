@@ -21,7 +21,7 @@ import java.util.function.ToLongFunction;
  *
  * <p> Implementations should avoid allocating memory and may assume that
  * {@code length} bytes can be read without extra bounds checks.
- * <p>
+ *
  * See {@code algo-overview.adoc} for usage examples.
  *
  * @param <B> the type of {@link BytesStore} that this function can compute hash values for.

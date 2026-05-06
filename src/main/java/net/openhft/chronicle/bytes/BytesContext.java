@@ -19,7 +19,6 @@ public interface BytesContext extends Closeable {
     /**
      * Provides a context-dependent key, such as a message type.
      */
-    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     int key();
 
     /**

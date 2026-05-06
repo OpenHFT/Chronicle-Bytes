@@ -5,7 +5,6 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.bytes.internal.BytesInternal;
 import net.openhft.chronicle.bytes.internal.Chars;
-import net.openhft.chronicle.bytes.util.BufferUtil;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.UnsafeMemory;
 import net.openhft.chronicle.core.annotation.NonNegative;
@@ -24,11 +23,26 @@ import static net.openhft.chronicle.core.util.Longs.requireNonNegative;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
 /**
- * Random-access read API for {@link BytesStore} implementations and other byte sources.
- * <p>
- * Supports reading primitives, arrays and strings at arbitrary offsets, bulk transfers to native
- * memory and helper utilities such as hashing and search. Implementations may be backed by heap,
- * direct or memory-mapped storage; thread-safety is implementation dependent.
+ * The {@code RandomDataInput} class provides a series of methods for reading data
+ * from various types of inputs. It allows to read data from an input source
+ * in a non-sequential manner, i.e., the data can be accessed at any offset.
+ *
+ * <p>This class supports reading of primitive data types like {@code int},
+ * {@code long}, {@code double} etc., as well as more complex data structures
+ * like {@code byte[]}, {@code String} and {@code ByteBuffer}. It also provides
+ * methods for direct reading from memory and for reading with a load barrier.
+ *
+ * <p>Furthermore, the {@code RandomDataInput} class provides additional methods for
+ * advanced operations like copying data to native memory, finding a specific byte,
+ * calculating the hash code of a sequence of bytes, and more.
+ *
+ * <p>Methods in this class may throw {@code BufferUnderflowException} if the offset
+ * specified is outside the limits of the byte sequence or {@code ClosedIllegalStateException}
+ * if the byte sequence has been released.
+ *
+ * <p>Note: Implementations of this class are typically not thread-safe. If multiple
+ * threads interact with a {@code RandomDataInput} instance concurrently, it must be synchronized
+ * externally.
  */
 public interface RandomDataInput extends RandomCommon {
     /**
@@ -135,7 +149,6 @@ public interface RandomDataInput extends RandomCommon {
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
-    @Deprecated(/* to be removed in 2027 */)
     default int readUnsignedInt24(@NonNegative long offset)
             throws BufferUnderflowException, ClosedIllegalStateException {
         return readUnsignedShort(offset) | (readUnsignedByte(offset) << 16);
@@ -267,7 +280,6 @@ public interface RandomDataInput extends RandomCommon {
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
-    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     default float readVolatileFloat(@NonNegative long offset)
             throws BufferUnderflowException, ClosedIllegalStateException {
         return Float.intBitsToFloat(readVolatileInt(offset));
@@ -296,7 +308,6 @@ public interface RandomDataInput extends RandomCommon {
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
-    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     default double readVolatileDouble(@NonNegative long offset)
             throws BufferUnderflowException, ClosedIllegalStateException {
         return Double.longBitsToDouble(readVolatileLong(offset));
@@ -326,7 +337,6 @@ public interface RandomDataInput extends RandomCommon {
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
-    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     void nativeRead(@NonNegative long position, long address, @NonNegative long size)
             throws BufferUnderflowException, ClosedIllegalStateException, ThreadingIllegalStateException;
 
@@ -471,7 +481,6 @@ public interface RandomDataInput extends RandomCommon {
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      * @see RandomDataOutput#writeUtf8(long, CharSequence)
      */
-    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     default <T extends Appendable & CharSequence> long readUtf8(@NonNegative long offset, @NotNull T sb)
             throws IORuntimeException, IllegalArgumentException, BufferUnderflowException, ArithmeticException, ClosedIllegalStateException {
         AppendableUtil.setLength(sb, 0);
@@ -589,7 +598,6 @@ public interface RandomDataInput extends RandomCommon {
      * @see RandomDataOutput#writeUtf8Limited(long, CharSequence, int)
      */
     @Nullable
-    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     default String readUtf8Limited(@NonNegative long offset, @NonNegative int maxUtf8Len)
             throws BufferUnderflowException, IORuntimeException, IllegalArgumentException,
             ClosedIllegalStateException {
@@ -609,7 +617,6 @@ public interface RandomDataInput extends RandomCommon {
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      * @throws IORuntimeException             If the contents are not a valid string.
      */
-    @Deprecated(/* to be removed in 2027 */)
     default boolean compareUtf8(@NonNegative long offset, @Nullable CharSequence other)
             throws IORuntimeException, BufferUnderflowException, ClosedIllegalStateException {
         return BytesInternal.compareUtf8(this, offset, other);
@@ -658,7 +665,7 @@ public interface RandomDataInput extends RandomCommon {
         ByteBuffer bb = ByteBuffer.allocateDirect(len);
         bb.order(ByteOrder.nativeOrder());
         copyTo(bb);
-        BufferUtil.clear(bb);
+        bb.clear();
         return bb;
     }
 
@@ -700,7 +707,6 @@ public interface RandomDataInput extends RandomCommon {
      *
      * @return true if the byte sequence can be read directly, false otherwise.
      */
-    @Deprecated(/* to be removed in 2027 */)
     default boolean canReadDirect() {
         return canReadDirect(0);
     }

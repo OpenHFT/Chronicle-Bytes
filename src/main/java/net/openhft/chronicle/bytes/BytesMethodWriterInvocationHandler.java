@@ -20,6 +20,5 @@ public interface BytesMethodWriterInvocationHandler extends InvocationHandler {
      *
      * @param closeable resource to close with the writer
      */
-    @Deprecated(/* to be removed in 2027 */)
     void onClose(Closeable closeable);
 }

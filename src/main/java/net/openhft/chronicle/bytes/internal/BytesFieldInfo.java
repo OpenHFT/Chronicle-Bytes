@@ -160,7 +160,6 @@ public class BytesFieldInfo {
      *
      * @return a set of group names
      */
-    @Deprecated(/* to be removed in 2027 */)
     public Set<String> groups() {
         return groups.keySet();
     }

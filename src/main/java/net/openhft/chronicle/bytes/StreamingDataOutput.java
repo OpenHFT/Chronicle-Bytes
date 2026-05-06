@@ -174,7 +174,6 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     @NotNull
-    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     default S writeStopBitDecimal(double d)
             throws BufferOverflowException, ClosedIllegalStateException {
         boolean negative = d < 0;
@@ -486,7 +485,6 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     @NotNull
-    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     default S writeInt24(int i)
             throws BufferOverflowException, ArithmeticException, ClosedIllegalStateException, ThreadingIllegalStateException {
         writeShort((short) i);
@@ -503,7 +501,6 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     @NotNull
-    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     default S writeUnsignedInt24(int i)
             throws BufferOverflowException, ArithmeticException, ClosedIllegalStateException, ThreadingIllegalStateException {
         writeShort((short) i);
@@ -645,7 +642,6 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     @NotNull
-    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     S writeDoubleAndInt(double d, int i)
             throws BufferOverflowException, ClosedIllegalStateException, ThreadingIllegalStateException;
 
@@ -809,7 +805,6 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
-    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     default S unsafeWrite(long address, @NonNegative int length) throws ClosedIllegalStateException, ThreadingIllegalStateException {
         if (isDirectMemory()) {
             writeSkip(length); // blow up if there isn't that much space left
@@ -1108,7 +1103,6 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
-    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     default void writeHistogram(@NotNull Histogram histogram)
             throws BufferOverflowException, ClosedIllegalStateException {
         BytesInternal.writeHistogram(this, histogram);
@@ -1123,7 +1117,6 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
-    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     default void writeBigDecimal(@NotNull BigDecimal bd)
             throws BufferOverflowException, ClosedIllegalStateException, IllegalArgumentException, ThreadingIllegalStateException {
         writeBigInteger(bd.unscaledValue());

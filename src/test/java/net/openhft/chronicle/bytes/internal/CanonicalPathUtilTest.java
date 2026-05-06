@@ -8,12 +8,9 @@ import net.openhft.chronicle.core.OS;
 import org.junit.Test;
 
 import java.io.File;
-import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.nio.file.Files;
 
-import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static org.junit.Assert.*;
 
 public class CanonicalPathUtilTest extends BytesTestCommon {
@@ -28,8 +25,8 @@ public class CanonicalPathUtilTest extends BytesTestCommon {
         // ensure file exists
         File parent = f2.getParentFile();
         assertTrue(parent.mkdirs() || parent.isDirectory());
-        try (OutputStreamWriter writer = new OutputStreamWriter(Files.newOutputStream(f2.toPath()), ISO_8859_1)) {
-            writer.write("x");
+        try (FileWriter fw = new FileWriter(f2)) {
+            fw.write("x");
         }
 
         String p1 = CanonicalPathUtil.of(f1);
@@ -40,3 +37,4 @@ public class CanonicalPathUtilTest extends BytesTestCommon {
         assertSame("Same canonical path must be same instance", p1, p2);
     }
 }
+

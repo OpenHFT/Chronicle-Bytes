@@ -13,7 +13,6 @@ import java.io.IOException;
 import static junit.framework.TestCase.assertEquals;
 import static org.junit.Assume.assumeFalse;
 
-@SuppressWarnings("deprecation")
 public class BytesTextMethodTesterTest extends BytesTestCommon {
     @Before
     public void directEnabled() {

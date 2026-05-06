@@ -3,10 +3,7 @@
  */
 package net.openhft.chronicle.bytes;
 
-import net.openhft.chronicle.bytes.internal.BytesInternal;
-import net.openhft.chronicle.bytes.internal.HasUncheckedRandomDataInput;
-import net.openhft.chronicle.bytes.internal.NativeBytesStore;
-import net.openhft.chronicle.bytes.internal.UncheckedRandomDataInput;
+import net.openhft.chronicle.bytes.internal.*;
 import net.openhft.chronicle.bytes.internal.migration.HashCodeEqualsUtil;
 import net.openhft.chronicle.bytes.render.DecimalAppender;
 import net.openhft.chronicle.bytes.render.Decimaliser;
@@ -22,7 +19,6 @@ import org.jetbrains.annotations.Nullable;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
-import net.openhft.chronicle.bytes.util.BufferUtil;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static net.openhft.chronicle.core.Jvm.uncheckedCast;
@@ -38,7 +34,7 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
  *
  * @param <U> the type this bytes can reference
  */
-@SuppressWarnings({"rawtypes", "deprecation"})
+@SuppressWarnings("rawtypes")
 public class UncheckedNativeBytes<U>
         extends AbstractReferenceCounted
         implements Bytes<U>, HasUncheckedRandomDataInput, DecimalAppender {
@@ -164,7 +160,6 @@ public class UncheckedNativeBytes<U>
         // Return this Bytes object to allow for method chaining
         return this;
     }
-
     @NotNull
     @Override
     public Bytes<U> readPosition(@NonNegative long position) {
@@ -593,7 +588,6 @@ public class UncheckedNativeBytes<U>
     }
 
     @SuppressWarnings("EmptyMethod")
-    @Deprecated(/* to be removed in 2027 */)
     void writeCheckOffset(@NonNegative long offset, long adding)
             throws BufferOverflowException {
         // Do nothing
@@ -796,7 +790,6 @@ public class UncheckedNativeBytes<U>
             throws IllegalStateException {
         bytesStore.write(writePosition, buffer, buffer.position(), buffer.limit());
         writePosition += buffer.remaining();
-        BufferUtil.setPosition(buffer, buffer.limit());
         assert writePosition <= writeLimit();
         return this;
     }
@@ -1026,7 +1019,6 @@ public class UncheckedNativeBytes<U>
         return bytesStore.write8bit(position, s, start, length);
     }
 
-    @Deprecated(/* to be removed in 2027 */)
     public Bytes<U> write8bit(@Nullable BytesStore<?, ?> bs) throws BufferOverflowException, IllegalStateException, BufferUnderflowException {
         if (bs == null) {
             BytesInternal.writeStopBitNeg1(this);

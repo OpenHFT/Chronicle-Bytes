@@ -8,6 +8,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Field;
+import java.util.Arrays;
 
 import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -27,6 +28,7 @@ class BytesMarshallerTest {
     private BytesOut<?> bytesOut;
     private BytesIn<?> bytesIn;
     private TestClass testObject;
+    private Field field;
 
     static class TestObject implements ReadBytesMarshallable, WriteBytesMarshallable {
         int intValue;
@@ -65,7 +67,7 @@ class BytesMarshallerTest {
         // Initialize your test object
         testObject = new TestClass();
         // Assuming TestClass has a field named "stringArray" you want to test
-        Field field = TestClass.class.getDeclaredField("stringArray");
+        field = TestClass.class.getDeclaredField("stringArray");
         field.setAccessible(true);
         // Initialize the ObjectArrayFieldAccess with the field
         fieldAccess = new BytesMarshaller.ObjectArrayFieldAccess(field);

@@ -5,7 +5,6 @@ package net.openhft.chronicle.bytes;
 
 import org.junit.Test;
 
-import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static org.junit.Assert.assertEquals;
 
 public class PrewriteTest extends BytesTestCommon {
@@ -14,7 +13,7 @@ public class PrewriteTest extends BytesTestCommon {
         Bytes<?> bytes = Bytes.allocateDirect(64);
         bytes.clearAndPad(64);
         bytes.prepend(1234);
-        bytes.prewrite(",hi,".getBytes(ISO_8859_1));
+        bytes.prewrite(",hi,".getBytes());
         Bytes<?> words = Bytes.from("words");
         bytes.prewrite(words);
         bytes.prewriteByte((byte) ',');

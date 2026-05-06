@@ -24,7 +24,7 @@ import java.util.function.Consumer;
  * {@link MethodEncoderLookup}, are used to decode arguments. This reader is not
  * thread-safe and extends {@link SimpleCloseable}.
  */
-@SuppressWarnings({"rawtypes", "deprecation"})
+@SuppressWarnings("rawtypes")
 public class BytesMethodReader extends SimpleCloseable implements MethodReader {
     private final BytesIn<?> in;
     private final BytesParselet defaultParselet;

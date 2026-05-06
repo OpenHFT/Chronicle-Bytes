@@ -3,7 +3,6 @@
  */
 package net.openhft.chronicle.bytes;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -13,7 +12,8 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.stream.Stream;
 
-import static java.nio.charset.StandardCharsets.ISO_8859_1;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 
 class BytesEqualityTests {
 
@@ -24,69 +24,69 @@ class BytesEqualityTests {
         @ParameterizedTest
         @MethodSource("bufferArguments")
         void zeroLength(Bytes<?> left, Bytes<?> right) {
-            Assertions.assertEquals(left, right);
+            assertEquals(left, right);
         }
 
         @ParameterizedTest
         @MethodSource("bufferArguments")
         void differentLength(Bytes<?> left, Bytes<?> right) {
-            left.write("tex".getBytes(ISO_8859_1));
-            right.write("text".getBytes(ISO_8859_1));
-            Assertions.assertNotEquals(left, right);
+            left.write("tex".getBytes());
+            right.write("text".getBytes());
+            assertNotEquals(left, right);
         }
 
         @ParameterizedTest
         @MethodSource("bufferArguments")
         void shortEqual(Bytes<?> left, Bytes<?> right) {
-            left.write("abc".getBytes(ISO_8859_1));
-            right.write("abc".getBytes(ISO_8859_1));
-            Assertions.assertEquals(left, right);
+            left.write("abc".getBytes());
+            right.write("abc".getBytes());
+            assertEquals(left, right);
         }
 
         @ParameterizedTest
         @MethodSource("bufferArguments")
         void longEquals(Bytes<?> left, Bytes<?> right) {
-            left.write("abcdefghijklmnopqrstuvwxyz".getBytes(ISO_8859_1));
-            right.write("abcdefghijklmnopqrstuvwxyz".getBytes(ISO_8859_1));
-            Assertions.assertEquals(left, right);
+            left.write("abcdefghijklmnopqrstuvwxyz".getBytes());
+            right.write("abcdefghijklmnopqrstuvwxyz".getBytes());
+            assertEquals(left, right);
         }
 
         @ParameterizedTest
         @MethodSource("bufferArguments")
         void longNotEquals(Bytes<?> left, Bytes<?> right) {
-            left.write("abcdefghijklmnopqrstuvwxyz".getBytes(ISO_8859_1));
-            right.write("abcdefghijklmnopqrst_vwxyz".getBytes(ISO_8859_1));
-            Assertions.assertNotEquals(left, right);
+            left.write("abcdefghijklmnopqrstuvwxyz".getBytes());
+            right.write("abcdefghijklmnopqrst_vwxyz".getBytes());
+            assertNotEquals(left, right);
         }
 
         @ParameterizedTest
         @MethodSource("bufferArguments")
         void longEqualsBeforeSkip(Bytes<?> left, Bytes<?> right) {
-            left.write("abcdefghijklmnopqrstuvwxyz".getBytes(ISO_8859_1));
+            left.write("abcdefghijklmnopqrstuvwxyz".getBytes());
             left.readSkip(8);
-            right.write("_bcdefghijklmnopqrstuvwxyz".getBytes(ISO_8859_1));
+            right.write("_bcdefghijklmnopqrstuvwxyz".getBytes());
             right.readPosition(8);
-            Assertions.assertEquals(left, right);
+            assertEquals(left, right);
         }
 
         @ParameterizedTest
         @MethodSource("bufferArguments")
         void longNotEqualsAfterSkip(Bytes<?> left, Bytes<?> right) {
-            left.write("abcdefghijklmnopqrstuvwxyz".getBytes(ISO_8859_1));
+            left.write("abcdefghijklmnopqrstuvwxyz".getBytes());
             left.readSkip(8);
-            right.write("abcdefghijklmnopqrstuvwxy_".getBytes(ISO_8859_1));
+            right.write("abcdefghijklmnopqrstuvwxy_".getBytes());
             right.readPosition(8);
-            Assertions.assertNotEquals(left, right);
+            assertNotEquals(left, right);
         }
 
         @ParameterizedTest
         @MethodSource("bufferArguments")
         void longEqualsWithReadSkip(Bytes<?> left, Bytes<?> right) {
-            left.write("abcdefghijklmnopqrstuvwxyz".getBytes(ISO_8859_1));
+            left.write("abcdefghijklmnopqrstuvwxyz".getBytes());
             left.readSkip(8);
-            right.write("abcdefghijklmnopqrstuvwxyz".getBytes(ISO_8859_1));
+            right.write("abcdefghijklmnopqrstuvwxyz".getBytes());
             right.readSkip(8);
-            Assertions.assertEquals(left, right);
+            assertEquals(left, right);
         }
 
         Stream<Arguments> bufferArguments() {
@@ -108,109 +108,109 @@ class BytesEqualityTests {
 
         @Test
         void baseFailureCase() {
-            byte[] source = "bazquux foobar plughfred".getBytes(ISO_8859_1);
+            byte[] source = "bazquux foobar plughfred".getBytes();
             Bytes<?> direct = Bytes.allocateElasticDirect();
             Bytes<?> heap = Bytes.allocateElasticOnHeap();
             direct.write(source);
             direct.readSkip(8);
             heap.write(source);
             heap.readSkip(8);
-            Assertions.assertEquals(direct, heap);
+            assertEquals(direct, heap);
         }
 
         @Test
         void baseFailureCase_argumentsPermuted() {
-            byte[] source = "bazquux foobar plughfred".getBytes(ISO_8859_1);
+            byte[] source = "bazquux foobar plughfred".getBytes();
             Bytes<?> direct = Bytes.allocateElasticDirect();
             Bytes<?> heap = Bytes.allocateElasticOnHeap();
             direct.write(source);
             direct.readSkip(8);
             heap.write(source);
             heap.readSkip(8);
-            Assertions.assertEquals(heap, direct);
+            assertEquals(heap, direct);
         }
 
         @Test
         void baseFailureCase_fixedSizeDirectBuffer() {
-            byte[] source = "bazquux foobar plughfred".getBytes(ISO_8859_1);
+            byte[] source = "bazquux foobar plughfred".getBytes();
             Bytes<?> direct = Bytes.allocateDirect(1024);
             Bytes<?> heap = Bytes.allocateElasticOnHeap();
             direct.write(source);
             direct.readSkip(8);
             heap.write(source);
             heap.readSkip(8);
-            Assertions.assertEquals(direct, heap);
+            assertEquals(direct, heap);
         }
 
         @Test
         void baseCase_readSkip1() {
-            byte[] source = "bazquux foobar plughfred".getBytes(ISO_8859_1);
+            byte[] source = "bazquux foobar plughfred".getBytes();
             Bytes<?> direct = Bytes.allocateElasticDirect();
             Bytes<?> heap = Bytes.allocateElasticOnHeap();
             direct.write(source);
             direct.readSkip(1);
             heap.write(source);
             heap.readSkip(1);
-            Assertions.assertEquals(direct, heap);
+            assertEquals(direct, heap);
         }
 
         @Test
         void withoutReadSkip() {
-            byte[] source = "bazquux foobar plughfred".getBytes(ISO_8859_1);
+            byte[] source = "bazquux foobar plughfred".getBytes();
             Bytes<?> direct = Bytes.allocateElasticDirect();
             Bytes<?> heap = Bytes.allocateElasticOnHeap();
             direct.write(source);
             heap.write(source);
-            Assertions.assertEquals(direct, heap);
+            assertEquals(direct, heap);
         }
 
         @Test
         void directDirect_withSkip() {
-            byte[] source = "bazquux foobar plughfred".getBytes(ISO_8859_1);
+            byte[] source = "bazquux foobar plughfred".getBytes();
             Bytes<?> direct1 = Bytes.allocateElasticDirect();
             Bytes<?> direct2 = Bytes.allocateElasticDirect();
             direct1.write(source);
             direct1.readSkip(8);
             direct2.write(source);
             direct2.readSkip(8);
-            Assertions.assertEquals(direct1, direct2);
+            assertEquals(direct1, direct2);
         }
 
         @Test
         void directDirect_noSkip() {
-            byte[] source = "bazquux foobar plughfred".getBytes(ISO_8859_1);
+            byte[] source = "bazquux foobar plughfred".getBytes();
             Bytes<?> direct1 = Bytes.allocateElasticDirect();
             Bytes<?> direct2 = Bytes.allocateElasticDirect();
             direct1.write(source);
             direct2.write(source);
-            Assertions.assertEquals(direct1, direct2);
+            assertEquals(direct1, direct2);
         }
 
         @Test
         void heapHeap_withSkip() {
-            byte[] source = "bazquux foobar plughfred".getBytes(ISO_8859_1);
+            byte[] source = "bazquux foobar plughfred".getBytes();
             Bytes<?> heap1 = Bytes.allocateElasticOnHeap();
             Bytes<?> heap2 = Bytes.allocateElasticOnHeap();
             heap1.write(source);
             heap1.readSkip(8);
             heap2.write(source);
             heap2.readSkip(8);
-            Assertions.assertEquals(heap1, heap2);
+            assertEquals(heap1, heap2);
         }
 
         @Test
         void heapHeap_noSkip() {
-            byte[] source = "bazquux foobar plughfred".getBytes(ISO_8859_1);
+            byte[] source = "bazquux foobar plughfred".getBytes();
             Bytes<?> heap1 = Bytes.allocateElasticOnHeap();
             Bytes<?> heap2 = Bytes.allocateElasticOnHeap();
             heap1.write(source);
             heap2.write(source);
-            Assertions.assertEquals(heap1, heap2);
+            assertEquals(heap1, heap2);
         }
 
         @Test
         void shortString() {
-            byte[] source = "test".getBytes(ISO_8859_1);
+            byte[] source = "test".getBytes();
             Bytes<?> direct = Bytes.allocateElasticDirect();
             Bytes<?> heap = Bytes.allocateElasticOnHeap();
 
@@ -220,7 +220,7 @@ class BytesEqualityTests {
             heap.write(source);
             heap.readSkip(1);
 
-            Assertions.assertEquals(direct, heap);
+            assertEquals(direct, heap);
         }
     }
 }

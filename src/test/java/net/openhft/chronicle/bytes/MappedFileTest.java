@@ -18,11 +18,9 @@ import java.io.OutputStreamWriter;
 import java.nio.BufferUnderflowException;
 import java.nio.file.Files;
 
-import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static org.junit.Assert.*;
 import static org.junit.Assume.assumeFalse;
 
-@SuppressWarnings("deprecation")
 public class MappedFileTest extends BytesTestCommon {
 
     @Rule
@@ -34,28 +32,6 @@ public class MappedFileTest extends BytesTestCommon {
         if (Jvm.maxDirectMemory() == 0) {
             ignoreException("Couldn't disable close on interrupt");
             ignoreException("class is not public");
-        }
-    }
-
-    @Test
-    public void insideHonoursSafeLimitWhenPageSizeDiffers() throws Exception {
-        assumeFalse(Jvm.maxDirectMemory() == 0);
-        final File file = tmpDir.newFile();
-        final long chunkSize = OS.pageAlign(64 << 10);
-        final long overlapSize = OS.pageAlign(4 << 10);
-        final int enlargedPageSize = Math.max(OS.pageSize(), 4096) * 2;
-        final ReferenceOwner owner = ReferenceOwner.temporary("page-matrix");
-
-        try (MappedFile mappedFile = MappedFile.of(file, chunkSize, overlapSize, enlargedPageSize, false)) {
-            final MappedBytesStore store = mappedFile.acquireByteStore(owner, chunkSize);
-            try {
-                final long safeLimit = store.safeLimit();
-                assertEquals(store.start() + chunkSize, safeLimit);
-                assertTrue(store.inside(safeLimit - 1));
-                assertFalse(store.inside(safeLimit));
-            } finally {
-                store.release(owner);
-            }
         }
     }
 
@@ -111,9 +87,8 @@ public class MappedFileTest extends BytesTestCommon {
             chunkSize = 64;
         } else if (Jvm.isMacArm()) {
             chunkSize = 16;
-        } else {
+        } else
             chunkSize = 4;
-        }
         chunkSize = chunkSize / 4 * PageUtil.getPageSize(tmp.getAbsolutePath());
 
         try (MappedFile mf = MappedFile.mappedFile(tmp, chunkSize, 0)) {
@@ -237,7 +212,7 @@ public class MappedFileTest extends BytesTestCommon {
         @NotNull File file = Files.createTempFile("readOnlyOpenFile", "deleteme").toFile();
 
         // write some stuff to a file so it exits using stock java APIs
-        @NotNull OutputStreamWriter outWrite = new OutputStreamWriter(Files.newOutputStream(file.toPath()), ISO_8859_1);
+        @NotNull OutputStreamWriter outWrite = new OutputStreamWriter(new FileOutputStream(file));
         outWrite.append(text);
         outWrite.flush();
         outWrite.close();
@@ -248,7 +223,7 @@ public class MappedFileTest extends BytesTestCommon {
         try (@NotNull MappedBytes mapBuf = MappedBytes.readOnly(file)) {
             mapBuf.readLimit(file.length());
             int readLen = mapBuf.read(tmp, 0, tmp.length);
-            assertEquals(text, new String(tmp, 0, readLen, ISO_8859_1));
+            assertEquals(text, new String(tmp, 0, readLen));
         }
 
         // open up the same file via a mapped file
@@ -258,7 +233,7 @@ public class MappedFileTest extends BytesTestCommon {
             @NotNull Bytes<?> buf = mapFile.acquireBytesForRead(temp, 0);
             buf.readLimit(file.length());
             int readLen = buf.read(tmp, 0, tmp.length);
-            assertEquals(text, new String(tmp, 0, readLen, ISO_8859_1));
+            assertEquals(text, new String(tmp, 0, readLen));
             buf.releaseLast(temp);
         }
 

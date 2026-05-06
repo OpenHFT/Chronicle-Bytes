@@ -18,12 +18,7 @@ import static net.openhft.chronicle.bytes.internal.ReferenceCountedUtil.throwExc
 
 /**
  * Output interface for writing to a {@link Bytes} buffer. It combines streaming
- * writes with text appending and prepending utilities. Implementations track a
- * dedicated write cursor and are responsible for validating capacity before
- * advancing it. Instances are usually coupled with {@link BytesIn} on the
- * consumer side and may be reused across multiple messages to minimise
- * allocation. For off-heap stores, callers must respect reference counting and
- * release any wrapper after use.
+ * writes with text appending and prepending utilities.
  *
  * @param <U> underlying store type
  */
@@ -52,7 +47,6 @@ public interface BytesOut<U> extends
     /**
      * Serialises {@code marshallable} prefixed with a 16-bit length.
      */
-    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     void writeMarshallableLength16(WriteBytesMarshallable marshallable)
             throws IllegalArgumentException, BufferOverflowException, BufferUnderflowException, InvalidMarshallableException, ClosedIllegalStateException, ThreadingIllegalStateException;
 
@@ -61,7 +55,7 @@ public interface BytesOut<U> extends
      * include {@link String}, boxed primitives, {@link BytesStore} and
      * {@link BytesMarshallable} implementations.
      */
-    default void writeObject(Class<?> componentType, Object obj)
+    default void writeObject(Class<?>componentType, Object obj)
             throws IllegalArgumentException, BufferOverflowException, ArithmeticException, ClosedIllegalStateException, BufferUnderflowException, InvalidMarshallableException, ThreadingIllegalStateException {
         if (!componentType.isInstance(obj))
             throw new IllegalArgumentException("Cannot serialize " + obj.getClass() + " as an " + componentType);

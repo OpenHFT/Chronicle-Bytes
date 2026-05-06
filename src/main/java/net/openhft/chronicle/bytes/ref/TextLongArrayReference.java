@@ -25,7 +25,7 @@ import static java.nio.charset.StandardCharsets.ISO_8859_1;
  * <p> Constants such as {@code TRU} and {@code FALS} encode the lock state.
  * <p> For debugging only, not tuned for throughput.
  */
-@SuppressWarnings({"rawtypes", "deprecation"})
+@SuppressWarnings("rawtypes")
 public class TextLongArrayReference extends AbstractReference implements ByteableLongArrayValues {
     private static final byte[] SECTION1 = "{ locked: false, capacity: ".getBytes(ISO_8859_1);
     private static final byte[] SECTION2 = ", used: ".getBytes(ISO_8859_1);

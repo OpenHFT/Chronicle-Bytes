@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 
-import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
@@ -30,7 +29,7 @@ class UnsafeRWObjectTest extends BytesTestCommon {
 
         BB bb2 = new BB(0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L);
 
-        directElastic.unsafeReadObject(bb2, offset, 8 * 8);
+        directElastic.unsafeReadObject(bb2, offset,8 * 8);
 
         assertEquals(bb1.l0, bb2.l0);
         assertEquals(bb1.l1, bb2.l1);
@@ -128,7 +127,7 @@ class UnsafeRWObjectTest extends BytesTestCommon {
                 Arrays.toString(
                         BytesUtil.triviallyCopyableRange(byte[].class)));
         Bytes<?> bytes = Bytes.allocateDirect(32);
-        byte[] byteArray = "Hello World.".getBytes(ISO_8859_1);
+        byte[] byteArray = "Hello World.".getBytes();
         int offset = BytesUtil.triviallyCopyableStart(((Object) byteArray).getClass());
         bytes.unsafeWriteObject(byteArray, offset, byteArray.length);
         assertEquals("00000000 48 65 6c 6c 6f 20 57 6f  72 6c 64 2e             Hello Wo rld.    \n",
@@ -137,7 +136,7 @@ class UnsafeRWObjectTest extends BytesTestCommon {
         bytes.unsafeReadObject(byteArray2, offset, byteArray.length);
         assertArrayEquals(byteArray, byteArray2);
 
-        assertEquals("Hello World.", new String(byteArray2, ISO_8859_1));
+        assertEquals("Hello World.", new String(byteArray2));
         bytes.releaseLast();
 
     }
@@ -163,9 +162,9 @@ class UnsafeRWObjectTest extends BytesTestCommon {
     }
 
     static class AA {
-        final int i;
-        final long l;
-        final double d;
+        int i;
+        long l;
+        double d;
 
         AA(int i, long l, double d) {
             this.i = i;
@@ -175,14 +174,7 @@ class UnsafeRWObjectTest extends BytesTestCommon {
     }
 
     static class BB {
-        final long l0;
-        final long l1;
-        final long l2;
-        final long l3;
-        final long l4;
-        final long l5;
-        final long l6;
-        final long l7;
+        long l0, l1, l2, l3, l4, l5, l6, l7;
 
         BB(long l0, long l1, long l2, long l3, long l4, long l5, long l6, long l7) {
             this.l0 = l0;
@@ -210,14 +202,7 @@ class UnsafeRWObjectTest extends BytesTestCommon {
     }
 
     static class DD {
-        final double l0;
-        final double l1;
-        final double l2;
-        final double l3;
-        final double l4;
-        final double l5;
-        final double l6;
-        final double l7;
+        double l0, l1, l2, l3, l4, l5, l6, l7;
 
         DD(double l0, double l1, double l2, double l3, double l4, double l5, double l6, double l7) {
             this.l0 = l0;

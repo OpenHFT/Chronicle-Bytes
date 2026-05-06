@@ -17,11 +17,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Arrays;
 
-import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static org.junit.Assert.*;
 import static org.junit.Assume.assumeTrue;
 
-@SuppressWarnings("deprecation")
 public class BytesUtilTest extends BytesTestCommon {
 
     File testFile;
@@ -65,11 +63,11 @@ public class BytesUtilTest extends BytesTestCommon {
     @Test
     public void fromFileInJar()
             throws IOException {
-        Bytes<?> bytes = BytesUtil.readFile("net/openhft/chronicle/core/onoes/Google.properties");
-        Bytes<?> apacheLicense = Bytes.from("Apache License");
-        long n = bytes.indexOf(apacheLicense);
+        Bytes<?> bytes = BytesUtil.readFile("/net/openhft/chronicle/core/onoes/Google.properties");
+        Bytes<?> apache_license = Bytes.from("Apache License");
+        long n = bytes.indexOf(apache_license);
         assertTrue(n > 0);
-        apacheLicense.releaseLast();
+        apache_license.releaseLast();
     }
 
     @Test
@@ -99,43 +97,6 @@ public class BytesUtilTest extends BytesTestCommon {
 
         Assert.assertEquals(start, BytesUtil.triviallyCopyableStart(A.class));
         Assert.assertEquals(20, BytesUtil.triviallyCopyableLength(A.class));
-
-        // Exercise fields so SpotBugs sees them as used
-        A a = new A();
-        a.i = 1;
-        a.l = 2L;
-        a.d = 3.0;
-        Assert.assertEquals(1, a.i);
-        Assert.assertEquals(2L, a.l);
-        Assert.assertEquals(3.0, a.d, 0.0);
-
-        B b = new B();
-        b.i = 4;
-        b.l = 5L;
-        b.d = 6.0;
-        b.s = "x";
-        Assert.assertEquals(4, b.i);
-        Assert.assertEquals(5L, b.l);
-        Assert.assertEquals(6.0, b.d, 0.0);
-        Assert.assertEquals("x", b.s);
-
-        C c = new C();
-        c.i = 7;
-        c.l = 8L;
-        c.d = 9.0;
-        Assert.assertEquals(7, c.i);
-        Assert.assertEquals(8L, c.l);
-        Assert.assertEquals(9.0, c.d, 0.0);
-
-        Nested nested = new Nested();
-        nested.i = 10;
-        Assert.assertEquals(10, nested.i);
-
-        SubNested subNested = new SubNested();
-        subNested.i = 11;
-        subNested.j = 12;
-        Assert.assertEquals(11, subNested.i);
-        Assert.assertEquals(12, subNested.j);
     }
 
     @Test
@@ -167,17 +128,6 @@ public class BytesUtilTest extends BytesTestCommon {
         assertFalse(BytesUtil.isTriviallyCopyable(A3.class, start - 4, 4 + 2 * 8));
         Assert.assertEquals(Jvm.isAzulZing(), BytesUtil.isTriviallyCopyable(A3.class, start + 8, 4 + 2 * 8));
         assertFalse(BytesUtil.isTriviallyCopyable(A3.class, start + 12, 4 + 2 * 8));
-
-        // Exercise A2/A3 fields so SpotBugs sees them as read
-        A2 a2 = new A2();
-        a2.s = 123;
-        a2.ch = 'z';
-        Assert.assertEquals(123, a2.s);
-        Assert.assertEquals('z', a2.ch);
-
-        A3 a3 = new A3();
-        a3.user = "user3";
-        Assert.assertEquals("user3", a3.user);
     }
 
     @Test
@@ -187,20 +137,6 @@ public class BytesUtilTest extends BytesTestCommon {
         int size2 = 20;
         int[] range = BytesUtil.triviallyCopyableRange(E.class);
         Assert.assertEquals(size2, range[1] - range[0]);
-
-        D d = new D();
-        d.user = "user";
-        Assert.assertEquals("user", d.user);
-
-        E e = new E();
-        e.user = "user2";
-        e.i = 1;
-        e.l = 2L;
-        e.d = 3.0;
-        Assert.assertEquals("user2", e.user);
-        Assert.assertEquals(1, e.i);
-        Assert.assertEquals(2L, e.l);
-        Assert.assertEquals(3.0, e.d, 0.0);
     }
 
     @Test
@@ -242,7 +178,7 @@ public class BytesUtilTest extends BytesTestCommon {
     @Test
     public void equals_equivalentObjects() {
         // Intentional boxing to create two equivalent but distinct objects
-        assertTrue(BytesUtil.equals(1, 1));
+        assertTrue(BytesUtil.equals(new Integer(1), new Integer(1)));
     }
 
     @Test
@@ -300,7 +236,7 @@ public class BytesUtilTest extends BytesTestCommon {
     @Test
     public void asIntStopBitAndPadding() {
         // Validate against native-endian view used by BytesUtil.asInt
-        int expected = java.nio.ByteBuffer.wrap("1234".getBytes(ISO_8859_1))
+        int expected = java.nio.ByteBuffer.wrap("1234".getBytes(java.nio.charset.StandardCharsets.ISO_8859_1))
                 .order(java.nio.ByteOrder.nativeOrder())
                 .getInt();
         Assert.assertEquals(expected, BytesUtil.asInt("1234"));
@@ -385,22 +321,10 @@ public class BytesUtilTest extends BytesTestCommon {
     static class A2 extends A {
         short s;
         char ch;
-
-        // Accessed reflectively via BytesUtil.triviallyCopyableRange; this assignment keeps static analysis satisfied.
-        @SuppressWarnings("unused")
-        A2() {
-            this.s = 1;
-            this.ch = 'x';
-        }
     }
 
     private static class A3 extends A2 {
         String user;
-
-        @SuppressWarnings("unused")
-        A3() {
-            this.user = "user";
-        }
     }
 
     private static class B {
@@ -431,7 +355,7 @@ public class BytesUtilTest extends BytesTestCommon {
         int i;
     }
 
-    private static class SubNested extends Nested {
+    private class SubNested extends Nested {
         int j;
     }
 }

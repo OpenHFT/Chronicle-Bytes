@@ -1,15 +1,13 @@
 = Chronicle Bytes Microbenchmarks
-:toc:
 :lang: en-GB
-:source-highlighter: rouge
 
 This module contains JMH benchmarks that measure the throughput of common
-operations such as primitive writes, string parsing, and CAS updates.
+operations such as primitive writes, string parsing and CAS updates.
 
 == Purpose
 The benchmarks help detect performance regressions and guide optimisation work.
 
-== How to run
+== How to Run
 From this directory execute:
 
 [source,bash]
@@ -19,6 +17,6 @@ mvn -q clean verify
 
 Results are printed on the console after the JMH harness completes.
 
-== Adding benchmarks
+== Adding Benchmarks
 Create a new class under `src/main/java` and follow the existing patterns.
 Each benchmark should document what it measures and keep setup code minimal.

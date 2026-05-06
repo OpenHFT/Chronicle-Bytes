@@ -27,10 +27,6 @@ import static net.openhft.chronicle.bytes.Allocator.*;
 import static org.junit.Assert.*;
 import static org.junit.Assume.assumeFalse;
 
-/**
- * Parameterised tests for {@link NativeBytes}, covering allocation sizing,
- * bounds checks, reference counting, and interactions with mapped files.
- */
 @RunWith(Parameterized.class)
 public class NativeBytesTest extends BytesTestCommon {
 

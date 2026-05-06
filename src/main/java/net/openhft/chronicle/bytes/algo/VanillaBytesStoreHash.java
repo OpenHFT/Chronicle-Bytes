@@ -114,19 +114,19 @@ public enum VanillaBytesStoreHash implements BytesStoreHash<BytesStore<?,?>> {
                 h3 *= K3;
             }
             long addrI = start + i;
-            final long l0 = bytes.readLong(addrI);
-            final int l0a = bytes.readInt(addrI + HI_BYTES);
-            final long l1 = bytes.readLong(addrI + 8);
-            final int l1a = bytes.readInt(addrI + 8 + HI_BYTES);
-            final long l2 = bytes.readLong(addrI + 16);
-            final int l2a = bytes.readInt(addrI + 16 + HI_BYTES);
-            final long l3 = bytes.readLong(addrI + 24);
-            final int l3a = bytes.readInt(addrI + 24 + HI_BYTES);
+            long l0 = bytes.readLong(addrI);
+            int l0a = bytes.readInt(addrI + HI_BYTES);
+            long l1 = bytes.readLong(addrI + 8);
+            int l1a = bytes.readInt(addrI + 8 + HI_BYTES);
+            long l2 = bytes.readLong(addrI + 16);
+            int l2a = bytes.readInt(addrI + 16 + HI_BYTES);
+            long l3 = bytes.readLong(addrI + 24);
+            int l3a = bytes.readInt(addrI + 24 + HI_BYTES);
 
-            h3 += (l3 + l0a - l1a) * M3;
             h0 += (l0 + l1a - l2a) * M0;
             h1 += (l1 + l2a - l3a) * M1;
             h2 += (l2 + l3a - l0a) * M2;
+            h3 += (l3 + l0a - l1a) * M3;
         }
 
         // perform a hash of the end.
@@ -140,19 +140,19 @@ public enum VanillaBytesStoreHash implements BytesStoreHash<BytesStore<?,?>> {
             }
 
             long addrI = start + i;
-            final long l0 = bytes.readIncompleteLong(addrI);
-            final int l0a = (int) (l0 >> 32);
-            final long l1 = bytes.readIncompleteLong(addrI + 8);
-            final int l1a = (int) (l1 >> 32);
-            final long l2 = bytes.readIncompleteLong(addrI + 16);
-            final int l2a = (int) (l2 >> 32);
-            final long l3 = bytes.readIncompleteLong(addrI + 24);
-            final int l3a = (int) (l3 >> 32);
+            long l0 = bytes.readIncompleteLong(addrI);
+            int l0a = (int) (l0 >> 32);
+            long l1 = bytes.readIncompleteLong(addrI + 8);
+            int l1a = (int) (l1 >> 32);
+            long l2 = bytes.readIncompleteLong(addrI + 16);
+            int l2a = (int) (l2 >> 32);
+            long l3 = bytes.readIncompleteLong(addrI + 24);
+            int l3a = (int) (l3 >> 32);
 
-            h3 += (l3 + l0a - l1a) * M3;
             h0 += (l0 + l1a - l2a) * M0;
             h1 += (l1 + l2a - l3a) * M1;
             h2 += (l2 + l3a - l0a) * M2;
+            h3 += (l3 + l0a - l1a) * M3;
         }
         return agitate(h0) ^ agitate(h1)
                 ^ agitate(h2) ^ agitate(h3);

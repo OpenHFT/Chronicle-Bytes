@@ -9,11 +9,6 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
-/**
- * Covers ordered, volatile and plain read/write operations on
- * {@link BytesStore} to ensure low-level accessors behave consistently for
- * native stores.
- */
 public class NativeBytesStoreOpsTest extends BytesTestCommon {
 
     @Test
@@ -36,3 +31,4 @@ public class NativeBytesStoreOpsTest extends BytesTestCommon {
         }
     }
 }
+

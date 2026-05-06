@@ -12,7 +12,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeFalse;
 
-@SuppressWarnings("deprecation")
 public class CASTest extends BytesTestCommon {
     @Test
     public void testCAS() {
@@ -24,12 +23,12 @@ public class CASTest extends BytesTestCommon {
 
             bytes.writeHexDumpDescription("s32").writeUtf8("s32");
             bytes.writeSkip((-bytes.writePosition()) & (4 - 1));
-            final long s32 = bytes.writePosition();
+            long s32 = bytes.writePosition();
             bytes.writeInt(0);
 
             bytes.writeHexDumpDescription("s64").writeUtf8("s64");
             bytes.writeSkip((-bytes.writePosition()) & (8 - 1));
-            final long s64 = bytes.writePosition();
+            long s64 = bytes.writePosition();
             bytes.writeLong(0);
 
             final String expected1 = "0000 03 73 33 32 00 00 00 00                         # s32\n" +

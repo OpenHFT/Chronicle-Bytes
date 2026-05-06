@@ -40,11 +40,9 @@ public class AllocationRatesTest extends BytesTestCommon {
     private long timeHeapByteBufferAllocations() {
         long start = System.nanoTime();
         for (int i = 0; i < ALLOCATIONS; i += BATCH) {
-            @NotNull ByteBuffer[] buffers = new ByteBuffer[BATCH];
-            for (int j = 0; j < BATCH; j++) {
-                buffers[j] = ByteBuffer.allocate(BUFFER_SIZE);
-                buffers[j].putInt(0, j);
-            }
+            @NotNull ByteBuffer[] bb = new ByteBuffer[BATCH];
+            for (int j = 0; j < BATCH; j++)
+                bb[j] = ByteBuffer.allocate(BUFFER_SIZE);
         }
         return System.nanoTime() - start;
     }
@@ -52,11 +50,9 @@ public class AllocationRatesTest extends BytesTestCommon {
     private long timeDirectByteBufferAllocations() {
         long start = System.nanoTime();
         for (int i = 0; i < ALLOCATIONS; i += BATCH) {
-            @NotNull ByteBuffer[] buffers = new ByteBuffer[BATCH];
-            for (int j = 0; j < BATCH; j++) {
-                buffers[j] = ByteBuffer.allocateDirect(BUFFER_SIZE);
-                buffers[j].putInt(0, j);
-            }
+            @NotNull ByteBuffer[] bb = new ByteBuffer[BATCH];
+            for (int j = 0; j < BATCH; j++)
+                bb[j] = ByteBuffer.allocateDirect(BUFFER_SIZE);
         }
         return System.nanoTime() - start;
     }

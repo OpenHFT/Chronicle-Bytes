@@ -18,7 +18,7 @@ import static org.junit.Assert.assertThrows;
 public class MethodWriterRollbackTest extends BytesTestCommon {
 
     interface Failer {
-        void go(); // declare Throwable to test non-Exception path
+        void go() throws Throwable; // declare Throwable to test non-Exception path
     }
 
     @Test

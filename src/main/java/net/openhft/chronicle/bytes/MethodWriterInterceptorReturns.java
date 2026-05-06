@@ -16,7 +16,6 @@ import java.util.function.BiFunction;
  * changing return values, or implementing pre- and post-method invocation actions.
  */
 @FunctionalInterface
-@Deprecated(/* to be removed in 2027 */)
 public interface MethodWriterInterceptorReturns {
 
     /**

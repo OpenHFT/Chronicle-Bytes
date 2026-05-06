@@ -129,7 +129,6 @@ public abstract class AbstractInterner<T> {
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
-    @Deprecated(/* to be removed in 2027 */)
     public T intern(@NotNull BytesStore<?, ?> cs)
             throws IORuntimeException, BufferUnderflowException, IllegalStateException {
         return intern(cs, (int) cs.readRemaining());
@@ -223,7 +222,6 @@ public abstract class AbstractInterner<T> {
      *
      * @return the count of non-null values
      */
-    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public int valueCount() {
         return (int) Stream.of(entries).filter(Objects::nonNull).count();
     }

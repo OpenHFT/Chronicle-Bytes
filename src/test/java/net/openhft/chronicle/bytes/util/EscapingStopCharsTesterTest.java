@@ -6,16 +6,17 @@ package net.openhft.chronicle.bytes.util;
 import net.openhft.chronicle.bytes.StopCharsTester;
 import org.junit.Test;
 import org.junit.Before;
-
+import static org.mockito.Mockito.*;
 import static org.junit.Assert.*;
 
 public class EscapingStopCharsTesterTest {
 
+    private StopCharsTester baseTester;
     private EscapingStopCharsTester tester;
     @Before
     public void setUp() {
         // Setup the base tester with specific behavior for demonstration
-        StopCharsTester baseTester = (ch, peekNextCh) -> ch == 'x'; // Let's say 'x' is a stop character
+        baseTester = (ch, peekNextCh) -> ch == 'x'; // Let's say 'x' is a stop character
         tester = new EscapingStopCharsTester(baseTester);
     }
 

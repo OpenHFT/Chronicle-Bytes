@@ -21,7 +21,7 @@ import java.util.zip.*;
  * provides {@link Compression} implementations for stream-based compression and
  * decompression.
  */
-@SuppressWarnings({"rawtypes", "deprecation"})
+@SuppressWarnings("rawtypes")
 public enum Compressions implements Compression {
 
     /**

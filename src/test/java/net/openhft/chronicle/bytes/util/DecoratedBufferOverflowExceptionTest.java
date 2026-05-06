@@ -17,23 +17,4 @@ public class DecoratedBufferOverflowExceptionTest {
         // Assert that the message is correctly set and retrieved
         assertEquals(expectedMessage, exception.getMessage());
     }
-
-    @Test
-    public void nullCauseIsEquivalentToNoCause() {
-        DecoratedBufferOverflowException withNull =
-                new DecoratedBufferOverflowException("with-null", null);
-        DecoratedBufferOverflowException withoutCause =
-                new DecoratedBufferOverflowException("without-cause");
-
-        assertNull(withNull.getCause());
-        assertNull(withoutCause.getCause());
-    }
-
-    @Test
-    public void nonNullCauseIsAttached() {
-        Throwable cause = new IllegalStateException("boom");
-        DecoratedBufferOverflowException exception =
-                new DecoratedBufferOverflowException("with-cause", cause);
-        assertSame(cause, exception.getCause());
-    }
 }

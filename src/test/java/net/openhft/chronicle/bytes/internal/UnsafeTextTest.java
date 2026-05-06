@@ -157,7 +157,7 @@ public class UnsafeTextTest extends BytesTestCommon {
     public void testRandom() {
         int runLength = 10_000;
         IntStream.range(0, runLength).parallel().forEach(t -> {
-            Random r = new Random(1L + t);
+            Random r = new Random();
             int size = max + 8;
             long address = OS.memory().allocate(size);
             long l = r.nextLong() | 1L;

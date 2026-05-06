@@ -1,11 +1,10 @@
 = Chronicle Bytes Hash Algorithms
-:toc:
-:lang: en-GB
-:toclevels: 2
 :doctype: book
-:source-highlighter: rouge
+:toc:
+:toclevels: 2
+:lang: en-GB
 
-This module provides non-cryptographic hash functions for `BytesStore` data.
+This module provides non-cryptographic hash functions for `BytesStore` data. [cite: 136]
 It is typically used for in-memory indexes and integrity checks where speed is more important than collision resistance.
 The available algorithms are designed for efficiency when processing byte sequences.
 
@@ -13,19 +12,12 @@ The available algorithms are designed for efficiency when processing byte sequen
 
 Chronicle Bytes provides several hashing implementations:
 
-`OptimisedBytesStoreHash` ::
-This algorithm dynamically selects an optimised hashing strategy based on the size of the data and whether it resides in direct memory.
-It considers system architecture details like endianness for performance.
+* **`OptimisedBytesStoreHash`**: This algorithm dynamically selects an optimised hashing strategy based on the size of the data and whether it resides in direct memory. [cite: 116, 125] It considers system architecture details like endianness for performance. [cite: 116]
+* **`VanillaBytesStoreHash`**: A general-purpose hashing algorithm for `BytesStore` instances. [cite: 133] It provides a consistent hashing approach suitable for various data sizes.
+* **`XxHash`**: An implementation of the xxHash algorithm, known for its speed.
+This version is migrated from the Zero-Allocation-Hashing project and supports a configurable seed. [cite: 128]
 
-`VanillaBytesStoreHash` ::
-A general-purpose hashing algorithm for `BytesStore` instances.
-It provides a consistent hashing approach suitable for various data sizes.
-
-`XxHash` ::
-An implementation of the xxHash algorithm, known for its speed.
-This version is migrated from the Zero-Allocation-Hashing project and supports a configurable seed.
-
-All hashing algorithms implement the `BytesStoreHash` interface.
+All hashing algorithms implement the `BytesStoreHash` interface. [cite: 126, 136]
 
 == Usage
 
@@ -73,14 +65,15 @@ int partialHash32 = BytesStoreHash.hash32(bytesStore, (int) lengthToHash);
 
 == Performance Considerations
 
-* `OptimisedBytesStoreHash` aims to provide the best performance for `BytesStore` instances in direct memory by using specialised routines for different data lengths (for example 1–7 bytes, 8 bytes, 9–16 bytes, etc.).
-* For on-heap `BytesStore` instances, or when a direct-memory-optimised version is not available, hashing typically falls back to implementations like `VanillaBytesStoreHash`.
-* Endianness (`IS_LITTLE_ENDIAN`) and specific memory access methods (for example `MEMORY.readLong`, `MEMORY.readInt`) are used by `OptimisedBytesStoreHash` to enhance speed.
-* `XxHash` is also designed for high throughput and low latency.
+* `OptimisedBytesStoreHash` aims to provide the best performance for `BytesStore` instances in direct memory by using specialized routines for different data lengths (e.g., 1-7 bytes, 8 bytes, 9-16 bytes, etc.). [cite: 116, 125]
+* For on-heap `BytesStore` instances, or when a direct memory optimized version is not available, hashing typically falls back to implementations like `VanillaBytesStoreHash`. [cite: 126]
+* Endianness (`IS_LITTLE_ENDIAN`) and specific memory access methods (`MEMORY.readLong`, `MEMORY.readInt`) are utilized by `OptimisedBytesStoreHash` to enhance speed. [cite: 116]
+* `XxHash` is also designed for high speed. [cite: 128, 136]
 
 == Important Notes
 
-* These hash functions are *non-cryptographic* and must not be used for security-sensitive applications where collision resistance against malicious input is required.
+* These hash functions are **non-cryptographic**.
+They should not be used for security-sensitive applications where collision resistance against malicious attacks is required. [cite: 136]
 * The hash computation depends on the readable bytes in the `BytesStore`.
 Ensure the `readPosition` and `readLimit` (or the specified length) accurately reflect the data you intend to hash.
 

@@ -8,15 +8,6 @@ import net.openhft.chronicle.core.cooler.CoolerTester;
 import net.openhft.chronicle.core.cooler.CpuCoolers;
 import org.jetbrains.annotations.NotNull;
 
-/**
- * Latency experiment for appending long values to {@link Bytes} under different cooling strategies.
- *
- * <p>This standalone tool uses {@link CoolerTester} and {@link CpuCoolers} to exercise a simple
- * append workload and report how various pause and busy-wait configurations affect latency
- * distributions. It is intended for hardware specific tuning rather than general benchmarking.
- * Launch from an IDE or via {@code mvn -pl Chronicle-Bytes exec:java} to compare the effect of
- * different CPU coolers on tail latency.
- */
 public class AppendLongCoolerMain {
 
     static int i = 0;
