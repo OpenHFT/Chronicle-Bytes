@@ -22,10 +22,7 @@ import java.nio.BufferUnderflowException;
 /**
  * Extension of {@link StreamingDataOutput} and {@link Appendable} that exposes
  * convenience methods for writing text and numbers to a {@link Bytes} stream.
- * Implementations honour the underlying {@link Bytes} decimaliser so numeric
- * rendering is consistent across writers. Each method returns {@code this} to
- * allow fluent call chains and to minimise intermediate allocations when
- * formatting to off-heap or on-heap buffers.
+ * Each method returns {@code this} to allow fluent call chains.
  *
  * @param <B> concrete type for fluent chaining
  */
@@ -38,7 +35,6 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      * @return Writer object representing the ByteStringAppender
      */
     @NotNull
-    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     default Writer writer() {
         return new ByteStringWriter(this);
     }
@@ -88,7 +84,6 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
     @NotNull
-    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     default B append(boolean flag)
             throws BufferOverflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
         return append(flag ? 'T' : 'F');
@@ -143,7 +138,6 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
     @NotNull
-    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     default B appendBase(long value, int base)
             throws BufferOverflowException, IllegalArgumentException, ClosedIllegalStateException, ThreadingIllegalStateException {
         if (base == 10)
@@ -215,7 +209,7 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      */
     @NotNull
     default B append(float f)
-            throws BufferOverflowException, IllegalStateException {
+            throws BufferOverflowException, IllegalStateException, ClosedIllegalStateException, ThreadingIllegalStateException {
         float f2 = Math.abs(f);
         if (f2 > 1e6 || f2 < 1e-3) {
             return append(Float.toString(f));
@@ -230,7 +224,7 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      */
     @NotNull
     default B append(double d)
-            throws BufferOverflowException, IllegalStateException {
+            throws BufferOverflowException, IllegalStateException, ClosedIllegalStateException, ThreadingIllegalStateException {
         try (ScopedResource<Bytes<?>> stlBytes = BytesInternal.acquireBytesScoped()) {
             Bytes<?> bytes = stlBytes.get();
             bytes.append(d);
@@ -242,7 +236,6 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
     /**
      * Returns the strategy used to convert floating point values to text.
      */
-    @Deprecated(/* to be removed in 2027 */)
     Decimaliser decimaliser();
 
     /**
@@ -398,7 +391,6 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
-    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     default B append8bit(@NotNull BytesStore<?, ?> bs, @NonNegative long start, @NonNegative long end)
             throws IllegalArgumentException, BufferOverflowException, BufferUnderflowException, IndexOutOfBoundsException, ClosedIllegalStateException, ThreadingIllegalStateException {
         assert end > start : "end=" + end + ",start=" + start;

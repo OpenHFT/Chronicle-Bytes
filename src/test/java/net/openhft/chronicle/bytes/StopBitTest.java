@@ -24,14 +24,20 @@ public class StopBitTest extends BytesTestCommon {
 
             final Bytes<?> b = Bytes.allocateElastic();
             try {
-                long offset = expectedBytes.readPosition();
-                long readRemaining = Math.min(b.writeRemaining(), expectedBytes.readLimit() - offset);
-                b.writeStopBit(readRemaining);
-                try {
-                    b.write(expectedBytes, offset, readRemaining);
-                } catch (BufferUnderflowException | IllegalArgumentException e) {
-                    throw new AssertionError(e);
+                if (expectedBytes == null) {
+                    b.writeStopBit(-1);
+                } else {
+                    long offset = expectedBytes.readPosition();
+                    long readRemaining = Math.min(b.writeRemaining(), expectedBytes.readLimit() - offset);
+                    b.writeStopBit(readRemaining);
+                    try {
+                        b.write(expectedBytes, offset, readRemaining);
+                    } catch (BufferUnderflowException | IllegalArgumentException e) {
+                        throw new AssertionError(e);
+                    }
                 }
+
+                // System.out.printf("0x%04x : %02x %02x %02x%n", i, b.readByte(0), b.readByte(1), b.readByte(3));
 
                 Assert.assertEquals("failed at " + i, expected, b.read8bit());
 

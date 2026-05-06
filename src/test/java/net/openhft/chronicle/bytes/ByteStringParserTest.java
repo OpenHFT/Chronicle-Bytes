@@ -18,10 +18,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assume.assumeFalse;
 
-@SuppressWarnings("deprecation")
 public class ByteStringParserTest extends BytesTestCommon {
     @NotNull
-    private final
+    private
     Bytes<?> bytes = Bytes.allocateElastic();
 
     @Override

@@ -14,7 +14,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assume.assumeFalse;
 
-@SuppressWarnings("deprecation")
 public class ReadLenientTest extends BytesTestCommon {
     @Test
     public void testLenient() {

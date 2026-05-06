@@ -7,12 +7,14 @@ import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.io.Closeable;
 
 /**
- * Reader facade for a Chronicle ring buffer with read-once semantics.
+ * An interface for a reader on a Ring Buffer, providing methods to read and navigate through the buffer.
+ * The reader supports a read-once-and-discard paradigm which makes it suitable for situations where
+ * high throughput is required and old data is irrelevant.
  * <p>
- * Supports concurrent producers and consumers without blocking writers; consumers call
- * {@link #beforeRead(Bytes)} / {@link #afterRead(long)} to advance safely and can gather stats via
- * {@link RingBufferReaderStats}. Once stopped, the reader keeps writers unblocked and may be
- * restarted if supported by the implementation.
+ * This interface also extends {@link RingBufferReaderStats}, which provides statistics
+ * about the Ring Buffer's usage, and {@link Closeable} for closing the reader when it's no longer needed.
+ *
+ * <p> The reader supports concurrent reading and writing operations without blocking the writers, even when stopped.
  */
 public interface RingBufferReader extends RingBufferReaderStats, Closeable {
 

@@ -39,7 +39,7 @@ import static org.junit.Assert.*;
 import static org.junit.Assume.assumeFalse;
 import static org.junit.Assume.assumeTrue;
 
-@SuppressWarnings({"rawtypes", "deprecation"})
+@SuppressWarnings("rawtypes")
 @RunWith(Parameterized.class)
 public class BytesTest extends BytesTestCommon {
 
@@ -73,7 +73,7 @@ public class BytesTest extends BytesTestCommon {
         final Bytes<?> data = alloc1.elasticBytes(120);
         data.write8bit("Test me again");
         data.writeLimit(data.readLimit()); // this breaks the check
-        assertEquals("Test me again", data.read8bit());
+        assertEquals(data.read8bit(), "Test me again");
         data.releaseLast();
     }
 
@@ -287,12 +287,8 @@ public class BytesTest extends BytesTestCommon {
             store2 = alloc1.elasticBytes(64).append("TW-TRSY-20181217-NY572677_3256N15");
             assertFalse(store1.equalBytes(store2, store2.length()));
         } finally {
-            if (store1 != null) {
-                store1.releaseLast();
-            }
-            if (store2 != null) {
-                store2.releaseLast();
-            }
+            store1.releaseLast();
+            store2.releaseLast();
         }
     }
 
@@ -483,14 +479,13 @@ public class BytesTest extends BytesTestCommon {
             throws IllegalStateException {
         assumeFalse(NativeBytes.areNewGuarded());
         Bytes<?> bytes = alloc1.elasticBytes(1);
-        try (PrintWriter writer = new PrintWriter(bytes.writer())) {
-            writer.println(1);
-            writer.println("Hello");
-            writer.println(12.34);
-            writer.append('a').append('\n');
-            writer.append("bye\n");
-            writer.append("for now\nxxxx", 0, 8);
-        }
+        @NotNull PrintWriter writer = new PrintWriter(bytes.writer());
+        writer.println(1);
+        writer.println("Hello");
+        writer.println(12.34);
+        writer.append('a').append('\n');
+        writer.append("bye\n");
+        writer.append("for now\nxxxx", 0, 8);
         assertEquals("1\n" +
                 "Hello\n" +
                 "12.34\n" +
@@ -931,13 +926,17 @@ public class BytesTest extends BytesTestCommon {
         try {
             for (int i = 0; i <= 36; i++) {
                 nbytes.clear().append(sb);
-                long offset = nbytes.readPosition();
-                long readRemaining = Math.min(bytes.writeRemaining(), nbytes.readLimit() - offset);
-                bytes.writeStopBit(readRemaining);
-                try {
-                    bytes.write(nbytes, offset, readRemaining);
-                } catch (BufferUnderflowException | IllegalArgumentException e) {
-                    throw new AssertionError(e);
+                if (nbytes == null) {
+                    bytes.writeStopBit(-1);
+                } else {
+                    long offset = nbytes.readPosition();
+                    long readRemaining = Math.min(bytes.writeRemaining(), nbytes.readLimit() - offset);
+                    bytes.writeStopBit(readRemaining);
+                    try {
+                        bytes.write(nbytes, offset, readRemaining);
+                    } catch (BufferUnderflowException | IllegalArgumentException e) {
+                        throw new AssertionError(e);
+                    }
                 }
                 bytes.read8bit(nbytes2.clear());
 
@@ -963,13 +962,17 @@ public class BytesTest extends BytesTestCommon {
         try {
             for (int i = 0; i <= 36; i++) {
                 nbytes.clear().append(sb);
-                long offset = nbytes.readPosition();
-                long readRemaining = Math.min(bytes.writeRemaining(), nbytes.readLimit() - offset);
-                bytes.writeStopBit(readRemaining);
-                try {
-                    bytes.write(nbytes, offset, readRemaining);
-                } catch (BufferUnderflowException | IllegalArgumentException e) {
-                    throw new AssertionError(e);
+                if (nbytes == null) {
+                    bytes.writeStopBit(-1);
+                } else {
+                    long offset = nbytes.readPosition();
+                    long readRemaining = Math.min(bytes.writeRemaining(), nbytes.readLimit() - offset);
+                    bytes.writeStopBit(readRemaining);
+                    try {
+                        bytes.write(nbytes, offset, readRemaining);
+                    } catch (BufferUnderflowException | IllegalArgumentException e) {
+                        throw new AssertionError(e);
+                    }
                 }
                 bytes.read8bit(nbytes2.clear());
 
@@ -1279,7 +1282,7 @@ public class BytesTest extends BytesTestCommon {
         ba[0] = '0';
         ba[1] = '1';
         bytes.read(offsetInRDI, ba, offset, bytes.length() - offsetInRDI);
-        assertEquals("01ello", new String(ba, ISO_8859_1));
+        assertEquals("01ello", new String(ba));
         bytes.releaseLast();
     }
 

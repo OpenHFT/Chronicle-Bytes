@@ -11,7 +11,6 @@ import org.mockito.MockitoAnnotations;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
-@SuppressWarnings("deprecation")
 public class BytesRingBufferTest {
 
     @Mock

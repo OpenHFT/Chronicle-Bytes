@@ -38,7 +38,7 @@ import static net.openhft.chronicle.bytes.ref.BinaryIntReference.INT_NOT_COMPLET
  * Note: This class is not thread-safe. External synchronisation may be
  * required if instances are shared between threads.
  */
-@SuppressWarnings({"rawtypes", "deprecation"})
+@SuppressWarnings("rawtypes")
 public class BinaryIntArrayReference extends AbstractReference implements ByteableIntArrayValues, BytesMarshallable {
 
     public static final int SHIFT = 2;
@@ -71,7 +71,6 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
     /**
      * Initializes the collection that keeps references to BinaryIntArrayReference instances.
      */
-    @Deprecated(/* to be removed in 2027 */)
     public static void startCollecting() {
         binaryIntArrayReferences = Collections.newSetFromMap(new IdentityHashMap<>());
     }
@@ -83,7 +82,6 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
-    @Deprecated(/* to be removed in 2027 */)
     public static void forceAllToNotCompleteState()
             throws IllegalStateException, BufferOverflowException {
         if (binaryIntArrayReferences == null)
@@ -109,7 +107,6 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
-    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public static void write(@NotNull Bytes<?> bytes, @NonNegative long capacity)
             throws BufferOverflowException, IllegalArgumentException, IllegalStateException {
         assert (bytes.writePosition() & 0x7) == 0;
@@ -138,7 +135,6 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
-    @Deprecated(/* to be removed in 2027 */)
     public static void lazyWrite(@NotNull Bytes<?> bytes, @NonNegative long capacity)
             throws BufferOverflowException, IllegalStateException {
         assert (bytes.writePosition() & 0x7) == 0;
@@ -299,11 +295,7 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
             throws IllegalStateException, BufferOverflowException, IllegalArgumentException {
         throwExceptionIfClosed();
 
-        if (!(value instanceof BinaryIntReference)) {
-            throw new IllegalArgumentException("Expected BinaryIntReference but got " + value.getClass().getName());
-        }
-        BinaryIntReference intRef = (BinaryIntReference) value;
-        intRef.bytesStore(bytesStore, VALUES + offset + (index << SHIFT), 8);
+        ((BinaryIntReference) value).bytesStore(bytesStore, VALUES + offset + (index << SHIFT), 8);
     }
 
     /**

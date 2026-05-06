@@ -52,9 +52,12 @@ public class ByteStringWriter extends Writer {
      * Writes a string.
      *
      * @param str String to be written.
+     * @throws IOException if an I/O error occurs.
+     * @throws ClosedIllegalStateException if the input ByteStringAppender is released.
      */
     @Override
-    public void write(@NotNull String str) {
+    public void write(@NotNull String str)
+            throws IOException {
         out.append(str);
     }
 
@@ -64,9 +67,12 @@ public class ByteStringWriter extends Writer {
      * @param str String to be written.
      * @param off Offset from which to start reading characters.
      * @param len Number of characters to be written.
+     * @throws IOException if an I/O error occurs.
+     * @throws ClosedIllegalStateException if the input ByteStringAppender is released.
      */
     @Override
-    public void write(@NotNull String str, @NonNegative int off, @NonNegative int len) {
+    public void write(@NotNull String str, @NonNegative int off, @NonNegative int len)
+            throws IOException {
         out.append(str, off, off + len);
     }
 
@@ -75,10 +81,13 @@ public class ByteStringWriter extends Writer {
      *
      * @param csq The character sequence to append.
      * @return This writer
+     * @throws IOException if an I/O error occurs.
+     * @throws ClosedIllegalStateException if the input ByteStringAppender is released.
      */
     @NotNull
     @Override
-    public Writer append(@NotNull CharSequence csq) {
+    public Writer append(@NotNull CharSequence csq)
+            throws IOException {
         out.append(csq);
         return this;
     }
@@ -135,9 +144,12 @@ public class ByteStringWriter extends Writer {
      * @param cbuf Array of characters.
      * @param off  Offset from which to start reading characters.
      * @param len  Number of characters to be written.
+     * @throws IOException if an I/O error occurs.
+     * @throws ClosedIllegalStateException if the input ByteStringAppender is released.
      */
     @Override
-    public void write(char[] cbuf, @NonNegative int off, @NonNegative int len) {
+    public void write(char[] cbuf, @NonNegative int off, @NonNegative int len)
+            throws IOException {
         for (int i = 0; i < len; i++)
             out.append(cbuf[i + off]);
     }

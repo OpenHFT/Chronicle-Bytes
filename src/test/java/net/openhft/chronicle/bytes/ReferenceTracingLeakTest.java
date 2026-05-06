@@ -11,7 +11,7 @@ import static org.junit.Assert.*;
 public class ReferenceTracingLeakTest extends BytesTestCommon {
 
     @Test
-    public void leakDetectionReportsCreatedHere() {
+    public void leakDetectionReportsCreatedHere() throws Exception {
         final NativeBytes<Void> leaked = Bytes.allocateElasticDirect(64);
         try {
             assertNotNull("createdHere should be recorded for traced resources",

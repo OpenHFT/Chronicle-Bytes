@@ -24,12 +24,11 @@ import java.nio.channels.FileLock;
  * {@code throwExceptionIfClosed...()} before mutating state.</p>
  *
  * <p> {@link #unmonitor()} propagates to the wrapped store.
- *
  * @see BytesStore
  * @see Byteable
  * @see Closeable
  */
-@SuppressWarnings({"rawtypes", "deprecation"})
+@SuppressWarnings("rawtypes")
 public abstract class AbstractReference extends AbstractCloseable implements Byteable, Closeable {
 
     /**

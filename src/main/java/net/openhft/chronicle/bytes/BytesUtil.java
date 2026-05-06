@@ -27,11 +27,9 @@ import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static net.openhft.chronicle.core.UnsafeMemory.MEMORY;
 import static net.openhft.chronicle.core.io.IOTools.*;
 
@@ -79,7 +77,6 @@ public enum BytesUtil {
     /**
      * Returns the configured maximum array length.
      */
-    @Deprecated(/* to be removed in 2027 */)
     public static int maxArrayLength() {
         return MAX_ARRAY_LEN;
     }
@@ -102,7 +99,6 @@ public enum BytesUtil {
      * Returns {@code true} if all primitive fields of {@code clazz} occupy a contiguous range allowing
      * direct memory copies.
      */
-    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public static boolean isTriviallyCopyable(@NotNull Class<?> clazz) {
         final int[] ints = TRIVIALLY_COPYABLE.get(clazz);
         return ints[1] > 0;
@@ -114,7 +110,7 @@ public enum BytesUtil {
      */
     static int[] isTriviallyCopyable0(@NotNull Class<?> clazz) {
         if (clazz.isArray()) {
-            Class<?> componentType = clazz.getComponentType();
+            Class<?>componentType = clazz.getComponentType();
             if (componentType.isPrimitive())
                 return new int[]{MEMORY.arrayBaseOffset(clazz)};
             return NO_INTS;
@@ -133,6 +129,7 @@ public enum BytesUtil {
         int min = 0;
         int max = 0;
         for (Field field : fields) {
+            final FieldGroup fieldGroup = Jvm.findAnnotation(field, FieldGroup.class);
             int start = (int) MEMORY.objectFieldOffset(field);
             int size = sizeOf(field.getType());
             int end = start + size;
@@ -158,7 +155,7 @@ public enum BytesUtil {
      * @param length Length of the field area.
      * @return true if all fields in the range are trivially copyable, false otherwise.
      */
-    public static boolean isTriviallyCopyable(Class<?> clazz, @NonNegative int offset, @NonNegative int length) {
+    public static boolean isTriviallyCopyable(Class<?>clazz, @NonNegative int offset, @NonNegative int length) {
         int[] ints = TRIVIALLY_COPYABLE.get(clazz);
         if (ints.length == 0)
             return false;
@@ -168,21 +165,21 @@ public enum BytesUtil {
     /**
      * Returns {@code [start, end]} offsets for the contiguous primitive block of {@code clazz}.
      */
-    public static int[] triviallyCopyableRange(Class<?> clazz) {
+    public static int[] triviallyCopyableRange(Class<?>clazz) {
         return TRIVIALLY_COPYABLE.get(clazz);
     }
 
     /**
      * Offset of the first trivially copyable byte within {@code clazz}.
      */
-    public static int triviallyCopyableStart(Class<?> clazz) {
+    public static int triviallyCopyableStart(Class<?>clazz) {
         return triviallyCopyableRange(clazz)[0];
     }
 
     /**
      * Length in bytes of the trivially copyable region of {@code clazz}.
      */
-    public static int triviallyCopyableLength(Class<?> clazz) {
+    public static int triviallyCopyableLength(Class<?>clazz) {
         final int[] startEnd = triviallyCopyableRange(clazz);
         return startEnd[1] - startEnd[0];
     }
@@ -232,17 +229,16 @@ public enum BytesUtil {
             url = urlFor(Thread.currentThread().getContextClassLoader(), name);
             file = new File(url.getFile());
         }
-        return Bytes.wrapForRead(readAsBytes(url == null ? Files.newInputStream(file.toPath()) : open(url)));
+        return Bytes.wrapForRead(readAsBytes(url == null ? new FileInputStream(file) : open(url)));
 
     }
 
     /**
      * Writes the readable bytes to {@code file}, overwriting any existing content.
      */
-    @Deprecated(/* to be removed in 2027 */)
     public static void writeFile(String file, Bytes<byte[]> bytes)
             throws IOException {
-        try (OutputStream os = Files.newOutputStream(Paths.get(file))) {
+        try (OutputStream os = new FileOutputStream(file)) {
             os.write(bytes.underlyingObject());
         }
     }
@@ -256,7 +252,7 @@ public enum BytesUtil {
      * @param secondOffset The starting position in the second object.
      * @param len          The number of bytes to compare.
      * @return true if the bytes are equal, false otherwise.
-     * @throws BufferUnderflowException       If there is insufficient data.
+     * @throws BufferUnderflowException If there is insufficient data.
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
@@ -293,11 +289,10 @@ public enum BytesUtil {
      * @param offset The starting position in the RandomDataInput object.
      * @param length The number of bytes to compare.
      * @return true if the bytes are equal to the CharSequence, false otherwise.
-     * @throws BufferUnderflowException       If there is insufficient data.
+     * @throws BufferUnderflowException If there is insufficient data.
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
-    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public static boolean bytesEqual(@Nullable CharSequence cs, @NotNull RandomDataInput bs, @NonNegative long offset, @NonNegative int length)
             throws IllegalStateException, BufferUnderflowException {
         if (cs == null || cs.length() != length)
@@ -316,7 +311,6 @@ public enum BytesUtil {
      * @param o2 The second object to compare.
      * @return true if the objects are equal, false otherwise.
      */
-    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public static boolean equals(Object o1, Object o2) {
         if (o1 == o2) return true;
         if (o1 instanceof CharSequence && o2 instanceof CharSequence)
@@ -331,7 +325,7 @@ public enum BytesUtil {
      * @return The integer value of the string.
      */
     public static int asInt(@NotNull String str) {
-        @NotNull ByteBuffer bb = ByteBuffer.wrap(str.getBytes(ISO_8859_1)).order(ByteOrder.nativeOrder());
+        @NotNull ByteBuffer bb = ByteBuffer.wrap(str.getBytes(StandardCharsets.ISO_8859_1)).order(ByteOrder.nativeOrder());
         return bb.getInt();
     }
 
@@ -357,13 +351,12 @@ public enum BytesUtil {
      *
      * @param bytes The Bytes object to convert.
      * @return The character array converted from the bytes.
-     * @throws ArithmeticException            If there is an arithmetic error.
-     * @throws BufferUnderflowException       If there is insufficient data.
+     * @throws ArithmeticException      If there is an arithmetic error.
+     * @throws BufferUnderflowException If there is insufficient data.
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     @NotNull
-    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public static char[] toCharArray(@NotNull Bytes<?> bytes)
             throws ArithmeticException, IllegalStateException, BufferUnderflowException {
         @NotNull final char[] chars = new char[Maths.toUInt31(bytes.readRemaining())];
@@ -381,7 +374,7 @@ public enum BytesUtil {
      * @param position The starting position in the Bytes object.
      * @param length   The number of bytes to convert.
      * @return The character array converted from the bytes.
-     * @throws BufferUnderflowException       If there is insufficient data.
+     * @throws BufferUnderflowException If there is insufficient data.
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
@@ -402,7 +395,7 @@ public enum BytesUtil {
      *
      * @param in The StreamingDataInput to read from.
      * @return The integer read.
-     * @throws IORuntimeException             If an IO error occurs.
+     * @throws IORuntimeException    If an IO error occurs.
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
@@ -416,7 +409,7 @@ public enum BytesUtil {
      *
      * @param out The StreamingDataOutput to write to.
      * @param n   The integer to write.
-     * @throws BufferOverflowException        If there is insufficient space.
+     * @throws BufferOverflowException If there is insufficient space.
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
@@ -432,7 +425,7 @@ public enum BytesUtil {
      * @param offset The position in the BytesStore to start writing.
      * @param n      The integer to write.
      * @return The resulting offset after writing.
-     * @throws BufferOverflowException        If there is insufficient space.
+     * @throws BufferOverflowException If there is insufficient space.
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
@@ -447,7 +440,7 @@ public enum BytesUtil {
      * @param addr The memory address to write to.
      * @param n    The integer to write.
      * @return The resulting memory address after writing.
-     * @throws BufferOverflowException        If there is insufficient space.
+     * @throws BufferOverflowException If there is insufficient space.
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
@@ -462,8 +455,8 @@ public enum BytesUtil {
      * @param in         The StreamingDataInput to read from.
      * @param appendable The Appendable to append to.
      * @param utflen     The length of the UTF-8 string.
-     * @throws UTFDataFormatRuntimeException  If the UTF-8 format is invalid.
-     * @throws BufferUnderflowException       If there is insufficient data.
+     * @throws UTFDataFormatRuntimeException If the UTF-8 format is invalid.
+     * @throws BufferUnderflowException      If there is insufficient data.
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
@@ -478,7 +471,7 @@ public enum BytesUtil {
      *
      * @param out The StreamingDataOutput to write to.
      * @param cs  The CharSequence to write.
-     * @throws IndexOutOfBoundsException      If the CharSequence length is out of bounds.
+     * @throws IndexOutOfBoundsException If the CharSequence length is out of bounds.
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
@@ -492,7 +485,7 @@ public enum BytesUtil {
      *
      * @param marshallable The Marshallable object to read.
      * @param bytes        The BytesIn object to read from.
-     * @throws InvalidMarshallableException   If the Marshallable object is invalid.
+     * @throws InvalidMarshallableException If the Marshallable object is invalid.
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
@@ -507,10 +500,10 @@ public enum BytesUtil {
      *
      * @param marshallable The Marshallable object to write.
      * @param bytes        The BytesOut object to write to.
-     * @throws BufferOverflowException        If there is insufficient space.
-     * @throws ArithmeticException            If an arithmetic error occurs.
-     * @throws BufferUnderflowException       If there is insufficient data.
-     * @throws InvalidMarshallableException   If the Marshallable object is invalid.
+     * @throws BufferOverflowException      If there is insufficient space.
+     * @throws ArithmeticException          If an arithmetic error occurs.
+     * @throws BufferUnderflowException     If there is insufficient data.
+     * @throws InvalidMarshallableException If the Marshallable object is invalid.
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
@@ -552,7 +545,6 @@ public enum BytesUtil {
      * @param x The value to round up.
      * @return The rounded value.
      */
-    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public static long roundUpTo64ByteAlign(long x) {
         return (x + 63L) & ~63L;
     }
@@ -571,11 +563,10 @@ public enum BytesUtil {
      * Reads padding bytes from a Bytes object to align the read position to the nearest 8-byte boundary.
      *
      * @param bytes The Bytes object.
-     * @throws BufferUnderflowException       If there is insufficient data.
+     * @throws BufferUnderflowException If there is insufficient data.
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
-    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public static void read8ByteAlignPadding(Bytes<?> bytes)
             throws IllegalStateException, BufferUnderflowException {
         bytes.readPosition(roundUpTo8ByteAlign(bytes.readPosition()));
@@ -585,11 +576,10 @@ public enum BytesUtil {
      * Writes padding bytes to a Bytes object to align the write position to the nearest 8-byte boundary.
      *
      * @param bytes The Bytes object.
-     * @throws BufferOverflowException        If there is insufficient space.
+     * @throws BufferOverflowException If there is insufficient space.
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
-    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public static void write8ByteAlignPadding(Bytes<?> bytes)
             throws BufferOverflowException, ClosedIllegalStateException {
         long start = bytes.writePosition();
@@ -696,8 +686,6 @@ public enum BytesUtil {
                     }
                 }
             }
-            return;
-            default:
         }
     }
 
@@ -708,7 +696,6 @@ public enum BytesUtil {
      * @param ch The character to check.
      * @return True if the character is a control space character, false otherwise.
      */
-    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     static boolean isControlSpace(int ch) {
         return 0 <= ch && ch <= ' ';
     }

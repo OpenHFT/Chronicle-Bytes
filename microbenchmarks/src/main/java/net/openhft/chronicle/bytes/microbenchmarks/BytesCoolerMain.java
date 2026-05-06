@@ -8,13 +8,6 @@ import net.openhft.chronicle.core.cooler.CoolerTester;
 import net.openhft.chronicle.core.cooler.CpuCoolers;
 import org.jetbrains.annotations.NotNull;
 
-/**
- * Latency experiment for reading and writing {@link Bytes} using different CPU cooling strategies.
- *
- * <p>This tool is similar in spirit to {@link AppendLongCoolerMain} but focuses on mixed read and
- * write operations over a fixed-size {@link Bytes} buffer. It is used to explore how various
- * pause and busy-wait patterns influence end-to-end latency on specific hardware.
- */
 public class BytesCoolerMain {
 
     public static void main(String[] args) {

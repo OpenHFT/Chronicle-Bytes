@@ -30,7 +30,7 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
  *
  * @param <U> underlying type
  */
-@SuppressWarnings({"restriction", "deprecation"})
+@SuppressWarnings("restriction")
 public class HeapBytesStore<U>
         extends AbstractBytesStore<HeapBytesStore<U>, U> {
     /** Actual byte array backing this store when wrapping heap memory. */
@@ -670,6 +670,7 @@ public class HeapBytesStore<U>
 
     @Override
     public long appendAndReturnLength(final long writePosition, boolean negative, long mantissa, int exponent, boolean append0) {
+        long start = writePosition;
         long addr = writePosition;
         try {
             throwExceptionIfReleased();
@@ -694,8 +695,8 @@ public class HeapBytesStore<U>
             if (negative) {
                 addr = rawWriteByte(addr, (byte) '-');
             }
-            reverseBytesFrom(writePosition, addr);
-            return addr - writePosition;
+            reverseBytesFrom(start, addr);
+            return addr - start;
         } catch (NullPointerException ifReleased) {
             throwExceptionIfReleased();
             throw ifReleased;

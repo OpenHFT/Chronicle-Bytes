@@ -7,19 +7,19 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
-
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
-@SuppressWarnings("deprecation")
 public class ByteableTest {
 
     private Byteable byteable;
+    private BytesStore<?, ?> bytesStore;
 
     @SuppressWarnings("unchecked")
     @Before
     public void setUp() throws IOException {
         byteable = mock(Byteable.class);
+        bytesStore = mock(BytesStore.class);
         doThrow(UnsupportedOperationException.class).when(byteable).address();
         doThrow(UnsupportedOperationException.class).when(byteable).lock(true);
         doThrow(UnsupportedOperationException.class).when(byteable).tryLock(true);

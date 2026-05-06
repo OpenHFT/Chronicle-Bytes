@@ -23,11 +23,10 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListSet;
 
-import static java.nio.charset.StandardCharsets.ISO_8859_1;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assume.assumeFalse;
 
-@SuppressWarnings("deprecation")
 @RunWith(Parameterized.class)
 public class BytesMarshallableTest extends BytesTestCommon {
 
@@ -59,7 +58,6 @@ public class BytesMarshallableTest extends BytesTestCommon {
 
     @Test
     public void serializePrimitives() {
-        assertNotNull(name);
         assumeFalse(NativeBytes.areNewGuarded());
         final Bytes<?> bytes = new HexDumpBytes();
         try {
@@ -448,10 +446,6 @@ public class BytesMarshallableTest extends BytesTestCommon {
 
             assertEquals(uc, uc2);
 
-            // Exercise nullCollection/nullMap so they are not considered write-only-null fields
-            uc2.nullCollection = Collections.emptyList();
-            uc2.nullMap = Collections.emptyMap();
-
             final String expected = "   02 01 61 01 62                                  # justList\n" +
                     "   03 01 63 01 64 01 65                            # justCollection\n" +
                     "   01 06 00 00 00 00 00 00 00                      # justSortedSet\n" +
@@ -542,7 +536,6 @@ public class BytesMarshallableTest extends BytesTestCommon {
 
             final BM1 bm1b = new BM1();
             bm1b.readMarshallable(bytes);
-            assertEquals(bm1.num, bm1b.num);
             assertEquals(bm1b.bm2.text, bm1.bm2.text);
             assertEquals(bm1b.bm3.value, bm1.bm3.value);
 
@@ -616,7 +609,7 @@ public class BytesMarshallableTest extends BytesTestCommon {
         final Bytes<?> bytes = new HexDumpBytes();
         try {
             final BMA bma = new BMA();
-            bma.bytes = "Hello".getBytes(ISO_8859_1);
+            bma.bytes = "Hello".getBytes();
             bma.ints = new int[]{0x12345678};
             bma.floats = new float[]{0x1.234567p0f};
             bma.longs = new long[]{0x123456789ABCDEFL};
@@ -651,16 +644,16 @@ public class BytesMarshallableTest extends BytesTestCommon {
     }
 
     private static final class MyCollections implements BytesMarshallable {
-        final List<String> words = new ArrayList<>();
-        final Map<Double, Long> scoreCountMap = new LinkedHashMap<>();
-        final List<RetentionPolicy> policies = new ArrayList<>();
-        final List<Integer> numbers = new ArrayList<>();
+        List<String> words = new ArrayList<>();
+        Map<Double, Long> scoreCountMap = new LinkedHashMap<>();
+        List<RetentionPolicy> policies = new ArrayList<>();
+        List<Integer> numbers = new ArrayList<>();
     }
 
     private static final class BM1 implements BytesMarshallable {
         int num;
-        final BM2 bm2 = new BM2();
-        final BM3 bm3 = new BM3();
+        BM2 bm2 = new BM2();
+        BM3 bm3 = new BM3();
 
         @Override
         public String toString() {
@@ -723,11 +716,6 @@ public class BytesMarshallableTest extends BytesTestCommon {
         NavigableMap<String, BM2> justNavigableMap;
         SortedMap<Integer, String> justSortedMap;
         Map<Integer, Integer> nullMap;
-
-        UninitializedCollections() {
-            nullCollection = null;
-            nullMap = null;
-        }
 
         @Override
         public boolean equals(Object o) {

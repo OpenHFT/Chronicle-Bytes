@@ -25,7 +25,7 @@ import static java.nio.charset.StandardCharsets.ISO_8859_1;
  * lock state.
  * <p> Debugging aid; not for high performance operations.
  */
-@SuppressWarnings({"rawtypes", "deprecation"})
+@SuppressWarnings("rawtypes")
 public class TextIntArrayReference extends AbstractReference implements ByteableIntArrayValues {
     private static final byte[] SECTION1 = "{ locked: false, capacity: ".getBytes(ISO_8859_1);
     private static final byte[] SECTION2 = ", used: ".getBytes(ISO_8859_1);
@@ -54,7 +54,6 @@ public class TextIntArrayReference extends AbstractReference implements Byteable
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
-    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public static void write(@NotNull Bytes<?> bytes, @NonNegative long capacity)
             throws IllegalStateException, BufferOverflowException {
         long start = bytes.writePosition();

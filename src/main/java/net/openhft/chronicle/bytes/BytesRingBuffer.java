@@ -14,13 +14,11 @@ import java.nio.BufferOverflowException;
 
 /**
  * Represents a ring buffer for {@link Bytes} data, intended for
- * high-throughput, low-latency messaging between threads or services. Each
- * instance couples statistics ({@link BytesRingBufferStats}), byte
- * consumption ({@link BytesConsumer}) and lifecycle management
- * ({@link Closeable}). Implementations may support multiple readers and apply
- * backpressure by rejecting writes when capacity is exhausted. Direct user
- * implementation is discouraged; the public factory delegates to the
- * commercial implementation when present.
+ * high-throughput, low-latency messaging between threads or services. It
+ * combines statistics ({@link BytesRingBufferStats}), byte consumption
+ * ({@link BytesConsumer}) and resource management ({@link Closeable}). Direct
+ * user implementation is discouraged and some functionality may require
+ * commercial libraries.
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
 public interface BytesRingBuffer extends BytesRingBufferStats, BytesConsumer, Closeable {
@@ -31,7 +29,6 @@ public interface BytesRingBuffer extends BytesRingBufferStats, BytesConsumer, Cl
      * @return new ring buffer instance
      */
     @NotNull
-    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     static BytesRingBuffer newInstance(@NotNull BytesStore<?, Void> bytesStore) {
         return newInstance(bytesStore, 1);
     }
@@ -130,7 +127,6 @@ public interface BytesRingBuffer extends BytesRingBufferStats, BytesConsumer, Cl
      * Number of bytes currently available for reading from the default reader
      * perspective.
      */
-    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     long readRemaining();
 
     /**

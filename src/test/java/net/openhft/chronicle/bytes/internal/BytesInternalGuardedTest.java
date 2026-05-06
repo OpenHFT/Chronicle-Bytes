@@ -22,7 +22,7 @@ import java.util.Collection;
 import static org.junit.Assert.*;
 import static org.junit.Assume.assumeFalse;
 
-@SuppressWarnings({"rawtypes", "deprecation"})
+@SuppressWarnings("rawtypes")
 @RunWith(Parameterized.class)
 public class BytesInternalGuardedTest extends BytesTestCommon {
 

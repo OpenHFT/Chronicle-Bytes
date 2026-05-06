@@ -6,110 +6,111 @@ package net.openhft.chronicle.bytes.internal;
 import net.openhft.chronicle.bytes.BytesTestCommon;
 import net.openhft.chronicle.bytes.render.*;
 import net.openhft.chronicle.core.Jvm;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 
-@SuppressWarnings({"squid:S2699", "squid:S5786", "deprecation"})
+import static org.junit.Assert.*;
+import static org.junit.Assume.assumeFalse;
+
+@SuppressWarnings({"squid:S2699", "squid:S5786"})
 class DecimaliserFloatTest extends BytesTestCommon {
 
     private static final DecimalAppender CHECK_OK = (negative, mantissa, exponent) -> {
         // ok
     };
     private static final DecimalAppender CHECK_NEG314 = (negative, mantissa, exponent) -> {
-        Assertions.assertTrue(negative);
-        Assertions.assertEquals(314, mantissa);
-        Assertions.assertEquals(2, exponent);
+        assertTrue(negative);
+        assertEquals(314, mantissa);
+        assertEquals(2, exponent);
     };
     private static final DecimalAppender CHECK_123456_789 = (negative, mantissa, exponent) -> {
-        Assertions.assertFalse(negative);
-        Assertions.assertEquals(12345679L, mantissa);
-        Assertions.assertEquals(2, exponent);
-        Assertions.assertEquals(123456.79f, mantissa / 1e2f, 0.0f);
+        assertFalse(negative);
+        assertEquals(12345679L, mantissa);
+        assertEquals(2, exponent);
+        assertEquals(123456.79f, mantissa / 1e2f, 0.0f);
     };
     private static final DecimalAppender CHECK_NEG_PI = (negative, mantissa, exponent) -> {
-        Assertions.assertTrue(negative);
-        Assertions.assertEquals(31415927, mantissa);
-        Assertions.assertEquals(7, exponent);
-        Assertions.assertEquals((float) Math.PI, mantissa / 1e7f, 0.0f);
+        assertTrue(negative);
+        assertEquals(31415927, mantissa);
+        assertEquals(7, exponent);
+        assertEquals((float) Math.PI, mantissa / 1e7f, 0.0f);
     };
     private static final DecimalAppender CHECK_ZERO = (negative, mantissa, exponent) -> {
-        Assertions.assertFalse(negative);
-        Assertions.assertEquals(0, mantissa);
+        assertFalse(negative);
+        assertEquals(0, mantissa);
         if (exponent != 0)
-            Assertions.assertEquals(1, exponent);
+            assertEquals(1, exponent);
     };
     private static final DecimalAppender CHECK_NEG_ZERO = (negative, mantissa, exponent) -> {
-        Assertions.assertTrue(negative);
-        Assertions.assertEquals(0, mantissa);
+        assertTrue(negative);
+        assertEquals(0, mantissa);
         if (exponent != 0)
-            Assertions.assertEquals(1, exponent);
+            assertEquals(1, exponent);
     };
     private static final float HARD_TO_DECIMALISE = 4.8846945805332034E-12f;
 
     @BeforeEach
     void hasDirect() {
-        Assumptions.assumeFalse(Jvm.maxDirectMemory() == 0);
+        assumeFalse(Jvm.maxDirectMemory() == 0);
     }
 
     @Test
     void toFloatTestTest() {
-        Assertions.assertFalse(SimpleDecimaliser.SIMPLE.toDecimal(HARD_TO_DECIMALISE, CHECK_OK));
+        assertFalse(SimpleDecimaliser.SIMPLE.toDecimal(HARD_TO_DECIMALISE, CHECK_OK));
     }
 
     @Test
     void toFloatLimitedTestTest() {
         DecimalAppender check = (negative, mantissa, exponent) -> {
-            Assertions.assertFalse(negative);
-            Assertions.assertEquals(48847, mantissa);
-            Assertions.assertEquals(16, exponent);
+            assertFalse(negative);
+            assertEquals(48847, mantissa);
+            assertEquals(16, exponent);
         };
-        Assertions.assertTrue(new MaximumPrecision(16).toDecimal(HARD_TO_DECIMALISE, check));
+        assertTrue(new MaximumPrecision(16).toDecimal(HARD_TO_DECIMALISE, check));
     }
 
     @Test
     void toFloatTest() {
         DecimalAppender check = (negative, mantissa, exponent) -> {
-            Assertions.assertFalse(negative);
-            Assertions.assertEquals(48846946, mantissa);
-            Assertions.assertEquals(19, exponent);
+            assertFalse(negative);
+            assertEquals(48846946, mantissa);
+            assertEquals(19, exponent);
         };
-        Assertions.assertTrue(GeneralDecimaliser.GENERAL.toDecimal(HARD_TO_DECIMALISE, check));
+        assertTrue(GeneralDecimaliser.GENERAL.toDecimal(HARD_TO_DECIMALISE, check));
     }
 
     @Test
     void toFloatTest1e_6() {
         DecimalAppender check = (negative, mantissa, exponent) -> {
-            Assertions.assertFalse(negative);
-            Assertions.assertEquals(1, mantissa);
-            Assertions.assertEquals(6, exponent);
+            assertFalse(negative);
+            assertEquals(1, mantissa);
+            assertEquals(6, exponent);
         };
-        Assertions.assertTrue(GeneralDecimaliser.GENERAL.toDecimal(1e-6f, check));
+        assertTrue(GeneralDecimaliser.GENERAL.toDecimal(1e-6f, check));
 
-        Assertions.assertTrue(new MaximumPrecision(7).toDecimal(1e-6f, check));
-        Assertions.assertTrue(new MaximumPrecision(6).toDecimal(1e-6f, check));
+        assertTrue(new MaximumPrecision(7).toDecimal(1e-6f, check));
+        assertTrue(new MaximumPrecision(6).toDecimal(1e-6f, check));
         DecimalAppender check0 = (negative, mantissa, exponent) -> {
-            Assertions.assertFalse(negative);
-            Assertions.assertEquals(0, mantissa);
-            Assertions.assertEquals(0, exponent);
+            assertFalse(negative);
+            assertEquals(0, mantissa);
+            assertEquals(0, exponent);
         };
-        Assertions.assertTrue(new MaximumPrecision(5).toDecimal(1e-6f, check0));
+        assertTrue(new MaximumPrecision(5).toDecimal(1e-6f, check0));
     }
 
     @Test
     void toFloatTestRounding() {
         DecimalAppender check = (negative, mantissa, exponent) -> {
-            Assertions.assertFalse(negative);
-            Assertions.assertEquals(1, mantissa);
-            Assertions.assertEquals(0, exponent);
+            assertFalse(negative);
+            assertEquals(1, mantissa);
+            assertEquals(0, exponent);
         };
         MaximumPrecision lp5 = new MaximumPrecision(5);
-        Assertions.assertTrue(lp5.toDecimal(1.0000004, check));
-        Assertions.assertTrue(lp5.toDecimal(0.9999996, check));
+        assertTrue(lp5.toDecimal(1.0000004, check));
+        assertTrue(lp5.toDecimal(0.9999996, check));
     }
 
     @Test
@@ -121,12 +122,12 @@ class DecimaliserFloatTest extends BytesTestCommon {
                     for (int i = 0; i <= 18; i++) {
                         // simple decimal is ok
                         float d = (float) x / f;
-                        Assertions.assertTrue(SimpleDecimaliser.SIMPLE.toDecimal(d, CHECK_OK));
+                        assertTrue(SimpleDecimaliser.SIMPLE.toDecimal(d, CHECK_OK));
 
                         // probably requires more precision
                         int l = Float.floatToRawIntBits(d);
                         float d2 = Float.intBitsToFloat(l + x);
-                        Assertions.assertTrue(UsesBigDecimal.USES_BIG_DECIMAL.toDecimal(d2, CHECK_OK));
+                        assertTrue(UsesBigDecimal.USES_BIG_DECIMAL.toDecimal(d2, CHECK_OK));
                         f *= 10;
                     }
                 });
@@ -135,14 +136,16 @@ class DecimaliserFloatTest extends BytesTestCommon {
     @Test
     void toFloatLarge() {
         DecimalAppender check = (negative, mantissa, exponent) -> {
-            Assertions.assertTrue(0 <= exponent);
-            Assertions.assertTrue(exponent <= 18, "exponent: " + exponent);
+            assertTrue(0 <= exponent);
+            assertTrue("exponent: " + exponent, exponent <= 18);
         };
         LongStream.range(-46, 39)
                 .forEach(x -> {
                     float f = (float) Math.pow(10, x);
                     float lower = 1e-18f;
-                    Assertions.assertEquals(f == 0 || (lower <= f && f < 1e18), SimpleDecimaliser.SIMPLE.toDecimal(f, check), "x: " + x);
+                    assertEquals("x: " + x,
+                            f == 0 || (lower <= f && f < 1e18),
+                            SimpleDecimaliser.SIMPLE.toDecimal(f, check));
                 });
     }
 
@@ -190,10 +193,11 @@ class DecimaliserFloatTest extends BytesTestCommon {
     void testNegLongMinValueBD() {
         DecimalAppender check = (negative, mantissa, exponent) -> {
             // -9223372036854775808
-            Assertions.assertTrue(negative);
-            Assertions.assertEquals(9223372L, mantissa);
-            Assertions.assertEquals(-12, exponent);
+            assertTrue(negative);
+            assertEquals(9223372L, mantissa);
+            assertEquals(-12, exponent);
         };
-        Assertions.assertTrue(UsesBigDecimal.USES_BIG_DECIMAL.toDecimal((float) Long.MIN_VALUE, check));
+        assertTrue(UsesBigDecimal.USES_BIG_DECIMAL.toDecimal((float) Long.MIN_VALUE, check));
     }
 }
+

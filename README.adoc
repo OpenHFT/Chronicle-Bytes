@@ -1,8 +1,9 @@
 = Chronicle Bytes
 Chronicle Software
-:lang: en-GB
 :css-signature: demo
-:source-highlighter: rouge
+:toc: macro
+:toclevels: 2
+:icons: font
 
 image:https://maven-badges.herokuapp.com/maven-central/net.openhft/chronicle-bytes/badge.svg[caption="",link=https://maven-badges.herokuapp.com/maven-central/net.openhft/chronicle-bytes]
 image:https://javadoc.io/badge2/net.openhft/chronicle-bytes/javadoc.svg[link="https://www.javadoc.io/doc/net.openhft/chronicle-bytes/latest/index.html"]
@@ -11,7 +12,9 @@ image:https://img.shields.io/github/license/OpenHFT/Chronicle-Bytes[GitHub]
 image:https://img.shields.io/badge/release%20notes-subscribe-brightgreen[link="https://chronicle.software/release-notes/"]
 image:https://sonarcloud.io/api/project_badges/measure?project=OpenHFT_Chronicle-Bytes&metric=alert_status[link="https://sonarcloud.io/dashboard?id=OpenHFT_Chronicle-Bytes"]
 
-image::docs/images/Bytes_line.png[width=20%]
+image::images/Bytes_line.png[width=20%]
+
+toc::[]
 
 == Introduction
 
@@ -29,8 +32,7 @@ The API offers:
 * Elastic ByteBuffer wrappers that resize as needed.
 * Direct parsing and writing of text to off-heap bytes.
 
-A number of relevant system properties are listed in link:src/main/docs/system-properties.adoc[system-properties.adoc].
-For detailed requirements and design rationale, see link:src/main/docs/project-requirements.adoc[project-requirements.adoc].
+A number of relevant system properties are listed in link:docs/systemProperties.adoc[systemProperties.adoc].
 
 === Supported Data Types
 
@@ -80,7 +82,7 @@ This section provides examples of how to create `Bytes` instances with different
 * Creating a `Bytes` instance which wraps an on heap byte array:
 
 .Bytes which wraps an on heap byte[]
-[source,java]
+[source,Java]
 ----
 Bytes<byte[]> bytes = Bytes.allocateElasticOnHeap();
 byte[] underlyingBytes = bytes.underlyingObject();
@@ -89,7 +91,7 @@ byte[] underlyingBytes = bytes.underlyingObject();
 * Creating a `Bytes` instance which wraps a pre-sized on heap byte array:
 
 .Bytes which wraps an on heap byte[] pre-sized
-[source,java]
+[source,Java]
 ----
 Bytes<byte[]> bytes = Bytes.allocateElasticOnHeap(64);
 byte[] underlyingBytes = bytes.underlyingObject();
@@ -98,7 +100,7 @@ byte[] underlyingBytes = bytes.underlyingObject();
 * Creating a `Bytes` instance which wraps an on heap ByteBuffer:
 
 .Bytes which wraps an on heap ByteBuffer
-[source,java]
+[source,Java]
 ----
 Bytes<ByteBuffer> bytes = Bytes.elasticHeapByteBuffer(64);
 ByteBuffer underlyingByteBuffer = bytes.underlyingObject();
@@ -107,7 +109,7 @@ ByteBuffer underlyingByteBuffer = bytes.underlyingObject();
 * Creating a `Bytes` instance which wraps a direct ByteBuffer:
 
 .Bytes which wraps a direct ByteBuffer
-[source,java,opts=novalidate]
+[source,Java]
 ----
 Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer(64);
 ByteBuffer underlyingByteBuffer = bytes.underlyingObject();
@@ -119,7 +121,7 @@ bytes.releaseLast();
 * Creating a `Bytes` instance which wraps some native memory:
 
 .Bytes which wraps some native memory
-[source,java,opts=novalidate]
+[source,Java]
 ----
 Bytes bytes = Bytes.allocateElasticDirect(64);
 long memoryAddress = bytes.address();
@@ -131,7 +133,7 @@ bytes.releaseLast();
 * Creating a `Bytes` instance which will wrap some native memory when used:
 
 .Bytes which will wrap some native memory when used
-[source,java,opts=novalidate]
+[source,Java]
 ----
 Bytes bytes = Bytes.allocateElasticDirect();
 // use the bytes
@@ -168,7 +170,7 @@ Also, `readLimit()` should always be less than or equals to `writeLimit()` and g
 BytesStore is a block of memory with fixed size into which you can write data and later read.
 You can create a BytesStore using the bytes in a CharSequence, String, ByteBuffer or another BytesStore.
 
-[source,java]
+[source,Java]
 ----
 //Create a BytesStore bs using bytes in a String. This gives you a BytesStore with
 //fixed size 18.
@@ -182,7 +184,7 @@ BytesStore bs2 = BytesStore.wrap(buf);
 
 You can see the buffer cursors of bs.
 
-[source,java,opts=novalidate]
+[source,Java]
 ----
 //Print cursors of bs.
 System.out.println("readLimit  " + bs.readLimit());
@@ -212,7 +214,7 @@ You can write into a BytesStore from an offset, however if your data is larger t
 NOTE: The returned object (BytesStore) is unchecked in terms of memory access, therefore the user code must make every effort not to exceed the underlying memory segment limit.
 Otherwise, the result is unspecified side effects including silently writing over other memory segments, and crashing the JVM.
 
-[source,java,opts=novalidate]
+[source,Java]
 ----
 //Write String "Another example.." into bs starting from offset 0.
 bs.writeUtf8(0,"Another example..");
@@ -225,7 +227,7 @@ System.out.println( bs.to8bitString());
 
 * In contrast to a BytesStore, a Bytes extends if you write data into it which is larger than the realCapacity of the Bytes.
 
-[source,java,opts=novalidate]
+[source,Java]
 ----
 //Create a Bytes with initial capacity 14 and write into it "This is an example" that
 //needs 18 bytes.
@@ -249,7 +251,7 @@ start 0
 * Bytes gives you access to the cursors, thus you can use them to read/write from/into a desired index.
 In contrast, you cannot use the cursors with a BytesStore.
 
-[source,java,opts=novalidate]
+[source,Java]
 ----
 //Write another data starting from index 5 which needs more bytes therefore bb extends.
 bb.writePosition(5);
@@ -281,7 +283,7 @@ The size of the new Bytes depends on the `limit` and `position` cursors of the o
 
 The new Bytes is not elastic and whether you use bytesForRead() or bytesForWrite() you can read and write from/into the new Bytes using cursors.
 
-[source,java]
+[source,Java]
 ----
 //Create a BytesStore bs using bytes in a String.
 BytesStore bs = BytesStore.from("This is an example");
@@ -339,7 +341,7 @@ start 0
 
 Regardless if bytesForRead() or bytesForWrite() is used, you can both read and write from/into the new Bytes using cursors.
 
-[source,java,opts=novalidate]
+[source,Java]
 ----
 //Create a Bytes bb with default size (256 bytes) and write a text into it.
 Bytes<ByteBuffer> bb = Bytes.elasticByteBuffer();
@@ -405,7 +407,7 @@ Writing to a hexadecimal dump is useful for documenting the format for messages 
 We have used the hexadecimal dump here.
 
 .Writing primitives as binary and dumping
-[source,java,opts=novalidate]
+[source,java]
 ----
 // only used for documentation
 HexDumpBytes bytes = new HexDumpBytes();
@@ -447,7 +449,7 @@ prints
 to read this data you can use
 
 .Reading the primitive values above
-[source,java,opts=novalidate]
+[source,java]
 ----
 boolean flag = bytes.readBoolean();
 byte s8 = bytes.readByte();
@@ -469,7 +471,7 @@ double f64 = bytes.readDouble();
 Instead of streaming the data, sometimes you need to control the placement of data, possibly at random.
 
 .Write and read primitive by offset
-[source,java,opts=novalidate]
+[source,Java]
 ----
 Bytes<ByteBuffer> bytes = Bytes.elasticHeapByteBuffer(64);
 bytes.writeBoolean(0, true);
@@ -519,7 +521,7 @@ NOTE: write ordered doesn't stall the pipeline to wait for the write to occur, m
 You can also write and read text to Bytes for low level, direct to native memory text processing.
 
 .Writing primitives as text
-[source,java,opts=novalidate]
+[source,Java]
 ----
 Bytes<ByteBuffer> bytes = Bytes.elasticHeapByteBuffer(64);
 bytes.append(true).append('\n');
@@ -541,7 +543,7 @@ prints
 ----
 
 .Reading primitives as text
-[source,java,opts=novalidate]
+[source,Java]
 ----
 boolean flag = bytes.parseBoolean();
 int s32 = bytes.parseInt();
@@ -560,7 +562,7 @@ Chronicle Bytes supports two encodings, ISO-8859-1 and UTF-8.
 It also supports writing these as binary with a length prefix, and a string which should be terminated.
 Bytes expects Strings to be read to a buffer for further processing, possibly with a String pool.
 
-[source,java,opts=novalidate]
+[source,Java]
 ----
 HexDumpBytes bytes = new HexDumpBytes();
 bytes.comment("write8bit").write8bit("£ 1");
@@ -580,7 +582,7 @@ a3 20 31 0a                                     # append8bit
 c2 a3 20 31 0a                                  # appendUtf8
 ----
 
-[source,java]
+[source,Java]
 ----
 String a = bytes.read8bit();
 String b = bytes.readUtf8();
@@ -590,7 +592,7 @@ String d = bytes.parseUtf8(StopCharTesters.CONTROL_STOP);
 
 Binary strings are prefixed with a https://github.com/OpenHFT/RFC/blob/master/Stop-Bit-Encoding/Stop-Bit-Encoding-1.0.adoc[Stop Bit Encoded] length.
 
-[source,java,opts=novalidate]
+[source,Java]
 ----
 HexDumpBytes bytes = new HexDumpBytes();
 bytes.comment("write8bit").write8bit((String) null);
@@ -618,7 +620,7 @@ NOTE: `80 00` is the stop bit encoding for `-1` or `~0`
 In binary, you can atomically replace an `int` or `long` on condition that it is an expected value.
 
 .Write two fields, remember where the `int` and `long` are
-[source,java,opts=novalidate]
+[source,Java]
 ----
 HexDumpBytes bytes = new HexDumpBytes();
 
@@ -641,7 +643,7 @@ prints
 ----
 
 .CAS two fields
-[source,java,opts=novalidate]
+[source,Java]
 ----
 assertTrue(bytes.compareAndSwapInt(s32, 0, Integer.MAX_VALUE));
 assertTrue(bytes.compareAndSwapLong(s64, 0, Long.MAX_VALUE));
@@ -667,7 +669,7 @@ For each 7 bits set, a byte is used with the high bit set when there is another 
 See https://github.com/OpenHFT/RFC/blob/master/Stop-Bit-Encoding/Stop-Bit-Encoding-1.0.adoc[Stop Bit Encoding RFC] for more details
 
 .Writing with stop bit encoding
-[source,java,opts=novalidate]
+[source,Java]
 ----
 HexDumpBytes bytes = new HexDumpBytes();
 
@@ -735,7 +737,7 @@ To read these you need either `long x = bytes.readStopBit()` or `double d = byte
 Chronicle Bytes supports serializing simple objects where the type is not stored.
 This is similar to`RawWire` in Chronicle Wire.
 
-[source,java,opts=novalidate]
+[source,Java]
 ----
 @NotNull MyByteable mb1 = new MyByteable(false, (byte) 1, (short) 2, '3', 4, 5.5f, 6, 7.7);
 @NotNull MyByteable mb2 = new MyByteable(true, (byte) 11, (short) 22, 'T', 44, 5.555f, 66, 77.77);
@@ -754,7 +756,7 @@ mn2.writeMarshallable(bytes);
 ----
 
 .MyByteable data structure
-[source,java]
+[source,Java]
 ----
 class MyByteable implements BytesMarshallable {
     boolean flag;
@@ -776,11 +778,10 @@ class MyByteable implements BytesMarshallable {
         this.l = l;
         this.d = d;
     }
-}
 ----
 
 .MyScalars data structure
-[source,java]
+[source,Java]
 ----
 class MyScalars implements BytesMarshallable {
     String s;
@@ -802,7 +803,6 @@ class MyScalars implements BytesMarshallable {
         this.zonedDateTime = zonedDateTime;
         this.uuid = uuid;
     }
-}
 ----
 
 prints
@@ -870,15 +870,15 @@ The simplest Lambda function is stateless, however this has limited application.
 They are useful for message translation.
 
 If you need a stateful Lambda function, you can consider the input to the function to be every message it has ever consumed.
-Obviously this is inefficient, however with appropriate caches in your lambda function, you can process and produce results incrementally.
+Obviously this is inefficient, however with appropriate caches in your lamdba function, you can process and produce result incrementally.
 
 === Data in and out.
 
-We model a Lambda function as having an interface for inputs and another for outputs.
+We module a Lambda function as having an interface for inputs and another for outputs.
 These interfaces can be the same.
 
 .Sample interface for Lambda function
-[source,java]
+[source,Java]
 ----
 interface IBytesMethod {
     @MethodId(0x81L) // <1>
@@ -896,7 +896,7 @@ interface IBytesMethod {
 
 Each method needs a DTO to describe the data for that message.
 
-[source,java]
+[source,Java]
 ----
 class MyByteable implements BytesMarshallable {
     boolean flag;
@@ -932,7 +932,7 @@ class MyNested implements BytesMarshallable {
 The implementation needs to take it's output interface and implement the input interface
 
 .A simple pass through implementation
-[source,java]
+[source,Java]
 ----
 static class IBMImpl implements IBytesMethod {
     final IBytesMethod out;
@@ -954,9 +954,10 @@ static class IBMImpl implements IBytesMethod {
 Once we have interfaces, DTOs, and an implementation we can setup a test harness
 
 .Setup a test harness for a Lambda function
-[source,java]
+[source,Java]
 ----
-protected void btmttTest(String input, String output) throws IOException {
+protected void btmttTest(String input, String output)
+throws IOException {
     BytesTextMethodTester tester = new BytesTextMethodTester<>(
             input,
             IBMImpl::new,
@@ -969,10 +970,11 @@ protected void btmttTest(String input, String output) throws IOException {
 
 This allows us to give two files, one for expected inputs and one for expected outputs.
 
-[source,java]
+[source,Java]
 ----
 @Test
-public void run() throws IOException {
+public void run()
+throws IOException {
     btmttTest("btmtt/prim-input.txt", "btmtt/prim-output.txt");
 }
 ----
@@ -1161,7 +1163,7 @@ A `syncMode` can be set to ensure data is flushed as each chunk is released.
 Below is an example of opening two MappedBytes for the same memory region:
 
 .Open two MappedBytes for the same region of memory
-[source,java,opts=novalidate]
+[source,java]
 ----
 // Specify the file name, chunk size, and overlap size of each chunk
 try (MappedBytes bytesW = MappedBytes.mappedBytes(file, 64 << 10, 16 << 10);
@@ -1177,9 +1179,9 @@ Memory mapped files are commonly used by Chronicle Map and Chronicle Queue.
 When utilizing IntelliJ IDEA, you can configure a custom renderer to view the bytes.
 Please refer to the images below for guidance on setting this up:
 
-image::docs/images/customize-data-views-menu.jpg[]
+image::/docs/images/customize-data-views-menu.jpg[]
 
-image::docs/images/customize-data-views.png[]
+image::/docs/images/customize-data-views.png[]
 
 === Note on Code Coverage
 

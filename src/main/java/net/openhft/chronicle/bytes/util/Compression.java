@@ -132,7 +132,6 @@ public interface Compression {
      * @return the compressed data
      * @throws AssertionError if an unexpected {@link IOException} occurs
      */
-    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     default byte[] compress(byte[] bytes) {
         @NotNull ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try (OutputStream output = compressingStream(baos)) {
@@ -238,7 +237,6 @@ public interface Compression {
      *
      * @return true if available, false otherwise.
      */
-    @Deprecated(/* to be removed in 2027 */)
     default boolean available() {
         return true;
     }

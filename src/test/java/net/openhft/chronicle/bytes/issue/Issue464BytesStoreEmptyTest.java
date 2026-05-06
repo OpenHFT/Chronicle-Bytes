@@ -11,7 +11,6 @@ import java.util.function.Supplier;
 
 import static org.junit.Assert.*;
 
-@SuppressWarnings("deprecation")
 public class Issue464BytesStoreEmptyTest extends BytesTestCommon {
     @Test
     public void emptyShouldNotAllocate() {

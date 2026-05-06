@@ -4,7 +4,6 @@
 package net.openhft.chronicle.bytes.internal;
 
 import net.openhft.chronicle.bytes.*;
-import net.openhft.chronicle.bytes.util.BufferUtil;
 import net.openhft.chronicle.bytes.util.DecoratedBufferOverflowException;
 import net.openhft.chronicle.bytes.util.DecoratedBufferUnderflowException;
 import net.openhft.chronicle.bytes.util.StringInternerBytes;
@@ -201,7 +200,7 @@ enum BytesInternal {
             } else {
                 BytesStore<?, ?> bytesStore = left.bytesStore();
                 if (!(bytesStore instanceof HeapBytesStore))
-                    throw new UnsupportedOperationException("Vectorized mismatch requires HeapBytesStore");
+                    return null;
 
                 HeapBytesStore heapBytesStore = (HeapBytesStore) bytesStore;
                 leftObject = heapBytesStore.realUnderlyingObject();
@@ -217,7 +216,7 @@ enum BytesInternal {
             } else {
                 BytesStore<?, ?> bytesStore = right.bytesStore();
                 if (!(bytesStore instanceof HeapBytesStore))
-                    throw new UnsupportedOperationException("Vectorized mismatch requires HeapBytesStore");
+                    return null;
 
                 HeapBytesStore heapBytesStore = (HeapBytesStore) bytesStore;
                 rightObject = heapBytesStore.realUnderlyingObject();
@@ -245,11 +244,9 @@ enum BytesInternal {
             }
 
             return Boolean.TRUE;
-        } catch (UnsupportedOperationException e) {
-            throw e;
         } catch (Throwable e) {
             Jvm.warn().on(BytesInternal.class, e);
-            throw new UnsupportedOperationException(e);
+            return null;
         }
     }
 
@@ -701,7 +698,6 @@ enum BytesInternal {
         return offset == limit && charI == other.length();
     }
 
-    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public static void parse8bit(@NonNegative long offset, @NotNull RandomDataInput bytesStore, Appendable appendable, @NonNegative int utflen)
             throws BufferUnderflowException, IOException, ClosedIllegalStateException {
         throwExceptionIfReleased(bytesStore);
@@ -1179,7 +1175,6 @@ enum BytesInternal {
     }
 
     @NotNull
-    @Deprecated(/* to be removed in 2027 */)
     public static Bytes<?> asBytes(@NotNull RandomDataOutput bytes, @NonNegative long position, @NonNegative long limit)
             throws ClosedIllegalStateException, BufferOverflowException, BufferUnderflowException {
         throwExceptionIfReleased(bytes);
@@ -2808,9 +2803,8 @@ enum BytesInternal {
                     if (-absValue < -MAX_VALUE_DIVIDE_10) {
                         throw new IORuntimeException("Can't parse flexible long as it goes beyond the range: " +
                                 "multiplication of " + absValue + " by 10");
-                    } else {
+                    } else
                         absValue *= 10;
-                    }
                 }
 
                 return sign * absValue;
@@ -3355,7 +3349,6 @@ enum BytesInternal {
         }
     }
 
-    @Deprecated(/* to be removed in 2027 */)
     public static void copyMemory(long from, long to, int length) {
         UnsafeMemory.copyMemory(from, to, length);
     }
@@ -3412,7 +3405,7 @@ enum BytesInternal {
         try (ScopedResource<Bytes<?>> stlBytes = BytesInternal.acquireBytesScoped()) {
             Bytes<?> sb = stlBytes.get();
             parseUtf8(parser, sb, tester);
-            if (sb.isEmpty())
+            if (sb.length() == 0)
                 return null;
             switch (sb.charAt(0)) {
                 case 't':
@@ -3519,13 +3512,11 @@ enum BytesInternal {
             out.writeStopBit(i);
     }
 
-    @Deprecated(/* to be removed in 2027 */)
     public static ByteBuffer asByteBuffer(@NotNull BytesStore<?, ?> bytesStore)
             throws BufferUnderflowException, ClosedIllegalStateException {
         return asByteBuffer(BYTE_BUFFER_TL, bytesStore);
     }
 
-    @Deprecated(/* to be removed in 2027 */)
     public static ByteBuffer asByteBuffer2(@NotNull BytesStore<?, ?> bytesStore)
             throws BufferUnderflowException, ClosedIllegalStateException {
         return asByteBuffer(BYTE_BUFFER2_TL, bytesStore);
@@ -3543,7 +3534,7 @@ enum BytesInternal {
         long address = bytesStore.addressForRead(bytesStore.readPosition());
         long capacity = bytesStore.realReadRemaining();
         ByteBuffers.setAddressCapacity(byteBuffer, address, capacity);
-        BufferUtil.clear(byteBuffer);
+        byteBuffer.clear();
     }
 
     private static boolean canReadBytesAt(
@@ -3595,7 +3586,6 @@ enum BytesInternal {
     }
 
     @SuppressWarnings("unchecked")
-    @Deprecated(/* to be removed in 2027 */)
     public static <T> T uncheckedCast(Object o) {
         return (T) o;
     }

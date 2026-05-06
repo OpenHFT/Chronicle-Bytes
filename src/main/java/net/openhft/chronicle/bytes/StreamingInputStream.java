@@ -24,7 +24,6 @@ public class StreamingInputStream extends InputStream {
     /**
      * Constructs a new StreamingInputStream instance and initializes the data source as an empty ByteStore.
      */
-    @Deprecated(/* to be removed in 2027 */)
     public StreamingInputStream() {
         this(NoBytesStore.NO_BYTES);
     }
@@ -45,7 +44,6 @@ public class StreamingInputStream extends InputStream {
      * @return this StreamingInputStream instance, for chaining.
      */
     @NotNull
-    @Deprecated(/* to be removed in 2027 */)
     public StreamingInputStream init(StreamingDataInput in) {
         this.in = in;
         return this;
@@ -64,7 +62,8 @@ public class StreamingInputStream extends InputStream {
     }
 
     @Override
-    public int available() {
+    public int available()
+            throws IOException {
         return (int) Math.min(Integer.MAX_VALUE, in.readRemaining());
     }
 

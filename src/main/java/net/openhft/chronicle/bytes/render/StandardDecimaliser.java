@@ -7,7 +7,6 @@ package net.openhft.chronicle.bytes.render;
  * Default decimaliser that attempts {@link MaximumPrecision} with precision 18
  * and falls back to {@link UsesBigDecimal} for large numbers.
  */
-@SuppressWarnings("deprecation")
 public class StandardDecimaliser implements Decimaliser {
 
     /**
@@ -24,7 +23,6 @@ public class StandardDecimaliser implements Decimaliser {
      * Convert {@code value} using {@link #PRECISION_18} then {@link UsesBigDecimal}.
      */
     @Override
-    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public boolean toDecimal(double value, DecimalAppender decimalAppender) {
         // Tries to convert using MaximumPrecision first, then falls back to UsesBigDecimal.
         return PRECISION_18.toDecimal(value, decimalAppender)
@@ -35,7 +33,6 @@ public class StandardDecimaliser implements Decimaliser {
      * Convert {@code value} using {@link #PRECISION_18} then {@link UsesBigDecimal}.
      */
     @Override
-    @Deprecated(/* to be removed in 2027, as it is only used in tests */)
     public boolean toDecimal(float value, DecimalAppender decimalAppender) {
         // Tries to convert using MaximumPrecision first, then falls back to UsesBigDecimal.
         return PRECISION_18.toDecimal(value, decimalAppender)

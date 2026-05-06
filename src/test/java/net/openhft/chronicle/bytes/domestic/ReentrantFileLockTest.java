@@ -4,7 +4,6 @@
 package net.openhft.chronicle.bytes.domestic;
 
 import net.openhft.chronicle.bytes.BytesTestCommon;
-import net.openhft.chronicle.bytes.util.BufferUtil;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.Closeable;
 import net.openhft.chronicle.core.io.IOTools;
@@ -34,7 +33,6 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@SuppressWarnings("deprecation")
 class ReentrantFileLockTest extends BytesTestCommon {
 
     private static final int NUM_THREADS = 4;
@@ -55,9 +53,7 @@ class ReentrantFileLockTest extends BytesTestCommon {
 
     @AfterEach
     void tearDown() {
-        if (!fileToLock.delete()) {
-            fileToLock.deleteOnExit();
-        }
+        fileToLock.delete();
     }
 
     @ParameterizedTest
@@ -79,7 +75,6 @@ class ReentrantFileLockTest extends BytesTestCommon {
     void willThrowOverlappingFileLockExceptionWhenAnOverlappingLockIsHeldDirectly(boolean useTryLock) throws IOException {
         try (FileChannel channel = FileChannel.open(fileToLock.toPath(), StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE)) {
             final FileLock lock = channel.lock();
-            assertNotNull(lock);
             assertThrows(OverlappingFileLockException.class, () -> acquireLock(useTryLock, fileToLock, channel));
             assertFalse(ReentrantFileLock.isHeldByCurrentThread(fileToLock));
         }
@@ -244,9 +239,9 @@ class ReentrantFileLockTest extends BytesTestCommon {
 
         private int readIdentifier(FileChannel channel) {
             try {
-                BufferUtil.clear(buffer);
+                buffer.clear();
                 channel.read(buffer, 0);
-                BufferUtil.flip(buffer);
+                buffer.flip();
                 return buffer.getInt();
             } catch (IOException e) {
                 throw new RuntimeException("Couldn't read ID", e);
@@ -255,9 +250,9 @@ class ReentrantFileLockTest extends BytesTestCommon {
 
         private void writeIdentifier(FileChannel channel) {
             try {
-                BufferUtil.clear(buffer);
+                buffer.clear();
                 buffer.putInt(identifier);
-                BufferUtil.flip(buffer);
+                buffer.flip();
                 channel.write(buffer, 0);
             } catch (IOException e) {
                 throw new RuntimeException("Couldn't write ID", e);
