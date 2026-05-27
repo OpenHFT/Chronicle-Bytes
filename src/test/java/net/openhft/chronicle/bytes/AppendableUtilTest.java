@@ -11,6 +11,7 @@ import java.nio.BufferUnderflowException;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
+import static org.junit.Assume.assumeFalse;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class AppendableUtilTest extends BytesTestCommon {
@@ -63,6 +64,52 @@ public class AppendableUtilTest extends BytesTestCommon {
         StringBuilder sb = new StringBuilder();
         AppendableUtil.parseUtf8(bs, sb, true, 11);
         Assertions.assertEquals("Hello World", sb.toString());
+    }
+
+    @Test
+    public void read8bitPreservesTextWhenStringBuilderUsesUtf16Storage() {
+        Bytes<?> bytes = Bytes.allocateElasticOnHeap();
+        try {
+            bytes.write8bit("field");
+
+            StringBuilder sb = utf16StringBuilder();
+            assertTrue(bytes.read8bit(sb));
+
+            assertEquals("field", sb.toString());
+        } finally {
+            bytes.releaseLast();
+        }
+    }
+
+    @Test
+    public void parse8bitPreservesExtendedByteWhenStringBuilderUsesUtf16Storage() throws Exception {
+        Bytes<?> bytes = Bytes.allocateElasticOnHeap();
+        try {
+            bytes.writeUnsignedByte(0xA3);
+
+            StringBuilder sb = utf16StringBuilder();
+            AppendableUtil.parse8bit(bytes, sb, 1);
+
+            assertEquals("\u00A3", sb.toString());
+        } finally {
+            bytes.releaseLast();
+        }
+    }
+
+    @Test
+    public void parse8bitFromNativeBytesPreservesExtendedByteWhenStringBuilderUsesUtf16Storage() throws Exception {
+        assumeFalse(NativeBytes.areNewGuarded());
+        Bytes<?> bytes = Bytes.allocateElasticDirect();
+        try {
+            bytes.writeUnsignedByte(0xA3);
+
+            StringBuilder sb = utf16StringBuilder();
+            AppendableUtil.parse8bit(bytes, sb, 1);
+
+            assertEquals("\u00A3", sb.toString());
+        } finally {
+            bytes.releaseLast();
+        }
     }
 
     @Test
@@ -151,5 +198,11 @@ public class AppendableUtilTest extends BytesTestCommon {
         assertEquals("helloXworld", sb.toString());
         assertEquals("HelloXWorld", b.toString());
         b.releaseLast();
+    }
+
+    private static StringBuilder utf16StringBuilder() {
+        StringBuilder sb = new StringBuilder("\u221A");
+        sb.setLength(0);
+        return sb;
     }
 }

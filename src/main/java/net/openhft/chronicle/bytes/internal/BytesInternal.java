@@ -771,10 +771,21 @@ enum BytesInternal {
         sb.ensureCapacity(utflen);
 
         if (Jvm.isJava9Plus() && Jvm.maxDirectMemory() > 0) {
-            byte[] sbBytes = extractBytes(sb);
-            for (int count = 0; count < utflen; count++) {
-                int c = bytes.readUnsignedByte();
-                sbBytes[count] = (byte) c;
+            byte coder = getStringCoder(sb);
+            if (coder == JAVA9_STRING_CODER_LATIN) {
+                byte[] sbBytes = extractBytes(sb);
+                for (int count = 0; count < utflen; count++) {
+                    int c = bytes.readUnsignedByte();
+                    sbBytes[count] = (byte) c;
+                }
+                StringUtils.setLength(sb, utflen);
+            } else {
+                assert coder == JAVA9_STRING_CODER_UTF16;
+                sb.setLength(utflen);
+                for (int count = 0; count < utflen; count++) {
+                    int c = bytes.readUnsignedByte();
+                    sb.setCharAt(count, (char) c);
+                }
             }
         } else {
             char[] chars = StringUtils.extractChars(sb);
@@ -782,8 +793,8 @@ enum BytesInternal {
                 int c = bytes.readUnsignedByte();
                 chars[count] = (char) c;
             }
+            StringUtils.setLength(sb, utflen);
         }
-        StringUtils.setLength(sb, utflen);
     }
 
     public static void parse8bit1(@NotNull StreamingDataInput bytes, @NotNull Appendable appendable, @NonNegative int utflen)
@@ -938,7 +949,7 @@ enum BytesInternal {
                 assert coder == JAVA9_STRING_CODER_UTF16;
                 sb.setLength(length);
                 while (count < length) {
-                    byte b = memory.readByte(address + count);
+                    int b = memory.readByte(address + count) & 0xFF;
                     sb.setCharAt(count++, (char) b);
                 }
             }
