@@ -18,6 +18,7 @@ import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
+import static net.openhft.chronicle.assertions.AssertUtil.SKIP_ASSERTIONS;
 import static net.openhft.chronicle.core.Jvm.uncheckedCast;
 import static net.openhft.chronicle.core.util.Ints.requireNonNegative;
 import static net.openhft.chronicle.core.util.Longs.requireNonNegative;
@@ -334,6 +335,7 @@ public class HeapBytesStore<U>
         requireNonNegative(length);
         try {
             throwExceptionIfReleased();
+            assert SKIP_ASSERTIONS || BytesInternal.isLatin1(s, start, length) : "write8bit cannot represent a char > 0xFF; use writeUtf8";
             position = BytesInternal.writeStopBit(this, position, length);
             memory.write8bit(s, start, realUnderlyingObject, dataOffset + position, length);
             return position + length;

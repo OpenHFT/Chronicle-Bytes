@@ -23,6 +23,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
 
+import static net.openhft.chronicle.assertions.AssertUtil.SKIP_ASSERTIONS;
 import static net.openhft.chronicle.bytes.Bytes.MAX_CAPACITY;
 import static net.openhft.chronicle.core.Jvm.uncheckedCast;
 import static net.openhft.chronicle.core.UnsafeMemory.MEMORY;
@@ -669,6 +670,7 @@ public class NativeBytesStore<U>
         requireNonNull(s);
         requireNonNegative(start);
         requireNonNegative(length);
+        assert SKIP_ASSERTIONS || BytesInternal.isLatin1(s, start, length) : "write8bit cannot represent a char > 0xFF; use writeUtf8";
         position = BytesUtil.writeStopBit(this, position, length);
         MEMORY.copy8bit(s, start, length, addressForWrite(position));
         return position + length;
