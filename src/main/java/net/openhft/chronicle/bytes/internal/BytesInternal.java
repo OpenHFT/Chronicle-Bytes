@@ -2816,6 +2816,19 @@ enum BytesInternal {
         }
     }
 
+    /**
+     * Parse a decimal (or {@code NaN}/{@code Infinity}) from the input as a double.
+     * <p>
+     * <b>Accuracy.</b> The decimal is accumulated and handed to
+     * {@link net.openhft.chronicle.core.Maths#asDouble(long, int, boolean, int)}, which is
+     * <em>correctly-rounded</em> (bit-identical to {@link Double#parseDouble(String)}) for the common
+     * realistic range: any value of up to 15 significant digits with a decimal exponent within
+     * &plusmn;22 &mdash; e.g. every finite magnitude in {@code [1e-8, 1e15)}, and modest-precision
+     * values up to {@code 1e22}. Extreme inputs &mdash; 16&ndash;17 significant-digit (full precision)
+     * mantissas, magnitudes below ~{@code 1e-8}, or very large full-precision values &mdash; may read
+     * back up to 1 ULP (2 ULP at the most extreme exponents) from correctly-rounded. See
+     * {@code Maths.asDouble} for the precise domain and rationale.
+     */
     public static double parseDouble(@NotNull StreamingDataInput in)
             throws BufferUnderflowException, ClosedIllegalStateException {
         long value = 0;
