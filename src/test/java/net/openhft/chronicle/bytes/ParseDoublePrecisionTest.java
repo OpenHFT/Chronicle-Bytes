@@ -3,7 +3,6 @@
  */
 package net.openhft.chronicle.bytes;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.Random;
@@ -63,12 +62,10 @@ public class ParseDoublePrecisionTest extends BytesTestCommon {
 
     /**
      * A clean decimal of 15 or fewer significant digits fits in the {@code long} mantissa without
-     * the lossy {@code value >>>= 1} shedding, so the parser should reproduce the correctly-rounded
-     * result exactly (0 ULP from {@link Double#parseDouble}).
+     * the lossy {@code value >>>= 1} shedding, so the parser reproduces the correctly-rounded result
+     * exactly (0 ULP from {@link Double#parseDouble}). Passes since the Clinger fast path was added
+     * to {@code Maths.asDouble} (CORE-65); before that ~451/1M such decimals were 1 ULP off.
      */
-    @Disabled("Target contract for the parseDouble fix. Currently FAILS, reproducing the issue: " +
-            "within [1e-3, 1e15) ~451/1M decimals of <=15 significant digits parse 1 ULP off " +
-            "-- including 13-digit values e.g. -6.1625505370891E11. Remove @Disabled to reproduce.")
     @Test
     public void fifteenOrFewerSignificantDigitsParseExactly() {
         Random r = new Random(1);
