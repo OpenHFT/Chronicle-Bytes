@@ -6,15 +6,13 @@ package net.openhft.chronicle.bytes;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
-import java.util.Map;
 import java.util.Random;
-import java.util.TreeMap;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 /**
- * Explorative tests characterising the precision of {@link Bytes#parseDouble()}.
+ * Regression tests for the precision contract of {@link Bytes#parseDouble()}.
  * <p>
  * Context: when {@code JSONWire}/{@code TextWire} write a finite double they emit the shortest
  * faithful decimal (via {@code Double.toString}); reading it back goes through
@@ -30,8 +28,7 @@ import static org.junit.jupiter.api.Assertions.fail;
  * It should never be worse than that — values of 15 or fewer significant digits must be
  * <b>exact</b>, and nothing should ever be off by more than one ULP.
  * <p>
- * These tests encode that contract. Those that currently fail reproduce the issue under
- * investigation on this branch.
+ * These tests encode that contract and guard the CORE-65 parser behavior.
  */
 public class ParseDoublePrecisionTest extends BytesTestCommon {
 
@@ -47,13 +44,6 @@ public class ParseDoublePrecisionTest extends BytesTestCommon {
         if (la < 0) la = 0x8000000000000000L - la;
         if (lb < 0) lb = 0x8000000000000000L - lb;
         return Math.abs(la - lb);
-    }
-
-    /** Count of significant decimal digits in a shortest-form decimal string. */
-    private static int significantDigits(String s) {
-        String m = s.split("[eE]")[0].replace("-", "").replace(".", "");
-        m = m.replaceFirst("^0+", "").replaceFirst("0+$", "");
-        return m.isEmpty() ? 1 : m.length();
     }
 
     private static double parse(Bytes<?> scratch, String s) {
@@ -97,9 +87,9 @@ public class ParseDoublePrecisionTest extends BytesTestCommon {
 
     /**
      * No double in {@code [1e-3, 1e15)}, however many significant digits its shortest form carries,
-     * may parse more than one ULP away from the correctly-rounded result. This currently passes and
-     * guards the accepted trade-off; the worse 2-ULP cases only occur at extreme exponents outside
-     * the practical range.
+     * may parse more than one ULP away from the correctly-rounded result. This guards the
+     * accepted trade-off; the worse 2-ULP cases only occur at extreme exponents outside the
+     * practical range.
      */
     @Test
     public void parseErrorNeverExceedsOneUlp() {
@@ -130,15 +120,12 @@ public class ParseDoublePrecisionTest extends BytesTestCommon {
      * Focused on the large end of the range {@code [1e11, 1e15)}, where the pre-fix parser was worst
      * (~5.5% of values 1 ULP off at 1e12). Each value is parsed in both forms it can be written:
      * plain {@code xxxxx.yyy} (decimal-places path) and scientific {@code xxxx.yyEn} (E-exponent
-     * path). Asserts the accepted contract -- neither form exceeds 1 ULP -- and prints the per-decade
-     * mismatch rate so the improvement over the pre-fix ~5.5% is visible.
+     * path). Asserts the accepted contract -- neither form exceeds 1 ULP.
      */
     @Test
     public void parseLargeValuesBothFormsWithinOneUlp() {
         Random r = new Random(11);
         Bytes<?> b = Bytes.allocateElasticOnHeap(64);
-        // decade -> [samples, plainMismatch, plainMaxUlp, sciMismatch, sciMaxUlp]
-        TreeMap<Integer, long[]> byDecade = new TreeMap<>();
         long over1 = 0;
         String worst = null;
         try {
@@ -154,12 +141,6 @@ public class ParseDoublePrecisionTest extends BytesTestCommon {
                 String plain = new BigDecimal(sci).toPlainString(); // xxxxx.yyy
                 long up = ulpsBetween(parse(b, plain), d);
                 long us = ulpsBetween(parse(b, sci), d);
-                long[] row = byDecade.computeIfAbsent(decade, k -> new long[5]);
-                row[0]++;
-                if (up != 0) row[1]++;
-                if (up > row[2]) row[2] = up;
-                if (us != 0) row[3]++;
-                if (us > row[4]) row[4] = us;
                 if (up > 1 || us > 1) {
                     over1++;
                     if (worst == null)
@@ -168,12 +149,6 @@ public class ParseDoublePrecisionTest extends BytesTestCommon {
             }
         } finally {
             b.releaseLast();
-        }
-        System.out.println("decade  samples   plainMiss%  plainMaxUlp  sciMiss%  sciMaxUlp");
-        for (Map.Entry<Integer, long[]> e : byDecade.entrySet()) {
-            long[] row = e.getValue();
-            System.out.printf("1e%-4d  %-8d  %-10.4f  %-11d  %-8.4f  %d%n",
-                    e.getKey(), row[0], 100.0 * row[1] / row[0], row[2], 100.0 * row[3] / row[0], row[4]);
         }
         final long o = over1;
         final String w = worst;
@@ -186,7 +161,7 @@ public class ParseDoublePrecisionTest extends BytesTestCommon {
      * being the largest exactly-representable power of ten) -- {@link Bytes#parseDouble()} produces
      * bit-identical results to the JDK {@link Double#parseDouble(String)}, for magnitudes all the
      * way up to {@code 10^22}. (Values needing 16-17 significant digits fall outside this domain and
-     * may differ by up to 1 ULP; see {@link #characteriseParseErrorByDigitCount()}.)
+     * may differ by up to 1 ULP; see {@link #parseErrorNeverExceedsOneUlp()}.)
      */
     @Test
     public void matchesJdkInClingerDomainUpTo1e22() {
@@ -224,7 +199,7 @@ public class ParseDoublePrecisionTest extends BytesTestCommon {
      * round-trip exactly through {@link Bytes#parseDouble()} (0 ULP), in both the plain
      * ({@code 0.000ddd}) and scientific ({@code d.dddE-n}) forms. At 1e-7 a 16-digit value sits right
      * at the fast path's {@code |decimalPlaces| <= 22} bound; below ~1e-8 decimalPlaces exceeds 22
-     * and exactness is no longer guaranteed (see {@link #characteriseParseErrorByDigitCount()}).
+     * and exactness is no longer guaranteed.
      */
     @Test
     public void smallMagnitudesParseExactlyBothForms() {
@@ -261,42 +236,9 @@ public class ParseDoublePrecisionTest extends BytesTestCommon {
     }
 
     /**
-     * Pure measurement (always passes): prints max ULP error and mismatch rate per significant-digit
-     * count, to guide the fix and show where the accepted 1-ULP trade-off begins.
-     */
-    @Test
-    public void characteriseParseErrorByDigitCount() {
-        Random r = new Random(3);
-        Bytes<?> b = Bytes.allocateElasticOnHeap(32);
-        // digits -> [count, mismatches, maxUlps]
-        TreeMap<Integer, long[]> byDigits = new TreeMap<>();
-        try {
-            for (int i = 0; i < SAMPLES; i++) {
-                double d = randomInRange(r);            // magnitude in [1e-3, 1e15)
-                String s = Double.toString(d);
-                double got = parse(b, s);
-                long ulps = ulpsBetween(got, d);
-                long[] row = byDigits.computeIfAbsent(significantDigits(s), k -> new long[3]);
-                row[0]++;
-                if (ulps != 0) row[1]++;
-                if (ulps > row[2]) row[2] = ulps;
-            }
-        } finally {
-            b.releaseLast();
-        }
-        System.out.println("sigDigits  samples      mismatches   mismatch%   maxUlps");
-        for (java.util.Map.Entry<Integer, long[]> e : byDigits.entrySet()) {
-            long[] row = e.getValue();
-            System.out.printf("%-9d  %-11d  %-11d  %-9.4f   %d%n",
-                    e.getKey(), row[0], row[1], 100.0 * row[1] / row[0], row[2]);
-        }
-    }
-
-    /**
      * Concrete values surfaced by a JSONWire round-trip sweep over {@code [1e11, 1e15)}: each is a
      * faithful shortest decimal that the parser restores imperfectly. Documents that these specific
-     * values sit within the accepted 1-ULP trade-off (the broader contract is asserted, and
-     * currently fails, in the disabled tests above).
+     * values sit within the accepted 1-ULP trade-off.
      */
     @Test
     public void knownWireValuesParseWithinOneUlp() {
@@ -311,7 +253,6 @@ public class ParseDoublePrecisionTest extends BytesTestCommon {
             StringBuilder over = new StringBuilder();
             for (String s : values) {
                 long ulps = ulpsBetween(parse(b, s), Double.parseDouble(s));
-                System.out.printf("%-24s ulps=%d%n", s, ulps);
                 if (ulps > 1)
                     over.append("\n  ").append(s).append(" off by ").append(ulps).append(" ULP");
             }
