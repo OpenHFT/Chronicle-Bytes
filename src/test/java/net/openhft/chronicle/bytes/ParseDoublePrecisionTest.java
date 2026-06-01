@@ -5,6 +5,8 @@ package net.openhft.chronicle.bytes;
 
 import org.junit.jupiter.api.Test;
 
+import java.math.BigDecimal;
+import java.util.Map;
 import java.util.Random;
 import java.util.TreeMap;
 
@@ -122,6 +124,60 @@ public class ParseDoublePrecisionTest extends BytesTestCommon {
         } finally {
             b.releaseLast();
         }
+    }
+
+    /**
+     * Focused on the large end of the range {@code [1e11, 1e15)}, where the pre-fix parser was worst
+     * (~5.5% of values 1 ULP off at 1e12). Each value is parsed in both forms it can be written:
+     * plain {@code xxxxx.yyy} (decimal-places path) and scientific {@code xxxx.yyEn} (E-exponent
+     * path). Asserts the accepted contract -- neither form exceeds 1 ULP -- and prints the per-decade
+     * mismatch rate so the improvement over the pre-fix ~5.5% is visible.
+     */
+    @Test
+    public void parseLargeValuesBothFormsWithinOneUlp() {
+        Random r = new Random(11);
+        Bytes<?> b = Bytes.allocateElasticOnHeap(64);
+        // decade -> [samples, plainMismatch, plainMaxUlp, sciMismatch, sciMaxUlp]
+        TreeMap<Integer, long[]> byDecade = new TreeMap<>();
+        long over1 = 0;
+        String worst = null;
+        try {
+            for (int i = 0; i < SAMPLES; i++) {
+                int decade = 11 + r.nextInt(4);                 // 1e11 .. 1e14
+                double low = Math.pow(10, decade);
+                double d = low + r.nextDouble() * (9 * low);    // full mantissa precision in the decade
+                if (r.nextBoolean())
+                    d = -d;
+                if (!Double.isFinite(d) || Math.abs(d) >= 1e15)
+                    continue;
+                String sci = Double.toString(d);                // xxxx.yyEn
+                String plain = new BigDecimal(sci).toPlainString(); // xxxxx.yyy
+                long up = ulpsBetween(parse(b, plain), d);
+                long us = ulpsBetween(parse(b, sci), d);
+                long[] row = byDecade.computeIfAbsent(decade, k -> new long[5]);
+                row[0]++;
+                if (up != 0) row[1]++;
+                if (up > row[2]) row[2] = up;
+                if (us != 0) row[3]++;
+                if (us > row[4]) row[4] = us;
+                if (up > 1 || us > 1) {
+                    over1++;
+                    if (worst == null)
+                        worst = "plain=" + plain + "(" + up + " ULP) sci=" + sci + "(" + us + " ULP)";
+                }
+            }
+        } finally {
+            b.releaseLast();
+        }
+        System.out.println("decade  samples   plainMiss%  plainMaxUlp  sciMiss%  sciMaxUlp");
+        for (Map.Entry<Integer, long[]> e : byDecade.entrySet()) {
+            long[] row = e.getValue();
+            System.out.printf("1e%-4d  %-8d  %-10.4f  %-11d  %-8.4f  %d%n",
+                    e.getKey(), row[0], 100.0 * row[1] / row[0], row[2], 100.0 * row[3] / row[0], row[4]);
+        }
+        final long o = over1;
+        final String w = worst;
+        assertEquals(0, o, () -> o + " large values exceeded 1 ULP in some form, e.g. " + w);
     }
 
     /**
