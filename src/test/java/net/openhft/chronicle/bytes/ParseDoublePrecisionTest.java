@@ -181,6 +181,44 @@ public class ParseDoublePrecisionTest extends BytesTestCommon {
     }
 
     /**
+     * Within the Clinger fast-path domain -- a mantissa of at most 15 significant digits (so it is
+     * exactly representable, {@code <= 2^53}) and a decimal exponent within +/-22 ({@code 10^22}
+     * being the largest exactly-representable power of ten) -- {@link Bytes#parseDouble()} produces
+     * bit-identical results to the JDK {@link Double#parseDouble(String)}, for magnitudes all the
+     * way up to {@code 10^22}. (Values needing 16-17 significant digits fall outside this domain and
+     * may differ by up to 1 ULP; see {@link #characteriseParseErrorByDigitCount()}.)
+     */
+    @Test
+    public void matchesJdkInClingerDomainUpTo1e22() {
+        Random r = new Random(22);
+        Bytes<?> b = Bytes.allocateElasticOnHeap(64);
+        long checked = 0, mismatches = 0;
+        String first = null;
+        try {
+            for (int i = 0; i < SAMPLES; i++) {
+                long mantissa = (Math.abs(r.nextLong()) % (1L << 53)) + 1;  // 1 .. 2^53 (exact in a double)
+                int exp = r.nextInt(45) - 22;                               // -22 .. 22  => |decimalPlaces| <= 22
+                String s = (r.nextBoolean() ? "-" : "") + mantissa + "E" + exp;
+                double ref = Double.parseDouble(s);
+                if (!Double.isFinite(ref) || ref == 0 || Math.abs(ref) > 1e22)
+                    continue;                                               // scope: magnitudes up to 10^22
+                checked++;
+                if (Double.doubleToLongBits(parse(b, s)) != Double.doubleToLongBits(ref)) {
+                    mismatches++;
+                    if (first == null)
+                        first = s + " -> " + parse(b, s) + " (jdk " + ref + ")";
+                }
+            }
+        } finally {
+            b.releaseLast();
+        }
+        final long m = mismatches, c = checked;
+        final String f = first;
+        assertEquals(0, m,
+                () -> m + " of " + c + " Clinger-domain decimals (<=10^22) differed from JDK Double.parseDouble; first: " + f);
+    }
+
+    /**
      * Pure measurement (always passes): prints max ULP error and mismatch rate per significant-digit
      * count, to guide the fix and show where the accepted 1-ULP trade-off begins.
      */
