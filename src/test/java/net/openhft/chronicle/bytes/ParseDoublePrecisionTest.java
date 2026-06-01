@@ -219,6 +219,48 @@ public class ParseDoublePrecisionTest extends BytesTestCommon {
     }
 
     /**
+     * Small magnitudes in {@code [1e-8, 1e-3)} -- the band that used to go through the lossy
+     * {@code Math.round(d*1e16)/1e9} compaction and now goes through {@code Double.toString} --
+     * round-trip exactly through {@link Bytes#parseDouble()} (0 ULP), in both the plain
+     * ({@code 0.000ddd}) and scientific ({@code d.dddE-n}) forms. At 1e-7 a 16-digit value sits right
+     * at the fast path's {@code |decimalPlaces| <= 22} bound; below ~1e-8 decimalPlaces exceeds 22
+     * and exactness is no longer guaranteed (see {@link #characteriseParseErrorByDigitCount()}).
+     */
+    @Test
+    public void smallMagnitudesParseExactlyBothForms() {
+        Random r = new Random(8);
+        Bytes<?> b = Bytes.allocateElasticOnHeap(64);
+        long checked = 0, mismatches = 0;
+        String first = null;
+        try {
+            for (int i = 0; i < SAMPLES; i++) {
+                int decade = -8 + r.nextInt(5);             // 1e-8 .. 1e-4  => magnitude in [1e-8, 1e-3)
+                double low = Math.pow(10, decade);
+                double d = low + r.nextDouble() * (9 * low);
+                if (r.nextBoolean())
+                    d = -d;
+                if (!Double.isFinite(d) || d == 0)
+                    continue;
+                String sci = Double.toString(d);                    // d.dddE-n
+                String plain = new BigDecimal(sci).toPlainString();  // 0.000ddd
+                checked++;
+                if (Double.doubleToLongBits(parse(b, sci)) != Double.doubleToLongBits(d)
+                        || Double.doubleToLongBits(parse(b, plain)) != Double.doubleToLongBits(d)) {
+                    mismatches++;
+                    if (first == null)
+                        first = "sci=" + sci + " plain=" + plain;
+                }
+            }
+        } finally {
+            b.releaseLast();
+        }
+        final long m = mismatches, c = checked;
+        final String f = first;
+        assertEquals(0, m,
+                () -> m + " of " + c + " values in [1e-8, 1e-3) did not round-trip exactly through parseDouble; first: " + f);
+    }
+
+    /**
      * Pure measurement (always passes): prints max ULP error and mismatch rate per significant-digit
      * count, to guide the fix and show where the accepted 1-ULP trade-off begins.
      */
