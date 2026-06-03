@@ -989,6 +989,7 @@ public class BytesTest extends BytesTestCommon {
     @Test
     public void write8BitCharSequence() {
         assumeFalse(alloc1 == HEAP_EMBEDDED);
+        requireMaxDirectMemory();
 
         @NotNull Bytes<?> bytes = alloc1.elasticBytes(703);
         StringBuilder sb = new StringBuilder();

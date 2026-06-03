@@ -305,10 +305,12 @@ public enum AppendableUtil {
     public static <C extends Appendable & CharSequence> void append(C a, CharSequence cs, @NonNegative long start, @NonNegative long len)
             throws ArithmeticException, BufferUnderflowException, ClosedIllegalStateException, BufferOverflowException {
         if (a instanceof StringBuilder) {
-            if (cs instanceof Bytes)
+            if (cs instanceof Bytes) {
                 ((StringBuilder) a).append(Bytes.toString(((Bytes) cs), start, len));
-            else
-                ((StringBuilder) a).append(cs.subSequence(Maths.toInt32(start), Maths.toInt32(len)));
+            } else {
+                int end = Maths.toInt32(Math.addExact(start, len));
+                ((StringBuilder) a).append(cs.subSequence(Maths.toInt32(start), end));
+            }
         } else if (a instanceof Bytes) {
             ((Bytes) a).appendUtf8(cs, Maths.toInt32(start), Maths.toInt32(len));
         } else {
