@@ -39,16 +39,34 @@ public class AppendableUtilTest extends BytesTestCommon {
 
     @Test
     public void testAppendDouble() {
-        StringBuilder sb = new StringBuilder();
-        AppendableUtil.append(sb, 3.14);
-        assertEquals("3.14", sb.toString());
+        Bytes<?> bytes = Bytes.elasticByteBuffer();
+        try {
+            AppendableUtil.append(bytes, 2.718);
+            bytes.append(',');
+            AppendableUtil.append(bytes, 3.14);
+            assertEquals("2.718,3.14", bytes.toString());
+        } finally {
+            bytes.releaseLast();
+        }
     }
 
     @Test
     public void testAppendLong() {
         StringBuilder sb = new StringBuilder();
         AppendableUtil.append(sb, 42L);
-        assertEquals("42", sb.toString());
+        sb.append(',');
+        AppendableUtil.append(sb, 128L);
+        assertEquals("42,128", sb.toString());
+
+        Bytes<?> bytes = Bytes.elasticByteBuffer();
+        try {
+            AppendableUtil.append(bytes, 42L);
+            bytes.append(',');
+            AppendableUtil.append(bytes, 128L);
+            assertEquals("42,128", bytes.toString());
+        } finally {
+            bytes.releaseLast();
+        }
     }
 
     @Test
@@ -68,14 +86,27 @@ public class AppendableUtilTest extends BytesTestCommon {
 
     @Test
     public void read8bitPreservesTextWhenStringBuilderUsesUtf16Storage() {
+        requireMaxDirectMemory();
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         try {
             bytes.write8bit("field");
+            bytes.write8bit("another");
+            bytes.write8bit(null);
 
             StringBuilder sb = utf16StringBuilder();
             assertTrue(bytes.read8bit(sb));
 
             assertEquals("field", sb.toString());
+
+            assertTrue(bytes.read8bit(sb));
+
+            assertEquals("another", sb.toString());
+
+            assertFalse(bytes.read8bit(sb));
+
+            // end of input == ""
+            assertTrue(bytes.read8bit(sb));
+            assertEquals("", sb.toString());
         } finally {
             bytes.releaseLast();
         }
@@ -83,14 +114,19 @@ public class AppendableUtilTest extends BytesTestCommon {
 
     @Test
     public void parse8bitPreservesExtendedByteWhenStringBuilderUsesUtf16Storage() throws Exception {
+        requireMaxDirectMemory();
         Bytes<?> bytes = Bytes.allocateElasticOnHeap();
         try {
             bytes.writeUnsignedByte(0xA3);
+            bytes.writeUnsignedByte(0xFF);
 
             StringBuilder sb = utf16StringBuilder();
-            AppendableUtil.parse8bit(bytes, sb, 1);
 
+            AppendableUtil.parse8bit(bytes, sb, 1);
             assertEquals("\u00A3", sb.toString());
+
+            AppendableUtil.parse8bit(bytes, sb, 1);
+            assertEquals("\u00FF", sb.toString());
         } finally {
             bytes.releaseLast();
         }
@@ -99,14 +135,19 @@ public class AppendableUtilTest extends BytesTestCommon {
     @Test
     public void parse8bitFromNativeBytesPreservesExtendedByteWhenStringBuilderUsesUtf16Storage() throws Exception {
         assumeFalse(NativeBytes.areNewGuarded());
+        requireMaxDirectMemory();
         Bytes<?> bytes = Bytes.allocateElasticDirect();
         try {
             bytes.writeUnsignedByte(0xA3);
+            bytes.writeUnsignedByte(0xFE);
 
             StringBuilder sb = utf16StringBuilder();
-            AppendableUtil.parse8bit(bytes, sb, 1);
 
+            AppendableUtil.parse8bit(bytes, sb, 1);
             assertEquals("\u00A3", sb.toString());
+
+            AppendableUtil.parse8bit(bytes, sb, 1);
+            assertEquals("\u00FE", sb.toString());
         } finally {
             bytes.releaseLast();
         }
@@ -122,8 +163,10 @@ public class AppendableUtilTest extends BytesTestCommon {
     @Test
     public void testAppendDoubleWithStringBuilder() {
         StringBuilder sb = new StringBuilder();
+        AppendableUtil.append(sb, 2.718);
+        sb.append(',');
         AppendableUtil.append(sb, 3.14);
-        Assertions.assertEquals("3.14", sb.toString());
+        Assertions.assertEquals("2.718,3.14", sb.toString());
     }
 
     @Test
@@ -155,17 +198,51 @@ public class AppendableUtilTest extends BytesTestCommon {
     }
 
     @Test
-    public void appendDoubleToStringBuilder() {
-        StringBuilder sb = new StringBuilder();
-        AppendableUtil.append(sb, 3.14);
-        assertEquals("3.14", sb.toString());
-    }
-
-    @Test
     public void appendStringToAppendableAndCharSequence() {
         StringBuilder sb = new StringBuilder();
         AppendableUtil.append(sb, "test");
-        assertEquals("test", sb.toString());
+        AppendableUtil.append(sb, " words");
+        assertEquals("test words", sb.toString());
+
+        Bytes<?> bytes = Bytes.elasticByteBuffer();
+        try {
+            AppendableUtil.append(bytes, "test");
+            AppendableUtil.append(bytes, " words");
+            assertEquals("test words", bytes.toString());
+        } finally {
+            bytes.releaseLast();
+        }
+    }
+
+    @Test
+    public void appendSubsequenceToAppendableAndCharSequence() {
+        String text = "prefix text";
+        StringBuilder sb = new StringBuilder();
+        AppendableUtil.append(sb, text, 1, 4);
+        AppendableUtil.append(sb, text, 6, 3);
+        assertEquals("refi te", sb.toString());
+
+        Bytes<?> bytes = Bytes.elasticByteBuffer();
+        try {
+            AppendableUtil.append(bytes, text, 1, 4);
+            AppendableUtil.append(bytes, text, 6, 3);
+            assertEquals("refi te", bytes.toString());
+        } finally {
+            bytes.releaseLast();
+        }
+    }
+
+    @Test
+    public void appendSubsequenceFromBytesToStringBuilder() {
+        Bytes<?> source = Bytes.from("prefix text");
+        try {
+            StringBuilder sb = new StringBuilder();
+            AppendableUtil.append(sb, source, 1, 4);
+            AppendableUtil.append(sb, source, 6, 3);
+            assertEquals("refi te", sb.toString());
+        } finally {
+            source.releaseLast();
+        }
     }
 
     @SuppressWarnings("rawtypes")

@@ -43,6 +43,11 @@ public class BytesTestCommon {
         return text != null && text.contains(message);
     }
 
+    protected static void requireMaxDirectMemory() {
+        if (Jvm.maxDirectMemory() <= 0)
+            throw new AssertionError("Jvm.maxDirectMemory() must be > 0; ensure root-parent-pom JVM args are applied");
+    }
+
     @Before
     @BeforeEach
     public void enableReferenceTracing() {

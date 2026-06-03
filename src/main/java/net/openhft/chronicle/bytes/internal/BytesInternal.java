@@ -768,32 +768,41 @@ enum BytesInternal {
         throwExceptionIfReleased(bytes);
         if (bytes.readRemaining() < utflen)
             throw new IllegalArgumentException();
-        sb.ensureCapacity(utflen);
-
-        if (Jvm.isJava9Plus() && Jvm.maxDirectMemory() > 0) {
-            byte coder = getStringCoder(sb);
-            if (coder == JAVA9_STRING_CODER_LATIN) {
-                byte[] sbBytes = extractBytes(sb);
-                for (int count = 0; count < utflen; count++) {
-                    int c = bytes.readUnsignedByte();
-                    sbBytes[count] = (byte) c;
-                }
-                StringUtils.setLength(sb, utflen);
-            } else {
-                assert coder == JAVA9_STRING_CODER_UTF16;
-                sb.setLength(utflen);
-                for (int count = 0; count < utflen; count++) {
-                    int c = bytes.readUnsignedByte();
-                    sb.setCharAt(count, (char) c);
-                }
-            }
+        // defensive code for when reflection isn't available
+        if (Jvm.maxDirectMemory() <= 0) {
+            noReflectionParse8bit(bytes, sb, utflen);
         } else {
-            char[] chars = StringUtils.extractChars(sb);
-            for (int count = 0; count < utflen; count++) {
-                int c = bytes.readUnsignedByte();
-                chars[count] = (char) c;
-            }
             StringUtils.setLength(sb, utflen);
+            if (Jvm.isJava9Plus()) {
+                java9Parse8bit(bytes, sb, utflen);
+            } else {
+                java8Parse8bit(bytes, sb, utflen);
+            }
+        }
+    }
+
+    private static void noReflectionParse8bit(@NotNull StreamingDataInput bytes, @NotNull StringBuilder sb, int utflen) {
+        sb.setLength(utflen);
+        for (int count = 0; count < utflen; count++) {
+            int c = bytes.readUnsignedByte();
+            sb.setCharAt(count, (char) c);
+        }
+    }
+
+    private static void java9Parse8bit(@NotNull StreamingDataInput bytes, @NotNull StringBuilder sb, int utflen) {
+        assert getStringCoder(sb) == JAVA9_STRING_CODER_LATIN;
+        byte[] sbBytes = extractBytes(sb);
+        for (int count = 0; count < utflen; count++) {
+            int c = bytes.readUnsignedByte();
+            sbBytes[count] = (byte) c;
+        }
+    }
+
+    private static void java8Parse8bit(@NotNull StreamingDataInput bytes, @NotNull StringBuilder sb, int utflen) {
+        char[] chars = StringUtils.extractChars(sb);
+        for (int count = 0; count < utflen; count++) {
+            int c = bytes.readUnsignedByte();
+            chars[count] = (char) c;
         }
     }
 
