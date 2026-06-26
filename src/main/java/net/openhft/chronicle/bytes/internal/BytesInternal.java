@@ -2777,7 +2777,8 @@ enum BytesInternal {
                     digits = true;
 
                 } else if (ch == '.') {
-                    decimalPlaces = 0;
+                    if (decimalPlaces < 0)
+                        decimalPlaces = 0;
 
                 } else if (ch == 'E' || ch == 'e') {
                     tens += (int) parseLong(in);
