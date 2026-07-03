@@ -207,7 +207,7 @@ public abstract class AbstractBytes<U>
     }
 
     /**
-     * Clears the buffer then advances both cursors by {@code length} bytes
+     * Clears the buffer and advances both cursors by {@code length} bytes
      * leaving space at the start.
      *
      * @throws BufferOverflowException if {@code start() + length > capacity()}
