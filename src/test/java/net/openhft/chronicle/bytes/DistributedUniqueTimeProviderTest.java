@@ -290,4 +290,58 @@ public class DistributedUniqueTimeProviderTest extends BytesTestCommon {
             lastTimeNanos = currentTimeNanos / 1000;
         }
     }
+
+    @Test
+    public void uniqueIdForNanosShouldBeUniqueAndMonotonic() {
+        long baseTime = setTimeProvider.currentTimeNanos();
+        long last = 0;
+
+        for (int i = 0; i < 1_000; i++) {
+            long id = timeProvider.uniqueIdForNanos(baseTime + i * 100L);
+            assertTrue("IDs must be monotonically increasing", id > last);
+            assertEquals(0, DistributedUniqueTimeProvider.hostIdFor(id));
+            last = id;
+        }
+    }
+
+    @Test
+    public void uniqueIdForNanosShouldAdvanceWhenTimestampInPast() {
+        // Generate a current ID to advance LAST_TIME
+        long now = timeProvider.currentTimeNanos();
+
+        // Now request an ID for a timestamp in the past
+        long pastTime = now - 1_000_000_000L; // 1 second ago
+        long id = timeProvider.uniqueIdForNanos(pastTime);
+
+        // Should still be greater than the last issued ID
+        assertTrue("ID for past timestamp should be advanced to maintain uniqueness", id > now);
+    }
+
+    @Test
+    public void uniqueIdForMicrosShouldBeUniqueAndMonotonic() {
+        long baseTime = setTimeProvider.currentTimeMicros();
+        long last = 0;
+
+        for (int i = 0; i < 1_000; i++) {
+            long id = timeProvider.uniqueIdForMicros(baseTime + i);
+            assertTrue("IDs must be monotonically increasing", id > last);
+            assertEquals(0, DistributedUniqueTimeProvider.hostIdFor(id));
+            last = id;
+        }
+    }
+
+    @Test
+    public void uniqueIdForNanosWithDifferentHostIds() {
+        try (DistributedUniqueTimeProvider tp1 = DistributedUniqueTimeProvider.forHostId(1);
+             DistributedUniqueTimeProvider tp2 = DistributedUniqueTimeProvider.forHostId(2)) {
+            long baseTime = System.nanoTime();
+
+            long id1 = tp1.uniqueIdForNanos(baseTime);
+            long id2 = tp2.uniqueIdForNanos(baseTime);
+
+            assertEquals(1, DistributedUniqueTimeProvider.hostIdFor(id1));
+            assertEquals(2, DistributedUniqueTimeProvider.hostIdFor(id2));
+            assertNotEquals("IDs from different hosts must differ", id1, id2);
+        }
+    }
 }
