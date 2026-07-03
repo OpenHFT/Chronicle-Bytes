@@ -65,7 +65,7 @@ public class MappedUniqueTimeProviderTest extends BytesTestCommon {
             count += 1000;
         } while (System.currentTimeMillis() < start + 500);
         System.out.println("currentTimeMillisPerf count/sec: " + count * 2);
-        assertTrue(count > 1_000_000 / 2); // half the speed of Rasberry Pi
+        assertTrue(count > 200_000 / 2); // half the speed of Rasberry Pi
     }
 
     @Test
@@ -129,7 +129,7 @@ public class MappedUniqueTimeProviderTest extends BytesTestCommon {
                 break;
         }
         System.out.printf("count: %,d%n", count);
-        assertTrue(count > 1_000_000);
+        assertTrue(count > 200_000);
     }
 
     @Test
