@@ -28,9 +28,10 @@ import static org.junit.Assume.assumeFalse;
 /**
  * Field offsets depend on the JVM: the object header is 12 bytes on 64-bit HotSpot with compressed class pointers
  * but 8 bytes on a 32-bit JVM or with compact object headers, and JDK 15 changed the field ordering
- * (JDK-8237767). What {@link BytesFieldInfo} owes its callers is that each group starts at its first field, ends
- * after its last field and contains no field of another group, so the expectations are derived from the actual
- * field offsets rather than pinned to one layout.
+ * (JDK-8237767). What {@link BytesFieldInfo} owes its callers is that each group starts at its first field and ends
+ * after its last field, so the expectations are derived from the actual field offsets rather than pinned to one
+ * layout. That no field of another group lies inside a group's range is a property of these fixtures, asserted as
+ * well, not a promise of the API.
  */
 public class BytesFieldInfoTest extends BytesTestCommon {
 
@@ -57,7 +58,7 @@ public class BytesFieldInfoTest extends BytesTestCommon {
 
         // each group's range as this JVM laid it out: from its first field to the end of its last field
         final Map<String, long[]> ranges = new LinkedHashMap<>();
-        final List<Field> fields = fieldsByOffset(type);
+        final List<Field> fields = instanceFields(type);
         for (Field field : fields) {
             final FieldGroup group = field.getAnnotation(FieldGroup.class);
             if (group == null)
@@ -92,14 +93,13 @@ public class BytesFieldInfoTest extends BytesTestCommon {
                     dump.indexOf(byOffset.get(i - 1) + ":") < dump.indexOf(byOffset.get(i) + ":"));
     }
 
-    /** every non-static field of {@code type} and its super classes, ordered by memory offset, enumerated by reflection */
-    private static List<Field> fieldsByOffset(Class<?> type) {
+    /** every non-static field of {@code type} and its super classes, enumerated by reflection; order is irrelevant */
+    private static List<Field> instanceFields(Class<?> type) {
         final List<Field> fields = new ArrayList<>();
         for (Class<?> c = type; c != null && c != Object.class; c = c.getSuperclass())
             for (Field field : c.getDeclaredFields())
                 if (!Modifier.isStatic(field.getModifiers()))
                     fields.add(field);
-        fields.sort(Comparator.comparingLong(MEMORY::getFieldOffset));
         return fields;
     }
 
