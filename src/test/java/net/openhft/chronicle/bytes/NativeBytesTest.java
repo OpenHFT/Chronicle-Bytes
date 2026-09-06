@@ -10,6 +10,7 @@ import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.Assume;
+import org.junit.AssumptionViolatedException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -140,7 +141,16 @@ public class NativeBytesTest extends BytesTestCommon {
         long maxMemory = Runtime.getRuntime().maxMemory();
         Assume.assumeTrue(maxMemory >= Bytes.MAX_HEAP_CAPACITY * 3L / 2);
 
-        @NotNull Bytes<ByteBuffer> bytes = Bytes.elasticHeapByteBuffer(Bytes.MAX_HEAP_CAPACITY);
+        //! maxMemory() is not enough of a guard: the Zing Java 8 agent runs in a container and reports a 15.8 GB
+        //! heap, yet the 2 GiB array below failed with OutOfMemoryError in Snapshot Zing Java 8 builds 1004 and 1007
+        //! while the other three forks held 9.7 GB between them; the later parameterised runs in the same fork passed.
+        //! A shortage of memory is an unmet assumption, not a failure of the growth check this test exists for.
+        final Bytes<ByteBuffer> bytes;
+        try {
+            bytes = Bytes.elasticHeapByteBuffer(Bytes.MAX_HEAP_CAPACITY);
+        } catch (OutOfMemoryError e) {
+            throw new AssumptionViolatedException("No room for a " + Bytes.MAX_HEAP_CAPACITY + " byte heap buffer", e);
+        }
         @Nullable ByteBuffer byteBuffer = bytes.underlyingObject();
         assertFalse(byteBuffer.isDirect());
 
