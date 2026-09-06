@@ -41,7 +41,12 @@ public class BooleanReferenceTest extends BytesTestCommon {
 
     @Test
     public void testText() {
-        BytesStore<?, Void> nbs = BytesStore.nativeStoreWithFixedCapacity(5);
+        //! Two five-byte values are written at offsets 0 and 5, so the store needs ten bytes. With five, the second
+        //! write ran past the end of the malloc'd block: harmless on glibc, where the minimum chunk has slack, but on
+        //! Windows it corrupts the CRT heap and the forked test JVM later exits with 0xC0000374
+        //! (STATUS_HEAP_CORRUPTION) and no crash report, as in Chronicle Bytes Snapshot Windows builds 1063 and 1064.
+        //! Found by an eight-byte guard word after every NativeBytesStore allocation; the assertions are unchanged.
+        BytesStore<?, Void> nbs = BytesStore.nativeStoreWithFixedCapacity(10);
         try (@NotNull TextBooleanReference ref = new TextBooleanReference()) {
 
             // First value
