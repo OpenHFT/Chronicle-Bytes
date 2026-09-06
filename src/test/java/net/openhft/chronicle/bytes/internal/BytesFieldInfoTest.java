@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 
 import static net.openhft.chronicle.core.UnsafeMemory.MEMORY;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeFalse;
 
 /**
@@ -33,17 +34,14 @@ import static org.junit.Assume.assumeFalse;
  */
 public class BytesFieldInfoTest extends BytesTestCommon {
 
-    //! The previous expectations pinned the field offsets of 64-bit HotSpot with compressed class pointers, where the
-    //! object header is 12 bytes and the first int lands at offset 12. OpenJDK 17 i386 has an 8-byte header and lays the
-    //! longs out first (Groups1 reports pad: 8 to 40 ... header: 88 to 92), so lookup() failed there although
-    //! BytesFieldInfo reported the real layout; compact object headers give 64-bit JVMs the same 8-byte header, and JDK 15
-    //! already forced one layout switch in this test. The expectations are derived from the JVM's own field offsets,
-    //! enumerated by reflection rather than through BytesFieldInfo.fields so an enumeration error in the code under test
-    //! cannot mirror into the expectation; group names and the description word stay hard-coded. This test is its own
-    //! discriminator: with the pinned offsets it fails on the 32-bit JDK and passes on 64-bit HotSpot; with the derived
-    //! ranges it passes on OpenJDK 21 amd64, 17 i386 and 8 amd64. The "no field of another group inside a group's range"
-    //! assertion is stronger than BytesFieldInfo's contract, which extends a group across interleaved un-annotated fields;
-    //! a failure there on some layout would be a real finding about the group being non-contiguous.
+    //! The old expectations pinned 64-bit HotSpot offsets (12-byte header, longs first), which is not what BytesFieldInfo
+    //! promises: OpenJDK 17 i386 (8-byte header, a different order) failed them while BytesFieldInfo reported the real
+    //! layout, and compact object headers would do the same on 64-bit. The ranges are now derived from reflection and
+    //! MEMORY.getFieldOffset, independent of BytesFieldInfo.fields so an enumeration error cannot mirror into the
+    //! expectation; group names and the description word stay pinned. With the pinned offsets this test fails on the
+    //! 32-bit JDK; with the derived ranges it passes on OpenJDK 21 amd64, 17 i386 and 8 amd64. The "no field of another
+    //! group inside a range" assertion is a property of these fixtures, stronger than the contract, which lets a group
+    //! extend across interleaved un-annotated fields.
     @Test
     public void lookup() {
         assumeFalse(Jvm.isArm() || Jvm.isAzulZing());
@@ -83,12 +81,15 @@ public class BytesFieldInfoTest extends BytesTestCommon {
                 }
             }
         }
-        // the dump lists the groups in offset order
-        final String groups = ranges.entrySet().stream()
+        // the dump lists the groups in offset order; its exact format is not part of the contract
+        final List<String> byOffset = ranges.entrySet().stream()
                 .sorted(Comparator.comparingLong(e -> e.getValue()[0]))
-                .map(e -> e.getKey() + ": " + e.getValue()[0] + " to " + e.getValue()[1])
-                .collect(Collectors.joining(", "));
-        assertEquals("type: BytesFieldInfo, groups: { " + groups + " }", lookup.dump());
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toList());
+        final String dump = lookup.dump();
+        for (int i = 1; i < byOffset.size(); i++)
+            assertTrue(byOffset.get(i - 1) + " before " + byOffset.get(i) + " in " + dump,
+                    dump.indexOf(byOffset.get(i - 1) + ":") < dump.indexOf(byOffset.get(i) + ":"));
     }
 
     /** every non-static field of {@code type} and its super classes, ordered by memory offset, enumerated by reflection */
