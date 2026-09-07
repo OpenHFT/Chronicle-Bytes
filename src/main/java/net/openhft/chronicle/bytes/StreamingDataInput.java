@@ -813,10 +813,19 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
         assert BytesUtil.isTriviallyCopyable(o.getClass(), offset, length);
         if (readRemaining() < length)
             throw new BufferUnderflowException();
-        if (isDirectMemory()) {
+        //! The raw copy reads length bytes from the unsized address, which promises only a mapping's overlap. A
+        //! ChunkedMappedBytes whose range is not inside its current chunk is copied byte by byte instead: the word loop
+        //! below reads through rawReadLong(), which rejects a word that straddles a zero-overlap chunk end.
+        //! MappedBytesReadAcrossMappingTest#copyFromAZeroOverlapSourceAcrossItsMappingEnd copies from chunk - 13.
+        if (isDirectMemory() && BytesInternal.insideCurrentStore(this, readPosition(), length)) {
             final long src = addressForRead(readPosition());
             readSkip(length); // blow up here first
             MEMORY.copyMemory(src, o, offset, length);
+            return;
+        }
+        if (isDirectMemory()) {
+            for (int i = 0; i < length; i++)
+                UnsafeMemory.unsafePutByte(o, (long) offset + i, readByte());
             return;
         }
         int i = 0;
@@ -840,10 +849,16 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     default S unsafeRead(long address, @NonNegative int length) throws ClosedIllegalStateException, ThreadingIllegalStateException {
-        if (isDirectMemory()) {
+        //! See unsafeReadObject: a mapped source whose range is not inside its current chunk is copied byte by byte,
+        //! since the word loop's readLong() rejects a word that straddles a zero-overlap chunk end.
+        //! MappedBytesReadAcrossMappingTest#copyFromAZeroOverlapSourceAcrossItsMappingEnd copies from chunk - 13.
+        if (isDirectMemory() && BytesInternal.insideCurrentStore(this, readPosition(), length)) {
             long src = addressForRead(readPosition());
             readSkip(length);
             UnsafeMemory.copyMemory(src, address, length);
+        } else if (isDirectMemory()) {
+            for (int i = 0; i < length; i++)
+                MEMORY.writeByte(address + i, readByte());
         } else {
             int i = 0;
             for (; i < length - 7; i += 8)

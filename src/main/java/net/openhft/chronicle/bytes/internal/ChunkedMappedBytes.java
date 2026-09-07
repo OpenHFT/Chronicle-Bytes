@@ -7,6 +7,7 @@ import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.bytes.util.DecoratedBufferOverflowException;
 import net.openhft.chronicle.bytes.util.DecoratedBufferUnderflowException;
 import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.Memory;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.annotation.NonNegative;
@@ -314,6 +315,58 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
             throw new DecoratedBufferUnderflowException(String.format(
                     "Acquired the next BytesStore, but a read of %d bytes at %d still straddles its end at %d",
                     size, offset, bytesStore.realCapacity()));
+    }
+
+    /** Copies from the read position in pieces that each stay inside one chunk mapping. */
+    @Override
+    public int read(byte[] bytes, @NonNegative int off, @NonNegative int len)
+            throws BufferUnderflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
+        requireNonNull(bytes);
+        final long remaining = readRemaining();
+        if (remaining <= 0)
+            return -1;
+        //! AbstractBytes.read copies 64 KiB at a time whatever the mapping, so a batch crossing a chunk end beyond the
+        //! overlap came back as garbage, or with the check above an exception. Bounding each batch by its mapping lets
+        //! the copy continue in the next chunk. MappedBytesReadAcrossMappingTest#bulkReadAcrossTheMappingEnd fails without this.
+        final int total = (int) Math.min(len, remaining);
+        int copied = 0;
+        while (copied < total) {
+            final long position = readPosition;
+            final int batch = Math.min(total - copied, mappedBatchSize(position));
+            readOffsetPositionMoved(batch);
+            bytesStore.read(position, bytes, off + copied, batch);
+            copied += batch;
+        }
+        return total;
+    }
+
+    /** Random-access copy in chunk-sized pieces; {@code copyTo(byte[])} reads through this method. */
+    @Override
+    public long read(@NonNegative long offsetInRDI, byte[] bytes, @NonNegative int offset, @NonNegative int length)
+            throws ClosedIllegalStateException {
+        requireNonNull(bytes);
+        //! The inherited copy read from the current chunk's store at an absolute offset with neither acquisition nor
+        //! range check, so a copy from another chunk or across a chunk end read outside the mapping.
+        //! MappedBytesReadAcrossMappingTest#copyToAcrossTheMappingEnd fails without this override.
+        final int len = Maths.toUInt31(Math.min(length, requireNonNegative(readLimit() - offsetInRDI)));
+        long position = offsetInRDI;
+        int copied = 0;
+        while (copied < len) {
+            final int batch = Math.min(len - copied, mappedBatchSize(position));
+            readCheckOffset(position, batch, true);
+            bytesStore.read(position, bytes, offset + copied, batch);
+            position += batch;
+            copied += batch;
+        }
+        return len;
+    }
+
+    /** @return the largest copy from {@code position} inside the chunk acquired for it, at most {@link #safeCopySize()} */
+    private int mappedBatchSize(final long position) {
+        BytesStore<?, ?> store = this.bytesStore;
+        if (!store.inside(position, 1))
+            store = acquireNextByteStore0(position, false);
+        return (int) Math.min(safeCopySize(), store.realCapacity() - position);
     }
 
     @Override

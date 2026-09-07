@@ -553,11 +553,26 @@ public class NativeBytesStore<U>
         requireNonNegative(length);
         throwExceptionIfReleased();
         if (bytes.isDirectMemory()) {
-            memoryCopyMemory(bytes.addressForRead(readOffset), addressForWrite(writeOffset), length);
+            //! addressForRead(readOffset) promises only the source's overlap, yet the whole length was copied raw: a copy
+            //! from a zero-overlap MappedBytes started shortly before its chunk end crashed the JVM or copied garbage.
+            //! The call acquires the source's chunk; if the range still does not fit it, copy through checked reads.
+            //! MappedBytesReadAcrossMappingTest#copyFromAZeroOverlapSourceAcrossItsMappingEnd crashes without this.
+            final long address = bytes.addressForRead(readOffset);
+            if (!BytesInternal.insideCurrentStore(bytes, readOffset, length)) {
+                writeByteWise(writeOffset, bytes, readOffset, length);
+                return this;
+            }
+            memoryCopyMemory(address, addressForWrite(writeOffset), length);
         } else {
             write0(writeOffset, bytes, readOffset, length);
         }
         return this;
+    }
+
+    private void writeByteWise(@NonNegative long writeOffset, @NotNull RandomDataInput bytes, @NonNegative long readOffset, @NonNegative long length)
+            throws BufferUnderflowException, ClosedIllegalStateException {
+        for (long i = 0; i < length; i++)
+            writeByte(writeOffset + i, bytes.readByte(readOffset + i));
     }
 
     public void write0(@NonNegative long offsetInRDO, @NotNull RandomDataInput bytes, @NonNegative long offset, @NonNegative long length)

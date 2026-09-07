@@ -3345,9 +3345,12 @@ enum BytesInternal {
         long i = 0;
         long rp1 = b1.readPosition();
         long rp2 = b2.readPosition();
+        //! readLong(offset) is rejected by a ChunkedMappedBytes when the word straddles the chunk acquired for it, so a
+        //! word outside the current mapping ends the word loop and the byte loop compares the rest through readByte(offset),
+        //! which acquires the next chunk. MappedBytesReadAcrossMappingTest#equalBytesAcrossTheMappingEndCompares fails without this.
         for (; i < readRemaining - 7 &&
-                canReadBytesAt(b1, rp1 + i, 8) &&
-                canReadBytesAt(b2, rp2 + i, 8); i += 8) {
+                canReadWordAt(b1, rp1 + i) &&
+                canReadWordAt(b2, rp2 + i); i += 8) {
             long l1 = b1.readLong(rp1 + i);
             long l2 = b2.readLong(rp2 + i);
             if (l1 != l2)
@@ -3394,12 +3397,34 @@ enum BytesInternal {
         }
     }
 
+    /**
+     * @return whether {@code source}, if it is a {@link Bytes}, currently maps the whole range. Any other input keeps
+     * its existing handling: this is not a general range check. Does not acquire a mapping: acquire the chunk for
+     * {@code offset} first where needed.
+     */
+    //! Shared by the source-side copy sites (NativeBytesStore.write, VanillaBytes.optimisedWrite and write0, writeFully,
+    //! the unsafeRead defaults), which copied raw memory past a source's mapping.
+    //! Test: MappedBytesReadAcrossMappingTest#copyFromAZeroOverlapSourceAcrossItsMappingEnd.
+    public static boolean insideCurrentStore(final Object source, @NonNegative final long offset, @NonNegative final long length) {
+        return !(source instanceof Bytes) || ((Bytes<?>) source).bytesStore().inside(offset, length);
+    }
+
     public static void writeFully(@NotNull final RandomDataInput bytes,
                                   @NonNegative final long offset,
                                   @NonNegative final long length,
                                   @NotNull final StreamingDataOutput sdo)
             throws BufferUnderflowException, BufferOverflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
         long i = 0;
+
+        //! A source read across its chunk end is copied byte by byte: readLong(offset) is rejected for a straddling word,
+        //! readByte(offset) acquires chunks as it goes, and a range past the source's store fails there instead of being
+        //! read raw. MappedBytesReadAcrossMappingTest#copyFromAZeroOverlapSourceAcrossItsMappingEnd reaches this through
+        //! the copies; #copyPastTheEndOfASourceStoreIsRejected covers the over-read.
+        if (!insideCurrentStore(bytes, offset, length)) {
+            for (; i < length; i++)
+                sdo.rawWriteByte(bytes.readByte(offset + i));
+            return;
+        }
 
         if (bytes instanceof HasUncheckedRandomDataInput) {
             // Do boundary checking outside the inner loop
@@ -3618,6 +3643,12 @@ enum BytesInternal {
     private static boolean canReadBytesAt(
             final BytesStore<?, ?> bs, final long offset, final int length) {
         return bs.readLimit() - offset >= length;
+    }
+
+    //! Word loop of equalBytesAny: a readable word that is not inside the current mapping is left to the byte loop.
+    //! MappedBytesReadAcrossMappingTest#equalBytesAcrossTheMappingEndCompares fails without it.
+    private static boolean canReadWordAt(final BytesStore<?, ?> bs, final long offset) {
+        return canReadBytesAt(bs, offset, 8) && bs.bytesStore().inside(offset, 8);
     }
 
     public static String parse8bit(ByteStringParser bsp, StopCharTester stopCharTester)
