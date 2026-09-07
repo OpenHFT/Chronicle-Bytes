@@ -1,0 +1,171 @@
+= Chronicle Bytes Security Review
+:toc:
+:sectnums:
+:lang: en-GB
+:toclevels: 2
+:doctype: book
+:source-highlighter: rouge
+
+This document summarises the main security considerations for Chronicle Bytes.
+It complements the formal security requirements in `project-requirements.adoc` (`CB-NF-S-*`) and applies the ISO 27001 topics referenced in the architecture TODO files.
+
+== Scope and Threat Model
+
+Chronicle Bytes is a low-level byte-access library and typically runs in-process as a dependency of higher-level systems (for example Chronicle Wire, Chronicle Queue, Chronicle Map).
+It assumes callers run in a trusted environment and does not implement authentication or authorisation itself.
+
+The primary security risks are:
+
+* memory-safety issues (for example out-of-bounds access in off-heap or memory-mapped regions);
+* data corruption when multiple processes or threads share mapped files incorrectly;
+* misuse of powerful primitives such as `Unsafe` or elastic buffers leading to resource exhaustion.
+
+Chronicle Bytes *does not* provide:
+
+* transport-level encryption (for example TLS);
+* application-level access control;
+* input validation for application payloads.
+
+Those are the responsibility of callers and higher-level modules.
+
+== Input Validation and Untrusted Inputs
+
+Chronicle Bytes treats all data as opaque byte sequences.
+Typical sources of untrusted input in systems that depend on Bytes include:
+
+* network messages decoded by Chronicle Wire or custom protocols;
+* on-disk queue files and other persisted logs;
+* application-level payloads passed into APIs such as `writeUtf8`, `write` and related methods.
+
+Bytes does not attempt to validate the _business semantics_ of these payloads.
+Instead:
+
+* checked buffer operations validate their documented cursor or offset limits, but checking depends on the concrete implementation, operation and configuration;
+* low-level native stores, raw addresses and explicitly unchecked operations require callers to validate the complete access range and keep the allocation alive;
+* semantic validation (for example schema checks, authorisation, range validation) is the responsibility of higher-level modules, as documented in their own security guides.
+
+Validate untrusted lengths and offsets before allocating, copying or decoding. Check for negative values and arithmetic overflow; for a region of length `size`, validate `offset <= size` and `length <= size - offset` after checking both operands are non-negative.
+Size limits and growth behaviour are explained in xref:memory-management.adoc[Memory Management].
+
+== Secure Coding and Bounds Checking (CB-NF-S-001, CB-NF-S-003)
+
+There is no library-wide guarantee that invalid memory access produces a recoverable Java exception.
+
+* Checked `Bytes` operations, such as the sequential primitive reads and writes exercised by link:../../test/java/net/openhft/chronicle/bytes/DocumentationContractsTest.java[DocumentationContractsTest], reject accesses beyond their applicable limits with `BufferUnderflowException` or `BufferOverflowException`. These tested checks do not depend on Java assertions.
+* Explicitly unchecked implementations and `bytes.bounds.unchecked=true` bypass checks on affected paths. Disabling Java assertions is a separate setting; assertions also provide diagnostics on selected paths.
+* link:../java/net/openhft/chronicle/bytes/internal/NativeBytesStore.java[NativeBytesStore] primitive methods such as `readByte(offset)` and `writeByte(offset, value)` access native memory without validating the allocation bounds. A `BytesStore` reference is not evidence that access is checked.
+* Obtaining a raw address does not validate the width of every subsequent access or reserve the allocation. Callers must validate ranges, ownership, alignment and synchronisation. Invalid native access can corrupt memory or crash the JVM.
+
+The scope of `CB-NF-S-001` is the documented checked operations and configurations. Tests and static analysis provide evidence for particular paths, not proof that every memory access is checked. Unsafe native misuse tests require a separate process and must not risk the normal test JVM.
+
+Use of `sun.misc.Unsafe` and other native mechanisms is encapsulated in dedicated classes.
+The implementation is reviewed with `CB-NF-S-003` in mind to ensure only the minimum necessary surface is exposed and usage is documented in Javadoc and `.adoc` guides such as `memory-management.adoc`.
+
+When writing new code that touches off-heap or mapped memory:
+
+* prefer documented checked `Bytes` operations, verifying the concrete implementation and applicable limits;
+* avoid caching raw addresses unless strictly necessary for performance;
+* ensure any new native or `Unsafe` usage is justified, covered by tests and referenced from `project-requirements.adoc`.
+
+Ordinary Java array indexing uses JVM bounds checks. That does not establish bounds checking for every heap-backed store operation: paths using `Unsafe` or native helpers need their own range validation.
+Off-heap bounds and alignment considerations are discussed in `memory-management.adoc` and the corresponding `CB-NF-S-*` requirements.
+
+== Memory-Mapped Files and Sharing (CB-NF-S-002)
+
+Chronicle Bytes uses memory-mapped files for durable storage and inter-process communication via classes such as `MappedBytesStore` and `MappedFile`.
+Requirement `CB-NF-S-002` mandates appropriate default behaviour and documentation when files may be shared.
+
+Key points:
+
+* sharing the same mapped file between multiple processes is possible but requires careful coordination by higher-level libraries (for example Chronicle Queue) to avoid corruption;
+* file locking helpers (for example `ReentrantFileLock` in the `domestic` package) are used to avoid overlapping locks in a single JVM, but they do not enforce global cross-process discipline;
+* documentation must highlight safe sharing patterns, particularly when addressing rolling logs or queue files.
+
+When integrating Chronicle Bytes into systems that share files across processes or hosts:
+
+* ensure a single writer pattern for mutation of shared regions;
+* use OS-level file permissions appropriate to the deployment environment;
+* consider higher-level replication protocols that detect and reconcile inconsistent states rather than relying on the raw byte layer.
+
+== Resource Exhaustion and Elastic Buffers (CB-NF-S-004, CB-FN-003)
+
+For elastic native buffers, `realCapacity()` is the current allocation and increases on growth; `capacity()` is the maximum addressable capacity used by the native resize path as its ceiling (`CB-FN-003`, `CB-FN-102`). A small initial allocation does not impose a small maximum.
+`writeLimit()` constrains sequential writes, but is mutable and is not a global memory budget: explicit reservation of capacity and some offset operations have different limits.
+
+Mitigations:
+
+* validate message sizes against an application limit before allocation or growth;
+* where appropriate, use a fixed-size buffer or an explicitly bounded factory such as `Bytes.elasticByteBuffer(initialCapacity, maxCapacity)`, with `0 <= initialCapacity <= maxCapacity`; link:../../test/java/net/openhft/chronicle/bytes/DocumentationContractsTest.java[DocumentationContractsTest] separately exercises growth and this maximum;
+* budget total concurrent allocations, pooled buffers and retained views. During native resizing the old and new stores coexist, and retained views can keep the old allocation alive;
+* release each owned reservation when finished. Pooling can retain memory and does not itself cap overall usage.
+
+When designing new features:
+
+* choose and document application size limits independently of initial capacity;
+* reject over-limit requests before allocating, and test rejection with small bounded buffers;
+* account for `OutOfMemoryError` even below a buffer's maximum: the ceiling does not guarantee that memory is available.
+
+== Access Control and Privileged Operations
+
+Chronicle Bytes does not implement authentication or authorisation mechanisms.
+Code runs with the privileges of the embedding JVM and relies on:
+
+* file-system permissions and operating-system controls for access to mapped files and temporary directories;
+* JVM flags and security policies when native features are enabled through Chronicle Core.
+
+Operations that can be considered privileged at the byte layer include:
+
+* creation and resizing of memory-mapped files via `MappedFile`/`MappedBytesStore`;
+* allocation of large off-heap buffers;
+* enabling unsafe memory access through Chronicle Core abstractions.
+
+These operations should only be available to trusted application code.
+Operational run-books and deployment descriptors should enforce least-privilege principles (for example service accounts with restricted file-system access and controlled JVM options).
+
+== Cryptography and Hashing
+
+Chronicle Bytes offers several utilities that touch on cryptographic concerns:
+
+* `BytesStore` exposes methods that accept a JCE `Cipher` instance to encrypt or decrypt the contents of a bytes store in-place or into another store.
+  The choice of algorithm, mode, padding and key material is entirely delegated to the caller.
+* Non-cryptographic hashing implementations such as `XxHash` and `VanillaBytesStoreHash` are provided for fast checksums and map keys but are not suitable for security-sensitive integrity protection.
+
+Chronicle Bytes does not embed keys or hard-coded cipher parameters.
+Key generation, storage and rotation must be managed by the calling application or platform using standard key-management solutions.
+TLS and higher-level encryption are provided by networking modules (for example Chronicle Network) rather than by Chronicle Bytes itself.
+
+== Network Security
+
+Chronicle Bytes does not open sockets or manage network connections; it operates as an in-process byte layer.
+Network communication security (encryption, endpoint authentication, protocol selection and configuration) is handled by components such as Chronicle Network or external frameworks that sit above the byte layer.
+This separation ensures that transport-level controls can evolve without changing the core byte-handling APIs.
+
+== Static Analysis, Testing and Tooling
+
+Security review should use both static and dynamic checks:
+
+* inspect the effective build and reports to establish which static analysis tools actually ran;
+* run targeted unit and integration tests for checked boundaries, concurrent access and failure paths;
+* record dependency scanner results, including the resolved dependency versions and scan date.
+
+When adding new dependencies or changing low-level algorithms:
+
+* prefer well-maintained libraries with established security practices;
+* avoid introducing ad-hoc cryptographic code;
+* update documentation if threat assumptions or mitigations change.
+
+This guide is not a dated vulnerability scan or an attestation of CI coverage. Record findings against the relevant `CB-NF-S-*` requirements and release notes; see the evidence status in xref:testing-strategy.adoc[Testing Strategy].
+
+Dedicated fuzz testing and penetration testing are typically performed at the system level rather than against this library in isolation.
+Nevertheless, adding targeted fuzz tests around encoding, decoding and bulk copy routines is recommended for high-assurance deployments and may be introduced alongside future feature work.
+
+== Summary and Future Work
+
+Existing documentation (for example `project-requirements.adoc`, `memory-management.adoc`, `architecture-overview.adoc`) already captures most security obligations through `CB-NF-S-*` and related requirements.
+This `security-review.adoc` consolidates those concerns into a single view to support ISO 27001 style reviews.
+
+Future improvements may include:
+
+* a more formal threat model for deployments that expose Bytes-backed storage to untrusted input;
+* additional fuzz testing around encoding, decoding and bulk copy routines;
+* clearer integration guidance for modules that build higher-level security guarantees on top of Chronicle Bytes.

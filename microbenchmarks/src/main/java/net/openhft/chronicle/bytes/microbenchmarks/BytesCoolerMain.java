@@ -11,8 +11,8 @@ import org.jetbrains.annotations.NotNull;
 public class BytesCoolerMain {
 
     public static void main(String[] args) {
-        Bytes small = Bytes.allocateDirect(23);
-        Bytes big = Bytes.allocateDirect(400);
+        Bytes<?> small = Bytes.allocateDirect(23);
+        Bytes<?> big = Bytes.allocateDirect(400);
 
         System.out.println("WITH COOLERS ACROSS MEMORY");
         new CoolerTester(

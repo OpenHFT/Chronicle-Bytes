@@ -10,7 +10,7 @@ This guide shows practical patterns for choosing wire formats, serializing objec
 == 1  What Is Chronicle Wire?
 
 *Chronicle Wire* is a high-performance serialization framework meticulously layered directly on
-`Chronicle Bytes` instances <<CB-FN-008>>.
+`Chronicle Bytes` instances xref:project-requirements.adoc#CB-FN-008[CB-FN-008].
 `Bytes` provides the versatile, low-level memory abstraction (on-heap, off-heap, or memory-mapped files), acting as the "transport medium" for the data.
 Chronicle Wire then intelligently formats Java objects, data types, or method calls into a stream of bytes onto this `Bytes` buffer, and reconstructs them upon reading.
 
@@ -104,7 +104,7 @@ Consider these factors when selecting a `WireType`:
 |Schema Flexibility Needed |`BINARY_LIGHT`, `YAML_ONLY`, `JSON`, `TEXT` are more tolerant of additive changes than `RAW`.
 |===
 
-Performance example for serializing/deserializing a simple 6-field object (<<CB-NF-P-001>> baseline, 3.2 GHz x86-64):
+Performance example for serializing/deserializing a simple 6-field object (xref:project-requirements.adoc#CB-NF-P-001[CB-NF-P-001] baseline, 3.2 GHz x86-64):
 
 * YAML: ~0.25 - 0.45 µs mean (depending on complexity)
 * JSON: ~0.20 - 0.35 µs mean

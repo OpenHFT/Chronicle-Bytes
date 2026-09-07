@@ -1,22 +1,47 @@
 = Chronicle Bytes Microbenchmarks
+:toc:
+:sectnums:
 :lang: en-GB
+:source-highlighter: rouge
 
 This module contains JMH benchmarks that measure the throughput of common
-operations such as primitive writes, string parsing and CAS updates.
+operations such as primitive writes, string parsing, and CAS updates.
 
 == Purpose
 The benchmarks help detect performance regressions and guide optimisation work.
 
-== How to Run
-From this directory execute:
+== How to run
+Use a JDK (the command below is for JDK 17 or 21) and Maven. From the Chronicle-Bytes repository root, first install the library being benchmarked and then build the separate JMH project:
 
 [source,bash]
 ----
-mvn -q clean verify
+mvn -q -DskipTests install
+bytes_version=$(mvn -q help:evaluate -Dexpression=project.version -DforceStdout)
+mvn -q -f microbenchmarks/pom.xml -Dbytes.version="$bytes_version" clean verify
 ----
 
-Results are printed on the console after the JMH harness completes.
+The explicit `bytes.version` selects this checkout's library version instead of the version currently selected by the snapshot Chronicle BOM. Reading `project.version` avoids hard-coding a version that becomes stale after a release. The root test suite should be run separately; skipping tests here only avoids repeating it while preparing a benchmark.
+The benchmark build generates JMH infrastructure and `microbenchmarks/target/benchmarks.jar`; it does not execute JMH by default.
+The module explicitly enables annotation processing because the shared parent disables it; without the JMH processor the jar has no generated benchmark metadata.
 
-== Adding Benchmarks
+Still from the repository root, run one benchmark as a short harness smoke test:
+
+[source,bash]
+----
+java --add-exports=java.base/jdk.internal.ref=ALL-UNNAMED \
+     --add-exports=java.base/sun.nio.ch=ALL-UNNAMED \
+     --add-opens=java.base/java.lang=ALL-UNNAMED \
+     --add-opens=java.base/java.lang.reflect=ALL-UNNAMED \
+     --add-opens=java.base/java.io=ALL-UNNAMED \
+     --add-opens=java.base/java.nio=ALL-UNNAMED \
+     -Djvm.resource.tracing=false \
+     -jar microbenchmarks/target/benchmarks.jar \
+     'AppendDoubleBenchmark.appendDouble$' -f 1 -wi 1 -i 1 -w 100ms -r 100ms -foe true
+----
+
+JMH prints the forked JVM options and results. The short run checks discovery and execution only; it is not evidence for a performance target. For measurements, remove the smoke-test timing overrides and record the workload, hardware/JDK, resolved dependencies and full report.
+See https://github.com/openjdk/jmh[JMH's build and execution guidance].
+
+== Adding benchmarks
 Create a new class under `src/main/java` and follow the existing patterns.
 Each benchmark should document what it measures and keep setup code minimal.

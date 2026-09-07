@@ -56,6 +56,13 @@ AppendDoubleBenchmark.appendFloatUnchecked       avgt    5   31.680 ±  0.233  n
 AppendDoubleBenchmark.appendFloatUncheckedHeap   avgt    5   52.645 ±  0.512  ns/op
 */
 
+/**
+ * Compares checked and unchecked floating-point appends with JDK formatting.
+ * Build the library and this separate JMH project before running the generated
+ * {@code microbenchmarks/target/benchmarks.jar}; select {@code AppendDoubleBenchmark.appendDouble$}.
+ * The complete commands in {@code microbenchmarks/README.adoc} select the checkout's current
+ * version and include the required JDK 17/21 JVM arguments and harness smoke-test settings.
+ */
 @Warmup(iterations = 3, time = 1)
 @Measurement(iterations = 5, time = 1)
 @Fork(1)

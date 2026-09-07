@@ -37,9 +37,9 @@ implementation 'net.openhft:chronicle-bytes:${chronicle.bytes.version}' // Use t
 Understanding these interfaces is key to using Chronicle Bytes effectively:
 
 * `BytesStore<B, U>`: Represents the underlying, typically immutable, block of memory.
-Implementations exist for on-heap (`byte[]`), native off-heap (direct memory), and memory-mapped file regions <<CB-FN-002>>.
+Implementations exist for on-heap (`byte[]`), native off-heap (direct memory), and memory-mapped file regions xref:project-requirements.adoc#CB-FN-002[CB-FN-002].
 * `Bytes<U>`: A mutable view over a `BytesStore` with independent read and write cursors (positions) and limits.
-It provides a rich API for reading and writing primitive types, strings, and other data structures <<CB-FN-001>>.
+It provides a rich API for reading and writing primitive types, strings, and other data structures xref:project-requirements.adoc#CB-FN-001[CB-FN-001].
 Most daily interactions happen via a `Bytes` instance.
 * `StreamingDataInput<S extends StreamingDataInput<S>>` / `StreamingDataOutput<S extends StreamingDataOutput<S>>`:
 Interfaces for cursor-driven sequential read/write operations, implemented by `Bytes`.
@@ -48,14 +48,14 @@ Interfaces for cursor-driven sequential read/write operations, implemented by `B
 == 2  Creating `Bytes` Instances
 
 Chronicle Bytes offers flexibility in how buffers are created and managed.
-Always ensure off-heap `Bytes` instances are released to prevent memory leaks <<CB-NF-O-001>>.
+Always ensure off-heap `Bytes` instances are released to prevent memory leaks xref:project-requirements.adoc#CB-NF-O-001[CB-NF-O-001].
 Using try-with-resources is highly recommended for `Bytes` instances that implement `java.io.Closeable`.
 
 === 2.1  Off-Heap Buffers (Direct Memory)
 
 These buffers are allocated outside the Java heap, reducing GC pressure.
 
-.Elastic Off-Heap Buffer <<CB-FN-003>>
+.Elastic Off-Heap Buffer xref:project-requirements.adoc#CB-FN-003[CB-FN-003]
 [source,java]
 ----
 // Initial capacity 64 bytes, can grow as needed
@@ -241,12 +241,12 @@ try (Bytes<Void> bytes = Bytes.allocateElasticDirect(16)) {
 
 === 4.2  Strings
 
-Chronicle Bytes supports various string encodings and formats <<CB-FN-009>>.
+Chronicle Bytes supports various string encodings and formats xref:project-requirements.adoc#CB-FN-009[CB-FN-009].
 UTF-8 is common.
 `readUtf8()`/`writeUtf8()` use a stop-bit encoded length prefix.
 `read8bit()`/`write8bit()` handle ISO-8859-1 / US-ASCII like strings.
 When consuming untrusted data, prefer `readUtf8Limited()` to cap string size.
-Inputs that exceed the remaining readable bytes trigger `BufferUnderflowException` <<CB-NF-S-001>>.
+Inputs that exceed the remaining readable bytes trigger `BufferUnderflowException` xref:project-requirements.adoc#CB-NF-S-001[CB-NF-S-001].
 
 .String I/O
 [source,java]
@@ -506,7 +506,7 @@ If you need to enforce specific alignment for a block of data (e.g., for SIMD op
 . Create a slice (`Bytes.subBytes()`) from that aligned offset.
 The standard read/write methods for primitives (`readInt`, `readLong`, etc.) on `Bytes` should handle any necessary alignment for correctness.
 Performance implications of unaligned access are platform-dependent.
-<<CB-FN-012>> calls for correct handling.
+xref:project-requirements.adoc#CB-FN-012[CB-FN-012] calls for correct handling.
 
 == 7  Common Pitfalls and Best Practices ("Gotchas")
 
@@ -516,7 +516,7 @@ This can cause a latency spike.
 Pre-size elastic buffers generously (`Bytes.allocateElasticDirect(expectedCapacity)`) if initial write latency is critical.
 * **Leaked Off-Heap Buffers**: Forgetting to call `releaseLast()` (or `close()` on `Closeable` `Bytes`) on off-heap `Bytes` instances leads to native memory leaks.
 This memory is *not* reclaimed by the Java GC.
-Use try-with-resources diligently <<CB-NF-O-003>>.
+Use try-with-resources diligently xref:project-requirements.adoc#CB-NF-O-003[CB-NF-O-003].
 * **`Bytes.wrapForRead(ByteBuffer)` Lifecycle**: When wrapping a `java.nio.ByteBuffer`, the `Bytes` instance shares the lifecycle of the original `ByteBuffer`.
 Do not release the `Bytes` instance in a way that expects to free the underlying direct `ByteBuffer` if it's managed elsewhere. `releaseLast()` on such a wrapper typically does nothing to the `ByteBuffer` itself.
 * **Thread Safety**: `Bytes` instances are **not** generally thread-safe for concurrent modification of their state (cursors, content) by multiple threads.

@@ -14,7 +14,7 @@ public class AppendLongCoolerMain {
     static long[] longs = {Integer.MIN_VALUE, -128, 0, 1, 11, 111, Integer.MAX_VALUE, Long.MAX_VALUE};
 
     public static void main(String[] args) {
-        Bytes bytes = Bytes.allocateElasticDirect(32);
+        Bytes<?> bytes = Bytes.allocateElasticDirect(32);
 
         new CoolerTester(
                 CpuCoolers.PAUSE1,

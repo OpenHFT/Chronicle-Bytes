@@ -1,80 +1,90 @@
 = Chronicle Bytes Memory Management
-:doctype: book
 :toc:
-:toclevels: 3
 :sectnums:
 :lang: en-GB
+:toclevels: 3
+:doctype: book
+:source-highlighter: rouge
 
 Chronicle Bytes allocates and manages memory outside the Java heap to minimise
-GC pauses. This guide explains how that memory is handled and how to avoid
+GC pauses.
+This guide explains how that memory is handled and how to avoid
 leaks or stalls when working with off-heap buffers.
 
-== 1  Reference Counting
+== Reference Counting
 
-All off-heap stores implement `ReferenceCounted`. Each call to `reserve()`
-increments the count. `release()` decrements it and `releaseLast()` frees the
-resource when the count reaches zero <<CB-NF-O-001>>.
+Off-heap stores implement `ReferenceCounted`. A reservation belongs to a `ReferenceOwner`; copying a Java reference does not acquire another reservation.
+`reserve(owner)` acquires a reservation and `release(owner)` balances it. The final release triggers resource cleanup.
+`releaseLast(owner)` additionally checks that no other reservations remain; the no-argument form uses `ReferenceOwner.INIT`.
+Use it only when that owner is expected to be the last owner of that object.
 
-Common pitfalls:
+Normal `AbstractBytes` views reserve their backing store as part of construction.
+The view and the store have separate reference counts: releasing the view's last reservation releases the view's reservation on its store, which may still have other owners.
+Correctly releasing a parent buffer or another store owner's reservation therefore leaves a retained view usable.
+Release every owned reservation exactly once; forgotten releases leak resources, and excess releases violate ownership.
 
-* Forgetting to call `release()` leads to native memory leaks.
-* Calling `release()` too many times throws `IllegalStateException`.
+.Acquisitions and their matching releases
+[cols="2,3",options="header"]
+|===
+|Acquisition |Matching action
+|`Bytes.allocateElasticDirect(...)` |Release the returned buffer's initial reservation in a `finally` block, normally with `releaseLast()` if it has no other owners.
+|`parent.bytesForRead()` returning a new retained view |Release that view's initial reservation when finished. It manages its own reservation on the backing store.
+|`bytes.bytesStore()` |Borrowed reference; no new reservation to release. Keep the owning buffer alive and account for replacement on resize.
+|`store.reserve(owner)` |`store.release(owner)` when finished, even if other owners remain.
+|`MappedFile.acquireByteStore(owner, position)` |Release the acquired store with `store.release(owner)`. Also close the `MappedFile` that the caller opened when finished.
+|===
 
-Use try-with-resources around `Closeable` `Bytes` objects or manage ownership via
-`ReferenceOwner` to avoid mistakes. `ReferenceCountedTracer` can help debug
-leaks by recording where a store was reserved.
+link:../../test/java/net/openhft/chronicle/bytes/DocumentationContractsTest.java[DocumentationContractsTest] provides compact executable examples: `viewSurvivesParentRelease`, `parentSurvivesViewRelease` and `viewSurvivesStoreOwnerRelease`.
+These check the surviving owner's data and the final store reference count.
 
-== 2  Native Memory
+== Native Memory
 
-`NativeBytesStore` allocates direct memory using `Unsafe`. `releaseLast()`
-returns the memory to the OS. For mapped files `MappedBytesStore` delegates to
-`MappedFile` which may unmap via an internal `Unmapper` or the JDK
-`Cleaner`. Failure to release prevents the memory from being reclaimed.
+`NativeBytesStore` allocates native memory using Chronicle Core's memory facilities.
+The final store release triggers freeing that allocation. Mapped stores instead unmap their mapped region; cleanup may be delegated to a background resource releaser.
+Raw addresses do not reserve memory and become invalid after cleanup. See xref:security-review.adoc[Security Review] for checking and range-validation responsibilities.
 
-== 3  Memory-Mapped Files
+== Memory-Mapped Files
 
-`MappedFile` maps a file region into memory. Acquire a `MappedBytes` view to
-read or write. When finished, call `releaseLast()` on both the `MappedBytes` and
-its store. Chunked mappings use fixed-size regions, while single mappings cover
-an entire file. Synchronisation with the filesystem is controlled via
+`MappedBytes.mappedBytes(...)` returns a closeable buffer that manages its acquired mappings. Use try-with-resources on that `MappedBytes`; obtaining its store with `bytesStore()` does not transfer ownership or require a separate store release.
+If instead the caller opens a `MappedFile` and explicitly calls `acquireByteStore(owner, position)`, that acquisition must be balanced with `store.release(owner)` in a `finally` block, followed by closing the caller-owned `MappedFile` when finished.
+Chunked mappings use fixed-size regions, while single mappings cover
+an entire file.
+Synchronisation with the filesystem is controlled via
 `SyncMode`.
 
-== 4  On-Heap Stores
+== On-Heap Stores
 
-`HeapBytesStore` wraps a `byte[]`. The JVM manages the array but the surrounding
-`Bytes` object may still need explicit release if it holds other off-heap
-resources.
+`HeapBytesStore` wraps a `byte[]`.
+The JVM manages the array, but callers should still balance the surrounding buffer's reservations.
 
-== 5  Resource Tracing
+== Resource Tracing
 
-Enable `Jvm.isResourceTracing()` during testing to record stack traces for
-allocations. This helps locate leaks if `releaseLast()` is not called.
+Enable `-Djvm.resource.tracing=true` during testing to record allocation and reservation diagnostics; `Jvm.isResourceTracing()` queries this setting.
+`ReferenceCountedTracer.createdHere()` can report an allocation stack when tracing is enabled. Do not assume every exception includes that stack; the native growth-limit exception reports the attempted size and capacity.
 
-`AbstractReferenceCounted` implements `ReferenceCountedTracer`, so classes such
-as `NativeBytes` can call `createdHere()` to recover the stack trace of the
-allocation site. Chronicle Bytes feeds that trace into diagnostics like
-`DecoratedBufferOverflowException` in `NativeBytes.newDBOE(...)`, which means a
-resizing failure reports both the write that triggered it and where the buffer
-originated. This is invaluable when multiple components reuse elastic buffers
-and you need to pinpoint which call chain produced a leaked or overgrown
-instance. The richer exception context fulfils the diagnostic requirement in
-<<CB-NF-O-006>>. When tracing is disabled `createdHere()` returns `null`, so
-Chronicle Bytes automatically falls back to the standard constructor to avoid
-raising a misleading `NullPointerException`.
+== Elastic Buffers
 
-== 6  Elastic Buffers
+For elastic native buffers, `realCapacity()` is the current allocation and can increase; `capacity()` is the maximum addressable capacity used by the resize path as its ceiling.
+`writeLimit()` is a mutable write-position limit, not a total allocation budget.
+For an explicit per-buffer maximum, use a fixed-size buffer or, for example, `Bytes.elasticByteBuffer(initialCapacity, maxCapacity)`, with `0 <= initialCapacity <= maxCapacity`.
+Validate application message sizes before allocation and budget all live buffers separately. Pre-sizing can reduce resize costs, but a small initial capacity is not a resource-exhaustion safeguard.
 
-Elastic `Bytes` can grow when more space is required. For native buffers a new
-`NativeBytesStore` is allocated and the existing data copied. On-heap elastic
-buffers resize the underlying array similarly. Pre-sizing reduces the overhead of
-the first expansion.
+When native growth replaces a store, it copies the contents, switches the parent to the new store and releases the parent's reservation on the old store.
+An existing retained view stays on the old store: it survives, but subsequent writes to the parent's new store do not appear in it, and vice versa.
+Both allocations coexist during copying, and views can retain the old allocation afterwards.
+The `viewKeepsOldStoreAfterNativeGrowth` contract example demonstrates sharing before growth and independent content afterwards.
+This describes native store replacement; do not assume every heap or mapped implementation has the same resize behaviour.
 
-== 7  Best Practices
+== Best Practices
 
-* Always release native or mapped buffers in a `finally` block or via
-  try-with-resources.
+* Release owned reservations in a `finally` block. Use try-with-resources for types that implement `Closeable`, such as `MappedBytes`; the general `Bytes` interface does not.
 * Keep references to stores short-lived when possible to lower the risk of leaks.
 * Use atomic operations on the store for thread-safe updates rather than sharing
   a single mutable `Bytes` instance.
 * Monitor application logs for warnings about unreleased stores when resource
   tracing is enabled.
+
+For a wider architectural context on how these practices are applied in higher-level libraries, see:
+
+* https://github.com/OpenHFT/Chronicle-Queue/blob/develop/README.adoc[Chronicle Queue Overview]
+* https://github.com/OpenHFT/Chronicle-Wire/blob/develop/src/main/docs/system-architecture.adoc[Chronicle Wire Architecture]

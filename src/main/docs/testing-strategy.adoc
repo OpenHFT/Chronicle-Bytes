@@ -1,0 +1,108 @@
+= Chronicle Bytes Testing Strategy
+:toc:
+:sectnums:
+:lang: en-GB
+:toclevels: 2
+:doctype: book
+:source-highlighter: rouge
+
+This document outlines the testing approach for Chronicle Bytes and links tests to the Nine-Box requirements defined in `project-requirements.adoc`.
+It supports the ISO 9001 design verification checklist and helps reviewers assess coverage for key behaviours.
+
+== Test Layers
+
+Chronicle Bytes uses several complementary test layers:
+
+* unit tests in `src/test/java/net/openhft/chronicle/bytes` for core API contracts, bounds checking, encoding and pooling behaviour;
+* integration tests that exercise combinations of `Bytes`/`BytesStore` implementations (on-heap, native, memory-mapped) and interactions with other Chronicle modules where appropriate;
+* micro-benchmarks and JMH-based harnesses in the `microbenchmarks` module for performance-related requirements (`CB-NF-P-*`);
+* exploratory and regression tests that capture previously reported bugs and edge cases.
+
+Where practical, test classes and methods reference requirement IDs (for example `CB-FN-001`, `CB-NF-S-001`) in comments or Javadoc to support traceability.
+
+== Unit Testing Approach
+
+Unit tests focus on:
+
+* cursor semantics: movement of `readPosition`, `writePosition`, `limit` and error conditions when attempting to read or write beyond bounds (`CB-FN-001`, `CB-NF-S-001`);
+* storage variants: behaviour of `BytesStore` implementations over `byte[]`, direct native memory and memory-mapped files (`CB-FN-002`);
+* functional utilities: stop-bit encoding/decoding, search and comparison helpers, hex dump output (`CB-FN-005` .. `CB-FN-007`, `CB-FN-013`);
+* pooling and lifecycle: acquisition, reuse and release semantics for `BytesPool` and reference-counted resources (`CB-FN-014`, `CB-NF-O-001`).
+
+Tests are written to avoid non-deterministic timing assumptions and to keep allocations low, reflecting the performance-sensitive nature of the library.
+
+== Integration and Compatibility Tests
+
+Integration and compatibility validation should cover:
+
+* combined usage of `Bytes`/`BytesStore` with Chronicle Wire and other modules where appropriate (`CB-FN-008`);
+* use of memory-mapped files across simulated process boundaries, including file locking helpers from the `domestic` package (`CB-NF-S-002`);
+* behaviour under different JVMs and operating systems, aligned with compatibility requirements (`CB-NF-MP-*`).
+
+Where possible, integration tests reuse production configuration defaults so that changes in settings (for example system properties) are exercised in CI.
+
+== Performance and Benchmarking Strategy
+
+Performance-related requirements (`CB-NF-P-*`) are targets to assess using:
+
+* JMH micro-benchmarks targeting serialisation/deserialisation latency, bulk copy throughput and comparison performance;
+* scenario-style benchmarks in the `microbenchmarks` module that simulate realistic workloads such as queue appending, off-heap updates or encoding-heavy paths.
+
+Record benchmark configurations (JVM flags, hardware, thread pinning, payload sizes), the exact command, resolved artefacts and the result report so that measurements can be assessed and compared.
+
+The existence of a benchmark or a requirement does not establish a passing measurement or an enforced release gate. Link the actual job and report before labelling a target verified.
+
+[[evidence-status]]
+== Evidence Status
+
+Implemented means there is a scoped implementation or executable contract example. Verified additionally requires a recorded passing run and configuration. A target has no such claim; deferred work has been explicitly postponed. Requirements without a specific evidence entry remain unverified targets.
+
+[cols="2,2,4",options="header"]
+|===
+|Requirement |Status |Evidence and scope
+|CB-FN-003, CB-NF-S-004 |Implemented; explicit per-buffer maximum |link:../../test/java/net/openhft/chronicle/bytes/DocumentationContractsTest.java[DocumentationContractsTest]: `nativeAllocationGrowsBeyondInitialRealCapacity`, `explicitMaximumRejectsGrowth` and `writeLimitIsNotAnAllocationBudget`. Uses small allocations, not resource exhaustion.
+|CB-FN-006, CB-NF-O-001 |Implemented for retained native views |The same class checks both parent/view release orders, releasing a store owner's reservation, and an existing view across native store replacement. This does not assert identical resize semantics for every storage backend.
+|CB-NF-S-001 |Implemented for tested checked paths |`checkedHeapBoundaries` and `checkedNativeBoundaries` reject sequential primitive accesses beyond the applicable limits with `bytes.bounds.unchecked=false`. Run with assertions enabled and disabled. No invalid raw native addresses are accessed.
+|Guarded primitive format |Implemented; debugging representation |`guardedPrimitiveChangesRepresentation` compares a four-byte ordinary integer with a five-byte guarded integer and its marker.
+|Decimal example |Executable smoke test |`DocumentationExamplesTest` compiles the Java block from `decimal-rendering.adoc` itself and checks positive and negative output.
+|CB-NF-P-001 .. CB-NF-P-009 |Targets; no qualifying measurement supplied here |xref:../../../microbenchmarks/README.adoc[Benchmark instructions] distinguish a harness smoke run from performance evidence. Supply workload, hardware/JDK, command and report before claiming a target is met.
+|CB-NF-MP-001, CB-NF-MP-004 |Requires CI evidence for each platform/JDK |A local successful build does not establish the Java/OS/architecture matrix or explain historical failed jobs.
+|CB-NF-O-002, CB-TEST-001 .. CB-TEST-004 |Unverified targets |This document supplies no `BytesMetrics` JMX implementation evidence, 90% coverage report, 12-hour soak result or enforced benchmark time budget. Inspect the effective POM and actual reports; configured thresholds may differ from targets.
+|===
+
+== Code Review and Regression Handling
+
+Design verification requires evidence that:
+
+* new features and bug fixes come with corresponding tests or benchmarks;
+* regressions are captured by durable tests where feasible;
+* test names or comments reference the relevant `CB-*` identifiers or issue references.
+
+During code review:
+
+* reviewers confirm that riskier changes (for example new `Unsafe` usage, modified pooling behaviour) include targeted tests and, where appropriate, updated documentation;
+* reviewers consider whether additional negative tests (for example invalid inputs, concurrent access) are needed to cover the intended behaviour.
+
+== Running the Test Suite
+
+From the repository root, run:
+
+[source,bash]
+----
+mvn -q clean verify
+----
+
+This builds the root project and runs the tests and checks bound in the effective POM. The microbenchmarks directory is a separate Maven project; it is not built by this command. Profiles and parent versions determine which additional checks run.
+
+For the documented contracts, from the repository root:
+
+[source,bash]
+----
+mvn -q -Dtest=DocumentationContractsTest,DocumentationExamplesTest -Ddocs.expectedAssertions=true test
+mvn -q -Dtest=DocumentationContractsTest -DsurefireArgLine=-da -Ddocs.expectedAssertions=false test
+----
+
+The second invocation passes `-da` through this project's `surefireArgLine` property, preserving its required JVM arguments; the contract test checks the actual assertion state of `AbstractBytes`. Inspect the effective POM if changing the test configuration. Keep `bytes.bounds.unchecked=false` for these runs.
+The decimal smoke test requires a JDK with `javac`. The tests do not establish blanket memory safety or replace the required CI matrix.
+
+With Ruby and the Asciidoctor gem installed, run `ruby scripts/check-docs.rb` from the repository root. It checks rendered local links, images and anchors in the README, main guides and benchmark README, then writes browsable HTML and referenced assets under `target/docs`. Inspect `target/docs/README.html` and the affected guides. External URLs and Mermaid diagrams need separate review; `opts=novalidate` does not exempt a link from this check or make a Java example executable.

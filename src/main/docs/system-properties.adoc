@@ -1,0 +1,28 @@
+= Chronicle Bytes System Properties
+:toc:
+:sectnums:
+:lang: en-GB
+:source-highlighter: rouge
+
+== System Properties
+
+Below, a number of relevant system properties are listed.
+
+NOTE: All boolean properties below are read using `net.openhft.chronicle.core.Jvm.getBoolean(String)`.
+A property is considered enabled if its value is empty (for example `-Dflag`) or set to `true`/`yes`.
+
+.System properties
+[cols="2a,1,3a,2a", options="header"]
+|===
+| Property Key | Default | Description | Java Variable Name (Type)
+| `bytes.guarded` | `false` | Selects link:../java/net/openhft/chronicle/bytes/GuardedNativeBytes.java[GuardedNativeBytes] for affected native factories as a debugging aid. Affected primitive writes add type markers which matching reads expect, changing the representation, offsets and encoded size. Guarded and ordinary encodings are not interchangeable. Adds considerable time and space overhead; the wrapper is not intended for production. | `BYTES_GUARDED` (boolean)
+| `bytes.bounds.unchecked` | `false` | Bypasses bounds checks on affected paths. Callers must validate ranges themselves; invalid native access may corrupt memory or crash the JVM. This is separate from Java assertion settings and does not describe every implementation's checking. | `BYTES_BOUNDS_UNCHECKED` (boolean)
+| `trace.mapped.bytes` | `false` | Emits trace information about mapped files and reference counts. | `TRACE` (boolean)
+| `mappedFile.retain` | `false` | Keeps a `MappedFile` reservation on acquired chunks until that file is closed, delaying their cleanup. | `RETAIN` (boolean)
+| `user.name` | JVM user name; `unknown` if absent | User name used in the default timestamp filename. | `USER_NAME` (String)
+| `timestamp.dir` | `OS.TMP` | Directory used for timestamp files. | `TIME_STAMP_DIR` (String)
+| `timestamp.path` | Absolute path to `.time-stamp.<user.name>.dat` under `timestamp.dir` | Overrides the timestamp path used by `BytesUtil`; this does not configure every time-provider implementation. | `TIME_STAMP_PATH` (String)
+| `bytes.max-array-len` | `16777216` | Maximum element count on array-reading paths that use `BytesUtil.checkArrayLength`. Not a global allocation budget. | `MAX_ARRAY_LEN` (int)
+|===
+
+For example, an ordinary native `writeInt(42)` advances the write position by four bytes. The guarded equivalent writes an `INT_T` marker followed by the four-byte value, advancing by five bytes; its `readInt()` consumes and checks that marker. The `guardedPrimitiveChangesRepresentation` example in link:../../test/java/net/openhft/chronicle/bytes/DocumentationContractsTest.java[DocumentationContractsTest] compares the two representations without changing the process-wide factory setting.

@@ -103,7 +103,7 @@ For `Bytes` instances that implement `java.io.Closeable` (most off-heap ones do)
 
 . **What happens if I forget to `releaseLast()` an off-heap `Bytes` instance?** The native memory will leak, at least temporarily.
 Chronicle Bytes often registers a `java.lang.ref.Cleaner` (or uses a finalizer in older versions) that attempts to free the native memory when the Java `Bytes` wrapper object is garbage collected.
-A warning message (including the allocation stack trace) is typically logged to SLF4J <<CB-NF-O-003>>.
+A warning message (including the allocation stack trace) is typically logged to SLF4J xref:project-requirements.adoc#CB-NF-O-003[CB-NF-O-003].
 However, relying on this is bad practice as GC is non-deterministic, and your application's memory footprint can grow excessively before cleanup occurs.
 
 . **Can I share one `Bytes` instance (or its underlying data) across processes?** Yes, this is a primary use case for `Bytes` backed by memory-mapped files (`MappedBytesStore`).

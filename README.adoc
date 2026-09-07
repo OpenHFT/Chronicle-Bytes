@@ -32,7 +32,9 @@ The API offers:
 * Elastic ByteBuffer wrappers that resize as needed.
 * Direct parsing and writing of text to off-heap bytes.
 
-A number of relevant system properties are listed in link:docs/systemProperties.adoc[systemProperties.adoc].
+A number of relevant system properties are listed in xref:src/main/docs/system-properties.adoc[System Properties].
+For safety and ownership guidance, see xref:src/main/docs/security-review.adoc[Security Review] and xref:src/main/docs/memory-management.adoc[Memory Management].
+The xref:src/main/docs/testing-strategy.adoc#evidence-status[evidence table] distinguishes tested contracts from requirements and performance targets.
 
 === Supported Data Types
 
@@ -1179,9 +1181,9 @@ Memory mapped files are commonly used by Chronicle Map and Chronicle Queue.
 When utilizing IntelliJ IDEA, you can configure a custom renderer to view the bytes.
 Please refer to the images below for guidance on setting this up:
 
-image::/docs/images/customize-data-views-menu.jpg[]
+image::docs/images/customize-data-views-menu.jpg[]
 
-image::/docs/images/customize-data-views.png[]
+image::docs/images/customize-data-views.png[]
 
 === Note on Code Coverage
 

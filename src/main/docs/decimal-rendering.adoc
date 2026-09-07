@@ -1,8 +1,10 @@
 = Decimal Rendering Strategies
-:doctype: book
 :toc:
-:toclevels: 2
+:sectnums:
 :lang: en-GB
+:toclevels: 2
+:doctype: book
+:source-highlighter: rouge
 
 This page summarises the options in the `net.openhft.chronicle.bytes.render` package.
 It accompanies the Javadoc and shows how to render floating point values into
@@ -23,18 +25,51 @@ textual form suitable for Chronicle's wire formats.
 
 == Example Usage
 
-The following snippet converts a value to text using a `Bytes` buffer:
+The following complete example emits the sign conditionally and renders the decimaliser's mantissa and exponent. `DocumentationExamplesTest` compiles this block and checks both signs.
 
 [source,java]
 ----
-Bytes<?> bytes = Bytes.allocateElasticOnHeap();
-Decimaliser d = StandardDecimaliser.STANDARD;
-boolean ok = d.toDecimal(1.2345, (neg, m, e) -> bytes.append(neg ? '-' : '')
-        .append(m)
-        .append('e')
-        .append(-e));
-System.out.println(bytes.toString());
+import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.render.Decimaliser;
+import net.openhft.chronicle.bytes.render.StandardDecimaliser;
+
+public class DecimalRenderingExample {
+    public static String render(double value) {
+        Bytes<?> bytes = Bytes.allocateElasticOnHeap();
+        try {
+            Decimaliser d = StandardDecimaliser.STANDARD;
+            boolean ok = d.toDecimal(value, (negative, mantissa, exponent) -> {
+                if (negative)
+                    bytes.append('-');
+                bytes.append(mantissa).append('e').append(-exponent);
+            });
+            if (!ok)
+                throw new IllegalArgumentException("Value not handled by decimaliser");
+            return bytes.toString();
+        } finally {
+            bytes.releaseLast();
+        }
+    }
+
+    public static void main(String[] args) {
+        System.out.println(render(1.2345)); // 12345e-4
+    }
+}
 ----
 
-See the <<wire-integration.adoc,Wire Integration>> guide for details on using
+See the xref:wire-integration.adoc[Wire Integration] guide for details on using
 these renderers within wire formats.
+
+== Trade-offs and Alternatives
+
+When choosing a decimal rendering strategy you balance speed, range and allocation:
+
+* `SimpleDecimaliser` is extremely fast and allocation-free but only handles a bounded range and precision.
+* `MaximumPrecision` gives fixed decimal places with rounding and modest overhead.
+* `UsesBigDecimal` converts a finite floating-point value through its decimal string representation at the cost of allocations and CPU. It cannot recover precision already lost in floating-point arithmetic.
+* `GeneralDecimaliser` and `StandardDecimaliser` provide pragmatic defaults that fall back to `BigDecimal` only when necessary.
+
+Callers should:
+
+* prefer the simpler strategies on hot paths where inputs are known to be well behaved;
+* consider `UsesBigDecimal` when the simpler decimalisers cannot handle the input, and always check the returned success flag.

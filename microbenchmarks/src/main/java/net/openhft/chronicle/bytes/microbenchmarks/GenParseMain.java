@@ -80,7 +80,7 @@ public class GenParseMain {
         input2 = Bytes.from(input);
         Thread thread = new Thread(() -> {
 //            Affinity.setAffinity(14);
-            Callable callable = () -> bytesDecode(bytesEncode(cn, bytes2), cn3);
+            Callable<CodeNumber> callable = () -> bytesDecode(bytesEncode(cn, bytes2), cn3);
 //            Callable callable = () -> simpleDecode(simpleEncode(cn));
             try {
                 Thread thread1 = Thread.currentThread();
@@ -114,7 +114,7 @@ public class GenParseMain {
         return cn;
     }
 
-    public static Bytes bytesEncode(CodeNumber cn, Bytes<?> bytes) {
+    public static Bytes<?> bytesEncode(CodeNumber cn, Bytes<?> bytes) {
         return bytes.clear().append(cn.ch).append(cn.number);
     }
 

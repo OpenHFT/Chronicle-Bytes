@@ -1,223 +1,319 @@
 = Chronicle Bytes Architecture Overview
-:doctype: book
 :toc:
-:toclevels: 3
 :sectnums:
 :lang: en-GB
+:toclevels: 3
+:doctype: book
+:source-highlighter: rouge
 
 This document positions Chronicle Bytes within the wider OpenHFT landscape, describes its core abstractions and key architectural principles, illustrates runtime interactions, and explains the critical data flows and design decisions that underpin its low-latency performance.
 It is intended for developers and architects working with or building upon the OpenHFT stack.
 
-== 1  Context and Core Abstractions
+== Context and Core Abstractions
 
-Chronicle Bytes is the **foundational byte-access layer** for every OpenHFT library that deals with off-heap memory, serialisation or durable messaging.
+Chronicle Bytes is the *foundational byte-access layer* for every OpenHFT library that deals with off-heap memory, serialisation or durable messaging.
 It hides the platform-specific details of raw memory manipulation behind a small, predictable API while exposing advanced features (elastic buffers, atomic CAS, stop-bit encoding) that higher layers consume.
 
 The primary abstractions are:
 
-* `BytesStore<B, U>`: Represents the underlying, typically immutable, block of memory.
-This can be on-heap (`byte[]`), native off-heap (direct memory), or memory-mapped file regions <<CB-FN-002>>.
+* `BytesStore<B, U>`: Represents the underlying block of memory; its contents are normally mutable.
+This can be on-heap (`byte[]`), native off-heap (direct memory), or memory-mapped file regions xref:project-requirements.adoc#CB-FN-002[CB-FN-002].
 * `Bytes<U>`: Provides a mutable view over a `BytesStore`, with independent read and write cursors (positions) and limits.
-It offers a rich API for reading and writing primitive types, strings, and other data structures
-<<CB-FN-001>>.
-* `RandomDataInput` / `RandomDataOutput`: Interfaces implemented by `Bytes`
-(among others) offering position-based read/write access, distinct from the streaming cursor-based access.
+It offers a rich API for reading and writing primitive types, strings, and other data structures xref:project-requirements.adoc#CB-FN-001[CB-FN-001].
+* `RandomDataInput` / `RandomDataOutput`: Interfaces implemented by `Bytes` (among others) offering position-based read/write access, distinct from the streaming, cursor-based access.
 
 [NOTE]
 ====
 Where a statement maps directly to a formal requirement from
-`project-requirements.adoc`, the identifier is shown in brackets, e.g.
-<<CB-FN-004>>.
+`project-requirements.adoc`, the identifier is shown in brackets, for example
+xref:project-requirements.adoc#CB-FN-004[CB-FN-004].
 ====
 
-=== 1.1  Component Relationships
+=== Component Relationships
 
-Chronicle Bytes maintains a clear separation between the region of memory and the
-view used to access it. `BytesStore` represents the memory itself while `Bytes`
-is an accessor with movable cursors. Several concrete implementations exist for
-different storage modes:
+Chronicle Bytes maintains a clear separation between the region of memory and the view used to access it.
+`BytesStore` represents the memory itself, while `Bytes` is an accessor with movable cursors.
+Several concrete implementations exist for different storage modes.
 
+.Component relationships between Bytes and BytesStore implementations
+[mermaid]
 ....
-            Bytes
-              |
-   +----------+----------+
-   |          |          |
-NativeBytes MappedBytes OnHeapBytes
-   |          |          |
-   |          |          |
-NativeBytesStore MappedBytesStore HeapBytesStore
+graph TD
+    subgraph "Bytes Views"
+        B["Bytes&lt;U&gt;"]
+    end
+
+    subgraph "BytesStore Implementations"
+        NBS["NativeBytesStore"]
+        MBS["MappedBytesStore"]
+        HBS["HeapBytesStore"]
+    end
+
+    subgraph "Concrete Bytes Types"
+        NB["NativeBytes"]
+        MB["MappedBytes"]
+        HB["OnHeapBytes"]
+    end
+
+    B --> NB
+    B --> MB
+    B --> HB
+
+    NB --> NBS
+    MB --> MBS
+    HB --> HBS
 ....
 
-Each `Bytes` variant wraps a specific `BytesStore`. A `BytesStore` may be shared
-between many `Bytes` views, but each `Bytes` instance has its own read and write
-cursors.
+Each `Bytes` variant wraps a specific `BytesStore`.
+A single `BytesStore` may be shared between many `Bytes` views, but each `Bytes` instance has its own read and write cursors.
 
-=== 1.2  Memory Types
+=== Memory Types
 
-* **On-heap**: Backed by a `byte[]`. GC manages the memory but introduces
-  unpredictable pauses.
-* **Native (off-heap)**: Backed by direct memory outside the Java heap. It avoids
-  GC pauses and is suitable for low-latency paths.
-* **Memory-mapped**: Regions of files mapped into memory via `MappedBytesStore`.
-  Useful for IPC and persistence with minimal copying.
+On-heap::
 
-=== 1.3  Threading Model (<<CB-NF-O-005>>)
+* Backed by a `byte[]`.
+* Managed by the JVM's garbage collector.
+* Simple to use but can introduce unpredictable GC pauses.
 
-`Bytes` instances are not thread-safe for concurrent mutation. Each thread should
-use its own `Bytes` view. Atomic operations on a `BytesStore` (`compareAndSwapLong`
-and similar) are safe to call from multiple threads.
+Native (off-heap)::
 
-=== 1.4  Elastic Buffers
+* Backed by direct memory outside the Java heap.
+* Reduces GC pressure and is suitable for low-latency paths.
+* Managed via explicit allocation and `ReferenceCounted`/`Closeable` semantics.
 
-Elastic `Bytes` instances, such as those created with
-`Bytes.allocateElasticDirect()`, grow on demand up to the capacity of their
-underlying `BytesStore`. Growth involves allocating a larger store and copying
-existing data, so pre-sizing buffers can avoid a stall on the first resize.
+Memory-mapped::
 
-=== 1.5  Reference Counting
+* Regions of files mapped into memory via `MappedBytesStore`.
+* Ideal for IPC and persistence with minimal copying and OS-assisted I/O.
 
-Off-heap `BytesStore` implementations use reference counting to manage native
-memory. Calls to `reserve()` increment the count, while `release()` and
-`releaseLast()` decrement it. When the count reaches zero the memory is freed or
-the mapping is unmapped. Forgetting to release results in leaks; releasing too
-many times throws `IllegalStateException`.
+=== Threading Model (xref:project-requirements.adoc#CB-NF-O-005[CB-NF-O-005])
 
-== 2  Guiding Architectural Principles
+* `Bytes` instances are **not** thread-safe for concurrent mutation.
+Each thread should use its own `Bytes` view.
+* Atomic operations on a shared `BytesStore` (for example `compareAndSwapLong`) are safe to call from multiple threads.
+* For composite structures, follow an *initialise -> reset -> hand-off* discipline and use `SingleThreadedChecked` to detect accidental cross-thread access.
+
+[[elastic-buffers]]
+=== Elastic Buffers
+
+Elastic native `Bytes` instances, such as those created with `Bytes.allocateElasticDirect()`, replace their backing store when more allocated space is needed.
+
+* Growth involves allocating a larger store and copying existing data.
+* Pre-sizing buffers can avoid the first-resize stall on hot paths.
+* `realCapacity()` is the current allocation and can increase. The native resize path uses the buffer's `capacity()` as its maximum addressable ceiling.
+* `writeLimit()` constrains sequential writes; it is mutable and does not cap all allocation paths. Applications must validate their intended size limits and, where needed, choose a fixed-size buffer or an explicit maximum such as `Bytes.elasticByteBuffer(initialCapacity, maxCapacity)`.
+* Existing retained views remain on the old store after native replacement. Budget both stores during copying and the old store for as long as any view retains it. See xref:memory-management.adoc[Memory Management].
+
+=== Reference Counting
+
+Off-heap `BytesStore` implementations use reference counting to manage native memory:
+
+* `reserve(ReferenceOwner owner)`: Increments the reference count.
+* `release(ReferenceOwner owner)`: Decrements the reference count.
+* `releaseLast(ReferenceOwner owner)`: Releases an owned reservation and checks that no other reservations remain. The final release triggers cleanup.
+* Normal `AbstractBytes` views reserve their store. Releasing another owner does not invalidate a retained view; a borrowed reference from `bytesStore()` does not acquire ownership.
+* Forgetting to release leads to leaks; over-releasing triggers `IllegalStateException`.
+* With `jvm.resource.tracing=true`, `ReferenceCounted` instances record creation and reservation sites to aid debugging.
+
+== Guiding Architectural Principles
 
 The design and implementation of Chronicle Bytes adhere to several core principles to meet the demands of high-performance systems:
 
-* **Low Latency by Design:** Every feature and API is scrutinised for its latency impact, aiming for sub-microsecond access times for common operations.
-* **Minimal Garbage Collection (GC) Impact:** Prioritising off-heap storage (direct memory and memory-mapped files) for critical data paths to avoid GC pauses.
-* **Mechanical Sympathy:** Structuring data and access patterns to align with how underlying hardware (CPUs, memory hierarchy, OS) operates efficiently.
-* **Zero-Copy Operations:** Enabling data manipulation and transfer without redundant intermediate copies where feasible.
-* **Deterministic Resource Management:** Providing explicit control over off-heap memory lifecycle via reference counting and `Closeable` interfaces
-<<CB-NF-O-001>>.
+Low latency by design::
 
-== 3  Container Diagram (C4 level 2)
+* Every feature and API is scrutinised for its latency impact, aiming for sub-microsecond access times for common operations.
 
-The system can be visualized at a container level as follows, showing components within a typical High-Frequency Trading (HFT) application:
+Minimal GC impact::
 
+* Favour off-heap storage (direct memory and memory-mapped files) for critical data paths to avoid GC pauses.
+
+Mechanical sympathy::
+
+* Structure data and access patterns to match CPU cache lines, prefetching, and branch prediction behaviour.
+
+Zero-copy operations::
+
+* Enable data movement between components (for example, Wire <-> Queue <-> Map) without redundant copies, by sharing `BytesStore` instances and using views.
+
+Deterministic resource management (xref:project-requirements.adoc#CB-NF-O-001[CB-NF-O-001])::
+
+* Provide explicit control over off-heap memory lifecycle via reference counting. Types such as `MappedBytes` also implement `Closeable`; the general `Bytes` interface does not.
+
+== Performance Characteristics
+
+Chronicle Bytes is designed to meet strict performance envelopes defined in the non-functional requirements (`CB-NF-P-*`) in `project-requirements.adoc`.
+At a high level:
+
+* *Serialisation and deserialisation latency* - End-to-end object encoding/decoding over YAML Wire must remain in the sub-microsecond range on reference hardware xref:project-requirements.adoc#CB-NF-P-001[CB-NF-P-001].
+* *Bulk comparison and copy throughput* - Region comparison and bulk copy operations are required to significantly outperform equivalent `java.nio.ByteBuffer` methods for typical payload sizes xref:project-requirements.adoc#CB-NF-P-002[CB-NF-P-002].
+* *Elastic buffer lifecycle* - Allocation, resizing and release of elastic off-heap buffers must stay within tight microsecond budgets xref:project-requirements.adoc#CB-NF-P-003[CB-NF-P-003], xref:project-requirements.adoc#CB-NF-P-008[CB-NF-P-008].
+* *Aligned access and atomics* - Aligned reads from hot-cache mapped regions and contended atomic operations on off-heap memory are constrained by nanosecond-level targets xref:project-requirements.adoc#CB-NF-P-004[CB-NF-P-004], xref:project-requirements.adoc#CB-NF-P-005[CB-NF-P-005].
+* *String encoding throughput* - UTF-8 and related encodings must sustain hundreds of megabytes per second per core under JMH benchmarks xref:project-requirements.adoc#CB-NF-P-006[CB-NF-P-006].
+
+These are targets, not measurements established by this document. Verification requires workload, hardware/JDK, command and result records; see xref:testing-strategy.adoc#evidence-status[Evidence Status]. Benchmark sources alone do not demonstrate that a target is met or that a release gate ran.
+
+== Container Diagram (C4 Level 2)
+
+The system can be visualised at a container level as follows, showing components within a typical High-Frequency Trading (HFT) application:
+
+[mermaid]
 ....
-+------------------------------------------------------------+
-| JVM A  (Market-Data Feed-Handler)                          |
-|                                                            |
-|  +-------------------+  +------------------------------+   |
-|  | Chronicle Queue   |  | Business Logic / Deserialise |   |
-|  | (uses MappedBytes)|  | via Chronicle Wire           |   |
-|  |  ^  |              |  +------------------------------+   |
-|  +--|--+--------------+                                   |
-|     |  writes raw Bytes (CB-FN-001)                        |
-+-----|------------------------------------------------------+
-      |    memory-mapped file (off-heap, CB-FN-002)          |
-......|......................................................
-      v
-+------------------------------------------------------------+
-| JVM B  (Risk Engine / Matching Engine)                       |
-|                                                            |
-|  +------------------------------+  consumes Bytes via      |
-|  | Chronicle Queue Tailer       |<-------------------------+
-|  | (uses MappedBytes)           |                          |
-|  +------------------------------+                          |
-|  | Risk Check & Matching Logic  |                          |
-|  +------------------------------+                          |
-|  | Chronicle Map (Positions)    |  atomic updates using    |
-|  | (uses OffHeapBytes)          |  Bytes' CAS (CB-FN-004)  |
-|  +------------------------------+                          |
-|                                                            |
-+------------------------------------------------------------+
+flowchart TB
+    subgraph JVMA["JVM A (Market-Data Feed-Handler)"]
+        QA["Chronicle Queue (uses MappedBytes)"]
+        BL["Business Logic / Deserialise via Chronicle Wire"]
+        QA --> BL
+    end
 
+    subgraph Shared["Shared Memory"]
+        MMF["Memory-mapped file (off-heap, CB-FN-002)"]
+    end
+
+    subgraph JVMB["JVM B (Risk Engine / Matching Engine)"]
+        QB["Chronicle Queue Tailer (uses MappedBytes)"]
+        RE["Risk Check &amp; Matching Logic"]
+        CM["Chronicle Map (Positions, OffHeapBytes, CAS via CB-FN-004)"]
+        QB --> RE --> CM
+    end
+
+    QA --> MMF --> QB
 ....
 
 Key points:
 
-* **Single-writer, multi-reader** pattern on the Chronicle Queue, leveraging
-`MappedBytes` for shared memory-mapped files, removes the need for locks during message exchange.
-* Both containers (JVMs) interact with the same memory-mapped files; IPC latency is often the cost of an L3 cache miss plus pointer arithmetic.
-* Risk logic updates positions in an off-heap Chronicle Map; contention is mitigated via `Bytes`' Compare-And-Swap (CAS) operations.
+* *Single-writer, multi-reader* pattern on the Chronicle Queue, leveraging `MappedBytes` for shared memory-mapped files, removes the need for locks during message exchange.
+* Both containers (JVMs) interact with the same memory-mapped files; IPC latency is often close to an L3 cache miss plus pointer arithmetic.
+* Risk logic updates positions in an off-heap `Chronicle Map`; contention is mitigated via `Bytes`-level Compare-And-Swap (CAS) operations.
 
-== 4  Data-Flow Narrative
+== Data-Flow Narrative
 
-=== 4.1 Hot Path (Low-Latency Event Processing)
+=== Hot Path (Low-Latency Event Processing)
 
-. **Feed handler** (JVM A) receives binary wire data from the network.
-It parses this and appends each message into a `MappedBytes` segment (a
-`Bytes<T>` view over a `MappedBytesStore`).
+. *Feed handler* (JVM A) receives binary wire data from the network.
+It parses this and appends each message into a `MappedBytes` segment (a `Bytes<T>` view over a `MappedBytesStore`).
 Chronicle Wire may be used here for efficient serialisation directly into the `Bytes` buffer.
-The write path adds minimal GC pressure as the memory is already mapped and managed off-heap
-<<CB-NF-P-003>>.
-. **Queue tailer** in JVM B polls the same memory-mapped file pages.
-As new data is written by JVM A (and memory barriers are handled by Chronicle Queue internals), it becomes visible to JVM B. Chronicle Wire deserialises the byte stream from its `Bytes` view into Java objects or direct method invocations, depending on configuration.
-. **Risk engine** in JVM B performs atomic adjustments on an entry within an off-heap `Chronicle Map`.
-The update (e.g., incrementing a position or changing a status) might be a single 64-bit CAS operation directly on the
-`BytesStore` backing the map, producing no garbage (`compareAndSwapLong`,
-<<CB-FN-004>>).
-. If an order passes risk checks, a response message may be written to a
-*second* Chronicle Queue (again, using `MappedBytes`) for further processing or sending to an exchange gateway.
+The write path adds minimal GC pressure as the memory is already mapped and managed off-heap xref:project-requirements.adoc#CB-NF-P-003[CB-NF-P-003].
+. *Queue tailer* in JVM B polls the same memory-mapped file pages.
+As new data is written by JVM A (and memory barriers are handled by Chronicle Queue internals), it becomes visible to JVM B.
+Chronicle Wire deserialises the byte stream from its `Bytes` view into Java objects or direct method invocations, depending on configuration.
+. *Risk engine* in JVM B performs atomic adjustments on an entry within an off-heap `Chronicle Map`.
+The update (for example incrementing a position or changing a status) may be a single 64-bit CAS operation directly on the `BytesStore` backing the map, producing no garbage (for example `compareAndSwapLong`, xref:project-requirements.adoc#CB-FN-004[CB-FN-004]).
+. If an order passes risk checks, a response message may be written to a second Chronicle Queue (again using `MappedBytes`) for further processing or sending to an exchange gateway.
 
-Typical latency budget (one-way, in-host, for Chronicle Bytes specific parts):
+Illustrative latency budgets (one-way, in-host, for Chronicle Bytes-specific parts; no measurement report is supplied here):
 
-* **Append to queue (Bytes level):** Sub-microsecond for writing raw bytes (actual serialisation via Wire adds to this, e.g., YAML as in <<CB-NF-P-001>>).
-* **Tailer read (Bytes level):** Sub-microsecond for reading raw bytes (deserialisation via Wire adds to this).
-* **CAS on position map (Bytes level):** ~70 ns mean (hot cache for the
-`BytesStore` location) – meets <<CB-NF-P-004>>.
+Append to queue (Bytes level)::
 
-=== 4.2 Cold Path Example (Resource Initialization)
+* Sub-microsecond for writing raw bytes (actual serialisation via Wire adds to this, for example YAML as in xref:project-requirements.adoc#CB-NF-P-001[CB-NF-P-001]).
 
-During application startup or when a new trading day begins (a "cold path" scenario), Chronicle Queue might create a new multi-gigabyte memory-mapped file.
-This involves Chronicle Bytes allocating and configuring a `MappedBytesStore` for the new file.
-This process includes interactions with the operating system to map the file into the process's address space.
-Chronicle Bytes may also pre-touch memory pages within the `MappedBytesStore` to ensure more predictable access times once the hot path operations begin.
-Similarly, Chronicle Map, upon startup, might load its initial dataset from a persisted file into an off-heap `BytesStore`, involving potentially large block reads and writes managed by `Bytes` instances.
-These operations are less frequent and less latency-sensitive than hot path processing but are critical for system setup and resilience.
+Tailer read (Bytes level)::
 
-== 5  Chronicle Bytes in the OpenHFT Stack
+* Sub-microsecond for reading raw bytes (deserialisation via Wire adds to this).
+
+CAS on position map (Bytes level)::
+
+* Measure against the contended CAS target in xref:project-requirements.adoc#CB-NF-P-005[CB-NF-P-005]. The hot-cache mapped-read target in xref:project-requirements.adoc#CB-NF-P-004[CB-NF-P-004] describes a different operation.
+
+=== Cold Path Example (Resource Initialisation)
+
+During application start-up or when a new trading day begins (a "cold path" scenario), Chronicle Queue may create a new multi-gigabyte memory-mapped file.
+This involves Chronicle Bytes allocating and configuring a `MappedBytesStore` for the new file, including OS-level calls to map the file into the process's address space.
+Chronicle Bytes may also pre-touch memory pages within the `MappedBytesStore` to ensure more predictable access times once hot-path operations begin.
+
+Similarly, Chronicle Map, upon start-up, might load its initial dataset from a persisted file into an off-heap `BytesStore`, involving potentially large block reads and writes managed by `Bytes` instances.
+These operations are less frequent and less latency-sensitive than hot-path processing but are critical for system start-up and resilience.
+
+== Chronicle Bytes in the OpenHFT Stack
 
 Chronicle Bytes serves as the fundamental building block for data handling in several key OpenHFT libraries:
 
-* **Chronicle Wire:** Uses `Bytes` instances (on-heap, off-heap, or mapped) as the underlying buffer for its various serialization protocols (binary, text, YAML, JSON, raw).
-This enables efficient, low-GC (de)serialization directly to/from any memory supported by Bytes.
-* **Chronicle Queue:** Relies heavily on `MappedBytes` (a `Bytes` implementation backed by `MappedBytesStore`) for its persistent message storage.
-This facilitates extremely fast inter-process communication (IPC) via shared memory-mapped files.
-* **Chronicle Map:** Utilizes off-heap `BytesStore` implementations to store its keys and values, allowing for very large, GC-free, persistent (if backed by MMFs) key-value stores.
-It leverages atomic operations from `Bytes` (e.g., `compareAndSwapLong`) for thread-safe concurrent access.
-* **Chronicle FIX (and other protocol engines):** Often use `Bytes` for parsing and constructing messages directly from/to network buffers or memory-mapped files, minimizing copying and GC overhead.
+Chronicle Wire::
 
-== 6  Key Design Decisions
+* Uses `Bytes` instances (on-heap, off-heap, or mapped) as the underlying buffer for its various serialisation protocols (binary, text, YAML, JSON, raw).
+* Enables efficient, low-GC (de)serialisation directly to/from any memory supported by `Bytes`.
+
+Chronicle Queue::
+
+* Relies heavily on `MappedBytes` (a `Bytes` implementation backed by `MappedBytesStore`) for its persistent message storage.
+* Facilitates extremely fast inter-process communication (IPC) via shared memory-mapped files.
+
+Chronicle Map::
+
+* Utilises off-heap `BytesStore` implementations to store its keys and values, allowing for very large, GC-free, and optionally persistent (when backed by MMFs) key-value stores.
+* Leverages atomic operations from `Bytes` (for example `compareAndSwapLong`) for thread-safe concurrent access.
+
+Chronicle FIX and other protocol engines::
+
+* Often use `Bytes` for parsing and constructing messages directly from/to network buffers or memory-mapped files, minimising copying and GC overhead.
+
+For a deeper description of the low-level primitives and utilities that Chronicle Bytes builds upon, see the Chronicle Core architecture overview:
+
+* https://github.com/OpenHFT/Chronicle-Core/blob/develop/src/main/docs/system-architecture.adoc[Chronicle Core Architecture]
+
+== Key Design Decisions
 
 [cols="1,5"]
 |===
-|Decision |Rationale
-|Off-heap first |Avoids GC pauses that would violate micro-second Service Level Agreements (SLAs), aligning with minimal GC impact principle.
-|Memory-mapped durability via `BytesStore` |Provides *in-memory speed* for access and *on-disk safety* for durability using a unified `Bytes` API.
-|Native endianness as default |Removes conditional branches in hot paths for performance; readers from different endian systems can detect mismatch and fail fast (CB-RISK-001).
-|Elastic buffers by default (`Bytes.elasticXXX()`) |Simplifies API usage for common cases while preserving performance and predictability; growth is bounded by `BytesStore.realCapacity()` (CB-FN-003).
-|Atomic field operations within `Bytes` API |Reduces boilerplate and potential errors in user code for lock-free algorithms, avoiding `java.util.concurrent.atomic` object overheads for off-heap memory (CB-FN-004).
-|Reference counting for off-heap resources |Enables deterministic reclamation of native memory, crucial for predictable system behaviour, unlike reliance on GC and finalizers alone (CB-NF-O-001).
+| Decision | Rationale
+
+| Off-heap first
+| Avoids GC pauses that would violate micro-second Service Level Agreements (SLAs), aligning with the minimal GC-impact principle.
+
+| Memory-mapped durability via `BytesStore`
+| Provides access to memory-mapped files through the `Bytes` API. Durability depends on synchronisation, OS behaviour and storage; mapping alone does not guarantee it.
+
+| Native endianness as default
+| Callers and formats must agree on byte order. Raw native-endian primitive access does not automatically detect endianness mismatches (CB-RISK-001 is a target for relevant higher-level formats).
+
+| Elastic buffers by default (`Bytes.elasticXXX()`)
+| Supports variable-size data; the native resize path is bounded by the buffer's `capacity()`, while `realCapacity()` grows. Applications must choose their own operational limits (CB-FN-003).
+
+| Atomic field operations within the `Bytes` API
+| Reduces boilerplate and potential errors in user code for lock-free algorithms, avoiding `java.util.concurrent.atomic` object overheads for off-heap memory (CB-FN-004).
+
+| Reference counting for off-heap resources
+| Enables deterministic reclamation of native memory, crucial for predictable system behaviour, rather than relying solely on GC and finalisers (CB-NF-O-001).
 |===
 
-== 7  Trade-Offs and Alternatives Considered
+== Trade-Offs and Alternatives Considered
 
-* **Netty `ByteBuf` or Agrona `DirectBuffer`:** These libraries provide similar low-level buffer primitives.
-However, neither integrates as seamlessly out-of-the-box with the Chronicle ecosystem (Wire, Queue, Map), which are designed around the `Bytes` and `BytesStore` abstractions.
-Adopting them would require introducing adapter layers, potentially adding overhead or complexity.
-* **Heap buffers (`byte[]` wrapped by `java.nio.ByteBuffer`):** While simpler from a memory management perspective (GC handles it), they reintroduce GC jitter on critical paths, which is unacceptable for most OpenHFT use cases.
-Chronicle Bytes *supports* on-heap buffers for flexibility but emphasizes off-heap for performance-sensitive paths.
-* **Custom memory mapping + `sun.misc.Unsafe`:** Writing custom memory mapping and direct memory access logic using only `Unsafe` would offer raw speed.
-However, this approach would duplicate much of the safety, utility (e.g., elasticity, typed accessors, bounds checking), and resource management code already robustly implemented and tested in Chronicle Bytes.
-The maintenance burden and risk of errors were considered too high.
+Netty `ByteBuf` or Agrona `DirectBuffer`::
 
-== 8  Alignment with Requirements
+* These libraries provide similar low-level buffer primitives.
+* They do not integrate as tightly with the Chronicle ecosystem (Wire, Queue, Map), which is built around the `Bytes` / `BytesStore` abstractions.
+* Adopting them would require adapter layers, potentially adding overhead and complexity.
+
+Heap buffers (`byte[]` wrapped by `java.nio.ByteBuffer`)::
+
+* Simpler from a memory-management perspective (GC-managed).
+* Reintroduce GC jitter on critical paths, which is unacceptable for most OpenHFT use cases.
+* Chronicle Bytes supports on-heap buffers for flexibility but emphasises off-heap for performance-sensitive paths.
+
+Custom memory mapping + `sun.misc.Unsafe`::
+
+* Writing bespoke memory mapping and direct-memory logic with `Unsafe` can be extremely fast.
+* However, it would duplicate much of the safety, utility (for example elasticity, typed accessors, bounds checking) and resource-management semantics already provided by Chronicle Bytes.
+* The long-term maintenance burden and risk of subtle memory bugs were judged to outweigh any marginal gains.
+
+== Alignment with Requirements
 
 This architecture directly supports and enables the fulfilment of the functional and performance requirements captured in `project-requirements.adoc`:
 
 * Core API exposure for various memory types and operations (CB-FN-001 .. CB-FN-008, CB-FN-012, CB-FN-014).
-* Performance targets for serialization, access speed, and atomic operations (e.g., <<CB-NF-P-001>>, <<CB-NF-P-003>>, <<CB-NF-P-004>>).
-* Operability hooks like JMX metrics for `BytesMetrics` (CB-NF-O-002) allow integration into standard monitoring dashboards.
-* Security considerations like robust bounds checking (CB-NF-S-001) are integral to the `Bytes` API design.
+* Performance targets for serialisation, access speed and atomic operations (for example xref:project-requirements.adoc#CB-NF-P-001[CB-NF-P-001], xref:project-requirements.adoc#CB-NF-P-003[CB-NF-P-003], xref:project-requirements.adoc#CB-NF-P-004[CB-NF-P-004]).
+* JMX metrics for `BytesMetrics` (CB-NF-O-002) are an unverified target, not an API demonstrated here.
+* Bounds checking depends on the concrete API and configuration (CB-NF-S-001). Low-level native stores and unchecked paths require caller validation; see xref:security-review.adoc[Security Review].
 
-== 9  Future Evolution
+== Future Evolution
 
-* **Adoption of JDK advancements:** Continue to leverage new JVM intrinsics and APIs like Project Panama/Foreign Function & Memory API (when production-ready and performant) or Vector API (e.g., `VectorizedMismatch` in Java 21+) to accelerate operations like `Bytes.equalTo()` or bulk data manipulation, aiming to exceed targets like <<CB-NF-P-002>>.
-* **Enhanced OS integration:** Explore deeper OS-level features like
-`userfaultfd` on Linux for more efficient page fault handling in memory-mapped files, potentially improving fsync performance without kernel round-trips.
-* **NUMA-aware allocation:** Investigate strategies for Non-Uniform Memory Access (NUMA) aware segment allocation for `BytesStore` instances, particularly for `MappedBytesStore`, to reduce cross-socket memory access latency on multi-socket server architectures.
+Adoption of JDK advancements::
+
+* Continue to leverage new JVM intrinsics and APIs such as Project Panama/Foreign Function & Memory API (when production-ready and performant) or the Vector API (for example `VectorizedMismatch` in Java 21+) to accelerate operations like `Bytes.equalTo()` or bulk data manipulation, aiming to exceed targets like xref:project-requirements.adoc#CB-NF-P-002[CB-NF-P-002].
+
+Enhanced OS integration::
+
+* Explore deeper OS-level capabilities such as `userfaultfd` on Linux for more efficient page-fault handling in memory-mapped files, potentially improving fsync behaviour without excessive kernel round-trips.
+
+NUMA-aware allocation::
+
+* Investigate strategies for Non-Uniform Memory Access (NUMA)-aware segment allocation for `BytesStore` instances, particularly for `MappedBytesStore`, to reduce cross-socket memory-access latency on multi-socket server architectures.
