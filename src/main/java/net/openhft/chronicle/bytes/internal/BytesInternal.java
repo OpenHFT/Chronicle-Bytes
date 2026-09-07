@@ -571,8 +571,14 @@ enum BytesInternal {
             } else if (input instanceof Bytes
                     && ((Bytes) input).bytesStore() instanceof NativeBytesStore) {
                 @Nullable NativeBytesStore bs = (NativeBytesStore) ((Bytes) input).bytesStore();
-                parseUtf8_SB1(bs, offset, (StringBuilder) appendable, length);
-                return;
+                //! A MappedBytes exposes only its current chunk as bytesStore(), and parseUtf8_SB1 bounds its raw read by
+                //! that store alone: readUtf8(offset, sb) threw for a string ending beyond the chunk although the bytes
+                //! exist. Read raw only when the whole range is inside the store; parseUtf81 acquires the right chunk
+                //! for every byte. Test: MappedBytesReadAcrossMappingTest#readUtf8AtOffsetAcrossMappingBoundary.
+                if (bs.inside(offset, length)) {
+                    parseUtf8_SB1(bs, offset, (StringBuilder) appendable, length);
+                    return;
+                }
             }
         }
         parseUtf81(input, offset, appendable, length);
@@ -2431,8 +2437,21 @@ enum BytesInternal {
 
         @Nullable final NativeBytesStore nb = (NativeBytesStore) bytes.bytesStore();
         int i = 0;
-        final int len = (int) Math.min(bytes.realReadRemaining(), Integer.MAX_VALUE);
-        final long address = nb.address + nb.translate(bytes.readPosition());
+        final long readPosition = bytes.readPosition();
+        final long remaining = bytes.realReadRemaining();
+        //! realReadRemaining() is bounded by the file, not by the current chunk, so a raw scan whose stop char lay in
+        //! the next chunk read past the mapping: a crash or garbage. Bound the scan by the store's absolute end
+        //! (realCapacity() includes the overlap); a plain NativeBytesStore is unchanged. Tests:
+        //! MappedBytesReadAcrossMappingTest#parseUtf8StopCharAcrossMappingBoundary and
+        //! #parseUtf8StopCharAcrossMappingBoundaryUpToTheReadLimit, whose builders are larger than the distance to the
+        //! boundary so the raw scan reaches the mapping end, and the 256-capacity rows of
+        //! #parseUtf8StopCharEndOfInputIsTheSameOnEveryBackend at two distances.
+        final long inStore = readPosition < nb.start() ? 0 : Math.min(remaining, nb.realCapacity() - readPosition);
+        final int len = (int) Math.min(inStore, Integer.MAX_VALUE);
+        //! translate(readPosition) asserts its bounds, and the read position can lie outside the current store after a
+        //! random read remapped ahead; that case takes the checked continuation, so the address is only computed when
+        //! the raw scan will run. MappedBytesReadAcrossMappingTest#parseUtf8StopCharAfterARandomReadRemappedAhead.
+        final long address = len > 0 ? nb.address + nb.translate(readPosition) : 0L;
         @Nullable final Memory memory = nb.memory;
 
         if (Jvm.isJava9Plus() && Jvm.maxDirectMemory() > 0) {
@@ -2464,9 +2483,12 @@ enum BytesInternal {
         }
         StringUtils.setCount(appendable, i);
         bytes.readSkip(i);
-        if (i < len) {
+        //! The raw scan can also stop at the end of the current mapping (len is at most remaining); the checked decoder
+        //! acquires the next chunk byte by byte and handles a clean end of input or a malformed byte there.
+        //! Tests: MappedBytesReadAcrossMappingTest#parseUtf8StopCharAcrossMappingBoundary and
+        //! #parseUtf8StopCharEndOfInputIsTheSameOnEveryBackend.
+        if (i < remaining)
             readUtf8_SB2(bytes, appendable, tester);
-        }
     }
 
     private static void readUtf8_SB2(@NotNull StreamingDataInput bytes, @NotNull StringBuilder appendable, @NotNull StopCharTester tester)
@@ -2474,6 +2496,13 @@ enum BytesInternal {
         while (true) {
             int c = bytes.readUnsignedByte();
             switch (c >> 4) {
+                //! -1 is a clean end of input, not a malformed byte, and -1 >> 4 is -1 (the arithmetic shift; >>> would
+                //! give 0x0FFFFFFF), so it is one more case of the dispatch. Before, an unterminated token threw or returned
+                //! depending on the builder's capacity and the backend; now it ends the scan on every backend, contiguous
+                //! memory too, and an end of input inside a multi-byte sequence still throws below.
+                //! MappedBytesReadAcrossMappingTest#parseUtf8StopCharEndOfInputIsTheSameOnEveryBackend fails without this.
+                case -1:
+                    return;
                 case 0:
                 case 1:
                 case 2:
@@ -2491,6 +2520,12 @@ enum BytesInternal {
                 case 12:
                 case 13: {
                     /* 110x xxxx 10xx xxxx */
+                    //! Lead bytes 0xC0 and 0xC1 only start overlong encodings, which UTF-8 forbids; they were accepted here
+                    //! and looked rejected only because the scan then threw at the end of the input. The overlong rows of
+                    //! MappedBytesReadAcrossMappingTest#parseUtf8StopCharEndOfInputIsTheSameOnEveryBackend fail without this
+                    //! on the direct and mapped backends.
+                    if (c < 0xC2)
+                        throw newUTFDataFormatException(-1, "");
                     int char2 = bytes.readUnsignedByte();
                     if ((char2 & 0xC0) != 0x80)
                         throw newUTFDataFormatException(-1, "");
@@ -2539,17 +2574,18 @@ enum BytesInternal {
         while (len-- > 0) {
             int c = bytes.rawReadByte() & 0xff;
             if (c >= 128) {
+                //! Decode from the non-ASCII byte even when it is the last one: a trailing lead byte used to be left unread
+                //! and the scan returned where the native scan throws. A clean ASCII end of input must not enter the
+                //! decoder: an unchecked Bytes cannot report -1 (BytesTest#testParseUtf8 on the unchecked heap allocator).
+                //! MappedBytesReadAcrossMappingTest#parseUtf8StopCharEndOfInputIsTheSameOnEveryBackend covers the heap backend.
                 bytes.readSkip(-1);
-                break;
+                readUtf82(bytes, appendable, tester);
+                return;
             }
             if (tester.isStopChar(c))
                 return;
             appendable.append((char) c);
         }
-        if (len <= 0)
-            return;
-
-        readUtf82(bytes, appendable, tester);
     }
 
     private static void readUtf82(@NotNull StreamingDataInput bytes, @NotNull Appendable appendable, @NotNull StopCharTester tester)
@@ -2557,6 +2593,10 @@ enum BytesInternal {
         while (true) {
             int c = bytes.readUnsignedByte();
             switch (c >> 4) {
+                //! The heap-bytes decoder had the same end-of-input defect as readUtf8_SB2: see the note there.
+                //! MappedBytesReadAcrossMappingTest#parseUtf8StopCharEndOfInputIsTheSameOnEveryBackend covers the heap backend.
+                case -1:
+                    return;
                 case 0:
                 case 1:
                 case 2:
@@ -2574,6 +2614,10 @@ enum BytesInternal {
                 case 12:
                 case 13: {
                     /* 110x xxxx 10xx xxxx */
+                    //! Overlong lead bytes, as in readUtf8_SB2. MoreBytesTest#testInvalidUTF8Scan (heap) and the heap rows of
+                    //! MappedBytesReadAcrossMappingTest#parseUtf8StopCharEndOfInputIsTheSameOnEveryBackend fail without this.
+                    if (c < 0xC2)
+                        throw new UTFDataFormatException(MALFORMED_INPUT_AROUND_BYTE);
                     int char2 = bytes.readUnsignedByte();
                     if ((char2 & 0xC0) != 0x80)
                         throw new UTFDataFormatException(
