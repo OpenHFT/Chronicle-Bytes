@@ -39,6 +39,19 @@ its store. Chunked mappings use fixed-size regions, while single mappings cover
 an entire file. Synchronisation with the filesystem is controlled via
 `SyncMode`.
 
+//! Documents the acquired-range contract introduced with the mapping-boundary fix: reads that straddled a
+//! zero-overlap chunk end used to continue from raw memory beyond the mapping (JVM crash or garbage) and now throw,
+//! matching the write-side check (MappedBytesReadAcrossMappingTest#primitiveReadStraddlingTheMappingEndIsRejected).
+Primitive reads and atomic swaps need their entire value inside one chunk mapping,
+including any overlap (CB-NF-S-001). If acquiring the chunk for the offset still
+leaves part of the value outside that mapping, `ChunkedMappedBytes` throws
+`DecoratedBufferUnderflowException`, matching its existing write-side range check.
+This includes volatile reads and peeks, and long compare-and-swap, where Core already refuses a
+straddling swap as misaligned and the check only unifies the exception type. A rejected read or copy
+may already have copied part of the range and switched the current mapping; the read position is
+unchanged. Byte-wise reads can continue into the next chunk. `read(Bytes, length)` and `readWithLength(Bytes)` still copy full
+eight-byte words, so they reject a word that straddles a zero-overlap chunk end.
+
 //! MappedBytesReadAcrossMappingTest#parseUtf8StopCharEndOfInputIsTheSameOnEveryBackend pins this contract.
 On every backend, stop-character UTF-8 parsing ends on a clean end of input between complete
 characters, rejects the overlong lead bytes 0xC0 and 0xC1, and throws on a trailing lead byte.
