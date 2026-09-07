@@ -304,6 +304,12 @@ public class VanillaBytes<U>
             if (len > 0) {
                 writeCheckOffset(writePosition(), len);
                 long address = bytes.addressForRead(offset);
+                //! The same source-side hole as NativeBytesStore.write: the address promises only the source's overlap.
+                //! MappedBytesReadAcrossMappingTest#copyFromAZeroOverlapSourceAcrossItsMappingEnd covers the streaming write.
+                if (!BytesInternal.insideCurrentStore(bytes, offset, len)) {
+                    BytesInternal.writeFully(bytes, offset, len, this);
+                    return;
+                }
                 long address2 = addressForWritePosition();
                 assert address != 0;
                 assert address2 != 0;
@@ -441,7 +447,15 @@ public class VanillaBytes<U>
     @NotNull
     private VanillaBytes<U> write0(@NotNull BytesStore<?, ?> bytes, @NonNegative long offset, long length) throws ClosedIllegalStateException, ThreadingIllegalStateException {
         ensureCapacity(writePosition() + length);
-        if (length == (int) length) {
+        //! Both direct branches copy from the source's current store at the given offset. The source's chunk for the
+        //! offset is acquired first, as optimisedWrite and NativeBytesStore.write do, so a mapped source whose cursor sits
+        //! in another chunk keeps the direct copy it had before this check existed, with its pre-existing side effect of
+        //! moving that source's read position; a range that still is not inside the chunk is copied through checked
+        //! reads. MappedBytesReadAcrossMappingTest#copyFromAZeroOverlapSourceAcrossItsMappingEnd covers
+        //! write(BytesStore, offset, length), including a source whose cursor is two chunks ahead.
+        if (length > 0 && length == (int) length && bytes.isDirectMemory())
+            bytes.addressForRead(offset);
+        if (length == (int) length && BytesInternal.insideCurrentStore(bytes, offset, length)) {
             if (bytes.canReadDirect(length) && canWriteDirect(length)) {
                 long wAddr = addressForWritePosition();
                 writeSkip(length);

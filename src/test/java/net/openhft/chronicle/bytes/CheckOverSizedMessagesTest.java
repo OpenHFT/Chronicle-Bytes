@@ -109,7 +109,10 @@ public class CheckOverSizedMessagesTest extends BytesTestCommon {
         try (MappedBytes mb = mbNoOverlap()) {
             RandomDataInput rdi = Bytes.allocateDirect(BYTE6K);
             final BytesStore<?, Void> bs0 = mb.bytesStore();
-            mb.write(4000, rdi, 128, 5900);
+            //! Review disposition: the copy used to start at offset 128 and read 28 bytes past the 6000-byte source, which
+            //! the raw copy performed silently; a copy whose range is not inside the source's store now goes through
+            //! checked reads and reports that. The destination still crosses its chunk end, which is what this test checks.
+            mb.write(4000, rdi, 100, 5900);
             rdi.releaseLast();
             final BytesStore<?, Void> bs2 = mb.bytesStore();
             assertNotSame(bs0, bs2);

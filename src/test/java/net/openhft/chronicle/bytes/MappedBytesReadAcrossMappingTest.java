@@ -13,10 +13,12 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.BufferUnderflowException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Arrays;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThrows;
@@ -204,6 +206,30 @@ public class MappedBytesReadAcrossMappingTest extends BytesTestCommon {
     }
 
     @Test
+    public void equalBytesAcrossTheMappingEndCompares() {
+        // the review probe that crashed the JVM: equalBytes compares eight bytes at a time through readLong(offset)
+        final String text = repeat('x', 200);
+        writer.writePosition(position);
+        writer.writeUtf8(text);
+        final long textStart = writer.writePosition() - text.length();
+        syncReader(textStart);
+        assertMappingEndsInsideText(textStart, text.length());
+
+        final Bytes<?> same = Bytes.from(text);
+        final Bytes<?> differentAfterTheBoundary = Bytes.from(repeat('x', 199) + "y");
+        try {
+            assertTrue("the word loop hands over to the byte loop at the mapping end", reader.equalBytes(same, text.length()));
+            assertFalse(reader.equalBytes(differentAfterTheBoundary, text.length()));
+            assertTrue("the mapped operand on the right takes the same byte loop", same.equalBytes(reader, text.length()));
+            assertFalse(differentAfterTheBoundary.equalBytes(reader, text.length()));
+            assertEquals("equalBytes does not move the read position", textStart, reader.readPosition());
+        } finally {
+            same.releaseLast();
+            differentAfterTheBoundary.releaseLast();
+        }
+    }
+
+    @Test
     public void parseUtf8StopCharAfterARandomReadRemappedAhead() {
         final String text = repeat('v', 200);
         writer.writePosition(position);
@@ -217,6 +243,40 @@ public class MappedBytesReadAcrossMappingTest extends BytesTestCommon {
         final StringBuilder sb = new StringBuilder();
         reader.parseUtf8(sb, StopCharTesters.COMMA_STOP);
         assertEquals(text, sb.toString());
+    }
+
+    @Test
+    public void bulkReadAcrossTheMappingEnd() {
+        final byte[] data = pattern(100, 1, 1);
+        writer.writePosition(chunk - 50);
+        writer.write(data);
+        syncReader(chunk - 50);
+        assertFalse(reader.bytesStore().inside(chunk - 50, data.length));
+
+        final byte[] out = new byte[data.length];
+        assertEquals(data.length, reader.read(out));
+        assertArrayEquals("the copy continues in the next mapping", data, out);
+        assertEquals(chunk + 50, reader.readPosition());
+        assertEquals(chunk, reader.bytesStore().start());
+    }
+
+    @Test
+    public void copyToAcrossTheMappingEnd() {
+        final byte[] data = pattern(100, 1, 1);
+        writer.writePosition(chunk - 50);
+        writer.write(data);
+        writer.writePosition(2 * chunk + 5);
+        writer.write(data, 0, 10);
+        syncReader(chunk - 50);
+
+        final byte[] out = new byte[data.length];
+        assertEquals(data.length, reader.copyTo(out));
+        assertArrayEquals(data, out);
+        assertEquals("copyTo does not move the read position", chunk - 50, reader.readPosition());
+        final byte[] later = new byte[10];
+        assertEquals(10, reader.read(2 * chunk + 5, later, 0, 10));
+        assertArrayEquals(Arrays.copyOf(data, 10), later);
+        assertEquals("the cursor's own chunk is re-acquired on the next read", 1, reader.readUnsignedByte());
     }
 
     @Test
@@ -318,6 +378,82 @@ public class MappedBytesReadAcrossMappingTest extends BytesTestCommon {
         assertEquals("the stop char is consumed", position + text.length() + 1, reader.readPosition());
     }
 
+    @Test
+    public void copyFromAZeroOverlapSourceAcrossItsMappingEnd() throws IOException {
+        final byte[] data = pattern(200, 1, 1);
+        writer.writePosition(position).write(data);
+        syncReader(position);
+        assertFalse(reader.bytesStore().inside(position, data.length));
+
+        final Bytes<?> direct = Bytes.allocateElasticDirect(256);
+        try {
+            direct.write(0, reader, position, data.length);                         // store copy at an offset
+            assertArrayEquals("random-access copy", data, bytesOf(direct, data.length));
+            direct.clear();
+            ((VanillaBytes<?>) direct).optimisedWrite(reader, position, data.length); // the protected fast path, same package
+            assertArrayEquals("optimisedWrite", data, bytesOf(direct, data.length));
+            direct.clear();
+            direct.write((BytesStore<?, ?>) reader, position, (long) data.length);   // store-to-store copy
+            assertArrayEquals("store copy", data, bytesOf(direct, data.length));
+            for (long start : new long[]{position, chunk - 13}) {                  // word-aligned and not
+                writer.writePosition(start).write(data);
+                reader.readLimit(writer.writePosition());
+                direct.clear();
+                direct.writeSkip(data.length);
+                reader.readPosition(start);
+                reader.unsafeRead(direct.addressForRead(0), data.length);          // raw copy into native memory
+                assertArrayEquals("unsafeRead from " + start, data, bytesOf(direct, data.length));
+                assertEquals(start + data.length, reader.readPosition());
+                final byte[] object = new byte[data.length];
+                reader.readPosition(start);
+                reader.unsafeReadObject(object, Jvm.arrayByteBaseOffset(), data.length);
+                assertArrayEquals("unsafeReadObject from " + start, data, object);
+            }
+            // a range inside one chunk, copied while the source's cursor is two chunks ahead; the direct copy acquires
+            // that chunk through addressForRead(offset), which moves the source's read position (pre-existing)
+            writer.writePosition(100).write(data, 0, 50);
+            writer.writePosition(2 * chunk).writeUnsignedByte(1);
+            syncReader(2 * chunk);
+            direct.clear();
+            direct.write((BytesStore<?, ?>) reader, 100L, 50L);
+            assertArrayEquals("copy with the cursor elsewhere", Arrays.copyOf(data, 50), bytesOf(direct, 50));
+        } finally {
+            direct.releaseLast();
+        }
+
+        writer.writePosition(position).write(data);                                // restore the fixture at position
+        final File other = new File(OS.getTarget(), "mapped-read-across-dest-" + System.nanoTime() + ".dat");
+        try (MappedBytes dest = MappedBytes.mappedBytes(other, chunk, chunk)) {
+            dest.write(0, reader, position, data.length);                           // chunked destination
+            assertArrayEquals("mapped destination", data, bytesOf(dest, data.length));
+        } finally {
+            BackgroundResourceReleaser.releasePendingResources();
+            deleteIfPossible(other);
+        }
+    }
+
+    @Test
+    public void copyPastTheEndOfASourceStoreIsRejected() {
+        // a plain Bytes source whose range exceeds its store used to be read past the allocation (pre-existing)
+        final Bytes<?> source = Bytes.allocateDirect(64);
+        final Bytes<?> dest = Bytes.allocateElasticDirect(128);
+        try {
+            source.writeSkip(64);
+            assertThrows(BufferUnderflowException.class, () -> dest.write((BytesStore<?, ?>) source, 32L, 64L));
+            assertThrows(BufferUnderflowException.class, () -> dest.write(0L, source, 32L, 64L));
+        } finally {
+            source.releaseLast();
+            dest.releaseLast();
+        }
+    }
+
+    private static byte[] bytesOf(Bytes<?> bytes, int length) {
+        final byte[] out = new byte[length];
+        bytes.readLimit(Math.max(bytes.readLimit(), length));
+        bytes.read(0, out, 0, length);
+        return out;
+    }
+
     private static long readLongByteWise(Bytes<?> bytes, long offset) {
         long value = 0;
         for (int i = 0; i < Long.BYTES; i++)
@@ -334,6 +470,13 @@ public class MappedBytesReadAcrossMappingTest extends BytesTestCommon {
 
     private static String repeat(char c, int n) {
         return new String(new char[n]).replace('\0', c);
+    }
+
+    private static byte[] pattern(int length, int step, int offset) {
+        final byte[] data = new byte[length];
+        for (int i = 0; i < length; i++)
+            data[i] = (byte) (i * step + offset);
+        return data;
     }
 
     /** The reader sees everything written so far, from {@code readPosition}. */
