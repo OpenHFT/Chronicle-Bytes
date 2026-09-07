@@ -864,7 +864,10 @@ public class NativeBytesStore<U>
         @Nullable final Memory mem = this.memory;
         final long translate = translate(offset);
         final long address2 = addr + translate;
-        return translate < start() || limit <= translate
+        //! translate(offset) is store-relative while start() and limit are absolute for a MappedBytesStore, so every
+        //! offset in a later chunk answered -1 although readUnsignedByte(offset) returned the byte. A plain store, with
+        //! start() 0, is unchanged. MappedBytesReadAcrossMappingTest#peekUnsignedByteInALaterMappingMatchesTheRead.
+        return offset < start() || limit <= offset
                 ? -1
                 : mem.readByte(address2) & 0xFF;
     }

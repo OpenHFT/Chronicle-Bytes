@@ -280,6 +280,19 @@ public class MappedBytesReadAcrossMappingTest extends BytesTestCommon {
     }
 
     @Test
+    public void peekUnsignedByteInALaterMappingMatchesTheRead() {
+        final long later = 2 * chunk + 5;
+        writer.writePosition(later);
+        writer.writeUnsignedByte(0x7B);
+        syncReader(0);
+        assertEquals(0, reader.bytesStore().start());
+
+        assertEquals(0x7B, reader.peekUnsignedByte(later));
+        assertEquals(0x7B, reader.readUnsignedByte(later));
+        assertEquals("a peek at the read limit is still -1", -1, reader.peekUnsignedByte(reader.readLimit()));
+    }
+
+    @Test
     public void parseUtf8StopCharEndOfInputIsTheSameOnEveryBackend() throws IOException {
         // a clean end of input between complete characters ends the scan; a malformed byte, a truncated character or an
         // overlong lead byte throws, on every backend
