@@ -21,6 +21,7 @@ import java.util.Arrays;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeFalse;
@@ -293,6 +294,76 @@ public class MappedBytesReadAcrossMappingTest extends BytesTestCommon {
     }
 
     @Test
+    public void hashAcrossTheMappingEndIsRejected() throws IOException {
+        final byte[] data = pattern(64, 7, 3);
+        writer.writePosition(chunk - 24);
+        writer.write(data);
+        final Bytes<byte[]> heap = Bytes.wrapForRead(Arrays.copyOf(data, 40));
+        try (MappedBytes overlapping = MappedBytes.mappedBytes(file, chunk, OS.pageSize(), true)) {
+            overlapping.readLimit(writer.writePosition());
+            overlapping.readPositionRemaining(chunk - 24, 40);
+            final long expected = overlapping.hash(40);
+            assertEquals("the raw hash within one mapping agrees with the heap hash", heap.hash(40), expected);
+
+            reader.readLimit(writer.writePosition());
+            reader.readPositionRemaining(chunk - 24, 40);
+            assertFalse(reader.bytesStore().inside(chunk - 24, 40));
+            final BytesStore<?, ?> mapping = reader.bytesStore();
+            assertThrows(UnsupportedOperationException.class, () -> reader.hash(40));
+
+            // Reject both aligned words and a word that straddles the mapping end.
+            reader.readPositionRemaining(chunk - 20, 40);
+            assertThrows(UnsupportedOperationException.class, () -> reader.hash(40));
+            // Check the small rejection first so a regression cannot attempt a multi-TB allocation in this test.
+            final long largeLength = 4L << 40;
+            reader.readLimit(reader.readPosition() + largeLength);
+            assertThrows(UnsupportedOperationException.class, () -> reader.hash(largeLength));
+            assertThrows(UnsupportedOperationException.class, () -> reader.hash(Long.MAX_VALUE - 31));
+            assertSame("rejection neither copies nor acquires another chunk", mapping, reader.bytesStore());
+            assertEquals(chunk - 20, reader.readPosition());
+            assertEquals(chunk - 20 + largeLength, reader.readLimit());
+        } finally {
+            heap.releaseLast();
+        }
+    }
+
+    @Test
+    public void hashPrefixWithinCurrentMappingMatchesNative() {
+        final byte[] data = pattern(128, 37, 11);
+        final Bytes<?> direct = Bytes.allocateElasticDirect();
+        try {
+            direct.write(data);
+            // at chunk - 4 an erroneous full-word read of a short prefix would straddle the boundary; at chunk - 24 it fits
+            for (long start : new long[]{chunk - 24, chunk - 4}) {
+                writer.writePosition(start).write(data);
+                reader.readLimit(writer.writePosition());
+                final long limit = reader.readLimit();
+                for (int length = 0; length <= 96; length++) {
+                    reader.readPosition(start);
+                    if (length <= chunk - start) {
+                        assertEquals("mapped prefix of " + length + " bytes at chunk - " + (chunk - start),
+                                direct.hash(length), reader.hash(length));
+                    } else {
+                        final int rejectedLength = length;
+                        assertThrows(UnsupportedOperationException.class, () -> reader.hash(rejectedLength));
+                    }
+                    assertEquals(start, reader.readPosition());
+                    assertEquals(limit, reader.readLimit());
+                }
+                reader.readUnsignedByte(chunk + 80);
+                assertEquals(chunk, reader.bytesStore().start());
+                assertThrows(UnsupportedOperationException.class, () -> reader.hash(4));
+                assertEquals(start, reader.readPosition());
+                assertEquals(limit, reader.readLimit());
+                reader.readPosition(reader.readPosition());
+                assertEquals("reselecting the cursor's chunk restores the contiguous hash", direct.hash(4), reader.hash(4));
+            }
+        } finally {
+            direct.releaseLast();
+        }
+    }
+
+    @Test
     public void parseUtf8StopCharEndOfInputIsTheSameOnEveryBackend() throws IOException {
         // a clean end of input between complete characters ends the scan; a malformed byte, a truncated character or an
         // overlong lead byte throws, on every backend
@@ -359,6 +430,28 @@ public class MappedBytesReadAcrossMappingTest extends BytesTestCommon {
         final byte[] out = Arrays.copyOf(head, head.length + 1);
         out[head.length] = (byte) trailing;
         return out;
+    }
+
+    @Test
+    public void hashWithinOverlapMatchesNativeForASignedTailWord() throws IOException {
+        // the high int of the tail's first word is Integer.MIN_VALUE, where the heap and native hashes differ
+        for (int length : new int[]{9, 12, 16, 40, 48}) {
+            final byte[] data = pattern(length, 37, 11);
+            final int tail = length <= 16 ? 0 : 32;
+            data[tail + 4] = 0;
+            data[tail + 5] = 0;
+            data[tail + 6] = 0;
+            data[tail + 7] = (byte) 0x80;
+            final Bytes<?> direct = Bytes.allocateElasticDirect(64).write(data);
+            try (MappedBytes overlapping = MappedBytes.mappedBytes(file, chunk, OS.pageSize(), true)) {
+                writer.writePosition(chunk - 8).write(data);
+                overlapping.readPositionRemaining(chunk - 8, length);
+                assertTrue(overlapping.bytesStore().inside(chunk - 8, length));
+                assertEquals("length " + length, direct.hash(length), overlapping.hash(length));
+            } finally {
+                direct.releaseLast();
+            }
+        }
     }
 
     //! Review disposition: the next two cases pin paths that already read through checked calls (the streaming
