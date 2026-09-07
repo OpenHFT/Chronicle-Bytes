@@ -3,6 +3,7 @@
  */
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.bytes.util.DecoratedBufferUnderflowException;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.BackgroundResourceReleaser;
@@ -142,6 +143,67 @@ public class MappedBytesReadAcrossMappingTest extends BytesTestCommon {
     }
 
     @Test
+    public void primitiveReadStraddlingTheMappingEndIsRejected() {
+        // no single mapping covers a long that straddles a zero-overlap chunk end: reject it rather than read raw memory
+        final long straddling = chunk - 4;
+        writer.writePosition(straddling);
+        writer.writeLong(0x0102030405060708L);
+        syncReader(position);
+        assertFalse(reader.bytesStore().inside(straddling, Long.BYTES));
+
+        assertThrows(DecoratedBufferUnderflowException.class, () -> reader.readLong(straddling));
+        assertThrows(DecoratedBufferUnderflowException.class, () -> reader.readVolatileLong(straddling));
+        assertThrows(DecoratedBufferUnderflowException.class, () -> reader.addressForRead(straddling, Long.BYTES));
+        reader.readPosition(straddling);
+        assertThrows(DecoratedBufferUnderflowException.class, reader::readLong);
+        assertEquals("a rejected read leaves the read position alone", straddling, reader.readPosition());
+        assertEquals("a byte-wise read of the same bytes still works", 0x0102030405060708L, Long.reverseBytes(readLongByteWise(reader, straddling)));
+    }
+
+    @Test
+    public void volatileShortStraddlingTheMappingEndIsRejected() {
+        final long straddling = chunk - 1;
+        writer.writePosition(straddling);
+        writer.writeShort((short) 0x0102);
+        syncReader(position);
+        assertFalse(reader.bytesStore().inside(straddling, Short.BYTES));
+
+        assertThrows(DecoratedBufferUnderflowException.class, () -> reader.readVolatileShort(straddling));
+        assertEquals("a rejected read leaves the read position alone", position, reader.readPosition());
+    }
+
+    @Test
+    public void volatileIntStraddlingTheMappingEndIsRejected() {
+        final long straddling = chunk - 2;
+        writer.writePosition(straddling);
+        writer.writeInt(0x01020304);
+        syncReader(position);
+        assertFalse(reader.bytesStore().inside(straddling, Integer.BYTES));
+
+        assertThrows(DecoratedBufferUnderflowException.class, () -> reader.readVolatileInt(straddling));
+        reader.readPosition(straddling);
+        assertThrows(DecoratedBufferUnderflowException.class, reader::peekVolatileInt);
+        assertEquals("a rejected peek leaves the read position alone", straddling, reader.readPosition());
+    }
+
+    @Test
+    public void compareAndSwapLongStraddlingTheMappingEndIsRejected() throws IOException {
+        final long straddling = chunk - 4;
+        final long expected = 0x0102030405060708L;
+        writer.writePosition(straddling);
+        writer.writeLong(expected);
+
+        try (MappedBytes zeroOverlapWriter = MappedBytes.mappedBytes(file, chunk, 0L)) {
+            zeroOverlapWriter.writePosition(straddling);
+            assertFalse(zeroOverlapWriter.bytesStore().inside(straddling, Long.BYTES));
+
+            assertThrows(DecoratedBufferUnderflowException.class,
+                    () -> zeroOverlapWriter.compareAndSwapLong(straddling, expected, 42L));
+            assertEquals("a rejected swap leaves the value alone", expected, writer.readLong(straddling));
+        }
+    }
+
+    @Test
     public void parseUtf8StopCharAfterARandomReadRemappedAhead() {
         final String text = repeat('v', 200);
         writer.writePosition(position);
@@ -254,6 +316,13 @@ public class MappedBytesReadAcrossMappingTest extends BytesTestCommon {
         reader.parseUtf8(sb, (ch, peekNextCh) -> ch == ',');
         assertEquals(text, sb.toString());
         assertEquals("the stop char is consumed", position + text.length() + 1, reader.readPosition());
+    }
+
+    private static long readLongByteWise(Bytes<?> bytes, long offset) {
+        long value = 0;
+        for (int i = 0; i < Long.BYTES; i++)
+            value = (value << 8) | bytes.readUnsignedByte(offset + i);
+        return value;
     }
 
     private void assertMappingEndsInsideText(long textStart, int textLength) {
