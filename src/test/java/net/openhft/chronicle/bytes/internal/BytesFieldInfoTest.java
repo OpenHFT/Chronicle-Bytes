@@ -88,9 +88,15 @@ public class BytesFieldInfoTest extends BytesTestCommon {
                 .map(Map.Entry::getKey)
                 .collect(Collectors.toList());
         final String dump = lookup.dump();
-        for (int i = 1; i < byOffset.size(); i++)
-            assertTrue(byOffset.get(i - 1) + " before " + byOffset.get(i) + " in " + dump,
-                    dump.indexOf(byOffset.get(i - 1) + ":") < dump.indexOf(byOffset.get(i) + ":"));
+        //! BytesFieldInfoTest#lookup must reject a missing first group: indexOf returns -1, which the old pairwise
+        //! comparison accepted as preceding the next marker. Check presence for every group before checking order.
+        int previousIndex = -1;
+        for (String group : byOffset) {
+            final int index = dump.indexOf(group + ":");
+            assertTrue(group + " is missing from " + dump, index >= 0);
+            assertTrue(group + " must follow the previous group in " + dump, index > previousIndex);
+            previousIndex = index;
+        }
     }
 
     /** every non-static field of {@code type} and its super classes, enumerated by reflection; order is irrelevant */
