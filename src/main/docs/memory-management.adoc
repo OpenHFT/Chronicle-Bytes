@@ -62,6 +62,10 @@ an entire file.
 Synchronisation with the filesystem is controlled via
 `SyncMode`.
 
+//! MappedBytesReadAcrossMappingTest#parseUtf8StopCharEndOfInputIsTheSameOnEveryBackend pins this contract.
+On every backend, stop-character UTF-8 parsing ends on a clean end of input between complete
+characters, rejects the overlong lead bytes 0xC0 and 0xC1, and throws on a trailing lead byte.
+
 == On-Heap Stores
 
 `HeapBytesStore` wraps a `byte[]`.
