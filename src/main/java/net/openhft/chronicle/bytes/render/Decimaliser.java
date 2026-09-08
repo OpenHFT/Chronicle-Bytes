@@ -4,7 +4,7 @@
 package net.openhft.chronicle.bytes.render;
 
 /**
- * Strategy interface that decomposes a floating point number into sign,
+ * Strategy interface that decomposes a floating-point number into sign,
  * mantissa and exponent suitable for textual serialisation.
  * Implementations may trade performance against precision.
  *

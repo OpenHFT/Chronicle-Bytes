@@ -14,7 +14,7 @@ import java.util.regex.Pattern;
  * Utility for substituting property placeholders in strings. Placeholders are
  * expected in the form {@code ${propertyName}} where optional ASCII white space
  * inside the braces is ignored.
- * The class is stateless and therefore thread safe.
+ * The class is stateless and therefore thread-safe.
  */
 public enum PropertyReplacer {
     ; // No instances

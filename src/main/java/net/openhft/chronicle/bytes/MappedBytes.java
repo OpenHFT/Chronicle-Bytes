@@ -23,7 +23,9 @@ import java.io.FileNotFoundException;
  * {@link #releaseLast()} when finished with a {@code MappedBytes} instance to
  * free system resources.
  * <p>
- * Instances are single threaded and should be reserved before use.
+ * Instances are single-threaded. Factory-created instances already hold an
+ * initial reservation; no additional reservation is needed for ordinary use.
+ * Any additional reservation must be paired with a matching release.
  */
 @SuppressWarnings("rawtypes")
 public abstract class MappedBytes extends AbstractBytes<Void> implements Closeable, ManagedCloseable, Syncable {
@@ -86,7 +88,7 @@ public abstract class MappedBytes extends AbstractBytes<Void> implements Closeab
      *
      * @param file     file to map
      * @param capacity total capacity
-     * @param readOnly {@code true} for read only
+     * @param readOnly {@code true} for read-only
      * @return a new {@code MappedBytes}
      * @throws FileNotFoundException if the file does not exist
      */
@@ -163,7 +165,7 @@ public abstract class MappedBytes extends AbstractBytes<Void> implements Closeab
      * @param chunkSize   size of each chunk
      * @param overlapSize overlap between adjacent chunks
      * @param pageSize    page size to align mappings
-     * @param readOnly    {@code true} for read only
+     * @param readOnly    {@code true} for read-only
      * @return a new {@code MappedBytes}
      * @throws FileNotFoundException          if the file does not exist
      * @throws ClosedIllegalStateException    if the mapped file is closed
@@ -216,7 +218,7 @@ public abstract class MappedBytes extends AbstractBytes<Void> implements Closeab
      * Maps the given file in read-only mode.
      *
      * @param file file to map
-     * @return a new read only {@code MappedBytes}
+     * @return a new read-only {@code MappedBytes}
      * @throws FileNotFoundException          if the file does not exist
      * @throws ClosedIllegalStateException    if the mapped file is closed
      * @throws ThreadingIllegalStateException if accessed from multiple threads
@@ -233,7 +235,7 @@ public abstract class MappedBytes extends AbstractBytes<Void> implements Closeab
     }
 
     /**
-     * @return {@code true} if the underlying file was mapped read only
+     * @return {@code true} if the underlying file was mapped read-only
      */
     public abstract boolean isBackingFileReadOnly();
 

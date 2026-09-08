@@ -11,7 +11,7 @@ import java.nio.BufferUnderflowException;
 
 /**
  * This interface defines methods for reading data of different types (byte, short, int, long) from
- * An ultra high performance interface for random data access. Implementations do
+ * An ultra high-performance interface for random data access. Implementations do
  * not perform bounds checks; callers must validate offsets themselves.
  */
 public interface UncheckedRandomDataInput {

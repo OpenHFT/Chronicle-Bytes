@@ -34,7 +34,7 @@ import static net.openhft.chronicle.core.UnsafeMemory.MEMORY;
 import static net.openhft.chronicle.core.io.IOTools.*;
 
 /**
- * Collection of helper methods dealing with {@link Bytes}, {@link BytesStore} and low level byte
+ * Collection of helper methods dealing with {@link Bytes}, {@link BytesStore} and low-level byte
  * manipulation.  Includes file I/O helpers, string conversions and checks for "trivially copyable"
  * objects.
  */
@@ -331,7 +331,7 @@ public enum BytesUtil {
 
     /**
      * Calculates the number of bytes required to store a variable-length integer
-     * using the stop bit encoding.
+     * using the stop-bit encoding.
      *
      * @param n The integer to calculate the length for.
      * @return The number of bytes required to store the integer.
@@ -391,7 +391,7 @@ public enum BytesUtil {
     }
 
     /**
-     * Reads a variable-length integer from a StreamingDataInput using the stop bit encoding.
+     * Reads a variable-length integer from a StreamingDataInput using the stop-bit encoding.
      *
      * @param in The StreamingDataInput to read from.
      * @return The integer read.
@@ -405,7 +405,7 @@ public enum BytesUtil {
     }
 
     /**
-     * Writes a variable-length integer to a StreamingDataOutput using the stop bit encoding.
+     * Writes a variable-length integer to a StreamingDataOutput using the stop-bit encoding.
      *
      * @param out The StreamingDataOutput to write to.
      * @param n   The integer to write.
@@ -419,7 +419,7 @@ public enum BytesUtil {
     }
 
     /**
-     * Writes a variable-length integer to a specific position in a BytesStore using the stop bit encoding.
+     * Writes a variable-length integer to a specific position in a BytesStore using the stop-bit encoding.
      *
      * @param bs     The BytesStore to write to.
      * @param offset The position in the BytesStore to start writing.
@@ -435,7 +435,7 @@ public enum BytesUtil {
     }
 
     /**
-     * Writes a variable-length integer to a specific memory address using the stop bit encoding.
+     * Writes a variable-length integer to a specific memory address using the stop-bit encoding.
      *
      * @param addr The memory address to write to.
      * @param n    The integer to write.

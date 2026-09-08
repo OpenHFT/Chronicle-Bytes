@@ -6,7 +6,7 @@ package net.openhft.chronicle.bytes;
 import net.openhft.posix.MSyncFlag;
 
 /**
- * Synchronisation options for memory mapped file updates, mirroring the
+ * Synchronisation options for memory-mapped file updates, mirroring the
  * behaviour of {@code msync(2)}.
  */
 public enum SyncMode {

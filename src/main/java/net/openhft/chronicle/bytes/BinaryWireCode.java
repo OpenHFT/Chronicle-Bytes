@@ -96,7 +96,7 @@ public interface BinaryWireCode {
     /** Set low 16-bit integer value. */
     int SET_LOW_INT16 = 0xA9;
 
-    /** Stop bit encoded integer. */
+    /** Stop-bit encoded integer. */
     int STOP_BIT = 0xAE;
 
     /** 64-bit integer formatted as hexadecimal. */
@@ -132,7 +132,7 @@ public interface BinaryWireCode {
     /** Event name string. */
     int EVENT_NAME = 0xB9;
 
-    /** Field number encoded as stop bit. */
+    /** Field number encoded as stop-bit. */
     int FIELD_NUMBER = 0xBA;
 
     /** Null marker. */

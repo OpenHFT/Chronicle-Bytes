@@ -23,7 +23,7 @@ import static java.nio.charset.StandardCharsets.ISO_8859_1;
  *
  * <p> Magic constants such as {@code FALSE} and {@code TRUE} hold the
  * lock state.
- * <p> Debugging aid; not for high performance operations.
+ * <p> Debugging aid; not for high-performance operations.
  */
 @SuppressWarnings("rawtypes")
 public class TextIntArrayReference extends AbstractReference implements ByteableIntArrayValues {
