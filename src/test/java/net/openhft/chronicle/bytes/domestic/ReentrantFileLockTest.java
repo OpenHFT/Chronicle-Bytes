@@ -30,6 +30,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -105,7 +106,7 @@ class ReentrantFileLockTest extends BytesTestCommon {
 
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
-    void errorIsLoggedWhenLocksArePassedBetweenThreads(boolean useTryLock) throws IOException, ExecutionException, InterruptedException {
+    void errorIsLoggedWhenLocksArePassedBetweenThreads(boolean useTryLock) throws IOException, ExecutionException, InterruptedException, TimeoutException {
         try (FileChannel channel = FileChannel.open(fileToLock.toPath(), StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE)) {
             final ReentrantFileLock lock = acquireLock(useTryLock, fileToLock, channel);
             final AtomicLong spawnedThreadId = new AtomicLong();
@@ -114,12 +115,12 @@ class ReentrantFileLockTest extends BytesTestCommon {
                 executor.submit(() -> {
                     spawnedThreadId.set(Jvm.currentThreadId());
                     assertTrue(lock.isValid());
-                }).get();
+                }).get(5, TimeUnit.SECONDS);
                 expectException("You're accessing a ReentrantFileLock created by thread " + Jvm.currentThreadId() + " on thread " + spawnedThreadId.get() + " this can have unexpected results, don't do it.");
             } finally {
                 Closeable.closeQuietly(lock);
                 executor.shutdownNow();
-                executor.awaitTermination(1, TimeUnit.SECONDS);
+                assertTrue(executor.awaitTermination(5, TimeUnit.SECONDS), "Lock-check executor did not terminate");
             }
         }
     }
