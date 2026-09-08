@@ -26,6 +26,7 @@ import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
@@ -108,11 +109,18 @@ class ReentrantFileLockTest extends BytesTestCommon {
         try (FileChannel channel = FileChannel.open(fileToLock.toPath(), StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE)) {
             final ReentrantFileLock lock = acquireLock(useTryLock, fileToLock, channel);
             final AtomicLong spawnedThreadId = new AtomicLong();
-            Executors.newSingleThreadExecutor().submit(() -> {
-                spawnedThreadId.set(Jvm.currentThreadId());
-                assertTrue(lock.isValid());
-            }).get();
-            expectException("You're accessing a ReentrantFileLock created by thread " + Jvm.currentThreadId() + " on thread " + spawnedThreadId.get() + " this can have unexpected results, don't do it.");
+            final ExecutorService executor = Executors.newSingleThreadExecutor();
+            try {
+                executor.submit(() -> {
+                    spawnedThreadId.set(Jvm.currentThreadId());
+                    assertTrue(lock.isValid());
+                }).get();
+                expectException("You're accessing a ReentrantFileLock created by thread " + Jvm.currentThreadId() + " on thread " + spawnedThreadId.get() + " this can have unexpected results, don't do it.");
+            } finally {
+                Closeable.closeQuietly(lock);
+                executor.shutdownNow();
+                executor.awaitTermination(1, TimeUnit.SECONDS);
+            }
         }
     }
 
