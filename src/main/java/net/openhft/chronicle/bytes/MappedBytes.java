@@ -23,7 +23,9 @@ import java.io.FileNotFoundException;
  * {@link #releaseLast()} when finished with a {@code MappedBytes} instance to
  * free system resources.
  * <p>
- * Instances are single-threaded and should be reserved before use.
+ * Instances are single-threaded. Factory-created instances already hold an
+ * initial reservation; no additional reservation is needed for ordinary use.
+ * Any additional reservation must be paired with a matching release.
  */
 @SuppressWarnings("rawtypes")
 public abstract class MappedBytes extends AbstractBytes<Void> implements Closeable, ManagedCloseable, Syncable {

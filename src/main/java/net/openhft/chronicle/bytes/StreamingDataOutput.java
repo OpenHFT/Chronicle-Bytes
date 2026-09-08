@@ -206,9 +206,11 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     }
 
     /**
-     * Writes a UTF-8 encoded string to the data stream, similar to writeUTF, but with a few differences.
-     * Firstly, the length is stop-bit encoded, meaning that the length encoding may be one byte longer
-     * for short strings, but the string's length is not limited. Secondly, the string can be null.
+     * Writes a UTF-8 string preceded by its stop-bit encoded byte length.
+     * A non-null payload shorter than 128 bytes uses a one-byte length prefix.
+     * Unlike {@link java.io.DataOutput#writeUTF(String)}, this method is not
+     * restricted to a 65,535-byte payload; buffer and implementation limits
+     * still apply. A stop-bit encoded -1 represents {@code null}.
      *
      * @param text The string to be written. Can be null.
      * @return The current StreamingDataOutput instance.
