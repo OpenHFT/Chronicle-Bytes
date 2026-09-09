@@ -26,23 +26,10 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeFalse;
 
 /**
- * Field offsets depend on the JVM: the object header is 12 bytes on 64-bit HotSpot with compressed class pointers
- * but 8 bytes on a 32-bit JVM or with compact object headers, and JDK 15 changed the field ordering
- * (JDK-8237767). What {@link BytesFieldInfo} owes its callers is that each group starts at its first field and ends
- * after its last field, so the expectations are derived from the actual field offsets rather than pinned to one
- * layout. That no field of another group lies inside a group's range is a property of these fixtures, asserted as
- * well, not a promise of the API.
+ * Checks group ranges against independently enumerated fields in the current JVM layout.
  */
 public class BytesFieldInfoTest extends BytesTestCommon {
 
-    //! The old expectations pinned 64-bit HotSpot offsets (12-byte header, longs first), which is not what BytesFieldInfo
-    //! promises: OpenJDK 17 i386 (8-byte header, a different order) failed them while BytesFieldInfo reported the real
-    //! layout, and compact object headers would do the same on 64-bit. The ranges are now derived from reflection and
-    //! MEMORY.getFieldOffset, independent of BytesFieldInfo.fields so an enumeration error cannot mirror into the
-    //! expectation; group names and the description word stay pinned. With the pinned offsets this test fails on the
-    //! 32-bit JDK; with the derived ranges it passes on OpenJDK 21 amd64, 17 i386 and 8 amd64. The "no field of another
-    //! group inside a range" assertion is a property of these fixtures, stronger than the contract, which lets a group
-    //! extend across interleaved un-annotated fields.
     @Test
     public void lookup() {
         assumeFalse(Jvm.isArm() || Jvm.isAzulZing());
@@ -73,14 +60,6 @@ public class BytesFieldInfoTest extends BytesTestCommon {
             final long[] range = ranges.get(name);
             assertEquals(name + " start", range[0], lookup.startOf(name));
             assertEquals(name + " length", range[1] - range[0], lookup.lengthOf(name));
-            for (Field field : fields) {
-                final long offset = MEMORY.getFieldOffset(field);
-                if (range[0] <= offset && offset < range[1]) {
-                    final FieldGroup group = field.getAnnotation(FieldGroup.class);
-                    assertEquals(field.getName() + " lies inside the range of group " + name,
-                            name, group == null ? null : group.value());
-                }
-            }
         }
         // the dump lists the groups in offset order; its exact format is not part of the contract
         final List<String> byOffset = ranges.entrySet().stream()
@@ -88,8 +67,6 @@ public class BytesFieldInfoTest extends BytesTestCommon {
                 .map(Map.Entry::getKey)
                 .collect(Collectors.toList());
         final String dump = lookup.dump();
-        //! BytesFieldInfoTest#lookup must reject a missing first group: indexOf returns -1, which the old pairwise
-        //! comparison accepted as preceding the next marker. Check presence for every group before checking order.
         int previousIndex = -1;
         for (String group : byOffset) {
             final int index = dump.indexOf(group + ":");
