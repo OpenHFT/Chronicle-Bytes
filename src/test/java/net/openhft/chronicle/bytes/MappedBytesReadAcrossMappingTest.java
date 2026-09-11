@@ -17,6 +17,7 @@ import java.nio.BufferUnderflowException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Arrays;
+import java.util.function.BiPredicate;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -231,6 +232,85 @@ public class MappedBytesReadAcrossMappingTest extends BytesTestCommon {
     }
 
     @Test
+    public void equalsAcrossTheMappingEndCompares() {
+        assertComparisonsAcrossMappingBoundary(Bytes::equals);
+    }
+
+    @Test
+    public void startsWithAcrossTheMappingEndCompares() {
+        assertComparisonsAcrossMappingBoundary(Bytes::startsWith);
+    }
+
+    private void assertComparisonsAcrossMappingBoundary(BiPredicate<Bytes<?>, Bytes<?>> comparison) {
+        final byte[] data = pattern(64, 3, 1);
+        for (boolean direct : new boolean[]{false, true}) {
+            final Bytes<?> other = direct ? Bytes.allocateDirect(data.length) : Bytes.allocateElasticOnHeap(data.length);
+            try {
+                other.write(data);
+                for (long start : new long[]{chunk - 3, chunk - 16}) {
+                    writer.writePosition(start).write(data);
+                    assertComparisonBothWays(comparison, other, start, data.length, true);
+                    other.writeByte(32, (byte) (data[32] ^ 1));
+                    assertComparisonBothWays(comparison, other, start, data.length, false);
+                    other.writeByte(32, data[32]);
+                }
+            } finally {
+                other.releaseLast();
+            }
+        }
+    }
+
+    private void assertComparisonBothWays(BiPredicate<Bytes<?>, Bytes<?>> comparison, Bytes<?> other,
+                                         long start, int length, boolean expected) {
+        reader.readPositionRemaining(start, length);
+        assertFalse(reader.bytesStore().inside(start, length));
+        assertEquals("mapped operand on the left", expected, comparison.test(reader, other));
+        assertEquals(start, reader.readPosition());
+        assertEquals(start + length, reader.readLimit());
+        reader.readPosition(start);
+        assertEquals("mapped operand on the right", expected, comparison.test(other, reader));
+        assertEquals(start, reader.readPosition());
+        assertEquals(start + length, reader.readLimit());
+        assertEquals(0, other.readPosition());
+    }
+
+    @Test
+    public void startsWithAcrossTheMappingEndUsesOnlyThePrefix() {
+        final byte[] data = pattern(96, 3, 1);
+        final Bytes<?> other = Bytes.allocateDirect(data.length);
+        try {
+            other.write(data);
+            writer.writePosition(chunk - 3).write(data);
+            reader.readPositionRemaining(chunk - 3, 64);
+            assertTrue(other.startsWith(reader));
+            assertFalse(reader.startsWith(other));
+            reader.readPositionRemaining(chunk - 3, data.length);
+            other.readLimit(64);
+            assertTrue(reader.startsWith(other));
+            assertFalse(other.startsWith(reader));
+        } finally {
+            other.releaseLast();
+        }
+    }
+
+    @Test
+    public void equalsAcrossTheMappingEndRetainsZeroFilledTailSemantics() {
+        final byte[] data = new byte[128];
+        data[0] = 42;
+        final Bytes<?> other = Bytes.allocateElasticOnHeap(32);
+        try {
+            other.write(data, 0, 32).readLimit(data.length);
+            assertEquals(32, other.realReadRemaining());
+            writer.writePosition(chunk - 3).write(data);
+            assertComparisonBothWays(Bytes::equals, other, chunk - 3, data.length, true);
+            writer.writeByte(chunk + 61, (byte) 1);
+            assertComparisonBothWays(Bytes::equals, other, chunk - 3, data.length, false);
+        } finally {
+            other.releaseLast();
+        }
+    }
+
+    @Test
     public void parseUtf8StopCharAfterARandomReadRemappedAhead() {
         final String text = repeat('v', 200);
         writer.writePosition(position);
@@ -291,6 +371,17 @@ public class MappedBytesReadAcrossMappingTest extends BytesTestCommon {
         assertEquals(0x7B, reader.peekUnsignedByte(later));
         assertEquals(0x7B, reader.readUnsignedByte(later));
         assertEquals("a peek at the read limit is still -1", -1, reader.peekUnsignedByte(reader.readLimit()));
+    }
+
+    @Test
+    public void directStorePeekOutsideALaterMappingReturnsMinusOne() {
+        writer.writePosition(2 * chunk + 5).writeUnsignedByte(0x7B);
+        syncReader(2 * chunk + 5);
+        final BytesStore<?, ?> store = reader.bytesStore();
+        assertEquals(2 * chunk, store.start());
+        assertEquals(-1, store.peekUnsignedByte(store.start() - 1));
+        assertEquals(-1, store.peekUnsignedByte(store.realCapacity()));
+        assertEquals(0x7B, store.peekUnsignedByte(2 * chunk + 5));
     }
 
     @Test
@@ -381,6 +472,43 @@ public class MappedBytesReadAcrossMappingTest extends BytesTestCommon {
                 assertStopCharScanOnEveryBackend(overlapping, truncatedCharacter, capacity, null, UTFDataFormatRuntimeException.class);
                 assertStopCharScanOnEveryBackend(overlapping, overlongC0, capacity, null, UTFDataFormatRuntimeException.class);
                 assertStopCharScanOnEveryBackend(overlapping, overlongC1, capacity, null, UTFDataFormatRuntimeException.class);
+            }
+        }
+    }
+
+    @Test
+    public void parseUtf8ThreeByteSequencesOnEveryBackend() throws IOException {
+        final Object[][] cases = {
+                {new byte[]{(byte) 0xE0, (byte) 0x81, (byte) 0x81}, null},
+                {new byte[]{(byte) 0xE0, (byte) 0x9F, (byte) 0xBF}, null},
+                {new byte[]{(byte) 0xE0, (byte) 0xA0}, null},
+                {new byte[]{(byte) 0xE0, (byte) 0xA0, (byte) 0x80}, "\u0800"},
+                {new byte[]{(byte) 0xE2, (byte) 0x82, (byte) 0xAC}, "\u20AC"},
+                {new byte[]{(byte) 0xED, (byte) 0x9F, (byte) 0xBF}, "\uD7FF"},
+                // Preserve the Java UTF-16 code units also emitted by appendUtf8Char.
+                {new byte[]{(byte) 0xED, (byte) 0xA0, (byte) 0x80}, "\uD800"},
+                {new byte[]{(byte) 0xED, (byte) 0xBF, (byte) 0xBF}, "\uDFFF"},
+                {new byte[]{(byte) 0xEE, (byte) 0x80, (byte) 0x80}, "\uE000"}
+        };
+        try (MappedBytes overlapping = MappedBytes.mappedBytes(file, chunk, OS.pageSize(), true)) {
+            for (int capacity : new int[]{16, 256}) {
+                // Split the sequence after its first or second byte at the zero-overlap boundary.
+                for (int prefixLength : new int[]{14, 15}) {
+                    final String prefix = repeat('v', prefixLength);
+                    for (Object[] testCase : cases) {
+                        final byte[] sequence = (byte[]) testCase[0];
+                        final String text = (String) testCase[1];
+                        byte[] input = utf8(prefix);
+                        for (byte b : sequence)
+                            input = withTrailingByte(input, b);
+                        for (boolean terminated : new boolean[]{false, true}) {
+                            assertStopCharScanOnEveryBackend(overlapping,
+                                    terminated ? withTrailingByte(input, ',') : input, capacity,
+                                    text == null ? null : prefix + text,
+                                    text == null ? UTFDataFormatRuntimeException.class : null);
+                        }
+                    }
+                }
             }
         }
     }
@@ -550,6 +678,26 @@ public class MappedBytesReadAcrossMappingTest extends BytesTestCommon {
         } finally {
             source.releaseLast();
             dest.releaseLast();
+        }
+    }
+
+    @Test
+    public void unsafeReadPastTheReadLimitLeavesInputAndDestinationAlone() {
+        final byte[] sentinel = pattern(64, 0, 0x5A);
+        for (int capacity : new int[]{64, 128}) {
+            final Bytes<?> source = Bytes.allocateDirect(capacity);
+            final Bytes<?> dest = Bytes.allocateDirect(sentinel.length);
+            try {
+                source.write(pattern(capacity, 1, 1));
+                source.readPositionRemaining(32, 32);
+                dest.write(sentinel);
+                assertThrows(BufferUnderflowException.class, () -> source.unsafeRead(dest.addressForRead(0), 64));
+                assertEquals("reject before consuming input", 32, source.readPosition());
+                assertArrayEquals("reject before copying any bytes", sentinel, bytesOf(dest, sentinel.length));
+            } finally {
+                source.releaseLast();
+                dest.releaseLast();
+            }
         }
     }
 

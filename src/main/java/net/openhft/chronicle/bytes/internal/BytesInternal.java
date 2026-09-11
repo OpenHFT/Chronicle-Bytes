@@ -155,6 +155,13 @@ enum BytesInternal {
             // The size is different so, we know that a and b cannot be equal
             return false;
 
+        // Both vectorised and unchecked readers bypass chunk acquisition. A logical read limit can span mappings.
+        final long aLength = a.realReadRemaining();
+        final long bLength = b.realReadRemaining();
+        if (!insideCurrentStore(a, a.readPosition(), aLength)
+                || !insideCurrentStore(b, b.readPosition(), bLength))
+            return contentEqualBytes(a, b, aLength, bLength);
+
         if (VECTORIZED_MISMATCH_METHOD_HANDLE != null
                 && b.realReadRemaining() == a.realReadRemaining()
                 && a.realReadRemaining() < Integer.MAX_VALUE
@@ -174,6 +181,25 @@ enum BytesInternal {
         return readRemaining <= Integer.MAX_VALUE
                 ? contentEqualInt(a, b)
                 : contentEqualsLong(a, b);
+    }
+
+    private static boolean contentEqualBytes(BytesStore<?, ?> a, BytesStore<?, ?> b, long aLength, long bLength) {
+        if (aLength < bLength)
+            return contentEqualBytes(b, a, bLength, aLength);
+        final long aPos = a.readPosition();
+        final long bPos = b.readPosition();
+        long i = 0;
+        // Checked byte reads acquire successive chunks, including where a word would straddle a zero-overlap boundary.
+        for (; i < bLength; i++) {
+            if (a.readByte(aPos + i) != b.readByte(bPos + i))
+                return false;
+        }
+        // Equality treats the unallocated tail of an elastic store as zeros.
+        for (; i < aLength; i++) {
+            if (a.readByte(aPos + i) != 0)
+                return false;
+        }
+        return true;
     }
 
     /**
@@ -446,7 +472,9 @@ enum BytesInternal {
             return false;
         }
 
-        if (b instanceof HasUncheckedRandomDataInput) {
+        if (b instanceof HasUncheckedRandomDataInput
+                && insideCurrentStore(a, a.readPosition(), bRealReadRemaining)
+                && insideCurrentStore(b, b.readPosition(), bRealReadRemaining)) {
             // We have hoisted out boundary checks in this path
             return startsWithUnchecked(a.acquireUncheckedInput(),
                     ((HasUncheckedRandomDataInput) b).acquireUncheckedInput(),
@@ -489,6 +517,8 @@ enum BytesInternal {
                                       @NonNegative final long aPos,
                                       @NonNegative final long bPos,
                                       @NonNegative final long length) {
+        if (!insideCurrentStore(a, aPos, length) || !insideCurrentStore(b, bPos, length))
+            return contentEqualBytes(a, b, length, length);
         int i;
         for (i = 0; i < length - 7; i += 8) {
             if (a.readLong(aPos + i) != b.readLong(bPos + i))
@@ -2542,7 +2572,9 @@ enum BytesInternal {
                     int char2 = bytes.readUnsignedByte();
                     int char3 = bytes.readUnsignedByte();
 
-                    if (((char2 & 0xC0) != 0x80) || ((char3 & 0xC0) != 0x80))
+                    // E0 80..9F would encode a value below U+0800 using three bytes.
+                    if (((char2 & 0xC0) != 0x80) || ((char3 & 0xC0) != 0x80)
+                            || (c == 0xE0 && char2 < 0xA0))
                         throw newUTFDataFormatException(-1, "");
                     int c3 = (char) (((c & 0x0F) << 12) |
                             ((char2 & 0x3F) << 6) |
@@ -2635,7 +2667,8 @@ enum BytesInternal {
                     int char2 = bytes.readUnsignedByte();
                     int char3 = bytes.readUnsignedByte();
 
-                    if (((char2 & 0xC0) != 0x80) || ((char3 & 0xC0) != 0x80))
+                    if (((char2 & 0xC0) != 0x80) || ((char3 & 0xC0) != 0x80)
+                            || (c == 0xE0 && char2 < 0xA0))
                         throw new UTFDataFormatException(
                                 MALFORMED_INPUT_AROUND_BYTE);
                     int c3 = (char) (((c & 0x0F) << 12) |

@@ -860,6 +860,9 @@ public class NativeBytesStore<U>
 
     @Override
     public int peekUnsignedByte(@NonNegative long offset) {
+        // MappedBytesStore.translate asserts that the absolute offset belongs to the mapping.
+        if (offset < start() || limit <= offset)
+            return -1;
         final long addr = this.address;
         @Nullable final Memory mem = this.memory;
         final long translate = translate(offset);
@@ -867,9 +870,7 @@ public class NativeBytesStore<U>
         //! translate(offset) is store-relative while start() and limit are absolute for a MappedBytesStore, so every
         //! offset in a later chunk answered -1 although readUnsignedByte(offset) returned the byte. A plain store, with
         //! start() 0, is unchanged. MappedBytesReadAcrossMappingTest#peekUnsignedByteInALaterMappingMatchesTheRead.
-        return offset < start() || limit <= offset
-                ? -1
-                : mem.readByte(address2) & 0xFF;
+        return mem.readByte(address2) & 0xFF;
     }
 
     @Override

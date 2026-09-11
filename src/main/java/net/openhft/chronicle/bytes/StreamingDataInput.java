@@ -841,14 +841,19 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
 
     /**
      * Reads data from the input stream into the memory at the provided address.
+     * Insufficient logical input is rejected before consuming or copying any bytes. A failure while acquiring
+     * a later mapping can leave partial output and an advanced read position.
      *
      * @param address the address of the memory to fill with the read data
      * @param length  the number of bytes to read
      * @return a reference to this object
+     * @throws BufferUnderflowException       If there's not enough data to read
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     default S unsafeRead(long address, @NonNegative int length) throws ClosedIllegalStateException, ThreadingIllegalStateException {
+        if (readRemaining() < length)
+            throw new BufferUnderflowException();
         //! See unsafeReadObject: a mapped source whose range is not inside its current chunk is copied byte by byte,
         //! since the word loop's readLong() rejects a word that straddles a zero-overlap chunk end.
         //! MappedBytesReadAcrossMappingTest#copyFromAZeroOverlapSourceAcrossItsMappingEnd copies from chunk - 13.
