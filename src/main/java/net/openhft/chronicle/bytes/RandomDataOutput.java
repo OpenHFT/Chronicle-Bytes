@@ -570,7 +570,7 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
 
     /**
      * Writes a BytesStore instance to this RandomDataOutput at the given position.
-     * The length of the BytesStore content is encoded using a stop bit encoding scheme.
+     * The length of the BytesStore content is encoded using a stop-bit encoding scheme.
      *
      * @param position the position at which the BytesStore content should be written.
      * @param bs       the BytesStore instance to write.
@@ -582,7 +582,7 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
 
     /**
      * Writes a portion of a string to this RandomDataOutput at the given position.
-     * The length of the string is encoded using a stop bit encoding scheme.
+     * The length of the string is encoded using a stop-bit encoding scheme.
      *
      * @param position the position at which the string should be written.
      * @param s        the string to write.

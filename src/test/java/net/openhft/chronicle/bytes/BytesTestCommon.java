@@ -70,6 +70,7 @@ public class BytesTestCommon {
     }
 
     @Before
+    @BeforeEach
     public void assumeFinishedNormally() {
         finishedNormally = true;
     }

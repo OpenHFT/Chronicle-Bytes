@@ -228,7 +228,7 @@ public class MappedFileTest extends BytesTestCommon {
 
         // open up the same file via a mapped file
         try (@NotNull MappedFile mapFile = MappedFile.mappedFile(file, OS.pageSize() * 16L, OS.pageSize(), true)) {
-            // this throws a exception as of v2.20.9. it shouldn't
+            // this throws an exception as of v2.20.9. it shouldn't
             ReferenceOwner temp = ReferenceOwner.temporary("TEMP");
             @NotNull Bytes<?> buf = mapFile.acquireBytesForRead(temp, 0);
             buf.readLimit(file.length());

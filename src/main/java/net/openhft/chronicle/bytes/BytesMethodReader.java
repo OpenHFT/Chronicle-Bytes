@@ -103,7 +103,7 @@ public class BytesMethodReader extends SimpleCloseable implements MethodReader {
 
     /**
      * Reads the next method call from the input stream. The message ID is read
-     * using stop bit encoding and used to look up a handler. If none is found the
+     * using stop-bit encoding and used to look up a handler. If none is found the
      * {@code defaultParselet} is invoked.
      *
      * @return {@code true} if a message was processed, {@code false} if no data

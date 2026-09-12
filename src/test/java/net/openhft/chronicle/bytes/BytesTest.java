@@ -337,13 +337,13 @@ public class BytesTest extends BytesTestCommon {
         }
     }
 
-    @Test(expected = BufferOverflowException.class)
+    @Test
     public void testPartialWriteArray() {
         assumeFalse(alloc1 == HEX_DUMP);
         @NotNull byte[] array = "Hello World".getBytes(ISO_8859_1);
         Bytes<?> to = alloc1.fixedBytes(6);
         try {
-            to.write(array);
+            assertThrows(BufferOverflowException.class, () -> to.write(array));
         } finally {
             postTest(to);
         }
@@ -423,7 +423,7 @@ public class BytesTest extends BytesTestCommon {
         }
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testExpectNegativeOffsetAbsoluteWriteOnElasticBytesThrowsIllegalArgumentException()
             throws BufferOverflowException, IllegalStateException {
         assumeFalse(alloc1 == HEX_DUMP);
@@ -432,13 +432,13 @@ public class BytesTest extends BytesTestCommon {
         try {
             assumeFalse(bytes.unchecked());
 
-            bytes.writeInt(-1, 1);
+            assertThrows(IllegalArgumentException.class, () -> bytes.writeInt(-1, 1));
         } finally {
             postTest(bytes);
         }
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testExpectNegativeOffsetAbsoluteWriteOnElasticBytesOfInsufficientCapacityThrowsIllegalArgumentException()
             throws IllegalStateException, BufferOverflowException {
         assumeFalse(alloc1 == HEX_DUMP);
@@ -446,29 +446,29 @@ public class BytesTest extends BytesTestCommon {
 
         try {
             assumeFalse(bytes.unchecked());
-            bytes.writeInt(-1, 1);
+            assertThrows(IllegalArgumentException.class, () -> bytes.writeInt(-1, 1));
         } finally {
             postTest(bytes);
         }
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testExpectNegativeOffsetAbsoluteWriteOnFixedBytesThrowsIllegalArgumentException() {
         assumeFalse(alloc1 == HEX_DUMP);
         Bytes<?> bytes = alloc1.fixedBytes(4);
         try {
-            bytes.writeInt(-1, 1);
+            assertThrows(IllegalArgumentException.class, () -> bytes.writeInt(-1, 1));
         } finally {
             postTest(bytes);
         }
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testExpectNegativeOffsetAbsoluteWriteOnFixedBytesOfInsufficientCapacityThrowsIllegalArgumentException() {
         assumeFalse(alloc1 == HEX_DUMP);
         Bytes<?> bytes = alloc1.fixedBytes(1);
         try {
-            bytes.writeInt(-1, 1);
+            assertThrows(IllegalArgumentException.class, () -> bytes.writeInt(-1, 1));
         } finally {
             postTest(bytes);
         }

@@ -9,17 +9,18 @@ import org.junit.Test;
 
 import java.nio.BufferUnderflowException;
 
+import static org.junit.Assert.assertThrows;
+
 public class BytesInternalSubBytesErrorsTest extends BytesTestCommon {
 
-    @Test(expected = BufferUnderflowException.class)
+    @Test
     public void subBytesThrowsWhenLengthTooLarge() {
         Bytes<?> src = Bytes.from("abc");
         try {
             // request a sub view longer than remaining
-            BytesInternal.subBytes(src, 0, 10);
+            assertThrows(BufferUnderflowException.class, () -> BytesInternal.subBytes(src, 0, 10));
         } finally {
             src.releaseLast();
         }
     }
 }
-

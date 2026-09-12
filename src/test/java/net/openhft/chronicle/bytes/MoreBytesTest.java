@@ -149,13 +149,13 @@ public class MoreBytesTest extends BytesTestCommon {
         }
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testAppendDoubleRandomPositionShouldThrowIllegalArgumentException() {
 
         final byte[] bytes = "000000".getBytes(ISO_8859_1);
         final Bytes<?> to = Bytes.wrapForWrite(bytes);
         try {
-            to.append(0, 33333.14, 2, 6);
+            assertThrows(IllegalArgumentException.class, () -> to.append(0, 33333.14, 2, 6));
         } finally {
             to.releaseLast();
         }
