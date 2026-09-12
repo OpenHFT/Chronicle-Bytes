@@ -260,6 +260,8 @@
                     <argLine>${surefireArgLine} ${jvm.requiredArgs}</argLine>
                     <forkCount>4</forkCount>
                     <reuseForks>true</reuseForks>
+                    <!-- Keep the first failure visible, including when CI requests retries. -->
+                    <rerunFailingTestsCount>0</rerunFailingTestsCount>
                     <runOrder>hourly</runOrder>
                 </configuration>
             </plugin>
