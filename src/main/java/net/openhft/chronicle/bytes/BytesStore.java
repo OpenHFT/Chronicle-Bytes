@@ -351,7 +351,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      * Returns if the {@code readPosition} is at the {@code start} and
      * the {@code writeLimit} is at the {@code end}.
      * <p>
-     * I.e {@code start() == readPosition() && writeLimit() == capacity()}
+     * I.e. {@code start() == readPosition() && writeLimit() == capacity()}
      *
      * @return if the {@code readPosition} is at the {@code start} and
      * the {@code writeLimit} is at the {@code end}
@@ -539,7 +539,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
     /**
      * By default, the maximum length of data shown is 256 characters. Use {@link #toDebugString(long)} if you want more.
      * <p>
-     * This is assumed to be used to print the contents on a best effort basis. If an Error occurs it will be returned in the String.
+     * This is assumed to be used to print the contents on a best-effort basis. If an Error occurs it will be returned in the String.
      *
      * @return this BytesStore as a DebugString
      */
@@ -550,7 +550,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
 
     /**
      * <p>
-     * This is assumed to be used to print the contents on a best effort basis. If an Error occurs it will be returned in the String.
+     * This is assumed to be used to print the contents on a best-effort basis. If an Error occurs it will be returned in the String.
      * @param maxLength the maximum length of the output
      * @return this BytesStore as a DebugString.
      */
@@ -932,7 +932,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
     }
 
     /**
-     * Convenience method to perform the cipher operation using thread local ByteBuffers for temporary buffers.
+     * Convenience method to perform the cipher operation using thread-local ByteBuffers for temporary buffers.
      * It encrypts or decrypts this BytesStore using the provided Cipher and writes the result to the outBytes.
      *
      * @param cipher   the Cipher to use for encryption or decryption

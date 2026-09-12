@@ -86,7 +86,7 @@ public interface RandomDataInput extends RandomCommon {
 
     /**
      * Reads an unsigned byte value from a specific offset.
-     * The value is returned as an int in order to represent the unsigned byte as a positive value.
+     * The value is returned as an int to represent the unsigned byte as a positive value.
      *
      * @param offset the location from where the unsigned byte value is read.
      * @return the unsigned byte value interpreted as a positive int.
@@ -102,7 +102,7 @@ public interface RandomDataInput extends RandomCommon {
     /**
      * Reads an unsigned byte value from a specific offset.
      * Returns -1 if the byte read is at the end of the byte source.
-     * The value is returned as an int in order to represent the unsigned byte as a positive value.
+     * The value is returned as an int to represent the unsigned byte as a positive value.
      *
      * @param offset the location from where the unsigned byte value is read.
      * @return the unsigned byte value interpreted as a positive int or -1.
@@ -126,7 +126,7 @@ public interface RandomDataInput extends RandomCommon {
 
     /**
      * Reads an unsigned short value from a specific offset.
-     * The value is returned as an int in order to represent the unsigned short as a positive value.
+     * The value is returned as an int to represent the unsigned short as a positive value.
      *
      * @param offset the location from where the unsigned short value is read.
      * @return the unsigned short value interpreted as a positive int.
@@ -168,7 +168,7 @@ public interface RandomDataInput extends RandomCommon {
 
     /**
      * Reads an unsigned 32-bit integer value from a specific offset.
-     * The value is returned as a long in order to represent the unsigned int as a positive value.
+     * The value is returned as a long to represent the unsigned int as a positive value.
      *
      * @param offset the location from where the unsigned 32-bit integer value is read.
      * @return the unsigned 32-bit integer value interpreted as a positive long.
@@ -194,7 +194,7 @@ public interface RandomDataInput extends RandomCommon {
             throws BufferUnderflowException, ClosedIllegalStateException;
 
     /**
-     * Reads a 32-bit floating point value from a specified offset.
+     * Reads a 32-bit floating-point value from a specified offset.
      *
      * @param offset the location from where the float value is read.
      * @return the read float value.
@@ -206,7 +206,7 @@ public interface RandomDataInput extends RandomCommon {
             throws BufferUnderflowException, ClosedIllegalStateException;
 
     /**
-     * Reads a 64-bit floating point value from a specified offset.
+     * Reads a 64-bit floating-point value from a specified offset.
      *
      * @param offset the location from where the double value is read.
      * @return the read double value.
@@ -271,7 +271,7 @@ public interface RandomDataInput extends RandomCommon {
             throws BufferUnderflowException, ClosedIllegalStateException, ThreadingIllegalStateException;
 
     /**
-     * Reads a volatile 32-bit floating point value from a specified offset. This operation includes a memory
+     * Reads a volatile 32-bit floating-point value from a specified offset. This operation includes a memory
      * barrier that prevents reordering of instructions before and after it.
      *
      * @param offset the location from where the float value is read.

@@ -12,24 +12,24 @@ import static org.junit.Assert.*;
 
 public class BytesBoundsAndLimitsTest extends BytesTestCommon {
 
-    @Test(expected = BufferOverflowException.class)
+    @Test
     public void writeBeyondWriteLimitThrows() {
         Bytes<?> b = Bytes.allocateElasticOnHeap(8);
         try {
             b.writeLimit(4);
-            b.writeLong(1L); // 8 bytes > writeLimit
+            assertThrows(BufferOverflowException.class, () -> b.writeLong(1L));
         } finally {
             b.releaseLast();
         }
     }
 
-    @Test(expected = BufferUnderflowException.class)
+    @Test
     public void readBeyondReadLimitThrows() {
         Bytes<?> b = Bytes.allocateElasticOnHeap(8);
         try {
             b.writeInt(123);
             b.readPosition(0);
-            b.readLong(); // 8 bytes > available 4
+            assertThrows(BufferUnderflowException.class, b::readLong);
         } finally {
             b.releaseLast();
         }

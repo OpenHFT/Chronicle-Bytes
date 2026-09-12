@@ -62,7 +62,7 @@ public enum AppendableUtil {
     }
 
     /**
-     * Adjusts the logical length of {@code sb}. For {@link Bytes} this moves the
+     * Adjusts the logical length of {@code sb}. For {@link Bytes} it moves the
      * write position to {@code newLength}.
      */
     public static void setLength(@NotNull Appendable sb, @NonNegative int newLength)

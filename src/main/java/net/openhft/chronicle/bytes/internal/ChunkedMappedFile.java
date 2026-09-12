@@ -33,7 +33,7 @@ import static net.openhft.chronicle.core.util.Longs.*;
 
 /**
  * Implementation of {@link MappedFile} that divides a file into multiple
- * potentially overlapping memory mapped chunks. Only a subset of chunks may be
+ * potentially overlapping memory-mapped chunks. Only a subset of chunks may be
  * mapped at once allowing access to files larger than a single mapping.
  */
 @SuppressWarnings("restriction")
@@ -190,7 +190,7 @@ public class ChunkedMappedFile extends MappedFile {
             }
         }
 
-        // its important we perform this outside the synchronized below, as this operation can take a while and if synchronized can block slow tailer
+        // It is important to perform this outside the synchronized block below, as this operation can take a while and can block a slow tailer.
         // from acquiring the next block
         resizeRafIfTooSmall(chunk);
 
@@ -401,7 +401,7 @@ public class ChunkedMappedFile extends MappedFile {
 
     @Override
     protected boolean threadSafetyCheck(boolean isUsed) {
-        // component is thread safe
+        // component is thread-safe
         return true;
     }
 

@@ -12,7 +12,7 @@ import net.openhft.chronicle.bytes.StopCharTester;
  * <p>
  * The escape state persists for a single subsequent call to
  * {@link #isStopChar(int)} on the same instance. Instances are therefore not
- * thread safe. See also {@link EscapingStopCharsTester} for the two-argument
+ * thread-safe. See also {@link EscapingStopCharsTester} for the two-argument
  * variant.
  */
 public class EscapingStopCharTester implements StopCharTester {

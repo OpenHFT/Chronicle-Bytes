@@ -656,11 +656,11 @@ public class ByteStoreTest extends BytesTestCommon {
         assertEquals(0, BytesStore.empty().realCapacity());
     }
 
-    @Test(expected = DecoratedBufferOverflowException.class)
+    @Test
     public void testClearAndPadTooMuch() {
         final Bytes<?> b = bytesStore.bytesForWrite();
         try {
-            b.clearAndPad(SIZE + 1);
+            assertThrows(DecoratedBufferOverflowException.class, () -> b.clearAndPad(SIZE + 1));
         } finally {
             b.releaseLast();
         }

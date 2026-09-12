@@ -29,9 +29,9 @@ import static net.openhft.chronicle.core.util.Longs.requireNonNegative;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
 /**
- * Bytes to wrap memory mapped data.
+ * Bytes to wrap memory-mapped data.
  * <p>
- * NOTE These Bytes are single Threaded as are all Bytes.
+ * NOTE These Bytes are single-threaded as are all Bytes.
  */
 @SuppressWarnings("rawtypes")
 public class ChunkedMappedBytes extends CommonMappedBytes {
@@ -254,7 +254,7 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
      * called within the overlap region (provided the full extent remains in the overlap region)
      * <p>
      * This version is therefore safe to use cooperatively with other handles in a defined sequence
-     * of bytes (eg returned from a DocumentContext) regardless of whether the handles span the
+     * of bytes (e.g. returned from a DocumentContext) regardless of whether the handles span the
      * overlap region
      */
     @Override
@@ -399,7 +399,7 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
         BytesStore<?, ?> bytesStore = this.bytesStore;
         if (desiredCapacity > capacity())
             throw new DecoratedBufferOverflowException("Cannot extend capacity beyond " + capacity());
-        // we deliberately check writePosition here - the javadoc of this method explicitly references
+        // we deliberately check writePosition here - the Javadoc of this method explicitly references
         // growing an elastic Bytes and it feels like the least surprising behaviour is to do this
         if (desiredCapacity > writePosition()) {
             long adding = desiredCapacity - writePosition();

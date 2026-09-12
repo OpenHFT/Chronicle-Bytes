@@ -338,7 +338,7 @@ public class SingleMappedFile extends MappedFile {
 
     @Override
     protected boolean threadSafetyCheck(boolean isUsed) {
-        // component is thread safe
+        // component is thread-safe
         return true;
     }
 

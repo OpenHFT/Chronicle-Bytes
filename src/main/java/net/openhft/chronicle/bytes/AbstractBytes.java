@@ -61,7 +61,7 @@ public abstract class AbstractBytes<U>
 
     /**
      * Deprecated flag (<em>bytes.append.0</em>) controlling whether whole
-     * floating point numbers were suffixed with ".0". Removal planned in x.28.
+     * floating-point numbers were suffixed with ".0". Removal planned in x.28.
      */
     @Deprecated(/* to remove in x.28 */)
     private static final boolean APPEND_0 = Jvm.getBoolean("bytes.append.0", true);
@@ -81,7 +81,7 @@ public abstract class AbstractBytes<U>
     protected boolean isPresent;
     /** Offset for the next byte to write. */
     private long writePosition;
-    /** Number of decimal places of the last appended floating point value. */
+    /** Number of decimal places of the last appended floating-point value. */
     private int lastDecimalPlaces = 0;
     /** Lenient mode suppresses {@link BufferUnderflowException} on some reads. */
     private boolean lenient = false;

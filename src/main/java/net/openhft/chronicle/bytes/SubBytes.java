@@ -11,7 +11,7 @@ import org.jetbrains.annotations.NotNull;
 import java.nio.BufferUnderflowException;
 
 /**
- * Represents a fixed size view over a region of another {@link BytesStore}.
+ * Represents a fixed-size view over a region of another {@link BytesStore}.
  * The view has its own start offset and capacity, effectively creating a slice
  * of the parent store. It is non elastic and extends {@link VanillaBytes}.
  *

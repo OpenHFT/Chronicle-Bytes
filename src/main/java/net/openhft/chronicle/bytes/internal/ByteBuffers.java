@@ -9,7 +9,7 @@ import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
 
 /**
- * Internal utility for low level manipulation of {@link ByteBuffer} objects,
+ * Internal utility for low-level manipulation of {@link ByteBuffer} objects,
  * primarily direct buffers. It relies on reflection to modify the private
  * address and capacity fields, so must be used with great care.
  */

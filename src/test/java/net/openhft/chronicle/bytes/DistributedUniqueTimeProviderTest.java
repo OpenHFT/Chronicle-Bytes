@@ -74,7 +74,7 @@ public class DistributedUniqueTimeProviderTest extends BytesTestCommon {
         } while ((end = System.currentTimeMillis()) < start + 500);
         long rate = 1000L * count / (end - start);
         System.out.printf("currentTimeMicrosPerf count/sec: %,d%n", rate);
-        assertTrue(count > 128_000 / 2); // half the speed of Rasberry Pi
+        assertTrue(count > 128_000 / 2); // half the speed of Raspberry Pi
     }
 
     @Test
@@ -88,7 +88,7 @@ public class DistributedUniqueTimeProviderTest extends BytesTestCommon {
         } while ((end = System.currentTimeMillis()) < start + 500);
         long rate = 1000L * count / (end - start);
         System.out.printf("currentTimeNanosPerf count/sec: %,d%n", rate);
-        assertTrue(count > 202_000 / 2); // half the speed of Rasberry Pi
+        assertTrue(count > 202_000 / 2); // half the speed of Raspberry Pi
     }
 
     @Test

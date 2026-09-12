@@ -12,7 +12,7 @@ import net.openhft.chronicle.bytes.StopCharsTester;
  * <p>
  * The escape state is held per instance: after seeing a backslash the next call
  * to {@link #isStopChar(int, int)} ignores the character passed and clears the
- * escaped state. Instances are therefore not thread safe. See also
+ * escaped state. Instances are therefore not thread-safe. See also
  * {@link EscapingStopCharTester} for the single-character variant.
  */
 public class EscapingStopCharsTester implements StopCharsTester {
