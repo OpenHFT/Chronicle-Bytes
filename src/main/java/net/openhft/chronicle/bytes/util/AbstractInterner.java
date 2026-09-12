@@ -34,7 +34,7 @@ import static net.openhft.chronicle.core.Jvm.uncheckedCast;
  * nor that different threads will return the same object,
  * though the contents should always be the same.
  * <p>
- * While not technically thread safe, it should still behave correctly.
+ * While not technically thread-safe, it should still behave correctly.
  * <p>
  * Abstract base class for implementing an interning mechanism, which helps
  * in reusing instances of immutable objects. This class is designed to store objects
@@ -70,7 +70,7 @@ public abstract class AbstractInterner<T> {
     /**
      * Constructor for creating an intern cache with the given capacity. The capacity will be adjusted to the next
      * power of 2 if it is not already a power of 2, to a limit of {@code 1 << 30}.
-     * The resulting structure is not inherently thread safe.
+     * The resulting structure is not inherently thread-safe.
      *
      * @param capacity the desired capacity for the intern cache
      * @throws IllegalArgumentException if {@code capacity} is negative

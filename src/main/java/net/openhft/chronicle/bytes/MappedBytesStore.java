@@ -32,7 +32,7 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
  * corrupt memory.
  */
 public class MappedBytesStore extends NativeBytesStore<Void> {
-    /** run before each write, throws if read only */
+    /** run before each write, throws if read-only */
     protected final Runnable writeCheck;
     /** owning mapped file */
     private final MappedFile mappedFile;

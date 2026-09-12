@@ -15,7 +15,7 @@ import java.nio.BufferOverflowException;
 import static net.openhft.chronicle.core.Jvm.uncheckedCast;
 
 /**
- * {@link VanillaBytes} backed by an on heap {@code byte[]}.
+ * {@link VanillaBytes} backed by an on-heap {@code byte[]}.
  */
 public class OnHeapBytes extends VanillaBytes<byte[]> {
     public static final int MAX_CAPACITY = Bytes.MAX_HEAP_CAPACITY;

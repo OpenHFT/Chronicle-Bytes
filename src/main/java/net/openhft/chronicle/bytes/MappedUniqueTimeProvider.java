@@ -54,7 +54,7 @@ public enum MappedUniqueTimeProvider implements TimeProvider, ReferenceOwner {
     }
 
     /**
-     * Returns the wall clock time in milliseconds.
+     * Returns the wall-clock time in milliseconds.
      * This value is not guaranteed to be unique.
      */
     @Override
