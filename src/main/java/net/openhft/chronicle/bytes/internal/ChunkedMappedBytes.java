@@ -7,6 +7,7 @@ import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.bytes.util.DecoratedBufferOverflowException;
 import net.openhft.chronicle.bytes.util.DecoratedBufferUnderflowException;
 import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.Memory;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.annotation.NonNegative;
@@ -261,8 +262,13 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
             throws UnsupportedOperationException, BufferUnderflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
 
         BytesStore<?, ?> bytesStore = this.bytesStore;
-        if (!bytesStore.inside(offset, bufferSize))
+        if (!bytesStore.inside(offset, bufferSize)) {
             bytesStore = acquireNextByteStore0(offset, true);
+            //! This overload promises an address safe for bufferSize contiguous bytes. With no overlap, or a range longer
+            //! than the overlap, acquiring the chunk cannot make that true, so the range is rejected.
+            //! MappedBytesReadAcrossMappingTest#primitiveReadStraddlingTheMappingEndIsRejected covers addressForRead.
+            requireInsideAcquiredStore(offset, bufferSize);
+        }
         return bytesStore.addressForRead(offset);
     }
 
@@ -288,8 +294,79 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
         BytesStore<?, ?> bytesStore = this.bytesStore;
         if (!bytesStore.inside(check, adding)) {
             acquireNextByteStore0(offset, false);
+            super.readCheckOffset(offset, adding, given);
+            //! Acquiring the chunk for an offset cannot make a range fit when the mapping has no overlap or the range is
+            //! longer than the overlap, and the read then went on from raw memory beyond it: equalBytes crashed the JVM
+            //! through readLong(offset) on a zero-overlap mapping. The read-limit check runs first so its exception is
+            //! unchanged; then the range is rejected as writeCheckOffset rejects the matching write. Byte-wise reads
+            //! still cross chunks. MappedBytesReadAcrossMappingTest#primitiveReadStraddlingTheMappingEndIsRejected.
+            requireInsideAcquiredStore(check, adding);
+            return;
         }
         super.readCheckOffset(offset, adding, given);
+    }
+
+    /**
+     * Rejects a read that still does not fit the chunk acquired for its offset, as {@link #writeCheckOffset} rejects
+     * the matching write: no single mapping covers a range that straddles a chunk end without enough overlap.
+     */
+    private void requireInsideAcquiredStore(final long offset, final long size) throws DecoratedBufferUnderflowException {
+        if (size > 0 && !bytesStore.inside(offset, size))
+            throw new DecoratedBufferUnderflowException(String.format(
+                    "Acquired the next BytesStore, but a read of %d bytes at %d still straddles its end at %d",
+                    size, offset, bytesStore.realCapacity()));
+    }
+
+    /** Copies from the read position in pieces that each stay inside one chunk mapping. */
+    @Override
+    public int read(byte[] bytes, @NonNegative int off, @NonNegative int len)
+            throws BufferUnderflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
+        requireNonNull(bytes);
+        final long remaining = readRemaining();
+        if (remaining <= 0)
+            return -1;
+        //! AbstractBytes.read copies 64 KiB at a time whatever the mapping, so a batch crossing a chunk end beyond the
+        //! overlap came back as garbage, or with the check above an exception. Bounding each batch by its mapping lets
+        //! the copy continue in the next chunk. MappedBytesReadAcrossMappingTest#bulkReadAcrossTheMappingEnd fails without this.
+        final int total = (int) Math.min(len, remaining);
+        int copied = 0;
+        while (copied < total) {
+            final long position = readPosition;
+            final int batch = Math.min(total - copied, mappedBatchSize(position));
+            readOffsetPositionMoved(batch);
+            bytesStore.read(position, bytes, off + copied, batch);
+            copied += batch;
+        }
+        return total;
+    }
+
+    /** Random-access copy in chunk-sized pieces; {@code copyTo(byte[])} reads through this method. */
+    @Override
+    public long read(@NonNegative long offsetInRDI, byte[] bytes, @NonNegative int offset, @NonNegative int length)
+            throws ClosedIllegalStateException {
+        requireNonNull(bytes);
+        //! The inherited copy read from the current chunk's store at an absolute offset with neither acquisition nor
+        //! range check, so a copy from another chunk or across a chunk end read outside the mapping.
+        //! MappedBytesReadAcrossMappingTest#copyToAcrossTheMappingEnd fails without this override.
+        final int len = Maths.toUInt31(Math.min(length, requireNonNegative(readLimit() - offsetInRDI)));
+        long position = offsetInRDI;
+        int copied = 0;
+        while (copied < len) {
+            final int batch = Math.min(len - copied, mappedBatchSize(position));
+            readCheckOffset(position, batch, true);
+            bytesStore.read(position, bytes, offset + copied, batch);
+            position += batch;
+            copied += batch;
+        }
+        return len;
+    }
+
+    /** @return the largest copy from {@code position} inside the chunk acquired for it, at most {@link #safeCopySize()} */
+    private int mappedBatchSize(final long position) {
+        BytesStore<?, ?> store = this.bytesStore;
+        if (!store.inside(position, 1))
+            store = acquireNextByteStore0(position, false);
+        return (int) Math.min(safeCopySize(), store.realCapacity() - position);
     }
 
     @Override
@@ -488,36 +565,42 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
     public short readVolatileShort(@NonNegative long offset)
             throws BufferUnderflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
         throwExceptionIfClosed();
+        //! See storeFor. MappedBytesReadAcrossMappingTest#volatileShortStraddlingTheMappingEndIsRejected fails without it.
+        return storeFor(offset, Short.BYTES)
+                .readVolatileShort(offset);
+    }
 
+    /** The store holding {@code size} bytes at {@code offset}: acquired if needed, rejected if they still do not fit. */
+    //! The volatile reads bypass readCheckOffset and read raw memory from the acquired chunk, and Core does not require
+    //! alignment for them, so a misaligned value at the last bytes of a zero-overlap chunk read past the mapping. One
+    //! helper serves the three reads. MappedBytesReadAcrossMappingTest#volatileShortStraddlingTheMappingEndIsRejected,
+    //! #volatileIntStraddlingTheMappingEndIsRejected and #primitiveReadStraddlingTheMappingEndIsRejected fail without it.
+    private BytesStore<?, ?> storeFor(final long offset, final int size)
+            throws BufferUnderflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
         BytesStore<?, ?> bytesStore = this.bytesStore;
-        if (!bytesStore.inside(offset, Short.BYTES)) {
+        if (!bytesStore.inside(offset, size)) {
             bytesStore = acquireNextByteStore0(offset, false);
+            requireInsideAcquiredStore(offset, size);
         }
-        return bytesStore.readVolatileShort(offset);
+        return bytesStore;
     }
 
     @Override
     public int readVolatileInt(@NonNegative long offset)
             throws BufferUnderflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
         throwExceptionIfClosed();
-
-        BytesStore<?, ?> bytesStore = this.bytesStore;
-        if (!bytesStore.inside(offset, Integer.BYTES)) {
-            bytesStore = acquireNextByteStore0(offset, false);
-        }
-        return bytesStore.readVolatileInt(offset);
+        //! See storeFor. MappedBytesReadAcrossMappingTest#volatileIntStraddlingTheMappingEndIsRejected fails without it.
+        return storeFor(offset, Integer.BYTES)
+                .readVolatileInt(offset);
     }
 
     @Override
     public long readVolatileLong(@NonNegative long offset)
             throws BufferUnderflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
         throwExceptionIfClosed();
-
-        BytesStore<?, ?> bytesStore = this.bytesStore;
-        if (!bytesStore.inside(offset, Long.BYTES)) {
-            bytesStore = acquireNextByteStore0(offset, false);
-        }
-        return bytesStore.readVolatileLong(offset);
+        //! See storeFor. MappedBytesReadAcrossMappingTest#primitiveReadStraddlingTheMappingEndIsRejected covers this read.
+        return storeFor(offset, Long.BYTES)
+                .readVolatileLong(offset);
     }
 
     @Override
@@ -556,6 +639,10 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
         BytesStore<?, ?> bytesStore = this.bytesStore;
         if (!bytesStore.inside(readPosition, Integer.BYTES)) {
             bytesStore = acquireNextByteStore0(readPosition, true);
+            //! peekVolatileInt reads through the raw address of the acquired chunk; a misaligned read position at the
+            //! last bytes of a zero-overlap chunk would read past the mapping.
+            //! MappedBytesReadAcrossMappingTest#volatileIntStraddlingTheMappingEndIsRejected covers the peek.
+            requireInsideAcquiredStore(readPosition, Integer.BYTES);
         }
         MappedBytesStore mbs = (MappedBytesStore) bytesStore;
         long address = mbs.address + mbs.translate(readPosition);
@@ -609,6 +696,11 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
         BytesStore<?, ?> bytesStore = this.bytesStore;
         if (bytesStore.start() > offset || offset + 8L > bytesStore.safeLimit()) {
             bytesStore = acquireNextByteStore0(offset, false);
+            //! Core already throws MisAlignedAssertionError for a swap that crosses a cache line, which every swap straddling
+            //! a page-aligned chunk end does, so this check adds no memory safety; it exists so that every acquired-range
+            //! rejection throws the same type. Kept as a decision: dropping it is the smaller change.
+            //! MappedBytesReadAcrossMappingTest#compareAndSwapLongStraddlingTheMappingEndIsRejected pins the type.
+            requireInsideAcquiredStore(offset, Long.BYTES);
         }
         return bytesStore.compareAndSwapLong(offset, expected, value);
     }

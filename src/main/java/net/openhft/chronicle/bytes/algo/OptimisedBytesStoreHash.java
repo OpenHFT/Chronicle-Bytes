@@ -365,9 +365,18 @@ public enum OptimisedBytesStoreHash implements BytesStoreHash<BytesStore<?,?>> {
      * @throws BufferUnderflowException If buffer underflows during reading.
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
+     * @throws UnsupportedOperationException If the range is not inside the current store, including any mapping overlap.
      */
     @Override
     public long applyAsLong(@NotNull BytesStore<?, ?> store, @NonNegative long remaining) throws IllegalStateException, BufferUnderflowException {
+        //! Raw hashing requires one contiguous mapping; copying an arbitrary mapped range can allocate and retain
+        //! terabytes in the thread-local pool. Reject it, including lengths that overflow the addition in inside().
+        //! MappedBytesReadAcrossMappingTest#hashAcrossTheMappingEndIsRejected covers both limits;
+        //! #hashPrefixWithinCurrentMappingMatchesNative and #hashWithinOverlapMatchesNativeForASignedTailWord
+        //! preserve native prefix/tail results for ranges inside the current mapping, including its overlap.
+        final long position = store.readPosition();
+        if (remaining > Long.MAX_VALUE - position || !store.bytesStore().inside(position, remaining))
+            throw new UnsupportedOperationException("Hashing requires the entire range to be inside the current store");
         if (remaining <= 16) {
             if (remaining == 0) {
                 return 0;

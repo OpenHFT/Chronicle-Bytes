@@ -39,6 +39,52 @@ its store. Chunked mappings use fixed-size regions, while single mappings cover
 an entire file. Synchronisation with the filesystem is controlled via
 `SyncMode`.
 
+//! Documents the acquired-range contract introduced with the mapping-boundary fix: reads that straddled a
+//! zero-overlap chunk end used to continue from raw memory beyond the mapping (JVM crash or garbage) and now throw,
+//! matching the write-side check (MappedBytesReadAcrossMappingTest#primitiveReadStraddlingTheMappingEndIsRejected).
+//! Byte-array copies are the exception: ChunkedMappedBytes copies them in pieces bounded by each mapping
+//! (MappedBytesReadAcrossMappingTest#bulkReadAcrossTheMappingEnd and #copyToAcrossTheMappingEnd).
+Primitive reads and atomic swaps need their entire value inside one chunk mapping,
+including any overlap (CB-NF-S-001). If acquiring the chunk for the offset still
+leaves part of the value outside that mapping, `ChunkedMappedBytes` throws
+`DecoratedBufferUnderflowException`, matching its existing write-side range check.
+This includes volatile reads and peeks, and long compare-and-swap, where Core already refuses a
+straddling swap as misaligned and the check only unifies the exception type. A rejected primitive read
+preserves the read position, but may switch the current mapping. A copy that fails while acquiring a
+later mapping can leave partial output; a streaming copy can also advance the read position.
+`unsafeRead` and `unsafeReadObject` reject insufficient logical input before consuming or copying bytes.
+Byte-wise reads can continue into the next chunk, and byte-array copies
+(`read(byte[])`, `read(offset, byte[], arrayOffset, length)`, `copyTo(byte[])`) are performed in pieces
+that each stay inside one mapping. `read(Bytes, length)` and `readWithLength(Bytes)` still copy full
+eight-byte words, so they reject a word that straddles a zero-overlap chunk end.
+
+//! MappedBytesReadAcrossMappingTest#hashAcrossTheMappingEndIsRejected prevents an unbounded copy or raw read;
+//! #hashPrefixWithinCurrentMappingMatchesNative pins reselecting the cursor's chunk after a random read.
+`hash(length)` requires the entire range to be inside the current mapping, including any overlap.
+Otherwise it throws `UnsupportedOperationException` without copying the range or acquiring another chunk.
+Copying a potentially multi-terabyte mapped range into a retained direct buffer would be unreasonable.
+A random read can select another chunk without moving the cursor; call `readPosition(readPosition())`
+to reselect the cursor's chunk before hashing a range that fits there. Rejection preserves the read position,
+read limit and current mapping. Hash values within one mapping and heap hashes are unchanged.
+
+//! Lists the remaining observable changes of the mapping-boundary fix so a caller can find them in one place:
+//! MappedBytesReadAcrossMappingTest#copyFromAZeroOverlapSourceAcrossItsMappingEnd, #equalBytesAcrossTheMappingEndCompares,
+//! #peekUnsignedByteInALaterMappingMatchesTheRead and #parseUtf8StopCharEndOfInputIsTheSameOnEveryBackend.
+Copies that read from a `MappedBytes` source (`write(offset, RandomDataInput, ...)`, `write(BytesStore, offset,
+length)`, the streaming `write(bytes, offset, length)`, `unsafeRead` and `unsafeReadObject`) go through checked
+reads when the source range is not inside its current chunk. `equalBytes` compares the part of a range beyond the
+current chunk byte by byte. Ordinary `equals` and `startsWith` also use checked byte reads when their
+compared ranges do not fit the current mappings, including when vectorisation is disabled.
+Equality retains its zero-filled unallocated-tail semantics, and comparisons preserve the read positions.
+`peekUnsignedByte(offset)` answers for every chunk, not only the first. A direct store returns `-1` for
+an offset outside its mapping before translating the address, including with assertions enabled. A copy from any
+`Bytes` whose range exceeds its store throws `BufferUnderflowException` instead of reading past the store. On every
+backend, stop-character UTF-8 parsing ends on a clean end of input between complete characters, rejects the
+overlong lead bytes 0xC0 and 0xC1 and three-byte overlong encodings starting with E0 80..9F,
+and throws on truncated characters or invalid continuation bytes. The stop-character decoder retains
+three-byte surrogate code units (ED A0..BF 80..BF), as emitted by `appendUtf8Char`; it is not a strict
+Unicode-scalar UTF-8 validator.
+
 == 4  On-Heap Stores
 
 `HeapBytesStore` wraps a `byte[]`. The JVM manages the array but the surrounding

@@ -155,6 +155,13 @@ enum BytesInternal {
             // The size is different so, we know that a and b cannot be equal
             return false;
 
+        // Both vectorised and unchecked readers bypass chunk acquisition. A logical read limit can span mappings.
+        final long aLength = a.realReadRemaining();
+        final long bLength = b.realReadRemaining();
+        if (!insideCurrentStore(a, a.readPosition(), aLength)
+                || !insideCurrentStore(b, b.readPosition(), bLength))
+            return contentEqualBytes(a, b, aLength, bLength);
+
         if (VECTORIZED_MISMATCH_METHOD_HANDLE != null
                 && b.realReadRemaining() == a.realReadRemaining()
                 && a.realReadRemaining() < Integer.MAX_VALUE
@@ -174,6 +181,25 @@ enum BytesInternal {
         return readRemaining <= Integer.MAX_VALUE
                 ? contentEqualInt(a, b)
                 : contentEqualsLong(a, b);
+    }
+
+    private static boolean contentEqualBytes(BytesStore<?, ?> a, BytesStore<?, ?> b, long aLength, long bLength) {
+        if (aLength < bLength)
+            return contentEqualBytes(b, a, bLength, aLength);
+        final long aPos = a.readPosition();
+        final long bPos = b.readPosition();
+        long i = 0;
+        // Checked byte reads acquire successive chunks, including where a word would straddle a zero-overlap boundary.
+        for (; i < bLength; i++) {
+            if (a.readByte(aPos + i) != b.readByte(bPos + i))
+                return false;
+        }
+        // Equality treats the unallocated tail of an elastic store as zeros.
+        for (; i < aLength; i++) {
+            if (a.readByte(aPos + i) != 0)
+                return false;
+        }
+        return true;
     }
 
     /**
@@ -446,7 +472,9 @@ enum BytesInternal {
             return false;
         }
 
-        if (b instanceof HasUncheckedRandomDataInput) {
+        if (b instanceof HasUncheckedRandomDataInput
+                && insideCurrentStore(a, a.readPosition(), bRealReadRemaining)
+                && insideCurrentStore(b, b.readPosition(), bRealReadRemaining)) {
             // We have hoisted out boundary checks in this path
             return startsWithUnchecked(a.acquireUncheckedInput(),
                     ((HasUncheckedRandomDataInput) b).acquireUncheckedInput(),
@@ -489,6 +517,8 @@ enum BytesInternal {
                                       @NonNegative final long aPos,
                                       @NonNegative final long bPos,
                                       @NonNegative final long length) {
+        if (!insideCurrentStore(a, aPos, length) || !insideCurrentStore(b, bPos, length))
+            return contentEqualBytes(a, b, length, length);
         int i;
         for (i = 0; i < length - 7; i += 8) {
             if (a.readLong(aPos + i) != b.readLong(bPos + i))
@@ -571,8 +601,14 @@ enum BytesInternal {
             } else if (input instanceof Bytes
                     && ((Bytes) input).bytesStore() instanceof NativeBytesStore) {
                 @Nullable NativeBytesStore bs = (NativeBytesStore) ((Bytes) input).bytesStore();
-                parseUtf8_SB1(bs, offset, (StringBuilder) appendable, length);
-                return;
+                //! A MappedBytes exposes only its current chunk as bytesStore(), and parseUtf8_SB1 bounds its raw read by
+                //! that store alone: readUtf8(offset, sb) threw for a string ending beyond the chunk although the bytes
+                //! exist. Read raw only when the whole range is inside the store; parseUtf81 acquires the right chunk
+                //! for every byte. Test: MappedBytesReadAcrossMappingTest#readUtf8AtOffsetAcrossMappingBoundary.
+                if (bs.inside(offset, length)) {
+                    parseUtf8_SB1(bs, offset, (StringBuilder) appendable, length);
+                    return;
+                }
             }
         }
         parseUtf81(input, offset, appendable, length);
@@ -2431,8 +2467,21 @@ enum BytesInternal {
 
         @Nullable final NativeBytesStore nb = (NativeBytesStore) bytes.bytesStore();
         int i = 0;
-        final int len = (int) Math.min(bytes.realReadRemaining(), Integer.MAX_VALUE);
-        final long address = nb.address + nb.translate(bytes.readPosition());
+        final long readPosition = bytes.readPosition();
+        final long remaining = bytes.realReadRemaining();
+        //! realReadRemaining() is bounded by the file, not by the current chunk, so a raw scan whose stop char lay in
+        //! the next chunk read past the mapping: a crash or garbage. Bound the scan by the store's absolute end
+        //! (realCapacity() includes the overlap); a plain NativeBytesStore is unchanged. Tests:
+        //! MappedBytesReadAcrossMappingTest#parseUtf8StopCharAcrossMappingBoundary and
+        //! #parseUtf8StopCharAcrossMappingBoundaryUpToTheReadLimit, whose builders are larger than the distance to the
+        //! boundary so the raw scan reaches the mapping end, and the 256-capacity rows of
+        //! #parseUtf8StopCharEndOfInputIsTheSameOnEveryBackend at two distances.
+        final long inStore = readPosition < nb.start() ? 0 : Math.min(remaining, nb.realCapacity() - readPosition);
+        final int len = (int) Math.min(inStore, Integer.MAX_VALUE);
+        //! translate(readPosition) asserts its bounds, and the read position can lie outside the current store after a
+        //! random read remapped ahead; that case takes the checked continuation, so the address is only computed when
+        //! the raw scan will run. MappedBytesReadAcrossMappingTest#parseUtf8StopCharAfterARandomReadRemappedAhead.
+        final long address = len > 0 ? nb.address + nb.translate(readPosition) : 0L;
         @Nullable final Memory memory = nb.memory;
 
         if (Jvm.isJava9Plus() && Jvm.maxDirectMemory() > 0) {
@@ -2464,9 +2513,12 @@ enum BytesInternal {
         }
         StringUtils.setCount(appendable, i);
         bytes.readSkip(i);
-        if (i < len) {
+        //! The raw scan can also stop at the end of the current mapping (len is at most remaining); the checked decoder
+        //! acquires the next chunk byte by byte and handles a clean end of input or a malformed byte there.
+        //! Tests: MappedBytesReadAcrossMappingTest#parseUtf8StopCharAcrossMappingBoundary and
+        //! #parseUtf8StopCharEndOfInputIsTheSameOnEveryBackend.
+        if (i < remaining)
             readUtf8_SB2(bytes, appendable, tester);
-        }
     }
 
     private static void readUtf8_SB2(@NotNull StreamingDataInput bytes, @NotNull StringBuilder appendable, @NotNull StopCharTester tester)
@@ -2474,6 +2526,13 @@ enum BytesInternal {
         while (true) {
             int c = bytes.readUnsignedByte();
             switch (c >> 4) {
+                //! -1 is a clean end of input, not a malformed byte, and -1 >> 4 is -1 (the arithmetic shift; >>> would
+                //! give 0x0FFFFFFF), so it is one more case of the dispatch. Before, an unterminated token threw or returned
+                //! depending on the builder's capacity and the backend; now it ends the scan on every backend, contiguous
+                //! memory too, and an end of input inside a multi-byte sequence still throws below.
+                //! MappedBytesReadAcrossMappingTest#parseUtf8StopCharEndOfInputIsTheSameOnEveryBackend fails without this.
+                case -1:
+                    return;
                 case 0:
                 case 1:
                 case 2:
@@ -2491,6 +2550,12 @@ enum BytesInternal {
                 case 12:
                 case 13: {
                     /* 110x xxxx 10xx xxxx */
+                    //! Lead bytes 0xC0 and 0xC1 only start overlong encodings, which UTF-8 forbids; they were accepted here
+                    //! and looked rejected only because the scan then threw at the end of the input. The overlong rows of
+                    //! MappedBytesReadAcrossMappingTest#parseUtf8StopCharEndOfInputIsTheSameOnEveryBackend fail without this
+                    //! on the direct and mapped backends.
+                    if (c < 0xC2)
+                        throw newUTFDataFormatException(-1, "");
                     int char2 = bytes.readUnsignedByte();
                     if ((char2 & 0xC0) != 0x80)
                         throw newUTFDataFormatException(-1, "");
@@ -2507,7 +2572,9 @@ enum BytesInternal {
                     int char2 = bytes.readUnsignedByte();
                     int char3 = bytes.readUnsignedByte();
 
-                    if (((char2 & 0xC0) != 0x80) || ((char3 & 0xC0) != 0x80))
+                    // E0 80..9F would encode a value below U+0800 using three bytes.
+                    if (((char2 & 0xC0) != 0x80) || ((char3 & 0xC0) != 0x80)
+                            || (c == 0xE0 && char2 < 0xA0))
                         throw newUTFDataFormatException(-1, "");
                     int c3 = (char) (((c & 0x0F) << 12) |
                             ((char2 & 0x3F) << 6) |
@@ -2539,17 +2606,18 @@ enum BytesInternal {
         while (len-- > 0) {
             int c = bytes.rawReadByte() & 0xff;
             if (c >= 128) {
+                //! Decode from the non-ASCII byte even when it is the last one: a trailing lead byte used to be left unread
+                //! and the scan returned where the native scan throws. A clean ASCII end of input must not enter the
+                //! decoder: an unchecked Bytes cannot report -1 (BytesTest#testParseUtf8 on the unchecked heap allocator).
+                //! MappedBytesReadAcrossMappingTest#parseUtf8StopCharEndOfInputIsTheSameOnEveryBackend covers the heap backend.
                 bytes.readSkip(-1);
-                break;
+                readUtf82(bytes, appendable, tester);
+                return;
             }
             if (tester.isStopChar(c))
                 return;
             appendable.append((char) c);
         }
-        if (len <= 0)
-            return;
-
-        readUtf82(bytes, appendable, tester);
     }
 
     private static void readUtf82(@NotNull StreamingDataInput bytes, @NotNull Appendable appendable, @NotNull StopCharTester tester)
@@ -2557,6 +2625,10 @@ enum BytesInternal {
         while (true) {
             int c = bytes.readUnsignedByte();
             switch (c >> 4) {
+                //! The heap-bytes decoder had the same end-of-input defect as readUtf8_SB2: see the note there.
+                //! MappedBytesReadAcrossMappingTest#parseUtf8StopCharEndOfInputIsTheSameOnEveryBackend covers the heap backend.
+                case -1:
+                    return;
                 case 0:
                 case 1:
                 case 2:
@@ -2574,6 +2646,10 @@ enum BytesInternal {
                 case 12:
                 case 13: {
                     /* 110x xxxx 10xx xxxx */
+                    //! Overlong lead bytes, as in readUtf8_SB2. MoreBytesTest#testInvalidUTF8Scan (heap) and the heap rows of
+                    //! MappedBytesReadAcrossMappingTest#parseUtf8StopCharEndOfInputIsTheSameOnEveryBackend fail without this.
+                    if (c < 0xC2)
+                        throw new UTFDataFormatException(MALFORMED_INPUT_AROUND_BYTE);
                     int char2 = bytes.readUnsignedByte();
                     if ((char2 & 0xC0) != 0x80)
                         throw new UTFDataFormatException(
@@ -2591,7 +2667,8 @@ enum BytesInternal {
                     int char2 = bytes.readUnsignedByte();
                     int char3 = bytes.readUnsignedByte();
 
-                    if (((char2 & 0xC0) != 0x80) || ((char3 & 0xC0) != 0x80))
+                    if (((char2 & 0xC0) != 0x80) || ((char3 & 0xC0) != 0x80)
+                            || (c == 0xE0 && char2 < 0xA0))
                         throw new UTFDataFormatException(
                                 MALFORMED_INPUT_AROUND_BYTE);
                     int c3 = (char) (((c & 0x0F) << 12) |
@@ -3301,9 +3378,12 @@ enum BytesInternal {
         long i = 0;
         long rp1 = b1.readPosition();
         long rp2 = b2.readPosition();
+        //! readLong(offset) is rejected by a ChunkedMappedBytes when the word straddles the chunk acquired for it, so a
+        //! word outside the current mapping ends the word loop and the byte loop compares the rest through readByte(offset),
+        //! which acquires the next chunk. MappedBytesReadAcrossMappingTest#equalBytesAcrossTheMappingEndCompares fails without this.
         for (; i < readRemaining - 7 &&
-                canReadBytesAt(b1, rp1 + i, 8) &&
-                canReadBytesAt(b2, rp2 + i, 8); i += 8) {
+                canReadWordAt(b1, rp1 + i) &&
+                canReadWordAt(b2, rp2 + i); i += 8) {
             long l1 = b1.readLong(rp1 + i);
             long l2 = b2.readLong(rp2 + i);
             if (l1 != l2)
@@ -3350,12 +3430,34 @@ enum BytesInternal {
         }
     }
 
+    /**
+     * @return whether {@code source}, if it is a {@link Bytes}, currently maps the whole range. Any other input keeps
+     * its existing handling: this is not a general range check. Does not acquire a mapping: acquire the chunk for
+     * {@code offset} first where needed.
+     */
+    //! Shared by the source-side copy sites (NativeBytesStore.write, VanillaBytes.optimisedWrite and write0, writeFully,
+    //! the unsafeRead defaults), which copied raw memory past a source's mapping.
+    //! Test: MappedBytesReadAcrossMappingTest#copyFromAZeroOverlapSourceAcrossItsMappingEnd.
+    public static boolean insideCurrentStore(final Object source, @NonNegative final long offset, @NonNegative final long length) {
+        return !(source instanceof Bytes) || ((Bytes<?>) source).bytesStore().inside(offset, length);
+    }
+
     public static void writeFully(@NotNull final RandomDataInput bytes,
                                   @NonNegative final long offset,
                                   @NonNegative final long length,
                                   @NotNull final StreamingDataOutput sdo)
             throws BufferUnderflowException, BufferOverflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
         long i = 0;
+
+        //! A source read across its chunk end is copied byte by byte: readLong(offset) is rejected for a straddling word,
+        //! readByte(offset) acquires chunks as it goes, and a range past the source's store fails there instead of being
+        //! read raw. MappedBytesReadAcrossMappingTest#copyFromAZeroOverlapSourceAcrossItsMappingEnd reaches this through
+        //! the copies; #copyPastTheEndOfASourceStoreIsRejected covers the over-read.
+        if (!insideCurrentStore(bytes, offset, length)) {
+            for (; i < length; i++)
+                sdo.rawWriteByte(bytes.readByte(offset + i));
+            return;
+        }
 
         if (bytes instanceof HasUncheckedRandomDataInput) {
             // Do boundary checking outside the inner loop
@@ -3574,6 +3676,12 @@ enum BytesInternal {
     private static boolean canReadBytesAt(
             final BytesStore<?, ?> bs, final long offset, final int length) {
         return bs.readLimit() - offset >= length;
+    }
+
+    //! Word loop of equalBytesAny: a readable word that is not inside the current mapping is left to the byte loop.
+    //! MappedBytesReadAcrossMappingTest#equalBytesAcrossTheMappingEndCompares fails without it.
+    private static boolean canReadWordAt(final BytesStore<?, ?> bs, final long offset) {
+        return canReadBytesAt(bs, offset, 8) && bs.bytesStore().inside(offset, 8);
     }
 
     public static String parse8bit(ByteStringParser bsp, StopCharTester stopCharTester)

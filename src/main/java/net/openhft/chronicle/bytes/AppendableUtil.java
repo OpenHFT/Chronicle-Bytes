@@ -262,6 +262,14 @@ public enum AppendableUtil {
             throw new BufferUnderflowException();
         @Nullable NativeBytesStore nbs = (NativeBytesStore) bytes.bytesStore();
         long offset = bytes.readPosition();
+        //! An appended Queue key can cross a compact reader's zero-overlap mapping, and readRemaining() is only a logical
+        //! bound: the raw read crashed the JVM or corrupted the key. Read raw only when the whole range is inside this
+        //! store, overlap included; otherwise parse8bit1 reacquires chunks byte by byte.
+        //! Tests: MappedBytesReadAcrossMappingTest#read8bitAcrossMappingBoundary and #read8bitWithinCurrentMapping.
+        if (!nbs.inside(offset, length)) {
+            BytesInternal.parse8bit1(bytes, sb, length);
+            return;
+        }
         int count = BytesInternal.parse8bit_SB1(offset, nbs, sb, length);
         bytes.readSkip(count);
     }
