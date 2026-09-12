@@ -1,8 +1,9 @@
 = Chronicle Bytes Domestic Utilities
-:doctype: book
 :toc:
-:toclevels: 2
 :lang: en-GB
+:toclevels: 2
+:doctype: book
+:source-highlighter: rouge
 
 The `net.openhft.chronicle.bytes.domestic` package contains helper classes primarily used internally by Chronicle Bytes.
 These are not intended as a stable public API, and their behaviour may change between releases without prior notice.
@@ -14,15 +15,24 @@ This class provides a mechanism for acquiring exclusive, re-entrant locks on fil
 
 === Purpose
 
-`ReentrantFileLock` is designed to prevent `OverlappingFileLockException` when the same thread attempts to acquire a lock on the same file multiple times. [cite: 1395] It achieves this by tracking locks on a per-thread basis using the canonical path of the file. [cite: 1395, 1396] Note that it does not prevent separate threads or processes from taking overlapping file locks if they are not using this specific re-entrant mechanism. [cite: 1395]
+`ReentrantFileLock` is designed to prevent `OverlappingFileLockException` when the same thread attempts to acquire a lock on the same file multiple times.
+It achieves this by tracking locks on a per-thread basis using the canonical path of the file.
+Note that it does not prevent separate threads or processes from taking overlapping file locks if they are not using this specific re-entrant mechanism.
 
 === Features
 
-* **Re-entrant Locking**: Allows a thread to acquire a lock multiple times on the same file without throwing an exception.
-The lock is only released when the corresponding number of `release()` calls have been made. [cite: 1396]
-* **Canonical Path Based**: Uses the canonical file path to identify locks, ensuring that different paths referring to the same file are treated as a single lockable entity. [cite: 1395, 1396]
-* **Thread-Local Tracking**: Manages held locks using thread-local storage. [cite: 1395]
-* **Standard `FileLock` Delegate**: Wraps a standard `java.nio.channels.FileLock`. [cite: 1396]
+Re-entrant locking::
+Allows a thread to acquire a lock multiple times on the same file without throwing an exception.
+The lock is only released when the corresponding number of `release()` calls have been made.
+
+Canonical-path based::
+Uses the canonical file path to identify locks, ensuring that different paths referring to the same file are treated as a single lockable entity.
+
+Thread-local tracking::
+Manages held locks using thread-local storage.
+
+Standard `FileLock` delegate::
+Wraps a standard `java.nio.channels.FileLock`.
 
 === Typical Usage
 
@@ -36,8 +46,14 @@ import java.nio.channels.FileChannel;
 import java.nio.file.StandardOpenOption;
 
 File fileToLock = new File("mydata.lock");
+
 // Obtain a FileChannel, for example:
-try (FileChannel channel = FileChannel.open(fileToLock.toPath(), StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE)) {
+try (FileChannel channel = FileChannel.open(
+        fileToLock.toPath(),
+        StandardOpenOption.READ,
+        StandardOpenOption.WRITE,
+        StandardOpenOption.CREATE)) {
+
     // Acquire the lock
     try (ReentrantFileLock lock = ReentrantFileLock.lock(fileToLock, channel)) {
         // Work with the file exclusively within this thread
@@ -52,9 +68,32 @@ try (FileChannel channel = FileChannel.open(fileToLock.toPath(), StandardOpenOpt
 
 Two main static methods are provided for acquiring locks:
 
-* `ReentrantFileLock.lock(File file, FileChannel fileChannel)`: Blocks until the lock is acquired. [cite: 1396]
-* `ReentrantFileLock.tryLock(File file, FileChannel fileChannel)`: Attempts to acquire the lock without blocking, returning `null` if the lock cannot be acquired immediately. [cite: 1396]
+* `ReentrantFileLock.lock(File file, FileChannel fileChannel)`: Blocks until the lock is acquired.
+* `ReentrantFileLock.tryLock(File file, FileChannel fileChannel)`: Attempts to acquire the lock without blocking, returning `null` if the lock cannot be acquired immediately.
 
-It's also possible to check if the current thread holds a lock on a file using `ReentrantFileLock.isHeldByCurrentThread(File file)`. [cite: 1396]
+It is also possible to check if the current thread holds a lock on a file using `ReentrantFileLock.isHeldByCurrentThread(File file)`.
 
-For general memory management information concerning `Bytes` and `BytesStore` which might be used in conjunction with file operations, refer to `memory-management.adoc` and `architecture-overview.adoc`.
+== Trade-offs and Alternatives
+
+The re-entrant locking approach used here trades strict global guarantees for low overhead and developer ergonomics:
+
+* *Pros:*
+** Simple API that mirrors `FileLock` while avoiding `OverlappingFileLockException` for the same thread.
+** No global registry beyond thread-local tracking, keeping contention and allocation overhead low.
+** Works well for single-process, multi-threaded applications where Chronicle Bytes already manages the mapped files.
+
+* *Cons:*
+** Does not coordinate with other JVMs or processes unless they also use `ReentrantFileLock`; OS-level semantics still apply.
+** Misuse (for example, forgetting to use try-with-resources) can lead to locks being held longer than intended.
+
+Alternatives include:
+
+* Relying solely on `java.nio.channels.FileLock` and handling `OverlappingFileLockException` manually.
+* Using higher-level coordination mechanisms in Chronicle Queue or external coordination services (for example, system-level file locks or cluster coordination).
+
+== Further Reading
+
+For general memory-management information concerning `Bytes` and `BytesStore` (which may be used in conjunction with file operations), see:
+
+* `memory-management.adoc`
+* `architecture-overview.adoc`
