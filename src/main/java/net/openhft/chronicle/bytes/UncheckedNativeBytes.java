@@ -160,6 +160,7 @@ public class UncheckedNativeBytes<U>
         // Return this Bytes object to allow for method chaining
         return this;
     }
+
     @NotNull
     @Override
     public Bytes<U> readPosition(@NonNegative long position) {

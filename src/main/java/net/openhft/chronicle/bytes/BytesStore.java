@@ -30,7 +30,14 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
 /**
  * Reference to a fixed-capacity region of memory. The bounds are immutable but
- * the content may be mutable. The instance itself is {@link ReferenceCounted}.
+ * the content may be mutable. A {@code BytesStore} exposes both random access
+ * operations and cursor based views via {@link Bytes} wrappers. Implementations
+ * may wrap on-heap arrays, direct native memory or memory-mapped files, but all
+ * are {@link ReferenceCounted} and must be released when no longer needed to
+ * avoid leaks.
+ *
+ * <p>Thread safety is implementation specific; callers must obey any documented
+ * single-writer or single-reader constraints when sharing instances.
  *
  * @param <B> concrete subtype
  * @param <U> backing buffer type
@@ -551,6 +558,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
     /**
      * <p>
      * This is assumed to be used to print the contents on a best-effort basis. If an Error occurs it will be returned in the String.
+     *
      * @param maxLength the maximum length of the output
      * @return this BytesStore as a DebugString.
      */

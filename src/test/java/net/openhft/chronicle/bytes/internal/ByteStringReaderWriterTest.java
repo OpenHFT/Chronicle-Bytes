@@ -64,4 +64,3 @@ public class ByteStringReaderWriterTest extends BytesTestCommon {
         }
     }
 }
-

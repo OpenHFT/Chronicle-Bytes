@@ -14,6 +14,14 @@ import java.nio.ByteBuffer;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * JMH benchmarks comparing {@link Bytes} backed by elastic {@link ByteBuffer} instances and
+ * {@link MappedBytes} for common append, read, write and equals operations.
+ *
+ * <p>The benchmarks exercise a set of representative workloads over randomly initialised buffers
+ * to characterise relative performance and allocation behaviour between heap based and mapped
+ * implementations.
+ */
 public class ElasticByteBufferJmh {
 
     static final int SIZE = 1024;

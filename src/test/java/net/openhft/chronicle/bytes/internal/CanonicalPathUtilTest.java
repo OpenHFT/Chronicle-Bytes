@@ -37,4 +37,3 @@ public class CanonicalPathUtilTest extends BytesTestCommon {
         assertSame("Same canonical path must be same instance", p1, p2);
     }
 }
-

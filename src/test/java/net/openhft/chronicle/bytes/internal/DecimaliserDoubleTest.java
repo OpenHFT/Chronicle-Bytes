@@ -216,4 +216,3 @@ class DecimaliserDoubleTest extends BytesTestCommon {
         assertFalse(SimpleDecimaliser.SIMPLE.toDecimal(value, check));
     }
 }
-

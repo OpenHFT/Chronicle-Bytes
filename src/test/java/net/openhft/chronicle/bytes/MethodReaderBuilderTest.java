@@ -7,7 +7,6 @@ import net.openhft.chronicle.core.Jvm;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
-import java.util.function.Predicate;
 
 import static org.junit.Assume.assumeFalse;
 import static org.mockito.Mockito.*;

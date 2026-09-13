@@ -35,6 +35,7 @@ public interface RandomCommon extends ReferenceCounted {
     default long capacity() {
         return Bytes.MAX_CAPACITY;
     }
+
     /**
      * @return the current allocated capacity of the underlying storage.
      * For elastic buffers this may be less than {@link #capacity()} and can grow on demand.
@@ -45,7 +46,8 @@ public interface RandomCommon extends ReferenceCounted {
     }
 
     /**
-    /**
+     * Returns the current read position.
+     *
      * @return the current read position.
      * Typically {@code start() <= readPosition() <= writePosition()} and {@code readPosition() <= readLimit()}.
      */

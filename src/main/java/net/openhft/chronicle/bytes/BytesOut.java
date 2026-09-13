@@ -18,7 +18,12 @@ import static net.openhft.chronicle.bytes.internal.ReferenceCountedUtil.throwExc
 
 /**
  * Output interface for writing to a {@link Bytes} buffer. It combines streaming
- * writes with text appending and prepending utilities.
+ * writes with text appending and prepending utilities. Implementations track a
+ * dedicated write cursor and are responsible for validating capacity before
+ * advancing it. Instances are usually coupled with {@link BytesIn} on the
+ * consumer side and may be reused across multiple messages to minimise
+ * allocation. For off-heap stores, callers must respect reference counting and
+ * release any wrapper after use.
  *
  * @param <U> underlying store type
  */

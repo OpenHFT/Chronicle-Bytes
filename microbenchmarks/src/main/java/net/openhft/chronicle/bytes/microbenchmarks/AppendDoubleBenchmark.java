@@ -56,6 +56,18 @@ AppendDoubleBenchmark.appendFloatUnchecked       avgt    5   31.680 ±  0.233  n
 AppendDoubleBenchmark.appendFloatUncheckedHeap   avgt    5   52.645 ±  0.512  ns/op
 */
 
+/**
+ * JMH benchmark suite for appending floating point values to {@link Bytes} instances.
+ *
+ * <p>The benchmark exercises different append strategies (heap vs direct, checked vs unchecked)
+ * for {@code double} and {@code float} values and compares them against the JDK's
+ * {@link Double#toString(double)}, {@link Float#toString(float)} and {@link String#format} based
+ * approaches. It is used to validate and tune Chronicle Bytes formatting performance.
+ * <p>
+ * Run via {@code mvn -pl Chronicle-Bytes -DskipTests -Dtest=AppendDoubleBenchmark} or directly
+ * through JMH. Use {@code -Dbytes.append.precision} to experiment with different decimal precision
+ * trade-offs.
+ */
 @Warmup(iterations = 3, time = 1)
 @Measurement(iterations = 5, time = 1)
 @Fork(1)

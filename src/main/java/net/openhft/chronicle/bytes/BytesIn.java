@@ -15,7 +15,13 @@ import java.nio.BufferUnderflowException;
 
 /**
  * Reads data from a byte stream or buffer. Combines random access, sequential
- * streaming, and text parsing capabilities.
+ * streaming, and text parsing capabilities while maintaining an independent
+ * read cursor. Implementations are typically paired with a {@link BytesOut}
+ * for request/response flows and may offer lenient mode so parsers can inspect
+ * headers without throwing on short buffers. Implementations are not thread
+ * safe unless documented otherwise; most are single-reader and rely on
+ * {@link RandomDataInput} fence methods for visibility when off-heap memory is
+ * shared.
  *
  * @param <U> underlying buffer type
  */

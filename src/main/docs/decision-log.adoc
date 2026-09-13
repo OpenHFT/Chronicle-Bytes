@@ -1,0 +1,200 @@
+= Chronicle Bytes - Decision Log
+:toc:
+:lang: en-GB
+:source-highlighter: rouge
+
+This file captures component-specific architectural and design decisions for Chronicle Bytes.
+Identifiers follow the Nine-Box pattern `<Scope>-<Tag>-NNN` described in `AGENTS.md`.
+Numbers are unique within the `CB` scope, and decisions cross-reference the formal requirements in
+`project-requirements.adoc` and the wider architecture documentation.
+
+== Decision Index
+
+* link:#CB-FN-101[CB-FN-101 Bytes and BytesStore API Split]
+* link:#CB-FN-102[CB-FN-102 Elastic Buffer Growth within Real Capacity]
+* link:#CB-FN-103[CB-FN-103 Atomic Operations on Off-Heap BytesStore]
+* link:#CB-FN-104[CB-FN-104 Zero-Copy Slicing and View Semantics]
+* link:#CB-NF-P-201[CB-NF-P-201 Encoding, Alignment and Pooling Strategy]
+* link:#CB-DOC-101[CB-DOC-101 Documentation Structure and Diagrams]
+
+[[CB-FN-101]]
+== CB-FN-101 Bytes and BytesStore API Split
+
+Context::
+* Chronicle Bytes must support a range of storage backends (on-heap arrays, off-heap native memory, memory-mapped files) without duplicating logic for cursor handling and API behaviour.
+* Higher level libraries (Wire, Queue, Map, Values) expect a consistent, low-level byte-access surface that hides storage details but exposes precise control over read and write positions.
+* Requirements `CB-FN-001` and `CB-FN-002` in `project-requirements.adoc` define the need for separate cursors and a backing store abstraction.
+Decision Statement::
+* Chronicle Bytes defines `BytesStore<B, U>` as the primary representation of the underlying memory region, and `Bytes<U>` as a mutable view over a `BytesStore` with independent read and write cursors.
+* Implementations of `BytesStore` cover on-heap, direct off-heap and memory-mapped storage, while all `Bytes` implementations present the same cursor-based API.
+Alternatives Considered::
+* Single class combining storage and cursors::
+** Pros: fewer types for new users to learn.
+** Cons: couples storage and view concerns; makes sharing storage between multiple views and backends harder; reduces flexibility for off-heap specific behaviour.
+* Java NIO `ByteBuffer` as the canonical API::
+** Pros: standard JDK type, familiar to many developers.
+** Cons: single cursor model with `flip` semantics; less suitable for separate read and write positions; less control over off-heap and mapped memory specifics.
+Rationale for Decision::
+* The split between `BytesStore` and `Bytes` provides a stable API that can evolve storage strategies without changing callers.
+* Separate read and write cursors match Chronicle usage patterns (for example, queue appenders and tailers) and simplify the implementation of zero-copy views.
+* Higher-level components can work with `Bytes` interfaces without needing to understand whether memory is on- or off-heap.
+Impact & Consequences::
+* Callers must acquire a `Bytes` view from a `BytesStore` rather than manipulating storage directly.
+* Sharing the same `BytesStore` between multiple `Bytes` views becomes a first-class pattern and underpins many memory-saving features.
+* Tests and documentation use the `CB-FN-001` and `CB-FN-002` identifiers when referring to these guarantees.
+Notes/Links::
+* link:project-requirements.adoc[Chronicle Bytes Project Requirements]
+* link:architecture-overview.adoc[Architecture Overview]
+* link:api-guide.adoc[API Guide]
+
+[[CB-FN-102]]
+== CB-FN-102 Elastic Buffer Growth within Real Capacity
+
+Context::
+* Many Chronicle workloads write variable-length records and cannot know the final buffer size in advance.
+* Unbounded growth risks exhausting memory or breaking latency guarantees when large reallocations occur.
+* Requirement `CB-FN-003` in `project-requirements.adoc` defines transparent growth up to a documented real capacity.
+Decision Statement::
+* Chronicle Bytes provides elastic `Bytes` variants (for example created via `Bytes.allocateElasticDirect()`) that grow transparently up to the maximum real capacity advertised by their `BytesStore`.
+* When growth is required, the implementation allocates a larger underlying `BytesStore`, copies existing data and updates the view, but never exceeds the configured real capacity.
+Alternatives Considered::
+* Fully fixed-size buffers only::
+** Pros: predictable memory usage, no growth stalls.
+** Cons: requires callers to over-estimate sizes or implement their own growth strategies; harder to use in exploratory or heterogeneous workloads.
+* Unbounded growth by default::
+** Pros: simplest behaviour from an API perspective.
+** Cons: can lead to unpredictable memory usage and significant, unbounded copy costs; difficult to enforce operational limits.
+Rationale for Decision::
+* Elastic growth up to a known real capacity balances ergonomics with predictable resource usage.
+* A documented capacity limit makes it possible to reason about worst-case allocation costs and to test growth behaviour in micro-benchmarks.
+Impact & Consequences::
+* Callers should still pre-size buffers for predictable latency on critical paths, but can rely on elastic behaviour in less critical code.
+* Operational documentation and benchmarks (for example those referenced by `CB-NF-P-003` and `CB-NF-P-008`) exercise and validate growth behaviour.
+Notes/Links::
+* link:project-requirements.adoc[Chronicle Bytes Project Requirements]
+* link:architecture-overview.adoc#elastic-buffers[Elastic Buffers] (if present)
+* link:pool-overview.adoc[Pool Overview]
+
+[[CB-FN-103]]
+== CB-FN-103 Atomic Operations on Off-Heap BytesStore
+
+Context::
+* Low-latency components require atomic operations (compare-and-swap, get-and-add) directly on off-heap memory for lock-free algorithms and shared state.
+* Requirement `CB-FN-004` in `project-requirements.adoc` mandates such operations on 32-bit and 64-bit primitives stored off-heap.
+* Relying solely on heap-based `AtomicLong` and similar classes introduces additional indirection and garbage collection overhead.
+Decision Statement::
+* Chronicle Bytes exposes atomic operations on `BytesStore` instances that map directly onto the underlying off-heap addresses, using the minimum necessary JVM and CPU primitives.
+* These operations are documented as safe to call concurrently from multiple threads when used on properly aligned locations.
+Alternatives Considered::
+* Only support atomic operations via heap-based `Atomic*` wrappers::
+** Pros: simpler implementation, uses built-in JDK types.
+** Cons: additional indirection and allocation; does not work directly on off-heap or mapped memory; weaker fit for Chronicle workloads.
+* Provide no atomic operations at the Bytes layer::
+** Pros: keeps the API smaller and delegates concurrency to higher layers.
+** Cons: forces each higher layer to reinvent low-level CAS logic; increases the risk of inconsistent or unsafe implementations.
+Rationale for Decision::
+* Centralising atomic operations in Chronicle Bytes ensures consistent, well-tested behaviour across the stack.
+* Direct off-heap atomics align with the performance expectations of Chronicle Queue, Map, and Wire.
+Impact & Consequences::
+* Callers must respect documentation around alignment and memory ordering when using atomic operations.
+* Benchmarks and tests referenced by `CB-NF-P-005` verify performance characteristics under contention.
+Notes/Links::
+* link:project-requirements.adoc[Chronicle Bytes Project Requirements]
+* link:architecture-overview.adoc[Architecture Overview]
+* link:memory-management.adoc[Memory Management]
+
+[[CB-FN-104]]
+== CB-FN-104 Zero-Copy Slicing and View Semantics
+
+Context::
+* Applications often need to work with subranges of a larger byte region (for example individual messages in a file or buffer) without copying data.
+* Requirement `CB-FN-006` in `project-requirements.adoc` calls for slice views that share underlying storage while maintaining independent cursors.
+* Incorrect handling of slices can easily lead to use-after-free errors or confusing lifetime semantics.
+Decision Statement::
+* Chronicle Bytes supports creation of lightweight slice views (for example via `bytesForRead`, `bytesForWrite` and `slice`) that do not copy underlying data.
+* Slice views hold a reference to the original `BytesStore` and maintain their own read and write cursors constrained to the slice bounds.
+* Lifetime and ownership rules are documented so that releasing the backing store invalidates all dependent slices.
+Alternatives Considered::
+* Always copy data when creating sub-buffers::
+** Pros: simplest ownership model, eliminates shared-storage lifetime concerns.
+** Cons: increases allocation and copy costs; unsuitable for high-throughput, low-latency use cases.
+* Expose raw offsets only and require callers to manage their own views::
+** Pros: minimal API surface.
+** Cons: high risk of off-by-one and bounds errors; increases complexity in every caller.
+Rationale for Decision::
+* Zero-copy slices provide the performance characteristics required by downstream libraries while keeping the ownership rules enforceable and documentable in one place.
+* Centralising slice semantics in Chronicle Bytes reduces repeated, ad-hoc slice logic in dependent projects.
+Impact & Consequences::
+* Callers must treat slices as views rather than independent buffers and avoid releasing the underlying `BytesStore` while slices are in use.
+* Tests in the Chronicle Bytes module cover slice behaviour, bounds enforcement and sharing of underlying addresses.
+Notes/Links::
+* link:project-requirements.adoc[Chronicle Bytes Project Requirements]
+* link:architecture-overview.adoc[Architecture Overview]
+* link:memory-management.adoc[Memory Management]
+
+[[CB-NF-P-201]]
+== CB-NF-P-201 Encoding, Alignment and Pooling Strategy
+
+Context::
+* Chronicle Bytes is responsible for efficient text encoding, numeric alignment and buffer pooling, which together have a large impact on throughput and latency.
+* Requirements `CB-FN-009` .. `CB-FN-014` and the `CB-NF-P-*` entries in `project-requirements.adoc` define expectations around encoding performance, alignment and pooling overheads.
+* Changes in these areas can subtly affect higher-level protocols and applications relying on predictable performance envelopes.
+Decision Statement::
+* Chronicle Bytes standardises on a small set of encodings (including UTF-8, ISO-8859-1 and US-ASCII) with dedicated, low-allocation paths that are validated by benchmarks and tests.
+* Alignment-sensitive operations are implemented to respect platform requirements, especially for off-heap and memory-mapped stores, and are reflected in dedicated aligned access methods.
+* A configurable pooling mechanism is provided for `Bytes` instances, allowing frequent allocate-and-release cycles to be served from pools rather than fresh allocations, within the limits described in the requirements.
+Alternatives Considered::
+* Treat encoding, alignment and pooling as purely caller concerns::
+** Pros: smaller core library surface.
+** Cons: leads to inconsistent patterns across projects; duplicates work; higher risk of performance regressions and subtle bugs.
+* Support many encodings and pooling strategies without clear defaults::
+** Pros: flexibility for niche use cases.
+** Cons: harder to reason about performance; more complex configuration and testing matrix.
+Rationale for Decision::
+* A focused, well-tested core of supported encodings and pooling behaviours offers predictable performance while still allowing specialised callers to plug in alternatives where needed.
+* Capturing these decisions in one place keeps project requirements, benchmarks and implementation aligned.
+Impact & Consequences::
+* Performance-sensitive code should use the documented encodings and pooling mechanisms rather than bespoke conversions.
+* Benchmark targets in `project-requirements.adoc` (for example `CB-NF-P-006` .. `CB-NF-P-009`) are treated as gating checks for significant changes in these areas.
+Notes/Links::
+* link:project-requirements.adoc[Chronicle Bytes Project Requirements]
+* link:architecture-overview.adoc[Architecture Overview]
+* link:api-guide.adoc[API Guide]
+* link:pool-overview.adoc[Pool Overview]
+* link:memory-management.adoc[Memory Management]
+
+[[CB-DOC-101]]
+== CB-DOC-101 Documentation Structure and Diagrams
+
+Context::
+* Chronicle Bytes documentation must support both high-level architecture work (for example ARCH_TODO) and day-to-day development.
+* Requirements, decisions and usage guides were historically scattered, with few diagrams or explicit mapping between files.
+* Documentation obligations `CB-DOC-001` .. `CB-DOC-007` require British English, traceability to requirements, and clear explanations of lifecycle and threading semantics.
+Decision Statement::
+* Chronicle Bytes standardises on a three-layer documentation structure:
+** `project-requirements.adoc` as the canonical catalogue of Nine-Box requirements (`CB-FN-*`, `CB-NF-*`, `CB-DOC-*`, `CB-TEST-*`, `CB-RISK-*`);
+** `architecture-overview.adoc`, `memory-management.adoc`, `wire-integration.adoc`, and related guides as narrative explanations and diagrams that reference those requirements via anchors;
+** `functional-requirements.adoc`, `testing-strategy.adoc`, `security-review.adoc` and similar files as thematic views (for example functional behaviour, tests, security) built on top of the canonical catalogue.
+* Diagrams are provided in ASCII art and `mermaid` blocks where helpful to illustrate component relationships and lifecycles, while remaining optional for text-only environments.
+Alternatives Considered::
+* Single monolithic architecture document containing requirements, decisions, diagrams and usage examples::
+** Pros: one file to read.
+** Cons: becomes large and hard to navigate; difficult to reuse across cross-module initiatives like ARCH_TODO.
+* Minimal documentation limited to Javadoc and README only::
+** Pros: low maintenance overhead.
+** Cons: insufficient for external architecture work, compliance objectives, and cross-module reasoning.
+Rationale for Decision::
+* Separating canonical requirements from narrative guides allows requirements to be audited and evolved independently of tutorial material.
+* Thematic documents (functional requirements, testing strategy, security review, memory management) make it easier for specialists to find relevant information without reading everything.
+* Lightweight diagrams help convey relationships (for example between `Bytes` and `BytesStore`, or reference-counting states) without imposing a specific diagramming tool on all users.
+Impact & Consequences::
+* All new documentation should reference requirement IDs where applicable and follow the layering above.
+* Future diagrams should prefer text-friendly formats (ASCII art or `mermaid` in code blocks) and remain in-sync with the code and requirements they represent.
+* Cross-module documentation (for example links to Chronicle Wire or Chronicle Queue) should use relative paths so that navigation works within the repository.
+Notes/Links::
+* link:project-requirements.adoc[Chronicle Bytes Project Requirements]
+* link:architecture-overview.adoc[Architecture Overview]
+* link:functional-requirements.adoc[Functional Requirements Overview]
+* link:memory-management.adoc[Memory Management]
+* link:testing-strategy.adoc[Testing Strategy]
+* link:security-review.adoc[Security Review]

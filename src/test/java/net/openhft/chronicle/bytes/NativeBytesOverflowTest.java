@@ -14,6 +14,10 @@ import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeFalse;
 
+/**
+ * Validates that {@link NativeBytes} enforces write limits and reports buffer
+ * overflows with enriched exceptions.
+ */
 public class NativeBytesOverflowTest extends BytesTestCommon {
 
     @Test

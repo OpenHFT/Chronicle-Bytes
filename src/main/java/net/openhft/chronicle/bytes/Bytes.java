@@ -33,7 +33,12 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
  * Mutable buffer for raw byte data with separate 63-bit read and write cursors.
  * A {@code Bytes} wraps a {@link BytesStore} which may reside on-heap, in
  * native memory or in a memory-mapped file. Instances may be elastic and are
- * {@link ReferenceCounted}. They are not thread-safe.
+ * {@link ReferenceCounted}; callers must invoke {@link #releaseLast()} to free
+ * off-heap resources. Position movement is explicit via
+ * {@link #readPosition(long)} and {@link #writePosition(long)}, which allows
+ * interleaving random access with streaming reads/writes. Bytes objects are
+ * not thread-safe and should be confined to a single thread unless guarded by
+ * higher-level coordination.
  *
  * @param <U> underlying store type
  */
@@ -852,7 +857,7 @@ public interface Bytes<U> extends
     @NotNull
     @Override
     default Bytes<U> bytesForRead()
-            throws IllegalStateException, ClosedIllegalStateException, ThreadingIllegalStateException {
+            throws IllegalStateException {
         throwExceptionIfReleased(this);
 
         BytesStore<?, U> bytesStore = bytesStore();

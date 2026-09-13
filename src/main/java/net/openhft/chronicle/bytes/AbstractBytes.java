@@ -323,24 +323,6 @@ public abstract class AbstractBytes<U>
         return this;
     }
 
-    @NotNull
-    private AbstractBytes<U> appendX23(double d) throws ClosedIllegalStateException, ThreadingIllegalStateException {
-        boolean fits = canWriteDirect(32);
-        if (fits) {
-            long address = addressForWrite(writePosition());
-            long address2 = UnsafeText.appendDouble(address, d);
-            writeSkip(address2 - address);
-            return this;
-        } else {
-            try (ScopedResource<Bytes<?>> stlBytes = BytesInternal.acquireBytesScoped()) {
-                Bytes<?> bytes = stlBytes.get();
-                bytes.append(d);
-                append(bytes);
-            }
-        }
-        return this;
-    }
-
     /**
      * Appends the string representation of the given float value to the bytes.
      * First, it tries to convert the float value using the Decimalizer instance. If that fails,

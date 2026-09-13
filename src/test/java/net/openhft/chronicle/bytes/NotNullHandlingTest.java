@@ -12,6 +12,10 @@ import static net.openhft.chronicle.core.util.Ints.requireNonNegative;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+/**
+ * Tests defensive null and bounds handling for helper methods that accept
+ * strings and lengths, ensuring consistent exception types are thrown.
+ */
 class NotNullHandlingTest extends BytesTestCommon {
 
     @Test

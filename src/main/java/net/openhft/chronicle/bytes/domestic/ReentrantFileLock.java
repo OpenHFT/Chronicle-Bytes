@@ -28,7 +28,7 @@ import static net.openhft.chronicle.core.io.Closeable.closeQuietly;
  * <p>
  * All the usual caveats around file locks apply, shared locks and locks for specific ranges are
  * not supported.
- *
+ * <p>
  * See {@code domestic-overview.adoc} for usage notes.
  */
 public final class ReentrantFileLock extends FileLock {
@@ -99,7 +99,7 @@ public final class ReentrantFileLock extends FileLock {
 
     /**
      * Releases the lock.
-     *
+     * <p>
      * Decrements the re-entrance counter and only releases the underlying file lock
      * when the counter reaches zero.
      *

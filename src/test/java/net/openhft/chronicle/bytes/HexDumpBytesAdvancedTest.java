@@ -29,4 +29,3 @@ public class HexDumpBytesAdvancedTest extends BytesTestCommon {
         }
     }
 }
-

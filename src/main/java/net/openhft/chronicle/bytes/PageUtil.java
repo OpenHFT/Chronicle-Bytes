@@ -25,7 +25,9 @@ import static java.text.MessageFormat.format;
  */
 public final class PageUtil {
 
-    /** assumed page size when no explicit value is found */
+    /**
+     * assumed page size when no explicit value is found
+     */
     public static final int DEFAULT_HUGE_PAGE_SIZE = 2 * 1024 * 1024;
 
     private static final Pattern PAGE_SIZE_PATTERN = Pattern.compile("pagesize=([0-9]+)([KkMmGg])");
@@ -96,6 +98,7 @@ public final class PageUtil {
     /**
      * Returns page size obtained from auto-scanned hugetlbfs mount points
      * or OS default page size for a given absolute file path
+     *
      * @param absolutePath file path
      */
     @Positive
@@ -115,6 +118,7 @@ public final class PageUtil {
 
     /**
      * Whether given file is located on hugetlbfs
+     *
      * @param absolutePath file path
      * @return true if file is located on hugetlbfs
      */

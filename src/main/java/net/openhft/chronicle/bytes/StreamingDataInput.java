@@ -31,10 +31,11 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
 /**
  * Provides sequential, cursor based reading of binary and textual data from a
- * stream or buffer. Methods typically advance the {@link #readPosition()} by
- * the number of bytes consumed. Implementations may also offer lenient mode in
- * which reads beyond a limit return default values rather than throwing.
- * This interface extends {@link StreamingCommon} and {@link ByteStringParser}.
+ * stream or buffer. Methods advance the {@link #readPosition()} by the number
+ * of bytes consumed and can interleave bulk reads with text parsing helpers.
+ * Implementations may also offer lenient mode in which reads beyond a limit
+ * return defaults instead of throwing, which is useful when peeking at headers
+ * on potentially truncated buffers.
  *
  * @param <S> the concrete type
  */
