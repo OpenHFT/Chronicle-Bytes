@@ -3432,14 +3432,24 @@ enum BytesInternal {
 
     /**
      * @return whether {@code source}, if it is a {@link Bytes}, currently maps the whole range. Any other input keeps
-     * its existing handling: this is not a general range check. Does not acquire a mapping: acquire the chunk for
-     * {@code offset} first where needed.
+     * its existing handling: this is not a general range check. Follows supported Bytes views to their physical
+     * store without acquiring a mapping: acquire the chunk for {@code offset} first where needed.
      */
     //! Shared by the source-side copy sites (NativeBytesStore.write, VanillaBytes.optimisedWrite and write0, writeFully,
     //! the unsafeRead defaults), which copied raw memory past a source's mapping.
     //! Test: MappedBytesReadAcrossMappingTest#copyFromAZeroOverlapSourceAcrossItsMappingEnd.
     public static boolean insideCurrentStore(final Object source, @NonNegative final long offset, @NonNegative final long length) {
-        return !(source instanceof Bytes) || ((Bytes<?>) source).bytesStore().inside(offset, length);
+        if (!(source instanceof Bytes))
+            return true;
+        BytesStore<?, ?> store = ((Bytes<?>) source).bytesStore();
+        while (store instanceof Bytes) {
+            final BytesStore<?, ?> next = store.bytesStore();
+            if (next == store)
+                break;
+            store = next;
+        }
+        return offset >= 0 && length >= 0 && length <= Long.MAX_VALUE - offset
+                && store.inside(offset, length);
     }
 
     public static void writeFully(@NotNull final RandomDataInput bytes,

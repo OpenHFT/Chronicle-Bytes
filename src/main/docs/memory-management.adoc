@@ -89,6 +89,13 @@ Copying a potentially multi-terabyte mapped range into a retained direct buffer 
 A random read can select another chunk without moving the cursor; call `readPosition(readPosition())`
 to reselect the cursor's chunk before hashing a range that fits there. Rejection preserves the read position,
 read limit and current mapping. Hash values within one mapping and heap hashes are unchanged.
+The native hash guard also applies to the public `OptimisedBytesStoreHash.applyAsLongAny` and
+`applyAsLong32bytesMultiple` entry points; their private implementations share the validated dispatch path.
+
+Views returned by `MappedBytes.bytesForRead()` and `bytesForWrite()` retain an intermediate `MappedBytes`.
+Contiguity checks follow that backing chain to the physical store, including its lower bound, without remapping.
+The intermediate view's logical start and whole-file capacity cannot prove a native range safe.
+Copies and comparisons through either view use the same bounded fallbacks as their mapped reader.
 
 //! Lists the remaining observable changes of the mapping-boundary fix so a caller can find them in one place:
 //! MappedBytesReadAcrossMappingTest#copyFromAZeroOverlapSourceAcrossItsMappingEnd, #equalBytesAcrossTheMappingEndCompares,

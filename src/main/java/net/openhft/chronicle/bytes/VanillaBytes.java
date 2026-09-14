@@ -593,7 +593,11 @@ public class VanillaBytes<U>
 
         if (isDirectMemory() &&
                 bytesStore instanceof VanillaBytes &&
-                bytesStore.isDirectMemory()) {
+                bytesStore.isDirectMemory() &&
+                this.bytesStore instanceof NativeBytesStore &&
+                bytesStore.bytesStore() instanceof NativeBytesStore &&
+                BytesInternal.insideCurrentStore(this, readPosition(), length) &&
+                BytesInternal.insideCurrentStore(bytesStore, bytesStore.readPosition(), length)) {
             @NotNull VanillaBytes<U> b2 = uncheckedCast(bytesStore);
             @NotNull NativeBytesStore nbs0 = (NativeBytesStore) this.bytesStore;
             @Nullable NativeBytesStore nbs2 = (NativeBytesStore) b2.bytesStore();

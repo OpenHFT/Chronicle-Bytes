@@ -524,7 +524,8 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
             if (bytes.isDirectMemory()) {
                 // need to check this to pull in the right bytesStore()
                 long fromAddress = bytes.addressForRead(offset);
-                if (length <= bytes.bytesStore().realCapacity() - offset) {
+                if (BytesInternal.insideCurrentStore(bytes, offset, length)
+                        && length <= bytes.bytesStore().realCapacity() - offset) {
                     this.acquireNextByteStore(writePosition(), false);
                     // can we do a direct copy of raw memory?
                     if (bytesStore.realCapacity() - writePosition() >= length) {
