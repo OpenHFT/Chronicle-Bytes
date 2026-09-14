@@ -4,6 +4,7 @@
 package net.openhft.chronicle.bytes.algo;
 
 import net.openhft.chronicle.bytes.BytesStore;
+import net.openhft.chronicle.bytes.internal.BytesInternal;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Memory;
 import net.openhft.chronicle.core.OS;
@@ -176,10 +177,16 @@ public enum OptimisedBytesStoreHash implements BytesStoreHash<BytesStore<?,?>> {
      * @param remaining The number of bytes to process (must be a multiple of 32).
      * @return A 64-bit hash value.
      * @throws BufferUnderflowException If there is not enough data.
+     * @throws UnsupportedOperationException If the range is not wholly in the current physical store.
      *
      * <p> Intended for large direct {@link BytesStore} blocks.
      */
     public static long applyAsLong32bytesMultiple(@NotNull BytesStore<?, ?> store, @NonNegative int remaining) throws BufferUnderflowException {
+        requireContiguousRange(store, remaining);
+        return applyAsLong32bytesMultipleUnchecked(store, remaining);
+    }
+
+    private static long applyAsLong32bytesMultipleUnchecked(@NotNull BytesStore<?, ?> store, @NonNegative int remaining) {
         @NotNull final BytesStore<?, ?> bytesStore = store.bytesStore();
         final long address = bytesStore.addressForRead(store.readPosition());
         long h0 = (long) remaining * K0;
@@ -222,10 +229,16 @@ public enum OptimisedBytesStoreHash implements BytesStoreHash<BytesStore<?,?>> {
      * @param remaining The number of bytes to process (must be non-negative).
      * @return A 64-bit hash value.
      * @throws BufferUnderflowException If there is not enough data.
+     * @throws UnsupportedOperationException If the range is not wholly in the current physical store.
      *
      * <p> Fallback for arbitrary lengths; still avoids allocation.
      */
     public static long applyAsLongAny(@NotNull BytesStore<?, ?> store, @NonNegative long remaining) throws BufferUnderflowException {
+        requireContiguousRange(store, remaining);
+        return applyAsLongAnyUnchecked(store, remaining);
+    }
+
+    private static long applyAsLongAnyUnchecked(@NotNull BytesStore<?, ?> store, @NonNegative long remaining) {
         @NotNull final BytesStore<?, ?> bytesStore = store.bytesStore();
         final long address = bytesStore.addressForRead(store.readPosition());
         long h0 = remaining * K0;
@@ -365,9 +378,11 @@ public enum OptimisedBytesStoreHash implements BytesStoreHash<BytesStore<?,?>> {
      * @throws BufferUnderflowException If buffer underflows during reading.
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
+     * @throws UnsupportedOperationException If the range is not inside the current store, including any mapping overlap.
      */
     @Override
     public long applyAsLong(@NotNull BytesStore<?, ?> store, @NonNegative long remaining) throws IllegalStateException, BufferUnderflowException {
+        requireContiguousRange(store, remaining);
         if (remaining <= 16) {
             if (remaining == 0) {
                 return 0;
@@ -381,9 +396,22 @@ public enum OptimisedBytesStoreHash implements BytesStoreHash<BytesStore<?,?>> {
         } else if (remaining <= 32) {
             return applyAsLong17to32(store, (int) remaining);
         } else if ((remaining & 31) == 0) {
-            return applyAsLong32bytesMultiple(store, (int) remaining);
+            return applyAsLong32bytesMultipleUnchecked(store, (int) remaining);
         } else {
-            return applyAsLongAny(store, remaining);
+            return applyAsLongAnyUnchecked(store, remaining);
         }
+    }
+
+    private static void requireContiguousRange(BytesStore<?, ?> store, long remaining) {
+        //! Raw hashing requires one contiguous mapping; copying an arbitrary mapped range can allocate and retain
+        //! terabytes in the thread-local pool. Reject it, including lengths that overflow the addition in inside().
+        //! MappedBytesReadAcrossMappingTest#hashAcrossTheMappingEndIsRejected covers both limits;
+        //! #hashPrefixWithinCurrentMappingMatchesNative and #hashWithinOverlapMatchesNativeForASignedTailWord
+        //! preserve native prefix/tail results for ranges inside the current mapping, including its overlap.
+        final long position = store.readPosition();
+        if (position < 0 || remaining < 0 || remaining > Long.MAX_VALUE - position
+                || !BytesInternal.insideCurrentStore(store, position, remaining)
+                || !store.bytesStore().inside(position, remaining))
+            throw new UnsupportedOperationException("Hashing requires the entire range to be inside the current store");
     }
 }
