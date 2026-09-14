@@ -127,6 +127,26 @@ public class MappedBytesViewRangeTest extends BytesTestCommon {
     }
 
     @Test
+    public void copyFromViewSharingTheDestinationCanRemap() throws IOException {
+        try (MappedBytes mapped = MappedBytes.mappedBytes(file, chunk, 0L)) {
+            mapped.readPositionRemaining(chunk, 32);
+            final Bytes<?> shared = writeView ? mapped.bytesForWrite() : mapped.bytesForRead();
+            try {
+                shared.readPositionRemaining(chunk, 32);
+                mapped.writePosition(2 * chunk + 8);
+                mapped.write((BytesStore<?, ?>) shared, chunk, 32);
+                byte[] actual = new byte[32];
+                mapped.read(2 * chunk + 8, actual, 0, actual.length);
+                assertArrayEquals(Arrays.copyOfRange(data, 16, 48), actual);
+                assertEquals(2 * chunk + 40, mapped.writePosition());
+                assertEquals(chunk, shared.readPosition());
+            } finally {
+                shared.releaseLast();
+            }
+        }
+    }
+
+    @Test
     public void comparisonsThroughViewsCrossMappings() {
         for (boolean direct : new boolean[]{false, true}) {
             final Bytes<?> other = direct ? Bytes.allocateDirect(data.length) : Bytes.allocateElasticOnHeap(data.length);

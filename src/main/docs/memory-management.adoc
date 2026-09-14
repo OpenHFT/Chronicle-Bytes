@@ -96,6 +96,8 @@ Views returned by `MappedBytes.bytesForRead()` and `bytesForWrite()` retain an i
 Contiguity checks follow that backing chain to the physical store, including its lower bound, without remapping.
 The intermediate view's logical start and whole-file capacity cannot prove a native range safe.
 Copies and comparisons through either view use the same bounded fallbacks as their mapped reader.
+If a source view shares the destination's mapped reader, selecting the destination can replace the source mapping.
+The direct-copy path rechecks the source and obtains its address after that selection; otherwise it uses checked reads.
 
 //! Lists the remaining observable changes of the mapping-boundary fix so a caller can find them in one place:
 //! MappedBytesReadAcrossMappingTest#copyFromAZeroOverlapSourceAcrossItsMappingEnd, #equalBytesAcrossTheMappingEndCompares,
