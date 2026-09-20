@@ -1,0 +1,287 @@
+# Static FIX-292 isolation snapshot, 2026-09-20. Provisional entries require review before removal.
+# references changed/named test fixture
+net/openhft/chronicle/bytes/AllocationRatesTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/AppendableUtilTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/ByteCheckSumTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/ByteStoreTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/ByteStringAppenderTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/ByteStringParserTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/Bytes2Test.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/Bytes3Test.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/Bytes4Test.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/BytesBoundsAndLimitsTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/BytesCopyMatrixTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/BytesCopyOfTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/BytesDebugAndUtf8Test.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/BytesJavaDocComplianceTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/BytesLifecycleTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/BytesMarshallableTest.java
+# Open PRs #709
+net/openhft/chronicle/bytes/BytesMarshallerTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/BytesMethodWriterBuilderTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/BytesReleaseInvariantNonPerformantMethodsTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/BytesReleaseInvariantObjectTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/BytesStoreTest.java
+# Open PRs #710
+net/openhft/chronicle/bytes/BytesTest.java
+# affinity-or-global-handler
+net/openhft/chronicle/bytes/BytesTestCommonTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/BytesTextMethodTesterTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/BytesUtilEqualityTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/BytesUtilTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/BytesWrite8bitRoundTripTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/BytesWriteSkipBehaviourTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/CheckOverSizedMessagesTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/CommonMarshallableTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/ConcurrentRafAccessTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/CopyBytesTest.java
+# Open PRs #709, #720, #739; process-global-setting
+net/openhft/chronicle/bytes/DistributedUniqueTimeProviderTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/HeapByteStoreTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/HexDumpBytesAdvancedTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/HexDumpBytesLayoutTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/HexDumpBytesTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/Issue128Test.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/Issue225Test.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/Issue281Test.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/Issue523Test.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/Issue85Test.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/LockingByteableTest.java
+# Open PRs #709
+net/openhft/chronicle/bytes/MappedBytesBoundaryTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/MappedBytesEdgeTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/MappedBytesReadAcrossMappingTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/MappedBytesStoreTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/MappedBytesTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/MappedBytesViewRangeTest.java
+# Open PRs #709
+net/openhft/chronicle/bytes/MappedBytesWrite8bitBoundaryTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/MappedFileMultiThreadTest.java
+# Open PRs #511
+net/openhft/chronicle/bytes/MappedFileTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/MappedMemoryTest.java
+# Open PRs #709, #712
+net/openhft/chronicle/bytes/MappedUniqueTimeProviderTest.java
+# Open PRs #709
+net/openhft/chronicle/bytes/MethodReaderBuilderTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/MethodWriterRollbackTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/MoreBytesTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/NativeBytesOverflowTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/NativeBytesStoreTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/NativeBytesTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/NotNullHandlingTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/ParseDoublePrecisionTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/PointerBytesStoreTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/PrewriteTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/RandomDataInputUtf8LimitedMoreTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/ReadLenientTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/ReadWriteMarshallableTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/ReferenceTracingLeakTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/ReleasedBytesStoreTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/StopBitDecimalTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/StopBitLengthTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/StopBitTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/StreamingDataInputTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/StreamingInputStreamTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/StringRWPerfTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/StructTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/SyncModeTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/TempDirectoryIntegrationTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/UTF8BytesTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/UncheckedBytesBehaviourTest.java
+# Open PRs #709
+net/openhft/chronicle/bytes/UncheckedBytesTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/UnsafeRWObjectTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/UnsafeTextBytesTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/Utf8ParsingBoundaryTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/VanillaBytesCapacityAndZeroOutTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/VanillaBytesEnsureCapacityTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/VanillaBytesOpsTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/VanillaBytesTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/VanillaBytesUsageTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/WriteLimitTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/ZeroCostAssertionStatusTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/algo/OptimisedBytesStoreHashTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/domestic/ReentrantFileLockTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/internal/ByteStringReaderWriterTest.java
+# Open PRs #730
+net/openhft/chronicle/bytes/internal/BytesFieldInfoTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/internal/BytesInternalContentEqualTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/internal/BytesInternalContentEqualsTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/internal/BytesInternalGuardedTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/internal/BytesInternalIOCopyTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/internal/BytesInternalParseFlexibleLongFuzzTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/internal/BytesInternalParsingTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/internal/BytesInternalSubBytesErrorsTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/internal/BytesInternalTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/internal/BytesInternalUtf8MoreTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/internal/BytesInternalUtf8Test.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/internal/BytesInternalWireUsageTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/internal/CanonicalPathUtilTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/internal/DecimaliserDoubleTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/internal/DecimaliserFloatTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/internal/EmptyBytesStoreTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/internal/HeapBytesStoreOpsTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/internal/NativeBytesStoreOpsTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/internal/Parse8bitVariantsTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/internal/ReferenceCountedUtilTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/internal/ResourceUtilTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/internal/UnsafeTextTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/issue/AppendDoubleTicket1808Test.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/issue/Issue384ReplaceByteStoreOnEmptyArrayTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/issue/Issue464BytesStoreEmptyTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/readme/CASTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/readme/PrimitiveTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/readme/StopBitTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/readme/StringsTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/ref/BinaryIntArrayReferenceTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/ref/BinaryIntReferenceTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/ref/BinaryLongArrayReferenceTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/ref/BinaryLongReferenceTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/ref/BinaryTwoLongReferenceTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/ref/BooleanReferenceTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/ref/ByteableReferenceTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/ref/ReferenceTypesTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/ref/TextIntArrayReferenceTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/ref/TextIntReferenceTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/ref/TextLongArrayReferenceTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/ref/TextLongReferenceTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/ref/UncheckedLongReferenceTest.java
+# Open PRs #709
+net/openhft/chronicle/bytes/util/AbstractInternerTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/util/BinaryLengthLengthTest.java
+# Open PRs #709
+net/openhft/chronicle/bytes/util/EscapingStopCharsTesterTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/util/GzipTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/util/LZWTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/util/PropertyReplacerTest.java
+# references changed/named test fixture
+net/openhft/chronicle/bytes/util/StringInternerBytesTest.java
