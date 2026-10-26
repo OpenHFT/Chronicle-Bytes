@@ -1,0 +1,12 @@
+= Timestamp fixture ownership
+:sectnums:
+
+`DistributedUniqueTimeProviderTest` may run after another test has initialised the
+process-wide time provider, or alongside a fork mapping the same timestamp file.
+Its setup atomically creates a missing file and preserves an existing file's
+contents and mapping. It neither truncates nor unlinks another owner's counter.
+The provider/fork owns that file's lifetime; project cleanup runs after forks exit.
+
+`TimestampFileSetupTest` checks missing-file creation and a live mapped file with
+a sentinel counter. Setup must preserve its size and counter, and the original
+mapping must remain writable. The control closes its mapping and checks deletion.
