@@ -11,7 +11,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -45,11 +44,15 @@ public class DistributedUniqueTimeProviderTest extends BytesTestCommon {
     public static void checks() throws IOException {
         System.setProperty("timestamp.dir", OS.getTarget());
         final File file = new File(BytesUtil.TIME_STAMP_PATH);
-        deleteIfPossible(file);
-        file.deleteOnExit();
-        try (FileOutputStream fos = new FileOutputStream(file)) {
-            assertNotNull(fos); // avoid warning
-        }
+        ensureTimestampFile(file);
+    }
+
+    static void ensureTimestampFile(File file) throws IOException {
+        // Another test or fork may already have mapped the shared timestamp file.
+        // Creating it atomically preserves that mapping and its counter; truncating
+        // fails on Windows, and unlinking would split the shared clock on POSIX.
+        // Its lifetime belongs to the provider/fork, not this individual test.
+        file.createNewFile();
     }
 
     @Test
