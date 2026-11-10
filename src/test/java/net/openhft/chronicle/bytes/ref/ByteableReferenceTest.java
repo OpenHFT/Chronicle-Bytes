@@ -31,21 +31,21 @@ public class ByteableReferenceTest extends BytesTestCommon {
     @Parameterized.Parameters(name = "{0}")
     public static List<Object[]> testData() {
         List<Object[]> objects = Arrays.asList(
-                datum(BinaryLongReference::new),
-                datum(BinaryTwoLongReference::new),
-                datum(BinaryBooleanReference::new),
-                datum(BinaryIntReference::new),
-                datum(TextBooleanReference::new),
-                datum(TextIntReference::new),
-                datum(TextLongReference::new)
+                datum(BinaryLongReference.class, BinaryLongReference::new),
+                datum(BinaryTwoLongReference.class, BinaryTwoLongReference::new),
+                datum(BinaryBooleanReference.class, BinaryBooleanReference::new),
+                datum(BinaryIntReference.class, BinaryIntReference::new),
+                datum(TextBooleanReference.class, TextBooleanReference::new),
+                datum(TextIntReference.class, TextIntReference::new),
+                datum(TextLongReference.class, TextLongReference::new)
         );
         AbstractCloseable.disableCloseableTracing();
         AbstractReferenceCounted.disableReferenceTracing();
         return objects;
     }
 
-    private static Object[] datum(final Supplier<Byteable> reference) {
-        return new Object[]{reference.getClass().getSimpleName(), reference};
+    private static Object[] datum(final Class<?> type, final Supplier<Byteable> reference) {
+        return new Object[]{type.getSimpleName(), reference};
     }
 
     @Test
