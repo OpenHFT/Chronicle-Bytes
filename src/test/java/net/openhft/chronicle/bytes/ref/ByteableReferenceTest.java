@@ -3,7 +3,6 @@
  */
 package net.openhft.chronicle.bytes.ref;
 
-import net.openhft.chronicle.bytes.Byteable;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.bytes.BytesTestCommon;
 import net.openhft.chronicle.core.io.AbstractCloseable;
@@ -22,30 +21,32 @@ import static org.junit.Assert.assertEquals;
 @RunWith(Parameterized.class)
 public class ByteableReferenceTest extends BytesTestCommon {
 
-    private final Supplier<AbstractReference> byteableCtor;
+    private final Supplier<? extends AbstractReference> byteableCtor;
 
-    public ByteableReferenceTest(final String className, final Supplier<AbstractReference> byteableCtor) {
+    public ByteableReferenceTest(final String className, final Supplier<? extends AbstractReference> byteableCtor) {
         this.byteableCtor = byteableCtor;
     }
 
     @Parameterized.Parameters(name = "{0}")
     public static List<Object[]> testData() {
         List<Object[]> objects = Arrays.asList(
-                datum(BinaryLongReference.class, BinaryLongReference::new),
-                datum(BinaryTwoLongReference.class, BinaryTwoLongReference::new),
-                datum(BinaryBooleanReference.class, BinaryBooleanReference::new),
-                datum(BinaryIntReference.class, BinaryIntReference::new),
-                datum(TextBooleanReference.class, TextBooleanReference::new),
-                datum(TextIntReference.class, TextIntReference::new),
-                datum(TextLongReference.class, TextLongReference::new)
+                datum(BinaryLongReference::new),
+                datum(BinaryTwoLongReference::new),
+                datum(BinaryBooleanReference::new),
+                datum(BinaryIntReference::new),
+                datum(TextBooleanReference::new),
+                datum(TextIntReference::new),
+                datum(TextLongReference::new)
         );
         AbstractCloseable.disableCloseableTracing();
         AbstractReferenceCounted.disableReferenceTracing();
         return objects;
     }
 
-    private static Object[] datum(final Class<?> type, final Supplier<Byteable> reference) {
-        return new Object[]{type.getSimpleName(), reference};
+    private static Object[] datum(final Supplier<? extends AbstractReference> constructor) {
+        try (AbstractReference instance = constructor.get()) {
+            return new Object[]{instance.getClass().getSimpleName(), constructor};
+        }
     }
 
     @Test
