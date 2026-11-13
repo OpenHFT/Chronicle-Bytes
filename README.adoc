@@ -744,15 +744,14 @@ This is similar to`RawWire` in Chronicle Wire.
 ==== Explicit marshalling on a latency-sensitive path
 
 The default `BytesMarshallable` methods process fields reflectively and call
-validation hooks. For latency-sensitive paths, override both
+validation hooks. For a stable schema, consider overriding both
 `writeMarshallable(BytesOut)` and `readMarshallable(BytesIn)` with matching
-field operations, either written explicitly or generated ahead of time.
-Measure the application path and verify binary compatibility and validation
-when replacing the defaults.
+field operations, written explicitly or generated ahead of time. Measure the
+application path and preserve binary compatibility and required validation.
 
-For a complete DTO example using Wire's `BytesInBinaryMarshallable`, conversion
-annotations and YAML text output, see
-https://github.com/OpenHFT/Chronicle-Wire/blob/ea/README.adoc#explicit-bytes-marshalling[explicit Bytes marshalling in Chronicle Wire].
+See the
+https://github.com/OpenHFT/Chronicle-Wire/blob/ac2726c38bb34f54278b3ee20d4db4f89541622a/docs/explicit-bytes-marshalling.adoc[complete Wire DTO example]
+for binary framing, conversion annotations and YAML text output.
 
 ==== Using the default implementation
 
