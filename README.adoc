@@ -741,6 +741,20 @@ To read these you need either `long x = bytes.readStopBit()` or `double d = byte
 Chronicle Bytes supports serializing simple objects where the type is not stored.
 This is similar to`RawWire` in Chronicle Wire.
 
+==== Explicit marshalling on a latency-sensitive path
+
+The default `BytesMarshallable` methods process fields reflectively and call
+validation hooks. For a stable schema, consider overriding both
+`writeMarshallable(BytesOut)` and `readMarshallable(BytesIn)` with matching
+field operations, written explicitly or generated ahead of time. Measure the
+application path and preserve binary compatibility and required validation.
+
+See the
+https://github.com/OpenHFT/Chronicle-Wire/blob/ac2726c38bb34f54278b3ee20d4db4f89541622a/docs/explicit-bytes-marshalling.adoc[complete Wire DTO example]
+for binary framing, conversion annotations and YAML text output.
+
+==== Using the default implementation
+
 [source,Java,opts=novalidate]
 ----
 @NotNull MyByteable mb1 = new MyByteable(false, (byte) 1, (short) 2, '3', 4, 5.5f, 6, 7.7);
