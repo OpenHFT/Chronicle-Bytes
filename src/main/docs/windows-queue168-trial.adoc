@@ -1,0 +1,16 @@
+= QUEUE-168 Windows mapping-owner sync trial
+:sectnums:
+
+Requires the matching Posix mapped-view integration trial.
+
+MappedFile.syncUpTo flushes existing live stores through an exclusive committed position, then forces the original owner channel. It neither maps missing chunks nor extends the file. Callers must retain the owner and serialise calls. Positions outside the current physical file are rejected.
+
+On Windows, writable stores retain a duplicated native file handle when SYNC is configured or first requested while the owner is open. This survives subsequent closure of the Java owner before background store release. Default ASYNC stores do not retain an extra handle, preserving Queue's rename recovery. A synchronous flush orders FlushViewOfFile before FlushFileBuffers. ASYNC uses a blocking view-flush fallback, without the file-handle force; this is an intentional latency change requiring measurement. Read-only mappings do not flush.
+
+Failed view flush or file force throws before syncLength advances, allowing retry at the same position. Cleanup always releases the duplicate handle and native view, even after flush failure. Final-release failures are reported, but cannot be retried after unmapping.
+
+Windows mapped stores and owners release synchronously in this trial. Real view flushing made Queue's immediate corrupt-file rename race asynchronous cleanup, even without a retained SYNC handle. Synchronous release removes that race but puts flush/unmap/close cost on the releasing thread. This is a material latency trade-off, not a qualified production default.
+
+Tests cover multiple live chunks, zero/out-of-range positions, unchanged file size, injected view/handle failures, retry, and the existing SYNC/ASYNC/NONE release tests. These checks do not establish power-loss durability or Linux/macOS behaviour. Mapping-owner sync has a default unsupported implementation for external MappedFile subclasses.
+
+Before production adoption, audit concurrently retiring stores, mode changes between ASYNC and SYNC at an unchanged position, file-force failure propagation and the cost of handle duplication/per-chunk forcing. The trial is not a release qualification.

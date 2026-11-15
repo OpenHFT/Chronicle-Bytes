@@ -236,6 +236,32 @@ public class ChunkedMappedFile extends MappedFile {
     }
 
     @Override
+    public void syncUpTo(long position, SyncMode mode) throws IOException {
+        throwExceptionIfClosed();
+        if (position < 0 || position > actualSize())
+            throw new IllegalArgumentException("Sync position outside current file: " + position);
+        if (position == 0 || mode == SyncMode.NONE || readOnly())
+            return;
+        final ReferenceOwner owner = ReferenceOwner.temporary("mapped-file-sync");
+        final java.util.List<MappedBytesStore> retained = new java.util.ArrayList<>();
+        try {
+            synchronized (stores) {
+                for (MappedBytesStore store : stores) {
+                    if (store != null && store.start() < position && store.tryReserve(owner))
+                        retained.add(store);
+                }
+            }
+            for (MappedBytesStore store : retained)
+                store.syncUpTo(position, mode);
+            if (mode == SyncMode.SYNC)
+                fileChannel.force(false);
+        } finally {
+            for (MappedBytesStore store : retained)
+                store.release(owner);
+        }
+    }
+
+    @Override
     public void syncMode(SyncMode syncMode) {
         synchronized (stores) {
             for (MappedBytesStore store : stores) {
