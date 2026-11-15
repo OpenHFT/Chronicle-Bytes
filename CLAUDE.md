@@ -111,7 +111,7 @@ Unlike `ByteBuffer`, you don't need to flip between reading and writing.
 - **Binary encoding**: Fixed-width primitives, stop-bit compression
 - **Text encoding**: Parsing and appending primitives as text
 - **String encoding**: Both ISO-8859-1 (8-bit) and UTF-8 supported
-- **Stop-bit encoding**: Variable-length compression (see https://github.com/OpenHFT/RFC/blob/master/Stop-Bit-Encoding/Stop-Bit-Encoding-1.0.adoc)
+- **Stop-bit encoding**: Variable-length compression (see https://github.com/OpenHFT/RFC/blob/HEAD/Stop-Bit-Encoding/Stop-Bit-Encoding-1.0.adoc)
 
 ## Common Development Tasks
 
