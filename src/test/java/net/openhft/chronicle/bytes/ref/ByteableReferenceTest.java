@@ -23,6 +23,8 @@ public class ByteableReferenceTest extends BytesTestCommon {
 
     private final Supplier<? extends AbstractReference> byteableCtor;
 
+    // JUnit uses the first data column for @Parameters(name = "{0}") and requires a matching constructor.
+    @SuppressWarnings("java:S1172")
     public ByteableReferenceTest(final String className, final Supplier<? extends AbstractReference> byteableCtor) {
         this.byteableCtor = byteableCtor;
     }
