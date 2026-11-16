@@ -389,7 +389,8 @@ public class VanillaBytes<U>
         try {
             if (isDirectMemory()) {
                 if (str instanceof BytesStore) {
-                    write((BytesStore) str, 0L, str.length());
+                    BytesStore<?, ?> source = (BytesStore<?, ?>) str;
+                    write(source, source.readPosition(), str.length());
                     return this;
                 }
                 if (str instanceof String && Jvm.maxDirectMemory() > 0) {
@@ -430,7 +431,7 @@ public class VanillaBytes<U>
     public Bytes<U> append8bit(@NotNull BytesStore<?, ?> bs)
             throws BufferOverflowException, BufferUnderflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
         long remaining = bs.readLimit() - bs.readPosition();
-        return write0(bs, 0L, remaining);
+        return write0(bs, bs.readPosition(), remaining);
     }
 
     @NotNull
