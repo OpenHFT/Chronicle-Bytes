@@ -348,8 +348,9 @@ public class VanillaBytes<U>
     @NotNull
     public VanillaBytes<U> append(@NotNull CharSequence str, @NonNegative int start, @NonNegative int end)
             throws IndexOutOfBoundsException {
-        assert end > start : "end=" + end + ",start=" + start;
         requireNonNull(str);
+        if (start < 0 || end < start || end > str.length())
+            throw new IndexOutOfBoundsException("start=" + start + ", end=" + end + ", length=" + str.length());
         try {
             if (isDirectMemory()) {
                 if (str instanceof BytesStore) {
@@ -388,7 +389,8 @@ public class VanillaBytes<U>
         try {
             if (isDirectMemory()) {
                 if (str instanceof BytesStore) {
-                    write((BytesStore) str, 0L, str.length());
+                    BytesStore<?, ?> source = (BytesStore<?, ?>) str;
+                    write(source, source.readPosition(), str.length());
                     return this;
                 }
                 if (str instanceof String && Jvm.maxDirectMemory() > 0) {
@@ -429,7 +431,7 @@ public class VanillaBytes<U>
     public Bytes<U> append8bit(@NotNull BytesStore<?, ?> bs)
             throws BufferOverflowException, BufferUnderflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
         long remaining = bs.readLimit() - bs.readPosition();
-        return write0(bs, 0L, remaining);
+        return write0(bs, bs.readPosition(), remaining);
     }
 
     @NotNull
