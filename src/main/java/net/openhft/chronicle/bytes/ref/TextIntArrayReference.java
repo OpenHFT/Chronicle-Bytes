@@ -104,7 +104,7 @@ public class TextIntArrayReference extends AbstractReference implements Byteable
     private void setUsed(long used)
             throws IllegalStateException, IllegalArgumentException {
         try {
-            bytesStore.append(VALUES + offset, used, DIGITS);
+            bytesStore.append(USED + offset, used, DIGITS);
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
             throw e;

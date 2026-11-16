@@ -1,0 +1,14 @@
+= Text Array Used Counts
+:sectnums:
+:lang: en-GB
+
+`TextIntArrayReference.setMaxUsed` and `TextLongArrayReference.setMaxUsed`
+increase the `used` metadata field without changing array elements. A request
+below the current used count leaves it unchanged. `TextLongArrayReference.setUsed`
+writes the same metadata field directly.
+
+The fixed-width `used` field and the first array element occupy different
+offsets. Writing the count at the values offset corrupts element zero while
+leaving `getUsed()` unchanged. `TextArrayUsedCountTest` covers increasing the
+count, preserving element zero and a subsequent lower-count request for both
+integer widths.
