@@ -12,3 +12,9 @@ offsets. Writing the count at the values offset corrupts element zero while
 leaving `getUsed()` unchanged. `TextArrayUsedCountTest` covers increasing the
 count, preserving element zero and a subsequent lower-count request for both
 integer widths.
+
+`sizeInBytes` and the encoded length agree for empty and non-empty arrays.
+Empty arrays have no separator to subtract. `reset` releases the current
+backing-store reservation and clears the binding without closing the reference,
+so it can be rebound. `TextArrayLifecycleTest` checks these contracts for both
+integer widths, including repeated reset.
