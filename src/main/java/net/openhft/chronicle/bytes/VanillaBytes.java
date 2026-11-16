@@ -348,8 +348,9 @@ public class VanillaBytes<U>
     @NotNull
     public VanillaBytes<U> append(@NotNull CharSequence str, @NonNegative int start, @NonNegative int end)
             throws IndexOutOfBoundsException {
-        assert end > start : "end=" + end + ",start=" + start;
         requireNonNull(str);
+        if (start < 0 || end < start || end > str.length())
+            throw new IndexOutOfBoundsException("start=" + start + ", end=" + end + ", length=" + str.length());
         try {
             if (isDirectMemory()) {
                 if (str instanceof BytesStore) {
