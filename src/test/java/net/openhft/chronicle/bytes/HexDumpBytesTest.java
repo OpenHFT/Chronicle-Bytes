@@ -24,8 +24,8 @@ public class HexDumpBytesTest extends BytesTestCommon {
         HexDumpBytes bytes = new HexDumpBytes(Bytes.allocateDirect(32));
         try {
             bytes.writeLong(123L);
-            long position = bytes.writePosition();
             String dump = bytes.toHexString();
+            long position = bytes.writePosition();
             for (Consumer<HexDumpBytes> write : Arrays.<Consumer<HexDumpBytes>>asList(
                     b -> b.writeByte(-1, (byte) 1),
                     b -> b.writeShort(-1, (short) 1),
