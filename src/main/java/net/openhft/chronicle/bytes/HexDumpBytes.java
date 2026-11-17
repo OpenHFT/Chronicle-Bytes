@@ -391,6 +391,7 @@ public class HexDumpBytes
     @Override
     @NotNull
     public Bytes<Void> writeByte(@NonNegative long offset, byte i8) throws BufferOverflowException, IllegalStateException {
+        requireNonNegative(offset);
         if (offset == base.writePosition())
             return writeByte(i8);
         base.writeByte(offset & MASK, i8);
@@ -401,6 +402,7 @@ public class HexDumpBytes
     @Override
     @NotNull
     public Bytes<Void> writeShort(@NonNegative long offset, short i) throws BufferOverflowException, IllegalStateException {
+        requireNonNegative(offset);
         if (offset == base.writePosition())
             return writeShort(i);
         base.writeShort(offset & MASK, i);
@@ -411,6 +413,7 @@ public class HexDumpBytes
     @Override
     @NotNull
     public Bytes<Void> writeInt24(@NonNegative long offset, int i) throws BufferOverflowException, IllegalStateException {
+        requireNonNegative(offset);
         if (offset == base.writePosition())
             return writeInt24(i);
         base.writeInt24(offset & MASK, i);
@@ -427,6 +430,7 @@ public class HexDumpBytes
     @Override
     @NotNull
     public Bytes<Void> writeOrderedInt(@NonNegative long offset, int i) throws BufferOverflowException, IllegalStateException {
+        requireNonNegative(offset);
         if (offset == base.writePosition())
             return writeOrderedInt(i);
         base.writeOrderedInt(offset & MASK, i);
@@ -443,6 +447,7 @@ public class HexDumpBytes
     @Override
     @NotNull
     public Bytes<Void> writeOrderedLong(@NonNegative long offset, long i) throws BufferOverflowException, IllegalStateException {
+        requireNonNegative(offset);
         if (offset == base.writePosition())
             return writeOrderedLong(i);
         base.writeOrderedLong(offset & MASK, i);
@@ -453,6 +458,7 @@ public class HexDumpBytes
     @Override
     @NotNull
     public Bytes<Void> writeFloat(@NonNegative long offset, float d) throws BufferOverflowException, IllegalStateException {
+        requireNonNegative(offset);
         if (offset == base.writePosition())
             return writeFloat(d);
         base.writeFloat(offset & MASK, d);
@@ -463,6 +469,7 @@ public class HexDumpBytes
     @Override
     @NotNull
     public Bytes<Void> writeDouble(@NonNegative long offset, double d) throws BufferOverflowException, IllegalStateException {
+        requireNonNegative(offset);
         if (offset == base.writePosition())
             return writeDouble(d);
         base.writeDouble(offset & MASK, d);
