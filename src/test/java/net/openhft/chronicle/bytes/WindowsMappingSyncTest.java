@@ -76,8 +76,54 @@ public class WindowsMappingSyncTest {
         }
     }
 
+    @Test
+    public void synchronousFlushIncludesPreviouslyAsynchronousPages() throws Exception {
+        assumeTrue(OS.isWindows());
+        PosixAPI previous = PosixAPI.posix();
+        CountingProvider provider = new CountingProvider();
+        PosixAPIHolder.POSIX_API = provider.api;
+        File file = Files.createTempFile("upgrade-sync", ".dat").toFile();
+        long pageSize = PageUtil.getPageSize(file.getAbsolutePath());
+        try (MappedBytes bytes = MappedBytes.mappedBytes(file, 4 * pageSize, 0)) {
+            bytes.writeLong(0, 123);
+            MappedBytesStore store = (MappedBytesStore) bytes.bytesStore();
+            store.syncUpTo(pageSize, SyncMode.ASYNC);
+            assertEquals(0, provider.forces);
+            store.syncUpTo(pageSize, SyncMode.SYNC);
+            assertEquals("ASYNC must not satisfy a subsequent SYNC", 1, provider.forces);
+            assertEquals(store.addressForRead(0), provider.lastAddress);
+            assertEquals(pageSize, provider.lastLength);
+            store.syncUpTo(pageSize, SyncMode.SYNC);
+            assertEquals("Completed synchronous progress can be reused", 1, provider.forces);
+
+            store.syncUpTo(3 * pageSize, SyncMode.ASYNC);
+            store.syncUpTo(2 * pageSize, SyncMode.SYNC);
+            assertEquals(2, provider.forces);
+            assertEquals(store.addressForRead(pageSize), provider.lastAddress);
+            assertEquals(pageSize, provider.lastLength);
+            int calls = provider.calls;
+            store.syncUpTo(3 * pageSize, SyncMode.ASYNC);
+            assertEquals("SYNC must not move ASYNC progress backwards", calls, provider.calls);
+
+            provider.failForce = true;
+            assertThrows(java.io.UncheckedIOException.class, () -> store.syncUpTo(3 * pageSize, SyncMode.SYNC));
+            provider.failForce = false;
+            store.syncUpTo(3 * pageSize, SyncMode.SYNC);
+            assertEquals(3, provider.forces);
+            assertEquals(store.addressForRead(2 * pageSize), provider.lastAddress);
+            assertEquals(pageSize, provider.lastLength);
+        } finally {
+            net.openhft.chronicle.core.io.BackgroundResourceReleaser.releasePendingResources();
+            PosixAPIHolder.POSIX_API = previous;
+            Files.deleteIfExists(file.toPath());
+        }
+    }
+
     private static class CountingProvider {
         int calls;
+        int forces;
+        long lastAddress;
+        long lastLength;
         boolean fail;
         boolean failForce;
         final PosixAPI delegate = new WinJNRPosixAPI();
@@ -85,6 +131,8 @@ public class WindowsMappingSyncTest {
                 PosixAPI.class.getClassLoader(), new Class<?>[]{PosixAPI.class}, (proxy, method, args) -> {
                     if (method.getName().equals("flushMappedView")) {
                         calls++;
+                        lastAddress = (long) args[0];
+                        lastLength = (long) args[1];
                         if (fail)
                             return -1;
                     }
@@ -96,6 +144,7 @@ public class WindowsMappingSyncTest {
                                 public void force() throws java.io.IOException {
                                     if (failForce) throw new java.io.IOException("injected force failure");
                                     retained.force();
+                                    forces++;
                                 }
                                 public void close() throws java.io.IOException { retained.close(); }
                             };

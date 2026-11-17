@@ -46,6 +46,8 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
     private SyncMode syncMode = MappedFile.DEFAULT_SYNC_MODE;
     /** length already synced */
     private long syncLength = 0;
+    // An asynchronous flush cannot satisfy a later synchronous request.
+    private long synchronousSyncLength = 0;
     private PosixAPI.FileSync retainedFileSync;
 
     /**
@@ -493,13 +495,16 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
         if (syncMode == SyncMode.NONE || address == 0 || refCount() <= 0)
             return;
         long positionFromStart = Math.min(limit, position) - start;
-        if (positionFromStart <= syncLength)
+        long completedLength = syncMode == SyncMode.SYNC ? synchronousSyncLength : syncLength;
+        if (positionFromStart <= completedLength)
             return;
         int mask = -pageSize;
         long pageEnd = (positionFromStart + pageSize - 1) & mask;
-        long syncStart = syncLength & mask;
+        long syncStart = completedLength & mask;
         final long length2 = pageEnd - syncStart;
         performMsync(syncStart, length2, syncMode);
-        syncLength = positionFromStart;
+        syncLength = Math.max(syncLength, positionFromStart);
+        if (syncMode == SyncMode.SYNC)
+            synchronousSyncLength = positionFromStart;
     }
 }
