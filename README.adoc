@@ -71,7 +71,7 @@ Here is an explanation for each operation supported by Chronicle Bytes:
 | CAS (Compare-and-Swap) | An atomic instruction used in multithreading for synchronization. It compares the contents of a memory location with a given value and, only if they match, updates the contents of that memory location to a new given value
 | Volatile Read/Write | Refer to http://tutorials.jenkov.com/java-concurrency/volatile.html[Volatile Variables]
 | Peek | An operation that retrieves the value of the bytes without affecting its read position
-| Stop Bit Compression | Refer to https://github.com/OpenHFT/RFC/tree/master/Stop-Bit-Encoding[Stop Bit Encoding]
+| Stop Bit Compression | Refer to https://github.com/OpenHFT/RFC/tree/HEAD/Stop-Bit-Encoding[Stop Bit Encoding]
 | Search | Any algorithm that addresses the search problem i.e., retrieving information stored within a data structure
 | AddAndGet | An operation that atomically adds a given value to the current value
 | Copy | Transferring data from one structure to another
@@ -594,7 +594,7 @@ String c = bytes.parse8bit(StopCharTesters.CONTROL_STOP);
 String d = bytes.parseUtf8(StopCharTesters.CONTROL_STOP);
 ----
 
-Binary strings are prefixed with a https://github.com/OpenHFT/RFC/blob/master/Stop-Bit-Encoding/Stop-Bit-Encoding-1.0.adoc[Stop Bit Encoded] length.
+Binary strings are prefixed with a https://github.com/OpenHFT/RFC/blob/HEAD/Stop-Bit-Encoding/Stop-Bit-Encoding-1.0.adoc[Stop Bit Encoded] length.
 
 [source,Java,opts=novalidate]
 ----
@@ -670,7 +670,7 @@ The `readPosition` actually holds the write position for both, which is why it h
 Stop Bit encoding is one form of simple compression.
 For each 7 bits set, a byte is used with the high bit set when there is another byte to write.
 
-See https://github.com/OpenHFT/RFC/blob/master/Stop-Bit-Encoding/Stop-Bit-Encoding-1.0.adoc[Stop Bit Encoding RFC] for more details
+See https://github.com/OpenHFT/RFC/blob/HEAD/Stop-Bit-Encoding/Stop-Bit-Encoding-1.0.adoc[Stop Bit Encoding RFC] for more details
 
 .Writing with stop bit encoding
 [source,Java,opts=novalidate]
@@ -740,6 +740,20 @@ To read these you need either `long x = bytes.readStopBit()` or `double d = byte
 
 Chronicle Bytes supports serializing simple objects where the type is not stored.
 This is similar to`RawWire` in Chronicle Wire.
+
+==== Explicit marshalling on a latency-sensitive path
+
+The default `BytesMarshallable` methods process fields reflectively and call
+validation hooks. For a stable schema, consider overriding both
+`writeMarshallable(BytesOut)` and `readMarshallable(BytesIn)` with matching
+field operations, written explicitly or generated ahead of time. Measure the
+application path and preserve binary compatibility and required validation.
+
+See the
+https://github.com/OpenHFT/Chronicle-Wire/blob/ac2726c38bb34f54278b3ee20d4db4f89541622a/docs/explicit-bytes-marshalling.adoc[complete Wire DTO example]
+for binary framing, conversion annotations and YAML text output.
+
+==== Using the default implementation
 
 [source,Java,opts=novalidate]
 ----
