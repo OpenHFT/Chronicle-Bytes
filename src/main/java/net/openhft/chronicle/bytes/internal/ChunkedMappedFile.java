@@ -219,7 +219,17 @@ public class ChunkedMappedFile extends MappedFile {
             final long address = OS.map(fileChannel, mode, startOfMap, mappedSize, pageSize);
             final MappedBytesStore mbs2 =
                     mappedBytesStoreFactory.create(owner, this, chunk * this.chunkSize, address, mappedSize, this.chunkSize, pageSize);
-            mbs2.syncMode(syncMode);
+            try {
+                mbs2.syncMode(syncMode);
+            } catch (RuntimeException | Error failure) {
+                // The store is not published yet; failed handle retention must unmap it.
+                try {
+                    mbs2.release(owner);
+                } catch (RuntimeException | Error cleanupFailure) {
+                    failure.addSuppressed(cleanupFailure);
+                }
+                throw failure;
+            }
             if (RETAIN)
                 mbs2.reserve(this);
             stores.set(chunk, mbs2);

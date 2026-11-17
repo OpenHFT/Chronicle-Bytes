@@ -15,4 +15,11 @@ Windows mapped stores and owners release synchronously in this trial. Real view 
 
 Tests cover multiple live chunks, zero/out-of-range positions, unchanged file size, injected view/handle failures, retry, ASYNC-to-SYNC transitions at unchanged and earlier positions, and the existing SYNC/ASYNC/NONE release tests. These checks do not establish power-loss durability or Linux/macOS behaviour. Mapping-owner sync has a default unsupported implementation for external MappedFile subclasses.
 
-Before production adoption, audit concurrently retiring stores, file-force failure propagation and the cost of handle duplication/per-chunk forcing. The trial is not a release qualification.
+`MappingSyncLifecycleTest` holds an owner flush at a controlled handoff while the
+original store owner retires. The sync reservation keeps the address alive until
+flushing finishes, without extending the file. A second control injects handle
+retention failure before a new store is published; construction releases the
+mapping and preserves the original error, including any suppressed cleanup error.
+
+Before production adoption, measure handle duplication/per-chunk forcing and
+blocking release latency on a quiet host. The trial is not a release qualification.
