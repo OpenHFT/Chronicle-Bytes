@@ -1,0 +1,25 @@
+= QUEUE-168 Windows mapping-owner sync trial
+:sectnums:
+
+Requires the matching Posix mapped-view integration trial (OpenHFT/Posix#99).
+The POM explicitly selects `posix:2026.3-SNAPSHOT` because the current Chronicle BOM selects the older release without these APIs.
+Build that prerequisite from source before this branch; the snapshot coordinate alone does not identify a qualified revision.
+
+MappedFile.syncUpTo flushes existing live stores through an exclusive committed position, then forces the original owner channel. It neither maps missing chunks nor extends the file. Callers must retain the owner and serialise calls. Positions outside the current physical file are rejected.
+
+On Windows, writable stores retain a duplicated native file handle when SYNC is configured or first requested while the owner is open. This survives subsequent closure of the Java owner before background store release. Default ASYNC stores do not retain an extra handle, preserving Queue's rename recovery. A synchronous flush orders FlushViewOfFile before FlushFileBuffers. ASYNC uses a blocking view-flush fallback, without the file-handle force; this is an intentional latency change requiring measurement. Read-only mappings do not flush.
+
+Failed view flush or file force throws before sync progress advances, allowing retry at the same position. ASYNC and SYNC completion are tracked separately: upgrading to SYNC at an unchanged or earlier position flushes any pages not yet synchronously completed. A successful SYNC also satisfies ASYNC requests through that position. Cleanup always releases the duplicate handle and native view, even after flush failure. Final-release failures are reported, but cannot be retried after unmapping.
+
+Windows mapped stores and owners release synchronously in this trial. Real view flushing made Queue's immediate corrupt-file rename race asynchronous cleanup, even without a retained SYNC handle. Synchronous release removes that race but puts flush/unmap/close cost on the releasing thread. This is a material latency trade-off, not a qualified production default.
+
+Tests cover multiple live chunks, zero/out-of-range positions, unchanged file size, injected view/handle failures, retry, ASYNC-to-SYNC transitions at unchanged and earlier positions, and the existing SYNC/ASYNC/NONE release tests. These checks do not establish power-loss durability or Linux/macOS behaviour. Mapping-owner sync has a default unsupported implementation for external MappedFile subclasses.
+
+`MappingSyncLifecycleTest` holds an owner flush at a controlled handoff while the
+original store owner retires. The sync reservation keeps the address alive until
+flushing finishes, without extending the file. A second control injects handle
+retention failure before a new store is published; construction releases the
+mapping and preserves the original error, including any suppressed cleanup error.
+
+Before production adoption, measure handle duplication/per-chunk forcing and
+blocking release latency on a quiet host. The trial is not a release qualification.

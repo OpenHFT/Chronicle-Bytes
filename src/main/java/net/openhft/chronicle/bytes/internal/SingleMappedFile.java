@@ -123,6 +123,24 @@ public class SingleMappedFile extends MappedFile {
      * @param syncMode The synchronization mode to set
      */
     @Override
+    public void syncUpTo(long position, SyncMode mode) throws IOException {
+        throwExceptionIfClosed();
+        if (position < 0 || position > actualSize())
+            throw new IllegalArgumentException("Sync position outside current file: " + position);
+        if (position == 0 || mode == SyncMode.NONE || readOnly())
+            return;
+        final ReferenceOwner owner = ReferenceOwner.temporary("mapped-file-sync");
+        store.reserve(owner);
+        try {
+            store.syncUpTo(position, mode);
+            if (mode == SyncMode.SYNC)
+                fileChannel.force(false);
+        } finally {
+            store.release(owner);
+        }
+    }
+
+    @Override
     public void syncMode(SyncMode syncMode) {
         store.syncMode(syncMode);
     }
