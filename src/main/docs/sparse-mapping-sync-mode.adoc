@@ -1,0 +1,5 @@
+= Set sync mode on sparse mappings
+:sectnums:
+:lang: en-GB
+
+Changing a chunked mapped file's sync mode updates every acquired mapping. Unacquired chunks are skipped; later mappings inherit the new mode. Acquiring a later chunk first does not require mapping earlier chunks.

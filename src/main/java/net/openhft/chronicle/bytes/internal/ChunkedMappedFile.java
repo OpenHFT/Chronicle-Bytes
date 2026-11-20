@@ -239,7 +239,8 @@ public class ChunkedMappedFile extends MappedFile {
     public void syncMode(SyncMode syncMode) {
         synchronized (stores) {
             for (MappedBytesStore store : stores) {
-                store.syncMode(syncMode);
+                if (store != null)
+                    store.syncMode(syncMode);
             }
         }
         this.syncMode = syncMode;
