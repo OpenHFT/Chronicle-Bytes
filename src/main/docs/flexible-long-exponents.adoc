@@ -1,0 +1,14 @@
+= Flexible long exponent bounds
+:sectnums:
+:lang: en-GB
+
+`parseFlexibleLong()` must not narrow a scientific-notation exponent to an `int`.
+An out-of-range non-zero value raises `IORuntimeException`; it must not wrap to a plausible integer.
+Exponent accumulation saturates at long magnitude instead of wrapping, and scale arithmetic is checked.
+Beyond that magnitude a non-zero result cannot fit in a long, while a zero mantissa remains zero.
+Scaling a non-zero mantissa either finishes or rejects a lost digit/overflow within the number of decimal digits of a long.
+A zero mantissa returns immediately after its exponent has been parsed.
+
+The decimal exponent parser retains sign, underscore and closing-delimiter handling.
+The existing mantissa precision rules remain in force; this is not a new arbitrary-precision decimal parser.
+`FlexibleLongExponentTest` covers integer and long exponent overflow, scale subtraction/negation, zero, exact long boundaries and the following token.
