@@ -3,7 +3,6 @@
  */
 package net.openhft.chronicle.bytes.ref;
 
-import net.openhft.chronicle.bytes.Byteable;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.bytes.BytesTestCommon;
 import net.openhft.chronicle.core.io.AbstractCloseable;
@@ -22,9 +21,11 @@ import static org.junit.Assert.assertEquals;
 @RunWith(Parameterized.class)
 public class ByteableReferenceTest extends BytesTestCommon {
 
-    private final Supplier<AbstractReference> byteableCtor;
+    private final Supplier<? extends AbstractReference> byteableCtor;
 
-    public ByteableReferenceTest(final String className, final Supplier<AbstractReference> byteableCtor) {
+    // JUnit uses the first data column for @Parameters(name = "{0}") and requires a matching constructor.
+    @SuppressWarnings("java:S1172")
+    public ByteableReferenceTest(final String className, final Supplier<? extends AbstractReference> byteableCtor) {
         this.byteableCtor = byteableCtor;
     }
 
@@ -44,8 +45,10 @@ public class ByteableReferenceTest extends BytesTestCommon {
         return objects;
     }
 
-    private static Object[] datum(final Supplier<Byteable> reference) {
-        return new Object[]{reference.getClass().getSimpleName(), reference};
+    private static Object[] datum(final Supplier<? extends AbstractReference> constructor) {
+        try (AbstractReference instance = constructor.get()) {
+            return new Object[]{instance.getClass().getSimpleName(), constructor};
+        }
     }
 
     @Test
