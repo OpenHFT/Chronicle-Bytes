@@ -1,0 +1,5 @@
+= Preserve empty and readable character slices
+:sectnums:
+:lang: en-GB
+
+Appending a BytesStore or a Bytes character sequence copies its readable slice, starting at readPosition and ending at readLimit. The source cursor is retained. Empty readable slices append nothing.
