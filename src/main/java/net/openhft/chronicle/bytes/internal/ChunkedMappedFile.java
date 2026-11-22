@@ -219,7 +219,17 @@ public class ChunkedMappedFile extends MappedFile {
             final long address = OS.map(fileChannel, mode, startOfMap, mappedSize, pageSize);
             final MappedBytesStore mbs2 =
                     mappedBytesStoreFactory.create(owner, this, chunk * this.chunkSize, address, mappedSize, this.chunkSize, pageSize);
-            mbs2.syncMode(syncMode);
+            try {
+                mbs2.syncMode(syncMode);
+            } catch (RuntimeException | Error failure) {
+                // The store is not published yet; failed handle retention must unmap it.
+                try {
+                    mbs2.release(owner);
+                } catch (RuntimeException | Error cleanupFailure) {
+                    failure.addSuppressed(cleanupFailure);
+                }
+                throw failure;
+            }
             if (RETAIN)
                 mbs2.reserve(this);
             stores.set(chunk, mbs2);
@@ -232,6 +242,32 @@ public class ChunkedMappedFile extends MappedFile {
                 Jvm.perf().on(getClass(), "Took " + elapsedNs / 1_000_000L + " ms to add mapping for " + file());
 
             return mbs2;
+        }
+    }
+
+    @Override
+    public void syncUpTo(long position, SyncMode mode) throws IOException {
+        throwExceptionIfClosed();
+        if (position < 0 || position > actualSize())
+            throw new IllegalArgumentException("Sync position outside current file: " + position);
+        if (position == 0 || mode == SyncMode.NONE || readOnly())
+            return;
+        final ReferenceOwner owner = ReferenceOwner.temporary("mapped-file-sync");
+        final java.util.List<MappedBytesStore> retained = new java.util.ArrayList<>();
+        try {
+            synchronized (stores) {
+                for (MappedBytesStore store : stores) {
+                    if (store != null && store.start() < position && store.tryReserve(owner))
+                        retained.add(store);
+                }
+            }
+            for (MappedBytesStore store : retained)
+                store.syncUpTo(position, mode);
+            if (mode == SyncMode.SYNC)
+                fileChannel.force(false);
+        } finally {
+            for (MappedBytesStore store : retained)
+                store.release(owner);
         }
     }
 
