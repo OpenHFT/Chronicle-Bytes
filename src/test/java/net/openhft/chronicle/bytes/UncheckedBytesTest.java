@@ -3,9 +3,6 @@
  */
 package net.openhft.chronicle.bytes;
 
-import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.BytesStore;
-import net.openhft.chronicle.bytes.UncheckedBytes;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
