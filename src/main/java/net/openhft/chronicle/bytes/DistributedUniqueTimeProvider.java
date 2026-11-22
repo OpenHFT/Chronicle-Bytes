@@ -252,6 +252,79 @@ public class DistributedUniqueTimeProvider extends SimpleCloseable implements Ti
         }
     }
 
+    /**
+     * Generates a unique nanosecond-resolution ID for the given timestamp, embedding the host id.
+     * This is useful for producing identifiers for events that occurred at a known time rather than "now".
+     * <p>
+     * The provided timestamp is an absolute nanosecond value (not epoch-adjusted).
+     * Uniqueness is still guaranteed via CAS on the shared memory-mapped file:
+     * if the requested timestamp would collide with a previously issued ID, it is advanced forward.
+     *
+     * @param timestampNanos the absolute nanosecond timestamp to base the ID on
+     * @return a unique ID with the host id embedded in the lower two digits
+     */
+    public long uniqueIdForNanos(long timestampNanos) {
+        long time0 = bytes.readVolatileLong(LAST_TIME);
+        long timeN = timestampFor(timestampNanos) + hostId;
+
+        if (timeN > time0 && bytes.compareAndSwapLong(LAST_TIME, time0, timeN))
+            return timeN;
+
+        return uniqueIdForNanosLoop(timestampNanos);
+    }
+
+    /**
+     * Loop variant of {@link #uniqueIdForNanos(long)} that finds the next available slot
+     * when the fast path fails due to contention or a timestamp in the past.
+     */
+    private long uniqueIdForNanosLoop(long timestampNanos) {
+        while (true) {
+            long time0 = bytes.readVolatileLong(LAST_TIME);
+            long next = timestampFor(timestampNanos) + hostId;
+
+            // If the proposed ID is not greater than the last issued one, advance
+            if (next <= time0) {
+                next = timestampFor(time0) + hostId;
+                if (next <= time0)
+                    next += HOST_IDS;
+            }
+
+            if (bytes.compareAndSwapLong(LAST_TIME, time0, next))
+                return next;
+
+            Jvm.nanoPause();
+        }
+    }
+
+    /**
+     * Generates a unique microsecond-resolution ID for the given timestamp, embedding the host id.
+     * This is useful for producing identifiers for events that occurred at a known time rather than "now".
+     * <p>
+     * The provided timestamp is an absolute microsecond value (not epoch-adjusted).
+     *
+     * @param timestampMicros the absolute microsecond timestamp to base the ID on
+     * @return a unique ID in microseconds with the host id embedded in the lower two digits
+     */
+    public long uniqueIdForMicros(long timestampMicros) {
+        long timeus = timestampMicros / HOST_IDS;
+
+        while (true) {
+            long time0 = bytes.readVolatileLong(LAST_TIME);
+            long time0us = time0 / (HOST_IDS * NANOS_PER_MICRO);
+            long time;
+
+            if (time0us >= timeus)
+                time = (time0us + 1) * (HOST_IDS * NANOS_PER_MICRO);
+            else
+                time = timeus * (HOST_IDS * NANOS_PER_MICRO);
+
+            if (bytes.compareAndSwapLong(LAST_TIME, time0, time))
+                return time / NANOS_PER_MICRO + hostId;
+
+            Jvm.nanoPause();
+        }
+    }
+
     @Override
     public void unmonitor() {
         Monitorable.unmonitor(file);
