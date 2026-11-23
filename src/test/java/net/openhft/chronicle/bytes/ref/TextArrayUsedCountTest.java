@@ -12,8 +12,10 @@ public class TextArrayUsedCountTest {
     public void increasingIntUsedCountPreservesFirstElement() {
         Bytes<?> bytes = Bytes.allocateDirect(256);
         try (TextIntArrayReference array = new TextIntArrayReference()) {
+            bytes.writeSkip(2); // Align the four-byte lock at array offset 10.
+            long offset = bytes.writePosition();
             TextIntArrayReference.write(bytes, 3);
-            array.bytesStore(bytes, 0, bytes.writePosition());
+            array.bytesStore(bytes, offset, bytes.writePosition() - offset);
             array.setValueAt(0, 42);
             array.setMaxUsed(2);
             assertEquals(2, array.getUsed());
@@ -29,8 +31,10 @@ public class TextArrayUsedCountTest {
     public void increasingLongUsedCountPreservesFirstElement() {
         Bytes<?> bytes = Bytes.allocateDirect(256);
         try (TextLongArrayReference array = new TextLongArrayReference()) {
+            bytes.writeSkip(2); // Align the four-byte lock at array offset 10.
+            long offset = bytes.writePosition();
             TextLongArrayReference.write(bytes, 3);
-            array.bytesStore(bytes, 0, bytes.writePosition());
+            array.bytesStore(bytes, offset, bytes.writePosition() - offset);
             array.setValueAt(0, 1L << 40);
             array.setMaxUsed(2);
             assertEquals(2, array.getUsed());
