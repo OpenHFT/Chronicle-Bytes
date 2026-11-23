@@ -85,8 +85,8 @@ public class TextIntArrayReference extends AbstractReference implements Byteable
      */
     public static long peakLength(@NotNull BytesStore<?, ?> bytes, @NonNegative long offset)
             throws IllegalStateException {
-        //todo check this, I think there could be a bug here
-        return (bytes.parseLong(offset + CAPACITY) * VALUE_SIZE) - SEP.length
+        long capacity = bytes.parseLong(offset + CAPACITY);
+        return capacity * VALUE_SIZE - (capacity > 0 ? SEP.length : 0)
                 + VALUES + SECTION4.length;
     }
 
@@ -104,7 +104,7 @@ public class TextIntArrayReference extends AbstractReference implements Byteable
     private void setUsed(long used)
             throws IllegalStateException, IllegalArgumentException {
         try {
-            bytesStore.append(VALUES + offset, used, DIGITS);
+            bytesStore.append(USED + offset, used, DIGITS);
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
             throw e;
@@ -234,7 +234,7 @@ public class TextIntArrayReference extends AbstractReference implements Byteable
             throws IllegalStateException {
         throwExceptionIfClosedInSetter();
 
-        bytesStore = null;
+        performClose();
         offset = 0;
         length = 0;
     }
@@ -275,6 +275,7 @@ public class TextIntArrayReference extends AbstractReference implements Byteable
      */
     @Override
     public long sizeInBytes(@NonNegative long capacity) {
-        return (capacity * VALUE_SIZE) + VALUES + SECTION3.length - SEP.length;
+        return capacity * VALUE_SIZE + VALUES + SECTION4.length
+                - (capacity > 0 ? SEP.length : 0);
     }
 }
