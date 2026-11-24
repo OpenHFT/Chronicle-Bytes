@@ -14,6 +14,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Random;
 
+import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertSame;
@@ -69,10 +70,10 @@ public class StringInternerBytesTest extends BytesTestCommon {
             try {
                 for (int length = 0; length <= 300; length++) {
                     b.clear();
-                    b.append("pad");
+                    b.write("pad".getBytes(ISO_8859_1));
                     for (int i = 0; i < length; i++)
                         b.writeUnsignedByte(random.nextInt(256));
-                    b.append("trail");
+                    b.write("trail".getBytes(ISO_8859_1));
                     b.readPosition(3);
                     String expected = new String(BytesUtil.toCharArray(b, 3, length));
 
@@ -106,10 +107,10 @@ public class StringInternerBytesTest extends BytesTestCommon {
             StringInternerBytes si = new StringInternerBytes(16);
             Bytes<?> b = allocate(direct);
             try {
-                b.append("ORDER-1");
+                b.write("ORDER-1".getBytes(ISO_8859_1));
                 String id = si.intern(b, 7);
                 b.clear();
-                b.append("XXXXXXX");
+                b.write("XXXXXXX".getBytes(ISO_8859_1));
                 assertEquals("ORDER-1", id);
             } finally {
                 b.releaseLast();
@@ -122,11 +123,11 @@ public class StringInternerBytesTest extends BytesTestCommon {
         StringInternerBytes si = new StringInternerBytes(1024);
         Bytes<?> b = Bytes.allocateElasticDirect(64);
         try {
-            b.append("ORD-0000001");
+            b.write("ORD-0000001".getBytes(ISO_8859_1));
             String one = si.intern(b, 11);
-            b.clear().append("ORD-0000002");
+            b.clear().write("ORD-0000002".getBytes(ISO_8859_1));
             String two = si.intern(b, 11);
-            b.clear().append("ORD-0000001");
+            b.clear().write("ORD-0000001".getBytes(ISO_8859_1));
             String oneAgain = si.intern(b, 11);
 
             assertEquals("ORD-0000001", one);
@@ -145,7 +146,7 @@ public class StringInternerBytesTest extends BytesTestCommon {
         StringInternerBytes si = new StringInternerBytes(16);
         MappedBytes b = MappedBytes.mappedBytes(file, 64 << 10);
         try {
-            b.append("MAPPED-ID-42");
+            b.write("MAPPED-ID-42".getBytes(ISO_8859_1));
             String id = si.intern(b, 12);
             assertEquals("MAPPED-ID-42", id);
             b.readPosition(0);
