@@ -86,7 +86,11 @@
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
-                    <proc>full</proc>
+                    <!-- Clear inherited -proc:none; selecting JMH works on both Java 8 and current JDKs. -->
+                    <proc combine.self="override" />
+                    <annotationProcessors>
+                        <annotationProcessor>org.openjdk.jmh.generators.BenchmarkProcessor</annotationProcessor>
+                    </annotationProcessors>
                 </configuration>
             </plugin>
             <plugin>
