@@ -522,6 +522,8 @@ NOTE: write ordered doesn't stall the pipeline to wait for the write to occur, m
 
 === Working with text
 
+For callback field ownership, encodings and interner cursor behaviour, see link:src/main/docs/util-overview.adoc#_choose_a_representation_for_a_callback_field[Choosing a representation for a callback field].
+
 You can also write and read text to Bytes for low level, direct to native memory text processing.
 
 .Writing primitives as text

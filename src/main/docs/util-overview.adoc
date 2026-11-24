@@ -41,7 +41,7 @@ classDiagram
     class AbstractInterner {
         <<abstract>>
     }
-    AbstractInterner <|-- StringInternerBytes
+    StringInterner <|-- StringInternerBytes
     AbstractInterner <|-- UTF8StringInterner
     AbstractInterner <|-- Bit8StringInterner
 
@@ -111,7 +111,7 @@ decompressed.releaseLast();
 == String interning utilities
 
 Interners are designed to reduce memory usage and garbage collection overhead by canonicalising `String` instances created from byte sequences.
-If a byte sequence has been seen before, a cached `String` instance is returned.
+Repeated values can reuse a cached string while its entry remains in the pool.
 
 `AbstractInterner<T>` ::
 An abstract base class for interners.
@@ -134,6 +134,23 @@ The simple collision resolution (toggle heuristic) means they are not strict LRU
 The interning methods aim to be allocation-free on a cache hit.
 A new value (and potentially an entry object) is allocated only on a cache miss.
 ====
+
+=== Choose a representation for a callback field
+
+A parser may lend a callback a reusable `Bytes<?>`. Use the field while the callback owns the view. To pass the entire readable field to another thread, copy it before returning:
+
+[source,java]
+----
+byte[] owned = field.toByteArray();
+----
+
+The caller owns that array. The copy preserves the bytes and the read position. Limit the readable range to the field first if the buffer also contains another field.
+
+For a small vocabulary of Latin-1 symbols, reuse a `Bit8StringInterner` and pass the exact field length. This reads from the current position and leaves it available for the next operation, including copying the ID into a reply. For UTF-8 use `UTF8StringInterner` with the length in bytes. Its bounded lookup also preserves the position. A byte `0xE9` represents U+00E9 in Latin-1. UTF-8 encodes the same character in two bytes. Keep opaque identifiers as bytes when their protocol specifies binary data.
+
+`StringInternerBytes` extends Chronicle Core's `StringInterner`. Its bounded lookup advances the read position by the supplied length. Intern last, or save and restore the callback's cursor and limit if later code needs the field. Bound the readable range to the exact field for this lookup on heap storage. Otherwise trailing bytes can affect the hash even when the decoded strings are equal. With Core 2026.4 on native storage, repeated Latin-1 values containing bytes above `0x7F` can miss on every lookup. `Bit8StringInterner` avoids both pitfalls for bounded 8-bit text.
+
+For unique order IDs, expect misses even with a correctly bounded field. Measure the application's actual mix of repeated values, unique IDs and storage types before relying on a reduction in allocation.
 
 [#length-prefix]
 == `BinaryLengthLength`
