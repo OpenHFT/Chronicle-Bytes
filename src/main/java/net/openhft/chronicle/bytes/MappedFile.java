@@ -467,7 +467,7 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
     @Override
     protected boolean canReleaseInBackground() {
         // don't perform the close in the background as that just sets a flag. This does the real work.
-        return true;
+        return !OS.isWindows();
     }
 
     /**
@@ -626,5 +626,14 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
      * @param syncMode of sync to perform.
      */
     public abstract void syncMode(SyncMode syncMode);
+
+    /**
+     * Flushes existing live mappings up to the exclusive committed position.
+     * Does not map missing chunks or extend the file. Callers must retain this
+     * owner and serialise sync calls; a failed flush must be retried.
+     */
+    public void syncUpTo(long position, SyncMode mode) throws IOException {
+        throw new UnsupportedOperationException("Mapping-owner sync is unavailable");
+    }
 
 }

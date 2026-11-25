@@ -57,6 +57,8 @@
         <dependency>
             <groupId>net.openhft</groupId>
             <artifactId>posix</artifactId>
+            <!-- Requires the caller-owned mapping APIs from Posix #99. -->
+            <version>2026.3-SNAPSHOT</version>
         </dependency>
 
         <dependency>
@@ -348,6 +350,32 @@
     </scm>
 
     <profiles>
+        <profile>
+            <id>pr-dependencies</id>
+            <activation>
+                <property>
+                    <name>chronicle.pr.dependencies</name>
+                </property>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>net.openhft</groupId>
+                    <artifactId>posix</artifactId>
+                    <version>${chronicle.pr.dependencies}</version>
+                </dependency>
+            </dependencies>
+            <dependencyManagement>
+                <dependencies>
+                    <dependency>
+                        <groupId>net.openhft</groupId>
+                        <artifactId>chronicle-bom</artifactId>
+                        <version>${chronicle.pr.dependencies}</version>
+                        <type>pom</type>
+                        <scope>import</scope>
+                    </dependency>
+                </dependencies>
+            </dependencyManagement>
+        </profile>
         <profile>
             <id>sonar</id>
             <build>
