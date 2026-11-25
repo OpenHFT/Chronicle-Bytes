@@ -7,6 +7,7 @@ import net.openhft.chronicle.bytes.util.DecoratedBufferOverflowException;
 import net.openhft.chronicle.bytes.util.DecoratedBufferUnderflowException;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
+import net.openhft.chronicle.core.io.BackgroundResourceReleaser;
 import net.openhft.chronicle.core.io.IOTools;
 import org.junit.After;
 import org.junit.Assert;
@@ -409,6 +410,8 @@ public class MappedBytesTest extends BytesTestCommon {
             }
             checkShouldBeReadOnly(MappedBytes.singleMappedBytes(file, 64 << 10, true));
         } finally {
+            // A zero reference count can precede background unmapping on Windows.
+            BackgroundResourceReleaser.releasePendingResources();
             Files.delete(file.toPath());
         }
     }
