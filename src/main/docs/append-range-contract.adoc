@@ -1,0 +1,9 @@
+= Appending empty character ranges
+:sectnums:
+:lang: en-GB
+
+`append(text, start, end)` uses an exclusive end offset in characters.
+A valid empty slice, where `0 <= start == end <= text.length()`, appends no bytes and preserves the current positions.
+Negative, reversed and out-of-range bounds raise `IndexOutOfBoundsException`, including invalid empty slices.
+
+`EmptyAppendRangeTest` checks empty strings, strings and builders, invalid bounds and a non-ASCII slice through the direct-memory path.
