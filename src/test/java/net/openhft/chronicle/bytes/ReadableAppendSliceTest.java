@@ -29,27 +29,27 @@ public class ReadableAppendSliceTest extends BytesTestCommon {
     }
 
     @Test
-    public void directUtf8UsesReadableSlice() throws Exception {
+    public void directUtf8UsesReadableSlice() {
         append(true, false, false);
     }
 
     @Test
-    public void heapUtf8UsesReadableSlice() throws Exception {
+    public void heapUtf8UsesReadableSlice() {
         append(false, false, false);
     }
 
     @Test
-    public void directEightBitUsesReadableSlice() throws Exception {
+    public void directEightBitUsesReadableSlice() {
         append(true, true, false);
     }
 
     @Test
-    public void heapEightBitUsesReadableSlice() throws Exception {
+    public void heapEightBitUsesReadableSlice() {
         append(false, true, false);
     }
 
     @Test
-    public void emptyReadableSliceDoesNotCopyPrefix() throws Exception {
+    public void emptyReadableSliceDoesNotCopyPrefix() {
         append(true, false, true);
     }
 }
