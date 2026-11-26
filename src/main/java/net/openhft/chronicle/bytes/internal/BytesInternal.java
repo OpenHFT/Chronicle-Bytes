@@ -184,19 +184,24 @@ enum BytesInternal {
     }
 
     private static boolean contentEqualBytes(BytesStore<?, ?> a, BytesStore<?, ?> b, long aLength, long bLength) {
-        if (aLength < bLength)
-            return contentEqualBytes(b, a, bLength, aLength);
-        final long aPos = a.readPosition();
-        final long bPos = b.readPosition();
+        return aLength < bLength
+                ? contentEqualOrderedBytes(b, a, bLength, aLength)
+                : contentEqualOrderedBytes(a, b, aLength, bLength);
+    }
+
+    private static boolean contentEqualOrderedBytes(BytesStore<?, ?> longer, BytesStore<?, ?> shorter,
+                                                    long longerLength, long shorterLength) {
+        final long aPos = longer.readPosition();
+        final long bPos = shorter.readPosition();
         long i = 0;
         // Checked byte reads acquire successive chunks, including where a word would straddle a zero-overlap boundary.
-        for (; i < bLength; i++) {
-            if (a.readByte(aPos + i) != b.readByte(bPos + i))
+        for (; i < shorterLength; i++) {
+            if (longer.readByte(aPos + i) != shorter.readByte(bPos + i))
                 return false;
         }
         // Equality treats the unallocated tail of an elastic store as zeros.
-        for (; i < aLength; i++) {
-            if (a.readByte(aPos + i) != 0)
+        for (; i < longerLength; i++) {
+            if (longer.readByte(aPos + i) != 0)
                 return false;
         }
         return true;
@@ -2919,6 +2924,13 @@ enum BytesInternal {
         }
     }
 
+    private static void finishFlexibleExponent(StreamingDataInput in, int ch) {
+        if (ch == ']' || ch == '}')
+            in.readSkip(-1);
+        else if (ch == '.')
+            consumeDecimals(in);
+    }
+
     private static long parseFlexibleExponent(StreamingDataInput in) {
         long value = 0;
         boolean negative = false;
@@ -2936,10 +2948,7 @@ enum BytesInternal {
             } else if (ch == '+' || ch == '_') {
                 // Preserve the separators accepted by the integer parser.
             } else {
-                if (ch == ']' || ch == '}')
-                    in.readSkip(-1);
-                else if (ch == '.')
-                    consumeDecimals(in);
+                finishFlexibleExponent(in, ch);
                 break;
             }
         }
