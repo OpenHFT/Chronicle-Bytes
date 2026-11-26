@@ -46,6 +46,9 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
     private SyncMode syncMode = MappedFile.DEFAULT_SYNC_MODE;
     /** length already synced */
     private long syncLength = 0;
+    // An asynchronous flush cannot satisfy a later synchronous request.
+    private long synchronousSyncLength = 0;
+    private PosixAPI.FileSync retainedFileSync;
 
     /**
      * Constructs a {@code MappedBytesStore} for a mapped region.
@@ -71,6 +74,7 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
 
         reserveTransfer(INIT, owner);
         this.pageSize = pageSize;
+
     }
 
     /**
@@ -389,11 +393,27 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
      */
     @Override
     protected void performRelease() {
-        if (address != 0 && syncMode != SyncMode.NONE) {
-            performMsync(0, safeLimit - start, syncMode());
+        try {
+            if (address != 0 && syncMode != SyncMode.NONE) {
+                performMsync(0, safeLimit - start, syncMode());
+            }
+        } finally {
+            // Failed flush must not leak the native mapping.
+            try {
+                if (retainedFileSync != null)
+                    retainedFileSync.close();
+            } catch (IOException e) {
+                Jvm.warn().on(getClass(), "Failed to close retained file handle", e);
+            } finally {
+                super.performRelease();
+            }
         }
-        // must sync before releasing
-        super.performRelease();
+    }
+
+    @Override
+    protected boolean canReleaseInBackground() {
+        // Windows rename/recovery must not race a pending view flush or handle close.
+        return !net.openhft.chronicle.core.OS.isWindows() && super.canReleaseInBackground();
     }
 
     /**
@@ -404,13 +424,25 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
      * @param syncMode the mode to sync
      */
     private void performMsync(@NonNegative long offset, long length, SyncMode syncMode) {
-        if (syncMode == SyncMode.NONE)
+        if (syncMode == SyncMode.NONE || mappedFile.readOnly())
             return;
+        if (syncMode == SyncMode.SYNC)
+            retainSyncHandle();
         long start0 = System.currentTimeMillis();
         boolean full = offset == 0;
-        int ret = PosixAPI.posix().msync(address + offset, length, syncMode.mSyncFlag());
+        // Windows ASYNC uses a blocking view flush, without a file-handle force.
+        int ret = net.openhft.chronicle.core.OS.isWindows()
+                ? PosixAPI.posix().flushMappedView(address + offset, length)
+                : PosixAPI.posix().msync(address + offset, length, syncMode.mSyncFlag());
         if (ret != 0)
-            Jvm.error().on(MappedBytesStore.class, "msync failed, " + PosixAPI.posix().lastErrorStr() + ", ret=" + ret + " " + mappedFile.file() + " " + Long.toHexString(offset) + " " + Long.toHexString(length));
+            throw new IllegalStateException("Mapped view flush failed: " + mappedFile.file() + ", errno=" + PosixAPI.posix().lastError());
+        if (net.openhft.chronicle.core.OS.isWindows() && syncMode == SyncMode.SYNC) {
+            try {
+                retainedFileSync.force();
+            } catch (IOException e) {
+                throw new java.io.UncheckedIOException(e);
+            }
+        }
         long time0 = System.currentTimeMillis() - start0;
         if (time0 >= 200)
             Jvm.perf().on(getClass(), "Took " + time0 + " ms to " + syncMode + " " + mappedFile.file() + (full ? " (full)" : ""));
@@ -429,7 +461,19 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
      * @param syncMode to use
      */
     public void syncMode(SyncMode syncMode) {
+        if (syncMode == SyncMode.SYNC)
+            retainSyncHandle();
         this.syncMode = syncMode;
+    }
+
+    private void retainSyncHandle() {
+        if (net.openhft.chronicle.core.OS.isWindows() && !mappedFile.readOnly() && retainedFileSync == null) {
+            try {
+                retainedFileSync = PosixAPI.posix().retainFileSync(mappedFile.raf().getFD());
+            } catch (IOException e) {
+                throw new java.io.UncheckedIOException(e);
+            }
+        }
     }
 
     /**
@@ -451,13 +495,16 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
         if (syncMode == SyncMode.NONE || address == 0 || refCount() <= 0)
             return;
         long positionFromStart = Math.min(limit, position) - start;
-        if (positionFromStart <= syncLength)
+        long completedLength = syncMode == SyncMode.SYNC ? synchronousSyncLength : syncLength;
+        if (positionFromStart <= completedLength)
             return;
         int mask = -pageSize;
         long pageEnd = (positionFromStart + pageSize - 1) & mask;
-        long syncStart = syncLength & mask;
+        long syncStart = completedLength & mask;
         final long length2 = pageEnd - syncStart;
         performMsync(syncStart, length2, syncMode);
-        syncLength = positionFromStart;
+        syncLength = Math.max(syncLength, positionFromStart);
+        if (syncMode == SyncMode.SYNC)
+            synchronousSyncLength = positionFromStart;
     }
 }

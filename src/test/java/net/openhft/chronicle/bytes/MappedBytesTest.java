@@ -7,6 +7,7 @@ import net.openhft.chronicle.bytes.util.DecoratedBufferOverflowException;
 import net.openhft.chronicle.bytes.util.DecoratedBufferUnderflowException;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
+import net.openhft.chronicle.core.io.BackgroundResourceReleaser;
 import net.openhft.chronicle.core.io.IOTools;
 import org.junit.After;
 import org.junit.Assert;
@@ -399,10 +400,20 @@ public class MappedBytesTest extends BytesTestCommon {
     }
 
     @Test
-    public void shouldNotBeReadOnlySingleFileReadWrite()
+    public void shouldBeReadOnlySingleFileReadWrite()
             throws Exception {
-        assumeFalse(OS.isWindows());
-        checkShouldBeReadOnly(MappedBytes.singleMappedBytes(File.createTempFile("mapped", "bytes"), 64 << 10, true));
+        final File file = File.createTempFile("mapped", "bytes");
+        try {
+            // A read-only mapping cannot extend an empty file on Windows.
+            try (RandomAccessFile raf = new RandomAccessFile(file, "rw")) {
+                raf.setLength(64 << 10);
+            }
+            checkShouldBeReadOnly(MappedBytes.singleMappedBytes(file, 64 << 10, true));
+        } finally {
+            // A zero reference count can precede background unmapping on Windows.
+            BackgroundResourceReleaser.releasePendingResources();
+            Files.delete(file.toPath());
+        }
     }
 
     @Test

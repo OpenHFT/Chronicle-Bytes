@@ -5,6 +5,7 @@ package net.openhft.chronicle.bytes.util;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.algo.BytesStoreHash;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.io.ClosedIllegalStateException;
@@ -29,6 +30,8 @@ import static net.openhft.chronicle.bytes.BytesUtil.toCharArray;
  * }</pre>
  */
 public class StringInternerBytes extends StringInterner {
+
+    private static final boolean JAVA9_PLUS = Jvm.isJava9Plus();
 
     /**
      * Constructs a new {@code StringInternerBytes} instance with the specified capacity.
@@ -97,14 +100,13 @@ public class StringInternerBytes extends StringInterner {
                 return s2;
             }
 
-            // Convert bytes to characters
-            char[] chars = toCharArray(bytes, position, length);
+            // Create the new string before choosing a slot, so a failed read leaves the pool unchanged
+            String result = newString(bytes, position, length);
 
             // Determine where to place the new string in the interner array
             final int toPlace = s == null || (s2 != null && toggle()) ? h : h2;
 
-            // Create a new string and add to the pool
-            String result = StringUtils.newString(chars);
+            // Add to the pool
             interner[toPlace] = result;
             return result;
 
@@ -112,5 +114,23 @@ public class StringInternerBytes extends StringInterner {
             // Skip read position by length
             bytes.readSkip(length);
         }
+    }
+
+    /**
+     * Creates the String for a miss, mapping each byte to the char with the same unsigned value.
+     * <p>
+     * On Java 9+ the compact-string path can adopt the byte array directly. With compact
+     * strings disabled, {@link StringUtils#newStringFromBytes(byte[])} decodes it as Latin-1.
+     * Java 8 uses the existing character-array path.
+     */
+    private static String newString(@NotNull final Bytes<?> bytes, @NonNegative final long position, @NonNegative final int length) {
+        if (length == 0)
+            return "";
+        if (!JAVA9_PLUS)
+            return StringUtils.newString(toCharArray(bytes, position, length));
+        final byte[] latin1 = new byte[length];
+        for (int i = 0; i < length; i++)
+            latin1[i] = bytes.readByte(position + i);
+        return StringUtils.newStringFromBytes(latin1);
     }
 }

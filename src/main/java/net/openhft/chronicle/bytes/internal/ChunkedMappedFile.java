@@ -219,7 +219,17 @@ public class ChunkedMappedFile extends MappedFile {
             final long address = OS.map(fileChannel, mode, startOfMap, mappedSize, pageSize);
             final MappedBytesStore mbs2 =
                     mappedBytesStoreFactory.create(owner, this, chunk * this.chunkSize, address, mappedSize, this.chunkSize, pageSize);
-            mbs2.syncMode(syncMode);
+            try {
+                mbs2.syncMode(syncMode);
+            } catch (RuntimeException | Error failure) {
+                // The store is not published yet; failed handle retention must unmap it.
+                try {
+                    mbs2.release(owner);
+                } catch (RuntimeException | Error cleanupFailure) {
+                    failure.addSuppressed(cleanupFailure);
+                }
+                throw failure;
+            }
             if (RETAIN)
                 mbs2.reserve(this);
             stores.set(chunk, mbs2);
@@ -236,10 +246,37 @@ public class ChunkedMappedFile extends MappedFile {
     }
 
     @Override
+    public void syncUpTo(long position, SyncMode mode) throws IOException {
+        throwExceptionIfClosed();
+        if (position < 0 || position > actualSize())
+            throw new IllegalArgumentException("Sync position outside current file: " + position);
+        if (position == 0 || mode == SyncMode.NONE || readOnly())
+            return;
+        final ReferenceOwner owner = ReferenceOwner.temporary("mapped-file-sync");
+        final java.util.List<MappedBytesStore> retained = new java.util.ArrayList<>();
+        try {
+            synchronized (stores) {
+                for (MappedBytesStore store : stores) {
+                    if (store != null && store.start() < position && store.tryReserve(owner))
+                        retained.add(store);
+                }
+            }
+            for (MappedBytesStore store : retained)
+                store.syncUpTo(position, mode);
+            if (mode == SyncMode.SYNC)
+                fileChannel.force(false);
+        } finally {
+            for (MappedBytesStore store : retained)
+                store.release(owner);
+        }
+    }
+
+    @Override
     public void syncMode(SyncMode syncMode) {
         synchronized (stores) {
             for (MappedBytesStore store : stores) {
-                store.syncMode(syncMode);
+                if (store != null)
+                    store.syncMode(syncMode);
             }
         }
         this.syncMode = syncMode;
@@ -392,6 +429,8 @@ public class ChunkedMappedFile extends MappedFile {
     /**
      * This finalize() is used to detect when a component is not released deterministically. It is not required to be run, but provides a warning
      */
+    // Java 8 leak diagnostics still require finalization; normal ownership releases deterministically.
+    @SuppressWarnings("java:S5738")
     @Override
     protected void finalize()
             throws Throwable {

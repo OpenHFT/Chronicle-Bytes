@@ -123,6 +123,24 @@ public class SingleMappedFile extends MappedFile {
      * @param syncMode The synchronization mode to set
      */
     @Override
+    public void syncUpTo(long position, SyncMode mode) throws IOException {
+        throwExceptionIfClosed();
+        if (position < 0 || position > actualSize())
+            throw new IllegalArgumentException("Sync position outside current file: " + position);
+        if (position == 0 || mode == SyncMode.NONE || readOnly())
+            return;
+        final ReferenceOwner owner = ReferenceOwner.temporary("mapped-file-sync");
+        store.reserve(owner);
+        try {
+            store.syncUpTo(position, mode);
+            if (mode == SyncMode.SYNC)
+                fileChannel.force(false);
+        } finally {
+            store.release(owner);
+        }
+    }
+
+    @Override
     public void syncMode(SyncMode syncMode) {
         store.syncMode(syncMode);
     }
@@ -209,9 +227,9 @@ public class SingleMappedFile extends MappedFile {
     protected void performRelease() {
         try {
             final MappedBytesStore mbs = store;
-            if (mbs != null && RETAIN) {
-                // this MappedFile is the only referrer to the MappedBytesStore at this point,
-                // so ensure that it is released
+            if (mbs != null) {
+                // This file always owns a reservation in the single store, regardless of chunk retention.
+                // Other owners may keep the mapping alive after this file closes.
                 try {
                     mbs.release(this);
                 } catch (ClosedIllegalStateException e) {
@@ -332,6 +350,8 @@ public class SingleMappedFile extends MappedFile {
     /**
      * This finalize() is used to detect when a component is not released deterministically. It is not required to be run, but provides a warning
      */
+    // Java 8 leak diagnostics still require finalization; normal ownership releases deterministically.
+    @SuppressWarnings("java:S5738")
     @Override
     protected void finalize()
             throws Throwable {
