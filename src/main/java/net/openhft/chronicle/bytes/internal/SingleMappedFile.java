@@ -332,6 +332,8 @@ public class SingleMappedFile extends MappedFile {
     /**
      * This finalize() is used to detect when a component is not released deterministically. It is not required to be run, but provides a warning
      */
+    // Java 8 leak diagnostics still require finalization; normal ownership releases deterministically.
+    @SuppressWarnings("java:S5738")
     @Override
     protected void finalize()
             throws Throwable {
