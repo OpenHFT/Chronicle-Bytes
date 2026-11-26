@@ -227,9 +227,9 @@ public class SingleMappedFile extends MappedFile {
     protected void performRelease() {
         try {
             final MappedBytesStore mbs = store;
-            if (mbs != null && RETAIN) {
-                // this MappedFile is the only referrer to the MappedBytesStore at this point,
-                // so ensure that it is released
+            if (mbs != null) {
+                // This file always owns a reservation in the single store, regardless of chunk retention.
+                // Other owners may keep the mapping alive after this file closes.
                 try {
                     mbs.release(this);
                 } catch (ClosedIllegalStateException e) {
