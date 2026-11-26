@@ -184,19 +184,24 @@ enum BytesInternal {
     }
 
     private static boolean contentEqualBytes(BytesStore<?, ?> a, BytesStore<?, ?> b, long aLength, long bLength) {
-        if (aLength < bLength)
-            return contentEqualBytes(b, a, bLength, aLength);
-        final long aPos = a.readPosition();
-        final long bPos = b.readPosition();
+        return aLength < bLength
+                ? contentEqualOrderedBytes(b, a, bLength, aLength)
+                : contentEqualOrderedBytes(a, b, aLength, bLength);
+    }
+
+    private static boolean contentEqualOrderedBytes(BytesStore<?, ?> longer, BytesStore<?, ?> shorter,
+                                                    long longerLength, long shorterLength) {
+        final long aPos = longer.readPosition();
+        final long bPos = shorter.readPosition();
         long i = 0;
         // Checked byte reads acquire successive chunks, including where a word would straddle a zero-overlap boundary.
-        for (; i < bLength; i++) {
-            if (a.readByte(aPos + i) != b.readByte(bPos + i))
+        for (; i < shorterLength; i++) {
+            if (longer.readByte(aPos + i) != shorter.readByte(bPos + i))
                 return false;
         }
         // Equality treats the unallocated tail of an elastic store as zeros.
-        for (; i < aLength; i++) {
-            if (a.readByte(aPos + i) != 0)
+        for (; i < longerLength; i++) {
+            if (longer.readByte(aPos + i) != 0)
                 return false;
         }
         return true;
@@ -2827,7 +2832,7 @@ enum BytesInternal {
                     // Do nothing
             }
 
-            int tens = 0;
+            long tens = 0;
             IORuntimeException parsingError = null;
             while (true) {
                 if (ch >= '0' && ch <= '9') {
@@ -2858,7 +2863,7 @@ enum BytesInternal {
                         decimalPlaces = 0;
 
                 } else if (ch == 'E' || ch == 'e') {
-                    tens += (int) parseLong(in);
+                    tens = Math.addExact(tens, parseFlexibleExponent(in));
                     break;
 
                 } else {
@@ -2879,12 +2884,15 @@ enum BytesInternal {
             if (decimalPlaces < 0)
                 decimalPlaces = 0;
 
-            tens -= decimalPlaces;
+            if (absValue == 0)
+                return 0L;
+
+            tens = Math.subtractExact(tens, decimalPlaces);
 
             if (tens <= 0) {
                 absValue *= sign;
 
-                for (int i = 0; i < -tens; i++) {
+                for (; tens < 0; tens++) {
                     int truncatingDigit = (int) Math.abs(absValue % 10);
 
                     if (truncatingDigit != 0) {
@@ -2907,11 +2915,44 @@ enum BytesInternal {
 
                 return sign * absValue;
             }
+        } catch (ArithmeticException e) {
+            throw new IORuntimeException("Flexible long exponent is out of range", e);
         } finally {
             final ByteStringParser bsp = (ByteStringParser) in;
             bsp.lastDecimalPlaces(decimalPlaces);
             bsp.lastNumberHadDigits(digits);
         }
+    }
+
+    private static void finishFlexibleExponent(StreamingDataInput in, int ch) {
+        if (ch == ']' || ch == '}')
+            in.readSkip(-1);
+        else if (ch == '.')
+            consumeDecimals(in);
+    }
+
+    private static long parseFlexibleExponent(StreamingDataInput in) {
+        long value = 0;
+        boolean negative = false;
+        while (in.readRemaining() > 0 && in.peekUnsignedByte() <= ' ')
+            in.readSkip(1);
+        while (in.readRemaining() > 0) {
+            int ch = in.readUnsignedByte();
+            if (ch >= '0' && ch <= '9') {
+                int digit = ch - '0';
+                // Larger exponents cannot yield a non-zero long, but zero remains zero.
+                value = value > (Long.MAX_VALUE - digit) / 10
+                        ? Long.MAX_VALUE : value * 10 + digit;
+            } else if (ch == '-') {
+                negative = true;
+            } else if (ch == '+' || ch == '_') {
+                // Preserve the separators accepted by the integer parser.
+            } else {
+                finishFlexibleExponent(in, ch);
+                break;
+            }
+        }
+        return negative ? -value : value;
     }
 
     /**
